@@ -1,0 +1,92 @@
+
+;------------------------------------------;
+; Doc for FAT filesystems.
+; source: https://www.pjrc.com/tech/8051/ide/fat32.html
+; this is a derivation of the above page.
+
+;------------------------------------------;
+; Assume the MBR is at LBA=0
+; Sanity check offset 0x1FE and 0x1FF are 0x55AA
+
+;------------------------------------------;
+; Each partition entry in the MBR is 16 bytes long
+; partition 1 is at offset 0x1BE.
+; partition 2 is at offset 0x1CE.
+; partition 3 is at offset 0x1DE.
+; partition 4 is at offset 0x1EE.
+
+;------------------------------------------;
+; Each partition entry:
+; size  name
+;==========================================;
+;   1   boot flag
+;   3   CHS begin
+;   1   Type code
+;   3   CHS end
+;   4   LBA begin
+;   4   number of sectors
+; FAT32 valid typecodes: 0x0B, 0x0C.
+
+;------------------------------------------;
+; Each partition starts with a volume ID sector
+;   offset   size   name                   ;
+;==========================================;
+;   0x0B     2      Bytes per sector. Always 512.
+;   0x0D     1      Sectors per cluster. Usually a power of 2.
+;   0x0E     2      Reserved sector count. Usually 0x20.
+;   0x10     1      Number of FATs. Always 2.
+;   0x24     4      Sectors per FAT. Depends on disk size.
+;   0x2C     4      Root directory first cluster.
+;   0x1FE    2      Signature. Always 0x55AA.
+
+;------------------------------------------;
+; Ripped from the page:                    ;
+;==========================================;
+;  (unsigned long)fat_begin_lba = Partition_LBA_Begin + Number_of_Reserved_Sectors;
+;  (unsigned long)cluster_begin_lba = Partition_LBA_Begin + Number_of_Reserved_Sectors + (Number_of_FATs * Sectors_Per_FAT);
+;  (unsigned char)sectors_per_cluster = BPB_SecPerClus;
+;  (unsigned long)root_dir_first_cluster = BPB_RootClus;
+;------------------------------------------;
+
+
+;------------------------------------------;
+; FAT Arrangement
+;   Volume ID
+;   Reserved sectors
+;   FAT #1
+;   FAT #2
+;   data section
+;   Small unused space
+
+;------------------------------------------;
+;FAT directory entries                     ;
+;==========================================;
+; Each is 32 bytes.                        ;
+; offset  size  name                       ;
+;==========================================;
+; 0x00    8.3  file name
+; 0x0B    1    attribute
+; 0x14    2    First cluster high
+; 0x1A    2    First cluster low
+; 0x1C    4    File size
+;------------------------------------------;
+; Types of entry, ripped from the page:    ;
+;==========================================;
+;Normal record with short filename - Attrib is normal
+;Long filename text                - Attrib has all four type bits set
+;Unused                            - First byte is 0xE5
+;End of directory                  - First byte is zero
+;------------------------------------------;
+; File attribute bits                      ;
+;  bit    LFN  comment                     ;
+;==========================================;
+;  0(LSB) 1    Read only, should not allow writing
+;  1      1    Hidden, should not allow dir listing
+;  2      1    System file
+;  3      1    Volume ID, file name is volume ID
+;  4      x    Is a subdirectory
+;  5      x    Archive. Has been changed since last backup
+;  6      x    Unused. Should be 0.
+;  7(MSB) x    Unused. Should be 0.
+
+
