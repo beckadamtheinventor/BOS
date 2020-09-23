@@ -4,6 +4,10 @@ macro pad_db? str, pad, amt
 	db (amt - lengthof str) dup pad
 end macro
 
+macro pad_until? pad, addr
+	db ( addr - $ ) dup pad
+end macro
+
 f_readonly   := 1
 f_hidden     := 2
 f_system     := 4
