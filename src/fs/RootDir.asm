@@ -40,6 +40,7 @@ fs_RootDir:
 .multloop3:
 	add hl,hl
 	djnz .multloop3
+;start of cluster map
 	ld bc,$2000 ; add two 8-sector FATs
 	add hl,bc   ; reserved sector size + FAT sectors size
 	ex hl,de
