@@ -378,7 +378,7 @@ namespace bos
 ?sys_ExecuteFile                 := $20108
 ?sys_ExecuteFileEntryPoint       := $2010C
 ?fs_OpenFile                     := $20110
-?fs_GetDataPtr                   := $20114
+?fs_GetSectorPtr                 := $20114
 ?LCD_PAL    := 0E30200h
 ?LCD_CTRL   := 0E30018h
 ?LCD_VRAM   := 0D40000h

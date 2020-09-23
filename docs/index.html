@@ -1,7 +1,7 @@
 <html><head><title>bos.inc docs</title><link rel="stylesheet" type="text/css" href="style.css"></head><body><h1>"bos.inc" documentation</h1><h3>syscalls marked in <a class="no_op">red</a> are no-ops and do nothing.</h3><h3>Download <a href="sources.zip">this archive</a> to view the source code</h3><table><th>syscall name</th><th>syscall adress</th><th>links</th><tr><td>bos.sys_ExecuteFile</td><td>020108</td><td><a href="#sys_ExecuteFile">doc</a></tr>
 <tr><td>bos.sys_ExecuteFileEntryPoint</td><td>02010C</td><td><a href="#sys_ExecuteFileEntryPoint">doc</a></tr>
 <tr><td>bos.fs_OpenFile</td><td>020110</td><td><a href="#fs_OpenFile">doc</a></tr>
-<tr><td>bos.fs_GetDataPtr</td><td>020114</td><td><a href="#fs_GetDataPtr">doc</a></tr>
+<tr><td>bos.fs_GetSectorPtr</td><td>020114</td><td><a href="#fs_GetSectorPtr">doc</a></tr>
 </table><div id="sys_ExecuteFile"><h1>sys_ExecuteFile</h1><h3>syscall Adress 020108</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td> hl = path</td><td> execute an executable file from a path.</td><td></td><td></td><td>
@@ -14,6 +14,8 @@
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td> hl = path</td><td> Opens a file from a path and returns file descriptor.</td><td> hl = file descriptor</td><td></td><td>
 </td></tr>
-</table></div><div id="fs_GetDataPtr"><h1>fs_GetDataPtr</h1><h3>syscall Adress 020114</h3>
+</table></div><div id="fs_GetSectorPtr"><h1>fs_GetSectorPtr</h1><h3>syscall Adress 020114</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> void *fs_GetSectorPtr(void *fd, int sector);</td><td> read a given sector of a file descriptor</td><td> hl = pointer to sector. hl = -1 if failed.</td><td></td><td>
+ this does not guarantee a contiguous memory space, as files can be fragmented in FAT32.</td></tr>
 </table></div></body></html>
