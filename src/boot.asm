@@ -5,8 +5,11 @@ boot_os:
 	call fs_SanityCheck
 	ld a,'C'
 	call fs_RootDir
-	ld de,current_working_dir
+	push hl
+	ld hl,current_working_dir
+	push hl
 	call fs_CopyFileName
+	pop bc,bc
 os_return:
 	call gfx_Set8bpp
 	ld hl,current_working_dir

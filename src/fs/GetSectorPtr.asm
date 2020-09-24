@@ -2,11 +2,12 @@
 ;@DOES read a given sector of a file descriptor
 ;@INPUT void *fs_GetSectorPtr(void *fd, int sector);
 ;@OUTPUT hl = pointer to sector. hl = -1 if failed.
-;@NOTE this does not guarantee a contiguous memory space, as files can be fragmented in FAT32.
+;@NOTE this does not guarantee a contiguous memory space, as files can be fragmented in FAT filesystems.
 fs_GetSectorPtr:
 	call ti._frameset0
 	ld hl,(ix+6)
 	ld de,(ix+9)
+	pop ix
 .loop:
 	ex hl,de
 	add hl,de
@@ -26,9 +27,14 @@ fs_GetSectorPtr:
 	cp a,(hl)
 .next:
 	pop hl
-	ld bc,4
-	add hl,bc
-	jr nz,.loop
+	jr z,.fail
+	ld hl,(hl)
+	ld b,10
+.cluster_mult_loop:
+	add hl,hl
+	djnz .cluster_mult_loop
+	jr .loop
+.fail:
 	scf
 	sbc hl,hl
 	ret

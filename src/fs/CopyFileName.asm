@@ -1,8 +1,13 @@
 
 ;@DOES copies file name from file descriptor
-;@INPUT hl = file descriptor
-;@INPUT de = destination string
+;@INPUT void fs_CopyFileName(char *dest, void *fd);
 fs_CopyFileName:
+	pop bc
+	pop hl
+	pop de
+	push de
+	push hl
+	push bc
 	ld a,(hl)
 	or a,a
 	jq z,.enda
@@ -52,5 +57,7 @@ fs_CopyFileName:
 	ld (de),a
 	ret
 .E5:
+	ld a,$E5
+	ld (de),a
 	jq .enterloop
 

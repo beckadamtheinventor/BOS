@@ -27,13 +27,7 @@ except Exception as e:
 counter=0x020108
 
 with open("bos.inc","w") as f:
-	f.write("""define ti? ti
-namespace ti
-""")
-	f.write(bootcalls)
 	f.write("""
-end namespace
-
 define bos? bos
 namespace bos
 """)

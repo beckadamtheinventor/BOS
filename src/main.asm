@@ -1,5 +1,6 @@
 
 include 'include/ti84pceg.inc'
+include 'include/ti84pce.inc'
 include 'include/ez80.inc'
 include 'include/tiformat.inc'
 format ti executable 'BOSOS'
@@ -25,13 +26,6 @@ installing_string:
 ;-------------------------------------------------------------------------------
 
 	jp boot_os
-	jp _nop
-	jp _nop
-	jp _nop
-	jp _nop
-	jp _nop
-	jp _nop
-	jp _nop
 
 include 'table.asm'
 include 'boot.asm'
@@ -41,6 +35,7 @@ include 'sys.inc'
 include 'util.inc'
 include 'fs.inc'
 include 'gui.inc'
+include 'usb.inc'
 include 'data.inc'
-_nop:
+DONOTHING:
 	ret

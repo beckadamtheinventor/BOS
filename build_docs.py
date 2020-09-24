@@ -19,11 +19,14 @@ def fwalk(d):
 
 def myfinder(d,df):
 	for fname in fwalk(d):
-		with open(fname) as fp:
-			dt=fp.read().splitlines()
-		for ix in range(len(dt)):
-			if dt[ix].startswith(df):
-				return dt,ix
+		try:
+			with open(fname) as fp:
+				dt=fp.read().splitlines()
+			for ix in range(len(dt)):
+				if dt[ix].startswith(df):
+					return dt,ix
+		except:
+			print(f"failed to read file {fname}")
 	return [],0
 
 
@@ -105,7 +108,7 @@ with open("docs/index.html","w") as f:
 				line=line[line.find("jp ")+3:]
 				if ";" in line:
 					line=line[:line.find(";")]
-				if line=="DONOTHING":
+				if line.strip(" \t")=="DONOTHING":
 					f.write("<tr class=\"no_op\">")
 				else:
 					f.write("<tr>")

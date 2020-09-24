@@ -2,12 +2,11 @@
 include 'include/ez80.inc'
 include 'include/ti84pceg.inc'
 include 'include/bosfs.inc'
-include 'include/defines.inc'
+include 'include/bos.inc'
 
 org $043000
 
 display_sector "BOOT.EXE", $
-
 fs_file "BOOT", "EXE", f_readonly+f_system
 	jr boot_main
 	db "FEX",0
@@ -21,6 +20,7 @@ boot_script:
 	db "CD C:/",$A
 	db "BBS home/user.bbs",$A
 	db "EXPLORER",$A
+	db "RETURN",$A
 end fs_file
 
 display_sector "CD.EXE", $
@@ -44,7 +44,7 @@ cd_main:
 	ex hl,de
 	jr .copy
 .abspath:
-	ld de,current_working_dir
+	ld de,bos.current_working_dir
 .copy:
 	push hl
 	push de
@@ -124,12 +124,14 @@ fs_file "MAN", "EXE", f_readonly+f_system
 	jr man_main
 	db "FEX",0
 man_main:
-	call ti._frameset0
-	ld hl,(ix+6)
-	push hl
-	call bos.fs_GetPathLastWord
 	pop bc
-	ld de,InputBuffer
+	pop hl
+	push hl
+	push bc
+	push hl
+	call bos.fs_GetPathLastName
+	pop bc
+	ld de,bos.InputBuffer
 	push de
 	ld bc,8
 	ldir
@@ -138,10 +140,9 @@ man_main:
 	ldir
 	call bos.fs_OpenFile
 	pop bc
-	call bos.fs_GetDataPtr
+	call bos.fs_GetSectorPtr
 	
 	
-	pop ix
 	ret
 man_extension:
 	db ".man",0

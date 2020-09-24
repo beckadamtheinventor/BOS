@@ -21,30 +21,28 @@ TEXT_MAX_ROW    := 231
 RAM_START  := 0D00400h
 
 ; iy flags
-flags                   := $D00080
-namespace flags
-sys_flags              := -1
-lcd_bg_color           :=  0
-text_fg                :=  1
-text_bg                :=  2
-color_primary          :=  3
-font_spacing           :=  4
-font_data              :=  7
-lcd_x                  :=  10
-lcd_y                  :=  13
-free_RAM_ptr           :=  16
-remaining_free_RAM     :=  19
-free_VAT_entry_ptr     :=  22
-cursor_x               :=  25
-cursor_y               :=  28
-cursor_flags           :=  29
-lcd_text_fg            :=  30
-lcd_text_bg            :=  31
-cursor_color           :=  32
-free_file_RAM_ptr      :=  33
-remaining_file_RAM     :=  36
-console_line           :=  39
-end namespace
+;flags                   := $D00080
+flags.sys_flags              := -1
+flags.lcd_bg_color           :=  0
+flags.text_fg                :=  1
+flags.text_bg                :=  2
+flags.color_primary          :=  3
+flags.font_spacing           :=  4
+flags.font_data              :=  7
+flags.lcd_x                  :=  10
+flags.lcd_y                  :=  13
+flags.free_RAM_ptr           :=  16
+flags.remaining_free_RAM     :=  19
+flags.free_VAT_entry_ptr     :=  22
+flags.cursor_x               :=  25
+flags.cursor_y               :=  28
+flags.cursor_flags           :=  29
+flags.lcd_text_fg            :=  30
+flags.lcd_text_bg            :=  31
+flags.cursor_color           :=  32
+flags.free_file_RAM_ptr      :=  33
+flags.remaining_file_RAM     :=  36
+flags.console_line           :=  39
 
 ; bos_sys_flags flag bits
 bos_read_only_fs        := 1
@@ -55,7 +53,7 @@ cursor_2nd              := 1
 
 ; iy flag memory locations
 flag_start             := $D00000
-sys_flags              := $D0007F
+;sys_flags              := $D0007F
 lcd_bg_color           := $D00080
 text_fg                := $D00081
 text_bg                := $D00082
@@ -83,6 +81,13 @@ open_files_table       := $D00100
 InputBuffer            := $D00200
 gfx_string_temp        := $D00300
 current_working_dir    := $D00310
+fsOP1                  := $D00500
+fsOP2                  := $D00510
+fsOP3                  := $D00520
+fsOP4                  := $D00530
+fsOP5                  := $D00540
+fsOP6                  := $D00550
+current_cluster_map    := $D00580
 stackbot               := $D08000
 start_of_file_RAM      := $D10000
 end_of_file_RAM        := $D40000

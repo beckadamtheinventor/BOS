@@ -3,6 +3,7 @@
 ;@INPUT A = Partition label / drive letter
 ;@OUTPUT hl = root directory descriptor
 ;@OUTPUT Cf is set if label/letter is invalid, or if drive is broken or invalid.
+;@NOTE sets (current_cluster_map) to the first FAT cluster map in the drive.
 fs_RootDir:
 	call fs_PartitionDescriptor
 	ret c
@@ -41,6 +42,7 @@ fs_RootDir:
 	add hl,hl
 	djnz .multloop3
 ;start of cluster map
+	ld (current_cluster_map),hl
 	ld bc,$2000 ; add two 8-sector FATs
 	add hl,bc   ; reserved sector size + FAT sectors size
 	ex hl,de

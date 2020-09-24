@@ -79,12 +79,13 @@ fs_drive_a_data:
 	dl fs_magic_bytes
 	dl fs_magic_bytes.len
 	dl $0403FC
-.len:=($-fs_drive_a_root_data) / 9
+	dl fs_drive_a_bin
+.len:=($-fs_drive_a_data) / 9
 
 
 fs_drive_c_data:
-	dl fs_drive_c_format_data
-	dl fs_drive_c_format_data.len
+	dl fs_drive_a_format_data
+	dl fs_drive_a_format_data.len
 	dl $0A0000
 	dl fs_magic_bytes
 	dl fs_magic_bytes.len
@@ -95,7 +96,7 @@ fs_drive_c_data:
 	dl fs_magic_bytes
 	dl fs_magic_bytes.len
 	dl $0A03FC
-.len:=($-fs_drive_a_root_data) / 9
+.len:=($-fs_drive_c_data) / 9
 
 
 fs_drive_a_format_data:
@@ -106,7 +107,7 @@ fs_drive_a_format_data:
 fs_partition_table_data:
 	db $00,$FF,$FF,$FF ;partition 1 (system partition "A")
 	db $0B,$FF,$FF,$FF
-	db $00,$02,$00,$00 ;start LBA = 0x200
+	db $01,$02,$00,$00 ;start LBA = 0x201
 	db $00,$04,$00,$00 ;end LBA = 0x400
 	
 	db $00,$FF,$FF,$FF ;partition 2 (swap partition "B")
@@ -132,10 +133,10 @@ fs_drive_a_volume_data:
 	db $02       ;number of FATs. always 2
 	db $1B dup 0
 	db $08,0,0,0 ;sectors per FAT
-	db $02,0,0,0 ;root directory first cluster
+	db $04,0,0,0 ;root directory first cluster
 .len:=$-fs_drive_a_volume_data
 
-fs_drive_a_bin:
+fs_drive_a_bin_dir:
 	db "bin     ","  "
 	db $11     ; read-only directory
 	db $00,$00,$00,$00
@@ -144,7 +145,7 @@ fs_drive_a_bin:
 	db $00,$00,$00,$00
 	db $00,$00 ; starting cluster low
 	db $00,$00,$00,$00 ;file size
-.len:=$-fs_drive_a_bin
+.len:=$-fs_drive_a_bin_dir
 
 fs_drive_c_volume_data:
 	db $00,$02   ;sector size. always 512
@@ -153,10 +154,10 @@ fs_drive_c_volume_data:
 	db $02       ;number of FATs. always 2
 	db $1B dup 0
 	db $08,0,0,0 ;sectors per FAT
-	db $02,0,0,0 ;root directory first cluster
+	db $04,0,0,0 ;root directory first cluster
 .len:=$-fs_drive_c_volume_data
 
-fs_drive_c_home_data:
+fs_drive_c_home_dir:
 	db "home    ","   "
 	db $10     ; directory
 	db $00,$00,$00,$00
@@ -165,7 +166,7 @@ fs_drive_c_home_data:
 	db $00,$00,$00,$00
 	db $00,$00 ;starting cluster low
 	db $00,$00,$00,$00 ;file size
-.len:=$-fs_drive_c_home_data
+.len:=$-fs_drive_c_home_dir
 
 fs_drive_a_root:
 	db $04,$02,$00,$00
