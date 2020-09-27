@@ -3,6 +3,9 @@
 
 include 'fs/CopyFileName.asm'
 include 'fs/CheckDirExists.asm'
+include 'fs/ClusterMap.asm'
+include 'fs/DataSection.asm'
+include 'fs/DriveLetterFromPtr.asm'
 include 'fs/fs_defines.asm'
 include 'fs/Format.asm'
 include 'fs/GetPathLastName.asm'

@@ -16,4 +16,11 @@ str_WritingDriveC:
 str_PressAnyKey:
 	db "Press any key to continue...",$A,0
 str_Prompt:
-	db "/>",$A,0
+	db ">",$A,0
+str_dotEXE:
+	db ".EXE",0
+str_CouldNotLocateExecutable:
+	db $9,"Could not locate executable",$A,0
+str_StartupProgram:
+	db "A:/BOOT.EXE",0
+

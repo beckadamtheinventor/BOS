@@ -3,10 +3,10 @@
 ;@INPUT void fs_CopyFileName(char *dest, void *fd);
 fs_CopyFileName:
 	pop bc
-	pop hl
 	pop de
-	push de
+	pop hl
 	push hl
+	push de
 	push bc
 	ld a,(hl)
 	or a,a

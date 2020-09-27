@@ -1,8 +1,6 @@
 ;@DOES set the lcd to 8bpp mode
 ;@DESTROYS HL,DE,BC,AF
-;@NOTE disables interrupts
 gfx_Set8bpp:
-	di
 	ld a,$FF
 	call	gfx_LcdClear
 .setup:

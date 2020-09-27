@@ -25,8 +25,6 @@ installing_string:
 	os_rom
 ;-------------------------------------------------------------------------------
 
-	jp boot_os
-
 include 'table.asm'
 include 'boot.asm'
 include 'gfx.inc'
@@ -35,7 +33,11 @@ include 'sys.inc'
 include 'util.inc'
 include 'fs.inc'
 include 'gui.inc'
-include 'usb.inc'
+;include 'usb.inc'
 include 'data.inc'
 DONOTHING:
 	ret
+
+macro exaf
+	db $08 ;why does the comma in ex af,af' have to screw with things? >_>
+end macro

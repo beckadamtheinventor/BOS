@@ -2,11 +2,11 @@
 ;@INPUT HL,A
 ;@OUTPUT HL
 ;@DESTROYS AF
-sys_MultHLA:
+sys_Mult24x8:
 	rrca
 	add hl,hl
 	ret z
-	jr nc,sys_MultHLA
+	jr nc,.
 	rlca
 	push de
 	push hl

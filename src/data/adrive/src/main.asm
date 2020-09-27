@@ -4,82 +4,23 @@ include 'include/ti84pceg.inc'
 include 'include/bosfs.inc'
 include 'include/bos.inc'
 
-org $043000
 
-display_sector "BOOT.EXE", $
-fs_file "BOOT", "EXE", f_readonly+f_system
-	jr boot_main
-	db "FEX",0
-boot_main:
-	ld hl,boot_script
-	push hl
-	call bbas_main
-	pop bc
-	ret
-boot_script:
-	db "CD C:/",$A
-	db "BBS home/user.bbs",$A
-	db "EXPLORER",$A
-	db "RETURN",$A
-end fs_file
+fs_fs $041000
 
-display_sector "CD.EXE", $
-fs_file "CD", "EXE", f_readonly+f_system
-	jr cd_main
-	db "FEX",0
-cd_main:
-	call ti._frameset0
-	ld hl,(ix+6)
-	inc hl
-	ld a,(hl)
-	dec hl
-	cp a,':'
-	jr z,.abspath
-	push hl
-	call ti._strcpy
-	ex (sp),hl
-	pop bc
-	ex hl,de
-	add hl,bc
-	ex hl,de
-	jr .copy
-.abspath:
-	ld de,bos.current_working_dir
-.copy:
-	push hl
-	push de
-	call bos.fs_CheckDirExists
-	jr c,.fail
-	call ti._strcpy
-	pop bc,bc
-.exit:
-	pop ix
-	xor a,a
-	ret
-.fail:
-	pop bc,bc
-	pop ix
-	ret
-end fs_file
 
-display_sector "BBS.EXE", $
 fs_file "BBS", "EXE", f_readonly+f_system
 	jr bbas_main
 	db "FEX",0
 bbas_main:
-	call ti._frameset0
-	ld hl,(ix+6)
-	ld ix,bbas_commands-6
+	ld iy,bbas_commands-6
 .loop:
-	lea ix,ix+6
+	lea iy,iy+6
 	push hl
-	ld hl,(ix)
+	ld hl,(iy)
 	add hl,bc
 	or a,a
 	sbc hl,bc
-	pop de
 	jr z,.runexec
-	push de
 	push hl
 	call ti._strlen
 	pop bc
@@ -87,9 +28,9 @@ bbas_main:
 	push bc
 	push hl
 	call ti._strncmp
+	pop hl
+	pop de
 	pop bc
-	pop hl
-	pop hl
 	or a,a
 	ld de,.loop
 	push de
@@ -100,18 +41,124 @@ bbas_main:
 	ex (sp),hl
 	ret  ;will return to command handler subroutine, and afterwards to the loop.
 .runexec:
-	push de
-	call bos.sys_ExecuteFile
+	call ti._strlen
+	ex (sp),hl
 	pop bc
-	pop ix
-	ret c
+	push bc,hl
+	ld a,' '
+	cpir
+	ld (bos.fsOP6),hl ;save arguments
+	pop hl,bc
+	push hl
+	inc hl
+	add hl,bc ;next line in program
+	ex (sp),hl
+	ld bc,(bos.fsOP6) ;arguments
+	push bc,hl
+	call bos.sys_ExecuteFile
+	pop bc,bc,hl
+	jq bbas_main
+
+bbas_commands:
+	dl str_Return, handler_Return
+	dl 0, 0
+str_Return:
+	db "RETURN",0
+handler_Return:
+	pop bc
 	xor a,a
 	ret
-bbas_commands:
-	dl 0
 end fs_file
 
-display_sector "EXPLORER.EXE", $
+
+fs_file "BOOT", "EXE", f_readonly+f_system
+	jr boot_main
+	db "FEX",0
+boot_main:
+	ld hl,boot_script
+	push hl
+	call bbas_main
+	pop bc
+	ret
+boot_script:
+	db "CLEAN",0
+	db "CLS",0
+	db "BBS C:/HOME/USER.BBS",0
+	db "EXPLORER",0
+	db "RETURN",0
+end fs_file
+
+
+fs_file "CD", "EXE", f_readonly+f_system
+	jr cd_main
+	db "FEX",0
+cd_main:
+	pop bc
+	pop hl
+	push hl
+	push bc
+	push ix
+	push hl
+	call bos.fs_CheckDirExists
+	pop hl
+	jr c,.fail
+	inc hl
+	ld a,(hl)
+	dec hl
+	cp a,':'
+	jr z,.abs_path
+	push hl
+	ld hl,bos.current_working_dir
+	push hl
+	call ti._strlen
+	ex (sp),hl
+	pop bc
+	add hl,bc
+	push hl
+	call ti._strlen
+	ex (sp),hl
+	ex hl,de
+	pop bc
+	pop hl
+	ldir
+	jq .return
+.abs_path:
+	ld de,bos.current_working_dir
+	push hl,de
+	call ti._strcpy
+	pop de
+	call ti._strlen
+	ex (sp),hl
+	pop bc
+	add hl,bc
+	ld (hl),0
+.return:
+	pop ix
+	xor a,a
+	sbc hl,hl
+	ret
+.fail:
+	pop ix
+	ld hl,str_DirDoesNotExist
+	call bos.gui_Print
+	ld hl,-2
+	ret
+str_DirDoesNotExist:
+	db $9,"Directory does not exist.",$A,0
+	
+end fs_file
+
+
+fs_file "CLEAN", "EXE", f_readonly+f_system
+	jr clean_main
+	db "FEX",0
+clean_main:
+	call bos.sys_FreeAll
+	xor a,a
+	ret
+end fs_file
+
+
 fs_file "EXPLORER", "EXE", f_readonly+f_system
 	jr explorer_main
 	db "FEX",0
@@ -119,7 +166,7 @@ explorer_main:
 	ret
 end fs_file
 
-display_sector "MAN.EXE", $
+
 fs_file "MAN", "EXE", f_readonly+f_system
 	jr man_main
 	db "FEX",0
@@ -129,24 +176,111 @@ man_main:
 	push hl
 	push bc
 	push hl
-	call bos.fs_GetPathLastName
+	call ti._strlen
+	ld bc,7+5
+	add hl,bc
+	push hl
+	call bos.sys_Malloc
 	pop bc
-	ld de,bos.InputBuffer
+	ex hl,de
+	pop hl ;argument
 	push de
-	ld bc,8
-	ldir
+	push hl
+	ld bc,7
+	ld hl,man_dir
+	ldir          ; copy in manual directory
+	call ti._strlen
+	ex (sp),hl
+	pop bc
+	ldir          ; copy in manual name
 	ld hl,man_extension
 	ld c,5
-	ldir
-	call bos.fs_OpenFile
-	pop bc
+	ldir          ; copy in manual extension and null byte
+	call bos.fs_OpenFile  ;try to open file
+	pop de
+	jq c,.not_found
+	ld bc,0
+.display_loop:
+	push bc,de,hl
+	ex hl,de
+	call bos.gui_DrawConsoleWindow
+	call bos.gui_NewLine
+	pop hl,de,bc
+	push de,hl,bc
 	call bos.fs_GetSectorPtr
-	
-	
+	pop bc,de,iy
+	jq c,.eof
+	push iy,de,bc
+	call bos.gui_Print
+	call bos.sys_WaitKeyCycle
+	pop bc,hl,de
+	cp a,4
+	jq z,.scroll_up
+	inc bc
+	cp a,15
+	jq nz,.display_loop
+.eof:
+	push bc,de,hl
+	ld hl,man_EndOfFileReached
+	call bos.gui_Print
+	call bos.sys_WaitKeyCycle
+	pop hl,de,bc
+	cp a,4
+	jq z,.scroll_up
+	cp a,9
+	jq z,.exit
+	cp a,15
+	jq nz,.display_loop
+.exit:
+	xor a,a
+	sbc hl,hl
 	ret
+.scroll_up:
+	ld (bos.ScrapMem),bc
+	ld a,(bos.ScrapMem+2)
+	or a,b
+	or a,c
+	jq z,.display_loop
+	dec bc
+	jq .display_loop
+.not_found:
+	ld hl,man_NotFound
+	call bos.gui_Print
+	call bos.gui_NewLine
+	scf
+	sbc hl,hl
+	ret
+man_EndOfFileReached:
+	db $9,"--EOF REACHED--",$A
+man_NotFound:
+	db "No matching manual found.",0
+man_dir:
+	db "A:/MAN/",0
 man_extension:
-	db ".man",0
+	db ".MAN",0
 end fs_file
 
 
+fs_file "CLS", "EXE", f_readonly+f_system
+	jr cls_main
+	db "FEX",0
+cls_main:
+	ld hl,bos.current_working_dir
+	call bos.gui_DrawConsoleWindow
+	ld hl,str_Prompt
+	call bos.gfx_PrintString
+	jp bos.gui_NewLine
+str_Prompt:
+	db ">",$A,0
+end fs_file
 
+
+fs_file "LS", "EXE", f_readonly+f_system
+	jr ls_main
+	db "FEX",0
+ls_main:
+	ret
+end fs_file
+
+
+end fs_fs

@@ -2,6 +2,7 @@
 ;@INPUT HL,DE pointers to compare
 ;@INPUT BC number of bytes to compare
 ;@OUTPUT Z flag set if success
+sys_MemCmp:
 memcmp:
 	ld a,(de)
 	inc de

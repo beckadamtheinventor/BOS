@@ -41,6 +41,14 @@ fs_Format:
 	call sys_WriteFlash
 	pop bc
 	djnz .write_loop
+
+	ld hl,fs_drive_a_data_compressed_bin
+	push hl
+	ld hl,$041000
+	push hl
+	call util_Zx7DecompressToFlash
+	pop hl,hl
+
 	ld hl,str_WritingDriveC
 	call gui_Print
 
@@ -75,11 +83,10 @@ fs_drive_a_data:
 	dl $0401FC
 	dl fs_drive_a_volume_data
 	dl fs_drive_a_volume_data.len
-	dl $040200
+	dl $04020B
 	dl fs_magic_bytes
 	dl fs_magic_bytes.len
 	dl $0403FC
-	dl fs_drive_a_bin
 .len:=($-fs_drive_a_data) / 9
 
 
@@ -92,10 +99,19 @@ fs_drive_c_data:
 	dl $0A01FC
 	dl fs_drive_c_volume_data
 	dl fs_drive_c_volume_data.len
-	dl $0A0200
+	dl $0A020B
 	dl fs_magic_bytes
 	dl fs_magic_bytes.len
 	dl $0A03FC
+	dl fs_drive_a_cluster_map
+	dl fs_drive_a_cluster_map.len
+	dl $0A0400
+	dl fs_drive_c_home_dir
+	dl fs_drive_c_home_dir.len
+	dl $0A3800
+	dl $FF0000 ; always reads zero
+	dl 32      ; write one 32 byte entry to signify end of directory
+	dl $0A3C00 ; write end-of-dir entry to cluster 3
 .len:=($-fs_drive_c_data) / 9
 
 
@@ -131,30 +147,21 @@ fs_drive_a_volume_data:
 	db $02       ;sectors per cluster
 	db $08,$00   ;reserved sector count
 	db $02       ;number of FATs. always 2
-	db $1B dup 0
-	db $08,0,0,0 ;sectors per FAT
-	db $04,0,0,0 ;root directory first cluster
+	db $13 dup 0
+	dd 8 ;sectors per FAT
+	db 4 dup 0
+	dd 2 ;root directory first cluster
 .len:=$-fs_drive_a_volume_data
-
-fs_drive_a_bin_dir:
-	db "bin     ","  "
-	db $11     ; read-only directory
-	db $00,$00,$00,$00
-	db $00,$00,$00,$00
-	db $00,$00 ; starting cluster high
-	db $00,$00,$00,$00
-	db $00,$00 ; starting cluster low
-	db $00,$00,$00,$00 ;file size
-.len:=$-fs_drive_a_bin_dir
 
 fs_drive_c_volume_data:
 	db $00,$02   ;sector size. always 512
 	db $02       ;sectors per cluster
 	db $08,$00   ;reserved sector count
 	db $02       ;number of FATs. always 2
-	db $1B dup 0
-	db $08,0,0,0 ;sectors per FAT
-	db $04,0,0,0 ;root directory first cluster
+	db $13 dup 0
+	dd 8 ;sectors per FAT
+	db 4 dup 0
+	dd 2 ;root directory first cluster
 .len:=$-fs_drive_c_volume_data
 
 fs_drive_c_home_dir:
@@ -164,17 +171,9 @@ fs_drive_c_home_dir:
 	db $00,$00,$00,$00
 	db $00,$00 ;starting cluster high
 	db $00,$00,$00,$00
-	db $00,$00 ;starting cluster low
+	db $03,$00 ;starting cluster low (0x0003)
 	db $00,$00,$00,$00 ;file size
 .len:=$-fs_drive_c_home_dir
-
-fs_drive_a_root:
-	db $04,$02,$00,$00
-.len:=$-fs_drive_a_root
-
-fs_drive_c_root:
-	db $04,$05,$00,$00
-.len:=$-fs_drive_c_root
 
 fs_magic_bytes:
 	db $00,$00,$55,$AA
@@ -188,4 +187,8 @@ fs_fat_end_of_chain:
 	db $FF,$FF,$FF,$F0
 .len:=$-fs_fat_end_of_chain
 
-
+fs_drive_a_cluster_map:
+	db $F0,$FF,$FF,$F0 ;FAT ID
+	db $FF,$FF,$FF,$F0 ;end of chain marker
+	db $FF,$FF,$FF,$F0 ;root directory first cluster
+.len:=$-fs_drive_a_cluster_map

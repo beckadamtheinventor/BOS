@@ -1,8 +1,9 @@
 
 ;@DOES get user input
 ;@INPUT bool gui_Input(char *buffer, int max_len);
+;@DESTROYS All
 gui_Input:
-	ld hl,-5
+	ld hl,-8
 	call ti._frameset
 	xor a,a
 	sbc hl,hl
@@ -22,23 +23,7 @@ gui_Input:
 	ld a,(ix-5)
 	ld (console_line),a
 .entry:
-	ld hl,LCD_BUFFER
-	ld c,a
-	add a,a
-	add a,a
-	add a,a
-	add a,c
-	ld c,a
-	ld b,160
-	mlt bc
-	add hl,bc
-	add hl,bc
-	push hl
-	pop de
-	inc de
-	ld (hl),0
-	ld bc,320*9
-	ldir
+	call .clear_line
 	ld bc,$FF
 	ld (lcd_text_fg),bc
 	ld hl,(ix+6)
@@ -49,6 +34,8 @@ gui_Input:
 	ld hl,.overtypes
 	ld c,(ix-4)
 	add hl,bc
+	ld bc,(lcd_x)
+	ld (ix-8),bc
 	ld a,(hl)
 	call gfx_PrintChar
 	ld a,$FF
@@ -112,11 +99,31 @@ gui_Input:
 	jr .return
 .exit:
 	xor a,a
+.return:
 	ld hl,(ix+6)
 	ld (hl),a
-.return:
 	ld sp,ix
 	pop ix
+	ret
+.clear_line:
+	ld a,(console_line)
+	ld hl,LCD_BUFFER
+	ld c,a
+	add a,a
+	add a,a
+	add a,a
+	add a,c
+	ld c,a
+	ld b,160
+	mlt bc
+	add hl,bc
+	add hl,bc
+	push hl
+	pop de
+	inc de
+	ld (hl),0
+	ld bc,320*9
+	ldir
 	ret
 .prevmap:
 	ld a,(ix-4)

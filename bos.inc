@@ -2,18 +2,38 @@
 define bos? bos
 namespace bos
 ;
-;DONOTHING                       := $20108
-;DONOTHING                       := $2010C
+?boot_os                         := $20108
+?handle_interrupt                := $2010C
 ;DONOTHING                       := $20110
 ;DONOTHING                       := $20114
 ;DONOTHING                       := $20118
 ;DONOTHING                       := $2011C
-?sys_ExecuteFile                 := $20120
-?sys_ExecuteFileEntryPoint       := $20124
-?fs_OpenFile                     := $20128
-?fs_GetSectorPtr                 := $2012C
-?fs_CheckDirExists               := $20130
-?fs_GetPathLastName              := $20134
+;DONOTHING                       := $20120
+?sys_ExecuteFile                 := $20124
+?sys_ExecuteFileEntryPoint       := $20128
+?fs_OpenFile                     := $2012C
+?fs_GetSectorPtr                 := $20130
+?fs_CheckDirExists               := $20134
+?fs_GetPathLastName              := $20138
+?sys_AddHLAndA                   := $2013C
+?sys_AnyKey                      := $20140
+?sys_FreeAll                     := $20144
+?sys_GetKey                      := $20148
+?sys_KbScan                      := $2014C
+?sys_Malloc                      := $20150
+?sys_MemCmp                      := $20154
+?sys_MemSet                      := $20158
+?sys_Mult24x8                    := $2015C
+?sys_WaitKey                     := $20160
+?sys_WaitKeyCycle                := $20164
+?gui_DrawConsoleWindow           := $20168
+?gui_Input                       := $2016C
+?gui_NewLine                     := $20170
+?gui_Print                       := $20174
+?gui_PrintInt                    := $20178
+?gui_Scroll                      := $2017C
+?gfx_BlitBuffer                  := $20180
+?gfx_PrintString                 := $20184
 ;
 ?LCD_PAL    := 0E30200h
 ?LCD_CTRL   := 0E30018h
@@ -25,6 +45,7 @@ namespace bos
 ?LCD_16BPP  := $2D
 ?TEXT_MAX_ROW    := 231
 ?RAM_START  := 0D00400h
+?iyflags                      := $D00080
 ?flags.sys_flags              := -1
 ?flags.lcd_bg_color           :=  0
 ?flags.text_fg                :=  1
@@ -46,6 +67,7 @@ namespace bos
 ?flags.free_file_RAM_ptr      :=  33
 ?flags.remaining_file_RAM     :=  36
 ?flags.console_line           :=  39
+?flags.bottom_of_RAM          :=  40
 ?bos_read_only_fs        := 1
 ?cursor_2nd              := 1
 ?flag_start             := $D00000
@@ -66,6 +88,7 @@ namespace bos
 ?free_file_RAM_ptr      := $D000A0
 ?remaining_file_RAM     := $D000A3
 ?console_line           := $D000A6
+?bottom_of_RAM          := $D000A7
 ?ScrapMem2              := $D000F9
 ?ScrapByte              := $D000FC
 ?ScrapWord              := $D000FD
@@ -81,10 +104,9 @@ namespace bos
 ?fsOP5                  := $D00540
 ?fsOP6                  := $D00550
 ?current_cluster_map    := $D00580
-?stackbot               := $D08000
-?start_of_file_RAM      := $D10000
-?end_of_file_RAM        := $D40000
-?total_file_RAM         := end_of_file_RAM-start_of_file_RAM
+?bos_Stackbot           := $D1A87C
+?bos_UserMem            := $D1A881
+?top_of_RAM             := $D40000
 ?start_of_user_archive  := $0C0000 ;sector $0C, standard
 ?end_of_user_archive    := $3B0000 ;sector $3B, start of certificate
 

@@ -21,7 +21,7 @@ TEXT_MAX_ROW    := 231
 RAM_START  := 0D00400h
 
 ; iy flags
-;flags                   := $D00080
+iyflags                      := $D00080
 flags.sys_flags              := -1
 flags.lcd_bg_color           :=  0
 flags.text_fg                :=  1
@@ -43,6 +43,7 @@ flags.cursor_color           :=  32
 flags.free_file_RAM_ptr      :=  33
 flags.remaining_file_RAM     :=  36
 flags.console_line           :=  39
+flags.bottom_of_RAM          :=  40
 
 ; bos_sys_flags flag bits
 bos_read_only_fs        := 1
@@ -53,7 +54,6 @@ cursor_2nd              := 1
 
 ; iy flag memory locations
 flag_start             := $D00000
-;sys_flags              := $D0007F
 lcd_bg_color           := $D00080
 text_fg                := $D00081
 text_bg                := $D00082
@@ -71,6 +71,7 @@ cursor_color           := $D00099
 free_file_RAM_ptr      := $D000A0
 remaining_file_RAM     := $D000A3
 console_line           := $D000A6
+bottom_of_RAM          := $D000A7
 ScrapMem2              := $D000F9
 ScrapByte              := $D000FC
 ScrapWord              := $D000FD
@@ -87,11 +88,12 @@ fsOP3                  := $D00520
 fsOP4                  := $D00530
 fsOP5                  := $D00540
 fsOP6                  := $D00550
-current_cluster_map    := $D00580
-stackbot               := $D08000
-start_of_file_RAM      := $D10000
-end_of_file_RAM        := $D40000
-total_file_RAM         := end_of_file_RAM-start_of_file_RAM
+current_cluster_map    := $D00580 ;3 bytes long
+usb_sector_buffer_ptr  := $D00583 ;3 bytes long
+bos_Stackbot           := $D1A87C
+bos_UserMem            := $D1A881
+top_of_RAM             := $D40000
+
 
 ; Flash locations
 start_of_user_archive  := $0C0000 ;sector $0C, standard

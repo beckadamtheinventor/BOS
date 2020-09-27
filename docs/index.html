@@ -1,37 +1,148 @@
-<html><head><title>bos.inc docs</title><link rel="stylesheet" type="text/css" href="style.css"></head><body><h1>"bos.inc" documentation</h1><h3>syscalls marked in <a class="no_op">red</a> are no-ops and do nothing.</h3><h3>Download <a href="sources.zip">this archive</a> to view the source code</h3><table><th>syscall name</th><th>syscall adress</th><th>links</th><tr class="no_op"><td>bos.DONOTHING </td><td>020108</td><td><a href="#DONOTHING ">doc</a></tr>
-<tr class="no_op"><td>bos.DONOTHING </td><td>02010C</td><td><a href="#DONOTHING ">doc</a></tr>
+<html><head><title>bos.inc docs</title><link rel="stylesheet" type="text/css" href="style.css"></head><body><h1>"bos.inc" documentation</h1><h3>syscalls marked in <a class="no_op">red</a> are no-ops and do nothing.</h3><h3>Download <a href="sources.zip">this archive</a> to view the source code</h3><table><th>syscall name</th><th>syscall adress</th><th>links</th><tr><td>bos.boot_os</td><td>020108</td><td><a href="#boot_os">doc</a></tr>
+<tr><td>bos.handle_interrupt</td><td>02010C</td><td><a href="#handle_interrupt">doc</a></tr>
 <tr class="no_op"><td>bos.DONOTHING </td><td>020110</td><td><a href="#DONOTHING ">doc</a></tr>
 <tr class="no_op"><td>bos.DONOTHING </td><td>020114</td><td><a href="#DONOTHING ">doc</a></tr>
 <tr class="no_op"><td>bos.DONOTHING </td><td>020118</td><td><a href="#DONOTHING ">doc</a></tr>
 <tr class="no_op"><td>bos.DONOTHING </td><td>02011C</td><td><a href="#DONOTHING ">doc</a></tr>
-<tr><td>bos.sys_ExecuteFile</td><td>020120</td><td><a href="#sys_ExecuteFile">doc</a></tr>
-<tr><td>bos.sys_ExecuteFileEntryPoint</td><td>020124</td><td><a href="#sys_ExecuteFileEntryPoint">doc</a></tr>
-<tr><td>bos.fs_OpenFile</td><td>020128</td><td><a href="#fs_OpenFile">doc</a></tr>
-<tr><td>bos.fs_GetSectorPtr</td><td>02012C</td><td><a href="#fs_GetSectorPtr">doc</a></tr>
-<tr><td>bos.fs_CheckDirExists</td><td>020130</td><td><a href="#fs_CheckDirExists">doc</a></tr>
-<tr><td>bos.fs_GetPathLastName</td><td>020134</td><td><a href="#fs_GetPathLastName">doc</a></tr>
-</table><div id="sys_ExecuteFile"><h1>sys_ExecuteFile</h1><h3>syscall Adress 020120</h3>
+<tr class="no_op"><td>bos.DONOTHING </td><td>020120</td><td><a href="#DONOTHING ">doc</a></tr>
+<tr><td>bos.sys_ExecuteFile</td><td>020124</td><td><a href="#sys_ExecuteFile">doc</a></tr>
+<tr><td>bos.sys_ExecuteFileEntryPoint</td><td>020128</td><td><a href="#sys_ExecuteFileEntryPoint">doc</a></tr>
+<tr><td>bos.fs_OpenFile</td><td>02012C</td><td><a href="#fs_OpenFile">doc</a></tr>
+<tr><td>bos.fs_GetSectorPtr</td><td>020130</td><td><a href="#fs_GetSectorPtr">doc</a></tr>
+<tr><td>bos.fs_CheckDirExists</td><td>020134</td><td><a href="#fs_CheckDirExists">doc</a></tr>
+<tr><td>bos.fs_GetPathLastName</td><td>020138</td><td><a href="#fs_GetPathLastName">doc</a></tr>
+<tr><td>bos.sys_AddHLAndA</td><td>02013C</td><td><a href="#sys_AddHLAndA">doc</a></tr>
+<tr><td>bos.sys_AnyKey</td><td>020140</td><td><a href="#sys_AnyKey">doc</a></tr>
+<tr><td>bos.sys_FreeAll</td><td>020144</td><td><a href="#sys_FreeAll">doc</a></tr>
+<tr><td>bos.sys_GetKey</td><td>020148</td><td><a href="#sys_GetKey">doc</a></tr>
+<tr><td>bos.sys_KbScan</td><td>02014C</td><td><a href="#sys_KbScan">doc</a></tr>
+<tr><td>bos.sys_Malloc</td><td>020150</td><td><a href="#sys_Malloc">doc</a></tr>
+<tr><td>bos.sys_MemCmp</td><td>020154</td><td><a href="#sys_MemCmp">doc</a></tr>
+<tr><td>bos.sys_MemSet</td><td>020158</td><td><a href="#sys_MemSet">doc</a></tr>
+<tr><td>bos.sys_Mult24x8</td><td>02015C</td><td><a href="#sys_Mult24x8">doc</a></tr>
+<tr><td>bos.sys_WaitKey</td><td>020160</td><td><a href="#sys_WaitKey">doc</a></tr>
+<tr><td>bos.sys_WaitKeyCycle</td><td>020164</td><td><a href="#sys_WaitKeyCycle">doc</a></tr>
+<tr><td>bos.gui_DrawConsoleWindow</td><td>020168</td><td><a href="#gui_DrawConsoleWindow">doc</a></tr>
+<tr><td>bos.gui_Input</td><td>02016C</td><td><a href="#gui_Input">doc</a></tr>
+<tr><td>bos.gui_NewLine</td><td>020170</td><td><a href="#gui_NewLine">doc</a></tr>
+<tr><td>bos.gui_Print</td><td>020174</td><td><a href="#gui_Print">doc</a></tr>
+<tr><td>bos.gui_PrintInt</td><td>020178</td><td><a href="#gui_PrintInt">doc</a></tr>
+<tr><td>bos.gui_Scroll</td><td>02017C</td><td><a href="#gui_Scroll">doc</a></tr>
+<tr><td>bos.gfx_BlitBuffer</td><td>020180</td><td><a href="#gfx_BlitBuffer">doc</a></tr>
+<tr><td>bos.gfx_PrintString</td><td>020184</td><td><a href="#gfx_PrintString">doc</a></tr>
+</table><div id="boot_os"><h1>boot_os</h1><h3>syscall Adress 020108</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td> hl = path</td><td> execute an executable file from a path.</td><td></td><td></td><td>
+<tr><td></td><td></td><td></td><td></td><td>
 </td></tr>
-</table></div><div id="sys_ExecuteFileEntryPoint"><h1>sys_ExecuteFileEntryPoint</h1><h3>syscall Adress 020124</h3>
+</table></div><div id="handle_interrupt"><h1>handle_interrupt</h1><h3>syscall Adress 02010C</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td> hl = file path appended with path of entry point.</td><td> execute a file from a given entry point</td><td></td><td></td><td>
+<tr><td></td><td></td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="sys_ExecuteFile"><h1>sys_ExecuteFile</h1><h3>syscall Adress 020124</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> int sys_ExecuteFile(char *path, char *args);</td><td> execute a file from a given entry point</td><td> -1 if file does not exist or is not a valid executable format</td><td> All, OP5, and OP6.</td><td>
+</td></tr>
+</table></div><div id="sys_ExecuteFileEntryPoint"><h1>sys_ExecuteFileEntryPoint</h1><h3>syscall Adress 020128</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> int sys_ExecuteFileEntryPoint(char *path, char *args);</td><td> execute a file from a given entry point</td><td> -1 if file does not exist or is not a valid executable format</td><td></td><td>
  entry point is essentially "file.whatever/entry.point/whatever"</td></tr>
-</table></div><div id="fs_OpenFile"><h1>fs_OpenFile</h1><h3>syscall Adress 020128</h3>
+</table></div><div id="fs_OpenFile"><h1>fs_OpenFile</h1><h3>syscall Adress 02012C</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td> hl = path</td><td> Opens a file from a path and returns file descriptor.</td><td> hl = file descriptor</td><td></td><td>
+<tr><td> void *fs_OpenFile(char *path);</td><td> Opens a file from a path and returns file descriptor.</td><td> hl = file descriptor. hl is -1 if file does not exist.</td><td> All, OP5, OP6</td><td>
 </td></tr>
-</table></div><div id="fs_GetSectorPtr"><h1>fs_GetSectorPtr</h1><h3>syscall Adress 02012C</h3>
+</table></div><div id="fs_GetSectorPtr"><h1>fs_GetSectorPtr</h1><h3>syscall Adress 020130</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td> void *fs_GetSectorPtr(void *fd, int sector);</td><td> read a given sector of a file descriptor</td><td> hl = pointer to sector. hl = -1 if failed.</td><td></td><td>
  this does not guarantee a contiguous memory space, as files can be fragmented in FAT filesystems.</td></tr>
-</table></div><div id="fs_CheckDirExists"><h1>fs_CheckDirExists</h1><h3>syscall Adress 020130</h3>
+</table></div><div id="fs_CheckDirExists"><h1>fs_CheckDirExists</h1><h3>syscall Adress 020134</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td> bool fs_CheckDirExists(char *path);</td><td> check if a directory exists.</td><td> zf/a=0 if path exists, else nzf/cf/a!=0.</td><td></td><td>
+<tr><td> bool fs_CheckDirExists(char *path);</td><td> check if a directory exists.</td><td> true if path exists, else false</td><td></td><td>
  uses InputBuffer and fsOP6</td></tr>
-</table></div><div id="fs_GetPathLastName"><h1>fs_GetPathLastName</h1><h3>syscall Adress 020134</h3>
+</table></div><div id="fs_GetPathLastName"><h1>fs_GetPathLastName</h1><h3>syscall Adress 020138</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td> char *fs_GetPathLastName(char *path);</td><td> get last file name from a path. Equivalent to python path.split("/")[-1]</td><td> pointer to file name</td><td></td><td>
  this will return the last entry in the path, regardless of whether the path exists or if it points to a program entrypoint.</td></tr>
+</table></div><div id="sys_AddHLAndA"><h1>sys_AddHLAndA</h1><h3>syscall Adress 02013C</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> HL number<br>
+ A increment</td><td> HL+=A</td><td> HL number+increment</td><td> AF</td><td>
+</td></tr>
+</table></div><div id="sys_AnyKey"><h1>sys_AnyKey</h1><h3>syscall Adress 020140</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td> Scans the keypad and updates data registers; checking if a key was pressed</td><td> 0 if no keys pressed</td><td> HL,AF</td><td>
+ Disables interrupts during execution</td></tr>
+</table></div><div id="sys_FreeAll"><h1>sys_FreeAll</h1><h3>syscall Adress 020144</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> void sys_FreeAll(void);</td><td> Free all memory malloc'd by sys_Malloc</td><td></td><td> All</td><td>
+</td></tr>
+</table></div><div id="sys_GetKey"><h1>sys_GetKey</h1><h3>syscall Adress 020148</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td> Return current keypress</td><td> A keypress<br>
+ z if no key pressed</td><td> HL,DE,BC,AF</td><td>
+</td></tr>
+</table></div><div id="sys_KbScan"><h1>sys_KbScan</h1><h3>syscall Adress 02014C</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td> Scans the keypad and updates data registers</td><td></td><td> HL,AF</td><td>
+</td></tr>
+</table></div><div id="sys_Malloc"><h1>sys_Malloc</h1><h3>syscall Adress 020150</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> void *sys_Malloc(size_t amt);</td><td> Allocate memory</td><td> hl = malloc'd bytes. hl = -1 if failed to malloc<br>
+ Cf set if failed to malloc</td><td> All</td><td>
+</td></tr>
+</table></div><div id="sys_MemCmp"><h1>sys_MemCmp</h1><h3>syscall Adress 020154</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> HL,DE pointers to compare<br>
+ BC number of bytes to compare</td><td> compare two memory pointers</td><td> Z flag set if success</td><td></td><td>
+</td></tr>
+</table></div><div id="sys_MemSet"><h1>sys_MemSet</h1><h3>syscall Adress 020158</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> HL pointer to set<br>
+ BC amount to set<br>
+ A byte to set memory to</td><td> set BC bytes of HL to the value A</td><td> HL HL+BC<br>
+ DE HL+BC+1</td><td> AF</td><td>
+</td></tr>
+</table></div><div id="sys_Mult24x8"><h1>sys_Mult24x8</h1><h3>syscall Adress 02015C</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> HL,A</td><td> Multiply HL (24 bit) by A (8 bit)</td><td> HL</td><td> AF</td><td>
+</td></tr>
+</table></div><div id="sys_WaitKey"><h1>sys_WaitKey</h1><h3>syscall Adress 020160</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td> Wait until a key is pressed and return it</td><td></td><td> HL,DE,BC,AF</td><td>
+</td></tr>
+</table></div><div id="sys_WaitKeyCycle"><h1>sys_WaitKeyCycle</h1><h3>syscall Adress 020164</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td> Wait until a key is pressed, then wait until it's released, then return the keycode</td><td> A = keycode</td><td> HL,DE,BC,AF</td><td>
+</td></tr>
+</table></div><div id="gui_DrawConsoleWindow"><h1>gui_DrawConsoleWindow</h1><h3>syscall Adress 020168</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td></td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="gui_Input"><h1>gui_Input</h1><h3>syscall Adress 02016C</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> bool gui_Input(char *buffer, int max_len);</td><td> get user input</td><td></td><td> All</td><td>
+</td></tr>
+</table></div><div id="gui_NewLine"><h1>gui_NewLine</h1><h3>syscall Adress 020170</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td></td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="gui_Print"><h1>gui_Print</h1><h3>syscall Adress 020174</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td></td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="gui_PrintInt"><h1>gui_PrintInt</h1><h3>syscall Adress 020178</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> hl = integer</td><td> Print an integer. Does not swap buffers.</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="gui_Scroll"><h1>gui_Scroll</h1><h3>syscall Adress 02017C</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td></td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="gfx_BlitBuffer"><h1>gfx_BlitBuffer</h1><h3>syscall Adress 020180</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td> copies the back buffer to the lcd</td><td></td><td> HL,DE,BC</td><td>
+</td></tr>
+</table></div><div id="gfx_PrintString"><h1>gfx_PrintString</h1><h3>syscall Adress 020184</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> HL pointer to string</td><td> print a string to the back buffer</td><td></td><td> HL,DE,BC,AF</td><td>
+</td></tr>
 </table></div></body></html>

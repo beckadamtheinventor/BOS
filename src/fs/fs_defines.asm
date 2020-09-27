@@ -18,6 +18,12 @@ fs_boot_magic_1 := $1FE
 fs_boot_magic_2 := $1FF
 
 
+fsbit_readonly       := 0
+fsbit_hidden         := 1
+fsbit_system         := 2
+fsbit_volumeid       := 3 ;file name is volume ID
+fsbit_subdirectory   := 4
+fsbit_archive        := 5 ;has been changed since last backup
 
 fsentry_avalible     := $00
 fsentry_E5           := $05

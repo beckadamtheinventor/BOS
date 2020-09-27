@@ -26,7 +26,7 @@ def myfinder(d,df):
 				if dt[ix].startswith(df):
 					return dt,ix
 		except:
-			print(f"failed to read file {fname}")
+			pass
 	return [],0
 
 
