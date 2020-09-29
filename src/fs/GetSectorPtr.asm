@@ -21,12 +21,14 @@ fs_GetSectorPtr:
 	jr z,.fail
 	dec hl
 	push de
-	ld bc,$14
+	ld bc,$12
 	add hl,bc
-	ld a,(hl)  ;upper byte of file starting cluster
-	ld c,$1A - $14
+	ld bc,(hl)  ;upper byte of file starting cluster
+	ld c,$1A - $12
 	add hl,bc
-	ld bc,(hl) ;low two bytes of file starting cluster
+	ld c,(hl) ;low two bytes of file starting cluster
+	inc hl
+	ld b,(hl)
 	ld (ScrapMem),bc
 	ld (ScrapMem+2),a
 	push hl

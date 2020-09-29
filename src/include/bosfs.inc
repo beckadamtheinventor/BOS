@@ -17,73 +17,81 @@ f_subdir     := $10
 f_archive    := $20
 f_device     := $40
 
+
+
 macro fs_fs? @base
-	local fs
 	fs.base = @base
-	virtual as 'clusters'
+	org fs.base
+	virtual
 		fs.exports.cmap::
 		dd $F0FFFFF0, $0FFFFFFF, $0FFFFFFF
 	end virtual
-	virtual as 'asm'
-		fs.exports.output::
-	end virtual
-	virtual as 'entries'
-		fs.exports.entries::
-		db 64 dup $FF
-	end virtual
-	fs.clusters_section = fs.base+$2000
-	org fs.data_section
-	macro fs_file? @@name, @@ext, @@prop
-		local file
-		file.start = $
-		virtual fs.exports.cmap
-			if file.len > 1024
-				local num
-				num = $-$$ shr 2
-				repeat file.len shr 10
-					dd num
-					num = num + 1
-				end repeat
-			end if
-			dd $0FFFFFFF
+	db fs.cmap
+	db $1000 - (fs.cmap_len and $7FF) dup $FF
+	db fs.cmap
+	db $1000 - (fs.cmap_len and $7FF) dup $FF
+	fs.clusters_section:
+
+	macro fs_subdir? fsname
+		virtual
+			_#fsname.exports.entries::
 		end virtual
-		virtual fs.exports.entries
-			local data
-			pad_db @@name, ' ', 8
-			pad_db @@ext, ' ', 3
-			db @@prop
-			db 8 dup 0
-			dw (((file.start-fs.clusters_section) shr 26) and $FFFF)
-			db 4 dup 0
-			dw (((file.start-fs.clusters_section) shr 10) and $FFFF)
-			dd file.len
-		end virtual
-		macro end?.fs_file?
-			file.end = $
-			file.len = $ - file.start
-			db ( $400 - ( file.len and $3FF ) ) dup $FF
-			file.last_sector = $-$$ shr 10
-			purge end?.fs_file?
+		db _#fsname.entries
+		db 32 dup 0
+		db $400 - (_#fsname.entries_len and $3FF) dup $FF
+		macro fs_file? @@name, @@ext, @@prop
+			local file
+			file.start = $
+			virtual fs.exports.cmap
+				if file.len > 1024
+					local num
+					num = $-$$ shr 2
+					repeat file.len shr 10
+						dd num
+						num = num + 1
+					end repeat
+				end if
+				dd $0FFFFFFF
+			end virtual
+			virtual _#fsname.exports.entries
+				pad_db @@name, ' ', 8
+				pad_db @@ext, ' ', 3
+				db @@prop
+				db 8 dup 0
+				dw (((file.start-fs.clusters_section) shr 26) and $FFFF)
+				db 4 dup 0
+				dw (((file.start-fs.clusters_section) shr 10) and $FFFF)
+				dd file.len
+			end virtual
+			macro end?.fs_file?
+				purge end?.fs_file?
+				file.end = $
+				file.len = $ - file.start
+				db ( $400 - ( file.len and $3FF ) ) dup $FF
+				file.last_sector = $-$$ shr 10
+			end macro
+		end macro
+		macro end?.fs_subdir?
+			purge end?.fs_subdir?
+			virtual _#fsname.exports.entries
+				_#fsname.entries_len = $+32-$$
+				load _#fsname.entries:$-$$ from $$
+			end virtual
 		end macro
 	end macro
+
+	fs_subdir 0
+
 	macro end?.fs_fs?
+		purge end?.fs_fs?
 		virtual fs.exports.cmap
-			assert $ < $$ + $1000
-			db $$ + $1000 - $ dup $FF
-			load fs.cmap_exports: $-$$ from $$
-			db fs.cmap_exports
+			fs.cmap_len = $-$$
+			load fs.cmap:$-$$ from $$
 		end virtual
-		virtual fs.exports.entries
-			db ( $400 - ( ($-$$) and $3FF ) ) dup $FF
-			fs.data_section = fs.base+$2000 + $-$$
-		end virtual
-		virtual fs.exports.output
-			db "file 'main.clusters'",$A
-			db "file 'main.entries'",$A
-			db "file 'main.bin'",$A
-		end virtual
+		end fs_subdir
 	end macro
 end macro
+
 
 calminstruction (var) strcalc? val
 	compute val, val        ; compute expression

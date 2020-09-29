@@ -17,10 +17,9 @@ sys_ExecuteFile:
 	ld a,(hl)
 	dec hl
 	cp a,':'
-	jq nz,.open_system_exe
 	push de
-.try_open:
 	push hl
+	jq nz,.open_system_exe
 	call fs_OpenFile
 	jr c,.try_exe
 .open_fd:
@@ -51,6 +50,9 @@ sys_ExecuteFile:
 	scf
 	sbc hl,hl
 	ret
+.fail_pop3bc:
+	pop bc
+	jr .fail_pop2bc
 .skip4:
 	inc hl
 	inc hl
@@ -61,24 +63,26 @@ sys_ExecuteFile:
 .system_drive_prefix:
 	db "A:/",0
 .open_system_exe:
-	push de
-	push hl
 	call ti._strlen
 	push hl
-	ld bc,3
+	ld bc,4
 	add hl,bc
 	push hl
 	call sys_Malloc
+	pop bc
+	jq c,.fail_pop3bc
 	ld (fsOP6),hl
 	ex hl,de
-	pop bc
 	ld bc,3
 	ld hl,.system_drive_prefix
 	ldir
 	pop bc
 	pop hl
 	ldir
+	xor a,a
+	ld (de),a
 	ld hl,(fsOP6)
+	push hl
 	jq .try_open
 .try_exe:
 	call ti._strlen
@@ -100,6 +104,7 @@ sys_ExecuteFile:
 	ld hl,str_dotEXE
 	ld bc,5
 	ldir
+.try_open:
 	call fs_OpenFile
 	jq c,.fail_pop2bc
 	jq .open_fd

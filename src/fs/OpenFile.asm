@@ -41,6 +41,7 @@ fs_OpenFile:
 	call sys_Malloc
 	pop bc
 	jq c,.fail_popbc
+	ld (fsOP6+6),hl
 	ex hl,de
 	ld hl,current_working_dir
 	ld bc,(fsOP6)
@@ -50,6 +51,7 @@ fs_OpenFile:
 	ldir
 	xor a,a
 	ld (de),a
+	ld hl,(fsOP6+6)
 	jr .next
 .abspath:
 	pop hl
@@ -76,15 +78,18 @@ fs_OpenFile:
 .search_loop:
 	ld a,(ix)
 	or a,a
-	ret z ;reached end of directory
+	jq z,.fail_popix ;reached end of directory
 	ld bc,fsOP6+3
 	push ix,bc
 	call fs_CopyFileName ;get file name string from file entry
 	pop bc,ix
-	push bc
-	call ti._strlen ;get length of file name string from file entry
+	ld e,'/'
+	push de,bc
+	call sys_StrLenChr ;get length of file name string from path
+	pop bc
 	ex (sp),hl
 	ld bc,(fsOP6)
+	ld hl,fsOP6+3
 	push bc,hl
 	call ti._strncmp ;compare with the target directory
 	pop bc,bc,bc
@@ -102,8 +107,11 @@ fs_OpenFile:
 	bit fsbit_subdirectory,(ix + fsentry_fileattr) ;check if we're entering a directory
 	jr z,.fail_popix
 .next_path_entry:
-	or a,a
-	jr z,.return
+	ld a,'/'
+	dec hl
+.next_path_skip_slash_loop:
+	cpi
+	jr z,.next_path_skip_slash_loop
 	ld (fsOP6),hl ;advance path entry
 	ld hl,(ix+$12) ;load byte at ix+$14 into hl upper byte
 	ld l,(ix+$1A) ;load low two bytes

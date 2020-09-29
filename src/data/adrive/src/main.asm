@@ -8,11 +8,29 @@ include 'include/bos.inc'
 fs_fs $041000
 
 
-fs_file "BBS", "EXE", f_readonly+f_system
-	jr bbas_main
+fs_file "BOOT", "EXE", f_readonly+f_system
+	jr boot_main
 	db "FEX",0
-bbas_main:
-	ld iy,bbas_commands-6
+boot_main:
+	ld hl,boot_script
+	push hl
+	call bsh_main
+	pop bc
+	ret
+boot_script:
+	db "CLS",0
+	db "CLEAN",0
+	db "BBS C:/HOME/USER.BBS",0
+	db "EXPLORER",0
+	db "RETURN",0
+end fs_file
+
+
+fs_file "BSH", "EXE", f_readonly+f_system
+	jr bsh_main
+	db "FEX",0
+bsh_main:
+	ld iy,bsh_commands-6
 .loop:
 	lea iy,iy+6
 	push hl
@@ -31,15 +49,12 @@ bbas_main:
 	pop hl
 	pop de
 	pop bc
-	or a,a
 	ld de,.loop
 	push de
 	ret nz
 	add hl,bc
-	push hl
-	ld hl,(ix+3)
-	ex (sp),hl
-	ret  ;will return to command handler subroutine, and afterwards to the loop.
+	ld iy,(iy+3)
+	jp (iy)  ;will return to command handler subroutine, and afterwards to the loop.
 .runexec:
 	call ti._strlen
 	ex (sp),hl
@@ -57,9 +72,9 @@ bbas_main:
 	push bc,hl
 	call bos.sys_ExecuteFile
 	pop bc,bc,hl
-	jq bbas_main
+	jq bsh_main
 
-bbas_commands:
+bsh_commands:
 	dl str_Return, handler_Return
 	dl 0, 0
 str_Return:
@@ -70,23 +85,6 @@ handler_Return:
 	ret
 end fs_file
 
-
-fs_file "BOOT", "EXE", f_readonly+f_system
-	jr boot_main
-	db "FEX",0
-boot_main:
-	ld hl,boot_script
-	push hl
-	call bbas_main
-	pop bc
-	ret
-boot_script:
-	db "CLEAN",0
-	db "CLS",0
-	db "BBS C:/HOME/USER.BBS",0
-	db "EXPLORER",0
-	db "RETURN",0
-end fs_file
 
 
 fs_file "CD", "EXE", f_readonly+f_system
@@ -114,12 +112,12 @@ cd_main:
 	ex (sp),hl
 	pop bc
 	add hl,bc
+	ex (sp),hl
 	push hl
 	call ti._strlen
 	ex (sp),hl
-	ex hl,de
 	pop bc
-	pop hl
+	pop de
 	ldir
 	jq .return
 .abs_path:
@@ -155,7 +153,25 @@ fs_file "CLEAN", "EXE", f_readonly+f_system
 clean_main:
 	call bos.sys_FreeAll
 	xor a,a
+	sbc hl,hl
 	ret
+end fs_file
+
+
+fs_file "CLS", "EXE", f_readonly+f_system
+	jr cls_main
+	db "FEX",0
+cls_main:
+	ld hl,bos.current_working_dir
+	call bos.gui_DrawConsoleWindow
+	ld hl,str_Prompt
+	call bos.gfx_PrintString
+	call bos.gui_NewLine
+	xor a,a
+	sbc hl,hl
+	ret
+str_Prompt:
+	db ">",$A,0
 end fs_file
 
 
@@ -165,6 +181,12 @@ fs_file "EXPLORER", "EXE", f_readonly+f_system
 explorer_main:
 	ret
 end fs_file
+
+
+; fs_file "MAN", "", f_readonly+f_system+f_subdir
+	; fs_subdir 1
+	; end fs_subdir
+; end fs_file
 
 
 fs_file "MAN", "EXE", f_readonly+f_system
@@ -258,20 +280,6 @@ man_dir:
 	db "A:/MAN/",0
 man_extension:
 	db ".MAN",0
-end fs_file
-
-
-fs_file "CLS", "EXE", f_readonly+f_system
-	jr cls_main
-	db "FEX",0
-cls_main:
-	ld hl,bos.current_working_dir
-	call bos.gui_DrawConsoleWindow
-	ld hl,str_Prompt
-	call bos.gfx_PrintString
-	jp bos.gui_NewLine
-str_Prompt:
-	db ">",$A,0
 end fs_file
 
 
