@@ -5,7 +5,6 @@
 ;@OUTPUT 0 if no keys pressed
 kb_AnyKey:
 sys_AnyKey:
-	di
 	ld	hl,$f50200		; DI_Mode = $f5xx00
 	ld	(hl),h
 	xor	a,a

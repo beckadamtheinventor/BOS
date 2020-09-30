@@ -46,3 +46,11 @@ fsentry_lowcluster       := $1A
 fsentry_lowcluster.len   := 2
 fsentry_filesize         := $1C
 fsentry_filesize.len     := 4
+
+f_readonly   := 1
+f_hidden     := 2
+f_system     := 4
+f_volume     := 8
+f_subdir     := $10
+f_archive    := $20
+f_device     := $40

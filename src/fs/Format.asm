@@ -108,10 +108,10 @@ fs_drive_c_data:
 	dl $0A0400
 	dl fs_drive_c_home_dir
 	dl fs_drive_c_home_dir.len
-	dl $0A3800
+	dl $0A3040
 	dl $FF0000 ; always reads zero
 	dl 32      ; write one 32 byte entry to signify end of directory
-	dl $0A3C00 ; write end-of-dir entry to cluster 3
+	dl $0A3060 ; write end-of-dir entry
 .len:=($-fs_drive_c_data) / 9
 
 
@@ -133,7 +133,7 @@ fs_partition_table_data:
 	
 	db $00,$FF,$FF,$FF ;partition 3 (user partition "C")
 	db $0B,$FF,$FF,$FF
-	db $00,$05,$00,$00 ;start LBA = 0x500
+	db $01,$05,$00,$00 ;start LBA = 0x501
 	db $00,$20,$00,$00 ;end LBA = 0x2000
 
 	db $00,$FF,$FF,$FF ;partition 4 (unused by default, might become mounted partition "D" at some point)

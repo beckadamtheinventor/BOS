@@ -4,7 +4,6 @@
 ;@DESTROYS HL,AF
 kb_Scan:
 sys_KbScan:
-;	di ;not actually needed here
 	ld	hl,$f50200		; DI_Mode = $f5xx00
 	ld	(hl),h
 	xor	a,a

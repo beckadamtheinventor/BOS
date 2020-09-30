@@ -1,9 +1,9 @@
 
-;@DOES read a given sector of a file descriptor
-;@INPUT void *fs_GetSectorPtr(void *fd, int sector);
+;@DOES read a given cluster of a file descriptor
+;@INPUT void *fs_GetClusterPtr(void *fd, int cluster);
 ;@OUTPUT hl = pointer to sector. hl = -1 if failed.
 ;@NOTE this does not guarantee a contiguous memory space, as files can be fragmented in FAT filesystems.
-fs_GetSectorPtr:
+fs_GetClusterPtr:
 	pop bc
 	pop hl
 	pop de
@@ -56,10 +56,11 @@ fs_GetSectorPtr:
 	ld a,$FF
 	ld b,3
 .check_end_loop:
-	cpi
+	cp a,(hl)
+	inc hl
 	jr nz,.next
 	djnz .check_end_loop
-	ld a,$F0
+	ld a,$0F
 	cp a,(hl)
 .next:
 	pop hl

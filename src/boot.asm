@@ -43,7 +43,6 @@ enter_input:
 	call gui_Input
 	or a,a
 	jr z,.exit
-	call gui_NewLine
 	call ti._strlen
 	ex (sp),hl
 	pop bc
@@ -58,16 +57,21 @@ enter_input:
 	ex (sp),hl ;args
 	push hl ;path
 	call sys_ExecuteFile
-	pop bc
+	pop bc,bc
 	jr c,.fail
 	ld (ScrapMem),hl
 	ld a,(ScrapMem+2)
 	or a,h
 	or a,l
 	jr z,.exit
+	push hl
+	call gfx_BlitBuffer
+	pop hl
 	call gui_PrintInt
 	call gui_NewLine
+	or a,$FF
 .exit:
+	call z,gfx_BlitBuffer
 	pop bc,bc
 	jq os_main
 .fail:

@@ -35,9 +35,9 @@ macro fs_fs? @base
 	macro fs_subdir? fsname
 		virtual
 			_#fsname.exports.entries::
+			db 64 dup $FF
 		end virtual
 		db _#fsname.entries
-		db 32 dup 0
 		db $400 - (_#fsname.entries_len and $3FF) dup $FF
 		macro fs_file? @@name, @@ext, @@prop
 			local file
@@ -74,7 +74,8 @@ macro fs_fs? @base
 		macro end?.fs_subdir?
 			purge end?.fs_subdir?
 			virtual _#fsname.exports.entries
-				_#fsname.entries_len = $+32-$$
+				db 32 dup 0
+				_#fsname.entries_len = $-$$
 				load _#fsname.entries:$-$$ from $$
 			end virtual
 		end macro

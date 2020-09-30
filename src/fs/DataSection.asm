@@ -7,7 +7,7 @@ fs_DataSection:
 	call fs_ClusterMap
 	jq c,.fail
 	ld bc,$2000
-	add hl,bc      ; add cluster tables - length of technically unused clusters
+	add hl,bc      ; add cluster tables
 	xor a,a
 	ret
 .fail:

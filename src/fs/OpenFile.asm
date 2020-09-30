@@ -67,7 +67,7 @@ fs_OpenFile:
 	jq c,.fail
 	ld a,(de)
 	or a,a
-	jq z,.return_root
+	ret z ;return root directory
 	ld (fsOP5),hl  ; save drive data section
 	push ix
 	push hl
@@ -83,16 +83,17 @@ fs_OpenFile:
 	push ix,bc
 	call fs_CopyFileName ;get file name string from file entry
 	pop bc,ix
-	ld e,'/'
-	push de,bc
-	call sys_StrLenChr ;get length of file name string from path
-	pop bc
+	push bc
+	call ti._strlen ;get length of file name string from file entry
 	ex (sp),hl
+	push hl
 	ld bc,(fsOP6)
-	ld hl,fsOP6+3
-	push bc,hl
-	call ti._strncmp ;compare with the target directory
+	push bc
+	call ti._memcmp ;compare with the target directory
 	pop bc,bc,bc
+	add hl,bc
+	or a,a
+	sbc hl,bc
 	jr nz,.search_next ;check next file entry
 
 .into_dir:
@@ -134,6 +135,5 @@ fs_OpenFile:
 .return:
 	lea hl,ix
 	pop ix
-.return_root:
 	xor a,a
 	ret

@@ -1,5 +1,5 @@
 
-;@DOES execute a file from a given entry point
+;@DOES execute a file
 ;@INPUT int sys_ExecuteFile(char *path, char *args);
 ;@OUTPUT -1 if file does not exist or is not a valid executable format
 ;@DESTROYS All, OP5, and OP6.
@@ -10,6 +10,9 @@ sys_ExecuteFile:
 	push de
 	push hl
 	push bc
+	push hl,de
+	call sys_PushArgumentStack
+	pop de,hl
 	ld a,(hl)
 	or a,a
 	jq z,.fail
@@ -17,7 +20,6 @@ sys_ExecuteFile:
 	ld a,(hl)
 	dec hl
 	cp a,':'
-	push de
 	push hl
 	jq nz,.open_system_exe
 	call fs_OpenFile
@@ -29,13 +31,13 @@ sys_ExecuteFile:
 	bit 4,(hl)
 	ld hl,(fsOP6)
 	pop bc
-	jr nz,.fail_popbc
+	jr nz,.fail
 	ld bc,0
 	push bc
 	push hl
-	call fs_GetSectorPtr
+	call fs_GetClusterPtr
 	pop bc,bc
-	jq c,.fail_popbc
+	jq c,.fail
 	push hl
 	ld a,(hl)
 	cp a,$18 ;jr
@@ -50,9 +52,6 @@ sys_ExecuteFile:
 	scf
 	sbc hl,hl
 	ret
-.fail_pop3bc:
-	pop bc
-	jr .fail_pop2bc
 .skip4:
 	inc hl
 	inc hl
@@ -65,12 +64,12 @@ sys_ExecuteFile:
 .open_system_exe:
 	call ti._strlen
 	push hl
-	ld bc,4
+	ld bc,4+5
 	add hl,bc
 	push hl
 	call sys_Malloc
 	pop bc
-	jq c,.fail_pop3bc
+	jq c,.fail_pop2bc
 	ld (fsOP6),hl
 	ex hl,de
 	ld bc,3
@@ -79,8 +78,9 @@ sys_ExecuteFile:
 	pop bc
 	pop hl
 	ldir
-	xor a,a
-	ld (de),a
+	ld hl,str_dotEXE
+	ld bc,5
+	ldir
 	ld hl,(fsOP6)
 	push hl
 	jq .try_open
@@ -89,7 +89,7 @@ sys_ExecuteFile:
 	ld bc,11
 	or a,a
 	sbc hl,bc
-	jq nc,.fail_popbc
+	jq nc,.fail
 	ld de,fsOP5
 	push de
 	call ti._strcpy
@@ -106,7 +106,7 @@ sys_ExecuteFile:
 	ldir
 .try_open:
 	call fs_OpenFile
-	jq c,.fail_pop2bc
+	jq c,.fail_popbc
 	jq .open_fd
 .ext:
 	ld de,(hl)
@@ -125,14 +125,25 @@ sys_ExecuteFile:
 	ld bc,$1C   ;offset of file length
 	add hl,bc
 	ld bc,(hl)  ;get file length in bytes
-	pop hl      ;file data pointer
+	pop de      ;file data pointer (not needed, this is re-handled in fs_Read)
+	push hl     ;void *fd
+	ld de,1
+	push de     ;uint8_t count
+	push bc     ;int len
 	ld de,bos_UserMem
-	push de
-	ldir
-	pop hl ;usermem
-	ex (sp),hl ;save usermem, restore args
-	ret ;jump to usermem
+	push de ;void *dest
+	call fs_Read
+	pop de,bc,bc,bc
+	push de ;jump address
 .exec_fex:
+	call sys_GetArgumentStack ;get arguments
+	ex (sp),hl ;push arguments to stack, pop jump location from the stack
+	call .jphl
+	pop bc
+	push hl
+	call sys_PopArgumentStack
 	pop hl
-	ex (sp),hl
+	xor a,a
 	ret
+.jphl:
+	jp (hl)

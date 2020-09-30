@@ -9,9 +9,11 @@
 	jp sys_ExecuteFile
 	jp sys_ExecuteFileEntryPoint
 	jp fs_OpenFile
-	jp fs_GetSectorPtr
+	jp fs_GetClusterPtr
 	jp fs_CheckDirExists
 	jp fs_GetPathLastName
+	jp fs_CopyFileName
+	jp fs_Read
 	jp sys_AddHLAndA
 	jp sys_AnyKey
 	jp sys_FreeAll

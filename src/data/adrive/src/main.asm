@@ -14,24 +14,34 @@ fs_file "BOOT", "EXE", f_readonly+f_system
 boot_main:
 	ld hl,boot_script
 	push hl
-	call bsh_main
+	call bsh_start
 	pop bc
 	ret
 boot_script:
 	db "CLS",0
 	db "CLEAN",0
-	db "BBS C:/HOME/USER.BBS",0
+	db "BSH C:/HOME/USER.BBS",0
 	db "EXPLORER",0
 	db "RETURN",0
 end fs_file
 
 
 fs_file "BSH", "EXE", f_readonly+f_system
-	jr bsh_main
+	jr bsh_start
 	db "FEX",0
+bsh_start:
+	pop bc
+	pop hl
+	push hl
+	push bc
 bsh_main:
 	ld iy,bsh_commands-6
 .loop:
+	push hl
+	call bos.sys_GetKey
+	pop hl
+	cp a,53
+	jq z,.keyboard_interrupt
 	lea iy,iy+6
 	push hl
 	ld hl,(iy)
@@ -55,6 +65,11 @@ bsh_main:
 	add hl,bc
 	ld iy,(iy+3)
 	jp (iy)  ;will return to command handler subroutine, and afterwards to the loop.
+.keyboard_interrupt:
+	ld hl,str_KeyboardInterrupt
+	call bos.gui_Print
+	xor a,a
+	ret
 .runexec:
 	call ti._strlen
 	ex (sp),hl
@@ -74,6 +89,8 @@ bsh_main:
 	pop bc,bc,hl
 	jq bsh_main
 
+str_KeyboardInterrupt:
+	db $9,"Program execution stopped.",$A,0
 bsh_commands:
 	dl str_Return, handler_Return
 	dl 0, 0
@@ -86,6 +103,56 @@ handler_Return:
 end fs_file
 
 
+fs_file "CAT", "EXE", f_readonly+f_system
+	jr cat_main
+	db "FEX",0
+cat_main:
+	pop bc
+	pop hl
+	push hl
+	push bc
+	ld a,(hl)
+	or a,a
+	jr z,.help
+	push hl
+	call bos.fs_OpenFile
+	pop bc
+	jr c,.fail
+	push iy
+	push hl
+	pop iy
+	ld hl,(iy+$1C) ;file length
+	ld de,1024
+	or a,a
+	sbc hl,de
+	add hl,de
+	jr nc,.file_too_large
+	ld bc,0
+	push bc,iy
+	call bos.fs_GetClusterPtr
+	pop bc,bc,iy
+	jq .print
+.file_too_large:
+	pop iy
+	ld hl,str_FileTooLarge
+	jq .print
+.help:
+	ld hl,str_CatHelp
+.print:
+	call bos.gui_Print
+	xor a,a
+	sbc hl,hl
+	ret
+.fail:
+	scf
+	sbc hl,hl
+	ret
+str_FileTooLarge:
+	db $9,"File too large to display at this time.",$A,0
+str_CatHelp:
+	db $9,"Usage: CAT [file]",$A,0
+end fs_file
+
 
 fs_file "CD", "EXE", f_readonly+f_system
 	jr cd_main
@@ -95,6 +162,9 @@ cd_main:
 	pop hl
 	push hl
 	push bc
+	ld a,(hl)
+	or a,a
+	jr z,.help
 	push ix
 	push hl
 	call bos.fs_CheckDirExists
@@ -121,15 +191,14 @@ cd_main:
 	ldir
 	jq .return
 .abs_path:
-	ld de,bos.current_working_dir
-	push hl,de
-	call ti._strcpy
-	pop de
+	push hl
 	call ti._strlen
 	ex (sp),hl
 	pop bc
-	add hl,bc
-	ld (hl),0
+	ld de,bos.current_working_dir
+	ldir
+	xor a,a
+	ld (de),a
 .return:
 	pop ix
 	xor a,a
@@ -141,9 +210,16 @@ cd_main:
 	call bos.gui_Print
 	ld hl,-2
 	ret
+.help:
+	ld hl,str_HelpDoc
+	call bos.gui_Print
+	or a,a
+	sbc hl,hl
+	ret
 str_DirDoesNotExist:
 	db $9,"Directory does not exist.",$A,0
-	
+str_HelpDoc:
+	db $9,"Usage: CD [dir]",$A,0
 end fs_file
 
 
@@ -179,14 +255,75 @@ fs_file "EXPLORER", "EXE", f_readonly+f_system
 	jr explorer_main
 	db "FEX",0
 explorer_main:
+	xor a,a
+	sbc hl,hl
 	ret
 end fs_file
 
 
-; fs_file "MAN", "", f_readonly+f_system+f_subdir
-	; fs_subdir 1
-	; end fs_subdir
-; end fs_file
+fs_file "HELP", "EXE", f_readonly+f_system
+	jr help_main
+	db "FEX",0
+help_main:
+	ld hl,.readme_file
+	push hl
+	call cat_main
+	pop bc
+	ret
+.readme_file:
+	db "A:/README.MAN",0
+end fs_file
+
+
+fs_file "LS", "EXE", f_readonly+f_system
+	jr ls_main
+	db "FEX",0
+ls_main:
+	pop bc
+	pop hl
+	push hl
+	push bc
+	ld a,(hl)
+	or a,a
+	jr nz,.non_null_dir
+	ld hl,bos.current_working_dir
+.non_null_dir:
+	push hl
+	call bos.gui_Print
+	call bos.gui_NewLine
+	call bos.fs_OpenFile
+	pop bc
+	jq c,.fail
+	ld a,(hl)
+	or a,a
+	jr z,.exit_nopop
+	push ix
+	push hl
+	pop ix
+.loop:
+	ld hl,bos.fsOP6+1
+	push ix,hl
+	call bos.fs_CopyFileName
+	pop hl,ix
+	dec hl
+	ld (hl),$9
+	call bos.gui_Print
+	call bos.gui_NewLine
+	lea ix,ix+32
+	ld a,(ix)
+	or a,a
+	jr nz,.loop
+.exit:
+	pop ix
+.exit_nopop:
+	xor a,a
+	sbc hl,hl
+	ret
+.fail:
+	scf
+	sbc hl,hl
+	ret
+end fs_file
 
 
 fs_file "MAN", "EXE", f_readonly+f_system
@@ -197,9 +334,11 @@ man_main:
 	pop hl
 	push hl
 	push bc
+	and a,(hl)
+	jq z,.info
 	push hl
 	call ti._strlen
-	ld bc,7+5
+	ld bc,man_dir.len+5
 	add hl,bc
 	push hl
 	call bos.sys_Malloc
@@ -208,7 +347,7 @@ man_main:
 	pop hl ;argument
 	push de
 	push hl
-	ld bc,7
+	ld bc,man_dir.len
 	ld hl,man_dir
 	ldir          ; copy in manual directory
 	call ti._strlen
@@ -228,9 +367,9 @@ man_main:
 	call bos.gui_DrawConsoleWindow
 	call bos.gui_NewLine
 	pop hl,de,bc
-	push de,hl,bc
-	call bos.fs_GetSectorPtr
-	pop bc,de,iy
+	push de,bc,hl
+	call bos.fs_GetClusterPtr
+	pop de,bc,iy
 	jq c,.eof
 	push iy,de,bc
 	call bos.gui_Print
@@ -272,22 +411,39 @@ man_main:
 	scf
 	sbc hl,hl
 	ret
+.info:
+	ld hl,str_ManInfo
+	call bos.gui_Print
+	xor a,a
+	sbc hl,hl
+	ret
+str_ManInfo:
+	db $9,"Usage: MAN [app]",$A,0
 man_EndOfFileReached:
 	db $9,"--EOF REACHED--",$A
 man_NotFound:
-	db "No matching manual found.",0
+	db $9,"No matching manual found.",0
 man_dir:
-	db "A:/MAN/",0
+	db "A:/"
+man_dir.len:=$-.
 man_extension:
 	db ".MAN",0
 end fs_file
 
 
-fs_file "LS", "EXE", f_readonly+f_system
-	jr ls_main
-	db "FEX",0
-ls_main:
-	ret
+
+
+fs_file "README", "MAN", f_readonly+f_system
+	db $9,"--BOSos Help Doc--",$A
+	db "CAT",$A,$9,"Display the contents of a file.",$A
+	db "CD",$A,$9,"Change Directory. Navigate to an absolute or relative path.",$A
+	db "CLEAN",$A,$9,"Clean up malloc'd memory, not including program memory.",$A
+	db "CLS",$A,$9,"CLear Screen. Wipes the terminal history.",$A
+	db "EXPLORER",$A,$9,"Open GUI interface.",$A
+	db "HELP",$A,$9,"display this document",$A
+	db "LS",$A,$9,"LiSt directory. List the current directory or a given directory.",$A
+	db "MAN",$A,$9,"Display MANual for a given executable.",$A
+	db 0
 end fs_file
 
 

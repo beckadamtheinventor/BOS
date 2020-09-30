@@ -24,6 +24,8 @@ gui_Print:
 	jq .
 
 .controlcode:
+	or a,a
+	jr z,.nextline
 	cp a,$0A ;LF
 	jq z,.nextline
 	cp a,$09 ;TAB

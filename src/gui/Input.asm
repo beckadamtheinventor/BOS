@@ -99,11 +99,15 @@ gui_Input:
 	jr .return
 .exit:
 	xor a,a
-.return:
 	ld hl,(ix+6)
 	ld (hl),a
+.return:
+	ld hl,(ix+6)
 	ld sp,ix
 	pop ix
+	push af
+	call gui_NewLine
+	pop af
 	ret
 .clear_line:
 	ld a,(console_line)
