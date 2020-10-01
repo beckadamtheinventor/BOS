@@ -1,5 +1,12 @@
 
 boot_os:
+	call flash_unlock
+	ld a,$08 ;set privleged code address to $080000
+	out0 ($1F),a
+	xor a,a
+	out0 ($1D),a
+	out0 ($1E),a
+	call flash_lock
 	ld hl,bos_UserMem
 	ld (bottom_of_RAM),hl
 	ld hl,top_of_RAM

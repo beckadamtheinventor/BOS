@@ -15,11 +15,11 @@ flash_unlock:
 	in0 a,($28)
 	bit 2,a
 
-	ld	a,$8c
-	out0	($24),a
-	ld	c,4
-	in0	a,(6)
-	or	c
-	out0	(6),a
-	out0	($28),c
+	; ld	a,$8c
+	; out0	($24),a
+	; ld	c,4
+	; in0	a,(6)
+	; or	c
+	; out0	(6),a
+	; out0	($28),c
 	ret
