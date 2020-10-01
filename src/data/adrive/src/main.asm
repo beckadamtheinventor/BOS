@@ -8,6 +8,66 @@ include 'include/bos.inc'
 fs_fs $041000
 
 
+fs_file "APPLE", "v6A", f_readonly
+	file "demos/APPLE.bin"
+end fs_file
+
+
+fs_file "APRG","EXE", f_readonly+f_system
+	jr aprg_main
+	db "FEX",0
+aprg_main:
+	pop bc
+	pop hl
+	push hl
+	push bc
+	push hl
+	call bos.fs_OpenFile
+	pop bc
+	jq c,.fail ;file not found
+	ld bc,$1C ;get file length
+	add hl,bc
+	ld de,(hl)
+	or a,a
+	sbc hl,bc
+	ld bc,0
+	push de,bc,hl
+	call bos.fs_GetClusterPtr
+	pop bc,bc,bc
+	jq c,.fail ;file first cluster could not be located
+	ld a,(hl)
+	cp a,$EF
+	jr nz,.fail ;not a valid executable
+	inc hl
+	ld a,(hl)
+	cp a,$7B
+	jr nz,.fail ;not a valid executable
+	dec hl
+	ld (bos.asm_prgm_size),bc
+	push hl,bc
+	push bc
+	pop hl
+	call bos._EnoughMem
+	pop bc,hl
+	jq c,.fail ;not enough memory
+;copy program into UserMem
+	push hl
+	ld hl,ti.userMem
+	push hl
+	add hl,bc
+	ld (bos.top_of_UserMem),hl
+	pop de,hl
+	inc hl
+	inc hl
+	push de
+	ldir
+	ret ;jump to userMem
+.fail:
+	scf
+	sbc hl,hl
+	ret
+end fs_file
+
 fs_file "BOOT", "EXE", f_readonly+f_system
 	jr boot_main
 	db "FEX",0
