@@ -26,26 +26,6 @@ macro os_private
 		ld	mb,a
 		ld.sis	sp,$987e
 		call.is	.unlock and $ffff
-		
-		ld	a,$2F
-
-; save TIOS
-.erase1:
-		push	af
-		call	.sectorerase
-		pop	af
-		inc	a
-		cp	a,$3B
-		jr	nz,.erase1
-		ld	de,$20100
-		ld	hl,($20105)
-		or a,a
-		sbc hl,de
-		push hl
-		pop bc
-		ld	hl,$2F0000
-		ex hl,de
-		call $2E0
 
 ; setup our OS
 		ld	a,$02

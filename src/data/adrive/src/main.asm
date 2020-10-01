@@ -22,6 +22,8 @@ boot_script:
 	db "CLEAN",0
 	db "BSH C:/HOME/USER.BBS",0
 	db "EXPLORER",0
+	db "CLEAN",0
+	db "CLS",0
 	db "RETURN",0
 end fs_file
 

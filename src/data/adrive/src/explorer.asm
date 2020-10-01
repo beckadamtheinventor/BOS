@@ -14,7 +14,7 @@ explorer_main:
 	sbc hl,hl
 	ret
 .main:
-	call gfx_Begin
+	;call gfx_Begin ;no need for this lol, already in 8bpp
 	ld c,1
 	push bc
 	call gfx_SetDraw

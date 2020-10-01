@@ -141,15 +141,23 @@ sys_ExecuteFile:
 	pop de,bc,bc,bc
 	jq c,.fail
 	push de ;jump address
+	xor a,a
+	ld (console_line),a
+	ld (console_col),a
 .exec_fex:
 	call sys_GetArgumentStack ;get arguments
 	ex (sp),hl ;push arguments to stack, pop jump location from the stack
+.run_hl:
 	call .jphl
 	pop bc
 	push hl
 	call sys_PopArgumentStack
-	pop hl
 	xor a,a
+	sbc hl,hl
+	ld (asm_prgm_size),hl
+	ld hl,bos_UserMem
+	ld (top_of_UserMem),hl
+	pop hl
 	ret
 .jphl:
 	ld (SaveSP),sp

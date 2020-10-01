@@ -77,8 +77,5 @@ sys_ExecuteFileEntryPoint:
 	call sys_GetArgumentStack ;only modifies hl
 	push hl
 	ex hl,de
-	call sys_ExecuteFile.jphl
-	pop bc
-	xor a,a
-	ret
+	jq sys_ExecuteFile.run_hl
 
