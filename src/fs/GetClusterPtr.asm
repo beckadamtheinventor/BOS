@@ -52,18 +52,16 @@ fs_GetClusterPtr:
 	ex hl,de
 	jr z,.exit
 	push de
-	push hl
-	ld a,$FF
-	ld b,3
-.check_end_loop:
-	cp a,(hl)
-	inc hl
+	ld a,(hl)
+	cp a,$FF
 	jr nz,.next
-	djnz .check_end_loop
-	ld a,$0F
-	cp a,(hl)
+	inc hl
+	ld hl,(hl)
+	ld de,$0FFFFF
+	or a,a
+	sbc hl,de
+	add hl,de
 .next:
-	pop hl
 	pop de
 	jr z,.fail
 	ld hl,(hl)

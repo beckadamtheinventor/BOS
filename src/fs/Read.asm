@@ -22,14 +22,14 @@ fs_Read:
 	ld bc,1024
 	jr .entry
 .copy_loop:
-	push hl,iy,de
+	push hl,de,iy
 	call fs_GetClusterPtr
 	jq c,.fail
 	ld de,(ix-3)
 	ld bc,1024
 	ldir
 	ld (ix-3),de
-	pop de,iy,hl
+	pop iy,de,hl
 	inc de
 	ld bc,1024
 	or a,a
@@ -38,9 +38,9 @@ fs_Read:
 	sbc hl,bc
 	add hl,bc
 	jr nc,.copy_loop
-	push hl,iy,de
+	push hl,de,iy
 	call fs_GetClusterPtr
-	pop de,bc,bc
+	pop bc,de,bc
 	ld de,(ix-3)
 	ldir
 	jr .exit

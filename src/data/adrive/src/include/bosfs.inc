@@ -45,10 +45,10 @@ macro fs_fs? @base
 			virtual fs.exports.cmap
 				if file.len > 1024
 					local num
-					num = $-$$ shr 2
+					num = ($-$$) shr 2
 					repeat file.len shr 10
-						dd num
 						num = num + 1
+						dd num
 					end repeat
 				end if
 				dd $0FFFFFFF
@@ -63,8 +63,12 @@ macro fs_fs? @base
 				dw (((file.start-fs.clusters_section) shr 10) and $FFFF)
 				dd file.len
 			end virtual
+			esc virtual
 			macro end?.fs_file?
 				purge end?.fs_file?
+				load file.data:$-$$ from $$
+				end virtual
+				db file.data
 				file.end = $
 				file.len = $ - file.start
 				db ( $400 - ( file.len and $3FF ) ) dup $FF

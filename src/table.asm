@@ -33,4 +33,21 @@
 	jp gui_Scroll
 	jp gfx_BlitBuffer
 	jp gfx_PrintString
-
+	jp _MemClear
+	jp _PushOP1
+	jp _PopOP1
+	jp _Mov9ToOP1
+	jp _CpHLDE
+	jp _Mov8b
+	jp _ChkFindSym
+	jp _LoadDEInd_s
+	jp _EnoughMem
+	jp _InsertMem
+	jp _SetHLUTo0
+	jp _PutS
+	jp _GetCSC
+	jp _NewLine
+	jp _ClrScrn
+	jp _HomeUp
+	jp _ErrMemory
+	jp _DrawStatusBar

@@ -125,15 +125,21 @@ sys_ExecuteFile:
 	ld bc,$1C   ;offset of file length
 	add hl,bc
 	ld bc,(hl)  ;get file length in bytes
+	ld (asm_prgm_size),bc
 	pop de      ;file data pointer (not needed, this is re-handled in fs_Read)
+	ld hl,(fsOP6)
 	push hl     ;void *fd
 	ld de,1
 	push de     ;uint8_t count
 	push bc     ;int len
 	ld de,bos_UserMem
 	push de ;void *dest
+	ex hl,de
+	add hl,bc
+	ld (top_of_UserMem),hl
 	call fs_Read
 	pop de,bc,bc,bc
+	jq c,.fail
 	push de ;jump address
 .exec_fex:
 	call sys_GetArgumentStack ;get arguments
@@ -146,4 +152,5 @@ sys_ExecuteFile:
 	xor a,a
 	ret
 .jphl:
+	ld (SaveSP),sp
 	jp (hl)

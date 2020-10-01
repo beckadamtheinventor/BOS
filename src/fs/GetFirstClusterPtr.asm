@@ -1,6 +1,6 @@
-;@DOES return the first sector of a file descriptor
-;@INPUT fs_GetFirstSectorPtr(void *fd);
-fs_GetFirstSectorPtr:
+;@DOES return the first cluster of a file descriptor
+;@INPUT fs_GetFirstClusterPtr(void *fd);
+fs_GetFirstClusterPtr:
 	pop bc
 	pop hl
 	push hl

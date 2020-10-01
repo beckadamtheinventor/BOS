@@ -252,12 +252,7 @@ end fs_file
 
 
 fs_file "EXPLORER", "EXE", f_readonly+f_system
-	jr explorer_main
-	db "FEX",0
-explorer_main:
-	xor a,a
-	sbc hl,hl
-	ret
+	file 'explorer.bin'
 end fs_file
 
 
@@ -446,5 +441,29 @@ fs_file "README", "MAN", f_readonly+f_system
 	db 0
 end fs_file
 
+
+fs_file "FATDRVCE","v21", f_readonly+f_system
+	file 'lib/fatdrvce.bin'
+end fs_file
+
+fs_file "FILEIOC","v21", f_readonly+f_system
+	file 'lib/fileioc.bin'
+end fs_file
+
+fs_file "GRAPHX","v21", f_readonly+f_system
+	file 'lib/graphx.bin'
+end fs_file
+
+fs_file "SRLDRVCE","v21", f_readonly+f_system
+	file 'lib/srldrvce.bin'
+end fs_file
+
+fs_file "USBDRVCE","v21", f_readonly+f_system
+	file 'lib/usbdrvce.bin'
+end fs_file
+
+fs_file "LibLoad", "v21", f_readonly+f_system
+	file 'lib/bos_libload.bin'
+end fs_file
 
 end fs_fs

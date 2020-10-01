@@ -3848,14 +3848,14 @@ pLcdCtrl		equ pLcdRange + lcdCtrl
 mpLcdCtrl		equ mpLcdRange + lcdCtrl
 lcdEn			equ 01h
 lcdTft			equ 20h
-lcdBpp1			equ 0000b | lcdTft | lcdEn
-lcdBpp2			equ 0010b | lcdTft | lcdEn
-lcdBpp4			equ 0100b | lcdTft | lcdEn
-lcdBpp8			equ 0110b | lcdTft | lcdEn
-lcdBpp16Alt		equ 1000b | lcdTft | lcdEn
-lcdBpp24		equ 1010b | lcdTft | lcdEn
-lcdBpp16		equ 1100b | lcdTft | lcdEn ; Default LCD mode
-lcdBpp12		equ 1110b | lcdTft | lcdEn
+lcdBpp1			equ 0000b + lcdTft + lcdEn
+lcdBpp2			equ 0010b + lcdTft + lcdEn
+lcdBpp4			equ 0100b + lcdTft + lcdEn
+lcdBpp8			equ 0110b + lcdTft + lcdEn
+lcdBpp16Alt		equ 1000b + lcdTft + lcdEn
+lcdBpp24		equ 1010b + lcdTft + lcdEn
+lcdBpp16		equ 1100b + lcdTft + lcdEn ; Default LCD mode
+lcdBpp12		equ 1110b + lcdTft + lcdEn
 lcdBgr			equ 100h
 lcdBigEndian		equ 200h
 lcdBigEndianPixels	equ 400h
@@ -3865,7 +3865,7 @@ lcdIntBack		equ 1000h
 lcdIntActiveVideo	equ 2000h
 lcdIntFront		equ 3000h
 lcdWatermark		equ 10000h
-lcdNormalMode		equ lcdPwr | lcdBgr | lcdBpp16
+lcdNormalMode		equ lcdPwr + lcdBgr + lcdBpp16
 
 lcdImsc			equ 001Ch
 pLcdImsc		equ pLcdRange + lcdImsc
@@ -3978,7 +3978,7 @@ bIntRtc			equ 12
 intRtc			equ 1 shl bIntRtc
 bIntUsb			equ 13
 intUsb			equ 1 shl bIntUsb
-intDefaultMask		equ intOn | intTmr3 | intOSTmr | intRtc | intUsb
+intDefaultMask		equ intOn + intTmr3 + intOSTmr + intRtc + intUsb
 
 ;Timer Ports
 ;-----------------------------------

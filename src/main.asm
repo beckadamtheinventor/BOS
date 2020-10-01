@@ -1,6 +1,5 @@
 
 include 'include/ti84pceg.inc'
-include 'include/ti84pce.inc'
 include 'include/ez80.inc'
 include 'include/tiformat.inc'
 format ti executable 'BOSOS'
@@ -35,6 +34,7 @@ include 'fs.inc'
 include 'gui.inc'
 ;include 'usb.inc'
 include 'data.inc'
+include 'compatibility.inc'
 
 DONOTHING:
 	ret

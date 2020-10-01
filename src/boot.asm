@@ -1,13 +1,19 @@
 
 boot_os:
-	ld iy,iyflags
 	ld hl,bos_UserMem
-	ld (iy+flags.bottom_of_RAM),hl
+	ld (bottom_of_RAM),hl
 	ld hl,top_of_RAM
-	ld (iy+flags.free_RAM_ptr),hl
+	ld (free_RAM_ptr),hl
 	ld bc,-bos_UserMem
 	add hl,bc
-	ld (iy+flags.remaining_free_RAM),hl
+	ld (remaining_free_RAM),hl
+	ld hl,bos_UserMem
+	ld (top_of_UserMem),hl
+	or a,a
+	sbc hl,hl
+	ld (asm_prgm_size),hl
+	ld hl,op_stack_top
+	ld (op_stack_ptr),hl
 	call gfx_SetDefaultFont
 	call gfx_Set8bpp
 	call fs_SanityCheck

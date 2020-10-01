@@ -32,6 +32,24 @@
 <tr><td>bos.gui_Scroll</td><td>020184</td><td><a href="#gui_Scroll">doc</a></tr>
 <tr><td>bos.gfx_BlitBuffer</td><td>020188</td><td><a href="#gfx_BlitBuffer">doc</a></tr>
 <tr><td>bos.gfx_PrintString</td><td>02018C</td><td><a href="#gfx_PrintString">doc</a></tr>
+<tr><td>bos._MemClear</td><td>020190</td><td><a href="#_MemClear">doc</a></tr>
+<tr><td>bos._PushOP1</td><td>020194</td><td><a href="#_PushOP1">doc</a></tr>
+<tr><td>bos._PopOP1</td><td>020198</td><td><a href="#_PopOP1">doc</a></tr>
+<tr><td>bos._Mov9ToOP1</td><td>02019C</td><td><a href="#_Mov9ToOP1">doc</a></tr>
+<tr><td>bos._CpHLDE</td><td>0201A0</td><td><a href="#_CpHLDE">doc</a></tr>
+<tr><td>bos._Mov8b</td><td>0201A4</td><td><a href="#_Mov8b">doc</a></tr>
+<tr><td>bos._ChkFindSym</td><td>0201A8</td><td><a href="#_ChkFindSym">doc</a></tr>
+<tr><td>bos._LoadDEInd_s</td><td>0201AC</td><td><a href="#_LoadDEInd_s">doc</a></tr>
+<tr><td>bos._EnoughMem</td><td>0201B0</td><td><a href="#_EnoughMem">doc</a></tr>
+<tr><td>bos._InsertMem</td><td>0201B4</td><td><a href="#_InsertMem">doc</a></tr>
+<tr><td>bos._SetHLUTo0</td><td>0201B8</td><td><a href="#_SetHLUTo0">doc</a></tr>
+<tr><td>bos._PutS</td><td>0201BC</td><td><a href="#_PutS">doc</a></tr>
+<tr><td>bos._GetCSC</td><td>0201C0</td><td><a href="#_GetCSC">doc</a></tr>
+<tr><td>bos._NewLine</td><td>0201C4</td><td><a href="#_NewLine">doc</a></tr>
+<tr><td>bos._ClrScrn</td><td>0201C8</td><td><a href="#_ClrScrn">doc</a></tr>
+<tr><td>bos._HomeUp</td><td>0201CC</td><td><a href="#_HomeUp">doc</a></tr>
+<tr><td>bos._ErrMemory</td><td>0201D0</td><td><a href="#_ErrMemory">doc</a></tr>
+<tr><td>bos._DrawStatusBar</td><td>0201D4</td><td><a href="#_DrawStatusBar">doc</a></tr>
 </table><div id="boot_os"><h1>boot_os</h1><h3>syscall Adress 020108</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
@@ -47,7 +65,7 @@
 </table></div><div id="sys_ExecuteFileEntryPoint"><h1>sys_ExecuteFileEntryPoint</h1><h3>syscall Adress 020128</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td> int sys_ExecuteFileEntryPoint(char *path, char *args);</td><td> execute a file from a given entry point</td><td> -1 if file does not exist or is not a valid executable format</td><td></td><td>
- entry point is essentially "file.whatever/entry.point/whatever"</td></tr>
+ entry point is essentially "file.whatever:entrypoint/whatever"</td></tr>
 </table></div><div id="fs_OpenFile"><h1>fs_OpenFile</h1><h3>syscall Adress 02012C</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td> void *fs_OpenFile(char *path);</td><td> Opens a file from a path and returns file descriptor.</td><td> hl = file descriptor. hl is -1 if file does not exist.</td><td> All, OP5, OP6</td><td>
@@ -153,8 +171,76 @@
 </td></tr>
 </table></div><div id="gfx_PrintString"><h1>gfx_PrintString</h1><h3>syscall Adress 02018C</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td> HL pointer to string</td><td> print a string to the back buffer</td><td> HL pointer to character after the last one printed<br>
- Cf set if a control code is encountered or if the text would overflow the line.<br>
- A = control code if a control code is encountered. (Cf will be set)</td><td> All</td><td>
- If you need a routine callable from C, this is not the one you'll want to use.</td></tr>
+<tr><td></td><td></td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="_MemClear"><h1>_MemClear</h1><h3>syscall Adress 020190</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td> Clear (Zero) BC bytes at HL</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="_PushOP1"><h1>_PushOP1</h1><h3>syscall Adress 020194</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td> Push OP1 to the OP stack</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="_PopOP1"><h1>_PopOP1</h1><h3>syscall Adress 020198</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td> Pop OP1 from the OP stack</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="_Mov9ToOP1"><h1>_Mov9ToOP1</h1><h3>syscall Adress 02019C</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td> move 9 bytes from HL to OP1</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="_CpHLDE"><h1>_CpHLDE</h1><h3>syscall Adress 0201A0</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td> compare HL to DE. Returns the resultant of "sbc hl,de" without modifying either.</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="_Mov8b"><h1>_Mov8b</h1><h3>syscall Adress 0201A4</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td> move 8 bytes from HL to DE</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="_ChkFindSym"><h1>_ChkFindSym</h1><h3>syscall Adress 0201A8</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> OP1+1 8 byte file name</td><td> Search for a '.v21' file (raw appvar) in both A and C drive's root directories</td><td> HL = pointer to file length<br>
+ DE = pointer to file data<br>
+ Cf set if file not found or otherwise cannot be opened.</td><td> OP1 and OP2</td><td>
+</td></tr>
+</table></div><div id="_LoadDEInd_s"><h1>_LoadDEInd_s</h1><h3>syscall Adress 0201AC</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td> load DE with 16-bit value at HL, advancing DE+=2</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="_EnoughMem"><h1>_EnoughMem</h1><h3>syscall Adress 0201B0</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td> Check if there are HL bytes avalible in userMem</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="_InsertMem"><h1>_InsertMem</h1><h3>syscall Adress 0201B4</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td> insert HL bytes into userMem at address DE</td><td></td><td></td><td>
+ this currently ignores DE and just moves the top of usermem forward HL bytes</td></tr>
+</table></div><div id="_SetHLUTo0"><h1>_SetHLUTo0</h1><h3>syscall Adress 0201B8</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td> Sets the top byte of HL to zero.</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="_PutS"><h1>_PutS</h1><h3>syscall Adress 0201BC</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> HL = string</td><td> Print a string to the current cursor position and blit the buffer when finished.</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="_GetCSC"><h1>_GetCSC</h1><h3>syscall Adress 0201C0</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+</table></div><div id="_NewLine"><h1>_NewLine</h1><h3>syscall Adress 0201C4</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+</table></div><div id="_ClrScrn"><h1>_ClrScrn</h1><h3>syscall Adress 0201C8</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td> Clear the screen and back buffer</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="_HomeUp"><h1>_HomeUp</h1><h3>syscall Adress 0201CC</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td> Set the cursor position to 0,0</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="_ErrMemory"><h1>_ErrMemory</h1><h3>syscall Adress 0201D0</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td> Quit the program and display a memory error message</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="_DrawStatusBar"><h1>_DrawStatusBar</h1><h3>syscall Adress 0201D4</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td> Nothing for now. Basically just a compatibility define</td><td></td><td></td><td>
+</td></tr>
 </table></div></body></html>
