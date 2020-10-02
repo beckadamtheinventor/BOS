@@ -54,6 +54,9 @@ namespace bos
 ?_HomeUp                         := $201CC
 ?_ErrMemory                      := $201D0
 ?_DrawStatusBar                  := $201D4
+?_os_GetSystemInfo               := $201D8
+?_UsbPowerVbus                   := $201DC
+?_UsbUnpowerVbus                 := $201E0
 ?LCD_PAL    := 0E30200h
 ?LCD_CTRL   := 0E30018h
 ?LCD_VRAM   := 0D40000h
@@ -104,11 +107,11 @@ namespace bos
 ?fsOP5                  := $D01040
 ?fsOP6                  := $D01050
 ?current_cluster_map    := $D01080 ;3 bytes
-?usb_sector_buffer_ptr  := $D01083 ;3 bytes
-?argument_stack_current := $D01086 ;3 bytes
-?asm_prgm_size          := $D01089 ;3 bytes
-?top_of_UserMem         := $D01092 ;3 bytes
-?SaveSP                 := $D01095 ;3 bytes, saves SP when running programs.
+?argument_stack_current := $D01083 ;3 bytes
+?asm_prgm_size          := $D01086 ;3 bytes
+?top_of_UserMem         := $D01089 ;3 bytes
+?SaveSP                 := $D01092 ;3 bytes, saves SP when running programs.
+?usb_sector_buffer      := $D02000 ;512 bytes
 ?bos_Stackbot           := $D1A87C
 ?bos_UserMem            := $D1A881
 ?top_of_RAM             := $D40000

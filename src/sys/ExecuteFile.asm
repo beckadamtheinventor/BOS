@@ -129,7 +129,11 @@ sys_ExecuteFile:
 	pop de      ;file data pointer (not needed, this is re-handled in fs_Read)
 	ld hl,(fsOP6)
 	push hl     ;void *fd
-	ld de,1
+	or a,a
+	sbc hl,hl
+	ex (sp),hl  ;int offset
+	push hl     ;void *fd
+	ld e,1
 	push de     ;uint8_t count
 	push bc     ;int len
 	ld de,bos_UserMem
@@ -138,7 +142,7 @@ sys_ExecuteFile:
 	add hl,bc
 	ld (top_of_UserMem),hl
 	call fs_Read
-	pop de,bc,bc,bc
+	pop de,bc,bc,bc,bc
 	jq c,.fail
 	push de ;jump address
 	xor a,a

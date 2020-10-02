@@ -39,13 +39,16 @@ os_return:
 	call sys_ExecuteFile
 	pop bc
 os_main:
-	ld bc,$5004
-	in a,(bc)
-	set 0,a
+	ld bc,$500C
+	ld a,$FF
 	out (bc),a
 	inc c
-	in a,(bc)
-	set 5,a
+	out (bc),a
+	ld bc,$5005
+	xor a,a
+	out (bc),a
+	dec c
+	inc a
 	out (bc),a
 	ei
 enter_input:
@@ -93,7 +96,7 @@ enter_input:
 	jr .exit
 
 handle_interrupt:
-	ld bc,$5015
+	ld bc,$5001
 	in a,(bc)
 	jq z,.check_interrupt_low
 	rla
@@ -101,14 +104,14 @@ handle_interrupt:
 	rla
 	jq c,handle_usb_interrupt
 	
-	ld c,$09
 	jq .reset_int
 .check_interrupt_low:
-	
-	
-	ld c,$0A
+
 .reset_int:
 	ld a,$FF
+	ld bc,$5008
+	out (bc),a
+	inc c
 	out (bc),a
 return_from_interrupt:
 	pop hl

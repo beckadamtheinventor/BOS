@@ -7,5 +7,6 @@ fasmg src/lib/graphx/graphx.asm src/lib/graphx.bin
 fasmg src/lib/srldrvce/srldrvce.asm src/lib/srldrvce.bin
 fasmg src/lib/usbdrvce/usbdrvce.asm src/lib/usbdrvce.bin
 fasmg src/explorer.asm src/explorer.bin
+fasmg src/fexplore.asm src/fexplore.bin
 fasmg src/main.asm obj/main.bin
 convbin -i obj/main.bin -o data.bin -j bin -k bin -c zx7

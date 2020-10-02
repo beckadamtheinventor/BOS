@@ -503,7 +503,7 @@ DEFAULT_RETRIES := 10
 ;-------------------------------------------------------------------------------
 usb_Init:
 	call	_usb_DisableTimer
-	call	_os_GetSystemInfo
+	call	bos._os_GetSystemInfo
 	ld	de,4
 	add	hl,de
 	bit	0,(hl)
@@ -518,7 +518,7 @@ usb_Init:
 	set	5,(hl)
 	ld	hl,mpTmr2Load
 	ld	c,12
-	call	_MemClear
+	call	bos._MemClear
 	ld	l,tmrCtrl+1
 	set	bTmr2CountUp-8,(hl)
 	dec	l;tmrCtrl
@@ -1993,7 +1993,7 @@ _PowerVbusForRole:
 	bitmsk	ROLE_DEVICE,a
 	jq	nz,.unpower
 .power:
-	call	$21B70
+	call	bos._UsbPowerVbus ;$21B70
 	res	bUsbABusDrop,(hl)
 	set	bUsbABusReq,(hl)
 	ld	l,usbSts+1
@@ -2018,7 +2018,7 @@ _PowerVbusForRole:
 	pop	de,hl
 	set	bUsbABusDrop,(hl)
 	res	bUsbABusReq,(hl)
-	jq	$21C68
+	jq	bos._UsbUnpowerVbus ;$21C68
 
 ;-------------------------------------------------------------------------------
 _DefaultHandler:

@@ -1,6 +1,5 @@
 
 ; BOS compatility routines for easier Asm/C porting
-
 include 'compatibility/_ClrScrn.asm'
 include 'compatibility/_CpHLDE.asm'
 include 'compatibility/_ChkFindSym.asm'
@@ -15,7 +14,10 @@ include 'compatibility/_MemClear.asm'
 include 'compatibility/_Mov8b.asm'
 include 'compatibility/_Mov9ToOP1.asm'
 include 'compatibility/_NewLine.asm'
+include 'compatibility/_os_GetSystemInfo.asm'
 include 'compatibility/_PopOP1.asm'
 include 'compatibility/_PushOP1.asm'
 include 'compatibility/_PutS.asm'
 include 'compatibility/_SetHLUTo0.asm'
+include 'compatibility/_UsbPowerVbus.asm'
+include 'compatibility/_UsbUnpowerVbus.asm'

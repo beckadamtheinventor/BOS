@@ -8,11 +8,6 @@ include 'include/bos.inc'
 fs_fs $041000
 
 
-fs_file "APPLE", "v6A", f_readonly
-	file "demos/APPLE.bin"
-end fs_file
-
-
 fs_file "APRG","EXE", f_readonly+f_system
 	jr aprg_main
 	db "FEX",0
@@ -315,6 +310,11 @@ end fs_file
 
 fs_file "EXPLORER", "EXE", f_readonly+f_system
 	file 'explorer.bin'
+end fs_file
+
+
+fs_file "FEXPLORE", "EXE", f_readonly+f_system
+	file 'fexplore.bin'
 end fs_file
 
 

@@ -51,3 +51,6 @@
 	jp _HomeUp
 	jp _ErrMemory
 	jp _DrawStatusBar
+	jp _os_GetSystemInfo
+	jp _UsbPowerVbus
+	jp _UsbUnpowerVbus

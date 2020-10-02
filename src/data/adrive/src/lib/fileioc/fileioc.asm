@@ -177,7 +177,7 @@ ti_CloseAll:
 ;  n/a
 ; return:
 ;  n/a
-	ld	a, $40
+	ld	a, $80
 	ld	(vat_ptr0 + 2), a
 	ld	(vat_ptr1 + 2), a
 	ld	(vat_ptr2 + 2), a
@@ -642,12 +642,15 @@ ti_Read:
 	; xor	a, a
 	; sbc	hl, hl
 	call ti._frameset0
-	ld a,(ix+15)
+	ld c,(ix+15)
 	call util_is_slot_open
-	jq c,util_ret_null_pop_ix
+	jq nz,util_ret_null_pop_ix
 	call util_get_vat_ptr
 	ld hl,(hl)
 	push hl
+	call util_get_offset
+	pop hl
+	push bc,hl
 	ld bc,(ix+12)
 	push bc
 	ld bc,(ix+9)
@@ -655,9 +658,18 @@ ti_Read:
 	ld bc,(ix+6)
 	push bc
 	call bos.fs_Read
-	pop bc,bc,bc,bc
+	pop bc,de,hl,bc,bc
+	ld b,e
+	ex hl,de
+	or a,a
+	sbc hl,hl
+.count_loop:
+	add hl,de
+	djnz .count_loop
+	push hl
+	pop bc
 	pop ix
-	ret
+	jq util_set_offset
 
 ;-------------------------------------------------------------------------------
 ti_GetC:
@@ -697,21 +709,25 @@ ti_GetC:
 	push bc
 	push hl
 	call util_is_slot_open
-	jq c,util_ret_null
+	jq nz,util_ret_null
 	call util_get_vat_ptr
 	ld hl,(hl)
 	push hl
+	call util_get_offset
+	pop hl
+	push bc,hl
 	ld bc,1
 	push bc
 	push bc
 	ld bc,.buffer
 	push bc
 	call bos.fs_Read
-	pop hl,bc,bc,bc
-	ld a,(hl)
-	ret
-.buffer:
-	db 0,0
+	pop bc,bc,bc,bc,bc
+	inc bc
+	ld a,0
+.buffer:=$-1
+	jq util_set_offset
+
 
 ;-------------------------------------------------------------------------------
 ti_PutC:
@@ -818,6 +834,15 @@ ti_Seek:
 	; push	de
 	; call	util_get_offset
 	; jr	.seek_set_asm
+	call ti._frameset0
+	ld c,(ix+12)
+	call util_is_slot_open
+	jq nz, util_ret_neg_one
+	
+	
+	
+	pop ix
+	ret
 
 ;-------------------------------------------------------------------------------
 ti_DeleteVar:
@@ -876,7 +901,7 @@ ti_Rewind:
 	push	bc
 	push	hl
 	call	util_is_slot_open
-	jp	z, util_ret_neg_one
+	jq nz, util_ret_neg_one
 .rewind:
 	ld	bc, 0
 	call	util_set_offset
@@ -896,7 +921,7 @@ ti_Tell:
 	push	bc
 	push	hl
 	call	util_is_slot_open
-	jp	z, util_ret_neg_one
+	jq	nz, util_ret_neg_one
 	call	util_get_offset
 	push	bc
 	pop	hl
@@ -914,7 +939,7 @@ ti_GetSize:
 	push	bc
 	push	hl
 	call	util_is_slot_open
-	jp	z, util_ret_neg_one
+	jq	nz, util_ret_neg_one
 	call	util_get_slot_size
 	push	bc
 	pop	hl
@@ -1162,15 +1187,30 @@ ti_GetDataPtr:
 	push	bc
 	push	de
 	call	util_is_slot_open
-	jq	z, util_ret_null
+	jq	nz, util_ret_null
 	call	util_get_vat_ptr
+	ld hl,(hl)
+	push hl
+	call util_get_offset
+	push bc
 	push bc
 	pop hl
-	ld hl,(hl)
+	ld bc,1024
+	call ti._idivu   ;offset>>10
+	push hl
+	pop bc
+	pop de
+	pop hl
+	push de
 	ld bc,0
 	push bc,hl
 	call bos.fs_GetClusterPtr
 	pop bc,bc
+	pop de
+	ld e,0   ;offset&=0x3FF
+	res 0,d
+	res 1,d
+	add hl,de
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -1185,7 +1225,7 @@ ti_GetVATPtr:
 	push	bc
 	push	de
 	call	util_is_slot_open
-	jq	z, util_ret_null
+	jq	nz, util_ret_null
 	call	util_get_vat_ptr
 	ld	hl, (hl)
 	ret
@@ -1207,7 +1247,7 @@ ti_GetName:
 	push	hl
 	call	util_is_slot_open
 	pop	de
-	ret	z
+	ret	nz
 	call	util_get_vat_ptr
 	ld	hl, (hl)
 	push hl,de
@@ -1615,45 +1655,21 @@ util_is_slot_open:
 util_get_vat_ptr:
 	ld	a, (curr_slot)
 	ld	hl, vat_ptrs
-	dec	a
-	ret	z
-	inc hl
-	inc hl
-	inc hl
-	dec	a
-	ret	z
-	inc hl
-	inc hl
-	inc hl
-	dec	a
-	ret	z
-	inc hl
-	inc hl
-	inc hl
-	dec	a
-	ret	z
-	ret
+	dec a
+	ret z
+	ld c,a
+	add a,a
+	add a,c
+	jp bos.sys_AddHLAndA
 util_get_data_ptr:
 	ld	a, (curr_slot)
 	ld	hl, data_ptrs
-	dec	a
-	ret	z
-	inc hl
-	inc hl
-	inc hl
-	dec	a
-	ret	z
-	inc hl
-	inc hl
-	inc hl
-	dec	a
-	ret	z
-	inc hl
-	inc hl
-	inc hl
-	dec	a
-	ret	z
-	ret
+	dec a
+	ret z
+	ld c,a
+	add a,a
+	add a,c
+	jp bos.sys_AddHLAndA
 util_get_offset_ptr:
 	push	bc
 	ld	hl, (curr_slot)

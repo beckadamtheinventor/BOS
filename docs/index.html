@@ -50,6 +50,9 @@
 <tr><td>bos._HomeUp</td><td>0201CC</td><td><a href="#_HomeUp">doc</a></tr>
 <tr><td>bos._ErrMemory</td><td>0201D0</td><td><a href="#_ErrMemory">doc</a></tr>
 <tr><td>bos._DrawStatusBar</td><td>0201D4</td><td><a href="#_DrawStatusBar">doc</a></tr>
+<tr><td>bos._os_GetSystemInfo</td><td>0201D8</td><td><a href="#_os_GetSystemInfo">doc</a></tr>
+<tr><td>bos._UsbPowerVbus</td><td>0201DC</td><td><a href="#_UsbPowerVbus">doc</a></tr>
+<tr><td>bos._UsbUnpowerVbus</td><td>0201E0</td><td><a href="#_UsbUnpowerVbus">doc</a></tr>
 </table><div id="boot_os"><h1>boot_os</h1><h3>syscall Adress 020108</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
@@ -88,7 +91,7 @@
 </td></tr>
 </table></div><div id="fs_Read"><h1>fs_Read</h1><h3>syscall Adress 020140</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td> int fs_Read(void *dest, int len, uint8_t count, void *fd);</td><td> read data from a file into RAM</td><td> number of bytes read</td><td> All, OP6</td><td>
+<tr><td> int fs_Read(void *dest, int len, uint8_t count, void *fd, int offset);</td><td> read data from a file into RAM</td><td> number of bytes read</td><td> All, OP6</td><td>
 </td></tr>
 </table></div><div id="sys_AddHLAndA"><h1>sys_AddHLAndA</h1><h3>syscall Adress 020144</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -242,5 +245,17 @@
 </table></div><div id="_DrawStatusBar"><h1>_DrawStatusBar</h1><h3>syscall Adress 0201D4</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td> Nothing for now. Basically just a compatibility define</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="_os_GetSystemInfo"><h1>_os_GetSystemInfo</h1><h3>syscall Adress 0201D8</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td> return system info. Compatibility define. It actually returns 0xFF0000. lol</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="_UsbPowerVbus"><h1>_UsbPowerVbus</h1><h3>syscall Adress 0201DC</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td> I honestly don't know. Included this routine for compatibility with USBDDRVCE.</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="_UsbUnpowerVbus"><h1>_UsbUnpowerVbus</h1><h3>syscall Adress 0201E0</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td> I honestly don't know. Included for compatibility with USBDRVCE.</td><td></td><td></td><td>
 </td></tr>
 </table></div></body></html>
