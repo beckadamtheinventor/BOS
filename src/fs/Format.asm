@@ -19,7 +19,7 @@ fs_Format:
 	call gfx_BlitBuffer
 	pop af
 	inc a
-	cp a,$40
+	cp a,$3B
 	jr nz,.erase_loop
 
 	ld hl,str_ErasedUserMemory
@@ -134,7 +134,7 @@ fs_partition_table_data:
 	db $00,$FF,$FF,$FF ;partition 3 (user partition "C")
 	db $0B,$FF,$FF,$FF
 	db $01,$05,$00,$00 ;start LBA = 0x501
-	db $00,$20,$00,$00 ;end LBA = 0x2000
+	db $80,$1D,$00,$00 ;end LBA = 0x1D80 (up until physical sector 0x3B)
 
 	db $00,$FF,$FF,$FF ;partition 4 (unused by default, might become mounted partition "D" at some point)
 	db $00,$FF,$FF,$FF

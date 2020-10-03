@@ -33,7 +33,7 @@ fexplore_main:
 	jq nz,no_drive_found
 	ld hl,str_WaitingForDevice
 	call bos.gui_DrawConsoleWindow
-.loop:
+main_explore_loop:
 	call bos.sys_GetKey
 	cp a,15
 	jr z,.exit
@@ -41,12 +41,65 @@ fexplore_main:
 	ld a,0
 is_device_connected:=$-1
 	or a,a
-	jr z,.loop
+	jr z,main_explore_loop
 	cp a,1
-	jq z,.fat_Find
+	jq z,_fat_Find
+	cp a,2
+	jq z,_fat_List
 	
-	jr .loop
-.fat_Find:
+	
+	jr main_explore_loop
+;Cleanup USB
+.exit:
+	ld bc,msd_device
+	push bc
+	call msd_Deinit
+	pop bc
+	call usb_Cleanup
+	jq _exit
+_fat_List:
+	xor a,a
+	ld bc,fat_volume_label
+	ld (bc),a
+	push bc
+	ld bc,fat_device
+	push bc
+	call fat_GetVolumeLabel
+	pop bc,bc
+	ld bc,0
+dir_skip:=$-3
+	push bc
+	ld bc,16
+	push bc
+	ld bc,fat_dir_entries
+	push bc
+	ld bc,0
+	push bc
+	ld bc,current_dir
+	push bc
+	ld bc,fat_device
+	push bc
+	call fat_DirList
+	pop bc,bc,bc,bc,bc,bc
+	ld bc,-1
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	jq z,main_explore_loop
+	ld iy,fat_dir_entries
+.display_loop:
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	jq z,main_explore_loop
+	dec hl
+	push hl,iy
+	call bos.gui_Print
+	call bos.gui_NewLine
+	pop iy,hl
+	lea iy,iy+18
+	jr .display_loop
+_fat_Find:
 	ld bc,1
 	push bc
 	ld bc,.thrown_away_value
@@ -63,18 +116,9 @@ is_device_connected:=$-1
 	add hl,bc
 	or a,a
 	sbc hl,bc
-	jq z,.loop
 	ld hl,str_FailedToLocatePartition
-	call bos.gui_Print
-	jq .loop
-;Cleanup USB
-.exit:
-	ld bc,msd_device
-	push bc
-	call msd_Deinit
-	pop bc
-	call usb_Cleanup
-	jq _exit
+	call nz,bos.gui_Print
+	jq main_explore_loop
 
 
 ;usb_error_t main_event_handler(usb_event_t event, void *event_data, usb_callback_data_t *callback_data);
@@ -134,6 +178,22 @@ usb_device:
 partition_descriptor:
 	dd 0
 	dl 0
+
+fat_device:
+	dl 0
+	db 0
+	dd 0
+	dl 3 dup 0
+	dd 8 dup 0
+	dl 4 dup 0
+
+fat_volume_label:
+	db 18 dup 0
+
+current_dir := bos.open_files_table
+
+fat_dir_entries:
+	db 18*8 dup 0
 
 
 no_drive_found:

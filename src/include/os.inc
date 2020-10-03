@@ -4,15 +4,28 @@ macro os_private
 	local os
 	element os.base
 
- 	postpone
-		os.size = $% - os.start_off
+	postpone
+		os.size = $% - os.start_off + 4
 		os.end = os.size + $20100
+		os.header_and_os = os.size + $100
 	end postpone
 
  	macro os_rom?
 		os.start = $
 		os.start_off = $%
-		org $20100
+		org $20000
+		db $80,$0F
+		dd (os.end-$20006) bswap dword
+		db $80,$12,$13,$00
+		db $80,$21,$05
+		db $80,$32,$25,$00
+		db $80,$A1,$07
+		db $80,$C2,$01,$00
+		db $80,$D6,$00,$03,$05,$00,$03,$05
+		db $80,$E6,$00,$03,$05,$00,$03,$05
+		db $00,$0D,$CF,$CF dup 0
+		db $80,$7F
+		dd (os.end-$20100) bswap dword
 		db $5a,$a5,$ff,$ff
 		jp os.end
 	end macro
@@ -21,6 +34,8 @@ macro os_private
 		di
 		call	.create
 		jp	.continue
+.sig_header:
+		db $02,$3E,$01,$00
 .create:
 		ld	a,$d1
 		ld	mb,a
@@ -38,8 +53,12 @@ macro os_private
 		jr	nz,.erase
 
 		ld	hl,os.start
-		ld	de,$20100
+		ld	de,$20000
 		ld	bc,os.size
+		call	$2e0
+		ld	hl,.sig_header
+		ld	de,os.end
+		ld	bc,4
 		call	$2e0
 
 		call.is	.lock and $ffff
