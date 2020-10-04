@@ -115,7 +115,7 @@ disable_relocations
 
 	jp	_libloadstart.destination ; jump to execution block
 
-relocate _libloadstart, saveSScreen + 19000
+relocate _libloadstart, $D3FC00 - _libloadstart.length
 	pop	hl			; hl->start of library jump table
 
 	ld	(eSP),sp		; save the stack pointer if we hit an error
@@ -214,12 +214,14 @@ _libinarc:
 	;ld	e,(hl)
 	;add	hl,de
 	;inc	hl			; hl->size bytes
-	push de
-	call	bos._LoadDEInd_s		; de=total size of library
-	push	de
-	pop	bc			; bc=total size of library
-;	ld	(totallibsize),bc
-	pop hl
+;	push de
+;	call	bos._LoadDEInd_s		; de=total size of library
+;	push	de
+;	pop	bc			; bc=total size of library
+	ld	bc,(hl)
+	ex	hl,de
+	ld	(totallibsize),bc
+;	pop hl
 	ld	(appvarstartptr),hl	; hl->start of appvar in archived memory
 
 assert libmagic1 = libmagic1alt+1

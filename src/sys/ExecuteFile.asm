@@ -168,6 +168,8 @@ sys_ExecuteFile:
 	ld (asm_prgm_size),hl
 	ld hl,bos_UserMem
 	ld (top_of_UserMem),hl
+	ld bc,$020000
+	call _MemClear
 	pop hl
 	ret
 .jphl:

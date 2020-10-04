@@ -3,19 +3,39 @@ include 'include/ez80.inc'
 include 'include/ti84pceg.inc'
 include 'include/bos.inc'
 
-org ti.userMem
+org $D1A881
 	jr fexplore_main
 	db "REX",0
 fexplore_main:
 	ld (_ErrSP),sp
 	call libload_load
-	jr z,.main
+	jr z,fexplore_main.main
 	ld hl,str_FailedToLoadLibload
 	call bos.gui_Print
 	scf
 	sbc hl,hl
 	ret
-.main:
+libload_load:
+	ld hl,libload_name
+	push hl
+	call bos.fs_OpenFile
+	pop bc
+	jr c,.notfound
+	ld bc,0
+	push bc,hl
+	call bos.fs_GetClusterPtr
+	pop bc,bc
+	ld   de,libload_relocations
+	ld   bc,.notfound
+	push   bc
+;	ld   bc,$aa55aa
+	jp   (hl)
+
+.notfound:
+	xor   a,a
+	inc   a
+	ret
+fexplore_main.main:
 ;init USB
 	ld bc, 1 shl 2 ;USB_USE_USB_AREA
 	push bc
@@ -102,7 +122,7 @@ dir_skip:=$-3
 _fat_Find:
 	ld bc,1
 	push bc
-	ld bc,.thrown_away_value
+	ld bc,bos.ScrapMem
 	push bc
 	ld bc,partition_descriptor
 	push bc
@@ -119,11 +139,15 @@ _fat_Find:
 	add hl,bc
 	or a,a
 	sbc hl,bc
+	jq z,.success
 	ld hl,str_FailedToLocatePartition
-	call nz,bos.gui_Print
+	call bos.gui_Print
 	jq main_explore_loop
-.thrown_away_value:
-	dl 0
+.success:
+	ld hl,str_FatInited
+	call bos.gui_Print
+	jq main_explore_loop
+
 
 ;usb_error_t main_event_handler(usb_event_t event, void *event_data, usb_callback_data_t *callback_data);
 main_event_handler:
@@ -148,6 +172,8 @@ main_event_handler:
 	sbc hl,hl
 	ret
 .device_connected:
+	ld hl,str_DeviceConnected
+	call bos.gui_Print
 	ld de,(ix+9)
 	ld hl,usb_device
 	ld (hl),de
@@ -159,6 +185,8 @@ main_event_handler:
 	pop bc,bc,bc
 	jq .success
 .device_disconnected:
+	ld hl,str_DeviceDisconnected
+	call bos.gui_Print
 	ld bc,msd_device
 	push bc
 	call msd_Deinit
@@ -231,31 +259,14 @@ str_HelloWorld:
 	db "Hello World!",$A,0
 str_FailedToLoadLibload:
 	db "Failed to load libload.",$A,0
+str_DeviceConnected:
+	db "Device connected.",$A,0
+str_DeviceDisconnected:
+	db "Device disconnected",$A,0
+str_FatInited:
+	db "FAT Filesystem initialized.",$A,"Read/Write can now occur",$A,0
 
-
-
-libload_load:
-	ld hl,libload_name
-	push hl
-	call bos.fs_OpenFile
-	pop bc
-	jr c,.notfound
-	ld bc,0
-	push bc,hl
-	call bos.fs_GetClusterPtr
-	pop bc,bc
-	ld   de,.relocations
-	ld   bc,.notfound
-	push   bc
-;	ld   bc,$aa55aa
-	jp   (hl)
-
-.notfound:
-	xor   a,a
-	inc   a
-	ret
-
-.relocations:
+libload_relocations:
 db $C0,"USBDRVCE",0,0
 usb_Init:
 	jp 0
