@@ -4,12 +4,12 @@ include 'include/ti84pceg.inc'
 include 'include/bos.inc'
 
 org $D1A881
-	jr fexplore_main
+	jq fexplore_main
 	db "REX",0
 fexplore_main:
 	ld (_ErrSP),sp
 	call libload_load
-	jr z,fexplore_main.main
+	jq z,fexplore_main.main
 	ld hl,str_FailedToLoadLibload
 	call bos.gui_Print
 	scf
@@ -20,7 +20,7 @@ libload_load:
 	push hl
 	call bos.fs_OpenFile
 	pop bc
-	jr c,.notfound
+	jq c,.notfound
 	ld bc,0
 	push bc,hl
 	call bos.fs_GetClusterPtr
@@ -52,33 +52,96 @@ fexplore_main.main:
 	add hl,bc
 	sbc hl,bc
 	jq nz,no_drive_found
+main_init_start:
 	ld hl,str_WaitingForDevice
 	call bos.gui_DrawConsoleWindow
-main_explore_loop:
-	call bos.sys_GetKey
-	cp a,15
-	jr z,.exit
-	call usb_HandleEvents
-	ld a,0
-is_device_connected:=$-1
+main_init_loop:
+	di
+	ld hl,ti.mpIntMask
+	set ti.bIntOn,(hl)
+	ei
+	call usb_WaitForInterrupt
+	add hl,bc
 	or a,a
-	jr z,main_explore_loop
-	cp a,1
-	jq z,_fat_Find
-	cp a,2
-	jq z,_fat_List
+	sbc hl,bc
+	jq nz,main_exit
+	ld a,0
+msd_inited:=$-1
+	or a,a
+	jq nz,init_explore_drive
+	ld hl,(usb_device)
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	jq z,.check_on_int
+	ld hl,usb_device
+	ld (hl),de
+	ld bc,bos.usb_sector_buffer
+	push bc,de,hl
+	call msd_Init
+	pop bc,bc,bc
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	jq nz,.init_fail
+	ld a,1
+	ld (msd_inited),a
+	ld hl,str_MsdInited
+	jq .print_then_check_on_int
+.init_fail:
+	ld hl,str_FailedToInitMsd
+.print_then_check_on_int:
+	call bos.gui_Print
+.check_on_int:
+	ld hl,bos.prev_interrupt_status
+	bit ti.bIntOn,(hl)
+	jq z,main_init_loop
+	jq main_exit
+init_explore_drive:
+	call init_fat_partition
+	jq nz,.fail
+	call init_fat_volume
+	jq nz,.fail
 	
 	
-	jr main_explore_loop
-;Cleanup USB
-.exit:
+.fail:
+	ld hl,str_FailedToInitFat
+	call bos.gui_Print
+	jq main_init_start
+
+init_fat_partition:
+	ld bc,1
+	push bc
+	ld bc,bos.ScrapMem
+	push bc
+	ld bc,partition_descriptor
+	push bc
 	ld bc,msd_device
 	push bc
-	call msd_Deinit
-	pop bc
-	call usb_Cleanup
-	jq _exit
-_fat_List:
+	call fat_Find
+	pop bc,bc,bc,bc
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	ret nz
+	ld bc,partition_descriptor
+	push bc
+	ld bc,fat_device
+	push bc
+	call fat_Init
+	pop bc,bc
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	ret nz
+	ld hl,str_FatInited
+	call bos.gui_Print
+	xor a,a
+	sbc hl,hl
+	ret
+
+
+init_fat_volume:
 	xor a,a
 	ld bc,fat_volume_label
 	ld (bc),a
@@ -87,6 +150,17 @@ _fat_List:
 	push bc
 	call fat_GetVolumeLabel
 	pop bc,bc
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	ret
+
+list_fat_dirs:
+	ld hl,1
+	call .entry
+	or a,a
+	sbc hl,hl
+.entry:
 	ld bc,0
 dir_skip:=$-3
 	push bc
@@ -94,8 +168,7 @@ dir_skip:=$-3
 	push bc
 	ld bc,fat_dir_entries
 	push bc
-	ld bc,0
-	push bc
+	push hl
 	ld bc,current_dir
 	push bc
 	ld bc,fat_device
@@ -106,98 +179,87 @@ dir_skip:=$-3
 	add hl,bc
 	or a,a
 	sbc hl,bc
-	jq z,main_explore_loop
+	jq z,.done_display
 	ld iy,fat_dir_entries
+
 .display_loop:
 	add hl,bc
 	or a,a
 	sbc hl,bc
-	jq z,main_explore_loop
+	ret z
 	dec hl
 	push hl,iy
+	lea hl,iy
 	call bos.gui_Print
 	call bos.gui_NewLine
 	pop iy,hl
 	lea iy,iy+18
-	jr .display_loop
-_fat_Find:
-	ld bc,1
-	push bc
-	ld bc,bos.ScrapMem
-	push bc
-	ld bc,partition_descriptor
-	push bc
+	jq .display_loop
+
+
+;Cleanup USB
+main_exit:
 	ld bc,msd_device
 	push bc
-	call fat_Find
+	call msd_Deinit
 	pop bc
-	ld bc,fat_device
-	push bc
-	call fat_Init
-	pop bc,bc,bc,bc
-	ld a,2
-	ld (is_device_connected),a
-	add hl,bc
-	or a,a
-	sbc hl,bc
-	jq z,.success
-	ld hl,str_FailedToLocatePartition
-	call bos.gui_Print
-	jq main_explore_loop
-.success:
-	ld hl,str_FatInited
-	call bos.gui_Print
-	jq main_explore_loop
-
+	call usb_Cleanup
+	ld hl,ti.mpIntAck
+	set ti.bIntOn,(hl)
+	jq _exit
 
 ;usb_error_t main_event_handler(usb_event_t event, void *event_data, usb_callback_data_t *callback_data);
 main_event_handler:
 	call ti._frameset0
+	ld hl,str_EventTriggered
+	call bos.gui_Print
 	ld hl,(ix+6)
 	or a,a
 	sbc hl,de
 	add hl,de
 	jq z,.success
-	ex hl,de
-	ld hl, 2 ;USB_DEVICE_CONNECTED_EVENT
-	or a,a
-	sbc hl,de
-	jr z,.device_connected
-	ld hl, 1 ;USB_DEVICE_DISCONNECTED_EVENT
-	or a,a
-	sbc hl,de
-	jr z,.device_disconnected
+	ld a,l
+	cp a, 1 ;USB_DEVICE_DISCONNECTED_EVENT
+	jq z,.device_disconnected
+	cp a, 2 ;USB_DEVICE_CONNECTED_EVENT
+	jq z,.device_connected
+	cp a, 4 ;USB_DEVICE_ENABLED_EVENT
+	jq z,.device_enabled
+	ld hl,str_MaybeUnhandled
+.print_then_success:
+	call bos.gui_Print
 .success:
 	pop ix
 	or a,a
 	sbc hl,hl
 	ret
-.device_connected:
-	ld hl,str_DeviceConnected
-	call bos.gui_Print
+.device_enabled:
+	ld hl,(ix+15)
 	ld de,(ix+9)
-	ld hl,usb_device
 	ld (hl),de
-	ld a,1
 	ld (is_device_connected),a
-	ld bc,bos.usb_sector_buffer
-	push bc,de,hl
-	call msd_Init
-	pop bc,bc,bc
-	jq .success
+	ld hl,str_DeviceEnabled
+	jq .print_then_success
+.device_connected:
+	ld de,(ix+9)
+	push de
+	call usb_ResetDevice
+	pop bc
+	ld hl,str_DeviceConnected
+	jq .print_then_success
 .device_disconnected:
-	ld hl,str_DeviceDisconnected
-	call bos.gui_Print
 	ld bc,msd_device
 	push bc
 	call msd_Deinit
 	pop bc
-	pop ix
 	xor a,a
-	ld (is_device_connected),a
 	sbc hl,hl
-	ld (usb_device),hl
-	ret
+	ld (is_device_connected),a
+	ex hl,de
+	ld hl,(ix+15)
+	ld (hl),de
+	ld hl,str_DeviceDisconnected
+	jq .print_then_success
 
 msd_device:
 usb_device:
@@ -207,7 +269,7 @@ usb_device:
 	db 0       ;uint8_t configindex
 	dl 0       ;uint24_t tag
 	dd 0       ;uint32_t LBA of LUN
-	dd 512     ;uint32_t block size
+	dd 0       ;uint32_t block size
 	db 0       ;uint8_t interface
 	db 0       ;uint8_t max LUN
 	db 0       ;uint8_t flags
@@ -245,19 +307,22 @@ no_drive_found:
 _exit:
 	ld sp,0
 _ErrSP:=$-3
+	xor a,a
+	sbc hl,hl
 	ret
 
-str_WaitingForDevice:
-	db $9,"Waiting for device...",$A
-	db "Please insert USB flash drive.",$A,0
-str_FailedToLocatePartition:
-	db $9,"Failed to locate any partitions.",$A
-	db "Are you sure this is a FAT32 formatted drive?",$A,0
 libload_name:
 	db   "A:/LibLoad.v21",0
 .len := $ - .
-str_HelloWorld:
-	db "Hello World!",$A,0
+str_WaitingForDevice:
+	db $9,"Waiting for device...",$A
+	db "Please insert USB flash drive.",$A
+	db "Press [on] to cancel",$A,0
+str_FailedToInitFat:
+	db $9,"Failed to initialize drive.",$A
+	db "Are you sure it is FAT32 formatted?",$A,0
+str_FailedToInitMsd:
+	db $9,"Failed to init device.",$A,0
 str_FailedToLoadLibload:
 	db "Failed to load libload.",$A,0
 str_DeviceConnected:
@@ -266,6 +331,14 @@ str_DeviceDisconnected:
 	db "Device disconnected",$A,0
 str_FatInited:
 	db "FAT Filesystem initialized.",$A,"Read/Write can now occur",$A,0
+str_MsdInited:
+	db "Device initialized.",$A,0
+str_MaybeUnhandled:
+	db "Maybe unhandled event?",$A,0
+str_EventTriggered:
+	db "Event Triggered.",$A,0
+str_DeviceEnabled:
+	db "Device Enabled.",$A,0
 
 libload_relocations:
 db $C0,"USBDRVCE",0,0
@@ -275,6 +348,10 @@ usb_Cleanup:
 	jp 3
 usb_HandleEvents:
 	jp 9
+usb_WaitForInterrupt:
+	jp 15
+usb_ResetDevice:
+	jp 39
 
 db $C0,"FATDRVCE",0,1
 msd_Init:

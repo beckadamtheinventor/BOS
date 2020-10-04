@@ -57,6 +57,8 @@ gfx_string_temp        := $D00300
 current_working_dir    := $D00310
 argument_stack_top     := $D00470 ;96 bytes downward
 op_stack_top           := $D00670 ;512 bytes downward
+prev_interrupt_status  := $D00670 ;2 bytes. Used to save interrupt flags when an interrupt is triggered.
+os_handled_interrupts  := $D00672 ;2 bytes. Used to tell the OS whether to acknowledge certain interrupt bits. 1 = OS handled. 0 = User handled.
 fsOP1                  := $D01000
 fsOP2                  := $D01010
 fsOP3                  := $D01020

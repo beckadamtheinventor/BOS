@@ -18,6 +18,9 @@ boot_os:
 	or a,a
 	sbc hl,hl
 	ld (asm_prgm_size),hl
+	dec a
+	ld (os_handled_interrupts),a
+	ld (os_handled_interrupts+1),a
 	ld hl,op_stack_top
 	ld (op_stack_ptr),hl
 	call gfx_SetDefaultFont
@@ -95,23 +98,19 @@ enter_input:
 	jr .exit
 
 handle_interrupt:
-	ld bc,$5001
-	in a,(bc)
-	jq z,.check_interrupt_low
-	rla
-	rla
-	rla
-	jq c,handle_usb_interrupt
-	
-	jq .reset_int
-.check_interrupt_low:
-
-.reset_int:
+	ld a,(ti.mpIntStat+1)
+	ld (prev_interrupt_status+1),a
+	or a,a
+	jq z,.check_low
 	ld a,$FF
-	ld bc,$5008
-	out (bc),a
-	inc c
-	out (bc),a
+	ld (ti.mpIntAck+1),a
+.check_low:
+	ld a,(ti.mpIntStat)
+	ld (prev_interrupt_status),a
+	or a,a
+	jq z,return_from_interrupt
+	ld a,$FF
+	ld (ti.mpIntAck),a
 return_from_interrupt:
 	pop hl
 	pop iy,ix
@@ -120,5 +119,3 @@ return_from_interrupt:
 	ei
 	reti
 
-handle_usb_interrupt:
-	jq return_from_interrupt
