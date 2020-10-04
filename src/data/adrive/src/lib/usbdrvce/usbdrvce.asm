@@ -727,7 +727,7 @@ usb_HandleEvents:
 ;.notHalted:
 	or	a,a
 	sbc	hl,hl
-	ld	a, (bos.prev_interrupt_status+1) ;(mpIntStat+1)
+	ld	a, (mpIntStat+1)
 	and	a,intUsb shr 8
 	ret	z
 	ld	hl,mpUsbSts

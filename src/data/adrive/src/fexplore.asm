@@ -37,8 +37,10 @@ libload_load:
 	inc   a
 	ret
 fexplore_main.main:
+	ld hl,str_DriveExplorer
+	call bos.gui_DrawConsoleWindow
 ;init USB
-	ld bc, 1 shl 2 ;USB_USE_USB_AREA
+	ld bc, 12  ;USB_DEFAULT_INIT_FLAGS
 	push bc
 	ld bc, 0       ;use default device descriptors
 	push bc
@@ -54,7 +56,7 @@ fexplore_main.main:
 	jq nz,no_drive_found
 main_init_start:
 	ld hl,str_WaitingForDevice
-	call bos.gui_DrawConsoleWindow
+	call bos.gui_Print
 main_init_loop:
 	di
 	ld hl,ti.mpIntMask
@@ -89,6 +91,8 @@ msd_inited:=$-1
 	ld hl,str_MsdInited
 	jq .print_then_check_on_int
 .init_fail:
+	ld a,$FF
+	ld (msd_inited),a
 	ld hl,str_FailedToInitMsd
 .print_then_check_on_int:
 	call bos.gui_Print
@@ -96,8 +100,18 @@ msd_inited:=$-1
 	ld hl,bos.prev_interrupt_status
 	bit ti.bIntOn,(hl)
 	jq z,main_init_loop
+	call bos.sys_GetKey
+	cp a,9
+	jq z,main_init_start
+	cp a,15
+	jq z,.fexplore_main.main
 	jq main_exit
+.fexplore_main.main:
+	call bos._ClrScrn
+	jq fexplore_main.main
 init_explore_drive:
+	cp a,1
+	jq nz,main_exit
 	call init_fat_partition
 	jq nz,.fail
 	call init_fat_volume
@@ -179,7 +193,7 @@ dir_skip:=$-3
 	add hl,bc
 	or a,a
 	sbc hl,bc
-	jq z,.done_display
+	ret z
 	ld iy,fat_dir_entries
 
 .display_loop:
@@ -230,14 +244,13 @@ main_event_handler:
 	call bos.gui_Print
 .success:
 	pop ix
-	or a,a
+	xor a,a
 	sbc hl,hl
 	ret
 .device_enabled:
 	ld hl,(ix+15)
 	ld de,(ix+9)
 	ld (hl),de
-	ld (is_device_connected),a
 	ld hl,str_DeviceEnabled
 	jq .print_then_success
 .device_connected:
@@ -254,7 +267,6 @@ main_event_handler:
 	pop bc
 	xor a,a
 	sbc hl,hl
-	ld (is_device_connected),a
 	ex hl,de
 	ld hl,(ix+15)
 	ld (hl),de
@@ -314,6 +326,8 @@ _ErrSP:=$-3
 libload_name:
 	db   "A:/LibLoad.v21",0
 .len := $ - .
+str_DriveExplorer:
+	db "FAT32 Flash Drive explorer",$A,0
 str_WaitingForDevice:
 	db $9,"Waiting for device...",$A
 	db "Please insert USB flash drive.",$A

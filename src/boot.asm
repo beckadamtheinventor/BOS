@@ -102,14 +102,12 @@ handle_interrupt:
 	ld (prev_interrupt_status+1),a
 	or a,a
 	jq z,.check_low
-	ld a,$FF
 	ld (ti.mpIntAck+1),a
 .check_low:
 	ld a,(ti.mpIntStat)
 	ld (prev_interrupt_status),a
 	or a,a
 	jq z,return_from_interrupt
-	ld a,$FF
 	ld (ti.mpIntAck),a
 return_from_interrupt:
 	pop hl
