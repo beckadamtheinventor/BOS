@@ -53,6 +53,9 @@
 <tr><td>bos._os_GetSystemInfo</td><td>0201D8</td><td><a href="#_os_GetSystemInfo">doc</a></tr>
 <tr><td>bos._UsbPowerVbus</td><td>0201DC</td><td><a href="#_UsbPowerVbus">doc</a></tr>
 <tr><td>bos._UsbUnpowerVbus</td><td>0201E0</td><td><a href="#_UsbUnpowerVbus">doc</a></tr>
+<tr><td>bos.sys_EraseFlashSector</td><td>0201E4</td><td><a href="#sys_EraseFlashSector">doc</a></tr>
+<tr><td>bos.sys_FlashUnlock</td><td>0201E8</td><td><a href="#sys_FlashUnlock">doc</a></tr>
+<tr><td>bos.sys_FlashLock</td><td>0201EC</td><td><a href="#sys_FlashLock">doc</a></tr>
 </table><div id="boot_os"><h1>boot_os</h1><h3>syscall Adress 020108</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
@@ -170,7 +173,7 @@
 </td></tr>
 </table></div><div id="gfx_BlitBuffer"><h1>gfx_BlitBuffer</h1><h3>syscall Adress 020188</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td></td><td> copies the back buffer to the lcd</td><td></td><td> HL,DE,BC</td><td>
+<tr><td></td><td></td><td></td><td></td><td>
 </td></tr>
 </table></div><div id="gfx_PrintString"><h1>gfx_PrintString</h1><h3>syscall Adress 02018C</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -257,5 +260,17 @@
 </table></div><div id="_UsbUnpowerVbus"><h1>_UsbUnpowerVbus</h1><h3>syscall Adress 0201E0</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td> I honestly don't know. Included for compatibility with USBDRVCE.</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="sys_EraseFlashSector"><h1>sys_EraseFlashSector</h1><h3>syscall Adress 0201E4</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> A sector to erase</td><td> Erase flash sector</td><td></td><td> All</td><td>
+ calls boot routine $2DC</td></tr>
+</table></div><div id="sys_FlashUnlock"><h1>sys_FlashUnlock</h1><h3>syscall Adress 0201E8</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td></td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="sys_FlashLock"><h1>sys_FlashLock</h1><h3>syscall Adress 0201EC</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td></td><td></td><td></td><td>
 </td></tr>
 </table></div></body></html>

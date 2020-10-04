@@ -57,6 +57,9 @@ namespace bos
 ?_os_GetSystemInfo               := $201D8
 ?_UsbPowerVbus                   := $201DC
 ?_UsbUnpowerVbus                 := $201E0
+?sys_EraseFlashSector            := $201E4
+?sys_FlashUnlock                 := $201E8
+?sys_FlashLock                   := $201EC
 ?LCD_PAL    := 0E30200h
 ?LCD_CTRL   := 0E30018h
 ?LCD_VRAM   := 0D40000h

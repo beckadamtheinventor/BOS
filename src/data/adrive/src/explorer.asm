@@ -14,7 +14,6 @@ explorer_main:
 	sbc hl,hl
 	ret
 .main:
-	;call gfx_Begin ;no need for this lol, already in 8bpp
 	ld c,1
 	push bc
 	call gfx_SetDraw
@@ -25,7 +24,7 @@ explorer_main:
 	call gfx_SetTextTransparentColor
 	call gfx_SetTextBGColor
 	pop bc
-	ld c,$A0
+	ld c,$FF
 	push bc
 	call gfx_SetTextFGColor
 	pop bc
@@ -34,10 +33,24 @@ explorer_main:
 	ld bc,str_HelloWorld
 	push bc
 	call gfx_PrintStringXY
-	pop bc,bc,bc
+	pop bc,bc,de
+	ld de,20
+	push de,bc
+	ld bc,str_PressToContinue
+	push bc
+	call gfx_PrintStringXY
+	pop bc,bc,de
+	ld de,30
+	push de,bc
+	ld bc,str_PressToDelete
+	push bc
+	call gfx_PrintStringXY
+	pop bc,bc,de
 	call gfx_SwapDraw
 .key_loop:
 	call bos.sys_WaitKeyCycle
+	cp a,56
+	jq z,.uninstall
 	cp a,9
 	jr z,.exit
 	cp a,15
@@ -46,6 +59,15 @@ explorer_main:
 	xor a,a
 	sbc hl,hl
 	ret
+.uninstall:
+	ld bc,str_Uninstall
+	push bc
+	call bos.sys_ExecuteFile
+	pop bc
+	ret
+str_Uninstall:
+	db "A:/UNINSTLR.EXE",0
+
 
 load_libload:
 	ld hl,libload_name
@@ -60,7 +82,7 @@ load_libload:
 	ld   de,.relocations
 	ld   bc,.notfound
 	push   bc
-	ld   bc,$aa55aa
+;	ld   bc,$aa55aa
 	jp   (hl)
 
 .notfound:
@@ -108,6 +130,11 @@ libload_name:
 .len := $ - .
 
 str_HelloWorld:
-	db "Hello World!",0
+	db "Hello World! Welcome to BOS!",0
+str_PressToDelete:
+	db "Press [del] to uninstall and receive TIOS",0
+str_PressToContinue:
+	db "Press [clear] or [enter] to continue",0
+
 str_FailedToLoadLibload:
 	db "Failed to load libload.",0

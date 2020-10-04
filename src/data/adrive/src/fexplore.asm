@@ -103,13 +103,16 @@ _fat_Find:
 	ld bc,1
 	push bc
 	ld bc,.thrown_away_value
-.thrown_away_value:=$-3
 	push bc
 	ld bc,partition_descriptor
 	push bc
 	ld bc,msd_device
 	push bc
 	call fat_Find
+	pop bc
+	ld bc,fat_device
+	push bc
+	call fat_Init
 	pop bc,bc,bc,bc
 	ld a,2
 	ld (is_device_connected),a
@@ -119,12 +122,18 @@ _fat_Find:
 	ld hl,str_FailedToLocatePartition
 	call nz,bos.gui_Print
 	jq main_explore_loop
-
+.thrown_away_value:
+	dl 0
 
 ;usb_error_t main_event_handler(usb_event_t event, void *event_data, usb_callback_data_t *callback_data);
 main_event_handler:
 	call ti._frameset0
-	ld de,(ix+6)
+	ld hl,(ix+6)
+	or a,a
+	sbc hl,de
+	add hl,de
+	jq z,.success
+	ex hl,de
 	ld hl, 2 ;USB_DEVICE_CONNECTED_EVENT
 	or a,a
 	sbc hl,de
@@ -215,6 +224,15 @@ str_WaitingForDevice:
 str_FailedToLocatePartition:
 	db $9,"Failed to locate any partitions.",$A
 	db "Are you sure this is a FAT32 formatted drive?",$A,0
+libload_name:
+	db   "A:/LibLoad.v21",0
+.len := $ - .
+str_HelloWorld:
+	db "Hello World!",$A,0
+str_FailedToLoadLibload:
+	db "Failed to load libload.",$A,0
+
+
 
 libload_load:
 	ld hl,libload_name
@@ -229,7 +247,7 @@ libload_load:
 	ld   de,.relocations
 	ld   bc,.notfound
 	push   bc
-	ld   bc,$aa55aa
+;	ld   bc,$aa55aa
 	jp   (hl)
 
 .notfound:
@@ -290,12 +308,4 @@ fat_Delete:
 	pop   hl      ; pop error return
 	ret
 
-libload_name:
-	db   "A:/LibLoad.v21", 0
-.len := $ - .
-
-str_HelloWorld:
-	db "Hello World!",0
-str_FailedToLoadLibload:
-	db "Failed to load libload.",0
 

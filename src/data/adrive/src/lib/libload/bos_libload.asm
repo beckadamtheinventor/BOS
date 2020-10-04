@@ -463,18 +463,18 @@ _throwerror:				; draw the error message onscreen
 	ld	sp,(eSP)
 	bit	showmsgs,(iy + asmflag)
 	ret	z
-	ld	a,lcdBpp16
-	ld	(mpLcdCtrl),a
+	;ld	a,lcdBpp16
+	;ld	(mpLcdCtrl),a
 	push	hl
-	call	bos._DrawStatusBar
+	;call	bos._DrawStatusBar
 	call	bos._ClrScrn		; clean up the screen a bit
 	call	bos._HomeUp			; if we encounter an error
 	pop	hl
-	set	textInverse,(iy+textFlags)
+	;set	textInverse,(iy+textFlags)
 	ld	a,2
 	ld	(bos.curcol),a
 	call	bos._PutS
-	res	textInverse,(iy+textFlags)
+	;res	textInverse,(iy+textFlags)
 	call	bos._NewLine
 	call	bos._NewLine		; make it look pretty
 	ld	hl,_libnamestr

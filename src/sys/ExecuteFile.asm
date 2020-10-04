@@ -109,6 +109,9 @@ sys_ExecuteFile:
 	jq c,.fail_popbc
 	jq .open_fd
 .ext:
+	ld a,(hl)
+	cp a,$EF
+	jq z,.check_ef7b
 	ld de,(hl)
 	db $21 ;ld hl,...
 	db 'FEX' ;Flash EXecutable
@@ -121,16 +124,20 @@ sys_ExecuteFile:
 	sbc hl,de
 
 	jq nz,.fail_popbc ;if it's neither a Flash Executable nor a Ram Executable, return -1
+
+	or a,a
+	sbc hl,hl
+	ld (fsOP6+3),hl
+
+.exec_rex:
+	pop hl      ;file data pointer (not needed, this is re-handled in fs_Read)
 	ld hl,(fsOP6) ;file descriptor
+	push hl     ;void *fd
 	ld bc,$1C   ;offset of file length
 	add hl,bc
 	ld bc,(hl)  ;get file length in bytes
 	ld (asm_prgm_size),bc
-	pop de      ;file data pointer (not needed, this is re-handled in fs_Read)
-	ld hl,(fsOP6)
-	push hl     ;void *fd
-	or a,a
-	sbc hl,hl
+	ld hl,(fsOP6+3)
 	ex (sp),hl  ;int offset
 	push hl     ;void *fd
 	ld e,1
@@ -165,4 +172,17 @@ sys_ExecuteFile:
 	ret
 .jphl:
 	ld (SaveSP),sp
+	di
 	jp (hl)
+
+.check_ef7b:
+	inc hl
+	ld a,(hl)
+	cp a,$7B
+	jq nz,.fail_popbc
+	ld hl,2
+	ld (fsOP6+3),hl
+	jq .exec_rex
+	
+
+

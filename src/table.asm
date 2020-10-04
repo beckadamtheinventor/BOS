@@ -54,3 +54,6 @@
 	jp _os_GetSystemInfo
 	jp _UsbPowerVbus
 	jp _UsbUnpowerVbus
+	jp sys_EraseFlashSector
+	jp sys_FlashUnlock
+	jp sys_FlashLock

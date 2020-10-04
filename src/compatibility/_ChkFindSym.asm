@@ -5,16 +5,19 @@
 ;@OUTPUT Cf set if file not found or otherwise cannot be opened.
 ;@DESTROYS OP1 and OP2
 _ChkFindSym:
-	ld hl,fsOP1+8 ;copy fsOP1+1 to fsOP1+3
-	ld de,fsOP1+10
-	ld bc,9
+	xor a,a
+	ld hl,fsOP1+9
+	ld (hl),a
+	dec hl
+	ld de,fsOP1+10  ;copy fsOP1+1 to fsOP1+3
+	ld bc,8
 	lddr
 	ld hl,fsOP1
 	db $11,"A:/" ;ld de,...
 	ld (hl),de
 	push hl
-	xor a,a
-	cpir ;bc is already zero
+	ld c,12 ;bc is already zero
+	cpir
 	dec hl
 	ex hl,de
 	ld hl,.str_v21

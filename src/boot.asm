@@ -9,13 +9,12 @@ boot_os:
 	call flash_lock
 	ld hl,bos_UserMem
 	ld (bottom_of_RAM),hl
+	ld (top_of_UserMem),hl
 	ld hl,top_of_RAM
 	ld (free_RAM_ptr),hl
 	ld bc,-bos_UserMem
 	add hl,bc
 	ld (remaining_free_RAM),hl
-	ld hl,bos_UserMem
-	ld (top_of_UserMem),hl
 	or a,a
 	sbc hl,hl
 	ld (asm_prgm_size),hl
