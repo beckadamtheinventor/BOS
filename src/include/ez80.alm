@@ -175,15 +175,16 @@ macro ?! isreg: metadata 1 element 1 eq @ez80
 		label done
 	end macro
 
-	iterate <suffixsize: 2,suffixname,suffixencoding,suffixadjustment,wordsize: =@ez80.=ws>, \
-	                     3,        s?,          100o,              il,                     , \
-	                     3,        l?,          111o,              il,                     , \
-	                     3,       is?,          100o,              l ,               =word?, \
-	                     3,       il?,          122o,              l ,               =long?, \
-	                     3,      sis?,          100o,                ,               =word?, \
-	                     3,      lis?,          111o,                ,               =word?, \
-	                     3,      sil?,          122o,                ,               =long?, \
-	                     3,      lil?,          133o,                ,               =long?,
+	iterate <suffixsize,suffixname,suffixencoding,suffixadjustment, wordsize>, \
+	                  2,          ,              ,                ,=@ez80.=ws, \
+	                  3,        s?,          100o,              il,=@ez80.=ws, \
+	                  3,        l?,          111o,              il,=@ez80.=ws, \
+	                  3,       is?,          100o,              l ,    =word?, \
+	                  3,       il?,          122o,              l ,    =long?, \
+	                  3,      sis?,          100o,                ,    =word?, \
+	                  3,      lis?,          111o,                ,    =word?, \
+	                  3,      sil?,          122o,                ,    =long?, \
+	                  3,      lil?,          133o,                ,    =long?
 		match adjustment, suffixadjustment
 			macro calminstruction?.emitsuffix?
 				local suffix
