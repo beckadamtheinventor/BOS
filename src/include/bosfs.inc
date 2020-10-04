@@ -97,17 +97,3 @@ macro fs_fs? @base
 	end macro
 end macro
 
-
-calminstruction (var) strcalc? val
-	compute val, val        ; compute expression
-	arrange val, val        ; convert result to a decimal token
-	stringify val           ; convert decimal token to string
-	publish var, val
-end calminstruction
-
-macro display_sector? name, addr
-	local addrstr
-	addrstr strcalc addr shr 9
-	display '"',name,'" LBA: ',addrstr,$A
-end macro
-
