@@ -58,9 +58,9 @@ macro fs_fs? @base
 				pad_db @@ext, ' ', 3
 				db @@prop
 				db 8 dup 0
-				dw (((file.start-fs.clusters_section) shr 26) and $FFFF)
+				dw (((file.start+$800-fs.clusters_section) shr 26) and $FFFF)
 				db 4 dup 0
-				dw (((file.start-fs.clusters_section) shr 10) and $FFFF)
+				dw (((file.start+$800-fs.clusters_section) shr 10) and $FFFF)
 				dd file.len
 			end virtual
 			esc virtual

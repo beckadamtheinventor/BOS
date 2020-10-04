@@ -6,8 +6,8 @@
 fs_DataSection:
 	call fs_ClusterMap
 	jq c,.fail
-	ld bc,$2000
-	add hl,bc      ; add cluster tables
+	ld bc,$2000 - $800
+	add hl,bc      ; add cluster tables - "invisible" clusters
 	xor a,a
 	ret
 .fail:

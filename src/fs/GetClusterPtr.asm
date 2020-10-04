@@ -21,14 +21,12 @@ fs_GetClusterPtr:
 	jr z,.fail
 	dec hl
 	push de
-	ld bc,$12
+	ld bc,$14
 	add hl,bc
-	ld bc,(hl)  ;upper byte of file starting cluster
-	ld c,$1A - $12
+	ld a,(hl)  ;upper byte of file starting cluster
+	ld c,$1A - $14
 	add hl,bc
-	ld c,(hl) ;low two bytes of file starting cluster
-	inc hl
-	ld b,(hl)
+	ld bc,(hl) ;low two bytes of file starting cluster
 	ld (ScrapMem),bc
 	ld (ScrapMem+2),a
 	push hl
@@ -64,6 +62,7 @@ fs_GetClusterPtr:
 .next:
 	pop de
 	jr z,.fail
+	dec de
 	ld hl,(hl)
 	add hl,hl
 	add hl,hl

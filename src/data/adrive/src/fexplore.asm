@@ -25,6 +25,7 @@ libload_load:
 	push bc,hl
 	call bos.fs_GetClusterPtr
 	pop bc,bc
+	jq c,.notfound
 	ld   de,libload_relocations
 	ld   bc,.notfound
 	push   bc
