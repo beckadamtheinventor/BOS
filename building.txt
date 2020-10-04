@@ -1,0 +1,6 @@
+
+See this link to locate the required version of fasmg to build this project.
+https://github.com/CE-Programming/toolchain/tree/fatdrvce/tools/fasmg
+
+Once that is installed and in your system path, smiply run either build.bat (Windows) or build.sh. (Linux/Mac)
+Note for Mac users: You may have to install bash / run build.sh with bash
