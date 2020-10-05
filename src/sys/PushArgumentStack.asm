@@ -14,6 +14,7 @@ sys_PushArgumentStack:
 	call sys_Malloc
 	ex hl,de
 	pop bc,hl
+	ret c
 	push de
 	ldir
 	xor a,a

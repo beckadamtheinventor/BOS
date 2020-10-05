@@ -7,6 +7,8 @@ boot_os:
 	out0 ($1D),a
 	out0 ($1E),a
 	call flash_lock
+	ld a,4           ;set wait states to 4
+	ld ($E00005),a
 	ld hl,bos_UserMem
 	ld (bottom_of_RAM),hl
 	ld (top_of_UserMem),hl

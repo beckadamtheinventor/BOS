@@ -27,9 +27,9 @@ macro fs_fs? @base
 		dd $F0FFFFF0, $0FFFFFFF, $0FFFFFFF
 	end virtual
 	db fs.cmap
-	db $1000 - (fs.cmap_len and $7FF) dup $FF
+	db $400 - (fs.cmap_len and $1FF) dup $FF
 	db fs.cmap
-	db $1000 - (fs.cmap_len and $7FF) dup $FF
+	db $400 - (fs.cmap_len and $1FF) dup $FF
 	fs.clusters_section:
 
 	macro fs_subdir? fsname

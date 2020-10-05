@@ -2,6 +2,7 @@
 ;@DOES return a pointer to a given drive's first cluster map.
 ;@INPUT a = drive letter
 ;@OUTPUT hl = cluster map
+;@OUTPUT de = Volume ID sector
 ;@OUTPUT Cf is set if failed.
 fs_ClusterMap:
 	call fs_PartitionDescriptor
@@ -20,33 +21,22 @@ fs_ClusterMap:
 	inc hl
 	inc hl
 	inc hl
-	ld hl,(hl) ;LBA of volume ID sector
+	ld hl,(hl) ;LBA of partition
 	ld b,9
 .multloop:
 	add hl,hl
-	djnz .multloop ;address of volume ID sector
-	ld l,$0E       ;bc = reserved sectors
-	ld c,(hl)
-	inc hl
-	ld b,(hl)
-	ld l,$2C       ;ude = root dir first cluster
-	ld de,(hl)
-	ld (ScrapMem),hl  ; get sector address of hl
-	ld hl,ScrapMem
-	xor a,a
-	ld (hl),a
-	inc hl
-	ld (hl),a
-	dec hl
-	ld hl,(hl)        ; hl is now the sector address
+	djnz .multloop ;address of partition
 	push hl
-	push bc
-	pop hl
-	ld b,9     ; reserved sectors *= 512
-.multloop3:
-	add hl,hl
-	djnz .multloop3
-	pop bc
+	ld bc,$0E ;get number of reserved sectors
 	add hl,bc
-	or a,a
+	ld e,(hl)
+	inc hl
+	ld d,(hl)
+	ex.s hl,de
+	ld b,9
+.multloop2:
+	add hl,hl
+	djnz .multloop2 ;get number of bytes in reserved sectors
+	pop de
+	add hl,de
 	ret

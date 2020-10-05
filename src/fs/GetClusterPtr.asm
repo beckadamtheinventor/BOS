@@ -21,6 +21,7 @@ fs_GetClusterPtr:
 	jr z,.fail
 	dec hl
 	push de
+	push hl
 	ld bc,$14
 	add hl,bc
 	ld a,(hl)  ;upper byte of file starting cluster
@@ -29,7 +30,6 @@ fs_GetClusterPtr:
 	ld bc,(hl) ;low two bytes of file starting cluster
 	ld (ScrapMem),bc
 	ld (ScrapMem+2),a
-	push hl
 	ld hl,(ScrapMem)
 	add hl,hl  ;multiply by 4
 	add hl,hl
@@ -41,8 +41,8 @@ fs_GetClusterPtr:
 	pop bc
 	pop de
 	jq c,.fail
-	add hl,bc
 .loop:
+	add hl,bc
 	ex hl,de
 	add hl,de
 	or a,a
@@ -67,7 +67,6 @@ fs_GetClusterPtr:
 	add hl,hl
 	add hl,hl
 	ld bc,(ScrapMem)
-	add hl,bc
 	jr .loop
 .fail:
 	scf
@@ -86,6 +85,8 @@ fs_GetClusterPtr:
 	call fs_DataSection
 	pop bc
 	jq c,.fail ;hope this doesn't happen
+	add hl,bc
+	ld bc,-$800
 	add hl,bc
 	xor a,a
 	ret

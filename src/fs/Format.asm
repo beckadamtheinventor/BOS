@@ -105,13 +105,16 @@ fs_drive_c_data:
 	dl $0A03FC
 	dl fs_drive_a_cluster_map
 	dl fs_drive_a_cluster_map.len
-	dl $0A0400
+	dl $0A1000
+	dl fs_drive_a_cluster_map
+	dl fs_drive_a_cluster_map.len
+	dl $0A3200
 	dl fs_drive_c_home_dir
 	dl fs_drive_c_home_dir.len
-	dl $0A3040
+	dl $0A7400
 	dl $FF0000 ; always reads zero
 	dl 32      ; write one 32 byte entry to signify end of directory
-	dl $0A3060 ; write end-of-dir entry
+	dl $0A7420 ; write end-of-dir entry
 .len:=($-fs_drive_c_data) / 9
 
 
@@ -133,7 +136,7 @@ fs_partition_table_data:
 	
 	db $00,$FF,$FF,$FF ;partition 3 (user partition "C")
 	db $0B,$FF,$FF,$FF
-	db $01,$05,$00,$00 ;start LBA = 0x501
+	db $00,$05,$00,$00 ;start LBA = 0x500
 	db $80,$1D,$00,$00 ;end LBA = 0x1D80 (up until physical sector 0x3B)
 
 	db $00,$FF,$FF,$FF ;partition 4 (unused by default, might become mounted partition "D" at some point)
@@ -145,10 +148,10 @@ fs_partition_table_data:
 fs_drive_a_volume_data:
 	db $00,$02   ;sector size. always 512
 	db $02       ;sectors per cluster
-	db $08,$00   ;reserved sector count
+	db $07,$00   ;reserved sector count
 	db $02       ;number of FATs. always 2
 	db $13 dup 0
-	dd 8 ;sectors per FAT
+	dd 2 ;sectors per FAT
 	db 4 dup 0
 	dd 2 ;root directory first cluster
 .len:=$-fs_drive_a_volume_data
@@ -159,7 +162,7 @@ fs_drive_c_volume_data:
 	db $08,$00   ;reserved sector count
 	db $02       ;number of FATs. always 2
 	db $13 dup 0
-	dd 8 ;sectors per FAT
+	dd $19 ;sectors per FAT
 	db 4 dup 0
 	dd 2 ;root directory first cluster
 .len:=$-fs_drive_c_volume_data

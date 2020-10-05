@@ -19,6 +19,7 @@ gui_PrintInt:
 	ld (hl),'-'
 	jq .print
 .positive:
+	ex hl,de
 	call	sys_HLToString
 	ex hl,de
 .print:

@@ -159,6 +159,7 @@ sys_ExecuteFile:
 	call sys_GetArgumentStack ;get arguments
 	ex (sp),hl ;push arguments to stack, pop jump location from the stack
 .run_hl:
+	ld (SaveSP),sp
 	call .jphl
 	pop bc
 	push hl
@@ -168,13 +169,9 @@ sys_ExecuteFile:
 	ld (asm_prgm_size),hl
 	ld hl,bos_UserMem
 	ld (top_of_UserMem),hl
-	ld bc,$020000
-	call _MemClear
 	pop hl
 	ret
 .jphl:
-	ld (SaveSP),sp
-	di
 	jp (hl)
 
 .check_ef7b:
