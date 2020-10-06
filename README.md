@@ -117,10 +117,10 @@ All libraries and routines must be located in the libload_relocations section.
 The library include header starts with the byte 0xC0 ($C0) and is followed by the null-terminated library name, which is then followed by a version byte.
 Note that the version byte for each library is different. Since BOS comes pre-loaded with the latest libload libraries, it is unlikely that you will see a version error.
 Headers for libload libraries included in BOS:
-+ fatdrvce: db $C0,"FATDRVCE",0,1
-+ fileioc: db $C0,"FILEIOC",0,6
-+ graphx: db $C0,"GRAPHX",0,11
-+ usbdrvce: db $C0,"USBDRVCE",0,0
++ fatdrvce: `db $C0,"FATDRVCE",0,1`
++ fileioc: `db $C0,"FILEIOC",0,6`
++ graphx: `db $C0,"GRAPHX",0,11`
++ usbdrvce: `db $C0,"USBDRVCE",0,0`
 Note that fileioc is currently unstable in BOS.
 
 Example usage:
