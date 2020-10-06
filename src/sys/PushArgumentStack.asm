@@ -7,6 +7,9 @@ sys_PushArgumentStack:
 	pop hl
 	push hl
 	push bc
+	ld a,(hl)
+	or a,a
+	jr z,.push_null
 	push hl
 	call ti._strlen
 	inc hl
@@ -20,6 +23,10 @@ sys_PushArgumentStack:
 	xor a,a
 	ld (de),a
 	pop de
+	jr .push
+.push_null:
+	ld de,$FF0000
+.push:
 	ld hl,(argument_stack_current)
 	dec hl
 	dec hl
@@ -27,5 +34,6 @@ sys_PushArgumentStack:
 	ld (hl),de
 	ld (argument_stack_current),hl
 	ex hl,de
+	or a,a
 	ret
 

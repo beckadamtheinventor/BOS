@@ -116,6 +116,7 @@ namespace bos
 ?asm_prgm_size          := $D01086 ;3 bytes
 ?top_of_UserMem         := $D01089 ;3 bytes
 ?SaveSP                 := $D01092 ;3 bytes, saves SP when running programs.
+?current_sectors_per_cluster := $D01095 ;1 byte. Number of sectors per cluster in last drive where fs_DataSection or fs_RootDir has been called on it.
 ?usb_sector_buffer      := $D02000 ;512 bytes
 ?bos_Stackbot           := $D1A87C
 ?bos_UserMem            := $D1A881

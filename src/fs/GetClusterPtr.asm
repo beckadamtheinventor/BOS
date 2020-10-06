@@ -76,17 +76,21 @@ fs_GetClusterPtr:
 	ld bc,(ScrapMem)
 	or a,a
 	sbc hl,bc
-	ld b,8     ;multiply by cluster size / cluster map entry size
+	ld b,7     ;multiply by sector size / cluster map entry size
 .mult_loop:
 	add hl,hl
 	djnz .mult_loop
+	call fs_MultBySectorsPerCluster
 	push hl
 	ld a,(ScrapByte)
 	call fs_DataSection
 	pop bc
 	jq c,.fail ;hope this doesn't happen
 	add hl,bc
-	ld bc,-$800
+	push hl
+	ld hl,-512 ;subtract "invisible" cluster
+	call fs_MultBySectorsPerCluster
+	pop bc
 	add hl,bc
-	xor a,a
+	or a,a
 	ret

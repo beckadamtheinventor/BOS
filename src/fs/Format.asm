@@ -147,7 +147,7 @@ fs_partition_table_data:
 
 fs_drive_a_volume_data:
 	db $00,$02   ;sector size. always 512
-	db $02       ;sectors per cluster
+	db $01       ;sectors per cluster
 	db $07,$00   ;reserved sector count
 	db $02       ;number of FATs. always 2
 	db $13 dup 0

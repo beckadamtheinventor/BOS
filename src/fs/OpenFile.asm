@@ -20,6 +20,7 @@ fs_OpenFile:
 .fail_popbc:
 	pop bc
 	scf
+	sbc hl,hl
 	ret
 .cwdnonzero:
 	pop hl

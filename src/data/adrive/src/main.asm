@@ -5,7 +5,7 @@ include 'include/bosfs.inc'
 include 'include/bos.inc'
 
 
-fs_fs $041000
+fs_fs $041000, 1
 
 
 fs_file "APRG","EXE", f_readonly+f_system
@@ -309,12 +309,12 @@ end fs_file
 
 
 fs_file "EXPLORER", "EXE", f_readonly+f_system
-	file 'explorer.bin'
+	file '../obj/explorer.bin'
 end fs_file
 
 
 fs_file "FEXPLORE", "EXE", f_readonly+f_system
-	file 'fexplore.bin'
+	file '../obj/fexplore.bin'
 end fs_file
 
 
@@ -505,27 +505,27 @@ end fs_file
 
 
 fs_file "FATDRVCE","v21", f_readonly+f_system
-	file 'lib/fatdrvce.bin'
+	file '../obj/fatdrvce.bin'
 end fs_file
 
 fs_file "FILEIOC","v21", f_readonly+f_system
-	file 'lib/fileioc.bin'
+	file '../obj/fileioc.bin'
 end fs_file
 
 fs_file "GRAPHX","v21", f_readonly+f_system
-	file 'lib/graphx.bin'
+	file '../obj/graphx.bin'
 end fs_file
 
 fs_file "SRLDRVCE","v21", f_readonly+f_system
-	file 'lib/srldrvce.bin'
+	file '../obj/srldrvce.bin'
 end fs_file
 
 fs_file "USBDRVCE","v21", f_readonly+f_system
-	file 'lib/usbdrvce.bin'
+	file '../obj/usbdrvce.bin'
 end fs_file
 
 fs_file "LibLoad", "v21", f_readonly+f_system
-	file 'lib/bos_libload.bin'
+	file '../obj/bos_libload.bin'
 end fs_file
 
 fs_file "UNINSTLR","EXE", f_readonly+f_system
@@ -549,7 +549,7 @@ end fs_file
 
 
 fs_file "MEMEDIT","EXE", f_readonly+f_system
-	file 'memedit.bin'
+	file '../obj/memedit.bin'
 end fs_file
 
 end fs_fs

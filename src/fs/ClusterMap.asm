@@ -27,8 +27,13 @@ fs_ClusterMap:
 	add hl,hl
 	djnz .multloop ;address of partition
 	push hl
-	ld bc,$0E ;get number of reserved sectors
+	;get number of sectors per cluster
+	ld bc,$0D
 	add hl,bc
+	ld a,(hl)
+	ld (current_sectors_per_cluster),a
+	;get number of reserved sectors
+	inc hl
 	ld e,(hl)
 	inc hl
 	ld d,(hl)
@@ -39,4 +44,5 @@ fs_ClusterMap:
 	djnz .multloop2 ;get number of bytes in reserved sectors
 	pop de
 	add hl,de
+	or a,a
 	ret

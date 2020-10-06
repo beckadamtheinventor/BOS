@@ -4,7 +4,7 @@
 ;@DESTROYS All, OP6
 fs_Read:
 	push iy
-	ld hl,-9
+	ld hl,-12
 	call ti._frameset
 	ld hl,(ix+18) ;void *fd
 	ld bc,$1C
@@ -17,7 +17,11 @@ fs_Read:
 	sbc hl,de
 	add hl,de
 	jq nc,.fail ;fail if offset>=len
-	ld bc,1024    ;cluster size
+	push hl
+	ld hl,512    ;cluster size
+	call fs_MultBySectorsPerCluster
+	ld (ix-12),hl
+	pop hl
 	call ti._idivu
 	ld (ix-6),hl  ;offset>>10
 	ld hl,(ix+21)
@@ -25,7 +29,7 @@ fs_Read:
 	and a,3
 	ld h,a
 	ex.s hl,de ;offset&0x3FF
-	ld hl,1024
+	ld hl,(ix-12)
 	or a,a
 	sbc hl,de
 	push hl
@@ -53,20 +57,20 @@ fs_Read:
 	or a,a
 	sbc hl,de
 	jq z,.return
-	ld bc,1024
+	ld bc,(ix-12)
 	call ti._idivu
 	inc hl
 	ld (ix-6),hl
 	ld hl,(ix+18)
 	ld de,0
-	ld bc,1024
+	ld bc,(ix-12)
 	jq .entry
 .copy_loop:
 	push de,hl
 	call fs_GetClusterPtr
 	jq c,.fail
 	ld de,(ix-3) ;dest
-	ld bc,1024
+	ld bc,(ix-12)
 	ldir
 	ld (ix-3),de ;no more need to offset
 	pop hl,de

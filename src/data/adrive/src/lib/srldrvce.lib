@@ -1,2 +1,0 @@
-library	"SRLDRVCE", 0
-	export	srl_Init ; 0
