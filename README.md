@@ -27,23 +27,23 @@ For example, say you were to add a program called "program"
 
 ## Step 1
 Appending `build.bat`/`build.sh`. Note that this must be placed before the last two lines.
-``
+```
 fasmg src/program.asm obj/program.bin
-``
+```
 
 ## Step 2
 The next two steps are different depending on whether your program runs from RAM or from flash.
 
 ### In RAM
 Appending `src/main.asm`. Note that this must be placed before `end fs_fs` and not within any `fs_file`/`end fs_file` blocks.
-``
+```
 fs_file "PROGRAM", "EXE", f_readonly+f_system
 	file "../obj/program.bin"
 end fs_file
-``
+```
 
 header of `src/program.asm`
-``
+```
 include 'include/ez80.inc'
 include 'include/ti84pceg.inc'
 include 'include/bos.inc'
@@ -53,18 +53,18 @@ org ti.userMem ;the address this executable runs from
 	db "REX",0 ;header to mark this program as a Ram EXecutable.
 main:
 	;your code here
-``
+```
 
 ### In flash
 Appending `src/main.asm`
-``
+```
 fs_file "PROGRAM", "EXE", f_readonly+f_system
 	include 'src/program.asm'
 end fs_file
-``
+```
 
 header of `src/program.asm`
-``
+```
 ;Note this file is directly included in the filesystem binary,
 ;and therefore does not need to include anything because they have already been included prior to this file being assembled.
 ;It should also not start with an org directive, because it is running from wherever it is in the filesystem.
@@ -74,7 +74,7 @@ header of `src/program.asm`
 	db "FEX",0 ;header to mark this program as a Flash EXecutable
 main:
 	;your code here
-``
+```
 
 ## Step 3
 Build BOS using the provided build.bat or build.sh files in the *root* directory of the repo.
@@ -91,7 +91,7 @@ Using these libraries requires your program to run from *RAM* as a *REX* (RAM) e
 
 ### the libload loader
 Put the following code somewhere in your executable.
-``
+```
 load_libload:
 	ld hl,libload_name
 	push hl
@@ -110,7 +110,7 @@ load_libload:
 	xor   a,a
 	inc   a
 	ret
-``
+```
 
 ### including a libload library
 All libraries and routines must be located in the libload_relocations section.
@@ -124,7 +124,7 @@ Headers for libload libraries included in BOS:
 Note that fileioc is currently unstable in BOS.
 
 Example usage:
-``
+```
 libload_relocations:
 	db $C0,"GRAPHX",0,11
 gfx_SetColor:
@@ -137,5 +137,5 @@ gfx_ZeroScreen:
 	pop hl
 	ret
 
-``
+```
 
