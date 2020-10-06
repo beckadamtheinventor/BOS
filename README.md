@@ -121,6 +121,7 @@ Headers for libload libraries included in BOS:
 + fileioc: `db $C0,"FILEIOC",0,6`
 + graphx: `db $C0,"GRAPHX",0,11`
 + usbdrvce: `db $C0,"USBDRVCE",0,0`
+
 Note that fileioc is currently unstable in BOS.
 
 Example usage:
