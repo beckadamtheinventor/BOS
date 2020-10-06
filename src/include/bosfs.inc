@@ -19,17 +19,19 @@ f_device     := $40
 
 
 
-macro fs_fs? @base
+macro fs_fs? @base, @clustersize
+	local fs
 	fs.base = @base
+	fs.clustersize = @clustersize
 	org fs.base
 	virtual
 		fs.exports.cmap::
 		dd $F0FFFFF0, $0FFFFFFF, $0FFFFFFF
 	end virtual
 	db fs.cmap
-	db $400 - (fs.cmap_len and $1FF) dup $FF
+	db $200 - (fs.cmap_len and $1FF) dup $FF
 	db fs.cmap
-	db $400 - (fs.cmap_len and $1FF) dup $FF
+	db $200 - (fs.cmap_len and $1FF) dup $FF
 	fs.clusters_section:
 
 	macro fs_subdir? fsname
@@ -43,10 +45,10 @@ macro fs_fs? @base
 			local file
 			file.start = $
 			virtual fs.exports.cmap
-				if file.len > 1024
+				if file.len > (fs.clustersize shl 9)
 					local num
 					num = ($-$$) shr 2
-					repeat file.len shr 10
+					repeat file.len / (fs.clustersize shl 9)
 						num = num + 1
 						dd num
 					end repeat
@@ -58,9 +60,9 @@ macro fs_fs? @base
 				pad_db @@ext, ' ', 3
 				db @@prop
 				db 8 dup 0
-				dw (((file.start+$800-fs.clusters_section) shr 26) and $FFFF)
+				dw (((file.start+(fs.clustersize shl 9)-fs.clusters_section) / (fs.clustersize shl 25)) and $FFFF)
 				db 4 dup 0
-				dw (((file.start+$800-fs.clusters_section) shr 10) and $FFFF)
+				dw (((file.start+(fs.clustersize shl 9)-fs.clusters_section) / (fs.clustersize shl 9)) and $FFFF)
 				dd file.len
 			end virtual
 			esc virtual
@@ -71,7 +73,7 @@ macro fs_fs? @base
 				db file.data
 				file.end = $
 				file.len = $ - file.start
-				db ( $400 - ( file.len and $3FF ) ) dup $FF
+				db ( (fs.clustersize shl 9) - ( file.len and ((fs.clustersize shl 9) - 1) ) ) dup $FF
 				file.last_sector = $-$$ shr 10
 			end macro
 		end macro
