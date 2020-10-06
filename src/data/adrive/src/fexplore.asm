@@ -61,7 +61,7 @@ main_init_loop:
 	di
 	ld hl,ti.mpIntMask
 	set ti.bIntOn,(hl)
-	ei
+.loop:
 	call usb_WaitForInterrupt
 	add hl,bc
 	or a,a
@@ -99,14 +99,14 @@ msd_inited:=$-1
 .check_on_int:
 	ld hl,bos.prev_interrupt_status
 	bit ti.bIntOn,(hl)
-	jq z,main_init_loop
+	jq z,main_init_loop.loop
 	call bos.sys_GetKey
 	cp a,9
-	jq z,main_init_start
+	jq z,fexplore_main.main
 	cp a,15
-	jq z,.fexplore_main.main
-	jq main_exit
-.fexplore_main.main:
+	jq z,main_exit
+	jq main_init_loop.loop
+explore_drive:
 	call bos._ClrScrn
 	jq fexplore_main.main
 init_explore_drive:
@@ -228,9 +228,9 @@ main_event_handler:
 	ld hl,str_EventTriggered
 	call bos.gui_Print
 	ld hl,(ix+6)
+	add hl,de
 	or a,a
 	sbc hl,de
-	add hl,de
 	jq z,.success
 	ld a,l
 	cp a, 1 ;USB_DEVICE_DISCONNECTED_EVENT
@@ -239,6 +239,8 @@ main_event_handler:
 	jq z,.device_connected
 	cp a, 4 ;USB_DEVICE_ENABLED_EVENT
 	jq z,.device_enabled
+	call bos.gui_PrintInt
+	call bos.gui_NewLine
 	ld hl,str_MaybeUnhandled
 .print_then_success:
 	call bos.gui_Print
@@ -273,9 +275,11 @@ main_event_handler:
 	ld hl,str_DeviceDisconnected
 	jq .print_then_success
 
-msd_device:
 usb_device:
-	dl 0       ;usb_device_t dev
+	dl 0
+
+msd_device:
+	dl usb_device       ;usb_device_t dev
 	db 0       ;uint8_t bulk in addr
 	db 0       ;uint8_t bulk out addr
 	db 0       ;uint8_t configindex
@@ -331,7 +335,8 @@ str_DriveExplorer:
 str_WaitingForDevice:
 	db $9,"Waiting for device...",$A
 	db "Please insert USB flash drive.",$A
-	db "Press [on] to cancel",$A,0
+	db "Press [on+clear] to cancel",$A
+	db "Press [on+enter] to re-init USB",$A,0
 str_FailedToInitFat:
 	db $9,"Failed to initialize drive.",$A
 	db "Are you sure it is FAT32 formatted?",$A,0
