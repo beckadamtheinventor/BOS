@@ -82,4 +82,10 @@ start_of_user_archive  := $0C0000 ;sector $0C, standard
 end_of_user_archive    := $3B0000 ;sector $3B, start of certificate
 
 
-
+fd_readonly   := 1
+fd_hidden     := 2
+fd_system     := 4
+fd_volume     := 8
+fd_subdir     := $10
+fd_archive    := $20
+fd_device     := $40

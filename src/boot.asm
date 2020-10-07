@@ -43,18 +43,18 @@ os_return:
 	call sys_ExecuteFile
 	pop bc
 os_main:
-	ld bc,$500C
-	ld a,$FF
-	out (bc),a
-	inc c
-	out (bc),a
-	ld bc,$5005
-	xor a,a
-	out (bc),a
-	dec c
-	inc a
-	out (bc),a
-	ei
+	;ld bc,$500C
+	;ld a,$FF
+	;out (bc),a
+	;inc c
+	;out (bc),a
+	;ld bc,$5005
+	;xor a,a
+	;out (bc),a
+	;dec c
+	;inc a
+	;out (bc),a
+	;ei
 enter_input:
 	ld bc,255
 	push bc
@@ -100,22 +100,118 @@ enter_input:
 	jr .exit
 
 handle_interrupt:
-	ld a,(ti.mpIntStat+1)
-	ld (prev_interrupt_status+1),a
-	or a,a
-	jq z,.check_low
-	ld (ti.mpIntAck+1),a
-.check_low:
-	ld a,(ti.mpIntStat)
-	ld (prev_interrupt_status),a
-	or a,a
-	jq z,return_from_interrupt
-	ld (ti.mpIntAck),a
+	ld bc,$5015
+	in a,(bc)
+	jr z,handle_interrupt_2
+	ld c,$09
+	rla
+	rla
+	jq c,high_bit_6_int
+	rla
+	jq c,high_bit_5_int
+	rla
+	jq c,high_bit_4_int
+	rla
+	jq c,high_bit_3_int
+	ld a,$FF
+	out (bc),a
+handle_interrupt_2:
+	ld c,$14
+	in a,(bc)
+	jr z,return_from_interrupt
+	ld c,$08
+	rra
+	jq c,low_bit_0_int
+	rra
+	jq c,low_bit_1_int
+	rra
+	jq c,low_bit_2_int
+	rra
+	jq c,low_bit_3_int
+	rra
+	jq c,low_bit_4_int
+	ld a,$FF
+	out (bc),a
 return_from_interrupt:
+	ld iy,$D00080
+	res 6,(iy+$1B)
 	pop hl
 	pop iy,ix
 	exx
 	exaf
 	ei
 	reti
+
+low_bit_0_int:
+	ld a,1 shl 0
+	out (bc),a
+	ld c,4
+	in a,(bc)
+	res 0,a
+	out (bc),a
+	jq return_from_interrupt
+low_bit_1_int:
+	ld a,1 shl 1
+	out (bc),a
+	ld c,4
+	in a,(bc)
+	res 1,a
+	out (bc),a
+	jq return_from_interrupt
+low_bit_2_int:
+	ld a,1 shl 2
+	out (bc),a
+	ld c,4
+	in a,(bc)
+	res 2,a
+	out (bc),a
+	jq return_from_interrupt
+low_bit_3_int:
+	ld a,1 shl 3
+	out (bc),a
+	ld c,4
+	in a,(bc)
+	res 3,a
+	out (bc),a
+	jq return_from_interrupt
+low_bit_4_int:
+	ld a,1 shl 4
+	out (bc),a
+	ld c,4
+	in a,(bc)
+	res 4,a
+	out (bc),a
+	jq return_from_interrupt
+high_bit_3_int:
+	ld a,1 shl 3
+	out (bc),a
+	ld c,5
+	in a,(bc)
+	res 3,a
+	out (bc),a
+	jq return_from_interrupt
+high_bit_4_int:
+	ld a,1 shl 4
+	out (bc),a
+	ld c,5
+	in a,(bc)
+	res 4,a
+	out (bc),a
+	jq return_from_interrupt
+high_bit_5_int:
+	ld a,1 shl 5
+	out (bc),a
+	ld c,5
+	in a,(bc)
+	res 5,a
+	out (bc),a
+	jq return_from_interrupt
+high_bit_6_int:
+	ld a,1 shl 6
+	out (bc),a
+	ld c,5
+	in a,(bc)
+	res 6,a
+	out (bc),a
+	jq return_from_interrupt
 

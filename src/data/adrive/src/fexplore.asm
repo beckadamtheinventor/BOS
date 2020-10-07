@@ -57,71 +57,45 @@ fexplore_main.main:
 main_init_start:
 	ld hl,str_WaitingForDevice
 	call bos.gui_Print
-main_init_loop:
-	di
-	ld hl,ti.mpIntMask
-	set ti.bIntOn,(hl)
 .loop:
 	call usb_WaitForInterrupt
 	add hl,bc
 	or a,a
 	sbc hl,bc
 	jq nz,main_exit
-	ld a,0
-msd_inited:=$-1
-	or a,a
-	jq nz,init_explore_drive
 	ld hl,(usb_device)
 	add hl,bc
 	or a,a
 	sbc hl,bc
-	jq z,.check_on_int
-	ld hl,usb_device
-	ld (hl),de
+	jq z,.loop
 	ld bc,bos.usb_sector_buffer
-	push bc,de,hl
+	ld de,msd_device
+	push bc,hl,de
 	call msd_Init
 	pop bc,bc,bc
 	add hl,bc
 	or a,a
 	sbc hl,bc
 	jq nz,.init_fail
-	ld a,1
-	ld (msd_inited),a
 	ld hl,str_MsdInited
-	jq .print_then_check_on_int
-.init_fail:
-	ld a,$FF
-	ld (msd_inited),a
-	ld hl,str_FailedToInitMsd
-.print_then_check_on_int:
 	call bos.gui_Print
-.check_on_int:
-	ld hl,bos.prev_interrupt_status
-	bit ti.bIntOn,(hl)
-	jq z,main_init_loop.loop
-	call bos.sys_GetKey
-	cp a,9
-	jq z,fexplore_main.main
-	cp a,15
-	jq z,main_exit
-	jq main_init_loop.loop
-explore_drive:
-	call bos._ClrScrn
-	jq fexplore_main.main
+	jq init_explore_drive
+.init_fail:
+	ld hl,str_FailedToInitMsd
+	call bos.gui_Print
+	jq main_exit
 init_explore_drive:
-	cp a,1
-	jq nz,main_exit
 	call init_fat_partition
 	jq nz,.fail
 	call init_fat_volume
 	jq nz,.fail
-	
-	
+	call bos.sys_WaitKeyCycle
+	jq main_exit
 .fail:
 	ld hl,str_FailedToInitFat
 	call bos.gui_Print
-	jq main_init_start
+	call bos.sys_WaitKeyCycle
+	jq main_exit
 
 init_fat_partition:
 	ld bc,1
@@ -225,23 +199,13 @@ main_exit:
 ;usb_error_t main_event_handler(usb_event_t event, void *event_data, usb_callback_data_t *callback_data);
 main_event_handler:
 	call ti._frameset0
-	ld hl,str_EventTriggered
-	call bos.gui_Print
 	ld hl,(ix+6)
-	add hl,de
-	or a,a
-	sbc hl,de
-	jq z,.success
 	ld a,l
 	cp a, 1 ;USB_DEVICE_DISCONNECTED_EVENT
 	jq z,.device_disconnected
 	cp a, 2 ;USB_DEVICE_CONNECTED_EVENT
 	jq z,.device_connected
-	cp a, 4 ;USB_DEVICE_ENABLED_EVENT
-	jq z,.device_enabled
-	call bos.gui_PrintInt
-	call bos.gui_NewLine
-	ld hl,str_MaybeUnhandled
+	jq .success
 .print_then_success:
 	call bos.gui_Print
 .success:
@@ -249,14 +213,9 @@ main_event_handler:
 	xor a,a
 	sbc hl,hl
 	ret
-.device_enabled:
-	ld hl,(ix+15)
-	ld de,(ix+9)
-	ld (hl),de
-	ld hl,str_DeviceEnabled
-	jq .print_then_success
 .device_connected:
 	ld de,(ix+9)
+	ld (usb_device),de
 	push de
 	call usb_ResetDevice
 	pop bc
@@ -267,19 +226,12 @@ main_event_handler:
 	push bc
 	call msd_Deinit
 	pop bc
-	xor a,a
-	sbc hl,hl
-	ex hl,de
-	ld hl,(ix+15)
-	ld (hl),de
 	ld hl,str_DeviceDisconnected
 	jq .print_then_success
 
 usb_device:
-	dl 0
-
 msd_device:
-	dl usb_device       ;usb_device_t dev
+	dl 0       ;usb_device_t dev
 	db 0       ;uint8_t bulk in addr
 	db 0       ;uint8_t bulk out addr
 	db 0       ;uint8_t configindex
@@ -335,8 +287,8 @@ str_DriveExplorer:
 str_WaitingForDevice:
 	db $9,"Waiting for device...",$A
 	db "Please insert USB flash drive.",$A
-	db "Press [on+clear] to cancel",$A
-	db "Press [on+enter] to re-init USB",$A,0
+	db "Hold [clear] to cancel",$A
+	db "Hold [enter] to re-init USB",$A,0
 str_FailedToInitFat:
 	db $9,"Failed to initialize drive.",$A
 	db "Are you sure it is FAT32 formatted?",$A,0
