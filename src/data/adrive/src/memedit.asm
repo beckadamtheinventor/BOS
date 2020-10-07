@@ -12,16 +12,16 @@ mem_edit:
 	ld (SaveIX),ix
 	ld (SaveSP),sp
 mem_edit_main:
-	ld bc,8
+	ld c,1
 	push bc
-	call bos.sys_Malloc
+	call gfx_SetDraw
 	pop bc
-	push hl
-	pop ix
-	pop bc
-	pop hl
-	push hl
-	push bc
+	call mem_edit_readme
+	cp a,15
+	jq z,.exit
+	ld hl,-8
+	call ti._frameset
+	ld hl,(ix+6)
 	ld a,(hl)
 	or a,a
 	jr z,.dont_open_file
@@ -37,9 +37,9 @@ mem_edit_main:
 	or a,a
 	sbc hl,bc
 	add hl,bc
-	jr nc,.file_too_large
 	ex hl,de
 	pop hl
+	jr nc,.file_too_large
 	ld bc,0
 	push bc ;int offset
 	push hl ;void *fd
@@ -54,7 +54,6 @@ mem_edit_main:
 .file_too_large:
 	ld hl,string_file_too_large
 	call _print
-	pop hl
 .dont_open_file:
 	ld hl,$D00000
 .init_editor:
@@ -65,10 +64,6 @@ mem_edit_main:
 	ld (ix-6),hl
 	ld (ix-7),a
 	ld (ix-8),a
-	ld c,1
-	push bc
-	call gfx_SetDraw
-	pop bc
 .main_loop:
 	ld a,(ix-7)
 	cp a,$FF
@@ -78,7 +73,7 @@ mem_edit_main:
 	jq .backwardpage
 .main_draw:
 	call .clearscreen
-	call .setdefaultcolors
+	call _setdefaultcolors
 	ld bc,(ix-3)
 	push bc
 	or a,a
@@ -93,20 +88,39 @@ mem_edit_main:
 	ld (curcol),a
 	ld c,16
 .outer:
+;draw hex
 	ld b,8
+	push hl
 .inner:
 	ld a,(hl)
 	inc hl
 	push hl,bc
 	call _print8h
+	ld hl,curcol
+	inc (hl)
 	pop bc,hl
-	ld a,(curcol)
-	inc a
-	ld (curcol),a
 	djnz .inner
-	ld a,(currow)
-	inc a
-	ld (currow),a
+;draw characters
+	pop de
+	ld b,8
+.inner2:
+	ld a,(de)
+	inc de
+	cp a,$80
+	push de,bc
+	jr nc,.dont_print_c
+	call _printc
+	jr .printed_c
+.dont_print_c:
+	ld hl,curcol
+	inc (hl)
+.printed_c:
+	pop bc,de
+	djnz .inner2
+;advance to next row
+	ld hl,currow
+	inc (hl)
+	ex hl,de
 	xor a,a
 	ld (curcol),a
 	dec c
@@ -130,9 +144,9 @@ mem_edit_main:
 	ld d,a
 	ld e,27
 	mlt de
-	ld bc,9
+	ld bc,8
 	add hl,bc
-	ld c,20
+	ld c,18
 	push bc,hl,de
 	call gfx_HorizLine
 	pop bc,bc,bc
@@ -167,8 +181,6 @@ mem_edit_main:
 	jq z,.forwardfullpage
 	cp a,11 ;"-" key
 	jq z,.backwardfullpage
-	cp a,12 ;"*"/"R" key
-	jq z,.maybeerasesector
 	ld bc,16
 	ld hl,.nibblekeys+15
 	cpdr
@@ -196,7 +208,7 @@ mem_edit_main:
 	or a,a
 	sbc hl,bc
 	add hl,bc
-	jr c,.flashwrite
+	jq c,.main_loop
 	ld (hl),a
 	jp .main_loop
 .exit:
@@ -249,10 +261,6 @@ SaveIX:=$-3
 	ld a,15*8
 	ld (ix-7),a
 	jr .forwardpage
-.flashwrite:
-	ex hl,de
-	call ___WriteFlashA
-	jp .main_loop
 .loadcursor:
 	ld (ix-7),a
 .dontloadcursor:
@@ -313,39 +321,15 @@ SaveIX:=$-3
 	call gfx_BlitBuffer
 	scf
 	ret
-.maybeerasesector:
-	call .clearscreen
-	ld hl,string_erase_sector
-	call _print
-	ld hl,string_are_you_sure
-	call _print
-	ld hl,string_press_enter_confirm
-	call _print
-	call gfx_BlitBuffer
-	call bos.sys_WaitKeyCycle
-	cp a,9
-	call z,.erasesector
-	jp .main_loop
-.erasesector:
-	or a,a
-	sbc hl,hl
-	ld bc,(ix-3)
-	ld l,(ix-7)
-	add hl,bc
-	ld (bos.ScrapMem),hl
-	ld a,(bos.ScrapMem+2)
-	push af
-	call bos.sys_FlashUnlock
-	pop af
-	call bos.sys_EraseFlashSector
-	jp bos.sys_FlashLock
 .clearscreen:
 	call gfx_ZeroScreen
 	xor a,a
 	ld (currow),a
 	ld (curcol),a
 	ret
-.setdefaultcolors:
+.nibblekeys:
+	db 33,34,26,18,35,27,19,36,28,20,47,39,31,46,38,30
+_setdefaultcolors:
 	ld c,0
 	push bc
 	call gfx_SetTextTransparentColor
@@ -354,12 +338,13 @@ SaveIX:=$-3
 	ld c,$FF
 	push bc
 	call gfx_SetTextFGColor
+	pop bc
+	ld c,$07
+	push bc
 	call gfx_SetColor
 	pop bc
 	ret
 
-.nibblekeys:
-	db 33,34,26,18,35,27,19,36,28,20,47,39,31,46,38,30
 
 ___WriteFlashA:
 	push af,de
@@ -405,6 +390,9 @@ _print24h:
 	dec hl
 	djnz .loop
 	ret
+_printc:
+	ld hl,temp_byte_str
+	ld (hl),a
 _print:
 	ld (.str),hl
 	ld a,0
@@ -418,28 +406,60 @@ currow:=$-1
 	sbc hl,hl
 	ld l,a
 	push hl
-	ld a,0
-curcol:=$-1
-	inc a
-	ld (curcol),a
-	dec a
-	ld c,a
-	add a,a
-	add a,a
-	add a,a
-	add a,c
-	or a,a
-	sbc hl,hl
-	ld l,a
+	ld hl,0
+curcol:=$-3
+	push hl
+	add hl,hl
+	add hl,hl
+	add hl,hl
+	pop de
+	add hl,de
 	push hl
 	ld hl,0
 .str:=$-3
 	push hl
 	call gfx_PrintStringXY
 	pop bc,bc,bc
+	ld hl,curcol
+	inc (hl)
 	ret
 
-
+mem_edit_readme:
+	call _setdefaultcolors
+	call gfx_ZeroScreen
+	ld hl,readme_strings
+.loop:
+	push hl
+	ld hl,(hl)
+	ld a,(hl)
+	or a,a
+	jr z,.exit
+	call _print
+	xor a,a
+	ld (curcol),a
+	ld hl,currow
+	inc (hl)
+	pop hl
+	inc hl
+	inc hl
+	inc hl
+	jr .loop
+.exit:
+	pop bc
+	call gfx_BlitBuffer
+	jp bos.sys_WaitKeyCycle
+readme_strings:
+	dl ._1, ._2, ._3, ._4, ._5, ._6, ._7, ._8, ._9, ._10, $FF0000
+._1: db "--MEMEDIT v1.0 by BeckATI--",0
+._2: db "Arrow keys navigate the cursor.",0
+._3: db "Clear quits. +/- scroll up/down.",0
+._4: db "0-9,A-F write hex nibbles.",0
+._5: db " two of these must be pressed",0
+._6: db " in order to write a byte",0
+._7: db "This program will only edit RAM.",0
+._8: db "Because editing flash directly is",0
+._9: db "usually a bad idea.",0
+._10: db "Press any key to continue.",0
 
 libload_load:
 	ld hl,.libload_name
@@ -499,12 +519,6 @@ gfx_BlitBuffer:
 	pop bc
 	ret
 
-string_erase_sector:
-	db "Erase flash sector?",0
-string_are_you_sure:
-	db "Are you sure?",0
-string_press_enter_confirm:
-	db "Press [enter] to confirm",0
 string_file_too_large:
 	db "File too large to open safely!",0
 

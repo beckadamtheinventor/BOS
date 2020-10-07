@@ -103,18 +103,18 @@ fs_drive_c_data:
 	dl fs_magic_bytes
 	dl fs_magic_bytes.len
 	dl $0A03FC
-	dl fs_drive_a_cluster_map
-	dl fs_drive_a_cluster_map.len
+	dl fs_drive_c_cluster_map
+	dl fs_drive_c_cluster_map.len
 	dl $0A1000
-	dl fs_drive_a_cluster_map
-	dl fs_drive_a_cluster_map.len
-	dl $0A3200
+	dl fs_drive_c_cluster_map
+	dl fs_drive_c_cluster_map.len
+	dl $0A4200
 	dl fs_drive_c_home_dir
 	dl fs_drive_c_home_dir.len
-	dl $0A7400
+	dl $0A7440
 	dl $FF0000 ; always reads zero
 	dl 32      ; write one 32 byte entry to signify end of directory
-	dl $0A7420 ; write end-of-dir entry
+	dl $0A7460 ; write end-of-dir entry
 .len:=($-fs_drive_c_data) / 9
 
 
@@ -190,8 +190,8 @@ fs_fat_end_of_chain:
 	db $FF,$FF,$FF,$F0
 .len:=$-fs_fat_end_of_chain
 
-fs_drive_a_cluster_map:
+fs_drive_c_cluster_map:
 	db $F0,$FF,$FF,$F0 ;FAT ID
 	db $FF,$FF,$FF,$F0 ;end of chain marker
 	db $FF,$FF,$FF,$F0 ;root directory first cluster
-.len:=$-fs_drive_a_cluster_map
+.len:=$-fs_drive_c_cluster_map
