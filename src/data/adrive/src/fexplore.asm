@@ -58,54 +58,79 @@ main_init_start:
 	ld hl,str_WaitingForDevice
 	call bos.gui_Print
 .loop:
-	call usb_WaitForInterrupt
+	call usb_HandleEvents
 	add hl,bc
 	or a,a
 	sbc hl,bc
 	jq nz,main_exit
+	call bos.sys_GetKey
+	cp a,9
+	jq z,fexplore_main.main
+	cp a,15
+	jq z,main_exit
 	ld hl,(usb_device)
 	add hl,bc
 	or a,a
 	sbc hl,bc
 	jq z,.loop
-	ld bc,bos.usb_sector_buffer
-	ld de,msd_device
-	push bc,hl,de
-	call msd_Init
-	pop bc,bc,bc
-	add hl,bc
-	or a,a
-	sbc hl,bc
-	jq nz,.init_fail
-	ld hl,str_MsdInited
-	call bos.gui_Print
-	jq init_explore_drive
+	call main_msd_Init
+	jq z,.init_success
 .init_fail:
 	ld hl,str_FailedToInitMsd
 	call bos.gui_Print
 	jq main_exit
+.init_success:
+	ld hl,str_MsdInited
+	call bos.gui_Print
 init_explore_drive:
 	call init_fat_partition
-	jq nz,.fail
+	jq nz,.init_fat_fail
 	call init_fat_volume
-	jq nz,.fail
+	jq nz,.init_fat_fail
 	call bos.sys_WaitKeyCycle
 	jq main_exit
-.fail:
+.init_fat_fail:
 	ld hl,str_FailedToInitFat
 	call bos.gui_Print
 	call bos.sys_WaitKeyCycle
 	jq main_exit
 
+reset_smc_bytes:
+	ld a,$01 ;ld bc,...
+	ld (main_msd_Init),a
+	ld a,$0E ;ld c,...
+	ld (init_fat_partition),a
+	ld a,$AF ;xor a,a
+	ld (init_fat_volume),a
+	ret
+
+
+main_msd_Init:
+	ld bc,bos.usb_sector_buffer
+	ld hl,msd_device
+	ld de,(hl)
+	push bc,de,hl
+	call msd_Init
+	pop bc,bc,bc
+	ld a,$C9 ;smc to ret so this routine doesn't try to re-init the drive constantly.
+	ld (.),a
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	ret
+
+
 init_fat_partition:
-	ld bc,1
+	ld c,1
 	push bc
-	ld bc,bos.ScrapMem
+	ld bc,found_partitions
 	push bc
 	ld bc,partition_descriptor
 	push bc
 	ld bc,msd_device
 	push bc
+	ld hl,str_LookingForPartitions
+	call bos.gui_Print
 	call fat_Find
 	pop bc,bc,bc,bc
 	add hl,bc
@@ -116,6 +141,8 @@ init_fat_partition:
 	push bc
 	ld bc,fat_device
 	push bc
+	ld hl,str_InitializingPartition
+	call bos.gui_Print
 	call fat_Init
 	pop bc,bc
 	add hl,bc
@@ -124,9 +151,17 @@ init_fat_partition:
 	ret nz
 	ld hl,str_FatInited
 	call bos.gui_Print
-	xor a,a
+	ld a,$C9
+	ld (.),a ;smc so we don't run this code again
+	or a,a
 	sbc hl,hl
 	ret
+str_LookingForPartitions:
+	db "Looking for partitions...",$A,0
+str_InitializingPartition:
+	db "Initializing partition...",$A,0
+found_partitions:
+	dl 0
 
 
 init_fat_volume:
@@ -138,6 +173,8 @@ init_fat_volume:
 	push bc
 	call fat_GetVolumeLabel
 	pop bc,bc
+	ld a,$C9
+	ld (.),a
 	add hl,bc
 	or a,a
 	sbc hl,bc
@@ -205,6 +242,8 @@ main_event_handler:
 	jq z,.device_disconnected
 	cp a, 2 ;USB_DEVICE_CONNECTED_EVENT
 	jq z,.device_connected
+	cp a, 4 ;USB_DEVICE_ENABLED_EVENT
+	jq z,.device_enabled
 	jq .success
 .print_then_success:
 	call bos.gui_Print
@@ -213,19 +252,24 @@ main_event_handler:
 	xor a,a
 	sbc hl,hl
 	ret
-.device_connected:
+.device_enabled:
 	ld de,(ix+9)
 	ld (usb_device),de
+	ld hl,(ix+12)
+	ld (hl),de
+	ld hl,str_DeviceEnabled
+	jq .print_then_success
+.device_connected:
+	ld de,(ix+9)
 	push de
 	call usb_ResetDevice
 	pop bc
 	ld hl,str_DeviceConnected
 	jq .print_then_success
 .device_disconnected:
-	ld bc,msd_device
-	push bc
-	call msd_Deinit
-	pop bc
+	ld de,0
+	ld hl,(ix+12)
+	ld (hl),de
 	ld hl,str_DeviceDisconnected
 	jq .print_then_success
 
@@ -286,9 +330,7 @@ str_DriveExplorer:
 	db "FAT32 Flash Drive explorer",$A,0
 str_WaitingForDevice:
 	db $9,"Waiting for device...",$A
-	db "Please insert USB flash drive.",$A
-	db "Hold [clear] to cancel",$A
-	db "Hold [enter] to re-init USB",$A,0
+	db "Please insert USB flash drive.",$A,0
 str_FailedToInitFat:
 	db $9,"Failed to initialize drive.",$A
 	db "Are you sure it is FAT32 formatted?",$A,0
@@ -329,6 +371,8 @@ msd_Init:
 	jp 0
 msd_Deinit:
 	jp 6
+msd_Reset:
+	jp 9
 fat_Find:
 	jp 24
 fat_Init:

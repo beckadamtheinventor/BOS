@@ -18,7 +18,7 @@ mem_edit_main:
 	pop bc
 	call mem_edit_readme
 	cp a,15
-	jq z,.exit
+	jq z,.exit_nocls
 	ld hl,-8
 	call ti._frameset
 	ld hl,(ix+6)
@@ -214,6 +214,7 @@ mem_edit_main:
 .exit:
 	call gfx_ZeroScreen
 	call gfx_BlitBuffer
+.exit_nocls:
 	ld sp,0
 SaveSP:=$-3
 	ld ix,0

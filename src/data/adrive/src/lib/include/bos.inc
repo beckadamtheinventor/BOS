@@ -60,6 +60,9 @@ namespace bos
 ?sys_EraseFlashSector            := $201E4
 ?sys_FlashUnlock                 := $201E8
 ?sys_FlashLock                   := $201EC
+?fs_CreateFile                   := $201F0
+?strupper                        := $201F4
+?strlower                        := $201F8
 ?LCD_PAL    := 0E30200h
 ?LCD_CTRL   := 0E30018h
 ?LCD_VRAM   := 0D40000h

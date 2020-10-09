@@ -24,7 +24,7 @@
 ;   1   Type code
 ;   3   CHS end
 ;   4   LBA begin
-;   4   number of sectors
+;   4   number of sectors (end LBA in BOS)
 ; FAT32 valid typecodes: 0x0B, 0x0C.
 
 ;------------------------------------------;

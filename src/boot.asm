@@ -55,49 +55,13 @@ os_main:
 	;inc a
 	;out (bc),a
 	;ei
-enter_input:
-	ld bc,255
-	push bc
-	ld bc,InputBuffer
-	push bc
-	call gui_Input
-	or a,a
-	jr z,.exit
-	call ti._strlen
-	ex (sp),hl
-	pop bc
-	push hl
-	ld a,' '
-	cpir
-	jr nz,.noargs
-	dec hl
-	ld (hl),0 ;replace the space with null so the file is easier to open
-	inc hl ;bypass the space lol
-.noargs:
-	ex (sp),hl ;args
-	push hl ;path
+	ld hl,str_CmdExecutable
+	ld bc,$FF0000
+	push bc,hl
 	call sys_ExecuteFile
 	pop bc,bc
-	jr c,.fail
-	ld (ScrapMem),hl
-	ld a,(ScrapMem+2)
-	or a,h
-	or a,l
-	jr z,.exit
-	push hl
-	call gfx_BlitBuffer
-	pop hl
-	call gui_PrintInt
-	call gui_NewLine
-	or a,$FF
-.exit:
-	call z,gfx_BlitBuffer
-	pop bc,bc
 	jq os_main
-.fail:
-	ld hl,str_CouldNotLocateExecutable
-	call gui_Print
-	jr .exit
+
 
 handle_interrupt:
 	ld bc,$5015
@@ -115,6 +79,7 @@ handle_interrupt:
 	jq c,high_bit_3_int
 	ld a,$FF
 	out (bc),a
+	jq return_from_interrupt
 handle_interrupt_2:
 	ld c,$14
 	in a,(bc)
@@ -143,32 +108,32 @@ return_from_interrupt:
 	reti
 
 low_bit_0_int:
-	ld a,1 shl 0
-	out (bc),a
+;	ld a,1 shl 0
+;	out (bc),a
 	ld c,4
 	in a,(bc)
 	res 0,a
 	out (bc),a
 	jq return_from_interrupt
 low_bit_1_int:
-	ld a,1 shl 1
-	out (bc),a
+;	ld a,1 shl 1
+;	out (bc),a
 	ld c,4
 	in a,(bc)
 	res 1,a
 	out (bc),a
 	jq return_from_interrupt
 low_bit_2_int:
-	ld a,1 shl 2
-	out (bc),a
+;	ld a,1 shl 2
+;	out (bc),a
 	ld c,4
 	in a,(bc)
 	res 2,a
 	out (bc),a
 	jq return_from_interrupt
 low_bit_3_int:
-	ld a,1 shl 3
-	out (bc),a
+;	ld a,1 shl 3
+;	out (bc),a
 	ld c,4
 	in a,(bc)
 	res 3,a
@@ -198,9 +163,9 @@ high_bit_4_int:
 	res 4,a
 	out (bc),a
 	jq return_from_interrupt
-high_bit_5_int:
-	ld a,1 shl 5
-	out (bc),a
+high_bit_5_int: ;USB interrupt
+;	ld a,1 shl 5
+;	out (bc),a
 	ld c,5
 	in a,(bc)
 	res 5,a

@@ -19,8 +19,7 @@ str_Prompt:
 	db ">",$A,0
 str_dotEXE:
 	db ".EXE",0
-str_CouldNotLocateExecutable:
-	db $9,"Could not locate executable",$A,0
 str_StartupProgram:
-	db "A:/BOOT.EXE",0
-
+	db "BOOT",0
+str_CmdExecutable:
+	db "CMD",0

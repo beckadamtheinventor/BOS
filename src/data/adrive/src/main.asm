@@ -4,9 +4,66 @@ include 'include/ti84pceg.inc'
 include 'include/bosfs.inc'
 include 'include/bos.inc'
 
+org $040800
+fs_fs 1, 2 ;filesystem with 1 sector per cluster, and 2 sectors per FAT
 
-fs_fs $041000, 1
 
+fs_file "CMD","EXE", f_readonly+f_system
+	jr enter_input
+	db "FEX",0
+enter_input:
+	ld bc,255
+	push bc
+	ld bc,bos.InputBuffer
+	push bc
+	call bos.gui_Input
+	or a,a
+	jq z,.exit
+	call ti._strlen
+	ex (sp),hl
+	pop bc
+	push hl
+	ld a,' '
+	cpir
+	jr nz,.noargs
+	dec hl
+	ld (hl),0 ;replace the space with null so the file is easier to open
+	inc hl ;bypass the space lol
+.noargs:
+	ex (sp),hl ;args
+	push hl ;path
+	call bos.sys_ExecuteFile
+	pop bc,bc
+	ld bc,enter_input
+	push bc
+	jr c,.fail
+	ld (bos.ScrapMem),hl
+	ld a,(bos.ScrapMem+2)
+	or a,h
+	or a,l
+	ret z
+	push hl
+	call bos.gfx_BlitBuffer
+	pop hl
+	call bos.gui_PrintInt
+	call bos.gui_NewLine
+	or a,$FF
+	jp bos.gfx_BlitBuffer
+.fail:
+	pop bc,bc
+	ld hl,str_CouldNotLocateExecutable
+	call bos.gui_Print
+	jq enter_input
+.exit:
+	pop bc,bc
+	ret
+
+
+str_ExplorerExecutable:
+	db "EXPLORER",0
+str_CouldNotLocateExecutable:
+	db $9,"Could not locate executable",$A,0
+end fs_file
 
 fs_file "APRG","EXE", f_readonly+f_system
 	jr aprg_main
@@ -16,6 +73,9 @@ aprg_main:
 	pop hl
 	push hl
 	push bc
+	ld a,(hl)
+	or a,a
+	jq z,.fail
 	push hl
 	call bos.fs_OpenFile
 	pop bc
@@ -75,11 +135,13 @@ boot_main:
 boot_script:
 	db "CLS",0
 	db "CLEAN",0
-	db "BSH C:/HOME/USER.BBS",0
 	db "EXPLORER",0
-	db "CLEAN",0
 	db "CLS",0
-	db "RETURN",0
+	db "CMD",0
+	db "CLS",0
+	db "ASM",0
+	pop bc,bc,bc
+	jq boot_main
 end fs_file
 
 
@@ -92,19 +154,18 @@ bsh_start:
 	push hl
 	push bc
 bsh_main:
-	ld iy,bsh_commands-6
+	ld ix,bsh_commands-6
 .loop:
 	push hl
 	call bos.sys_GetKey
 	pop hl
 	cp a,53
 	jq z,.keyboard_interrupt
-	lea iy,iy+6
+	lea ix,ix+6
 	push hl
-	ld hl,(iy)
-	add hl,bc
+	ld hl,(ix)
+	ld a,(hl)
 	or a,a
-	sbc hl,bc
 	jr z,.runexec
 	push hl
 	call ti._strlen
@@ -113,15 +174,24 @@ bsh_main:
 	push bc
 	push hl
 	call ti._strncmp
+	add hl,bc
+	or a,a
+	sbc hl,bc
 	pop hl
 	pop de
 	pop bc
-	ld de,.loop
-	push de
-	ret nz
+	jq nz,.loop
+	push hl
+	call ti._strlen
+	ex (sp),hl
+	pop bc
 	add hl,bc
-	ld iy,(iy+3)
-	jp (iy)  ;will return to command handler subroutine, and afterwards to the loop.
+	inc hl
+	push hl
+	ld hl,(ix+3)
+	call .jphl  ;jump to command handler subroutine
+	pop hl
+	jq .loop
 .keyboard_interrupt:
 	ld hl,str_KeyboardInterrupt
 	call bos.gui_Print
@@ -131,26 +201,33 @@ bsh_main:
 	call ti._strlen
 	ex (sp),hl
 	pop bc
-	push bc,hl
+	push hl
+	add hl,bc
+	push hl
+	or a,a
+	sbc hl,bc
 	ld a,' '
 	cpir
-	ld (bos.fsOP6),hl ;save arguments
-	pop hl,bc
-	push hl
-	inc hl
-	add hl,bc ;next line in program
-	ex (sp),hl
-	ld bc,(bos.fsOP6) ;arguments
-	push bc,hl
+	pop bc,de
+	push bc,hl,de
 	call bos.sys_ExecuteFile
 	pop bc,bc,hl
+	inc hl
 	jq bsh_main
 
 str_KeyboardInterrupt:
 	db $9,"Program execution stopped.",$A,0
 bsh_commands:
 	dl str_Return, handler_Return
-	dl 0, 0
+	dl str_Asm, handler_Asm
+	dl $FF0000
+str_Asm:
+	db "ASM",0
+handler_Asm:
+	pop bc
+	pop hl
+bsh_main.jphl:
+	jp (hl)
 str_Return:
 	db "RETURN",0
 handler_Return:
@@ -551,5 +628,32 @@ end fs_file
 fs_file "MEMEDIT","EXE", f_readonly+f_system
 	file '../obj/memedit.bin'
 end fs_file
+
+fs_file "MKFILE","EXE", f_readonly+f_system
+	jr mkfile_main
+	db "FEX",0
+mkfile_main:
+	pop bc
+	pop hl
+	push hl
+	push bc
+	ld a,(hl)
+	or a,a
+	jq z,mkfile_info
+	push hl
+	call bos.sys_WaitKeyCycle
+	call bos.fs_CreateFile
+	pop bc
+mkfile_info:
+	ld hl,mkfile_info_str
+	call bos.gui_Print
+mkfile_success:
+	xor a,a
+	sbc hl,hl
+	ret
+mkfile_info_str:
+	db "Usage: MKFILE [file]",0
+end fs_file
+
 
 end fs_fs
