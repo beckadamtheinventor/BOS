@@ -7,7 +7,7 @@ fs_PartitionDescriptor:
 .notaletter:
 	or a,a
 	jq z,.fail
-	cp a,4
+	cp a,5
 	jq nc,.fail
 	add a,a
 	add a,a

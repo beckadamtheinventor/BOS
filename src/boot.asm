@@ -55,49 +55,13 @@ os_main:
 	;inc a
 	;out (bc),a
 	;ei
-enter_input:
-	ld bc,255
-	push bc
-	ld bc,InputBuffer
-	push bc
-	call gui_Input
-	or a,a
-	jr z,.exit
-	call ti._strlen
-	ex (sp),hl
-	pop bc
-	push hl
-	ld a,' '
-	cpir
-	jr nz,.noargs
-	dec hl
-	ld (hl),0 ;replace the space with null so the file is easier to open
-	inc hl ;bypass the space lol
-.noargs:
-	ex (sp),hl ;args
-	push hl ;path
+	ld hl,str_CmdExecutable
+	ld bc,$FF0000
+	push bc,hl
 	call sys_ExecuteFile
 	pop bc,bc
-	jr c,.fail
-	ld (ScrapMem),hl
-	ld a,(ScrapMem+2)
-	or a,h
-	or a,l
-	jr z,.exit
-	push hl
-	call gfx_BlitBuffer
-	pop hl
-	call gui_PrintInt
-	call gui_NewLine
-	or a,$FF
-.exit:
-	call z,gfx_BlitBuffer
-	pop bc,bc
 	jq os_main
-.fail:
-	ld hl,str_CouldNotLocateExecutable
-	call gui_Print
-	jr .exit
+
 
 handle_interrupt:
 	ld bc,$5015

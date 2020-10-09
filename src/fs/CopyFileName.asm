@@ -55,6 +55,13 @@ fs_CopyFileName:
 	xor a,a
 .enda:
 	ld (de),a
+	pop bc
+	pop hl
+	push hl
+	push bc
+	push hl
+	call strupper
+	pop hl
 	ret
 .E5:
 	ld a,$E5

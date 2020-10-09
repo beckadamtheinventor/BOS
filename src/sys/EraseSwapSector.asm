@@ -1,6 +1,6 @@
 ;@DOES flash the swap sector
-;@INPUT void sys_FlashSwapSector(void);
-sys_FlashSwapSector:
+;@INPUT void sys_EraseSwapSector(void);
+sys_EraseSwapSector:
 	ld a,'B'
 	call fs_PartitionDescriptor
 	ld bc,8

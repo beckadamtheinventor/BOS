@@ -19,6 +19,10 @@ explorer_init:
 	sbc hl,hl
 	ret
 explorer_init_2:
+	ld c,1
+	push bc
+	call gfx_SetDraw
+	pop bc
 	ld bc,256
 	push bc
 	call bos.sys_Malloc
@@ -35,6 +39,8 @@ explorer_args:=$-3
 	ex (sp),hl
 	pop bc,de
 	ldir
+	xor a,a
+	ld (de),a
 	jq explore_files
 .default_path:
 	db $11,"C:/"
@@ -44,10 +50,6 @@ explorer_args:=$-3
 	inc hl
 	ld (hl),0
 explorer_main:
-	ld c,1
-	push bc
-	call gfx_SetDraw
-	pop bc
 	call gfx_ZeroScreen
 	ld c,0
 	push bc
@@ -58,24 +60,8 @@ explorer_main:
 	push bc
 	call gfx_SetTextFGColor
 	pop bc
-	ld bc,10
-	push bc,bc
-	ld bc,str_HelloWorld
-	push bc
-	call gfx_PrintStringXY
-	pop bc,bc,de
-	ld de,20
-	push de,bc
-	ld bc,str_PressToContinue
-	push bc
-	call gfx_PrintStringXY
-	pop bc,bc,de
-	ld de,30
-	push de,bc
-	ld bc,str_PressToDelete
-	push bc
-	call gfx_PrintStringXY
-	pop bc,bc,de
+	ld hl,initial_strings
+	call gfx_PrintStrings
 	call gfx_BlitBuffer
 .key_loop:
 	call bos.sys_WaitKeyCycle
@@ -284,6 +270,36 @@ str_Archive:
 str_Device:
 	db "DEV",0
 
+
+gfx_PrintStrings:
+	ld bc,10
+	ld (.y_pos),bc
+.loop:
+	push hl
+	ld hl,(hl)
+	ld a,(hl)
+	or a,a
+	jr z,.exit
+	ld bc,10
+.y_pos:=$-3
+	push bc
+	ld c,0
+	push bc,hl
+	call gfx_PrintStringXY
+	pop bc,bc,bc
+	ld hl,(.y_pos)
+	ld bc,10
+	add hl,bc
+	ld (.y_pos),hl
+	pop hl
+	inc hl
+	inc hl
+	inc hl
+	jr .loop
+.exit:
+	pop hl
+	ret
+
 load_libload:
 	ld hl,libload_name
 	push hl
@@ -351,13 +367,20 @@ gfx_BlitBuffer:
 	pop bc
 	ret
 
+initial_strings:
+	dl str_HelloWorld, str_PressToDelete, str_PressToContinue, str_PressToConsole, $FF0000
 str_HelloWorld:
 	db "Hello World! Welcome to BOS!",0
 str_PressToDelete:
 	db "Press [del] to uninstall and receive TIOS",0
 str_PressToContinue:
-	db "Press [clear] or [enter] to continue",0
+	db "Press [enter] to continue",0
+str_PressToConsole:
+	db "or [clear] to open console",0
 str_FailedToLoadLibload:
 	db "Failed to load libload.",0
+str_CmdExecutable:
+	db "CMD",0
+.len:=$-.
 str_FileNameString:
 	db 13 dup 0

@@ -57,3 +57,6 @@
 	jp sys_EraseFlashSector
 	jp sys_FlashUnlock
 	jp sys_FlashLock
+	jp fs_CreateFile
+	jp strupper
+	jp strlower

@@ -62,7 +62,9 @@ fs_OpenFile:
 	inc hl
 	inc hl
 	ld (fsOP6),hl
-	push hl
+	push hl,af
+	call strupper
+	pop af
 	call fs_RootDir
 	pop de
 	jq c,.fail

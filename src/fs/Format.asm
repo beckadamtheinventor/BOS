@@ -44,7 +44,7 @@ fs_Format:
 
 	ld hl,fs_drive_a_data_compressed_bin
 	push hl
-	ld hl,$041000
+	ld hl,$040800
 	push hl
 	call util_Zx7DecompressToFlash
 	pop hl,hl
@@ -91,30 +91,24 @@ fs_drive_a_data:
 
 
 fs_drive_c_data:
-	dl fs_drive_a_format_data
-	dl fs_drive_a_format_data.len
-	dl $0A0000
+	dl fs_drive_c_volume_data
+	dl fs_drive_c_volume_data.len
+	dl $0A000B
 	dl fs_magic_bytes
 	dl fs_magic_bytes.len
 	dl $0A01FC
-	dl fs_drive_c_volume_data
-	dl fs_drive_c_volume_data.len
-	dl $0A020B
-	dl fs_magic_bytes
-	dl fs_magic_bytes.len
-	dl $0A03FC
 	dl fs_drive_c_cluster_map
 	dl fs_drive_c_cluster_map.len
-	dl $0A1000
+	dl $0A0400
 	dl fs_drive_c_cluster_map
 	dl fs_drive_c_cluster_map.len
-	dl $0A4200
+	dl $0A3600
 	dl fs_drive_c_home_dir
 	dl fs_drive_c_home_dir.len
-	dl $0A7440
+	dl $0A6840
 	dl $FF0000 ; always reads zero
 	dl 32      ; write one 32 byte entry to signify end of directory
-	dl $0A7460 ; write end-of-dir entry
+	dl $0A6860 ; write end-of-dir entry
 .len:=($-fs_drive_c_data) / 9
 
 
@@ -148,7 +142,7 @@ fs_partition_table_data:
 fs_drive_a_volume_data:
 	db $00,$02   ;sector size. always 512
 	db $01       ;sectors per cluster
-	db $07,$00   ;reserved sector count
+	db $03,$00   ;reserved sector count
 	db $02       ;number of FATs. always 2
 	db $13 dup 0
 	dd 2 ;sectors per FAT
@@ -159,7 +153,7 @@ fs_drive_a_volume_data:
 fs_drive_c_volume_data:
 	db $00,$02   ;sector size. always 512
 	db $02       ;sectors per cluster
-	db $08,$00   ;reserved sector count
+	db $02,$00   ;reserved sector count
 	db $02       ;number of FATs. always 2
 	db $13 dup 0
 	dd $19 ;sectors per FAT

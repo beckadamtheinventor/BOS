@@ -17,11 +17,6 @@ fs_DataSection:
 	djnz .mult_loop
 	pop bc,de
 	add hl,bc ; add cluster tables
-	push hl
-	ld hl,-1024 ;subtract two clusters
-	call fs_MultBySectorsPerCluster
-	pop bc
-	add hl,bc
 	or a,a
 	ret
 .fail:

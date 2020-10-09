@@ -111,19 +111,20 @@ util_Zx7DecompressToFlash:
         pop     de                      ; DE = destination
 ;        ldir
 		push af
-	.write_flash_loop:
-		ld a,(hl)
-		push de,hl,bc
-		call sys_WriteFlashA
-		pop bc,hl,de
-		inc de
-		inc hl
-		dec bc
-		ld (ScrapMem),bc
-		ld a,(ScrapMem+2)
-		or a,b
-		or a,c
-		jr nz,.write_flash_loop
+	; .write_flash_loop:
+		; ld a,(hl)
+		; push de,hl,bc
+		; call sys_WriteFlashA
+		; pop bc,hl,de
+		; inc de
+		; inc hl
+		; dec bc
+		; ld (ScrapMem),bc
+		; ld a,(ScrapMem+2)
+		; or a,b
+		; or a,c
+		; jr nz,.write_flash_loop
+		call sys_WriteFlash
 		pop af
 .zx7t_exit:
 

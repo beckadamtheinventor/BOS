@@ -56,6 +56,9 @@
 <tr><td>bos.sys_EraseFlashSector</td><td>0201E4</td><td><a href="#sys_EraseFlashSector">doc</a></tr>
 <tr><td>bos.sys_FlashUnlock</td><td>0201E8</td><td><a href="#sys_FlashUnlock">doc</a></tr>
 <tr><td>bos.sys_FlashLock</td><td>0201EC</td><td><a href="#sys_FlashLock">doc</a></tr>
+<tr><td>bos.fs_CreateFile</td><td>0201F0</td><td><a href="#fs_CreateFile">doc</a></tr>
+<tr><td>bos.strupper</td><td>0201F4</td><td><a href="#strupper">doc</a></tr>
+<tr><td>bos.strlower</td><td>0201F8</td><td><a href="#strlower">doc</a></tr>
 </table><div id="boot_os"><h1>boot_os</h1><h3>syscall Adress 020108</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
@@ -267,10 +270,22 @@
  calls boot routine $2DC</td></tr>
 </table></div><div id="sys_FlashUnlock"><h1>sys_FlashUnlock</h1><h3>syscall Adress 0201E8</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td></td><td> Unlocks flash</td><td></td><td></td><td>
+<tr><td></td><td></td><td></td><td></td><td>
 </td></tr>
 </table></div><div id="sys_FlashLock"><h1>sys_FlashLock</h1><h3>syscall Adress 0201EC</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="fs_CreateFile"><h1>fs_CreateFile</h1><h3>syscall Adress 0201F0</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> bool fs_CreateFile(char *path);</td><td> create a file</td><td></td><td> All</td><td>
+</td></tr>
+</table></div><div id="strupper"><h1>strupper</h1><h3>syscall Adress 0201F4</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> HL pointer to string</td><td> convert a string to uppercase</td><td> HL HL+strlen(HL)</td><td> AF</td><td>
+</td></tr>
+</table></div><div id="strlower"><h1>strlower</h1><h3>syscall Adress 0201F8</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> HL pointer to string</td><td> convert a string to lowercase</td><td> HL HL+strlen(HL)</td><td> AF</td><td>
 </td></tr>
 </table></div></body></html>
