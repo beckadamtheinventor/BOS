@@ -79,6 +79,7 @@ handle_interrupt:
 	jq c,high_bit_3_int
 	ld a,$FF
 	out (bc),a
+	jq return_from_interrupt
 handle_interrupt_2:
 	ld c,$14
 	in a,(bc)
@@ -107,32 +108,32 @@ return_from_interrupt:
 	reti
 
 low_bit_0_int:
-	ld a,1 shl 0
-	out (bc),a
+;	ld a,1 shl 0
+;	out (bc),a
 	ld c,4
 	in a,(bc)
 	res 0,a
 	out (bc),a
 	jq return_from_interrupt
 low_bit_1_int:
-	ld a,1 shl 1
-	out (bc),a
+;	ld a,1 shl 1
+;	out (bc),a
 	ld c,4
 	in a,(bc)
 	res 1,a
 	out (bc),a
 	jq return_from_interrupt
 low_bit_2_int:
-	ld a,1 shl 2
-	out (bc),a
+;	ld a,1 shl 2
+;	out (bc),a
 	ld c,4
 	in a,(bc)
 	res 2,a
 	out (bc),a
 	jq return_from_interrupt
 low_bit_3_int:
-	ld a,1 shl 3
-	out (bc),a
+;	ld a,1 shl 3
+;	out (bc),a
 	ld c,4
 	in a,(bc)
 	res 3,a
@@ -162,9 +163,9 @@ high_bit_4_int:
 	res 4,a
 	out (bc),a
 	jq return_from_interrupt
-high_bit_5_int:
-	ld a,1 shl 5
-	out (bc),a
+high_bit_5_int: ;USB interrupt
+;	ld a,1 shl 5
+;	out (bc),a
 	ld c,5
 	in a,(bc)
 	res 5,a

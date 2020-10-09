@@ -120,6 +120,8 @@ explorer_cursor_y:=$-3
 	pop bc
 	jq .keyloop
 _exit:
+	call gfx_ZeroScreen
+	call bos._HomeUp
 	xor a,a
 	sbc hl,hl
 	ret

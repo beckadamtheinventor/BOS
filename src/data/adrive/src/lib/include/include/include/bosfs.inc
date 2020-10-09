@@ -19,19 +19,19 @@ f_device     := $40
 
 
 
-macro fs_fs? @base, @clustersize
+macro fs_fs? @clustersize, @cmap_size
 	local fs
-	fs.base = @base
+	fs.base = $
 	fs.clustersize = @clustersize
-	org fs.base
+	fs.cmap_size = @cmap_size shl 9
 	virtual
 		fs.exports.cmap::
 		dd $F0FFFFF0, $0FFFFFFF, $0FFFFFFF
 	end virtual
 	db fs.cmap
-	db $200 - (fs.cmap_len and $1FF) dup $FF
+	db fs.cmap_size - (fs.cmap_len and (fs.cmap_size-1)) dup $FF
 	db fs.cmap
-	db $200 - (fs.cmap_len and $1FF) dup $FF
+	db fs.cmap_size - (fs.cmap_len and (fs.cmap_size-1)) dup $FF
 	fs.clusters_section:
 
 	macro fs_subdir? fsname

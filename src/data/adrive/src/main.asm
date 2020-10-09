@@ -52,15 +52,11 @@ enter_input:
 .fail:
 	pop bc,bc
 	ld hl,str_CouldNotLocateExecutable
-	jp bos.gui_Print
+	call bos.gui_Print
+	jq enter_input
 .exit:
 	pop bc,bc
-	ld hl,str_ExplorerExecutable
-	ld bc,$FF0000
-	push bc,hl
-	call bos.sys_ExecuteFile
-	pop bc,bc
-	jq enter_input
+	ret
 
 
 str_ExplorerExecutable:
@@ -79,7 +75,7 @@ aprg_main:
 	push bc
 	ld a,(hl)
 	or a,a
-	jq c,.fail
+	jq z,.fail
 	push hl
 	call bos.fs_OpenFile
 	pop bc
@@ -145,7 +141,7 @@ boot_script:
 	db "CLS",0
 	db "ASM",0
 	pop bc,bc,bc
-	jp boot_main
+	jq boot_main
 end fs_file
 
 
@@ -168,9 +164,8 @@ bsh_main:
 	lea ix,ix+6
 	push hl
 	ld hl,(ix)
-	add hl,bc
+	ld a,(hl)
 	or a,a
-	sbc hl,bc
 	jr z,.runexec
 	push hl
 	call ti._strlen
@@ -178,7 +173,6 @@ bsh_main:
 	ex (sp),hl
 	push bc
 	push hl
-	call bos.strupper
 	call ti._strncmp
 	add hl,bc
 	or a,a
@@ -188,16 +182,15 @@ bsh_main:
 	pop bc
 	jq nz,.loop
 	push hl
-	ld hl,(ix+3)
-	call .jphl  ;jump to command handler subroutine
-	db $3E ;ld a,... (dummify next byte)
-.next:
-	push hl
 	call ti._strlen
 	ex (sp),hl
 	pop bc
 	add hl,bc
 	inc hl
+	push hl
+	ld hl,(ix+3)
+	call .jphl  ;jump to command handler subroutine
+	pop hl
 	jq .loop
 .keyboard_interrupt:
 	ld hl,str_KeyboardInterrupt
@@ -209,28 +202,30 @@ bsh_main:
 	ex (sp),hl
 	pop bc
 	push hl
+	add hl,bc
 	push hl
+	or a,a
+	sbc hl,bc
 	ld a,' '
 	cpir
-	pop de
-	push hl,de
+	pop bc,de
+	push bc,hl,de
 	call bos.sys_ExecuteFile
-	pop bc,bc
-	pop hl
-	jq .next
+	pop bc,bc,hl
+	inc hl
+	jq bsh_main
 
 str_KeyboardInterrupt:
 	db $9,"Program execution stopped.",$A,0
 bsh_commands:
 	dl str_Return, handler_Return
 	dl str_Asm, handler_Asm
-	dl 0, 0
+	dl $FF0000
 str_Asm:
 	db "ASM",0
 handler_Asm:
 	pop bc
 	pop hl
-	push hl
 bsh_main.jphl:
 	jp (hl)
 str_Return:
