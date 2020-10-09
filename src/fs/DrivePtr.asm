@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 ;@DOES get a pointer to a given drive letter
 fs_DrivePtr:
 	call fs_PartitionDescriptor
@@ -24,7 +24,6 @@ fs_DrivePtr:
 	djnz .multloop ;address of partition
 	ret
 
-=======
 ;@DOES get a pointer to a given drive letter
 fs_DrivePtr:
 	call fs_PartitionDescriptor
@@ -50,4 +49,3 @@ fs_DrivePtr:
 	djnz .multloop ;address of partition
 	ret
 
->>>>>>> 918f0304d78541c67e8265897a0c7971f33cb3bd
