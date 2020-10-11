@@ -8,5 +8,6 @@ cd src\data\adrive\
 call build.bat
 cd ..\..\..\
 fasmg src/main.asm bin/BOSOS.8xp
+fasmg src/updater.asm bin/BOSUPDTR.BIN
 python build_docs.py
 pause

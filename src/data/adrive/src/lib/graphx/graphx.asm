@@ -135,9 +135,6 @@ library 'GRAPHX', 11
 	export gfx_CopyRectangle
 
 ;-------------------------------------------------------------------------------
-define lcdWidth? lcdWidth
-define lcdHeight? lcdHeight
-define vram? vRam
 LcdSize            := LcdWidth*LcdHeight
 ; minimum stack size to provide for interrupts if moving the stack
 InterruptStackSize := 4000

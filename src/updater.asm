@@ -2,16 +2,19 @@
 include 'include/ti84pceg.inc'
 include 'include/ez80.inc'
 include 'include/tiformat.inc'
-format ti executable 'BOSOS'
 
 include 'include/os.inc'
 include 'include/defines.inc'
+include 'include/bos.inc'
 
 
-	call ti.ClrLCD
-	call ti.HomeUp
+org ti.userMem
+
+updater_start:
+	call bos._ClrScrn
+	call bos._HomeUp
 	ld hl,installing_string
-	call ti.PutS
+	call bos._PutS
 
 ;-------------------------------------------------------------------------------
 	os_create
@@ -41,3 +44,5 @@ DONOTHING:
 macro exaf
 	db $08 ;why does the comma in ex af,af' have to screw with things? >_>
 end macro
+
+

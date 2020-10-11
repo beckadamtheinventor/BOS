@@ -58,16 +58,11 @@ main_init_start:
 	ld hl,str_WaitingForDevice
 	call bos.gui_Print
 .loop:
-	call usb_HandleEvents
+	call usb_WaitForInterrupt
 	add hl,bc
 	or a,a
 	sbc hl,bc
 	jq nz,main_exit
-	call bos.sys_GetKey
-	cp a,9
-	jq z,fexplore_main.main
-	cp a,15
-	jq z,main_exit
 	ld hl,(usb_device)
 	add hl,bc
 	or a,a
@@ -87,13 +82,33 @@ init_explore_drive:
 	jq nz,.init_fat_fail
 	call init_fat_volume
 	jq nz,.init_fat_fail
-	call bos.sys_WaitKeyCycle
-	jq main_exit
+
+	ld hl,str_NotYetImplemented
+	jq .print_and_exit
 .init_fat_fail:
 	ld hl,str_FailedToInitFat
+.print_and_exit:
 	call bos.gui_Print
 	call bos.sys_WaitKeyCycle
 	jq main_exit
+
+main_fail_memory:
+	ld hl,str_MemoryError
+
+main_print_and_exit:
+	call bos.gui_Print
+;Cleanup USB
+main_exit:
+	ld bc,msd_device
+	push bc
+	call msd_Deinit
+	pop bc
+	call usb_Cleanup
+	ld hl,ti.mpIntAck
+	set ti.bIntOn,(hl)
+	jq _exit
+
+
 
 reset_smc_bytes:
 	ld a,$01 ;ld bc,...
@@ -137,6 +152,11 @@ init_fat_partition:
 	or a,a
 	sbc hl,bc
 	ret nz
+	ld hl,(found_partitions)
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	jq z,.no_partitions
 	ld bc,partition_descriptor
 	push bc
 	ld bc,fat_device
@@ -156,6 +176,14 @@ init_fat_partition:
 	or a,a
 	sbc hl,hl
 	ret
+.no_partitions:
+	ld hl,str_NoParitions
+	call bos.gui_Print
+	ld a,1
+	or a,a
+	ret
+str_NoParitions:
+	db "No Partitions found.",$A,0
 str_LookingForPartitions:
 	db "Looking for partitions...",$A,0
 str_InitializingPartition:
@@ -222,16 +250,6 @@ dir_skip:=$-3
 	jq .display_loop
 
 
-;Cleanup USB
-main_exit:
-	ld bc,msd_device
-	push bc
-	call msd_Deinit
-	pop bc
-	call usb_Cleanup
-	ld hl,ti.mpIntAck
-	set ti.bIntOn,(hl)
-	jq _exit
 
 ;usb_error_t main_event_handler(usb_event_t event, void *event_data, usb_callback_data_t *callback_data);
 main_event_handler:
@@ -292,12 +310,7 @@ partition_descriptor:
 	dl 0
 
 fat_device:
-	dl 0
-	db 0
-	dd 0
-	dl 3 dup 0
-	dd 8 dup 0
-	dl 4 dup 0
+	db 64 dup 0
 
 fat_volume_label:
 	db 18 dup 0
@@ -352,6 +365,14 @@ str_EventTriggered:
 	db "Event Triggered.",$A,0
 str_DeviceEnabled:
 	db "Device Enabled.",$A,0
+str_NotYetImplemented:
+	db $9,"This program is not fully implemented.",$A,0
+str_NoArguments:
+	db $9,"Usage: FEXPLORE mode file",$A,0
+str_FileNotFound:
+	db $9,"File not found.",$A,0
+str_MemoryError:
+	db $9,"Not Enough Memory.",$A,0
 
 libload_relocations:
 db $C0,"USBDRVCE",0,0

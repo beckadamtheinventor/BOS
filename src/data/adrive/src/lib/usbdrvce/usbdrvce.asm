@@ -96,9 +96,7 @@ macro ?!
      end match
     end while
    end match
-   match v, val
-	op	bsr idx,v
-   end match
+	op	bsr idx,val
   end macro
  end iterate
 
@@ -727,7 +725,7 @@ usb_HandleEvents:
 ;.notHalted:
 	or	a,a
 	sbc	hl,hl
-	ld	a, (mpIntStat+1)
+	ld	a,(mpIntStat+1)
 	and	a,intUsb shr 8
 	ret	z
 	ld	hl,mpUsbSts
@@ -1993,7 +1991,7 @@ _PowerVbusForRole:
 	bitmsk	ROLE_DEVICE,a
 	jq	nz,.unpower
 .power:
-	call	bos._UsbPowerVbus ;$21B70
+	call	bos._UsbPowerVbus
 	res	bUsbABusDrop,(hl)
 	set	bUsbABusReq,(hl)
 	ld	l,usbSts+1
@@ -2018,7 +2016,7 @@ _PowerVbusForRole:
 	pop	de,hl
 	set	bUsbABusDrop,(hl)
 	res	bUsbABusReq,(hl)
-	jq	bos._UsbUnpowerVbus ;$21C68
+	jq	bos._UsbUnpowerVbus
 
 ;-------------------------------------------------------------------------------
 _DefaultHandler:

@@ -641,7 +641,7 @@ ti_Read:
 ; .ret0:
 	; xor	a, a
 	; sbc	hl, hl
-	call ti._frameset0
+	call __frameset0
 	ld c,(ix+15)
 	call util_is_slot_open
 	jq nz,util_ret_null_pop_ix
@@ -834,7 +834,7 @@ ti_Seek:
 	; push	de
 	; call	util_get_offset
 	; jr	.seek_set_asm
-	call ti._frameset0
+	call __frameset0
 	ld c,(ix+12)
 	call util_is_slot_open
 	jq nz, util_ret_neg_one
@@ -1196,7 +1196,7 @@ ti_GetDataPtr:
 	push bc
 	pop hl
 	ld bc,1024
-	call ti._idivu   ;offset>>10
+	call __idivu   ;offset>>10
 	push hl
 	pop bc
 	pop de

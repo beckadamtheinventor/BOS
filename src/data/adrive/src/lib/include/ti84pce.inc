@@ -8,17 +8,17 @@
 ;- tr1p1ea
 ;- Kerm Martian
 ;- Texas Instruments (ti83plus.inc)
-;.nolist
+.nolist
 
-;#ifndef TI84PCE
-;#define TI84PCE
+#ifndef TI84PCE
+#define TI84PCE
 
 ; Included for Assembler Compatibility
 ;------------------------------------
-;#define equ .equ
-;#define EQU .equ
-;#define end .end
-;#define END .end
+#define equ .equ
+#define EQU .equ
+#define end .end
+#define END .end
 
 ; Hardware Defines
 ;------------------------------
@@ -3075,33 +3075,33 @@ usbHcsParams		equ 0004h
 pUsbHcsParams		equ pUsbRange + usbHcsParams
 mpUsbHcsParams		equ mpUsbRange + usbHcsParams
 bUsbNumPorts		equ 0
-bmUsbNumPorts		equ 0Fh shl bUsbNumPorts
+bmUsbNumPorts		equ 0Fh << bUsbNumPorts
 bUsbPortPwrCtrl		equ 4
-bmUsbPortPwrCtrl	equ 1 shl bUsbPortPwrCtrl
+bmUsbPortPwrCtrl	equ 1 << bUsbPortPwrCtrl
 bUsbPortRoutRules	equ 7
-bmUsbPortRoutRules	equ 1 shl bUsbPortRoutRules
+bmUsbPortRoutRules	equ 1 << bUsbPortRoutRules
 bUsbNumPortsPerCC	equ 8
-bmUsbNumPortsPerCC	equ 0Fh shl bUsbNumPortsPerCC
+bmUsbNumPortsPerCC	equ 0Fh << bUsbNumPortsPerCC
 bUsbNumCC		equ 12
-bmUsbNumCC		equ 0Fh shl bUsbNumCC
+bmUsbNumCC		equ 0Fh << bUsbNumCC
 bUsbPortIndics		equ 16
-bmUsbPortIndics		equ 1 shl bUsbPortIndics
+bmUsbPortIndics		equ 1 << bUsbPortIndics
 bUsbDebugPortNum	equ 20
-bmUsbDebugPortNum	equ 0Fh shl bUsbDebugPortNum
+bmUsbDebugPortNum	equ 0Fh << bUsbDebugPortNum
 
 usbHccParams		equ 0008h
 pUsbHccParams		equ pUsbRange + usbHccParams
 mpUsbHccParams		equ mpUsbRange + usbHccParams
 bUsb64Bit		equ 0
-bmUsb64Bit		equ 1 shl bUsb64Bit
+bmUsb64Bit		equ 1 << bUsb64Bit
 bUsbProgFrameList	equ 1
-bmUsbProgFrameList	equ 1 shl bUsbProgFrameList
+bmUsbProgFrameList	equ 1 << bUsbProgFrameList
 bUsbAsyncSchedParkCap	equ 2
-bmUsbAsyncSchedParkCap	equ 1 shl bUsbAsyncSchedParkCap
+bmUsbAsyncSchedParkCap	equ 1 << bUsbAsyncSchedParkCap
 bUsbIsochSchedThresh	equ 4
-bmUsbIsochSchedThresh	equ 0Fh shl bUsbIsochSchedThresh
+bmUsbIsochSchedThresh	equ 0Fh << bUsbIsochSchedThresh
 bUsbEhciExtendCap	equ 8
-bmUsbEhciExtendCap	equ 0FFh shl bUsbEhciExtendCap
+bmUsbEhciExtendCap	equ 0FFh << bUsbEhciExtendCap
 
 usbHcspPortRout		equ 000Ch
 pUsbHcspPortRout	equ pUsbRange + usbHcspPortRout
@@ -3111,25 +3111,25 @@ usbCmd			equ 0010h
 pUsbCmd			equ pUsbRange + usbCmd
 mpUsbCmd		equ mpUsbRange + usbCmd
 bUsbRunStop		equ 0
-bmUsbRunStop		equ 1 shl bUsbRunStop
+bmUsbRunStop		equ 1 << bUsbRunStop
 bUsbHcReset		equ 1
-bmUsbHcReset		equ 1 shl bUsbHcReset
+bmUsbHcReset		equ 1 << bUsbHcReset
 bUsbFrameListSize	equ 2
-bmUsbFrameListSize	equ 3 shl bUsbFrameListSize
+bmUsbFrameListSize	equ 3 << bUsbFrameListSize
 bUsbPeriodicSchedEn	equ 4
-bmUsbPeriodicSchedEn	equ 1 shl bUsbPeriodicSchedEn
+bmUsbPeriodicSchedEn	equ 1 << bUsbPeriodicSchedEn
 bUsbAsyncSchedEn	equ 5
-bmUsbAsyncSchedEn	equ 1 shl bUsbAsyncSchedEn
+bmUsbAsyncSchedEn	equ 1 << bUsbAsyncSchedEn
 bUsbIntAsyncAdvDrbl	equ 6
-bmUsbIntAsyncAdvDrbl	equ 1 shl bUsbIntAsyncAdvDrbl
+bmUsbIntAsyncAdvDrbl	equ 1 << bUsbIntAsyncAdvDrbl
 bUsbLightHcReset	equ 7
-bmUsbLightHcReset	equ 1 shl bUsbLightHcReset
+bmUsbLightHcReset	equ 1 << bUsbLightHcReset
 bUsbAsyncSchedParkCnt	equ 8
-bmUsbAsyncSchedParkCnt	equ 3 shl bUsbAsyncSchedParkCnt
+bmUsbAsyncSchedParkCnt	equ 3 << bUsbAsyncSchedParkCnt
 bUsbAsyncSchedParkEn	equ 11
-bmUsbAsyncSchedParkEn	equ 1 shl bUsbAsyncSchedParkEn
+bmUsbAsyncSchedParkEn	equ 1 << bUsbAsyncSchedParkEn
 bUsbIntThreshCtrl	equ 16
-bmUsbIntThreshCtrl	equ 0FFh shl bUsbIntThreshCtrl
+bmUsbIntThreshCtrl	equ 0FFh << bUsbIntThreshCtrl
 
 usbSts			equ 0014h
 pUsbSts			equ pUsbRange + usbSts
@@ -3138,31 +3138,31 @@ usbIntEn		equ 0018h
 pUsbIntEn		equ pUsbRange + usbIntEn
 mpUsbIntEn		equ mpUsbRange + usbIntEn
 bUsbInt			equ 0
-bmUsbInt		equ 1 shl bUsbInt
+bmUsbInt		equ 1 << bUsbInt
 bUsbIntErr		equ 1
-bmUsbIntErr		equ 1 shl bUsbIntErr
+bmUsbIntErr		equ 1 << bUsbIntErr
 bUsbIntPortChgDetect	equ 2
-bmUsbIntPortChgDetect	equ 1 shl bUsbIntPortChgDetect
+bmUsbIntPortChgDetect	equ 1 << bUsbIntPortChgDetect
 bUsbIntFrameListOver	equ 3
-bmUsbIntFrameListOver	equ 1 shl bUsbIntFrameListOver
+bmUsbIntFrameListOver	equ 1 << bUsbIntFrameListOver
 bUsbIntHostSysErr	equ 4
-bmUsbIntHostSysErr	equ 1 shl bUsbIntHostSysErr
+bmUsbIntHostSysErr	equ 1 << bUsbIntHostSysErr
 bUsbIntAsyncAdv		equ 5
-bmUsbIntAsyncAdv	equ 1 shl bUsbIntAsyncAdv
+bmUsbIntAsyncAdv	equ 1 << bUsbIntAsyncAdv
 bUsbHcHalted		equ 12
-bmUsbHcHalted		equ 1 shl bUsbHcHalted
+bmUsbHcHalted		equ 1 << bUsbHcHalted
 bUsbReclamation		equ 13
-bmUsbReclamation	equ 1 shl bUsbReclamation
+bmUsbReclamation	equ 1 << bUsbReclamation
 bUsbPeriodicSchedSts	equ 14
-bmUsbPeriodicSchedSts	equ 1 shl bUsbPeriodicSchedSts
+bmUsbPeriodicSchedSts	equ 1 << bUsbPeriodicSchedSts
 bUsbAsyncSchedSts	equ 15
-bmUsbAsyncSchedSts	equ 1 shl bUsbAsyncSchedSts
+bmUsbAsyncSchedSts	equ 1 << bUsbAsyncSchedSts
 
 usbFrameIdx		equ 001Ch
 pUsbFrameIdx		equ pUsbRange + usbFrameIdx
 mpUsbFrameIdx		equ mpUsbRange + usbFrameIdx
 bUsbFrameIdx		equ 0
-bmUsbFrameIdx		equ 03FFFh shl bUsbFrameIdx
+bmUsbFrameIdx		equ 03FFFh << bUsbFrameIdx
 
 usbCtrlDsSeg		equ 0020h
 pUsbCtrlDsSeg		equ pUsbRange + usbCtrlDsSeg
@@ -3172,118 +3172,118 @@ usbPeriodicListBase	equ 0024h
 pUsbPeriodicListBase	equ pUsbRange + usbPeriodicListBase
 mpUsbPeriodicListBase	equ mpUsbRange + usbPeriodicListBase
 bUsbPeriodicListBase	equ 12
-bmUsbPeriodicListBase	equ 0FFFFFh shl bUsbPeriodicListBase
+bmUsbPeriodicListBase	equ 0FFFFFh << bUsbPeriodicListBase
 
 usbAsyncListAddr	equ 0028h
 pUsbAsyncListAddr	equ pUsbRange + usbAsyncListAddr
 mpUsbAsyncListAddr	equ mpUsbRange + usbAsyncListAddr
 bUsbAsyncListAddr	equ 5
-bmUsbAsyncListAddr	equ 07FFFFFFh shl bUsbAsyncListAddr
+bmUsbAsyncListAddr	equ 07FFFFFFh << bUsbAsyncListAddr
 
 usbPortStsCtrl		equ 0030h
 pUsbPortStsCtrl		equ pUsbRange + usbPortStsCtrl
 mpUsbPortStsCtrl	equ mpUsbRange + usbPortStsCtrl
 bUsbCurConnSts		equ 0
-bmUsbCurConnSts		equ 1 shl bUsbCurConnSts
+bmUsbCurConnSts		equ 1 << bUsbCurConnSts
 bUsbConnStsChg		equ 1
-bmUsbConnStsChg		equ 1 shl bUsbConnStsChg
+bmUsbConnStsChg		equ 1 << bUsbConnStsChg
 bUsbPortEn		equ 2
-bmUsbPortEn		equ 1 shl bUsbPortEn
+bmUsbPortEn		equ 1 << bUsbPortEn
 bUsbPortEnChg		equ 3
-bmUsbPortEnChg		equ 1 shl bUsbPortEnChg
+bmUsbPortEnChg		equ 1 << bUsbPortEnChg
 bUsbOvercurrActive	equ 4
-bmUsbOvercurrActive	equ 1 shl bUsbOvercurrActive
+bmUsbOvercurrActive	equ 1 << bUsbOvercurrActive
 bUsbOvercurrChg		equ 5
-bmUsbOvercurrChg	equ 1 shl bUsbOvercurrChg
+bmUsbOvercurrChg	equ 1 << bUsbOvercurrChg
 bUsbForcePortResume	equ 6
-bmUsbForcePortResume	equ 1 shl bUsbForcePortResume
+bmUsbForcePortResume	equ 1 << bUsbForcePortResume
 bUsbPortSuspended	equ 7
-bmUsbPortSuspended	equ 1 shl bUsbPortSuspended
+bmUsbPortSuspended	equ 1 << bUsbPortSuspended
 bUsbPortReset		equ 8
-bmUsbPortReset		equ 1 shl bUsbPortReset
+bmUsbPortReset		equ 1 << bUsbPortReset
 bUsbLineSts		equ 10
-bmUsbLineSts		equ 3 shl bUsbLineSts
+bmUsbLineSts		equ 3 << bUsbLineSts
 bUsbPortPwr		equ 12
-bmUsbPortPwr		equ 1 shl bUsbPortPwr
+bmUsbPortPwr		equ 1 << bUsbPortPwr
 bUsbPortOwner		equ 13
-bmUsbPortOwner		equ 1 shl bUsbPortOwner
+bmUsbPortOwner		equ 1 << bUsbPortOwner
 bUsbPortIndicCtrl	equ 14
-bmUsbPortIndicCtrl	equ 3 shl bUsbPortIndicCtrl
+bmUsbPortIndicCtrl	equ 3 << bUsbPortIndicCtrl
 bUsbPortTestCtrl	equ 16
-bmUsbPortTestCtrl	equ 0Fh shl bUsbPortTestCtrl
+bmUsbPortTestCtrl	equ 0Fh << bUsbPortTestCtrl
 bUsbWakeConnEn		equ 20
-bmUsbWakeConnEn		equ 1 shl bUsbWakeConnEn
+bmUsbWakeConnEn		equ 1 << bUsbWakeConnEn
 bUsbWakeDiscEn		equ 21
-bmUsbWakeDiscEn		equ 1 shl bUsbWakeDiscEn
+bmUsbWakeDiscEn		equ 1 << bUsbWakeDiscEn
 bUsbWakeOvercurrEn	equ 22
-bmUsbWakeOvercurrEn	equ 1 shl bUsbWakeOvercurrEn
+bmUsbWakeOvercurrEn	equ 1 << bUsbWakeOvercurrEn
 
 usbMisc			equ 0040h
 pUsbMisc		equ pUsbRange + usbMisc
 mpUsbMisc		equ mpUsbRange + usbMisc
 bUsbAsyncSchedSleepTmr	equ 0
-bmUsbAsyncSchedSleepTmr	equ 3 shl bUsbAsyncSchedSleepTmr
+bmUsbAsyncSchedSleepTmr	equ 3 << bUsbAsyncSchedSleepTmr
 bUsbEof1Timing		equ 2
-bmUsbEof1Timing		equ 3 shl bUsbEof1Timing
+bmUsbEof1Timing		equ 3 << bUsbEof1Timing
 bUsbEof2Timing		equ 4
-bmUsbEof2Timing		equ 3 shl bUsbEof2Timing
+bmUsbEof2Timing		equ 3 << bUsbEof2Timing
 bUsbHostSuspend		equ 6
-bmUsbHostSuspend	equ 1 shl bUsbHostSuspend
+bmUsbHostSuspend	equ 1 << bUsbHostSuspend
 
 usbOtgCsr		equ 0080h
 pUsbOtgCsr		equ pUsbRange + usbOtgCsr
 mpUsbOtgCsr		equ mpUsbRange + usbOtgCsr
 bUsbBBusReq		equ 0
-bmUsbBBusReq		equ 1 shl bUsbBBusReq
+bmUsbBBusReq		equ 1 << bUsbBBusReq
 bUsbBHnp		equ 1
-bmUsbBHnp		equ 1 shl bUsbBHnp
+bmUsbBHnp		equ 1 << bUsbBHnp
 bUsbBVbusDisc		equ 2
-bmUsbBVbusDisc		equ 1 shl bUsbBVbusDisc
+bmUsbBVbusDisc		equ 1 << bUsbBVbusDisc
 bUsbABusReq		equ 4
-bmUsbABusReq		equ 1 shl bUsbABusReq
+bmUsbABusReq		equ 1 << bUsbABusReq
 bUsbABusDrop		equ 5
-bmUsbABusDrop		equ 1 shl bUsbABusDrop
+bmUsbABusDrop		equ 1 << bUsbABusDrop
 bUsbAHnp		equ 6
-bmUsbAHnp		equ 1 shl bUsbAHnp
+bmUsbAHnp		equ 1 << bUsbAHnp
 bUsbASrpEn		equ 7
-bmUsbASrpEn		equ 1 shl bUsbASrpEn
+bmUsbASrpEn		equ 1 << bUsbASrpEn
 bUsbASrpMode		equ 8
-usbASrpModeVbus		equ 0 shl bUsbASrpMode
-usbASrpModeData		equ 1 shl bUsbASrpMode
-bmUsbASrpMode		equ 1 shl bUsbASrpMode
+usbASrpModeVbus		equ 0 << bUsbASrpMode
+usbASrpModeData		equ 1 << bUsbASrpMode
+bmUsbASrpMode		equ 1 << bUsbASrpMode
 bUsbIdFilt		equ 9
-usbIdFiltShort		equ 0 shl bUsbIdFilt
-usbIdFiltLong		equ 1 shl bUsbIdFilt
-bmUsbIdFilt		equ 1 shl bUsbIdFilt
+usbIdFiltShort		equ 0 << bUsbIdFilt
+usbIdFiltLong		equ 1 << bUsbIdFilt
+bmUsbIdFilt		equ 1 << bUsbIdFilt
 bUsbVbusFilt		equ 10
-usbVbusFiltShort	equ 0 shl bUsbVbusFilt
-usbVbusFiltLong		equ 1 shl bUsbVbusFilt
-bmUsbVbusFilt		equ 1 shl bUsbVbusFilt
+usbVbusFiltShort	equ 0 << bUsbVbusFilt
+usbVbusFiltLong		equ 1 << bUsbVbusFilt
+bmUsbVbusFilt		equ 1 << bUsbVbusFilt
 bUsbHdiscFilt		equ 11
-usbHdiscFiltShort	equ 0 shl bUsbHdiscFilt
-usbHdiscFiltLong	equ 1 shl bUsbHdiscFilt
-bmUsbHdiscFilt		equ 1 shl bUsbHdiscFilt
+usbHdiscFiltShort	equ 0 << bUsbHdiscFilt
+usbHdiscFiltLong	equ 1 << bUsbHdiscFilt
+bmUsbHdiscFilt		equ 1 << bUsbHdiscFilt
 bUsbBSessEnd		equ 16
-bmUsbBSessEnd		equ 1 shl bUsbBSessEnd
+bmUsbBSessEnd		equ 1 << bUsbBSessEnd
 bUsbBSessVld		equ 17
-bmUsbBSessVld		equ 1 shl bUsbBSessVld
+bmUsbBSessVld		equ 1 << bUsbBSessVld
 bUsbASessVld		equ 18
-bmUsbASessVld		equ 1 shl bUsbASessVld
+bmUsbASessVld		equ 1 << bUsbASessVld
 bUsbAVbusVld		equ 19
-bmUsbAVbusVld		equ 1 shl bUsbAVbusVld
+bmUsbAVbusVld		equ 1 << bUsbAVbusVld
 bUsbRole		equ 20
-usbRoleHost		equ 0 shl bUsbRole
-usbRoleDev		equ 1 shl bUsbRole
-bmUsbRole		equ 1 shl bUsbRole
+usbRoleHost		equ 0 << bUsbRole
+usbRoleDev		equ 1 << bUsbRole
+bmUsbRole		equ 1 << bUsbRole
 bUsbId			equ 21
-usbIdA			equ 0 shl bUsbId
-usbIdB			equ 1 shl bUsbId
-bmUsbId			equ 1 shl bUsbId
+usbIdA			equ 0 << bUsbId
+usbIdB			equ 1 << bUsbId
+bmUsbId			equ 1 << bUsbId
 bUsbSpd			equ 22
-usbSpdFull		equ 0 shl bUsbSpd
-usbSpdLow		equ 1 shl bUsbSpd
-usbSpdHigh		equ 2 shl bUsbSpd
-bmUsbSpd		equ 3 shl bUsbSpd
+usbSpdFull		equ 0 << bUsbSpd
+usbSpdLow		equ 1 << bUsbSpd
+usbSpdHigh		equ 2 << bUsbSpd
+bmUsbSpd		equ 3 << bUsbSpd
 
 usbOtgIsr		equ 0084h
 pUsbOtgIsr		equ pUsbRange + usbOtgIsr
@@ -3292,23 +3292,23 @@ usbOtgIer		equ 0088h
 pUsbOtgIer		equ pUsbRange + usbOtgIer
 mpUsbOtgIer		equ mpUsbRange + usbOtgIer
 bUsbIntBSrpComplete	equ 0
-bmUsbIntBSrpComplete	equ 1 shl bUsbIntBSrpComplete
+bmUsbIntBSrpComplete	equ 1 << bUsbIntBSrpComplete
 bUsbIntASrpDetect	equ 4
-bmUsbIntASrpDetect	equ 1 shl bUsbIntASrpDetect
+bmUsbIntASrpDetect	equ 1 << bUsbIntASrpDetect
 bUsbIntAVbusErr		equ 5
-bmUsbIntAVbusErr	equ 1 shl bUsbIntAVbusErr
+bmUsbIntAVbusErr	equ 1 << bUsbIntAVbusErr
 bUsbIntBSessEnd		equ 6
-bmUsbIntBSessEnd	equ 1 shl bUsbIntBSessEnd
+bmUsbIntBSessEnd	equ 1 << bUsbIntBSessEnd
 bUsbIntRoleChg		equ 8
-bmUsbIntRoleChg		equ 1 shl bUsbIntRoleChg
+bmUsbIntRoleChg		equ 1 << bUsbIntRoleChg
 bUsbIntIdChg		equ 9
-bmUsbIntIdChg		equ 1 shl bUsbIntIdChg
+bmUsbIntIdChg		equ 1 << bUsbIntIdChg
 bUsbIntOvercurr		equ 10
-bmUsbIntOvercurr	equ 1 shl bUsbIntOvercurr
+bmUsbIntOvercurr	equ 1 << bUsbIntOvercurr
 bUsbIntBPlugRemoved	equ 11
-bmUsbIntBPlugRemoved	equ 1 shl bUsbIntBPlugRemoved
+bmUsbIntBPlugRemoved	equ 1 << bUsbIntBPlugRemoved
 bUsbIntAPlugRemoved	equ 12
-bmUsbIntAPlugRemoved	equ 1 shl bUsbIntAPlugRemoved
+bmUsbIntAPlugRemoved	equ 1 << bUsbIntAPlugRemoved
 
 usbIsr			equ 00C0h
 pUsbIsr			equ pUsbRange + usbIsr
@@ -3317,89 +3317,89 @@ usbImr			equ 00C4h
 pUsbImr			equ pUsbRange + usbImr
 mpUsbImr		equ mpUsbRange + usbImr
 bUsbIntDev		equ 0
-bmUsbIntDev		equ 1 shl bUsbIntDev
+bmUsbIntDev		equ 1 << bUsbIntDev
 bUsbIntOtg		equ 1
-bmUsbIntOtg		equ 1 shl bUsbIntOtg
+bmUsbIntOtg		equ 1 << bUsbIntOtg
 bUsbIntHost		equ 2
-bmUsbIntHost		equ 1 shl bUsbIntHost
+bmUsbIntHost		equ 1 << bUsbIntHost
 bUsbIntLevel		equ 3
-usbIntLevelLow		equ 0 shl bUsbIntLevel
-usbIntLevelHigh		equ 1 shl bUsbIntLevel
-bmUsbIntLevel		equ 1 shl bUsbIntLevel
+usbIntLevelLow		equ 0 << bUsbIntLevel
+usbIntLevelHigh		equ 1 << bUsbIntLevel
+bmUsbIntLevel		equ 1 << bUsbIntLevel
 
 usbDevCtrl		equ 0100h
 pUsbDevCtrl		equ pUsbRange + usbDevCtrl
 mpUsbDevCtrl		equ mpUsbRange + usbDevCtrl
 bUsbRemoteWake		equ 0
-bmUsbRemoteWake		equ 1 shl bUsbRemoteWake
+bmUsbRemoteWake		equ 1 << bUsbRemoteWake
 bUsbHalfSpd		equ 1
-bmUsbHalfSpd		equ 1 shl bUsbHalfSpd
+bmUsbHalfSpd		equ 1 << bUsbHalfSpd
 bUsbGirqEn		equ 2
-bmUsbGirqEn		equ 1 shl bUsbGirqEn
+bmUsbGirqEn		equ 1 << bUsbGirqEn
 bUsbDevSuspend		equ 3
-bmUsbDevSuspend		equ 1 shl bUsbDevSuspend
+bmUsbDevSuspend		equ 1 << bUsbDevSuspend
 bUsbDevReset		equ 4
-bmUsbDevReset		equ 1 shl bUsbDevReset
+bmUsbDevReset		equ 1 << bUsbDevReset
 bUsbDevEn		equ 5
-bmUsbDevEn		equ 1 shl bUsbDevEn
+bmUsbDevEn		equ 1 << bUsbDevEn
 bUsbDevSpd		equ 6
-bmUsbDevSpd		equ 1 shl bUsbDevSpd
+bmUsbDevSpd		equ 1 << bUsbDevSpd
 bUsbDevForceFullSpd	equ 9
-bmUsbDevForceFullSpd	equ 1 shl bUsbDevForceFullSpd
+bmUsbDevForceFullSpd	equ 1 << bUsbDevForceFullSpd
 
 usbDevAddr		equ 0104h
 pUsbDevAddr		equ pUsbRange + usbDevAddr
 mpUsbDevAddr		equ mpUsbRange + usbDevAddr
 bUsbDevAddr		equ 0
-bmUsbDevAddr		equ 07Fh shl bUsbDevAddr
+bmUsbDevAddr		equ 07Fh << bUsbDevAddr
 bUsbDevConf		equ 7
-bmUsbDevConf		equ 1 shl bUsbDevConf
+bmUsbDevConf		equ 1 << bUsbDevConf
 
 usbDevTest		equ 0108h
 pUsbDevTest		equ pUsbRange + usbDevTest
 mpUsbDevTest		equ mpUsbRange + usbDevTest
 bUsbTstClrFifo		equ 0
-bmUsbTstClrFifo		equ 1 shl bUsbTstClrFifo
+bmUsbTstClrFifo		equ 1 << bUsbTstClrFifo
 bUsbTstCxLp		equ 1
-bmUsbTstCxLp		equ 1 shl bUsbTstCxLp
+bmUsbTstCxLp		equ 1 << bUsbTstCxLp
 bUsbTstClrEa		equ 2
-bmUsbTstClrEa		equ 1 shl bUsbTstClrEa
+bmUsbTstClrEa		equ 1 << bUsbTstClrEa
 bUsbTstNoCrc		equ 3
-bmUsbTstNoCrc		equ 1 shl bUsbTstNoCrc
+bmUsbTstNoCrc		equ 1 << bUsbTstNoCrc
 bUsbTstNoTs		equ 4
-bmUsbTstNoTs		equ 1 shl bUsbTstNoTs
+bmUsbTstNoTs		equ 1 << bUsbTstNoTs
 bUsbTstMode		equ 5
-bmUsbTstMode		equ 1 shl bUsbTstMode
+bmUsbTstMode		equ 1 << bUsbTstMode
 bUsbNoSof		equ 6
-bmUsbNoSof		equ 1 shl bUsbNoSof
+bmUsbNoSof		equ 1 << bUsbNoSof
 
 usbSofFrNum		equ 010Ch
 pUsbSofFrNum		equ pUsbRange + usbSofFrNum
 mpUsbSofFrNum		equ mpUsbRange + usbSofFrNum
 bUsbSofFrNum		equ 0
-bmUsbSofFrNum		equ 07FFh shl bUsbSofFrNum
+bmUsbSofFrNum		equ 07FFh << bUsbSofFrNum
 bUsbSofUFrNum		equ 11
-bmUsbSofUFrNum		equ 7 shl bUsbSofUFrNum
+bmUsbSofUFrNum		equ 7 << bUsbSofUFrNum
 
 usbSofMtr		equ 0110h
 pUsbSofMtr		equ pUsbRange + usbSofMtr
 mpUsbSofMtr		equ mpUsbRange + usbSofMtr
 bUsbSofMtrTmr		equ 0
-bmUsbSofMtrTmr		equ 0FFFFh shl bUsbSofMtrTmr
+bmUsbSofMtrTmr		equ 0FFFFh << bUsbSofMtrTmr
 
 usbPhyTmsr		equ 0114h
 pUsbPhyTmsr		equ pUsbRange + usbPhyTmsr
 mpUsbPhyTmsr		equ mpUsbRange + usbPhyTmsr
 bUsbUnplug		equ 0
-bmUsbUnplug		equ 1 shl bUsbUnplug
+bmUsbUnplug		equ 1 << bUsbUnplug
 bUsbTstJState		equ 1
-bmUsbTstJState		equ 1 shl bUsbTstJState
+bmUsbTstJState		equ 1 << bUsbTstJState
 bUsbTstKState		equ 2
-bmUsbTstKState		equ 1 shl bUsbTstKState
+bmUsbTstKState		equ 1 << bUsbTstKState
 bUsbTstSe0Nak		equ 3
-bmUsbTstSe0Nak		equ 1 shl bUsbTstSe0Nak
+bmUsbTstSe0Nak		equ 1 << bUsbTstSe0Nak
 bUsbTstPkt		equ 4
-bmUsbTstPkt		equ 1 shl bUsbTstPkt
+bmUsbTstPkt		equ 1 << bUsbTstPkt
 
 usbCxsr			equ 011Ch
 pUsbCxsr		equ pUsbRange + usbCxsr
@@ -3409,27 +3409,27 @@ usbCxFifo		equ 0120h
 pUsbCxFifo		equ pUsbRange + usbCxFifo
 mpUsbCxFifo		equ mpUsbRange + usbCxFifo
 bCxFifoFin		equ 0
-bmCxFifoFin		equ 1 shl bCxFifoFin
+bmCxFifoFin		equ 1 << bCxFifoFin
 bTstPktFin		equ 1
-bmTstPktFin		equ 1 shl bTstPktFin
+bmTstPktFin		equ 1 << bTstPktFin
 bCxFifoStall		equ 2
-bmCxFifoStall		equ 1 shl bCxFifoStall
+bmCxFifoStall		equ 1 << bCxFifoStall
 bCxFifoClr		equ 3
-bmCxFifoClr		equ 1 shl bCxFifoClr
+bmCxFifoClr		equ 1 << bCxFifoClr
 bCxFifoFull		equ 4
-bmCxFifoFull		equ 1 shl bCxFifoFull
+bmCxFifoFull		equ 1 << bCxFifoFull
 bCxFifoEmpty		equ 5
-bmCxFifoEmpty		equ 1 shl bCxFifoEmpty
+bmCxFifoEmpty		equ 1 << bCxFifoEmpty
 bFifo0Empty		equ 8
-bmFifo0Empty		equ 1 shl bFifo0Empty
+bmFifo0Empty		equ 1 << bFifo0Empty
 bFifo1Empty		equ 9
-bmFifo1Empty		equ 1 shl bFifo1Empty
+bmFifo1Empty		equ 1 << bFifo1Empty
 bFifo2Empty		equ 10
-bmFifo2Empty		equ 1 shl bFifo2Empty
+bmFifo2Empty		equ 1 << bFifo2Empty
 bFifo3Empty		equ 11
-bmFifo3Empty		equ 1 shl bFifo3Empty
+bmFifo3Empty		equ 1 << bFifo3Empty
 bFifoEmpty		equ 8
-bmFifoEmpty		equ 0Fh shl bFifoEmpty
+bmFifoEmpty		equ 0Fh << bFifoEmpty
 
 usbCxFifoBytes		equ 0123h
 pUsbCxFifoBytes		equ pUsbRange + usbCxFifoBytes
@@ -3441,7 +3441,7 @@ usbIdle			equ 0124h
 pUsbIdle		equ pUsbRange + usbIdle
 mpUsbIdle		equ mpUsbRange + usbIdle
 bUsbIdleMs		equ 0
-bmUsbIdleMs		equ 7 shl bUsbIdleMs
+bmUsbIdleMs		equ 7 << bUsbIdleMs
 
 usbGimr			equ 0130h
 pUsbGimr		equ pUsbRange + usbGimr
@@ -3450,11 +3450,11 @@ usbGisr			equ 0140h
 pUsbGisr		equ pUsbRange + usbGisr
 mpUsbGisr		equ mpUsbRange + usbGisr
 bUsbDevIntCx		equ 0
-bmUsbDevIntCx		equ 1 shl bUsbDevIntCx
+bmUsbDevIntCx		equ 1 << bUsbDevIntCx
 bUsbDevIntFifo		equ 1
-bmUsbDevIntFifo		equ 1 shl bUsbDevIntFifo
+bmUsbDevIntFifo		equ 1 << bUsbDevIntFifo
 bUsbDevIntDev		equ 2
-bmUsbDevIntDev		equ 1 shl bUsbDevIntDev
+bmUsbDevIntDev		equ 1 << bUsbDevIntDev
 
 usbCxImr		equ 0134h
 pUsbCxImr		equ pUsbRange + usbCxImr
@@ -3463,19 +3463,19 @@ usbCxIsr		equ 0144h
 pUsbCxIsr		equ pUsbRange + usbCxIsr
 mpUsbCxIsr		equ mpUsbRange + usbCxIsr
 bUsbIntCxSetup		equ 0
-bmUsbIntCxSetup		equ 1 shl bUsbIntCxSetup
+bmUsbIntCxSetup		equ 1 << bUsbIntCxSetup
 bUsbIntCxIn		equ 1
-bmUsbIntCxIn		equ 1 shl bUsbIntCxIn
+bmUsbIntCxIn		equ 1 << bUsbIntCxIn
 bUsbIntCxOut		equ 2
-bmUsbIntCxOut		equ 1 shl bUsbIntCxOut
+bmUsbIntCxOut		equ 1 << bUsbIntCxOut
 bUsbIntCxEnd		equ 3
-bmUsbIntCxEnd		equ 1 shl bUsbIntCxEnd
+bmUsbIntCxEnd		equ 1 << bUsbIntCxEnd
 bUsbIntCxErr		equ 4
-bmUsbIntCxErr		equ 1 shl bUsbIntCxErr
+bmUsbIntCxErr		equ 1 << bUsbIntCxErr
 bUsbIntCxAbort		equ 5
-bmUsbIntCxAbort		equ 1 shl bUsbIntCxAbort
+bmUsbIntCxAbort		equ 1 << bUsbIntCxAbort
 bUsbIntCx		equ 0
-bmUsbIntCx		equ 01Fh shl bUsbIntCx
+bmUsbIntCx		equ 01Fh << bUsbIntCx
 
 usbFifoRxImr		equ 0138h
 pUsbFifoRxImr		equ pUsbRange + usbFifoRxImr
@@ -3484,23 +3484,23 @@ usbFifoRxIsr		equ 0148h
 pUsbFifoRxIsr		equ pUsbRange + usbFifoRxIsr
 mpUsbFifoRxIsr		equ mpUsbRange + usbFifoRxIsr
 bUsbIntFifo0Out		equ 0
-bmUsbIntFifo0Out	equ 1 shl bUsbIntFifo0Out
+bmUsbIntFifo0Out	equ 1 << bUsbIntFifo0Out
 bUsbIntFifo0Spk		equ 1
-bmUsbIntFifo0Spk	equ 1 shl bUsbIntFifo0Spk
+bmUsbIntFifo0Spk	equ 1 << bUsbIntFifo0Spk
 bUsbIntFifo1Out		equ 2
-bmUsbIntFifo1Out	equ 1 shl bUsbIntFifo1Out
+bmUsbIntFifo1Out	equ 1 << bUsbIntFifo1Out
 bUsbIntFifo1Spk		equ 3
-bmUsbIntFifo1Spk	equ 1 shl bUsbIntFifo1Spk
+bmUsbIntFifo1Spk	equ 1 << bUsbIntFifo1Spk
 bUsbIntFifo2Out		equ 4
-bmUsbIntFifo2Out	equ 1 shl bUsbIntFifo2Out
+bmUsbIntFifo2Out	equ 1 << bUsbIntFifo2Out
 bUsbIntFifo2Spk		equ 5
-bmUsbIntFifo2Spk	equ 1 shl bUsbIntFifo2Spk
+bmUsbIntFifo2Spk	equ 1 << bUsbIntFifo2Spk
 bUsbIntFifo3Out		equ 6
-bmUsbIntFifo3Out	equ 1 shl bUsbIntFifo3Out
+bmUsbIntFifo3Out	equ 1 << bUsbIntFifo3Out
 bUsbIntFifo3Spk		equ 7
-bmUsbIntFifo3Spk	equ 1 shl bUsbIntFifo3Spk
+bmUsbIntFifo3Spk	equ 1 << bUsbIntFifo3Spk
 bUsbFifoRxInts		equ 0
-bmUsbFifoRxInts		equ 0FFh shl bUsbFifoRxInts
+bmUsbFifoRxInts		equ 0FFh << bUsbFifoRxInts
 
 usbFifoTxImr		equ 013Ah
 pUsbFifoTxImr		equ pUsbRange + usbFifoTxImr
@@ -3509,15 +3509,15 @@ usbFifoTxIsr		equ 014Ah
 pUsbFifoTxIsr		equ pUsbRange + usbFifoTxIsr
 mpUsbFifoTxIsr		equ mpUsbRange + usbFifoTxIsr
 bUsbIntFifo0In		equ 0
-bmUsbIntFifo0In		equ 1 shl bUsbIntFifo0In
+bmUsbIntFifo0In		equ 1 << bUsbIntFifo0In
 bUsbIntFifo1In		equ 1
-bmUsbIntFifo1In		equ 1 shl bUsbIntFifo1In
+bmUsbIntFifo1In		equ 1 << bUsbIntFifo1In
 bUsbIntFifo2In		equ 2
-bmUsbIntFifo2In		equ 1 shl bUsbIntFifo2In
+bmUsbIntFifo2In		equ 1 << bUsbIntFifo2In
 bUsbIntFifo3In		equ 3
-bmUsbIntFifo3In		equ 1 shl bUsbIntFifo3In
+bmUsbIntFifo3In		equ 1 << bUsbIntFifo3In
 bUsbFifoTxInts		equ 0
-bmUsbFifoTxInts		equ 0Fh shl bUsbFifoTxInts
+bmUsbFifoTxInts		equ 0Fh << bUsbFifoTxInts
 
 usbDevImr		equ 013Ch
 pUsbDevImr		equ pUsbRange + usbDevImr
@@ -3526,29 +3526,29 @@ usbDevIsr		equ 014Ch
 pUsbDevIsr		equ pUsbRange + usbDevIsr
 mpUsbDevIsr		equ mpUsbRange + usbDevIsr
 bUsbIntDevReset		equ 0
-bmUsbIntDevReset	equ 1 shl bUsbIntDevReset
+bmUsbIntDevReset	equ 1 << bUsbIntDevReset
 bUsbIntDevSuspend	equ 1
-bmUsbIntDevSuspend	equ 1 shl bUsbIntDevSuspend
+bmUsbIntDevSuspend	equ 1 << bUsbIntDevSuspend
 bUsbIntDevResume	equ 2
-bmUsbIntDevResume	equ 1 shl bUsbIntDevResume
+bmUsbIntDevResume	equ 1 << bUsbIntDevResume
 bUsbIntDevIsocErr	equ 3
-bmUsbIntDevIsocErr	equ 1 shl bUsbIntDevIsocErr
+bmUsbIntDevIsocErr	equ 1 << bUsbIntDevIsocErr
 bUsbIntDevIsocAbt	equ 4
-bmUsbIntDevIsocAbt	equ 1 shl bUsbIntDevIsocAbt
+bmUsbIntDevIsocAbt	equ 1 << bUsbIntDevIsocAbt
 bUsbIntDevZlpTx		equ 5
-bmUsbIntDevZlpTx	equ 1 shl bUsbIntDevZlpTx
+bmUsbIntDevZlpTx	equ 1 << bUsbIntDevZlpTx
 bUsbIntDevZlpRx		equ 6
-bmUsbIntDevZlpRx	equ 1 shl bUsbIntDevZlpRx
+bmUsbIntDevZlpRx	equ 1 << bUsbIntDevZlpRx
 bUsbIntDevDmaFin	equ 7
-bmUsbIntDevDmaFin	equ 1 shl bUsbIntDevDmaFin
+bmUsbIntDevDmaFin	equ 1 << bUsbIntDevDmaFin
 bUsbIntDevDmaErr	equ 8
-bmUsbIntDevDmaErr	equ 1 shl bUsbIntDevDmaErr
+bmUsbIntDevDmaErr	equ 1 << bUsbIntDevDmaErr
 bUsbIntDevIdle		equ 9
-bmUsbIntDevIdle		equ 1 shl bUsbIntDevIdle
+bmUsbIntDevIdle		equ 1 << bUsbIntDevIdle
 bUsbIntDevWakeup	equ 10
-bmUsbIntDevWakeup	equ 1 shl bUsbIntDevWakeup
+bmUsbIntDevWakeup	equ 1 << bUsbIntDevWakeup
 bUsbDevInts		equ 0
-bmUsbDevInts		equ 07FFh shl bUsbDevInts
+bmUsbDevInts		equ 07FFh << bUsbDevInts
 
 usbRxZlp		equ 0150h
 pUsbRxZlp		equ pUsbRange + usbRxZlp
@@ -3557,59 +3557,59 @@ usbTxZlp		equ 0154h
 pUsbTxZlp		equ pUsbRange + usbTxZlp
 mpUsbTxZlp		equ mpUsbRange + usbTxZlp
 bUsbEp1Zlp		equ 0
-bmUsbEp1Zlp		equ 1 shl bUsbEp1Zlp
+bmUsbEp1Zlp		equ 1 << bUsbEp1Zlp
 bUsbEp2Zlp		equ 1
-bmUsbEp2Zlp		equ 1 shl bUsbEp2Zlp
+bmUsbEp2Zlp		equ 1 << bUsbEp2Zlp
 bUsbEp3Zlp		equ 2
-bmUsbEp3Zlp		equ 1 shl bUsbEp3Zlp
+bmUsbEp3Zlp		equ 1 << bUsbEp3Zlp
 bUsbEp4Zlp		equ 3
-bmUsbEp4Zlp		equ 1 shl bUsbEp4Zlp
+bmUsbEp4Zlp		equ 1 << bUsbEp4Zlp
 bUsbEp5Zlp		equ 4
-bmUsbEp5Zlp		equ 1 shl bUsbEp5Zlp
+bmUsbEp5Zlp		equ 1 << bUsbEp5Zlp
 bUsbEp6Zlp		equ 5
-bmUsbEp6Zlp		equ 1 shl bUsbEp6Zlp
+bmUsbEp6Zlp		equ 1 << bUsbEp6Zlp
 bUsbEp7Zlp		equ 6
-bmUsbEp7Zlp		equ 1 shl bUsbEp7Zlp
+bmUsbEp7Zlp		equ 1 << bUsbEp7Zlp
 bUsbEp8Zlp		equ 7
-bmUsbEp8Zlp		equ 1 shl bUsbEp8Zlp
+bmUsbEp8Zlp		equ 1 << bUsbEp8Zlp
 bUsbZlp			equ 0
-bmUsbZlp		equ 0FFh shl bUsbZlp
+bmUsbZlp		equ 0FFh << bUsbZlp
 
 usbIsoEasr		equ 0158h
 pUsbIsoEasr		equ pUsbRange + usbIsoEasr
 mpUsbIsoEasr		equ mpUsbRange + usbIsoEasr
 bUsbEp1IsocAbort	equ 0
-bmUsbEp1IsocAbort	equ 1 shl bUsbEp1IsocAbort
+bmUsbEp1IsocAbort	equ 1 << bUsbEp1IsocAbort
 bUsbEp2IsocAbort	equ 1
-bmUsbEp2IsocAbort	equ 1 shl bUsbEp2IsocAbort
+bmUsbEp2IsocAbort	equ 1 << bUsbEp2IsocAbort
 bUsbEp3IsocAbort	equ 2
-bmUsbEp3IsocAbort	equ 1 shl bUsbEp3IsocAbort
+bmUsbEp3IsocAbort	equ 1 << bUsbEp3IsocAbort
 bUsbEp4IsocAbort	equ 3
-bmUsbEp4IsocAbort	equ 1 shl bUsbEp4IsocAbort
+bmUsbEp4IsocAbort	equ 1 << bUsbEp4IsocAbort
 bUsbEp5IsocAbort	equ 4
-bmUsbEp5IsocAbort	equ 1 shl bUsbEp5IsocAbort
+bmUsbEp5IsocAbort	equ 1 << bUsbEp5IsocAbort
 bUsbEp6IsocAbort	equ 5
-bmUsbEp6IsocAbort	equ 1 shl bUsbEp6IsocAbort
+bmUsbEp6IsocAbort	equ 1 << bUsbEp6IsocAbort
 bUsbEp7IsocAbort	equ 6
-bmUsbEp7IsocAbort	equ 1 shl bUsbEp7IsocAbort
+bmUsbEp7IsocAbort	equ 1 << bUsbEp7IsocAbort
 bUsbEp8IsocAbort	equ 7
-bmUsbEp8IsocAbort	equ 1 shl bUsbEp8IsocAbort
+bmUsbEp8IsocAbort	equ 1 << bUsbEp8IsocAbort
 bUsbEp1IsocErr		equ 16
-bmUsbEp1IsocErr		equ 1 shl bUsbEp1IsocErr
+bmUsbEp1IsocErr		equ 1 << bUsbEp1IsocErr
 bUsbEp2IsocErr		equ 17
-bmUsbEp2IsocErr		equ 1 shl bUsbEp2IsocErr
+bmUsbEp2IsocErr		equ 1 << bUsbEp2IsocErr
 bUsbEp3IsocErr		equ 18
-bmUsbEp3IsocErr		equ 1 shl bUsbEp3IsocErr
+bmUsbEp3IsocErr		equ 1 << bUsbEp3IsocErr
 bUsbEp4IsocErr		equ 19
-bmUsbEp4IsocErr		equ 1 shl bUsbEp4IsocErr
+bmUsbEp4IsocErr		equ 1 << bUsbEp4IsocErr
 bUsbEp5IsocErr		equ 20
-bmUsbEp5IsocErr		equ 1 shl bUsbEp5IsocErr
+bmUsbEp5IsocErr		equ 1 << bUsbEp5IsocErr
 bUsbEp6IsocErr		equ 21
-bmUsbEp6IsocErr		equ 1 shl bUsbEp6IsocErr
+bmUsbEp6IsocErr		equ 1 << bUsbEp6IsocErr
 bUsbEp7IsocErr		equ 22
-bmUsbEp7IsocErr		equ 1 shl bUsbEp7IsocErr
+bmUsbEp7IsocErr		equ 1 << bUsbEp7IsocErr
 bUsbEp8IsocErr		equ 23
-bmUsbEp8IsocErr		equ 1 shl bUsbEp8IsocErr
+bmUsbEp8IsocErr		equ 1 << bUsbEp8IsocErr
 
 usbInEp1		equ 0160h
 pUsbInEp1		equ pUsbRange + usbInEp1
@@ -3660,15 +3660,15 @@ usbOutEp8		equ 019Ch
 pUsbOutEp8		equ pUsbRange + usbOutEp8
 mpUsbOutEp8		equ mpUsbRange + usbOutEp8
 bUsbEpMaxPktSz		equ 0
-bmUsbEpMaxPktSz		equ 07FFh shl bUsbEpMaxPktSz
+bmUsbEpMaxPktSz		equ 07FFh << bUsbEpMaxPktSz
 bUsbEpStall		equ 11
-bmUsbEpStall		equ 1 shl bUsbEpStall
+bmUsbEpStall		equ 1 << bUsbEpStall
 bUsbEpReset		equ 12
-bmUsbEpReset		equ 1 shl bUsbEpReset
+bmUsbEpReset		equ 1 << bUsbEpReset
 bUsbInEpTxNum		equ 13
-bmUsbInEpTxNum		equ 3 shl bUsbInEpTxNum
+bmUsbInEpTxNum		equ 3 << bUsbInEpTxNum
 bUsbInEpSendZlp		equ 15
-bmUsbInEpSendZlp	equ 1 shl bUsbInEpSendZlp
+bmUsbInEpSendZlp	equ 1 << bUsbInEpSendZlp
 
 usbEp1Map		equ 01A0h
 pUsbEp1Map		equ pUsbRange + usbEp1Map
@@ -3695,9 +3695,9 @@ usbEp8Map		equ 01A7h
 pUsbEp8Map		equ pUsbRange + usbEp8Map
 mpUsbEp8Map		equ mpUsbRange + usbEp8Map
 bUsbEpMapIn		equ 0
-bmUsbEpMapIn		equ 0Fh shl bUsbEpMapIn
+bmUsbEpMapIn		equ 0Fh << bUsbEpMapIn
 bUsbEpMapOut		equ 4
-bmUsbEpMapOut		equ 0Fh shl bUsbEpMapOut
+bmUsbEpMapOut		equ 0Fh << bUsbEpMapOut
 
 usbFifo0Map		equ 01A8h
 pUsbFifo0Map		equ pUsbRange + usbFifo0Map
@@ -3712,12 +3712,12 @@ usbFifo3Map		equ 01ABh
 pUsbFifo3Map		equ pUsbRange + usbFifo3Map
 mpUsbFifo3Map		equ mpUsbRange + usbFifo3Map
 bUsbFifoEp		equ 0
-bmUsbFifoEp		equ 0Fh shl bUsbFifoEp
+bmUsbFifoEp		equ 0Fh << bUsbFifoEp
 bUsbFifoDir		equ 4
-usbFifoOut		equ 0 shl bUsbFifoDir
-usbFifoIn		equ 1 shl bUsbFifoDir
-usbFifoBi		equ 2 shl bUsbFifoDir
-bmUsbFifoDir		equ 3 shl bUsbFifoDir
+usbFifoOut		equ 0 << bUsbFifoDir
+usbFifoIn		equ 1 << bUsbFifoDir
+usbFifoBi		equ 2 << bUsbFifoDir
+bmUsbFifoDir		equ 3 << bUsbFifoDir
 
 usbFifo0Cfg		equ 01ACh
 pUsbFifo0Cfg		equ pUsbRange + usbFifo0Cfg
@@ -3732,21 +3732,21 @@ usbFifo3Cfg		equ 01AFh
 pUsbFifo3Cfg		equ pUsbRange + usbFifo3Cfg
 mpUsbFifo3Cfg		equ mpUsbRange + usbFifo3Cfg
 bUsbFifoType		equ 0
-usbFifoIsoc		equ 1 shl bUsbFifoType
-usbFifoBulk		equ 2 shl bUsbFifoType
-usbFifoIntr		equ 3 shl bUsbFifoType
-bmUsbFifoType		equ 3 shl bUsbFifoType
+usbFifoIsoc		equ 1 << bUsbFifoType
+usbFifoBulk		equ 2 << bUsbFifoType
+usbFifoIntr		equ 3 << bUsbFifoType
+bmUsbFifoType		equ 3 << bUsbFifoType
 bUsbFifoNumBlks		equ 2
-usbFifo1Blk		equ 0 shl bUsbFifoNumBlks
-usbFifo2Blks		equ 1 shl bUsbFifoNumBlks
-usbFifo3Blks		equ 2 shl bUsbFifoNumBlks
-bmUsbFifoNumBlks	equ 3 shl bUsbFifoNumBlks
+usbFifo1Blk		equ 0 << bUsbFifoNumBlks
+usbFifo2Blks		equ 1 << bUsbFifoNumBlks
+usbFifo3Blks		equ 2 << bUsbFifoNumBlks
+bmUsbFifoNumBlks	equ 3 << bUsbFifoNumBlks
 bUsbFifoBlkSz		equ 4
-usbFifoBlkSz512		equ 0 shl bUsbFifoBlkSz
-usbFifoBlkSz1024	equ 1 shl bUsbFifoBlkSz
-bmUsbFifoBlkSz		equ 1 shl bUsbFifoBlkSz
+usbFifoBlkSz512		equ 0 << bUsbFifoBlkSz
+usbFifoBlkSz1024	equ 1 << bUsbFifoBlkSz
+bmUsbFifoBlkSz		equ 1 << bUsbFifoBlkSz
 bUsbFifoEn		equ 5
-bmUsbFifoEn		equ 1 shl bUsbFifoEn
+bmUsbFifoEn		equ 1 << bUsbFifoEn
 
 usbFifo0Csr		equ 01B0h
 pUsbFifo0Csr		equ pUsbRange + usbFifo0Csr
@@ -3761,59 +3761,59 @@ usbFifo3Csr		equ 01BCh
 pUsbFifo3Csr		equ pUsbRange + usbFifo3Csr
 mpUsbFifo3Csr		equ mpUsbRange + usbFifo3Csr
 bUsbFifoLen		equ 0
-bmUsbFifoLen		equ 07FFh shl bUsbFifoLen
+bmUsbFifoLen		equ 07FFh << bUsbFifoLen
 bUsbFifoReset		equ 12
-bmUsbFifoReset		equ 1 shl bUsbFifoReset
+bmUsbFifoReset		equ 1 << bUsbFifoReset
 
 usbDmaFifo		equ 01C0h
 pUsbDmaFifo		equ pUsbRange + usbDmaFifo
 mpUsbDmaFifo		equ mpUsbRange + usbDmaFifo
 bUsbDmaFifo0		equ 0
-bmUsbDmaFifo0		equ 1 shl bUsbDmaFifo0
+bmUsbDmaFifo0		equ 1 << bUsbDmaFifo0
 bUsbDmaFifo1		equ 1
-bmUsbDmaFifo1		equ 1 shl bUsbDmaFifo1
+bmUsbDmaFifo1		equ 1 << bUsbDmaFifo1
 bUsbDmaFifo2		equ 2
-bmUsbDmaFifo2		equ 1 shl bUsbDmaFifo2
+bmUsbDmaFifo2		equ 1 << bUsbDmaFifo2
 bUsbDmaFifo3		equ 3
-bmUsbDmaFifo3		equ 1 shl bUsbDmaFifo3
+bmUsbDmaFifo3		equ 1 << bUsbDmaFifo3
 bUsbDmaCxFifo		equ 4
-bmUsbDmaCxFifo		equ 1 shl bUsbDmaCxFifo
+bmUsbDmaCxFifo		equ 1 << bUsbDmaCxFifo
 bUsbDmaFifo		equ 0
-bmUsbDmaNoFifo		equ 0 shl bUsbDmaFifo
-bmUsbDmaFifo		equ 01Fh shl bUsbDmaFifo
+bmUsbDmaNoFifo		equ 0 << bUsbDmaFifo
+bmUsbDmaFifo		equ 01Fh << bUsbDmaFifo
 
 usbDmaCtrl		equ 01C8h
 pUsbDmaCtrl		equ pUsbRange + usbDmaCtrl
 mpUsbDmaCtrl		equ mpUsbRange + usbDmaCtrl
 bUsbDmaStart		equ 0
-bmUsbDmaStart		equ 1 shl bUsbDmaStart
+bmUsbDmaStart		equ 1 << bUsbDmaStart
 bUsbDmaDir		equ 1
-usbDmaFifo2Mem		equ 0 shl bUsbDmaDir
-usbDmaMem2Fifo		equ 1 shl bUsbDmaDir
-usbDmaFifo2Fifo		equ 2 shl bUsbDmaDir
-bmUsbDmaDir		equ 3 shl bUsbDmaDir
+usbDmaFifo2Mem		equ 0 << bUsbDmaDir
+usbDmaMem2Fifo		equ 1 << bUsbDmaDir
+usbDmaFifo2Fifo		equ 2 << bUsbDmaDir
+bmUsbDmaDir		equ 3 << bUsbDmaDir
 bUsbDmaAbort		equ 3
-bmUsbDmaAbort		equ 1 shl bUsbDmaAbort
+bmUsbDmaAbort		equ 1 << bUsbDmaAbort
 bUsbDmaClrFifo		equ 4
-bmUsbDmaClrFifo		equ 1 shl bUsbDmaClrFifo
+bmUsbDmaClrFifo		equ 1 << bUsbDmaClrFifo
 
 usbDmaLen		equ 01C9h
 pUsbDmaLen		equ pUsbRange + usbDmaLen
 mpUsbDmaLen		equ mpUsbRange + usbDmaLen
 bUsbDmaLen		equ 0
-bmUsbDmaLen		equ 01FFFFh shl bUsbDmaLen
+bmUsbDmaLen		equ 01FFFFh << bUsbDmaLen
 
 usbDmaAddr		equ 01CCh
 pUsbDmaAddr		equ pUsbRange + usbDmaAddr
 mpUsbDmaAddr		equ mpUsbRange + usbDmaAddr
 bUsbDmaAddr		equ 0
-bmUsbDmaAddr		equ 07FFFFh shl bUsbDmaAddr
+bmUsbDmaAddr		equ 07FFFFh << bUsbDmaAddr
 
 usbEp0Data		equ 01D0h
 pUsbEp0Data		equ pUsbRange + usbEp0Data
 mpUsbEp0Data		equ mpUsbRange + usbEp0Data
 bUsbEp0Data		equ 0
-bmUsbEp0Data		equ 0FFFFFFFFh shl bUsbEp0Data
+bmUsbEp0Data		equ 0FFFFFFFFh << bUsbEp0Data
 
 ;LCD Ports
 ;--------------------------------
@@ -3848,14 +3848,14 @@ pLcdCtrl		equ pLcdRange + lcdCtrl
 mpLcdCtrl		equ mpLcdRange + lcdCtrl
 lcdEn			equ 01h
 lcdTft			equ 20h
-lcdBpp1			equ 0000b + lcdTft + lcdEn
-lcdBpp2			equ 0010b + lcdTft + lcdEn
-lcdBpp4			equ 0100b + lcdTft + lcdEn
-lcdBpp8			equ 0110b + lcdTft + lcdEn
-lcdBpp16Alt		equ 1000b + lcdTft + lcdEn
-lcdBpp24		equ 1010b + lcdTft + lcdEn
-lcdBpp16		equ 1100b + lcdTft + lcdEn ; Default LCD mode
-lcdBpp12		equ 1110b + lcdTft + lcdEn
+lcdBpp1			equ 0000b | lcdTft | lcdEn
+lcdBpp2			equ 0010b | lcdTft | lcdEn
+lcdBpp4			equ 0100b | lcdTft | lcdEn
+lcdBpp8			equ 0110b | lcdTft | lcdEn
+lcdBpp16Alt		equ 1000b | lcdTft | lcdEn
+lcdBpp24		equ 1010b | lcdTft | lcdEn
+lcdBpp16		equ 1100b | lcdTft | lcdEn ; Default LCD mode
+lcdBpp12		equ 1110b | lcdTft | lcdEn
 lcdBgr			equ 100h
 lcdBigEndian		equ 200h
 lcdBigEndianPixels	equ 400h
@@ -3865,7 +3865,7 @@ lcdIntBack		equ 1000h
 lcdIntActiveVideo	equ 2000h
 lcdIntFront		equ 3000h
 lcdWatermark		equ 10000h
-lcdNormalMode		equ lcdPwr + lcdBgr + lcdBpp16
+lcdNormalMode		equ lcdPwr | lcdBgr | lcdBpp16
 
 lcdImsc			equ 001Ch
 pLcdImsc		equ pLcdRange + lcdImsc
@@ -3881,13 +3881,13 @@ pLcdIcr			equ pLcdRange + lcdIcr
 mpLcdIcr		equ mpLcdRange + lcdIcr
 
 bLcdIntFuf		equ 1
-lcdIntFuf		equ 1 shl bLcdIntFuf
+lcdIntFuf		equ 1 << bLcdIntFuf
 bLcdIntLNBU		equ 2
-lcdIntLNBU		equ 1 shl bLcdIntLNBU
+lcdIntLNBU		equ 1 << bLcdIntLNBU
 bLcdIntVcomp		equ 3
-lcdIntVcomp		equ 1 shl bLcdIntVcomp
+lcdIntVcomp		equ 1 << bLcdIntVcomp
 bLcdIntMbErr		equ 4
-lcdIntMbErr		equ 1 shl bLcdIntMbErr
+lcdIntMbErr		equ 1 << bLcdIntMbErr
 
 lcdCurr			equ 002Ch
 pLcdCurr		equ pLcdRange + lcdCurr
@@ -3961,24 +3961,24 @@ pIntMasked		equ pIntRange + intMasked
 mpIntMasked		equ mpIntRange + intMasked
 
 bIntOn			equ 0
-intOn			equ 1 shl bIntOn
+intOn			equ 1 << bIntOn
 bIntTmr1		equ 1
-intTmr1			equ 1 shl bIntTmr1
+intTmr1			equ 1 << bIntTmr1
 bIntTmr2		equ 2
-intTmr2			equ 1 shl bIntTmr2
+intTmr2			equ 1 << bIntTmr2
 bIntTmr3		equ 3
-intTmr3			equ 1 shl bIntTmr3
+intTmr3			equ 1 << bIntTmr3
 bIntOSTmr		equ 4
-intOSTmr		equ 1 shl bIntOSTmr
+intOSTmr		equ 1 << bIntOSTmr
 bIntKey			equ 10
-intKey			equ 1 shl bIntKey
+intKey			equ 1 << bIntKey
 bIntLcd			equ 11
-intLcd			equ 1 shl bIntLcd
+intLcd			equ 1 << bIntLcd
 bIntRtc			equ 12
-intRtc			equ 1 shl bIntRtc
+intRtc			equ 1 << bIntRtc
 bIntUsb			equ 13
-intUsb			equ 1 shl bIntUsb
-intDefaultMask		equ intOn + intTmr3 + intOSTmr + intRtc + intUsb
+intUsb			equ 1 << bIntUsb
+intDefaultMask		equ intOn | intTmr3 | intOSTmr | intRtc | intUsb
 
 ;Timer Ports
 ;-----------------------------------
@@ -4030,52 +4030,52 @@ pTmrCtrl		equ 7030h
 mpTmrCtrl		equ 0F20030h
 
 bTmr1Enable		equ 0
-tmr1Enable		equ 1shlbTmr1Enable
+tmr1Enable		equ 1<<bTmr1Enable
 bTmr1Crystal		equ 1
-tmr1Crystal		equ 1shlbTmr1Crystal
+tmr1Crystal		equ 1<<bTmr1Crystal
 bTmr1Overflow		equ 2
-tmr1Overflow		equ 1shlbTmr1Overflow
+tmr1Overflow		equ 1<<bTmr1Overflow
 bTmr2Enable		equ 3
-tmr2Enable		equ 1shlbTmr2Enable
+tmr2Enable		equ 1<<bTmr2Enable
 bTmr2Crystal		equ 4
-tmr2Crystal		equ 1shlbTmr2Crystal
+tmr2Crystal		equ 1<<bTmr2Crystal
 bTmr2Overflow		equ 5
-tmr2Overflow		equ 1shlbTmr2Overflow
+tmr2Overflow		equ 1<<bTmr2Overflow
 bTmr3Enable		equ 6
-tmr3Enable		equ 1shlbTmr3Enable
+tmr3Enable		equ 1<<bTmr3Enable
 bTmr3Crystal		equ 7
-tmr3Crystal		equ 1shlbTmr3Crystal
+tmr3Crystal		equ 1<<bTmr3Crystal
 bTmr3Overflow		equ 8
-tmr3Overflow		equ 1shlbTmr3Overflow
+tmr3Overflow		equ 1<<bTmr3Overflow
 bTmr1CountUp		equ 9
-tmr1CountUp		equ 1shlbTmr1CountUp
+tmr1CountUp		equ 1<<bTmr1CountUp
 bTmr2CountUp		equ 10
-tmr2CountUp		equ 1shlbTmr2CountUp
+tmr2CountUp		equ 1<<bTmr2CountUp
 bTmr3CountUp		equ 11
-tmr3CountUp		equ 1shlbTmr3CountUp
+tmr3CountUp		equ 1<<bTmr3CountUp
 
 tmrIntStatus		equ 34h
 pTmrIntStatus		equ 7034h
 mpTmrIntStatus		equ 0F20034h
 
 bTmr1IntMatch1		equ 0
-tmr1IntMatch1		equ 1shlbTmr1IntMatch1
+tmr1IntMatch1		equ 1<<bTmr1IntMatch1
 bTmr1IntMatch2		equ 1
-tmr1IntMatch2		equ 1shlbTmr1IntMatch2
+tmr1IntMatch2		equ 1<<bTmr1IntMatch2
 bTmr1IntOverflow	equ 2
-tmr1IntOverflow		equ 1shlbTmr1IntOverflow
+tmr1IntOverflow		equ 1<<bTmr1IntOverflow
 bTmr2IntMatch1		equ 3
-tmr2IntMatch1		equ 1shlbTmr2IntMatch1
+tmr2IntMatch1		equ 1<<bTmr2IntMatch1
 bTmr2IntMatch2		equ 4
-tmr2IntMatch2		equ 1shlbTmr2IntMatch2
+tmr2IntMatch2		equ 1<<bTmr2IntMatch2
 bTmr2IntOverflow	equ 5
-tmr2IntOverflow		equ 1shlbTmr2IntOverflow
+tmr2IntOverflow		equ 1<<bTmr2IntOverflow
 bTmr3IntMatch1		equ 6
-tmr3IntMatch1		equ 1shlbTmr3IntMatch1
+tmr3IntMatch1		equ 1<<bTmr3IntMatch1
 bTmr3IntMatch2		equ 7
-tmr3IntMatch2		equ 1shlbTmr3IntMatch2
+tmr3IntMatch2		equ 1<<bTmr3IntMatch2
 bTmr3IntOverflow	equ 8
-tmr3IntOverflow		equ 1shlbTmr3IntOverflow
+tmr3IntOverflow		equ 1<<bTmr3IntOverflow
 
 tmrIntMask		equ 38h
 pTmrIntMask		equ 7038h
@@ -4121,11 +4121,11 @@ pKeyGpio		equ pKeyRange + keyGpio
 mpKeyGpio		equ mpKeyRange + keyGpio
 
 bKeyIntScanDone		equ 0
-keyIntScanDone		equ 1 shl bKeyIntScanDone
+keyIntScanDone		equ 1 << bKeyIntScanDone
 bKeyIntKeyChange	equ 1
-keyIntKeyChange		equ 1 shl bKeyIntKeyChange
+keyIntKeyChange		equ 1 << bKeyIntKeyChange
 bKeyIntKeyPress		equ 2
-keyIntKeyPress		equ 1 shl bKeyIntKeyPress
+keyIntKeyPress		equ 1 << bKeyIntKeyPress
 
 keyModeIdle		equ 0
 keyModeAny		equ 1
@@ -4238,7 +4238,7 @@ Lbackquote		equ 060h
 La			equ 061h
 Lb			equ 062h
 Lc			equ 063h
-;Ld			equ 064h
+Ld			equ 064h
 Le			equ 065h
 Lf			equ 066h
 Lg			equ 067h
@@ -6535,7 +6535,7 @@ GroupObj		equ 17h ;group.
 ;System Error Codes
 ;-----------------------------------------------------------
 E_EDITF			equ 7 ;allow re-entering application
-E_EDIT			equ 1shlE_EDITF
+E_EDIT			equ 1<<E_EDITF
 E_Mask			equ 7Fh
 E_Overflow		equ 1+E_EDIT
 E_DivBy0		equ 2+E_EDIT
@@ -6805,14 +6805,14 @@ appCurGraphic		equ 5		;1=graphic cursor
 appCurWord		equ 6		;1=text cursor covers entire word
 appExit 		equ 7		;1=application handles [EXIT] key itself
 
-appWantIntrptF		equ 1shlappWantIntrpt
-appTextSaveF		equ 1shlappTextSave
-appAutoScrollF		equ 1shlappAutoScroll
-appMenusF		equ 1shlappMenus
-appLockMenusF		equ 1shlappLockMenus
-appCurGraphicF		equ 1shlappCurGraphic
-appCurWordF		equ 1shlappCurWord
-appExitF		equ 1shlappExit
+appWantIntrptF		equ 1<<appWantIntrpt
+appTextSaveF		equ 1<<appTextSave
+appAutoScrollF		equ 1<<appAutoScroll
+appMenusF		equ 1<<appMenus
+appLockMenusF		equ 1<<appLockMenus
+appCurGraphicF		equ 1<<appCurGraphic
+appCurWordF		equ 1<<appCurWord
+appExitF		equ 1<<appExit
 ;----------------------------------------------------------------------
 rclFlag			equ 0Eh		;OS recall queue flags
 enableQueue		equ 7		;1 = enable recall queue
@@ -7033,5 +7033,5 @@ putMapUseColor		equ 4		;1 = use custom color
 graphDispFlags		equ 4Bh
 backgroundValid		equ 4		;1 = items in graph background are still valid
 ;----------------------------------------------------------------------
-;#endif
-;.list
+#endif
+.list

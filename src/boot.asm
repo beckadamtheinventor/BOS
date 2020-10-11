@@ -41,26 +41,9 @@ os_return:
 	ld hl,str_StartupProgram
 	push hl
 	call sys_ExecuteFile
-	pop bc
-os_main:
-	;ld bc,$500C
-	;ld a,$FF
-	;out (bc),a
-	;inc c
-	;out (bc),a
-	;ld bc,$5005
-	;xor a,a
-	;out (bc),a
-	;dec c
-	;inc a
-	;out (bc),a
-	;ei
-	ld hl,str_CmdExecutable
-	ld bc,$FF0000
-	push bc,hl
-	call sys_ExecuteFile
-	pop bc,bc
-	jq os_main
+	pop bc ;we're never getting back here lmao
+	jq os_return
+
 
 
 handle_interrupt:
@@ -108,32 +91,32 @@ return_from_interrupt:
 	reti
 
 low_bit_0_int:
-;	ld a,1 shl 0
-;	out (bc),a
+	ld a,1 shl 0
+	out (bc),a
 	ld c,4
 	in a,(bc)
 	res 0,a
 	out (bc),a
 	jq return_from_interrupt
 low_bit_1_int:
-;	ld a,1 shl 1
-;	out (bc),a
+	ld a,1 shl 1
+	out (bc),a
 	ld c,4
 	in a,(bc)
 	res 1,a
 	out (bc),a
 	jq return_from_interrupt
 low_bit_2_int:
-;	ld a,1 shl 2
-;	out (bc),a
+	ld a,1 shl 2
+	out (bc),a
 	ld c,4
 	in a,(bc)
 	res 2,a
 	out (bc),a
 	jq return_from_interrupt
 low_bit_3_int:
-;	ld a,1 shl 3
-;	out (bc),a
+	ld a,1 shl 3
+	out (bc),a
 	ld c,4
 	in a,(bc)
 	res 3,a
@@ -164,8 +147,8 @@ high_bit_4_int:
 	out (bc),a
 	jq return_from_interrupt
 high_bit_5_int: ;USB interrupt
-;	ld a,1 shl 5
-;	out (bc),a
+	ld a,1 shl 5
+	out (bc),a
 	ld c,5
 	in a,(bc)
 	res 5,a

@@ -9,7 +9,7 @@ fasmg src/lib/usbdrvce/usbdrvce.asm obj/usbdrvce.bin
 fasmg src/explorer.asm obj/explorer.bin
 fasmg src/fexplore.asm obj/fexplore.bin
 fasmg src/memedit.asm obj/memedit.bin
-
+fasmg src/updater.asm obj/updater.bin
 
 
 fasmg src/main.asm obj/main.bin

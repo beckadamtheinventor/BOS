@@ -17,7 +17,7 @@ macro include_library? file*
 					symbol := $ + %-1
 					jp offset
 				end if
-				offset = offset + @ez80.ws
+				offset = offset + word + @ez80.il
 			if 0
 		end macro
 	end iterate

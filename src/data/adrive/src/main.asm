@@ -88,7 +88,7 @@ aprg_main:
 	ld bc,0
 	push de,bc,hl
 	call bos.fs_GetClusterPtr
-	pop bc,bc,bc
+	pop de,bc,bc
 	jq c,.fail ;file first cluster could not be located
 	ld a,(hl)
 	cp a,$EF
@@ -99,24 +99,27 @@ aprg_main:
 	jr nz,.fail ;not a valid executable
 	dec hl
 	ld (bos.asm_prgm_size),bc
-	push hl,bc
+	push de,bc
 	push bc
 	pop hl
 	call bos._EnoughMem
-	pop bc,hl
-	jq c,.fail ;not enough memory
-;copy program into UserMem
-	push hl
-	ld hl,ti.userMem
-	push hl
-	add hl,bc
-	ld (bos.top_of_UserMem),hl
-	pop de,hl
-	inc hl
-	inc hl
-	push de
-	ldir
-	ret ;jump to userMem
+	pop bc,de
+	jq c,bos._ErrMemory ;not enough memory
+;read program into UserMem
+	or a,a
+	sbc hl,hl
+	push hl ;int offset
+	push de ;void *fd
+	ld de,1
+	push de ;uint8_t count
+	push bc ;int len
+	ld bc,ti.userMem
+	push bc ;void *dest
+	ld hl,(bos.asm_prgm_size)
+	call bos._InsertMem
+	call bos.fs_Read
+	pop bc,bc,bc,bc,bc
+	jp ti.userMem ;jump to userMem
 .fail:
 	scf
 	sbc hl,hl
@@ -127,114 +130,131 @@ fs_file "BOOT", "EXE", f_readonly+f_system
 	jr boot_main
 	db "FEX",0
 boot_main:
-	ld hl,boot_script
-	push hl
-	call bsh_start
-	pop bc
-	ret
-boot_script:
-	db "CLS",0
-	db "CLEAN",0
-	db "EXPLORER",0
-	db "CLS",0
-	db "CMD",0
-	db "CLS",0
-	db "ASM",0
-	pop bc,bc,bc
-	jq boot_main
-end fs_file
-
-
-fs_file "BSH", "EXE", f_readonly+f_system
-	jr bsh_start
-	db "FEX",0
-bsh_start:
-	pop bc
-	pop hl
-	push hl
-	push bc
-bsh_main:
-	ld ix,bsh_commands-6
+	;ld hl,boot_script
+	;push hl
+	;call bsh_start
+	;pop bc
+	;ret
+;boot_script:
+	;db "CLS",0
+	;db "CLEAN",0
+	;db "EXPLORER",0
+	;db "CLS",0
+	;db "CMD",0
+	;db "CLS",0
+	;db "ASM",0
+	;pop bc,bc,bc
+	;jq boot_main
 .loop:
-	push hl
-	call bos.sys_GetKey
-	pop hl
-	cp a,53
-	jq z,.keyboard_interrupt
-	lea ix,ix+6
-	push hl
-	ld hl,(ix)
-	ld a,(hl)
-	or a,a
-	jr z,.runexec
-	push hl
-	call ti._strlen
-	pop bc
-	ex (sp),hl
+	call cls_main
+	call clean_main
+	ld bc,str_ExplorerExecutable
 	push bc
-	push hl
-	call ti._strncmp
-	add hl,bc
-	or a,a
-	sbc hl,bc
-	pop hl
-	pop de
-	pop bc
-	jq nz,.loop
-	push hl
-	call ti._strlen
-	ex (sp),hl
-	pop bc
-	add hl,bc
-	inc hl
-	push hl
-	ld hl,(ix+3)
-	call .jphl  ;jump to command handler subroutine
-	pop hl
-	jq .loop
-.keyboard_interrupt:
-	ld hl,str_KeyboardInterrupt
-	call bos.gui_Print
-	xor a,a
-	ret
-.runexec:
-	call ti._strlen
-	ex (sp),hl
-	pop bc
-	push hl
-	add hl,bc
-	push hl
-	or a,a
-	sbc hl,bc
-	ld a,' '
-	cpir
-	pop bc,de
-	push bc,hl,de
 	call bos.sys_ExecuteFile
-	pop bc,bc,hl
-	inc hl
-	jq bsh_main
-
-str_KeyboardInterrupt:
-	db $9,"Program execution stopped.",$A,0
-bsh_commands:
-	dl str_Return, handler_Return
-	dl str_Asm, handler_Asm
-	dl $FF0000
-str_Asm:
-	db "ASM",0
-handler_Asm:
 	pop bc
-	pop hl
-bsh_main.jphl:
-	jp (hl)
-str_Return:
-	db "RETURN",0
-handler_Return:
+	call cls_main
+	call clean_main
+	ld bc,str_CmdExecutable
+	push bc
+	call bos.sys_ExecuteFile
 	pop bc
-	xor a,a
-	ret
+	jq .loop
+str_CmdExecutable:
+	db "CMD",0
 end fs_file
+
+
+;comment this for now, it's too unstable.
+;fs_file "BSH", "EXE", f_readonly+f_system
+	;jr bsh_start
+	;db "FEX",0
+;bsh_start:
+	;pop bc
+	;pop hl
+	;push hl
+	;push bc
+;bsh_main:
+	;ld ix,bsh_commands-6
+;.loop:
+	;push hl
+	;call bos.sys_GetKey
+	;pop hl
+	;cp a,53
+	;jq z,.keyboard_interrupt
+	;lea ix,ix+6
+	;push hl
+	;ld hl,(ix)
+	;ld a,(hl)
+	;or a,a
+	;jr z,.runexec
+	;push hl
+	;call ti._strlen
+	;pop bc
+	;ex (sp),hl
+	;push bc
+	;push hl
+	;call ti._strncmp
+	;add hl,bc
+	;or a,a
+	;sbc hl,bc
+	;pop hl
+	;pop de
+	;pop bc
+	;jq nz,.loop
+	;push hl
+	;call ti._strlen
+	;ex (sp),hl
+	;pop bc
+	;add hl,bc
+	;inc hl
+	;push hl
+	;ld hl,(ix+3)
+	;call .jphl  ;jump to command handler subroutine
+	;pop hl
+	;jq .loop
+;.keyboard_interrupt:
+	;ld hl,str_KeyboardInterrupt
+	;call bos.gui_Print
+	;xor a,a
+	;ret
+;.runexec:
+	;call ti._strlen
+	;ex (sp),hl
+	;pop bc
+	;push hl
+	;add hl,bc
+	;push hl
+	;or a,a
+	;sbc hl,bc
+	;ld a,' '
+	;cpir
+	;pop bc,de
+	;push bc,hl,de
+	;call bos.sys_ExecuteFile
+	;pop bc,bc,hl
+	;inc hl
+	;jq bsh_main
+
+;str_KeyboardInterrupt:
+	;db $9,"Program execution stopped.",$A,0
+;bsh_commands:
+	;dl str_Return, handler_Return
+	;dl str_Asm, handler_Asm
+	;dl $FF0000
+;str_Asm:
+	;db "ASM",0
+;handler_Asm:
+	;pop bc
+	;pop hl
+;bsh_main.jphl:
+	;jp (hl)
+;str_Return:
+	;db "RETURN",0
+;handler_Return:
+	;pop bc
+	;xor a,a
+	;ret
+;end fs_file
 
 
 fs_file "CAT", "EXE", f_readonly+f_system
@@ -625,6 +645,10 @@ uninstall_main:
 end fs_file
 
 
+fs_file "UPDATER", "EXE", f_readonly+f_system
+	file '../obj/updater.bin'
+end fs_file
+
 fs_file "MEMEDIT","EXE", f_readonly+f_system
 	file '../obj/memedit.bin'
 end fs_file
@@ -653,6 +677,23 @@ mkfile_success:
 	ret
 mkfile_info_str:
 	db "Usage: MKFILE [file]",0
+end fs_file
+
+fs_file "OFF","EXE", f_readonly+f_system
+	jr turn_off_main
+	db "FEX",0
+turn_off_main:
+	call ti.boot.TurnOffHardware
+	di
+	ld hl,ti.mpIntMask
+	set ti.bIntOn,(hl)
+	ld l,ti.intAck
+	set ti.bIntOn,(hl)
+	ei
+	halt
+	nop
+	nop
+	jp ti.boot.InitializeHardware
 end fs_file
 
 

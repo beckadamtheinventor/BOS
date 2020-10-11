@@ -156,10 +156,12 @@ sys_ExecuteFile:
 	call sys_GetArgumentStack ;get arguments
 	ex (sp),hl ;push arguments to stack, pop jump location from the stack
 .run_hl:
+	call .normalize_lcd
 	call .jphl
 	pop bc
 	push hl
 	call sys_PopArgumentStack
+	call .normalize_lcd
 	xor a,a
 	sbc hl,hl
 	ld (asm_prgm_size),hl
@@ -180,5 +182,11 @@ sys_ExecuteFile:
 	ld (fsOP6+3),hl
 	jq .exec_rex
 	
+.normalize_lcd:
+	ld bc,ti.vRam
+	ld (ti.mpLcdUpbase),bc
+	ld a,ti.lcdBpp8
+	ld (ti.mpLcdCtrl),a
+	ret
 
 

@@ -5,15 +5,17 @@ macro os_private
 	element os.base
 
 	postpone
-		os.size = $% - os.start_off + 4
+		os.size = $-$$ + 4
 		os.end = os.size + $20100
 		os.header_and_os = os.size + $100
+		load os.full_code:$-$$ from $$
+		end virtual
+		os.start:
+		db os.full_code
 	end postpone
 
  	macro os_rom?
-		os.start = $
-		os.start_off = $%
-		org $20000
+		virtual at $020000
 		db $80,$0F
 		dd (os.end-$20006) bswap dword
 		db $80,$12,$13,$00

@@ -14,7 +14,7 @@
 ;         hl->start of LibLoad
 ; output: once relocation of program and library dependencies is complete,
 ;         jumps to start of program block after relocation block and begins execution
-; uses:   ti.cursorImage, saveSScreen + 19000 and up
+; uses:   cursorImage, saveSScreen + 19000 and up
 ; note:   updated size is added to the copy in ram of the program for libraries
 ; notes:  all code is location independent; no need to relocate to absolute address.
 ;         keeping in archive is safe.
@@ -28,24 +28,24 @@ define VERSION_MAJOR       3
 define VERSION_MINOR       1
 
 ; global equates
-arclibrarylocations        = ti.cursorImage + 000 ; place to store locations of archived libraries
-dependencyqueuelocation    = ti.cursorImage + 450 ; queue for keeping track of which libraries still need to be resolved
+arclibrarylocations        = cursorImage + 000 ; place to store locations of archived libraries
+dependencyqueuelocation    = cursorImage + 450 ; queue for keeping track of which libraries still need to be resolved
 
-eSP                        = ti.cursorImage + 950 ; save sp for errors
-totallibsize               = ti.cursorImage + 953 ; total size of the library appvar (not used)
-extractedsize              = ti.cursorImage + 956 ; holds extracted size of the library
-arclocation                = ti.cursorImage + 959 ; pointer to place to begin extraction from the archive
-ramlocation                = ti.cursorImage + 962 ; pointer to place to extract in usermem
-endarclibrarylocations     = ti.cursorImage + 965 ; pointer to end of archived library locations in arclibrarylocations
-enddependencyqueue         = ti.cursorImage + 968 ; pointer to end of dependency stack
-nextlibptr                 = ti.cursorImage + 971 ; pointer to save location of next lib place that needs to be relocated
-jumptblptr                 = ti.cursorImage + 974 ; pointer to start of function table for each library in the program
-vectortblptr               = ti.cursorImage + 977 ; pointer to start of archived function vector table
-relocationtblptr           = ti.cursorImage + 980 ; pointer to start of relocation table
-endrelocationtbl           = ti.cursorImage + 983 ; pointer to end of relocation table
-prgmstart                  = ti.cursorImage + 986 ; pointer to start of actual program when dealing with dependencies
-appvarstartptr             = ti.cursorImage + 989 ; pointer to start of library appvar in archive
-libnameptr                 = ti.cursorImage + 992 ; pointer to name of library to extract
+eSP                        = cursorImage + 950 ; save sp for errors
+totallibsize               = cursorImage + 953 ; total size of the library appvar (not used)
+extractedsize              = cursorImage + 956 ; holds extracted size of the library
+arclocation                = cursorImage + 959 ; pointer to place to begin extraction from the archive
+ramlocation                = cursorImage + 962 ; pointer to place to extract in usermem
+endarclibrarylocations     = cursorImage + 965 ; pointer to end of archived library locations in arclibrarylocations
+enddependencyqueue         = cursorImage + 968 ; pointer to end of dependency stack
+nextlibptr                 = cursorImage + 971 ; pointer to save location of next lib place that needs to be relocated
+jumptblptr                 = cursorImage + 974 ; pointer to start of function table for each library in the program
+vectortblptr               = cursorImage + 977 ; pointer to start of archived function vector table
+relocationtblptr           = cursorImage + 980 ; pointer to start of relocation table
+endrelocationtbl           = cursorImage + 983 ; pointer to end of relocation table
+prgmstart                  = cursorImage + 986 ; pointer to start of actual program when dealing with dependencies
+appvarstartptr             = cursorImage + 989 ; pointer to start of library appvar in archive
+libnameptr                 = cursorImage + 992 ; pointer to name of library to extract
 
 ; macro definitions
 define lib_byte            $C0		; library signifier byte
@@ -96,7 +96,7 @@ disable_relocations
 	res	showmsgs,(iy + asmflag)
 .showmsgs:
 	ld	bc,1020
-	ld	hl,ti.cursorImage
+	ld	hl,cursorImage
 	call	bos._MemClear		; initialize to wipe out past runs
 
 	ld	hl,arclibrarylocations
