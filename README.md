@@ -1,6 +1,7 @@
 # BOS
 An Operating system (WIP) for the TI-84+CE family (eZ80) graphing calculators
 
+
 # Building
 See this link to locate the required version of fasmg to build this project.
 https://github.com/CE-Programming/toolchain/tree/fatdrvce/tools/fasmg
@@ -11,6 +12,13 @@ Note for Mac users: You may have to install bash and run build.sh with bash
 
 # Building on Windows
 Run the provided `build.bat` file, and the binary will be in the `bin` folder.
+
+
+# Updating BOS
+When building BOS there is a file that can be used to reinstall/update BOS from a FAT32-formatted USB flash drive.
+Send `bin/BOSUPDTR.BIN` to the root directory of a FAT32 formatted flash drive, and plug it into the calculator.
+Then from the console, type: `UPDATER`. The calc will read from `BOSUPDTR.BIN` and execute it from UserMem.
+It is essentially the same program that initially installs BOS.
 
 
 # Documentation
@@ -139,4 +147,5 @@ gfx_ZeroScreen:
 	ret
 
 ```
+
 
