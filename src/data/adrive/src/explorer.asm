@@ -7,49 +7,51 @@ org ti.userMem
 	jr explorer_init
 	db "REX",0
 explorer_init:
-	pop bc
-	pop hl
-	push hl
-	push bc
-	ld (explorer_args),hl
+	;pop bc
+	;pop hl
+	;push hl
+	;push bc
+	;ld (explorer_args),hl
+	ld (_SaveIX),ix
 	call load_libload
 	jr z,explorer_init_2
 	ld hl,str_FailedToLoadLibload
+	call bos.gui_Print
 	scf
 	sbc hl,hl
 	ret
 explorer_init_2:
+	;ld bc,256
+	;push bc
+	;call bos.sys_Malloc
+	;pop bc
+	;jp c,bos._ErrMemory
+	;ld (explorer_path_ptr),hl
+	;ld de,0
+;explorer_args:=$-3
+	;ld a,(de)
+	;or a,a
+	;jq z,.default_path
+	;push hl,de
+	;call ti._strlen
+	;ex (sp),hl
+	;pop bc,de
+	;ldir
+	;xor a,a
+	;ld (de),a
+	;jq explore_files
+;.default_path:
+	;db $11,"C:/"
+	;ld (hl),de
+	;inc hl
+	;inc hl
+	;inc hl
+	;ld (hl),0
+explorer_main:
 	ld c,1
 	push bc
 	call gfx_SetDraw
 	pop bc
-	ld bc,256
-	push bc
-	call bos.sys_Malloc
-	pop bc
-	jp c,bos._ErrMemory
-	ld (explorer_path_ptr),hl
-	ld de,0
-explorer_args:=$-3
-	ld a,(de)
-	or a,a
-	jq z,.default_path
-	push hl,de
-	call ti._strlen
-	ex (sp),hl
-	pop bc,de
-	ldir
-	xor a,a
-	ld (de),a
-	jq explore_files
-.default_path:
-	db $11,"C:/"
-	ld (hl),de
-	inc hl
-	inc hl
-	inc hl
-	ld (hl),0
-explorer_main:
 	call gfx_ZeroScreen
 	ld c,0
 	push bc
@@ -73,22 +75,20 @@ explorer_main:
 	jq nz,.key_loop
 explore_files:
 	call gfx_ZeroScreen
-	ld hl,0
+	ld hl,bos.current_working_dir
 explorer_path_ptr:=$-3
 	push hl
 	call bos.fs_OpenFile
 	pop bc
 	push hl
-	pop iy
-	push af
+	pop ix
 	ld bc,(explorer_path_ptr)
 	or a,a
 	sbc hl,hl
 	push hl,hl,bc
 	call gfx_PrintStringXY
 	pop bc,bc,bc
-	pop af
-	call nc,explorer_draw_files
+	call explorer_draw_files
 	ld hl,0
 explorer_cursor_y:=$-3
 	inc hl
@@ -122,6 +122,8 @@ explorer_cursor_y:=$-3
 _exit:
 	call gfx_ZeroScreen
 	call bos._HomeUp
+	ld ix,0
+_SaveIX:=$-3
 	xor a,a
 	sbc hl,hl
 	ret
@@ -154,7 +156,7 @@ explorer_scroll_up:
 	ret
 explorer_page_down:
 	ld hl,(explorer_dir_offset)
-	ld bc,$20
+	ld bc,32
 	add hl,bc
 	ld a,(hl)
 	or a,a
@@ -163,7 +165,7 @@ explorer_page_down:
 	ret
 explorer_page_up:
 	ld hl,(explorer_dir_offset)
-	ld bc,$20
+	ld bc,32
 	or a,a
 	sbc hl,bc
 	ret c
@@ -175,22 +177,7 @@ explorer_draw_files:
 	ld bc,0
 explorer_dir_offset:=$-3
 	add ix,bc
-	push ix
-.draw_dirs_loop:
-	ld a,(ix)
-	or a,a
-	jr z,.draw_files
-	call .setxy
-	bit bos.fd_hidden,(ix+$B)
-	jr nz,.next_dir
-	bit bos.fd_subdir,(ix+$B)
-	call nz,.draw_dir
-.next_dir:
-	lea ix,ix+$20
-	jr .draw_dirs_loop
-.draw_files:
-	pop ix
-.draw_files_loop:
+.draw_loop:
 	ld a,(ix)
 	or a,a
 	ret z
@@ -198,19 +185,28 @@ explorer_dir_offset:=$-3
 	bit bos.fd_hidden,(ix+$B)
 	jr nz,.next_file
 	bit bos.fd_subdir,(ix+$B)
+	call nz,.draw_dir
+	bit bos.fd_subdir,(ix+$B)
 	call z,.draw_file
 .next_file:
-	lea ix,ix+$20
-	jr .draw_files_loop
+	lea ix,ix+32
+	jr .draw_loop
 .setxy:
 	ld bc,10
 .y_pos:=$-3
 	push bc
 	ld bc,12
+.setxy_entry:
 	push bc
 	call gfx_SetTextXY
 	pop bc,bc
 	ret
+.setxy_2:
+	ld bc,(.y_pos)
+	push bc
+	ld bc,150
+	jq .setxy_entry
+
 .draw_dir:
 	ld hl,str_SubDir
 	push hl
@@ -221,10 +217,7 @@ explorer_dir_offset:=$-3
 	push ix,hl
 	call bos.fs_CopyFileName
 	call gfx_PrintString
-	ld hl,str_Space
-	push hl
-	call gfx_PrintString
-	pop bc
+	call .setxy_2
 	pop bc,ix
 	bit bos.fd_system,(ix+$B)
 	call nz,.system
@@ -264,9 +257,7 @@ str_ReadOnly:
 str_SubDir:
 	db "<DIR" ;flow into next string on purpose
 str_CursorString:
-	db ">"    ;and again
-str_Space:
-	db " ",0
+	db ">",0
 str_Archive:
 	db "ARC",0
 str_Device:
@@ -351,6 +342,8 @@ gfx_SetTextFGColor:
 	jp 63
 gfx_SetTextTransparentColor:
 	jp 66
+gfx_GetTextY:
+	jp 87
 gfx_ZeroScreen:
 	jp 228
 
@@ -368,6 +361,7 @@ gfx_BlitBuffer:
 	call gfx_Blit
 	pop bc
 	ret
+
 
 initial_strings:
 	dl str_HelloWorld, str_PressToDelete, str_PressToContinue, str_PressToConsole, $FF0000

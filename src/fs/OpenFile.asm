@@ -71,11 +71,13 @@ fs_OpenFile:
 	ld a,(de)
 	or a,a
 	ret z ;return root directory
+	cp a,' '
+	ret z ;return root directory
 	ld (fsOP5),hl  ; save drive data section
 	push ix
 	push hl
 	pop ix
-	jq .search_loop
+	db $01 ;ld bc,...
 .search_next:
 	lea ix,ix+32
 .search_loop:

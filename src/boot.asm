@@ -38,10 +38,11 @@ boot_os:
 	ld (hl),0
 os_return:
 	call gfx_Set8bpp
+	ld bc,$FF0000
 	ld hl,str_StartupProgram
-	push hl
+	push bc,hl
 	call sys_ExecuteFile
-	pop bc ;we're never getting back here lmao
+	pop bc,bc ;we're never getting back here lmao
 	jq os_return
 
 

@@ -10,12 +10,12 @@ sys_ExecuteFile:
 	push de
 	push hl
 	push bc
-	push hl,de
-	call sys_PushArgumentStack
-	pop de,hl
 	ld a,(hl)
 	or a,a
 	jq z,.fail
+	push hl,de
+	call sys_PushArgumentStack
+	pop de,hl
 	inc hl
 	ld a,(hl)
 	dec hl
@@ -149,9 +149,9 @@ sys_ExecuteFile:
 	add hl,bc
 	ld (top_of_UserMem),hl
 	call fs_Read
-	pop hl,bc,bc,bc
-	jq c,.fail_popbc
-	ex (sp),hl ;jump address
+	pop hl,bc,bc,bc,bc
+	jq c,.fail
+	push hl ;save jump address
 .exec_fex:
 	call sys_GetArgumentStack ;get arguments
 	ex (sp),hl ;push arguments to stack, pop jump location from the stack

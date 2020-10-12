@@ -147,16 +147,17 @@ boot_main:
 	;jq boot_main
 .loop:
 	call cls_main
-	call clean_main
+	ld bc,$FF0000
+	push bc
 	ld bc,str_ExplorerExecutable
 	push bc
 	call bos.sys_ExecuteFile
 	pop bc
 	call cls_main
-	call clean_main
 	ld bc,str_CmdExecutable
 	push bc
 	call bos.sys_ExecuteFile
+	pop bc
 	pop bc
 	jq .loop
 str_CmdExecutable:
@@ -695,6 +696,20 @@ turn_off_main:
 	nop
 	jp ti.boot.InitializeHardware
 end fs_file
+
+
+fs_file "USBRUN","EXE", f_readonly+f_system
+	file "../obj/usbrun.bin"
+end fs_file
+
+;fs_file "USBLS","EXE", f_readonly+f_system
+;	file "../obj/usbls.bin"
+;end fs_file
+
+fs_file "USBSEND","EXE", f_readonly+f_system
+	file "../obj/usbsend.bin"
+end fs_file
+
 
 
 end fs_fs
