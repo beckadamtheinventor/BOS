@@ -9,7 +9,7 @@
 	jp sys_ExecuteFile
 	jp sys_ExecuteFileEntryPoint
 	jp fs_OpenFile
-	jp fs_GetClusterPtr
+	jp fs_GetSectorAddress
 	jp fs_CheckDirExists
 	jp fs_GetPathLastName
 	jp fs_CopyFileName
@@ -60,3 +60,7 @@
 	jp fs_CreateFile
 	jp strupper
 	jp strlower
+	jp fs_AbsPath
+	jp fs_MultByBytesPerSector
+	jp _LoadLibraryOP1
+	jp fs_OpenFileInDir

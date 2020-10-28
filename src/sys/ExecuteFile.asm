@@ -16,14 +16,12 @@ sys_ExecuteFile:
 	push hl,de
 	call sys_PushArgumentStack
 	pop de,hl
-	inc hl
 	ld a,(hl)
-	dec hl
-	cp a,':'
+	cp a,'/'
 	push hl
 	jq nz,.open_system_exe
 	call fs_OpenFile
-	jr c,.try_exe
+	jq c,.try_exe
 .open_fd:
 	ld (fsOP6),hl ;save file descriptor for later
 	ld bc,$B
@@ -31,21 +29,19 @@ sys_ExecuteFile:
 	bit 4,(hl)
 	ld hl,(fsOP6)
 	pop bc
-	jr nz,.fail
-	ld bc,0
-	push bc
+	jq nz,.fail
+	ld de,fsentry_filesector
+	add hl,de
+	ld hl,(hl)
 	push hl
-	call fs_GetClusterPtr
-	pop bc,bc
-	jq c,.fail
+	call fs_GetSectorAddress
+	pop bc
 	push hl
 	ld a,(hl)
 	cp a,$18 ;jr
-	jr z,.skip2
+	jq z,.skip2
 	cp a,$C3 ;jp
-	jr z,.skip4
-.fail_pop2bc:
-	pop bc
+	jq z,.skip4
 .fail_popbc:
 	pop bc
 .fail:
@@ -60,19 +56,20 @@ sys_ExecuteFile:
 	inc hl
 	jq .ext
 .system_drive_prefix:
-	db "A:/",0
+	db "/bin/"
+.system_drive_prefix_len:=$-.system_drive_prefix
 .open_system_exe:
 	call ti._strlen
 	push hl
-	ld bc,4+5
+	ld bc,.system_drive_prefix_len + 4
 	add hl,bc
 	push hl
 	call sys_Malloc
 	pop bc
-	jq c,.fail_pop2bc
+	jq c,.fail_popbc
 	ld (fsOP6),hl
 	ex hl,de
-	ld bc,3
+	ld bc,.system_drive_prefix_len
 	ld hl,.system_drive_prefix
 	ldir
 	pop bc
@@ -117,7 +114,7 @@ sys_ExecuteFile:
 	db 'FEX' ;Flash EXecutable
 	or a,a
 	sbc hl,de
-	jr z,.exec_fex
+	jq z,.exec_fex
 	db $21 ;ld hl,...
 	db 'REX' ;Ram EXecutable
 	or a,a
@@ -131,27 +128,27 @@ sys_ExecuteFile:
 
 .exec_rex:
 	pop hl      ;file data pointer (not needed, this is re-handled in fs_Read)
-	ld hl,(fsOP6) ;file descriptor
-	push hl     ;void *fd
-	ld bc,$1C   ;offset of file length
-	add hl,bc
-	ld bc,(hl)  ;get file length in bytes
-	ld (asm_prgm_size),bc
-	ld hl,(fsOP6+3)
-	ex (sp),hl  ;int offset
-	push hl     ;void *fd
-	ld e,1
-	push de     ;uint8_t count
-	push bc     ;int len
+	ld iy,(fsOP6) ;file descriptor
+	ld hl,(iy+fsentry_filesector)
+	push hl
+	call fs_GetSectorAddress
+	pop bc
+	push hl
+	ld hl,(iy+fsentry_filelen)
+	ex.s hl,de
+	push de
+	pop bc
+	pop hl
 	ld de,bos_UserMem
-	push de ;void *dest
-	ex hl,de
+	push de ;save jump address
+	ld (asm_prgm_size),bc
+	push bc ;save program size
+	ldir
+	pop bc
+	pop hl  ;usermem
+	push hl
 	add hl,bc
-	ld (top_of_UserMem),hl
-	call fs_Read
-	pop hl,bc,bc,bc,bc
-	jq c,.fail
-	push hl ;save jump address
+	ld (top_of_UserMem),hl ;save top of usermem
 .exec_fex:
 	call sys_GetArgumentStack ;get arguments
 	ex (sp),hl ;push arguments to stack, pop jump location from the stack

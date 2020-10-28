@@ -11,11 +11,8 @@ fs_GetPathLastName:
 	call ti._strlen
 	ex (sp),hl
 	pop bc
+	add hl,bc
 	ld a,'/'
-.loop:
-	push hl
-	pop de
-	cpir
-	jr z,.loop
+	cpdr
 	inc hl
 	ret

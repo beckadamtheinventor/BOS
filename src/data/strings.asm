@@ -9,10 +9,8 @@ str_ErasingSector:
 	db "Erasing Sector ",0
 str_ErasedUserMemory:
 	db "Erased user memory.",$A,0
-str_WritingDriveA:
-	db "Writing system partition (A)...",$A,0
-str_WritingDriveC:
-	db "Writing user partition (C)...",$A,0
+str_WritingFilesystem:
+	db "Writing filesystem...",$A,0
 str_PressAnyKey:
 	db "Press any key to continue...",$A,0
 str_Prompt:
@@ -20,6 +18,6 @@ str_Prompt:
 str_dotEXE:
 	db ".EXE",0
 str_StartupProgram:
-	db "BOOT",0
+	db "boot",0
 str_CmdExecutable:
-	db "CMD",0
+	db "cmd",0

@@ -125,9 +125,9 @@ relocate _libloadstart, $D3FC00 - _libloadstart.length
 	jr	z,_startrelocating	; if not, just run it from wherever de was pointing
 	jp	(hl)			; return to execution if there are no libs
 _startrelocating:
-	push	hl
-	call	bos._PushOP1		; save program name
-	pop	hl
+;	push	hl
+;	call	bos._PushOP1		; save program name
+;	pop	hl
 _extractlib:				; hl->NULL terminated libray name string -> $C0,"LIBNAME",0
 	ld	(hl),AppVarObj		; change $C0 byte to mark as extracted
 	push	hl
@@ -197,7 +197,7 @@ _notextracted:
 	call	_movetostrngend
 	push	hl			; save the location in the program we are on
 _findbinary:
-	call	bos._ChkFindSym
+	call	bos._LoadLibraryOP1
 ;	jr	nc,_foundlibrary	; throw an error if the library doesn't exist
 	jp	c,_missingerror		; jump to the lib missing handler
 _foundlibrary: ;no need to check RAM status, files are always in flash/archive
@@ -214,14 +214,12 @@ _libinarc:
 	;ld	e,(hl)
 	;add	hl,de
 	;inc	hl			; hl->size bytes
-;	push de
-;	call	bos._LoadDEInd_s		; de=total size of library
-;	push	de
-;	pop	bc			; bc=total size of library
-	ld	bc,(hl)
-	ex	hl,de
+	push de
+	call	bos._LoadDEInd_s		; de=total size of library
+	push	de
+	pop	bc			; bc=total size of library
 	ld	(totallibsize),bc
-;	pop hl
+	pop hl
 	ld	(appvarstartptr),hl	; hl->start of appvar in archived memory
 
 assert libmagic1 = libmagic1alt+1
@@ -411,7 +409,7 @@ _nosetstart:
 	jp	_extractlib		; extract current dependency if needed, or resolve entry points
 
 _runpgrm:
-	call	bos._PopOP1			; restore program name
+	;call	bos._PopOP1			; restore program name
 	ld	hl,(prgmstart)
 	jp	(hl)			; passed all the checks; let's start execution! :)
 
@@ -502,8 +500,8 @@ _waitkeyloop:
 	jr	_waitkeyloop
 _exitwaitloop:
 	call	bos._ClrScrn
-	call	bos._HomeUp			; stop execution of the program
-	jp	bos._PopOP1			; restore program name
+	jp	bos._HomeUp			; stop execution of the program
+	;jp	bos._PopOP1			; restore program name
 
 _versionlibstr:				; strings for LibLoad Errors
 	db	"ERROR: Library Version",0

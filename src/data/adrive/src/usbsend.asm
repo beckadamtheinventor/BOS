@@ -40,11 +40,12 @@ libload_load:
 	call bos.fs_OpenFile
 	pop bc
 	jq c,.notfound
-	ld bc,0
-	push bc,hl
-	call bos.fs_GetClusterPtr
-	pop bc,bc
-	jq c,.notfound
+	ld bc,$0C
+	add hl,bc
+	ld hl,(hl)
+	push hl
+	call bos.fs_GetSectorAddress
+	pop bc
 	ld   de,libload_relocations
 	ld   bc,.notfound
 	push   bc
@@ -290,7 +291,7 @@ _ErrSP:=$-3
 	ret
 
 libload_name:
-	db   "A:/LibLoad.v21",0
+	db   "/lib/LibLoad.LLL",0
 .len := $ - .
 str_NoParitions:
 	db "No Partitions found.",$A,0
@@ -403,12 +404,12 @@ _Arg2:=$-3
 	sbc hl,hl
 .write_file_loop:
 	push hl
-	ld bc,0
+	ld hl,0
 .source_fd:=$-3
-	push hl,bc
-	call bos.fs_GetClusterPtr
-	pop bc,hl
-	jq c,.finished
+	ld bc,$0C
+	add hl,bc
+	ld hl,(hl)
+	call bos.fs_GetSectorAddress
 	ld a,(bos.current_sectors_per_cluster)
 	ld bc,0
 	ld c,a

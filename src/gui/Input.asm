@@ -8,9 +8,10 @@ gui_Input:
 	xor a,a
 	sbc hl,hl
 	ld (ix-3),hl
-	ld (ix-4),a
 	ld hl,(ix+6)
 	ld (hl),a
+	inc a
+	ld (ix-4),a
 	push hl
 	pop de
 	inc de

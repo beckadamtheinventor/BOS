@@ -4,7 +4,7 @@ include 'include/ti84pceg.inc'
 include 'include/bos.inc'
 
 org ti.userMem
-	jr explorer_init
+	jq explorer_init
 	db "REX",0
 explorer_init:
 	;pop bc
@@ -14,7 +14,7 @@ explorer_init:
 	;ld (explorer_args),hl
 	ld (_SaveIX),ix
 	call load_libload
-	jr z,explorer_init_2
+	jq z,explorer_init_2
 	ld hl,str_FailedToLoadLibload
 	call bos.gui_Print
 	scf
@@ -74,14 +74,16 @@ explorer_main:
 	cp a,9
 	jq nz,.key_loop
 explore_files:
-	call gfx_ZeroScreen
 	ld hl,bos.current_working_dir
 explorer_path_ptr:=$-3
 	push hl
 	call bos.fs_OpenFile
 	pop bc
-	push hl
-	pop ix
+	ld (explorer_curdir_ix),hl
+explore_files_main:
+	call gfx_ZeroScreen
+	ld ix,0
+explorer_curdir_ix:=$-3
 	ld bc,(explorer_path_ptr)
 	or a,a
 	sbc hl,hl
@@ -110,8 +112,12 @@ explorer_cursor_y:=$-3
 	call bos.sys_WaitKeyCycle
 	cp a,15
 	jq z,explorer_main
-	ld bc,explore_files
+	ld bc,explore_files_main
 	push bc
+	cp a,2
+	jq z,explorer_zero_cursor
+	cp a,3
+	jq z,explorer_path_into
 	cp a,1
 	jq z,explorer_scroll_down
 	cp a,4
@@ -134,7 +140,7 @@ _uninstall_bos:
 	pop bc
 	ret
 str_Uninstall:
-	db "A:/UNINSTLR.EXE",0
+	db "uninstlr",0
 explorer_scroll_down:
 	ld hl,(explorer_cursor_y)
 	inc hl
@@ -156,20 +162,57 @@ explorer_scroll_up:
 	ret
 explorer_page_down:
 	ld hl,(explorer_dir_offset)
-	ld bc,32
-	add hl,bc
+	ld b,16
+.loop:
+	inc hl
 	ld a,(hl)
 	or a,a
 	ret z
 	ld (explorer_dir_offset),hl
+	djnz .loop
 	ret
 explorer_page_up:
 	ld hl,(explorer_dir_offset)
-	ld bc,32
+	ld bc,16
 	or a,a
 	sbc hl,bc
 	ret c
 	ld (explorer_dir_offset),hl
+	ret
+explorer_zero_cursor:
+	or a,a
+	sbc hl,hl
+	ld (explorer_dir_offset),hl
+	ld (explorer_cursor_y),hl
+	ret
+;explorer_path_back:
+	;ld hl,.prevdir_str
+	;push ix,hl
+	;call bos.fs_OpenFileInDir
+	;pop bc,bc ;no need to pop into ix because the previous routine preserves it
+	;ret c
+	;ld (explorer_curdir_ix),hl
+	;ret
+;.prevdir_str:
+	;db "..",0
+explorer_path_into:
+	ld hl,(explorer_cursor_y)
+	add hl,hl
+	add hl,hl
+	add hl,hl
+	add hl,hl
+	ld bc,(explorer_dir_offset)
+	add hl,bc
+	ex hl,de
+	ld ix,(explorer_curdir_ix)
+	add ix,de
+	bit bos.fd_subdir,(ix+$B)
+	ret z
+	ld hl,(ix+$C)
+	push hl
+	call bos.fs_GetSectorAddress
+	pop bc
+	ld (explorer_curdir_ix),hl
 	ret
 explorer_draw_files:
 	ld bc,10
@@ -183,14 +226,14 @@ explorer_dir_offset:=$-3
 	ret z
 	call .setxy
 	bit bos.fd_hidden,(ix+$B)
-	jr nz,.next_file
+	jq nz,.next_file
 	bit bos.fd_subdir,(ix+$B)
 	call nz,.draw_dir
 	bit bos.fd_subdir,(ix+$B)
 	call z,.draw_file
 .next_file:
-	lea ix,ix+32
-	jr .draw_loop
+	lea ix,ix+16
+	jq .draw_loop
 .setxy:
 	ld bc,10
 .y_pos:=$-3
@@ -235,13 +278,13 @@ explorer_dir_offset:=$-3
 	ret
 .device:
 	ld hl,str_Device
-	jr .print_hl
+	jq .print_hl
 .archive:
 	ld hl,str_Archive
-	jr .print_hl
+	jq .print_hl
 .readonly:
 	ld hl,str_ReadOnly
-	jr .print_hl
+	jq .print_hl
 .system:
 	ld hl,str_System
 .print_hl:
@@ -272,7 +315,7 @@ gfx_PrintStrings:
 	ld hl,(hl)
 	ld a,(hl)
 	or a,a
-	jr z,.exit
+	jq z,.exit
 	ld bc,10
 .y_pos:=$-3
 	push bc
@@ -288,7 +331,7 @@ gfx_PrintStrings:
 	inc hl
 	inc hl
 	inc hl
-	jr .loop
+	jq .loop
 .exit:
 	pop hl
 	ret
@@ -298,11 +341,13 @@ load_libload:
 	push hl
 	call bos.fs_OpenFile
 	pop bc
-	jr c,.notfound
-	ld bc,0
-	push bc,hl
-	call bos.fs_GetClusterPtr
-	pop bc,bc
+	jq c,.notfound
+	ld bc,$0C
+	add hl,bc
+	ld hl,(hl)
+	push hl
+	call bos.fs_GetSectorAddress
+	pop bc
 	ld   de,.relocations
 	ld   bc,.notfound
 	push   bc
@@ -322,8 +367,6 @@ gfx_End:
 	jp 3
 gfx_SetColor:
 	jp 6
-gfx_FillScreen:
-	jp 15
 gfx_SetDraw:
 	jp 27
 gfx_Blit:
@@ -352,7 +395,7 @@ gfx_ZeroScreen:
 	ret
 
 libload_name:
-	db   "A:/LibLoad.v21", 0
+	db   "/lib/LibLoad.LLL", 0
 .len := $ - .
 
 gfx_BlitBuffer:

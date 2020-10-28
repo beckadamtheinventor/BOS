@@ -4,12 +4,92 @@ include 'include/ti84pceg.inc'
 include 'include/bosfs.inc'
 include 'include/bos.inc'
 
-org $040800
-fs_fs 1, 2 ;filesystem with 1 sector per cluster, and 2 sectors per FAT
+org $040000
+fs_fs
 
+;-------------------------------------------------------------
+;directory listings section
+;-------------------------------------------------------------
 
-fs_file "CMD","EXE", f_readonly+f_system
-	jr enter_input
+;filesystem root directory entries
+fs_file root_dir
+	fs_entry bin_dir, "bin", "", f_readonly+f_system+f_subdir
+	fs_entry home_dir, "home", "", f_subdir
+	fs_entry lib_dir, "lib", "", f_readonly+f_system+f_subdir
+	fs_entry man_dir, "man", "", f_readonly+f_system+f_subdir
+	fs_entry root_user_dir, "root", "", f_subdir+f_system
+	db 16 dup 0
+end fs_file
+
+;"/bin/" directory
+fs_file bin_dir
+	fs_entry root_dir, "..", "", f_subdir
+	fs_entry boot_exe, "boot", "EXE", f_readonly+f_system
+	fs_entry cat_exe, "cat", "EXE", f_readonly+f_system
+	fs_entry cd_exe, "cd", "EXE", f_readonly+f_system
+	fs_entry cmd_exe, "cmd","EXE", f_readonly+f_system
+	fs_entry clean_exe, "clean", "EXE", f_readonly+f_system
+	fs_entry cls_exe, "cls", "EXE", f_readonly+f_system
+	fs_entry explorer_exe, "explorer", "EXE", f_readonly+f_system
+	fs_entry fexplore_exe, "fexplore", "EXE", f_readonly+f_system
+	fs_entry help_exe, "help", "EXE", f_readonly+f_system
+	fs_entry ls_exe, "ls", "EXE", f_readonly+f_system
+	fs_entry man_exe, "man", "EXE", f_readonly+f_system
+	fs_entry uninstaller_exe, "uninstlr","EXE", f_readonly+f_system
+	fs_entry updater_exe, "updater", "EXE", f_readonly+f_system
+	fs_entry memedit_exe, "memedit","EXE", f_readonly+f_system
+	fs_entry off_exe, "off","EXE", f_readonly+f_system
+	fs_entry usbrun_exe, "usbrun","EXE", f_readonly+f_system
+	fs_entry usbsend_exe, "usbsend","EXE", f_readonly+f_system
+	db 16 dup 0
+end fs_file
+
+;"/lib/" directory
+fs_file lib_dir
+	fs_entry root_dir, "..", "", f_subdir
+	fs_entry fatdrvce_lll, "FATDRVCE","LLL", f_readonly+f_system
+	fs_entry fileioc_lll, "FILEIOC","LLL", f_readonly+f_system
+	fs_entry graphx_lll, "GRAPHX","LLL", f_readonly+f_system
+	fs_entry srldrvce_lll, "SRLDRVCE","LLL", f_readonly+f_system
+	fs_entry usbdrvce_lll, "USBDRVCE","LLL", f_readonly+f_system
+	fs_entry libload_lll, "LibLoad", "LLL", f_readonly+f_system
+	db 16 dup 0
+end fs_file
+
+;"/man/" directory
+fs_file man_dir
+	fs_entry root_dir, "..", "", f_subdir
+	fs_entry readme_man, "README", "MAN", f_readonly+f_system
+	db 16 dup 0
+end fs_file
+
+fs_file root_user_dir
+	fs_entry root_dir, "..", "", f_subdir
+	db 16 dup 0
+end fs_file
+
+fs_file home_dir
+	fs_entry root_dir, "..", "", f_subdir
+	fs_entry user_home_dir, "user", "", f_subdir
+	db 16 dup 0
+end fs_file
+
+fs_file user_home_dir
+	fs_entry home_dir, "..", "", f_subdir
+	fs_entry user_settings_dat, "settings", "dat", 0
+	db 16 dup 0
+end fs_file
+
+;-------------------------------------------------------------
+;file data section
+;-------------------------------------------------------------
+
+fs_file user_settings_dat
+	db 0
+end fs_file
+
+fs_file cmd_exe
+	jq enter_input
 	db "FEX",0
 enter_input:
 	ld bc,255
@@ -25,7 +105,7 @@ enter_input:
 	push hl
 	ld a,' '
 	cpir
-	jr nz,.noargs
+	jq nz,.noargs
 	dec hl
 	ld (hl),0 ;replace the space with null so the file is easier to open
 	inc hl ;bypass the space lol
@@ -36,7 +116,7 @@ enter_input:
 	pop bc,bc
 	ld bc,enter_input
 	push bc
-	jr c,.fail
+	jq c,.fail
 	ld (bos.ScrapMem),hl
 	ld a,(bos.ScrapMem+2)
 	or a,h
@@ -57,77 +137,13 @@ enter_input:
 .exit:
 	pop bc,bc
 	ret
-
-
-str_ExplorerExecutable:
-	db "EXPLORER",0
 str_CouldNotLocateExecutable:
 	db $9,"Could not locate executable",$A,0
 end fs_file
 
-fs_file "APRG","EXE", f_readonly+f_system
-	jr aprg_main
-	db "FEX",0
-aprg_main:
-	pop bc
-	pop hl
-	push hl
-	push bc
-	ld a,(hl)
-	or a,a
-	jq z,.fail
-	push hl
-	call bos.fs_OpenFile
-	pop bc
-	jq c,.fail ;file not found
-	ld bc,$1C ;get file length
-	add hl,bc
-	ld de,(hl)
-	or a,a
-	sbc hl,bc
-	ld bc,0
-	push de,bc,hl
-	call bos.fs_GetClusterPtr
-	pop de,bc,bc
-	jq c,.fail ;file first cluster could not be located
-	ld a,(hl)
-	cp a,$EF
-	jr nz,.fail ;not a valid executable
-	inc hl
-	ld a,(hl)
-	cp a,$7B
-	jr nz,.fail ;not a valid executable
-	dec hl
-	ld (bos.asm_prgm_size),bc
-	push de,bc
-	push bc
-	pop hl
-	call bos._EnoughMem
-	pop bc,de
-	jq c,bos._ErrMemory ;not enough memory
-;read program into UserMem
-	or a,a
-	sbc hl,hl
-	push hl ;int offset
-	push de ;void *fd
-	ld de,1
-	push de ;uint8_t count
-	push bc ;int len
-	ld bc,ti.userMem
-	push bc ;void *dest
-	ld hl,(bos.asm_prgm_size)
-	call bos._InsertMem
-	call bos.fs_Read
-	pop bc,bc,bc,bc,bc
-	jp ti.userMem ;jump to userMem
-.fail:
-	scf
-	sbc hl,hl
-	ret
-end fs_file
 
-fs_file "BOOT", "EXE", f_readonly+f_system
-	jr boot_main
+fs_file boot_exe
+	jq boot_main
 	db "FEX",0
 boot_main:
 	;ld hl,boot_script
@@ -146,6 +162,7 @@ boot_main:
 	;pop bc,bc,bc
 	;jq boot_main
 .loop:
+	call clean_main
 	call cls_main
 	ld bc,$FF0000
 	push bc
@@ -161,105 +178,13 @@ boot_main:
 	pop bc
 	jq .loop
 str_CmdExecutable:
-	db "CMD",0
+	db "cmd",0
+str_ExplorerExecutable:
+	db "explorer",0
 end fs_file
 
-
-;comment this for now, it's too unstable.
-;fs_file "BSH", "EXE", f_readonly+f_system
-	;jr bsh_start
-	;db "FEX",0
-;bsh_start:
-	;pop bc
-	;pop hl
-	;push hl
-	;push bc
-;bsh_main:
-	;ld ix,bsh_commands-6
-;.loop:
-	;push hl
-	;call bos.sys_GetKey
-	;pop hl
-	;cp a,53
-	;jq z,.keyboard_interrupt
-	;lea ix,ix+6
-	;push hl
-	;ld hl,(ix)
-	;ld a,(hl)
-	;or a,a
-	;jr z,.runexec
-	;push hl
-	;call ti._strlen
-	;pop bc
-	;ex (sp),hl
-	;push bc
-	;push hl
-	;call ti._strncmp
-	;add hl,bc
-	;or a,a
-	;sbc hl,bc
-	;pop hl
-	;pop de
-	;pop bc
-	;jq nz,.loop
-	;push hl
-	;call ti._strlen
-	;ex (sp),hl
-	;pop bc
-	;add hl,bc
-	;inc hl
-	;push hl
-	;ld hl,(ix+3)
-	;call .jphl  ;jump to command handler subroutine
-	;pop hl
-	;jq .loop
-;.keyboard_interrupt:
-	;ld hl,str_KeyboardInterrupt
-	;call bos.gui_Print
-	;xor a,a
-	;ret
-;.runexec:
-	;call ti._strlen
-	;ex (sp),hl
-	;pop bc
-	;push hl
-	;add hl,bc
-	;push hl
-	;or a,a
-	;sbc hl,bc
-	;ld a,' '
-	;cpir
-	;pop bc,de
-	;push bc,hl,de
-	;call bos.sys_ExecuteFile
-	;pop bc,bc,hl
-	;inc hl
-	;jq bsh_main
-
-;str_KeyboardInterrupt:
-	;db $9,"Program execution stopped.",$A,0
-;bsh_commands:
-	;dl str_Return, handler_Return
-	;dl str_Asm, handler_Asm
-	;dl $FF0000
-;str_Asm:
-	;db "ASM",0
-;handler_Asm:
-	;pop bc
-	;pop hl
-;bsh_main.jphl:
-	;jp (hl)
-;str_Return:
-	;db "RETURN",0
-;handler_Return:
-	;pop bc
-	;xor a,a
-	;ret
-;end fs_file
-
-
-fs_file "CAT", "EXE", f_readonly+f_system
-	jr cat_main
+fs_file cat_exe
+	jq cat_main
 	db "FEX",0
 cat_main:
 	pop bc
@@ -268,24 +193,27 @@ cat_main:
 	push bc
 	ld a,(hl)
 	or a,a
-	jr z,.help
+	jq z,.help
 	push hl
 	call bos.fs_OpenFile
 	pop bc
-	jr c,.fail
+	jq c,.fail
 	push iy
 	push hl
 	pop iy
-	ld hl,(iy+$1C) ;file length
+	ld hl,(iy+$E) ;file length
+	ld de,(iy+$C)
+	or a,a
+	sbc hl,de
+	call bos.fs_MultByBytesPerSector
 	ld de,1024
 	or a,a
 	sbc hl,de
 	add hl,de
-	jr nc,.file_too_large
-	ld bc,0
-	push bc,iy
-	call bos.fs_GetClusterPtr
-	pop bc,bc,iy
+	jq nc,.file_too_large
+	ld hl,(iy+$C)
+	call bos.fs_GetSectorAddress
+	pop iy
 	jq .print
 .file_too_large:
 	pop iy
@@ -309,8 +237,8 @@ str_CatHelp:
 end fs_file
 
 
-fs_file "CD", "EXE", f_readonly+f_system
-	jr cd_main
+fs_file cd_exe
+	jq cd_main
 	db "FEX",0
 cd_main:
 	pop bc
@@ -319,17 +247,17 @@ cd_main:
 	push bc
 	ld a,(hl)
 	or a,a
-	jr z,.help
+	jq z,.help
 	push ix
 	push hl
 	call bos.fs_CheckDirExists
 	pop hl
-	jr c,.fail
+	jq c,.fail
 	inc hl
 	ld a,(hl)
 	dec hl
 	cp a,':'
-	jr z,.abs_path
+	jq z,.abs_path
 	push hl
 	ld hl,bos.current_working_dir
 	push hl
@@ -378,8 +306,8 @@ str_HelpDoc:
 end fs_file
 
 
-fs_file "CLEAN", "EXE", f_readonly+f_system
-	jr clean_main
+fs_file clean_exe
+	jq clean_main
 	db "FEX",0
 clean_main:
 	call bos.sys_FreeAll
@@ -389,8 +317,8 @@ clean_main:
 end fs_file
 
 
-fs_file "CLS", "EXE", f_readonly+f_system
-	jr cls_main
+fs_file cls_exe
+	jq cls_main
 	db "FEX",0
 cls_main:
 	ld hl,bos.current_working_dir
@@ -406,18 +334,18 @@ str_Prompt:
 end fs_file
 
 
-fs_file "EXPLORER", "EXE", f_readonly+f_system
+fs_file explorer_exe
 	file '../obj/explorer.bin'
 end fs_file
 
 
-fs_file "FEXPLORE", "EXE", f_readonly+f_system
+fs_file fexplore_exe
 	file '../obj/fexplore.bin'
 end fs_file
 
 
-fs_file "HELP", "EXE", f_readonly+f_system
-	jr help_main
+fs_file help_exe
+	jq help_main
 	db "FEX",0
 help_main:
 	ld hl,.readme_file
@@ -426,12 +354,12 @@ help_main:
 	pop bc
 	ret
 .readme_file:
-	db "A:/README.MAN",0
+	db "/man/README.MAN",0
 end fs_file
 
 
-fs_file "LS", "EXE", f_readonly+f_system
-	jr ls_main
+fs_file ls_exe
+	jq ls_main
 	db "FEX",0
 ls_main:
 	pop bc
@@ -440,7 +368,7 @@ ls_main:
 	push bc
 	ld a,(hl)
 	or a,a
-	jr nz,.non_null_dir
+	jq nz,.non_null_dir
 	ld hl,bos.current_working_dir
 .non_null_dir:
 	push hl
@@ -449,13 +377,21 @@ ls_main:
 	call bos.fs_OpenFile
 	pop bc
 	jq c,.fail
-	ld a,(hl)
-	or a,a
-	jr z,.exit_nopop
 	push ix
 	push hl
 	pop ix
 .loop:
+	ld a,(ix)
+	or a,a
+	jq z,.exit
+	bit bos.fd_hidden,(ix+$B) ;check if file is hidden
+	jq z,.not_hidden
+	ld a,$1F
+	jq .set_cursor_color
+.not_hidden:
+	ld a,$FF
+.set_cursor_color:
+	ld (bos.lcd_text_fg),a
 	ld hl,bos.fsOP6+1
 	push ix,hl
 	call bos.fs_CopyFileName
@@ -463,11 +399,8 @@ ls_main:
 	dec hl
 	ld (hl),$9
 	call bos.gui_Print
-	call bos.gui_NewLine
-	lea ix,ix+32
-	ld a,(ix)
-	or a,a
-	jr nz,.loop
+	lea ix,ix+16
+	jq .loop
 .exit:
 	pop ix
 .exit_nopop:
@@ -478,11 +411,13 @@ ls_main:
 	scf
 	sbc hl,hl
 	ret
+.tab_str:
+	db $9,$9,0
 end fs_file
 
 
-fs_file "MAN", "EXE", f_readonly+f_system
-	jr man_main
+fs_file man_exe
+	jq man_main
 	db "FEX",0
 man_main:
 	pop bc
@@ -493,7 +428,7 @@ man_main:
 	jq z,.info
 	push hl
 	call ti._strlen
-	ld bc,man_dir.len+5
+	ld bc,str_man_dir.len+5
 	add hl,bc
 	push hl
 	call bos.sys_Malloc
@@ -502,8 +437,8 @@ man_main:
 	pop hl ;argument
 	push de
 	push hl
-	ld bc,man_dir.len
-	ld hl,man_dir
+	ld bc,str_man_dir.len
+	ld hl,str_man_dir
 	ldir          ; copy in manual directory
 	call ti._strlen
 	ex (sp),hl
@@ -523,9 +458,12 @@ man_main:
 	call bos.gui_NewLine
 	pop hl,de,bc
 	push de,bc,hl
-	call bos.fs_GetClusterPtr
+	ld bc,$0C
+	add hl,bc
+	ld hl,(hl)
+	call bos.fs_GetSectorAddress
 	pop de,bc,iy
-	jq c,.eof
+;	jq c,.eof
 	push iy,de,bc
 	call bos.gui_Print
 	call bos.sys_WaitKeyCycle
@@ -578,56 +516,54 @@ man_EndOfFileReached:
 	db $9,"--EOF REACHED--",$A
 man_NotFound:
 	db $9,"No matching manual found.",0
-man_dir:
-	db "A:/"
-man_dir.len:=$-.
+str_man_dir:
+	db "/man/"
+str_man_dir.len:=$-.
 man_extension:
 	db ".MAN",0
 end fs_file
 
 
-
-
-fs_file "README", "MAN", f_readonly+f_system
+fs_file readme_man
 	db $9,"--BOSos Help Doc--",$A
-	db "CAT",$A,$9,"Display the contents of a file.",$A
-	db "CD",$A,$9,"Change Directory. Navigate to an absolute or relative path.",$A
-	db "CLEAN",$A,$9,"Clean up malloc'd memory, not including program memory.",$A
-	db "CLS",$A,$9,"CLear Screen. Wipes the terminal history.",$A
-	db "EXPLORER",$A,$9,"Open GUI interface.",$A
-	db "HELP",$A,$9,"display this document",$A
-	db "LS",$A,$9,"LiSt directory. List the current directory or a given directory.",$A
-	db "MAN",$A,$9,"Display MANual for a given executable.",$A
+	db "cat",$A,$9,"Display the contents of a file.",$A
+	db "cd",$A,$9,"Change Directory. Navigate to an absolute or relative path.",$A
+	db "clean",$A,$9,"Clean up malloc'd memory, not including program memory.",$A
+	db "cls",$A,$9,"CLear Screen. Wipes the terminal history.",$A
+	db "explorer",$A,$9,"Open GUI interface.",$A
+	db "fexplore", $A,$9,""
+	db "help",$A,$9,"display this document",$A
+	db "ls",$A,$9,"LiSt directory. List the current directory or a given directory.",$A
+	db "man",$A,$9,"Display MANual for a given executable.",$A
 	db 0
 end fs_file
 
-
-fs_file "FATDRVCE","v21", f_readonly+f_system
+fs_file fatdrvce_lll
 	file '../obj/fatdrvce.bin'
 end fs_file
 
-fs_file "FILEIOC","v21", f_readonly+f_system
+fs_file fileioc_lll
 	file '../obj/fileioc.bin'
 end fs_file
 
-fs_file "GRAPHX","v21", f_readonly+f_system
+fs_file graphx_lll
 	file '../obj/graphx.bin'
 end fs_file
 
-fs_file "SRLDRVCE","v21", f_readonly+f_system
+fs_file srldrvce_lll
 	file '../obj/srldrvce.bin'
 end fs_file
 
-fs_file "USBDRVCE","v21", f_readonly+f_system
+fs_file usbdrvce_lll
 	file '../obj/usbdrvce.bin'
 end fs_file
 
-fs_file "LibLoad", "v21", f_readonly+f_system
+fs_file libload_lll
 	file '../obj/bos_libload.bin'
 end fs_file
 
-fs_file "UNINSTLR","EXE", f_readonly+f_system
-	jr uninstall_main
+fs_file uninstaller_exe
+	jq uninstall_main
 	db "FEX",0
 uninstall_main:
 	ld hl,.are_you_sure
@@ -646,42 +582,17 @@ uninstall_main:
 end fs_file
 
 
-fs_file "UPDATER", "EXE", f_readonly+f_system
+fs_file updater_exe
 	file '../obj/updater.bin'
 end fs_file
 
-fs_file "MEMEDIT","EXE", f_readonly+f_system
+fs_file memedit_exe
 	file '../obj/memedit.bin'
 end fs_file
 
-fs_file "MKFILE","EXE", f_readonly+f_system
-	jr mkfile_main
-	db "FEX",0
-mkfile_main:
-	pop bc
-	pop hl
-	push hl
-	push bc
-	ld a,(hl)
-	or a,a
-	jq z,mkfile_info
-	push hl
-	call bos.sys_WaitKeyCycle
-	call bos.fs_CreateFile
-	pop bc
-mkfile_info:
-	ld hl,mkfile_info_str
-	call bos.gui_Print
-mkfile_success:
-	xor a,a
-	sbc hl,hl
-	ret
-mkfile_info_str:
-	db "Usage: MKFILE [file]",0
-end fs_file
 
-fs_file "OFF","EXE", f_readonly+f_system
-	jr turn_off_main
+fs_file off_exe
+	jq turn_off_main
 	db "FEX",0
 turn_off_main:
 	call ti.boot.TurnOffHardware
@@ -698,15 +609,14 @@ turn_off_main:
 end fs_file
 
 
-fs_file "USBRUN","EXE", f_readonly+f_system
+fs_file usbrun_exe
 	file "../obj/usbrun.bin"
 end fs_file
 
 ;fs_file "USBLS","EXE", f_readonly+f_system
 ;	file "../obj/usbls.bin"
 ;end fs_file
-
-fs_file "USBSEND","EXE", f_readonly+f_system
+fs_file usbsend_exe
 	file "../obj/usbsend.bin"
 end fs_file
 

@@ -1,20 +1,13 @@
 ;@DOES check the filesystem for errors. Attempts to fix if there are any. If that fails, it reformats the filesystem.
 ;@DESTROYS All
 fs_SanityCheck:
-	ld a,(fs_drive_a + fs_boot_magic_1)
-	cp a,$55
-	jq nz,.check_errors
-	ld a,(fs_drive_a + fs_boot_magic_2)
-	cp a,$AA
-	jq nz,.check_errors
+	ld hl,fs_filesystem_address
+	ld a,$FF
+	ld bc,$010000 ;if there's 64k of unwritten data, the filesystem hasn't been formatted yet
+.check_loop_1:
+	cpi
+	jp po,fs_Format
+	jr z,.check_loop_1
 	
 	
 	ret
-.check_errors:
-;	ld hl,str_CheckingFilesystem
-;	call gfx_DrawWarningWindow
-;	ld hl,fs_drive_a
-	
-	
-	
-	jp fs_Format

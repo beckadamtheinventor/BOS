@@ -1,95 +1,49 @@
 ;@DOES read data from a file into RAM
 ;@INPUT int fs_Read(void *dest, int len, uint8_t count, void *fd, int offset);
 ;@OUTPUT number of bytes read
-;@DESTROYS All, OP6
+;@DESTROYS All
 fs_Read:
-	push iy
-	ld hl,-12
+	ld hl,-3
 	call ti._frameset
-	ld hl,(ix+18) ;void *fd
-	ld bc,$1C
+	ld hl,(ix+15)
+	ld bc,fsentry_filesector
 	add hl,bc
-	ld de,(hl)
-	ld hl,(ix+9)  ;void *dest
-	ld (ix-3),hl
-	ld hl,(ix+21) ;int offset
-	or a,a
-	sbc hl,de
-	add hl,de
-	jq nc,.fail ;fail if offset>=len
-	push hl
-	ld hl,512    ;cluster size
-	call fs_MultBySectorsPerCluster
-	ld (ix-12),hl
-	pop hl
-	call ti._idivu
-	ld (ix-6),hl  ;offset>>10
-	ld hl,(ix+21)
-	ld a,h
-	and a,3
-	ld h,a
-	ex.s hl,de ;offset&0x3FF
-	ld hl,(ix-12)
-	or a,a
-	sbc hl,de
-	push hl
-	ld hl,(ix+18)
-	ld de,(ix-6)
-	push de,hl
-	call fs_GetClusterPtr
-	jq c,.fail
-	pop bc,bc
-	add hl,bc ;add offset&0x3FF
-	pop bc
-	ld de,(ix-3)
-	push bc
-	ldir
+	call _LoadDEInd_s
 	ld (ix-3),de
+	ld c,fsentry_filelen - fsentry_filesector
+	add hl,bc
+	call _LoadDEInd_s
+	push de
+	ld de,(ix+9)
+	ld b,(ix+12)
 	or a,a
 	sbc hl,hl
-	ld de,(ix+12) ;int len
-	ld b,(ix+15)  ;uint8_t count
-.get_len_loop:
+.mult_loop:
 	add hl,de
-	djnz .get_len_loop
-	ld (ix-9),hl
-	pop de
-	or a,a
-	sbc hl,de
-	jq z,.return
-	ld bc,(ix-12)
-	call ti._idivu
-	inc hl
-	ld (ix-6),hl
-	ld hl,(ix+18)
-	ld de,0
-	ld bc,(ix-12)
-	jq .entry
-.copy_loop:
-	push de,hl
-	call fs_GetClusterPtr
-	jq c,.fail
-	ld de,(ix-3) ;dest
-	ld bc,(ix-12)
-	ldir
-	ld (ix-3),de ;no more need to offset
-	pop hl,de
-.entry:
+	djnz .mult_loop
 	push hl
-	ld hl,(ix-6)
+	pop bc
+	ld de,(ix+18)
+	add hl,de
+	pop de
+	add hl,de
 	or a,a
 	sbc hl,de
-	inc de
-	pop hl
-	jq nc,.copy_loop
-.return:
-	ld hl,(ix-9)
-	db $01 ;dummify next 3 bytes
+	jq c,.fail
+	
+	ld hl,(ix-3)
+	push bc,hl
+	call fs_GetSectorAddress
+	ld bc,(ix+18)
+	add hl,bc
+	pop bc,bc
+	ld de,(ix+6)
+	ldir
+	db $01 ;ld bc,...
 .fail:
-	xor a,a   ;1 byte
-	sbc hl,hl ;2 bytes
-.exit:
+	scf
+	sbc hl,hl
+.return:
 	ld sp,ix
 	pop ix
-	pop iy
 	ret

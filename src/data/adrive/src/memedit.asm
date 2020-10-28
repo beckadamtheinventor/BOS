@@ -468,18 +468,19 @@ libload_load:
 	call bos.fs_OpenFile
 	pop bc
 	jr c,.notfound
-	ld bc,0
-	push bc,hl
-	call bos.fs_GetClusterPtr
-	pop bc,bc
-	jr c,.notfound
+	ld bc,$0C
+	add hl,bc
+	ld hl,(hl)
+	push hl
+	call bos.fs_GetSectorAddress
+	pop bc
 	ld   de,libload_relocations
 	ld   bc,.notfound
 	push   bc
 	ld   bc,$aa55aa
 	jp   (hl)
 .libload_name:
-	db "A:/LibLoad.v21",0
+	db "/lib/LibLoad.LLL",0
 
 .notfound:
 	xor   a,a

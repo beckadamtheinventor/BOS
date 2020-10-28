@@ -29,13 +29,8 @@ boot_os:
 	call gfx_Set8bpp
 	call fs_SanityCheck
 	ld hl,current_working_dir
-	db $01 ;ld bc,...
-	db "C:/"
+	ld bc,'/'
 	ld (hl),bc
-	inc hl
-	inc hl
-	inc hl
-	ld (hl),0
 os_return:
 	call gfx_Set8bpp
 	ld bc,$FF0000

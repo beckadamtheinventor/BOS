@@ -3,7 +3,7 @@
 gfx_Set16bpp:
 	ld	hl,LCD_VRAM
 	ld	bc,((LCD_WIDTH * LCD_HEIGHT) * 2) - 1
-	ld	a,255
+	ld	a,$FF
 	call	sys_MemSet
 	ld	a,LCD_16BPP
 	ld	(LCD_CTRL),a

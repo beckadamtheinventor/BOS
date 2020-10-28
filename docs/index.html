@@ -8,7 +8,7 @@
 <tr><td>bos.sys_ExecuteFile</td><td>020124</td><td><a href="#sys_ExecuteFile">doc</a></tr>
 <tr><td>bos.sys_ExecuteFileEntryPoint</td><td>020128</td><td><a href="#sys_ExecuteFileEntryPoint">doc</a></tr>
 <tr><td>bos.fs_OpenFile</td><td>02012C</td><td><a href="#fs_OpenFile">doc</a></tr>
-<tr><td>bos.fs_GetClusterPtr</td><td>020130</td><td><a href="#fs_GetClusterPtr">doc</a></tr>
+<tr><td>bos.fs_GetSectorAddress</td><td>020130</td><td><a href="#fs_GetSectorAddress">doc</a></tr>
 <tr><td>bos.fs_CheckDirExists</td><td>020134</td><td><a href="#fs_CheckDirExists">doc</a></tr>
 <tr><td>bos.fs_GetPathLastName</td><td>020138</td><td><a href="#fs_GetPathLastName">doc</a></tr>
 <tr><td>bos.fs_CopyFileName</td><td>02013C</td><td><a href="#fs_CopyFileName">doc</a></tr>
@@ -59,6 +59,10 @@
 <tr><td>bos.fs_CreateFile</td><td>0201F0</td><td><a href="#fs_CreateFile">doc</a></tr>
 <tr><td>bos.strupper</td><td>0201F4</td><td><a href="#strupper">doc</a></tr>
 <tr><td>bos.strlower</td><td>0201F8</td><td><a href="#strlower">doc</a></tr>
+<tr><td>bos.fs_AbsPath</td><td>0201FC</td><td><a href="#fs_AbsPath">doc</a></tr>
+<tr><td>bos.fs_MultByBytesPerSector</td><td>020200</td><td><a href="#fs_MultByBytesPerSector">doc</a></tr>
+<tr><td>bos._LoadLibraryOP1</td><td>020204</td><td><a href="#_LoadLibraryOP1">doc</a></tr>
+<tr><td>bos.fs_OpenFileInDir</td><td>020208</td><td><a href="#fs_OpenFileInDir">doc</a></tr>
 </table><div id="boot_os"><h1>boot_os</h1><h3>syscall Adress 020108</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
@@ -77,12 +81,12 @@
  entry point is essentially "file.whatever:entrypoint/whatever"</td></tr>
 </table></div><div id="fs_OpenFile"><h1>fs_OpenFile</h1><h3>syscall Adress 02012C</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td> void *fs_OpenFile(char *path);</td><td> Opens a file from a path and returns file descriptor.</td><td> hl = file descriptor. hl is -1 if file does not exist.</td><td> All, OP5, OP6</td><td>
-</td></tr>
-</table></div><div id="fs_GetClusterPtr"><h1>fs_GetClusterPtr</h1><h3>syscall Adress 020130</h3>
+<tr><td> void *fs_OpenFile(char *path);</td><td> Opens a file from a path and returns file descriptor.</td><td> hl = file descriptor. hl is -1 if file does not exist.</td><td> All</td><td>
+ This only searches for short 8.3 file names.</td></tr>
+</table></div><div id="fs_GetSectorAddress"><h1>fs_GetSectorAddress</h1><h3>syscall Adress 020130</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td> void *fs_GetClusterPtr(void *fd, int cluster);</td><td> read a given cluster of a file descriptor</td><td> hl = pointer to sector. hl = -1 if failed.</td><td></td><td>
- this does not guarantee a contiguous memory space, as files can be fragmented in FAT filesystems.</td></tr>
+<tr><td> void *fs_GetSectorAddress(uint16_t sector);</td><td> get the physical address of a given sector.</td><td></td><td></td><td>
+</td></tr>
 </table></div><div id="fs_CheckDirExists"><h1>fs_CheckDirExists</h1><h3>syscall Adress 020134</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td> bool fs_CheckDirExists(char *path);</td><td> check if a directory exists.</td><td> true if path exists, else false</td><td></td><td>
@@ -93,11 +97,11 @@
  this will return the last entry in the path, regardless of whether the path exists or if it points to a program entrypoint.</td></tr>
 </table></div><div id="fs_CopyFileName"><h1>fs_CopyFileName</h1><h3>syscall Adress 02013C</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td> void fs_CopyFileName(char *dest, void *fd);</td><td> copies file name from file descriptor</td><td></td><td></td><td>
+<tr><td> char *fs_CopyFileName(char *dest, void *fd);</td><td> copies file name from file descriptor</td><td> first byte of dest will be null if failed.</td><td></td><td>
 </td></tr>
 </table></div><div id="fs_Read"><h1>fs_Read</h1><h3>syscall Adress 020140</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td> int fs_Read(void *dest, int len, uint8_t count, void *fd, int offset);</td><td> read data from a file into RAM</td><td> number of bytes read</td><td> All, OP6</td><td>
+<tr><td> int fs_Read(void *dest, int len, uint8_t count, void *fd, int offset);</td><td> read data from a file into RAM</td><td> number of bytes read</td><td> All</td><td>
 </td></tr>
 </table></div><div id="sys_AddHLAndA"><h1>sys_AddHLAndA</h1><h3>syscall Adress 020144</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -208,9 +212,9 @@
 </td></tr>
 </table></div><div id="_ChkFindSym"><h1>_ChkFindSym</h1><h3>syscall Adress 0201A8</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td> OP1+1 8 byte file name</td><td> Search for a '.v21' file (raw appvar) in both A and C drive's root directories</td><td> HL = pointer to file length<br>
+<tr><td> OP1+1 8 byte file name</td><td> Search for a file (no extension) in the "/bin/" directory</td><td> HL = pointer to 2 byte file length<br>
  DE = pointer to file data<br>
- Cf set if file not found or otherwise cannot be opened.</td><td> OP1 and OP2</td><td>
+ Cf set if file not found or otherwise cannot be opened.</td><td> OP1</td><td>
 </td></tr>
 </table></div><div id="_LoadDEInd_s"><h1>_LoadDEInd_s</h1><h3>syscall Adress 0201AC</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -278,7 +282,7 @@
 </td></tr>
 </table></div><div id="fs_CreateFile"><h1>fs_CreateFile</h1><h3>syscall Adress 0201F0</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td> bool fs_CreateFile(char *path);</td><td> create a file</td><td></td><td> All</td><td>
+<tr><td> int fs_CreateFile(char *path);</td><td> create a file</td><td> 0 if failed, -1 if parent directory does not exist</td><td> All</td><td>
 </td></tr>
 </table></div><div id="strupper"><h1>strupper</h1><h3>syscall Adress 0201F4</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -288,4 +292,21 @@
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td> HL pointer to string</td><td> convert a string to lowercase</td><td> HL HL+strlen(HL)</td><td> AF</td><td>
 </td></tr>
+</table></div><div id="fs_AbsPath"><h1>fs_AbsPath</h1><h3>syscall Adress 0201FC</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> char *fs_AbsPath(const char *path);</td><td> get absolute path representation of hl</td><td> hl = absolute path. Will be equal to the input if it is already an absolute path<br>
+ Cf set if failed</td><td></td><td>
+</td></tr>
+</table></div><div id="fs_MultByBytesPerSector"><h1>fs_MultByBytesPerSector</h1><h3>syscall Adress 020200</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> HL = number</td><td> multiply by the number of bytes per sector</td><td> HL*=256</td><td> BC,DE,AF</td><td>
+</td></tr>
+</table></div><div id="_LoadLibraryOP1"><h1>_LoadLibraryOP1</h1><h3>syscall Adress 020204</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> OP1 name of library</td><td> locate and return a pointer to a library from a ".LLL" file in the "/lib/" directory</td><td> hl points to file length, de points to file data. Cf set if failed</td><td></td><td>
+</td></tr>
+</table></div><div id="fs_OpenFileInDir"><h1>fs_OpenFileInDir</h1><h3>syscall Adress 020208</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> void *fs_OpenFileInDir(char *path, void *dir);</td><td> Opens a file given a path and a pointer to the dir to start searching from. Returns file descriptor.</td><td> hl = file descriptor. hl is -1 if file does not exist.</td><td> All</td><td>
+ This only searches for short 8.3 file names.</td></tr>
 </table></div></body></html>

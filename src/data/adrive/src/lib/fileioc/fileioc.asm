@@ -1204,7 +1204,7 @@ ti_GetDataPtr:
 	push de
 	ld bc,0
 	push bc,hl
-	call bos.fs_GetClusterPtr
+;	call bos.fs_GetClusterPtr
 	pop bc,bc
 	pop de
 	ld e,0   ;offset&=0x3FF

@@ -12,7 +12,7 @@ namespace bos
 ?sys_ExecuteFile                 := $20124
 ?sys_ExecuteFileEntryPoint       := $20128
 ?fs_OpenFile                     := $2012C
-?fs_GetClusterPtr                := $20130
+?fs_GetSectorAddress             := $20130
 ?fs_CheckDirExists               := $20134
 ?fs_GetPathLastName              := $20138
 ?fs_CopyFileName                 := $2013C
@@ -63,6 +63,10 @@ namespace bos
 ?fs_CreateFile                   := $201F0
 ?strupper                        := $201F4
 ?strlower                        := $201F8
+?fs_AbsPath                      := $201FC
+?fs_MultByBytesPerSector         := $20200
+?_LoadLibraryOP1                 := $20204
+?fs_OpenFileInDir                := $20208
 ?LCD_PAL    := 0E30200h
 ?LCD_CTRL   := 0E30018h
 ?LCD_VRAM   := 0D40000h

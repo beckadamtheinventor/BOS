@@ -1,7 +1,7 @@
 ;@DOES set the lcd to 8bpp mode
 ;@DESTROYS HL,DE,BC,AF
 gfx_Set8bpp:
-	ld a,$FF
+	xor a,a
 	call	gfx_LcdClear
 .setup:
 	ld	a,LCD_8BPP

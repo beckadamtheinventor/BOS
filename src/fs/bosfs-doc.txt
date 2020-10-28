@@ -1,0 +1,21 @@
+
+;Each partition begins with a directory data section
+
+;----------------------------------------------
+;each directory data section
+;0x10    16b   file/directory entries
+
+
+;----------------------------------------------
+;each file/directory entry
+;0x00    8b    file name
+;0x08    3b    file extension
+;0x0B    1b    file entry flags
+;0x0C    2b    file starting cluster
+;0x0E    2b    file ending cluster
+
+;special entries
+; -  starting with 0x00             end of directory marker
+; -  starting with 0x2E,0x2E        Parent directory. Root directory should point to itself.
+; -  starting with 0xF0             Deleted file
+; -  starting with 0xF1             Long file name. Applies to previous file in directory. Each successive entry appends to the previous.
