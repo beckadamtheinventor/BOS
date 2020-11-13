@@ -47,6 +47,7 @@ free_file_RAM_ptr      := $D00030
 remaining_file_RAM     := $D00033
 console_line           := $D00036
 bottom_of_RAM          := $D00037
+flashStatusByte        := $D0003A
 ScrapMem2              := $D00079
 ScrapByte              := $D0007C
 ScrapWord              := $D0007D
@@ -82,6 +83,7 @@ start_of_user_archive  := $0C0000 ;sector $0C, standard
 end_of_user_archive    := $3B0000 ;sector $3B, start of certificate
 
 
+; file entry flags
 fd_readonly   := 0
 fd_hidden     := 1
 fd_system     := 2
@@ -89,3 +91,12 @@ fd_volume     := 3
 fd_subdir     := 4
 fd_archive    := 5
 fd_device     := 6
+
+; flashStatusByte flags
+bIsFlashUnlocked     := 0
+bKeepFlashUnlocked   := 1
+
+mIsFlashUnlocked     := 1
+mKeepFlashUnlocked   := 2
+
+

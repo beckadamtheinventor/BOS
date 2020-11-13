@@ -151,11 +151,11 @@ gui_Input:
 .keymaps:
 	dl .keymap_A,.keymap_a,.keymap_1,0
 .keymap_A:
-	db "#WRMH  ?!VQLG  :ZUPKFC  YTOJEB  XSNIDA"
+	db '"',"WRMH  ?!VQLG  :ZUPKFC  YTOJEB  XSNIDA"
 .keymap_a:
-	db "#wrmh  ?!vqlg  :zupkfc  ytojeb  xsnida"
+	db '"',"wrmh  ?!vqlg  :zupkfc  ytojeb  xsnida"
 .keymap_1:
-	db "+-*/^  ;369)$@ .258(&~ 0147,][  ",$1A,"<=>}{"
+	db "+-*/^  ;369)$@ .258(&~ 0147,][  '<=>}{"
 .overtypes:
 	db "Aa1"
 
