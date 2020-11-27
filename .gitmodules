@@ -1,0 +1,3 @@
+[submodule "noti-ez80"]
+	path = noti-ez80
+	url = https://github.com/beckadamtheinventor/noti-ez80
