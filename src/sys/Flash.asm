@@ -68,9 +68,15 @@ port_ospre55:
 	jp	(hl)
 
 ;modified to use static unlock routine
+;modified to only unlock flash when it isn't already
 flash_unlock:
 sys_FlashUnlock:
 port_unlock:
+	ld	a,(flashStatusByte)
+	bit	bIsFlashUnlocked, a
+	ret	nz
+	set	bIsFlashUnlocked, a
+	ld	(flashStatusByte),a
 	push	de,bc,hl
 	call	port_ospre55.unlock
 .pop:
@@ -78,9 +84,17 @@ port_unlock:
 	ret
 
 ;modified to use static lock routine
+;modified to only lock flash when it is not required to remain unlocked
 flash_lock:
 sys_FlashLock:
 port_lock:
+	ld	a,(flashStatusByte)
+	bit	bKeepFlashUnlocked, a
+	ret nz
+	bit bIsFlashUnlocked,	a
+	ret z
+	res bIsFlashUnlocked,	a
+	ld	(flashStatusByte),	a
 	push	de,bc,hl
 	call	port_ospre55.lock
 .code := $-3

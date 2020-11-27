@@ -15,13 +15,9 @@ sys_ExecuteFile:
 	jq z,.fail
 	push hl,de
 	call sys_PushArgumentStack
-	pop de,hl
-	ld a,(hl)
-	cp a,'/'
-	push hl
-	jq nz,.open_system_exe
+	pop de
 	call fs_OpenFile
-	jq c,.try_exe
+	jq c,.fail_popbc
 .open_fd:
 	ld (fsOP6),hl ;save file descriptor for later
 	ld bc,$B
@@ -54,58 +50,6 @@ sys_ExecuteFile:
 .skip2:
 	inc hl
 	inc hl
-	jq .ext
-.system_drive_prefix:
-	db "/bin/"
-.system_drive_prefix_len:=$-.system_drive_prefix
-.open_system_exe:
-	call ti._strlen
-	push hl
-	ld bc,.system_drive_prefix_len + 4
-	add hl,bc
-	push hl
-	call sys_Malloc
-	pop bc
-	jq c,.fail_popbc
-	ld (fsOP6),hl
-	ex hl,de
-	ld bc,.system_drive_prefix_len
-	ld hl,.system_drive_prefix
-	ldir
-	pop bc
-	pop hl
-	ldir
-	ld hl,str_dotEXE
-	ld bc,5
-	ldir
-	ld hl,(fsOP6)
-	push hl
-	jq .try_open
-.try_exe:
-	call ti._strlen
-	ld bc,11
-	or a,a
-	sbc hl,bc
-	jq nc,.fail
-	ld de,fsOP5
-	push de
-	call ti._strcpy
-	pop hl,bc
-	push hl
-	call ti._strlen
-	ex (sp),hl
-	pop bc
-	push hl
-	add hl,bc
-	ex hl,de
-	ld hl,str_dotEXE
-	ld bc,5
-	ldir
-.try_open:
-	call fs_OpenFile
-	jq c,.fail_popbc
-	jq .open_fd
-.ext:
 	ld a,(hl)
 	cp a,$EF
 	jq z,.check_ef7b

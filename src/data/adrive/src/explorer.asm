@@ -71,6 +71,8 @@ explorer_main:
 	jq z,_uninstall_bos
 	cp a,15
 	jq z,_exit
+	cp a,10
+	jq z,_test
 	cp a,9
 	jq nz,.key_loop
 explore_files:
@@ -292,6 +294,15 @@ explorer_dir_offset:=$-3
 	call gfx_PrintString
 	pop bc
 	ret
+_test:
+	ld hl,.tester_file
+	ld bc,$FF0000
+	push bc,hl
+	call bos.sys_ExecuteFile
+	pop bc,bc
+	jq explorer_main
+.tester_file:
+	db "/test/tester.EXE",0
 
 str_System:
 	db "SYS ",0
@@ -361,10 +372,6 @@ load_libload:
 
 .relocations:
 	db	$C0, "GRAPHX", $00, 11
-gfx_Begin:
-	jp 0
-gfx_End:
-	jp 3
 gfx_SetColor:
 	jp 6
 gfx_SetDraw:
