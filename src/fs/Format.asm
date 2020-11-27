@@ -5,9 +5,7 @@ fs_Format:
 	ld hl,str_Formatting
 	call gui_DrawConsoleWindow
 
-	ld hl,flashStatusByte
-	set bKeepFlashUnlocked, (hl)
-	call sys_FlashUnlock
+	call flash_unlock
 
 	ld a,$04
 .erase_loop: ;erase all system and user flash sectors
@@ -37,12 +35,8 @@ fs_Format:
 	call util_Zx7DecompressToFlash
 	pop hl,hl
 
-	call fs_InitClusterMap
-	ld hl,flashStatusByte
-	res bKeepFlashUnlocked, (hl)
-	call sys_FlashLock
+	call flash_lock
 	ld hl,str_PressAnyKey
 	call gui_Print
 	jp sys_WaitKeyCycle
-
 

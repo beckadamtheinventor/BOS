@@ -14,62 +14,39 @@ fs_fs
 ;filesystem root directory entries
 fs_file root_dir
 	fs_entry bin_dir, "bin", "", f_readonly+f_system+f_subdir
-	fs_entry dev_dir, "dev", "", f_readonly+f_system+f_subdir
-	fs_entry etc_dir, "etc", "", f_readonly+f_system+f_subdir
 	fs_entry home_dir, "home", "", f_subdir
 	fs_entry lib_dir, "lib", "", f_readonly+f_system+f_subdir
 	fs_entry man_dir, "man", "", f_readonly+f_system+f_subdir
 	fs_entry root_user_dir, "root", "", f_subdir+f_system
-	fs_entry test_dir, "test", "", f_subdir+f_system
 	db 16 dup 0
 end fs_file
 
 ;"/bin/" directory
 fs_file bin_dir
-	fs_entry root_dir, "..", "", f_subdir+f_system
-	fs_entry boot_exe, "boot", "exe", f_readonly+f_system
-	fs_entry cat_exe, "cat", "exe", f_readonly+f_system
-	fs_entry cd_exe, "cd", "exe", f_readonly+f_system
-	fs_entry cmd_exe, "cmd","exe", f_readonly+f_system
-	fs_entry clean_exe, "clean", "exe", f_readonly+f_system
-	fs_entry cls_exe, "cls", "exe", f_readonly+f_system
-	fs_entry explorer_exe, "explorer", "exe", f_readonly+f_system
-	fs_entry fexplore_exe, "fexplore", "exe", f_readonly+f_system
-	fs_entry help_exe, "help", "exe", f_readonly+f_system
-	fs_entry ls_exe, "ls", "exe", f_readonly+f_system
-	fs_entry man_exe, "man", "exe", f_readonly+f_system
-	fs_entry uninstaller_exe, "uninstlr","exe", f_readonly+f_system
-	fs_entry updater_exe, "updater", "exe", f_readonly+f_system
-	fs_entry memedit_exe, "memedit","exe", f_readonly+f_system
-	fs_entry off_exe, "off","exe", f_readonly+f_system
-	fs_entry usbrun_exe, "usbrun","exe", f_readonly+f_system
-	fs_entry usbsend_exe, "usbsend","exe", f_readonly+f_system
-	db 16 dup 0
-end fs_file
-
-;"/dev/" directory
-fs_file dev_dir
-	fs_entry root_dir, "..", "", f_subdir+f_system
-	fs_entry cluster_map_file, "cmap", "dat", f_readonly+f_system
-	db 16 dup 0
-end fs_file
-
-;"/etc/" directory
-fs_file etc_dir
-	fs_entry root_dir, "..", "", f_subdir+f_system
-	db 16 dup 0
-end fs_file
-
-;"/test/" directory
-fs_file test_dir
-	fs_entry root_dir, "..", "", f_subdir+f_system
-	fs_entry tester_exe, "tester", "exe", f_system+f_readonly
+	fs_entry root_dir, "..", "", f_subdir
+	fs_entry boot_exe, "boot", "EXE", f_readonly+f_system
+	fs_entry cat_exe, "cat", "EXE", f_readonly+f_system
+	fs_entry cd_exe, "cd", "EXE", f_readonly+f_system
+	fs_entry cmd_exe, "cmd","EXE", f_readonly+f_system
+	fs_entry clean_exe, "clean", "EXE", f_readonly+f_system
+	fs_entry cls_exe, "cls", "EXE", f_readonly+f_system
+	fs_entry explorer_exe, "explorer", "EXE", f_readonly+f_system
+	fs_entry fexplore_exe, "fexplore", "EXE", f_readonly+f_system
+	fs_entry help_exe, "help", "EXE", f_readonly+f_system
+	fs_entry ls_exe, "ls", "EXE", f_readonly+f_system
+	fs_entry man_exe, "man", "EXE", f_readonly+f_system
+	fs_entry uninstaller_exe, "uninstlr","EXE", f_readonly+f_system
+	fs_entry updater_exe, "updater", "EXE", f_readonly+f_system
+	fs_entry memedit_exe, "memedit","EXE", f_readonly+f_system
+	fs_entry off_exe, "off","EXE", f_readonly+f_system
+	fs_entry usbrun_exe, "usbrun","EXE", f_readonly+f_system
+	fs_entry usbsend_exe, "usbsend","EXE", f_readonly+f_system
 	db 16 dup 0
 end fs_file
 
 ;"/lib/" directory
 fs_file lib_dir
-	fs_entry root_dir, "..", "", f_subdir+f_system
+	fs_entry root_dir, "..", "", f_subdir
 	fs_entry fatdrvce_lll, "FATDRVCE","LLL", f_readonly+f_system
 	fs_entry fileioc_lll, "FILEIOC","LLL", f_readonly+f_system
 	fs_entry graphx_lll, "GRAPHX","LLL", f_readonly+f_system
@@ -81,26 +58,22 @@ end fs_file
 
 ;"/man/" directory
 fs_file man_dir
-	fs_entry root_dir, "..", "", f_subdir+f_system
+	fs_entry root_dir, "..", "", f_subdir
 	fs_entry readme_man, "README", "MAN", f_readonly+f_system
 	db 16 dup 0
 end fs_file
 
-
-;"/root/" directory
 fs_file root_user_dir
-	fs_entry root_dir, "..", "", f_subdir+f_system
+	fs_entry root_dir, "..", "", f_subdir
 	db 16 dup 0
 end fs_file
 
-;"/home/" directory
 fs_file home_dir
 	fs_entry root_dir, "..", "", f_subdir
 	fs_entry user_home_dir, "user", "", f_subdir
 	db 16 dup 0
 end fs_file
 
-;"/home/user/" directory
 fs_file user_home_dir
 	fs_entry home_dir, "..", "", f_subdir
 	fs_entry user_settings_dat, "settings", "dat", 0
@@ -111,61 +84,8 @@ end fs_file
 ;file data section
 ;-------------------------------------------------------------
 
-fs_file cluster_map_file
-	db 8192 dup $FF
-end fs_file
-
 fs_file user_settings_dat
-	db 16 dup 0
-end fs_file
-
-fs_file tester_exe
-	jq tester_exe_main
-	db "FEX",0
-tester_exe_main:
-	ld hl,.file_to_write
-	push hl
-	call bos.fs_OpenFile
-	pop bc
-	jq c,.fail
-	ld bc,1024
-	push hl,bc
-	call bos.fs_SetSize
-	pop bc,hl
-	ld bc,0
-	push bc,hl
-	ld c,1
-	push bc
-	ld c,.file_to_write_len
-	push bc
-	ld bc,.file_to_write
-	push bc
-	call bos.fs_Write
-	pop bc,bc,bc
-	ld bc,.file_to_write_len
-	push bc
-	call bos.sys_Malloc
-	pop bc
-	pop de,bc
-	jq c,.fail
-	ld bc,0
-	push bc,de
-	ld c,1
-	push bc
-	ld c,.file_to_write_len
-	push bc,hl
-	call bos.fs_Read
-	pop hl,bc,bc,bc,bc
-	call bos.gui_Print
-	call bos.gui_NewLine
-	xor a,a
-.fail:
-	sbc hl,hl
-	ret
-.file_to_write:
-	db "/home/user/settings.dat",0
-.file_to_write_len := $ - .file_to_write
-
+	db 0
 end fs_file
 
 fs_file cmd_exe
@@ -192,61 +112,31 @@ enter_input:
 .noargs:
 	ex (sp),hl ;args
 	push hl ;path
-	call bos.fs_OpenFile
-	jq c,.system_exe
-.execute:
 	call bos.sys_ExecuteFile
 	pop bc,bc
+	ld bc,enter_input
+	push bc
+	jq c,.fail
 	ld (bos.ScrapMem),hl
 	ld a,(bos.ScrapMem+2)
 	or a,h
 	or a,l
-	jq z,enter_input
+	ret z
 	push hl
 	call bos.gfx_BlitBuffer
 	pop hl
 	call bos.gui_PrintInt
 	call bos.gui_NewLine
 	or a,$FF
-	call bos.gfx_BlitBuffer
-	jq enter_input
-.exit:
-	pop bc,bc
-	ret
-.system_exe:
-	call ti._strlen
-	ex (sp),hl
-	pop bc
-	push bc,hl
-	ld hl,5+str_system_drive.len
-	add hl,bc
-	push hl
-	call bos.sys_Malloc
-	ex hl,de
-	pop bc,hl,bc
-	jq c,.exit
-	push de,bc,hl
-	ld hl,str_system_drive
-	ld bc,str_system_drive.len
-	ldir
-	pop hl,bc
-	ldir
-	ld hl,str_exe_ext
-	ld bc,5
-	ldir
-	call bos.fs_OpenFile
-	jq nc,.execute
+	jp bos.gfx_BlitBuffer
 .fail:
 	pop bc,bc
 	ld hl,str_CouldNotLocateExecutable
 	call bos.gui_Print
 	jq enter_input
-str_system_drive:
-	db "/bin/"
-.len:=$-.
-str_exe_ext:
-	db ".exe",0
-
+.exit:
+	pop bc,bc
+	ret
 str_CouldNotLocateExecutable:
 	db $9,"Could not locate executable",$A,0
 end fs_file
@@ -288,9 +178,9 @@ boot_main:
 	pop bc
 	jq .loop
 str_CmdExecutable:
-	db "/bin/cmd.exe",0
+	db "cmd",0
 str_ExplorerExecutable:
-	db "/bin/explorer.exe",0
+	db "explorer",0
 end fs_file
 
 fs_file cat_exe
@@ -358,68 +248,57 @@ cd_main:
 	ld a,(hl)
 	or a,a
 	jq z,.help
-	cp a,'/'
-	jq z,.abspath
-	cp a,'.'
-	jq nz,.not_dot
+	push ix
+	push hl
+	call bos.fs_CheckDirExists
+	pop hl
+	jq c,.fail
 	inc hl
-	cp a,(hl)
-	jq nz,.return
+	ld a,(hl)
+	dec hl
+	cp a,':'
+	jq z,.abs_path
+	push hl
 	ld hl,bos.current_working_dir
 	push hl
 	call ti._strlen
 	ex (sp),hl
 	pop bc
-	push hl
 	add hl,bc
-	ld a,'/'
-	cpdr
-	dec hl
-	cpdr
-	inc hl
-	ld (hl),0
-	pop hl
-	ld (hl),a
-	jq .return
-.not_dot:
+	ex (sp),hl
 	push hl
-	call bos.fs_CheckDirExists
-	pop hl
-	jq c,.fail
-	push hl
-	call bos.fs_AbsPath
+	call ti._strlen
+	ex (sp),hl
 	pop bc
-.abspath:
+	pop de
+	ldir
+	jq .return
+.abs_path:
 	push hl
 	call ti._strlen
 	ex (sp),hl
 	pop bc
 	ld de,bos.current_working_dir
 	ldir
-	ex hl,de
-	dec hl
-	ld a,'/'
-	cp a,(hl)
-	inc hl
-	jq z,.dont_put_fwd
-	ld (hl),a
-	inc hl
-.dont_put_fwd:
-	ld (hl),0
+	xor a,a
+	ld (de),a
 .return:
+	pop ix
 	xor a,a
 	sbc hl,hl
 	ret
 .fail:
+	pop ix
 	ld hl,str_DirDoesNotExist
 	call bos.gui_Print
-	call bos.gui_NewLine
 	ld hl,-2
 	ret
 .help:
 	ld hl,str_HelpDoc
 	call bos.gui_Print
-	jq .return
+	or a,a
+	sbc hl,hl
+	ret
 str_DirDoesNotExist:
 	db $9,"Directory does not exist.",$A,0
 str_HelpDoc:
@@ -498,13 +377,14 @@ ls_main:
 	call bos.fs_OpenFile
 	pop bc
 	jq c,.fail
+	push ix
 	push hl
-	pop iy
+	pop ix
 .loop:
-	ld a,(iy)
+	ld a,(ix)
 	or a,a
 	jq z,.exit
-	bit bos.fd_hidden,(iy+$B) ;check if file is hidden
+	bit bos.fd_hidden,(ix+$B) ;check if file is hidden
 	jq z,.not_hidden
 	ld a,$1F
 	jq .set_cursor_color
@@ -513,16 +393,16 @@ ls_main:
 .set_cursor_color:
 	ld (bos.lcd_text_fg),a
 	ld hl,bos.fsOP6+1
-	push iy,hl
+	push ix,hl
 	call bos.fs_CopyFileName
-	pop hl,iy
+	pop hl,ix
 	dec hl
 	ld (hl),$9
 	call bos.gui_Print
-	call bos.gui_NewLine
-	lea iy,iy+16
+	lea ix,ix+16
 	jq .loop
 .exit:
+	pop ix
 .exit_nopop:
 	xor a,a
 	sbc hl,hl
@@ -733,16 +613,13 @@ fs_file usbrun_exe
 	file "../obj/usbrun.bin"
 end fs_file
 
-;fs_file "USBLS","exe", f_readonly+f_system
+;fs_file "USBLS","EXE", f_readonly+f_system
 ;	file "../obj/usbls.bin"
 ;end fs_file
-
 fs_file usbsend_exe
 	file "../obj/usbsend.bin"
 end fs_file
 
-fs_file tedit_exe
-	file "../obj/tedit.bin"
-end fs_file
+
 
 end fs_fs

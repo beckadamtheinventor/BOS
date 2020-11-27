@@ -2,9 +2,7 @@
 ; BOS filesystem functions
 
 include 'fs/AbsPath.asm'
-include 'fs/Alloc.asm'
 include 'fs/bosfs-doc.txt'
-include 'fs/CeilDivBySector.asm'
 include 'fs/CheckDirExists.asm'
 include 'fs/CopyFileName.asm'
 include 'fs/CreateFile.asm'
@@ -13,7 +11,6 @@ include 'fs/Format.asm'
 include 'fs/fs_defines.asm'
 include 'fs/GetPathLastName.asm'
 include 'fs/GetSectorAddress.asm'
-include 'fs/InitClusterMap.asm'
 include 'fs/MultByBytesPerSector.asm'
 include 'fs/OpenFile.asm'
 include 'fs/OpenFileInDir.asm'

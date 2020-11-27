@@ -10,8 +10,6 @@ fasmg src/explorer.asm obj/explorer.bin
 fasmg src/fexplore.asm obj/fexplore.bin
 fasmg src/memedit.asm obj/memedit.bin
 fasmg src/updater.asm obj/updater.bin
-fasmg src/usbrun.asm obj/usbrun.bin
-fasmg src/usbsend.asm obj/usbsend.bin
 
 
 fasmg src/main.asm obj/main.bin

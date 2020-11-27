@@ -7,10 +7,10 @@ org ti.userMem
 	jr mem_edit
 	db "REX",0
 mem_edit:
-	ld hl,-8
-	call ti._frameset
 	call libload_load
 	ret nz
+	ld (SaveIX),ix
+	ld (SaveSP),sp
 mem_edit_main:
 	ld c,1
 	push bc
@@ -19,26 +19,27 @@ mem_edit_main:
 	call mem_edit_readme
 	cp a,15
 	jq z,.exit_nocls
+	ld hl,-8
+	call ti._frameset
 	ld hl,(ix+6)
 	ld a,(hl)
 	or a,a
-	jq z,.dont_open_file
+	jr z,.dont_open_file
 	push hl
 	call bos.fs_OpenFile
 	pop bc
-	jq c,.dont_open_file
-	ld bc,$E
+	jr c,.dont_open_file
+	ld bc,$1C
 	push hl
 	add hl,bc
-	ld de,(hl)
-	ex.s hl,de
+	ld hl,(hl)
 	ld bc,(bos.remaining_free_RAM)
 	or a,a
 	sbc hl,bc
 	add hl,bc
 	ex hl,de
 	pop hl
-	jq nc,.file_too_large
+	jr nc,.file_too_large
 	ld bc,0
 	push bc ;int offset
 	push hl ;void *fd
@@ -49,7 +50,7 @@ mem_edit_main:
 	push bc ;void *dest
 	call bos.fs_Read
 	pop hl,bc,bc,bc,bc
-	jq .init_editor
+	jr .init_editor
 .file_too_large:
 	ld hl,string_file_too_large
 	call _print
@@ -214,8 +215,10 @@ mem_edit_main:
 	call gfx_ZeroScreen
 	call gfx_BlitBuffer
 .exit_nocls:
-	ld sp,ix
-	pop ix
+	ld sp,0
+SaveSP:=$-3
+	ld ix,0
+SaveIX:=$-3
 	xor a,a
 	sbc hl,hl
 	ret

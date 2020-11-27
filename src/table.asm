@@ -14,7 +14,6 @@
 	jp fs_GetPathLastName
 	jp fs_CopyFileName
 	jp fs_Read
-	jp fs_Write
 	jp sys_AddHLAndA
 	jp sys_AnyKey
 	jp sys_FreeAll
@@ -65,6 +64,3 @@
 	jp fs_MultByBytesPerSector
 	jp _LoadLibraryOP1
 	jp fs_OpenFileInDir
-	jp fs_SetSize
-	jp fs_WriteFile
-

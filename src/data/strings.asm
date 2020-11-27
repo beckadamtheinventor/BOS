@@ -15,10 +15,9 @@ str_PressAnyKey:
 	db "Press any key to continue...",$A,0
 str_Prompt:
 	db ">",$A,0
-str_CmdExecutable:
-	db "/bin/cmd"
 str_dotEXE:
-	db ".exe",0
+	db ".EXE",0
 str_StartupProgram:
-	db "/bin/boot.exe",0
-
+	db "boot",0
+str_CmdExecutable:
+	db "cmd",0
