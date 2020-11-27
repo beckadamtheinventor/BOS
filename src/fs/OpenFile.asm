@@ -86,7 +86,7 @@ fs_OpenFile:
 	lea bc,ix-16
 	push iy,bc
 	call fs_CopyFileName ;get file name string from file entry
-	pop bc,iy
+	pop bc
 	push bc
 	call ti._strlen ;get length of file name string from file entry
 	ex (sp),hl
@@ -94,7 +94,7 @@ fs_OpenFile:
 	ld bc,(ix-3)
 	push bc
 	call ti._memcmp ;compare with the target directory
-	pop bc,bc,bc
+	pop bc,bc,bc,iy
 	add hl,bc
 	or a,a
 	sbc hl,bc

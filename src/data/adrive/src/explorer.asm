@@ -71,8 +71,6 @@ explorer_main:
 	jq z,_uninstall_bos
 	cp a,15
 	jq z,_exit
-	cp a,10
-	jq z,_test
 	cp a,9
 	jq nz,.key_loop
 explore_files:
@@ -117,8 +115,10 @@ explorer_cursor_y:=$-3
 	ld bc,explore_files_main
 	push bc
 	cp a,2
-	jq z,explorer_zero_cursor
+	jq z,explorer_path_out
 	cp a,3
+	jq z,explorer_path_into
+	cp a,9
 	jq z,explorer_path_into
 	cp a,1
 	jq z,explorer_scroll_down
@@ -181,22 +181,9 @@ explorer_page_up:
 	ret c
 	ld (explorer_dir_offset),hl
 	ret
-explorer_zero_cursor:
-	or a,a
-	sbc hl,hl
-	ld (explorer_dir_offset),hl
-	ld (explorer_cursor_y),hl
-	ret
-;explorer_path_back:
-	;ld hl,.prevdir_str
-	;push ix,hl
-	;call bos.fs_OpenFileInDir
-	;pop bc,bc ;no need to pop into ix because the previous routine preserves it
-	;ret c
-	;ld (explorer_curdir_ix),hl
-	;ret
-;.prevdir_str:
-	;db "..",0
+explorer_path_out:
+	ld ix,(explorer_curdir_ix)
+	jq explorer_path_into.entry
 explorer_path_into:
 	ld hl,(explorer_cursor_y)
 	add hl,hl
@@ -208,6 +195,7 @@ explorer_path_into:
 	ex hl,de
 	ld ix,(explorer_curdir_ix)
 	add ix,de
+.entry:
 	bit bos.fd_subdir,(ix+$B)
 	ret z
 	ld hl,(ix+$C)
@@ -215,6 +203,10 @@ explorer_path_into:
 	call bos.fs_GetSectorAddress
 	pop bc
 	ld (explorer_curdir_ix),hl
+	or a,a
+	sbc hl,hl
+	ld (explorer_dir_offset),hl
+	ld (explorer_cursor_y),hl
 	ret
 explorer_draw_files:
 	ld bc,10
@@ -294,15 +286,6 @@ explorer_dir_offset:=$-3
 	call gfx_PrintString
 	pop bc
 	ret
-_test:
-	ld hl,.tester_file
-	ld bc,$FF0000
-	push bc,hl
-	call bos.sys_ExecuteFile
-	pop bc,bc
-	jq explorer_main
-.tester_file:
-	db "/test/tester.EXE",0
 
 str_System:
 	db "SYS ",0
@@ -420,13 +403,10 @@ str_HelloWorld:
 str_PressToDelete:
 	db "Press [del] to uninstall and receive TIOS",0
 str_PressToContinue:
-	db "Press [enter] to continue",0
+	db "Press [enter] to open file explorer",0
 str_PressToConsole:
 	db "or [clear] to open console",0
 str_FailedToLoadLibload:
 	db "Failed to load libload.",0
-str_CmdExecutable:
-	db "CMD",0
-.len:=$-.
 str_FileNameString:
 	db 13 dup 0

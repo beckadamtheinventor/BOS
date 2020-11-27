@@ -16,7 +16,7 @@ chmod +x build.sh
 ./build.sh
 cd ../../../
 echo "Building OS"
-fasmg src/main.asm bin/BOSOS.8xp
+fasmg src/main.asm obj/bosos.bin
 echo "Building installer 8xp"
 fasmg src/installer8xp.asm bin/BOSOS.8xp
 echo "Building updater"
