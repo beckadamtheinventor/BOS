@@ -70,6 +70,7 @@ namespace bos
 ?fs_OpenFileInDir                := $2020C
 ?fs_SetSize                      := $20210
 ?fs_WriteFile                    := $20214
+?sys_HLToString                  := $20218
 ;
 ?LCD_PAL    := 0E30200h
 ?LCD_CTRL   := 0E30018h

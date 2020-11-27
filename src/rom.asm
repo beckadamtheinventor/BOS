@@ -7,11 +7,11 @@ include 'include/os.inc'
 include 'include/defines.inc'
 
 
-file 'noti-ez80/bin/NOTI.rom'
+file '../noti-ez80/bin/NOTI.rom'
 
 ;-------------------------------------------------------------------------------
 	os_rom
 ;-------------------------------------------------------------------------------
 
-file '../obj/bosos.bin'
+	file '../obj/bosos.bin'
 

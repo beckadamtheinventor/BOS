@@ -142,7 +142,7 @@ _uninstall_bos:
 	pop bc
 	ret
 str_Uninstall:
-	db "uninstlr",0
+	db "/bin/uninstlr.exe",0
 explorer_scroll_down:
 	ld hl,(explorer_cursor_y)
 	inc hl

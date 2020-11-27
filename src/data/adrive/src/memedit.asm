@@ -23,6 +23,8 @@ mem_edit_main:
 	ld a,(hl)
 	or a,a
 	jq z,.dont_open_file
+	cp a,'$'
+	jq z,.seek_to_offset
 	push hl
 	call bos.fs_OpenFile
 	pop bc
@@ -53,6 +55,39 @@ mem_edit_main:
 .file_too_large:
 	ld hl,string_file_too_large
 	call _print
+	jq .dont_open_file
+.seek_to_offset:
+	ex hl,de
+	or a,a
+	sbc hl,hl
+.seek_to_offset_interpret_loop:
+	ld a,(de)
+	inc de
+	or a,a
+	jq z,.init_editor
+	cp a,' '
+	jq z,.init_editor
+	push de
+	call .interpret_nibble
+	pop de
+	jq .seek_to_offset_interpret_loop	
+.interpret_nibble:
+	cp a,'0'
+	ret c
+	cp a,'F'+1
+	ret nc
+	cp a,'9'+1
+	jq c,.interpret_nibble_lteq9
+	sub a,'A'-'9'
+.interpret_nibble_lteq9:
+	add hl,hl ;total*2
+	push hl
+	add hl,hl ;total*4
+	add hl,hl ;total*8
+	pop bc
+	add hl,bc ;total*2 + total*8
+	jq bos.sys_AddHLAndA ;total*10 + nibble
+	
 .dont_open_file:
 	ld hl,$D00000
 .init_editor:

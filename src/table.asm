@@ -67,4 +67,5 @@
 	jp fs_OpenFileInDir
 	jp fs_SetSize
 	jp fs_WriteFile
+	jp sys_HLToString
 

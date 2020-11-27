@@ -66,6 +66,7 @@
 <tr><td>bos.fs_OpenFileInDir</td><td>02020C</td><td><a href="#fs_OpenFileInDir">doc</a></tr>
 <tr><td>bos.fs_SetSize</td><td>020210</td><td><a href="#fs_SetSize">doc</a></tr>
 <tr><td>bos.fs_WriteFile</td><td>020214</td><td><a href="#fs_WriteFile">doc</a></tr>
+<tr><td>bos.sys_HLToString</td><td>020218</td><td><a href="#sys_HLToString">doc</a></tr>
 </table><div id="boot_os"><h1>boot_os</h1><h3>syscall Adress 020108</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
@@ -324,4 +325,9 @@
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td> int WriteFile(void *data, int len, void *fd);</td><td> Overwrite all data stored in a file from a given data pointer.</td><td> number of bytes written. 0 if failed to write</td><td></td><td>
  Only the number of clusters aready allocated to the file will be written. Call fs_SetSize() to reallocate file clusters.</td></tr>
+</table></div><div id="sys_HLToString"><h1>sys_HLToString</h1><h3>syscall Adress 020218</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> HL = number to convert</td><td> convert a number to a string</td><td> DE = string<br>
+ string stored at gfx_string_temp</td><td></td><td>
+</td></tr>
 </table></div></body></html>
