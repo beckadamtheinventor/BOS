@@ -74,19 +74,25 @@ mem_edit_main:
 .interpret_nibble:
 	cp a,'0'
 	ret c
+	cp a,'a'+1
+	jq c,.interpret_upper
+	cp a,'f'+1
+	ret nc
+	sub a,$27
+	jq .interpret_nibble_lteq9
+.interpret_upper:
 	cp a,'F'+1
 	ret nc
 	cp a,'9'+1
 	jq c,.interpret_nibble_lteq9
-	sub a,'A'-'9'
+	sub a,7
 .interpret_nibble_lteq9:
+	sub a,'0'
 	add hl,hl ;total*2
-	push hl
 	add hl,hl ;total*4
 	add hl,hl ;total*8
-	pop bc
-	add hl,bc ;total*2 + total*8
-	jq bos.sys_AddHLAndA ;total*10 + nibble
+	add hl,hl ;total*16
+	jq bos.sys_AddHLAndA ;total*16 + nibble
 	
 .dont_open_file:
 	ld hl,$D00000

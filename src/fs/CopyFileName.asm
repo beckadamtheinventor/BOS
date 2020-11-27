@@ -19,7 +19,7 @@ fs_CopyFileName:
 	ld (de),a
 	inc de
 	cp a,fsentry_dot
-	jq z,.end
+	jq z,.enda
 .enterloop:
 	inc hl
 	push hl
@@ -56,9 +56,14 @@ fs_CopyFileName:
 	xor a,a
 .enda:
 	ld (de),a
+	xor a,a
+	inc de
+	ld (de),a
 	pop bc
 	pop hl
 	push hl
 	push bc
 	ret
+
+
 

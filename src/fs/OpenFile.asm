@@ -16,9 +16,9 @@ fs_OpenFile:
 	ld hl,fs_filesystem_address
 	ret ;return root directory
 .pathnonzero:
-	ld hl,-19
+	ld hl,-20
 	call ti._frameset
-	ld (ix-19),iy
+	ld (ix-20),iy
 	ld hl,(ix+6)
 	push hl
 	call fs_AbsPath
@@ -67,7 +67,7 @@ fs_OpenFile:
 	db $01 ;ld bc,...
 ._return:
 	lea hl,iy ;is a 3 byte instruction
-	ld iy,(ix-19) ;restore iy
+	ld iy,(ix-20) ;restore iy
 	ld sp,ix
 	pop ix
 	ret
@@ -83,17 +83,15 @@ fs_OpenFile:
 	jq z,.search_next
 	cp a,fsentry_longfilename
 	jq z,.search_next
-	lea bc,ix-16
+	lea bc,ix-17
 	push iy,bc
 	call fs_CopyFileName ;get file name string from file entry
-	pop bc
-	push bc
 	call ti._strlen ;get length of file name string from file entry
 	ex (sp),hl
 	push hl
 	ld bc,(ix-3)
 	push bc
-	call ti._memcmp ;compare with the target directory
+	call ti._strncmp ;compare with the target directory
 	pop bc,bc,bc,iy
 	add hl,bc
 	or a,a
