@@ -4,6 +4,11 @@
 fs_RenameFile:
 	ld hl,-16
 	call ti._frameset
+	push iy
+	ld iy,(ix+6)
+	bit fsbit_readonly,(iy+fsentry_fileattr)
+	pop iy
+	jq nz,.fail
 	ld hl,(ix+6)
 	ld a,(hl)
 	or a,a

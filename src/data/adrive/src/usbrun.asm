@@ -304,6 +304,8 @@ str_FileNotFound:
 	db $9,"File not found.",$A,0
 str_MemoryError:
 	db $9,"Not Enough Memory.",$A,0
+str_InavlidExecutable:
+	db "Invalid Executable Format. Aborting.",$A,0
 
 
 libload_relocations:
@@ -387,6 +389,16 @@ _Args:=$-3
 	call fat_ReadSectors
 	pop bc,bc,bc
 	call usb_Cleanup
+	ld hl,(.copy_file_dest)
+	ld a,(hl)
+	inc hl
+	cp a,$EF
+	jq nz,.invalid_executable
+	ld a,(hl)
+	inc hl
+	cp a,$7B
+	jq nz,.invalid_executable
+	ld (.copy_file_dest),hl
 	ld hl,program_loader
 	ld de,ti.cursorImage
 	ld bc,program_loader.len
@@ -399,6 +411,11 @@ _Args:=$-3
 .copy_file_length:=$-3
 	ld de,ti.userMem
 	ret
+.invalid_executable:
+	ld hl,str_InavlidExecutable
+	call bos.gui_Print
+	jp bos.sys_WaitKeyCycle
+
 
 program_loader:
 	push de

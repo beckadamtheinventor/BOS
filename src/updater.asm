@@ -8,8 +8,8 @@ include 'include/defines.inc'
 include 'include/bos.inc'
 
 
-org ti.userMem
-
+org ti.userMem-2
+	db $EF,$7B
 updater_start:
 	call bos._ClrScrn
 	call bos._HomeUp

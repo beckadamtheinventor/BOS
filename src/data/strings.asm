@@ -21,4 +21,11 @@ str_dotEXE:
 	db ".exe",0
 str_StartupProgram:
 	db "/bin/boot.exe",0
+fs_cluster_map_file:
+	db "/dev/cmap.dat",0
+string_FilesystemCorrupt:
+	db "Filesystem corrupted!",$A,"Filesystem will now be formatted.",$A,"Press enter to continue.",$A,0
+string_FilesystemReformatted:
+	db "Format complete.",$A,"Press enter to continue to BOS.",$A,0
+
 

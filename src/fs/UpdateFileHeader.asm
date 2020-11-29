@@ -4,12 +4,21 @@
 ;@OUTPUT true if success, otherwise fail
 fs_UpdateFileHeader:
 	call ti._frameset0
+	push iy
+	ld iy,(ix+6)
+	bit fsbit_readonly,(iy+fsentry_fileattr)
+	pop iy
+	jq c,.fail
 	ld de,(ix+6)
 	ld hl,(ix+9)
 	ld bc,8+3+1 ;update 8.3 file name and attribute byte
 	push bc,hl,de
 	call sys_WriteFlashFull
 	pop bc,bc,bc
+	db $3E ;ld a,...
+.fail:
+	xor a,a
 	pop ix
+	or a,a
 	ret
 

@@ -13,9 +13,8 @@ sys_ExecuteFile:
 	ld a,(hl)
 	or a,a
 	jq z,.fail
-	push hl,de
-	call sys_PushArgumentStack
-	pop de
+	ld (fsOP6+6),de
+	push hl
 	call fs_OpenFile
 	jq c,.fail_popbc
 .open_fd:
@@ -94,14 +93,13 @@ sys_ExecuteFile:
 	add hl,bc
 	ld (top_of_UserMem),hl ;save top of usermem
 .exec_fex:
-	call sys_GetArgumentStack ;get arguments
+	ld hl,(fsOP6+6)
 	ex (sp),hl ;push arguments to stack, pop jump location from the stack
 .run_hl:
 	call .normalize_lcd
 	call .jphl
 	pop bc
 	push hl
-	call sys_PopArgumentStack
 	call .normalize_lcd
 	xor a,a
 	sbc hl,hl

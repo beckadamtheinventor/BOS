@@ -8,7 +8,7 @@ fs_Alloc:
 
 	ld (ix-4),l
 
-	ld hl,.cluster_file
+	ld hl,fs_cluster_map_file
 	push hl
 	call fs_OpenFile
 	pop bc
@@ -26,22 +26,23 @@ fs_Alloc:
 	ld (ix-7),hl
 	ld hl,(ix-3)
 .search_loop_entry:
+	ld a,$FF
 	ld bc,(ix-7)
 .search_loop:
 	or a,a
 	sbc hl,bc
 	jq nc,.garbage_collect ;we've hit the end of the cluster map, and we need to do a garbage collect
 	add hl,bc
-	ld a,(hl)
+	cp a,(hl)
 	inc hl
-	cp a,$FF
 	jq nz,.search_loop
 
 	ld (ix-3),hl
 	ld b,(ix-4)
 	ld a,$FF
 .len_loop:
-	cpi
+	cp a,(hl)
+	inc hl
 	jq nz,.search_loop_entry ;area not long enough
 	djnz .len_loop
 ;if we're here, we succeeded :D
@@ -70,6 +71,4 @@ fs_Alloc:
 	ret
 .garbage_collect:=.fail ;TODO
 
-.cluster_file:
-	db "/dev/cmap.dat",0
 

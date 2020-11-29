@@ -219,8 +219,6 @@ explorer_dir_offset:=$-3
 	or a,a
 	ret z
 	call .setxy
-	bit bos.fd_hidden,(ix+$B)
-	jq nz,.next_file
 	bit bos.fd_subdir,(ix+$B)
 	call nz,.draw_dir
 	bit bos.fd_subdir,(ix+$B)
@@ -244,12 +242,27 @@ explorer_dir_offset:=$-3
 	ld bc,150
 	jq .setxy_entry
 
-.draw_dir:
-	ld hl,str_SubDir
-	push hl
-	call gfx_PrintString
-	pop bc
 .draw_file:
+	bit bos.fd_device,(ix+$B)
+	xor a,a
+	ld (bos.lcd_text_bg),a
+	jq z,.not_device
+	ld a,$75
+	jq .draw_file_name
+.not_device:
+	bit bos.fd_system,(ix+$B)
+	jq z,.not_system
+	ld a,$C0
+	jq .draw_file_name
+.not_system:
+	xor a,a
+	ld a,$FF
+	jq .draw_file_name
+.draw_dir:
+	xor a,a
+	ld a,$19
+.draw_file_name:
+	ld (bos.lcd_text_fg),a
 	ld hl,str_FileNameString
 	push ix,hl
 	call bos.fs_CopyFileName
@@ -260,8 +273,6 @@ explorer_dir_offset:=$-3
 	call nz,.system
 	bit bos.fd_readonly,(ix+$B)
 	call nz,.readonly
-	bit bos.fd_archive,(ix+$B)
-	call nz,.archive
 	bit bos.fd_device,(ix+$B)
 	call nz,.device
 .next_line:
@@ -272,9 +283,6 @@ explorer_dir_offset:=$-3
 	ret
 .device:
 	ld hl,str_Device
-	jq .print_hl
-.archive:
-	ld hl,str_Archive
 	jq .print_hl
 .readonly:
 	ld hl,str_ReadOnly
@@ -291,12 +299,8 @@ str_System:
 	db "SYS ",0
 str_ReadOnly:
 	db "R/O ",0
-str_SubDir:
-	db "<DIR" ;flow into next string on purpose
 str_CursorString:
 	db ">",0
-str_Archive:
-	db "ARC",0
 str_Device:
 	db "DEV",0
 

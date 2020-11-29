@@ -68,4 +68,5 @@
 	jp fs_SetSize
 	jp fs_WriteFile
 	jp sys_HLToString
+	jp fs_DeleteFile
 

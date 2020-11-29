@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import os
 import zipfile
-def error(e):	
+def error(e):
 	print("Something went wrong building!\nError:",e)
 	quit()
 def myhex(n):
@@ -43,10 +43,6 @@ except Exception as e:
 
 counter=0x020108
 
-try:
-	os.remove("docs")
-except:
-	pass
 try:
 	os.makedirs("docs")
 except:
@@ -92,13 +88,12 @@ table{
 
 
 print("Generating index.html")
-with open("docs/index.html","w") as f:
+with open("docs/syscalls.html","w") as f:
 	f.write("<html><head><title>bos.inc docs</title>\
 <link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\"></head>\
 <body>\
 <h1>\"bos.inc\" documentation</h1>\
 <h3>syscalls marked in <a class=\"no_op\">red</a> are no-ops and do nothing.</h3>\
-<h3>Download <a href=\"sources.zip\">this archive</a> to view the source code</h3>\
 <table><th>syscall name</th><th>syscall adress</th><th>links</th>\
 ")
 	with open("docs/tmp","w") as f2:
@@ -159,7 +154,7 @@ with open("docs/index.html","w") as f:
 				counter+=4
 		
 	f.write("</table>")
-	print("Writing to index.html")
+	print("Writing to syscalls.html")
 	with open("docs/tmp") as f2:
 		f.write(f2.read())
 	os.remove("docs/tmp")
@@ -169,7 +164,7 @@ print("Archiving \"src\" directory")
 with zipfile.ZipFile("./docs/sources.zip",'w') as zf:
 	for fname in fwalk("./src"):
 		zf.write(fname)
-	for fname in ["./build.bat","./build.sh","bos.inc","build_bos.inc.py","build_docs.py","LICENSE","README.md"]:
+	for fname in ["build.bat","build.sh","bos.inc","build_bos.inc.py","build_docs.py","LICENSE","README.md"]:
 		zf.write(fname)
 
 print("Done.")

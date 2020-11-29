@@ -4,12 +4,21 @@
 ;@OUTPUT true if success, otherwise fail
 fs_DeleteFile:
 	call ti._frameset0
+	push iy
+	ld iy,(ix+6)
+	bit fsbit_readonly,(iy+fsentry_fileattr)
+	pop iy
+	jq nz,.fail
 	ld de,(ix+6)
 	ld hl,.deleted_header
 	ld bc,8+3 ;clear 8.3 file name but leave attribute byte and data position/length data
 	push bc,hl,de
 	call sys_WriteFlashFull
 	pop bc,bc,bc
+	db $3E ;ld a,...
+.fail:
+	xor a,a
+	or a,a
 	pop ix
 	ret
 .deleted_header:

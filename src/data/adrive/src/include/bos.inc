@@ -71,6 +71,7 @@ namespace bos
 ?fs_SetSize                      := $20210
 ?fs_WriteFile                    := $20214
 ?sys_HLToString                  := $20218
+?fs_DeleteFile                   := $2021C
 ;
 ?LCD_PAL    := 0E30200h
 ?LCD_CTRL   := 0E30018h
@@ -88,6 +89,8 @@ namespace bos
 ?lcd_bg_color           := $D00010
 ?text_fg                := $D00011
 ?text_bg                := $D00012
+?lcd_text_fg            := $D00011
+?lcd_text_bg            := $D00012
 ?color_primary          := $D00013
 ?font_spacing           := $D00014
 ?font_data              := $D00017
@@ -96,8 +99,6 @@ namespace bos
 ?free_RAM_ptr           := $D00020
 ?remaining_free_RAM     := $D00023
 ?free_VAT_entry_ptr     := $D00026
-?lcd_text_fg            := $D00027
-?lcd_text_bg            := $D00028
 ?cursor_color           := $D00029
 ?console_col            := $D0002A
 ?op_stack_ptr           := $D0002B
@@ -131,10 +132,12 @@ namespace bos
 ?SaveSP                 := $D01092 ;3 bytes, saves SP when running programs.
 ?current_sectors_per_cluster := $D01095 ;1 byte. Number of sectors per cluster in last drive where fs_DataSection or fs_RootDir has been called on it.
 ?usb_sector_buffer      := $D02000 ;512 bytes
+?safeRAM                := $D08000 ; 65536 bytes scrap RAM
+?reservedRAM            := $D18000 ; 10369 bytes reserved RAM
 ?bos_Stackbot           := $D1A87C
 ?bos_UserMem            := $D1A881
 ?top_of_RAM             := $D40000
-?start_of_user_archive  := $0C0000 ;sector $0C, standard
+?start_of_user_archive  := $040000 ;sector $04
 ?end_of_user_archive    := $3B0000 ;sector $3B, start of certificate
 ?fd_readonly   := 0
 ?fd_hidden     := 1

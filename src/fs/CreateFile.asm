@@ -6,22 +6,43 @@ fs_CreateFile:
 	call ti._frameset
 	ld bc,(ix+6)
 	push bc
+	call fs_OpenFile
+	jq nc,.fail
 	call ti._strlen
+	pop de
+	ld a,(de)
+	cp a,'/'
+	push de
+	jq nz,.not_abs
 	inc hl
 	push hl
-	call sys_TempMalloc
-	ld (ix-19),hl
+	call sys_Malloc
+	ex hl,de
+	pop hl
+	ex (sp),hl
+	push hl,de
+	call ti._memcpy
+	pop de,hl,bc
+	jq .process_path
+.not_abs:
+	call fs_AbsPath
 	pop bc
 	push hl
-	call ti._strcpy
-	pop hl,bc
-	push hl
+.process_path:
+	ld (ix-19),de
+	push de
 	ld bc,0
 	xor a,a
 	cpir
+	dec hl
 	ld (ix-22),hl
+	dec hl
+	dec hl
+	dec bc
+	dec bc
 	ld a,'/'
 	cpdr
+	inc hl
 	ld (hl),0
 	call fs_OpenFile
 	pop bc
@@ -45,17 +66,13 @@ fs_CreateFile:
 	ex.s hl,de
 	pop hl
 	push iy,de,hl
-	ld bc,512
-	push bc
-	call fs_Alloc
-	jq c,.fail
-	pop bc
-	call fs_CeilDivBySector
-	ld bc,1
+	or a,a
+	sbc hl,hl
 	ld (ix + fsentry_filesector - 16),hl
-	ld (ix + fsentry_filelen - 16),b
-	ld (ix + fsentry_filelen - 15),b
-	push bc
+	ld (ix + fsentry_filelen - 16),l
+	ld (ix + fsentry_filelen - 15),h
+	ld l,1
+	push hl
 	ld c,16
 	push bc
 	pea ix-16

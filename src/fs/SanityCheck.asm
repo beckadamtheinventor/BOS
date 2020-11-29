@@ -8,6 +8,28 @@ fs_SanityCheck:
 	cpi
 	jp po,fs_Format
 	jr z,.check_loop_1
+	ld hl,fs_cluster_map_file
+	push hl
+	call fs_OpenFile
+	pop bc
+	jq c,.corrupted ;if the cluster map is not found, assume filesystem is corrupted.
 	
 	
 	ret
+.corrupted:
+	ld hl,string_FilesystemCorrupt
+	call gui_DrawConsoleWindow
+.corrupted_wait:
+	call sys_WaitKeyCycle
+	cp a,9
+	jq nz,.corrupted_wait
+	call fs_Format
+	ld hl,string_FilesystemReformatted
+	call gui_Print
+.finished_wait:
+	call sys_WaitKeyCycle
+	cp a,9
+	jq nz,.finished_wait
+	ret
+
+

@@ -18,9 +18,6 @@ fs_file root_dir
 	fs_entry etc_dir, "etc", "", f_readonly+f_system+f_subdir
 	fs_entry home_dir, "home", "", f_subdir
 	fs_entry lib_dir, "lib", "", f_readonly+f_system+f_subdir
-	fs_entry man_dir, "man", "", f_readonly+f_system+f_subdir
-	fs_entry root_user_dir, "root", "", f_subdir+f_system
-	fs_entry test_dir, "test", "", f_subdir+f_system
 	db 16 dup 0
 end fs_file
 
@@ -35,12 +32,12 @@ fs_file bin_dir
 	fs_entry cls_exe, "cls", "exe", f_readonly+f_system
 	fs_entry explorer_exe, "explorer", "exe", f_readonly+f_system
 	fs_entry fexplore_exe, "fexplore", "exe", f_readonly+f_system
-	fs_entry help_exe, "help", "exe", f_readonly+f_system
 	fs_entry info_exe, "info", "exe", f_readonly+f_system
 	fs_entry ls_exe, "ls", "exe", f_readonly+f_system
-	fs_entry man_exe, "man", "exe", f_readonly+f_system
 	fs_entry memedit_exe, "memedit","exe", f_readonly+f_system
+	fs_entry mkdir_exe, "mkdir", "exe", f_readonly+f_system
 	fs_entry off_exe, "off","exe", f_readonly+f_system
+	fs_entry rm_exe, "rm", "exe", f_readonly+f_system
 	fs_entry uninstaller_exe, "uninstlr","exe", f_readonly+f_system
 	fs_entry updater_exe, "updater", "exe", f_readonly+f_system
 	fs_entry usbrun_exe, "usbrun","exe", f_readonly+f_system
@@ -52,6 +49,7 @@ end fs_file
 fs_file dev_dir
 	fs_entry root_dir, "..", "", f_subdir+f_system
 	fs_entry cluster_map_file, "cmap", "dat", f_readonly+f_system
+	fs_entry dev_null, "null", "", f_readonly+f_system+f_device
 	db 16 dup 0
 end fs_file
 
@@ -61,36 +59,16 @@ fs_file etc_dir
 	db 16 dup 0
 end fs_file
 
-;"/test/" directory
-fs_file test_dir
-	fs_entry root_dir, "..", "", f_subdir+f_system
-	fs_entry tester_exe, "tester", "exe", f_system+f_readonly
-	db 16 dup 0
-end fs_file
-
 ;"/lib/" directory
 fs_file lib_dir
 	fs_entry root_dir, "..", "", f_subdir+f_system
 	fs_entry fatdrvce_lll, "FATDRVCE","LLL", f_readonly+f_system
 	fs_entry fileioc_lll, "FILEIOC","LLL", f_readonly+f_system
 	fs_entry graphx_lll, "GRAPHX","LLL", f_readonly+f_system
+	fs_entry keypadc_lll, "KEYPADC", "LLL", f_readonly+f_system
 	fs_entry srldrvce_lll, "SRLDRVCE","LLL", f_readonly+f_system
 	fs_entry usbdrvce_lll, "USBDRVCE","LLL", f_readonly+f_system
 	fs_entry libload_lll, "LibLoad", "LLL", f_readonly+f_system
-	db 16 dup 0
-end fs_file
-
-;"/man/" directory
-fs_file man_dir
-	fs_entry root_dir, "..", "", f_subdir+f_system
-	fs_entry readme_man, "README", "MAN", f_readonly+f_system
-	db 16 dup 0
-end fs_file
-
-
-;"/root/" directory
-fs_file root_user_dir
-	fs_entry root_dir, "..", "", f_subdir+f_system
 	db 16 dup 0
 end fs_file
 
@@ -116,58 +94,33 @@ fs_file cluster_map_file
 	db 8192 dup $FF
 end fs_file
 
+fs_file dev_null
+	jp dev_null_get_location
+	jp dev_null_read
+	jp dev_null_write
+	ret
+dev_null_get_location:
+	ld hl,$FF0000
+	ret
+dev_null_read:
+	pop hl,de,bc
+	push bc,de,hl
+	ld hl,$FF0000
+	ldir
+	ret
+dev_null_write:
+	pop hl,de,bc
+	push bc,de,hl
+	ld hl,$FF0000
+	add hl,bc
+	ld bc,0
+	ret
+end fs_file
+
 fs_file user_settings_dat
 	db 16 dup 0
 end fs_file
 
-fs_file tester_exe
-	jq tester_exe_main
-	db "FEX",0
-tester_exe_main:
-	ld hl,.file_to_write
-	push hl
-	call bos.fs_OpenFile
-	pop bc
-	jq c,.fail
-	ld bc,1024
-	push hl,bc
-	call bos.fs_SetSize
-	pop bc,hl
-	ld bc,0
-	push bc,hl
-	ld c,1
-	push bc
-	ld c,.file_to_write_len
-	push bc
-	ld bc,.file_to_write
-	push bc
-	call bos.fs_Write
-	pop bc,bc,bc
-	ld bc,.file_to_write_len
-	push bc
-	call bos.sys_Malloc
-	pop bc
-	pop de,bc
-	jq c,.fail
-	ld bc,0
-	push bc,de
-	ld c,1
-	push bc
-	ld c,.file_to_write_len
-	push bc,hl
-	call bos.fs_Read
-	pop hl,bc,bc,bc,bc
-	call bos.gui_Print
-	call bos.gui_NewLine
-	xor a,a
-.fail:
-	sbc hl,hl
-	ret
-.file_to_write:
-	db "/home/user/settings.dat",0
-.file_to_write_len := $ - .file_to_write
-
-end fs_file
 
 fs_file cmd_exe
 	jq enter_input
@@ -257,21 +210,6 @@ fs_file boot_exe
 	jq boot_main
 	db "FEX",0
 boot_main:
-	;ld hl,boot_script
-	;push hl
-	;call bsh_start
-	;pop bc
-	;ret
-;boot_script:
-	;db "CLS",0
-	;db "CLEAN",0
-	;db "EXPLORER",0
-	;db "CLS",0
-	;db "CMD",0
-	;db "CLS",0
-	;db "ASM",0
-	;pop bc,bc,bc
-	;jq boot_main
 .loop:
 	call clean_main
 	call cls_main
@@ -466,19 +404,6 @@ fs_file fexplore_exe
 end fs_file
 
 
-fs_file help_exe
-	jq help_main
-	db "FEX",0
-help_main:
-	ld hl,.readme_file
-	push hl
-	call cat_main
-	pop bc
-	ret
-.readme_file:
-	db "/man/README.MAN",0
-end fs_file
-
 
 fs_file ls_exe
 	jq ls_main
@@ -505,8 +430,11 @@ ls_main:
 	ld a,(iy)
 	or a,a
 	jq z,.exit
+	cp a,'.'
+	jq z,.hidden
 	bit bos.fd_hidden,(iy+$B) ;check if file is hidden
 	jq z,.not_hidden
+.hidden:
 	ld a,$1F
 	jq .set_cursor_color
 .not_hidden:
@@ -536,129 +464,6 @@ ls_main:
 	db $9,$9,0
 end fs_file
 
-
-fs_file man_exe
-	jq man_main
-	db "FEX",0
-man_main:
-	pop bc
-	pop hl
-	push hl
-	push bc
-	and a,(hl)
-	jq z,.info
-	push hl
-	call ti._strlen
-	ld bc,str_man_dir.len+5
-	add hl,bc
-	push hl
-	call bos.sys_Malloc
-	pop bc
-	ex hl,de
-	pop hl ;argument
-	push de
-	push hl
-	ld bc,str_man_dir.len
-	ld hl,str_man_dir
-	ldir          ; copy in manual directory
-	call ti._strlen
-	ex (sp),hl
-	pop bc
-	ldir          ; copy in manual name
-	ld hl,man_extension
-	ld c,5
-	ldir          ; copy in manual extension and null byte
-	call bos.fs_OpenFile  ;try to open file
-	pop de
-	jq c,.not_found
-	ld bc,0
-.display_loop:
-	push bc,de,hl
-	ex hl,de
-	call bos.gui_DrawConsoleWindow
-	call bos.gui_NewLine
-	pop hl,de,bc
-	push de,bc,hl
-	ld bc,$0C
-	add hl,bc
-	ld hl,(hl)
-	call bos.fs_GetSectorAddress
-	pop de,bc,iy
-;	jq c,.eof
-	push iy,de,bc
-	call bos.gui_Print
-	call bos.sys_WaitKeyCycle
-	pop bc,hl,de
-	cp a,4
-	jq z,.scroll_up
-	inc bc
-	cp a,15
-	jq nz,.display_loop
-.eof:
-	push bc,de,hl
-	ld hl,man_EndOfFileReached
-	call bos.gui_Print
-	call bos.sys_WaitKeyCycle
-	pop hl,de,bc
-	cp a,4
-	jq z,.scroll_up
-	cp a,9
-	jq z,.exit
-	cp a,15
-	jq nz,.display_loop
-.exit:
-	xor a,a
-	sbc hl,hl
-	ret
-.scroll_up:
-	ld (bos.ScrapMem),bc
-	ld a,(bos.ScrapMem+2)
-	or a,b
-	or a,c
-	jq z,.display_loop
-	dec bc
-	jq .display_loop
-.not_found:
-	ld hl,man_NotFound
-	call bos.gui_Print
-	call bos.gui_NewLine
-	scf
-	sbc hl,hl
-	ret
-.info:
-	ld hl,str_ManInfo
-	call bos.gui_Print
-	xor a,a
-	sbc hl,hl
-	ret
-str_ManInfo:
-	db $9,"Usage: MAN [app]",$A,0
-man_EndOfFileReached:
-	db $9,"--EOF REACHED--",$A
-man_NotFound:
-	db $9,"No matching manual found.",0
-str_man_dir:
-	db "/man/"
-str_man_dir.len:=$-.
-man_extension:
-	db ".MAN",0
-end fs_file
-
-
-fs_file readme_man
-	db $9,"--BOSos Help Doc--",$A
-	db "cat",$A,$9,"Display the contents of a file.",$A
-	db "cd",$A,$9,"Change Directory. Navigate to an absolute or relative path.",$A
-	db "clean",$A,$9,"Clean up malloc'd memory, not including program memory.",$A
-	db "cls",$A,$9,"CLear Screen. Wipes the terminal history.",$A
-	db "explorer",$A,$9,"Open GUI interface.",$A
-	db "fexplore", $A,$9,""
-	db "help",$A,$9,"display this document",$A
-	db "ls",$A,$9,"LiSt directory. List the current directory or a given directory.",$A
-	db "man",$A,$9,"Display MANual for a given executable.",$A
-	db 0
-end fs_file
-
 fs_file fatdrvce_lll
 	file '../obj/fatdrvce.bin'
 end fs_file
@@ -669,6 +474,10 @@ end fs_file
 
 fs_file graphx_lll
 	file '../obj/graphx.bin'
+end fs_file
+
+fs_file keypadc_lll
+	file '../obj/keypadc.bin'
 end fs_file
 
 fs_file srldrvce_lll
@@ -833,6 +642,62 @@ info_exe_main:
 .string_rex:
 	db "RAM EXecutable",0
 end fs_file
+
+fs_file rm_exe
+	jq rm_main
+	db "FEX",0
+rm_main:
+	pop bc,hl
+	push hl,bc
+	push hl
+	call bos.fs_OpenFile
+	ex (sp),hl
+	pop iy
+	bit f_readonly, (iy+$B)
+	jq nz,.fail
+	push iy
+	call bos.fs_DeleteFile
+	pop bc
+	xor a,a
+	sbc hl,hl
+	ret
+.fail:
+	ld hl,.string_readonly
+	call bos.gui_Print
+	ld hl,1
+	ret
+.string_readonly:
+	db $9,"Read only file cannot be removed.",$A,0
+end fs_file
+
+
+fs_file mkdir_exe
+	jq mkdir_main
+	db "FEX",0
+mkdir_main:
+	pop bc,hl
+	push hl,bc
+	push hl
+	call bos.fs_OpenFile
+	ex (sp),hl
+	pop iy
+	jq nc,.fail
+	ld c,f_subdir
+	push bc,hl
+	call bos.fs_CreateFile
+	pop bc,bc
+	xor a,a
+	sbc hl,hl
+	ret
+.fail:
+	ld hl,.string_fileexists
+	call bos.gui_Print
+	ld hl,1
+	ret
+.string_fileexists:
+	db $9,"File/Dir already exists.",$A,0
+end fs_file
+
 
 
 end fs_fs

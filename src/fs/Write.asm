@@ -8,6 +8,8 @@ fs_Write:
 	call ti._frameset
 	ld (ix-3),iy
 	ld iy,(ix+15) ;void *fd
+	bit fsbit_readonly,(iy+fsentry_fileattr)
+	jq nz,.fail
 	ld de,(ix+9) ;int len
 	ld b,(ix+12) ;uint8_t count
 	or a,a
@@ -49,6 +51,7 @@ fs_Write:
 	scf
 	sbc hl,hl
 
+	ld iy,(ix-3)
 	ld sp,ix
 	pop ix
 	ret
