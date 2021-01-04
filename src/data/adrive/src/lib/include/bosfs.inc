@@ -1,4 +1,5 @@
 
+
 macro pad_db? str, pad, amt
 	local fstart
 	fstart = $
@@ -31,17 +32,29 @@ macro fs_fs?
 		dw (fdata.len and $FFFF)
 	end macro
 
+	macro fs_dir? flabel
+		fs_file flabel
+		fs_entry flabel, ".", "", f_subdir
+		macro end?.fs_dir?
+			db 16 dup 0
+			end fs_file
+			purge end?.fs_dir
+		end macro
+	end macro
+
 	macro fs_file? flabel
 		flabel := $
 		macro end?.fs_file?
 			flabel.len := $ - flabel
 			db $200-(flabel.len and $1FF) dup $FF
+			purge end?.fs_file?
 		end macro
 	end macro
 
 	macro end?.fs_fs?
 		purge end?.fs_fs?
 		purge fs_entry?
+		purge fs_dir?
 		purge fs_file?
 	end macro
 end macro

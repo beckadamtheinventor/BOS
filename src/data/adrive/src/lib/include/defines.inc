@@ -27,43 +27,35 @@ flag_start             := $D00000
 currow?                := console_line
 curcol?                := console_col
 
-lcd_bg_color           := $D00010
-text_fg                := $D00011
-text_bg                := $D00012
-lcd_text_fg            := $D00011
-lcd_text_bg            := $D00012
-
-
-color_primary          := $D00013
-font_spacing           := $D00014
-font_data              := $D00017
-lcd_x                  := $D0001A
-lcd_y                  := $D0001D
-free_RAM_ptr           := $D00020
-remaining_free_RAM     := $D00023
-free_VAT_entry_ptr     := $D00026
-;lcd_text_fg            := $D00027
-;lcd_text_bg            := $D00028
-cursor_color           := $D00029
-console_col            := $D0002A
-op_stack_ptr           := $D0002B
-free_file_RAM_ptr      := $D00030
-remaining_file_RAM     := $D00033
-console_line           := $D00036
-bottom_of_RAM          := $D00037
-flashStatusByte        := $D0003A
-ScrapMem2              := $D00079
-ScrapByte              := $D0007C
-ScrapWord              := $D0007D
-ScrapMem               := $D0007D
-open_files_table       := $D00100
-InputBuffer            := $D00200
-gfx_string_temp        := $D00300
-current_working_dir    := $D00310
-argument_stack_top     := $D00470 ;96 bytes downward
-op_stack_top           := $D00670 ;512 bytes downward
-prev_interrupt_status  := $D00670 ;2 bytes. Used to save interrupt flags when an interrupt is triggered.
-os_handled_interrupts  := $D00672 ;2 bytes. Used to tell the OS whether to acknowledge certain interrupt bits. 1 = OS handled. 0 = User handled.
+lcd_bg_color           := $D00210
+text_fg                := $D00211
+text_bg                := $D00212
+lcd_text_fg            := $D00211
+lcd_text_bg            := $D00212
+color_primary          := $D00213
+font_spacing           := $D00214
+font_data              := $D00217
+lcd_x                  := $D0021A
+lcd_y                  := $D0021D
+free_RAM_ptr           := $D00220
+remaining_free_RAM     := $D00223
+cursor_color           := $D00226
+console_col            := $D00227
+op_stack_ptr           := $D00228
+console_line           := $D0022C
+bottom_of_RAM          := $D0022D
+flashStatusByte        := $D00230
+filesystem_driver      := $D00231
+ScrapMem2              := $D00279
+ScrapByte              := $D0027C
+ScrapWord              := $D0027D
+ScrapMem               := $D0027D
+open_files_table       := $D00300
+InputBuffer            := $D00400
+gfx_string_temp        := $D00500
+current_working_dir    := $D00510
+argument_stack_top     := $D00670 ;96 bytes downward
+op_stack_top           := $D00870 ;512 bytes downward
 fsOP1                  := $D01000
 fsOP2                  := $D01010
 fsOP3                  := $D01020
@@ -77,12 +69,20 @@ top_of_UserMem         := $D01089 ;3 bytes
 SaveSP                 := $D01092 ;3 bytes, saves SP when running programs.
 current_sectors_per_cluster := $D01095 ;1 byte. Number of sectors per cluster in last drive where fs_DataSection or fs_RootDir has been called on it.
 usb_sector_buffer      := $D02000 ;512 bytes
+malloc_cache           := $D03000 ;4096 bytes
 safeRAM                := $D08000 ; 65536 bytes scrap RAM
 reservedRAM            := $D18000 ; 10369 bytes reserved RAM
 bos_Stackbot           := $D1A87C
 bos_UserMem            := $D1A881
+bottom_of_malloc_RAM   := $D30000
 top_of_RAM             := $D40000
 
+; threading defines
+thread_map             := $D02800 ; thread map. 256 threads. Active threads have bit 7 set.
+thread_temp_save       := $D03000 ; temporary save location for registers when a thread switch interrupt is triggered. 32 bytes per thread, 256 threads = 8192 bytes.
+current_thread         := $D05000 ; currently running thread ID
+thread_control         := $D05001 ; zero if threading is disabled
+thread_memory_end      := $D05002 ; end of thread memory
 
 ; Flash locations
 start_of_user_archive  := $040000 ;sector $04

@@ -82,10 +82,7 @@ init_explore_drive:
 	call init_fat_partition
 	jq nz,.init_fat_fail
 	call init_fat_volume
-	jq nz,.init_fat_fail
-
-	ld hl,str_NotYetImplemented
-	jq .print_and_exit
+	jq z,fexplore_explore_files
 .init_fat_fail:
 	ld hl,str_FailedToInitFat
 .print_and_exit:
@@ -433,5 +430,12 @@ fat_Delete:
 	xor   a,a      ; return z (loaded)
 	pop   hl      ; pop error return
 	ret
+
+fexplore_explore_files:
+	call list_fat_dirs
+	
+	
+	jq main_exit
+
 
 

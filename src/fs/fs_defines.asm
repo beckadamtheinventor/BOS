@@ -1,5 +1,6 @@
 
-fs_filesystem_address := $040000
+fs_filesystem_root_address := $040000
+fs_filesystem_address := $040200
 
 fsbit_readonly       := 0
 fsbit_hidden         := 1

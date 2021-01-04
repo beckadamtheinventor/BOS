@@ -1,7 +1,8 @@
 ;@DOES allocate space for a file
-;@INPUT bool fs_Alloc(int len);
+;@INPUT int fs_Alloc(int len);
+;@OUTPUT hl = first cluster allocated
 fs_Alloc:
-	ld hl,-7
+	ld hl,-10
 	call ti._frameset
 	ld hl,(ix+6)
 	call fs_CeilDivBySector
@@ -20,6 +21,7 @@ fs_Alloc:
 	push hl
 	call fs_GetSectorAddress
 	pop bc
+	ld (ix-10),hl
 	ld (ix-3),hl
 	ld bc,8192
 	add hl,bc
@@ -61,13 +63,17 @@ fs_Alloc:
 
 	call sys_FlashLock
 
-	xor a,a
-	db $06 ;ld b,...
+	ld hl,(ix-3)
+	ld de,(ix-10)
+	or a,a
+	sbc hl,de ;return first allocated cluster
+
+	db $01 ;ld bc,...
 .fail:
 	scf
+	sbc hl,hl
 	ld sp,ix
 	pop ix
-	sbc a,a
 	ret
 .garbage_collect:=.fail ;TODO
 

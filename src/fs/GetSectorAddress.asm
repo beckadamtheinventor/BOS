@@ -3,10 +3,21 @@
 fs_GetSectorAddress:
 	pop bc,hl
 	push hl,bc
+	ld a,(filesystem_driver)
+	or a,a
+	jq nz,.otherfs
+	ld de,fs_filesystem_root_address
 	ld b,9
 .mult_loop:
 	add hl,hl
 	djnz .mult_loop
-	ld bc,fs_filesystem_address
-	add hl,bc
+	add hl,de
 	ret
+.otherfs:
+	ld de,fs_filesystem_root_address
+	ld b,8 ;256
+	cp a,1 ;alternative bosfs with 256b clusters
+	jq z,.mult_loop
+	
+	ret
+

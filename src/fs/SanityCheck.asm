@@ -11,8 +11,18 @@ fs_SanityCheck:
 	ld hl,fs_cluster_map_file
 	push hl
 	call fs_OpenFile
+	jq nc,.dont_rebuild_cmap
+	ld c,5 ;system, readonly file.
+	push bc
+	call fs_CreateFile ;if the cluster map is not found, try to create and initialize it.
+	call nc,fs_InitClusterMap
 	pop bc
-	jq c,.corrupted ;if the cluster map is not found, assume filesystem is corrupted.
+	pop bc
+	jq c,.corrupted ;if we failed to create it, either fs is corrupted or OS is corrupted
+	db $3E ;ld a,...
+.dont_rebuild_cmap:
+	pop bc
+	
 	
 	
 	ret

@@ -1,36 +1,52 @@
 
 ;@DOES Resizes a file descriptor.
-;@INPUT int fs_SetSize(int len, void *fd);
-;@OUTPUT number of bytes allocated to the file
+;@INPUT bool fs_SetSize(int len, void *fd);
+;@OUTPUT true if resizing succeeded
 ;@NOTE Will allocate enough sectors to contain len bytes.
 fs_SetSize:
 	ld hl,-19
 	call ti._frameset
+	ld iy,(ix+9)
 	ld hl,(iy+$C)
 	ld (ix-19),hl
-	ld iy,(ix+9)
-	ld hl,(iy+$E)
+	ld de,(iy+$E)
 	ex.s hl,de
-	ld e,0
-	res 0,d
-	inc d
-	inc d
-	ld hl,(ix+6)
+	call fs_CeilDivBySector
+	ld b,9
+.mult_loop:
+	add hl,hl
+	djnz .mult_loop
+	ld de,(ix+6)
 	or a,a
 	sbc hl,de
 	add hl,de
-	jq c,.update_file_entry ;file resize does not require any more clusters
-
-	ld hl,(ix+6)
-	push hl
-	call fs_Alloc
-	pop bc
-	jq c,.fail
-	ld (ix-19),hl
+	jq nc,.update_file_entry ;file resize does not require any more clusters
 
 	ld hl,(iy+$E)
+	ex.s hl,de
+	push de
+	ld hl,(ix+6)
 	push hl
-	
+	call fs_Alloc ;allocate space for new file
+	jq c,.fail
+	pop bc
+	ld (ix-19),hl
+	push hl
+	call fs_GetSectorAddress
+	ex (sp),hl
+	ld hl,(iy+$C)
+	push hl
+	call fs_GetSectorAddress
+	pop bc
+	ex (sp),hl
+	push hl
+	call sys_WriteFlashFull
+	pop bc,bc,bc
+
+	ld de,(iy+$E)
+	ex.s hl,de
+	call fs_CeilDivBySector
+	push hl
 	ld hl,.cluster_file
 	push hl
 	call fs_OpenFile
@@ -41,36 +57,33 @@ fs_SetSize:
 	push hl
 	call fs_GetSectorAddress
 	pop bc
-	pop iy,bc,bc
-	ld bc,(iy+$C)
-	add hl,bc
-
-	pop hl
-
-	call fs_CeilDivBySector
-	ld b,l
-	ld c,$FF
-	push iy
-.dealloc_loop:
-	push bc,hl
-	call sys_WriteFlashByteFull
-	pop bc,bc
-	djnz .dealloc_loop
-	pop iy
+	push hl
+	ld iy,(ix+9)
+	ld de,(iy+$C) ;file's old address
+	ex.s hl,de
+	pop de
+	pop bc
+	add hl,de ;hl = &cluster_table[file_old_address];
+	ex hl,de
+	ld hl,$03FF80 ;should always read 128 bytes of 0xFF
+	push bc,hl,de
+	call sys_WriteFlashFull
+	pop bc,bc,bc
+	ld iy,(ix+9)
 
 .update_file_entry:
-	ld bc,16 ;update the file entry
 	lea de,ix-16
 	lea hl,iy
+	ld bc,16
 	push bc
+	ld c,12
 	ldir
-	ld bc,(ix+6)
-	lea hl,ix-2
-	ld (hl),c
-	inc hl
-	ld (hl),b
 	lea hl,ix-4
 	ld bc,(ix-19)
+	ld (hl),bc
+	inc hl
+	inc hl
+	ld bc,(ix+6)
 	ld (hl),c
 	inc hl
 	ld (hl),b
@@ -90,10 +103,6 @@ fs_SetSize:
 .cluster_file:
 	db "/dev/cmap.dat",0
 
-
-.allocate_sectors:
-	
-	jq .update_file_entry
 
 
 

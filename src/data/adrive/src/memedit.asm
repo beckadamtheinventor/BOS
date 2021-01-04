@@ -102,6 +102,22 @@ mem_edit_main:
 	and a,7
 	ld (ix-7),a
 	jq .backwardpage
+.main_set_file_max:
+	ld bc,(ix-3)
+	or a,a
+	sbc hl,hl
+	ld l,(ix-7)
+	add hl,bc
+	ld bc,bos.safeRAM
+	or a,a
+	sbc hl,bc
+	jq c,.main_draw
+	ld bc,(ix-11)
+	or a,a
+	sbc hl,bc
+	jq c,.main_draw
+	add hl,bc
+	ld (ix-11),hl
 .main_draw:
 	call .clearscreen
 	call _setdefaultcolors
@@ -246,19 +262,7 @@ mem_edit_main:
 	add hl,bc
 	jq c,.main_loop
 	ld (hl),a
-	ex hl,de
-	ld bc,(ix-11)
-	ld hl,bos.safeRAM
-	add hl,bc
-	or a,a
-	sbc hl,de
-	jq c,.main_loop
-	ex hl,de
-	ld bc,bos.safeRAM
-	or a,a
-	sbc hl,bc
-	ld (ix-11),hl
-	jq .main_loop
+	jq .main_set_file_max
 .exit:
 	call gfx_ZeroScreen
 	call gfx_BlitBuffer
@@ -466,7 +470,7 @@ mem_edit_main:
 .string_input_set_cursor:
 	add hl,bc
 	ld (ix-7),l
-	jq .main_draw
+	jq .main_set_file_max
 .nibblekeys:
 	db 33,34,26,18,35,27,19,36,28,20,47,39,31,46,38,30
 _setdefaultcolors:

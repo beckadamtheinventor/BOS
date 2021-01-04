@@ -12,17 +12,16 @@ fs_fs
 ;-------------------------------------------------------------
 
 ;filesystem root directory entries
-fs_file root_dir
+fs_dir root_dir
 	fs_entry bin_dir, "bin", "", f_readonly+f_system+f_subdir
 	fs_entry dev_dir, "dev", "", f_readonly+f_system+f_subdir
 	fs_entry etc_dir, "etc", "", f_readonly+f_system+f_subdir
 	fs_entry home_dir, "home", "", f_subdir
 	fs_entry lib_dir, "lib", "", f_readonly+f_system+f_subdir
-	db 16 dup 0
-end fs_file
+end fs_dir
 
 ;"/bin/" directory
-fs_file bin_dir
+fs_dir bin_dir
 	fs_entry root_dir, "..", "", f_subdir+f_system
 	fs_entry boot_exe, "boot", "exe", f_readonly+f_system
 	fs_entry cat_exe, "cat", "exe", f_readonly+f_system
@@ -42,49 +41,51 @@ fs_file bin_dir
 	fs_entry updater_exe, "updater", "exe", f_readonly+f_system
 	fs_entry usbrun_exe, "usbrun","exe", f_readonly+f_system
 	fs_entry usbsend_exe, "usbsend","exe", f_readonly+f_system
-	db 16 dup 0
-end fs_file
+end fs_dir
 
 ;"/dev/" directory
-fs_file dev_dir
+fs_dir dev_dir
 	fs_entry root_dir, "..", "", f_subdir+f_system
 	fs_entry cluster_map_file, "cmap", "dat", f_readonly+f_system
+	fs_entry dev_lcd, "lcd", "", f_readonly+f_system+f_device
 	fs_entry dev_null, "null", "", f_readonly+f_system+f_device
-	db 16 dup 0
-end fs_file
+	fs_entry tivars_dir, "tivars", "", f_subdir
+end fs_dir
 
 ;"/etc/" directory
-fs_file etc_dir
+fs_dir etc_dir
 	fs_entry root_dir, "..", "", f_subdir+f_system
-	db 16 dup 0
-end fs_file
+end fs_dir
 
 ;"/lib/" directory
-fs_file lib_dir
+fs_dir lib_dir
 	fs_entry root_dir, "..", "", f_subdir+f_system
 	fs_entry fatdrvce_lll, "FATDRVCE","LLL", f_readonly+f_system
 	fs_entry fileioc_lll, "FILEIOC","LLL", f_readonly+f_system
+	fs_entry fontlibc_lll, "FONTLIBC","LLL", f_readonly+f_system
 	fs_entry graphx_lll, "GRAPHX","LLL", f_readonly+f_system
 	fs_entry keypadc_lll, "KEYPADC", "LLL", f_readonly+f_system
 	fs_entry srldrvce_lll, "SRLDRVCE","LLL", f_readonly+f_system
 	fs_entry usbdrvce_lll, "USBDRVCE","LLL", f_readonly+f_system
 	fs_entry libload_lll, "LibLoad", "LLL", f_readonly+f_system
-	db 16 dup 0
-end fs_file
+end fs_dir
 
 ;"/home/" directory
-fs_file home_dir
+fs_dir home_dir
 	fs_entry root_dir, "..", "", f_subdir
 	fs_entry user_home_dir, "user", "", f_subdir
-	db 16 dup 0
-end fs_file
+end fs_dir
 
 ;"/home/user/" directory
-fs_file user_home_dir
+fs_dir user_home_dir
 	fs_entry home_dir, "..", "", f_subdir
 	fs_entry user_settings_dat, "settings", "dat", 0
 	db 16 dup 0
-end fs_file
+end fs_dir
+
+fs_dir tivars_dir
+	fs_entry dev_dir, "..", "", f_subdir+f_system
+end fs_dir
 
 ;-------------------------------------------------------------
 ;file data section
@@ -95,6 +96,8 @@ fs_file cluster_map_file
 end fs_file
 
 fs_file dev_null
+	db $C9, 1
+	jp dev_null_retnull
 	jp dev_null_get_location
 	jp dev_null_read
 	jp dev_null_write
@@ -115,6 +118,73 @@ dev_null_write:
 	add hl,bc
 	ld bc,0
 	ret
+dev_null_retnull:
+	or a,a
+	sbc hl,hl
+	ret
+end fs_file
+
+fs_file dev_lcd
+	db $C9, 0
+	jp dev_lcd_init
+	jp dev_lcd_deinit
+	jp dev_lcd_get_address
+	jp dev_lcd_read
+	jp dev_lcd_write
+dev_lcd_write:
+	call ti._frameset0
+	ld de,(ix+6)
+	ld hl,(ix+9)
+	ld bc,ti.vRam
+	add hl,bc
+	ex hl,de
+	jq dev_lcd_read.copy
+dev_lcd_read:
+	call ti._frameset0
+	ld de,(ix+6)
+	ld hl,(ix+9)
+	ld bc,ti.vRam
+	add hl,bc
+.copy:
+	ld bc,(ix+12)
+	ldir
+	pop ix
+	ret
+dev_lcd_get_address:
+	ld hl,ti.vRam
+	ret
+dev_lcd_init:
+	call dev_lcd_deinit
+	ld	a,$27
+	ld	($E30018),a
+	ld	de,$E30200  ; address of mmio palette
+	ld	b,e         ; b = 0
+.loop:
+	ld	a,b
+	rrca
+	xor	a,b
+	and	a,224
+	xor	a,b
+	ld	(de),a
+	inc	de
+	ld	a,b
+	rla
+	rla
+	rla
+	ld	a,b
+	rra
+	ld	(de),a
+	inc	de
+	inc	b
+	jr	nz,.loop		; loop for 256 times to fill palette
+	ret
+dev_lcd_deinit:
+	ld hl,ti.vRam
+	ld de,ti.vRam+1
+	ld (hl),l
+	ld bc,320*240*2-1
+	ldir
+	ret
 end fs_file
 
 fs_file user_settings_dat
@@ -123,19 +193,61 @@ end fs_file
 
 
 fs_file cmd_exe
-	jq enter_input
+	jq cmd_exe_main
 	db "FEX",0
+cmd_exe_main:
+	ld hl,-3
+	call ti._frameset
+	ld hl,256
+	push hl
+	call bos.sys_Malloc
+	pop bc
+	ret c
+	ld (ix-3),hl
+	ld bc,256
+	call bos._MemClear
+enter_input_clear:
+	ld hl,bos.InputBuffer
+	ld bc,256
+	call bos._MemClear
+	jq enter_input
+recall_last:
+	ld hl,(ix-3)
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	jq z,enter_input
+	push hl
+	call ti._strlen
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	ex (sp),hl
+	pop bc
+	jq z,enter_input
+	ld de,bos.InputBuffer
+	ldir
 enter_input:
 	ld bc,255
 	push bc
 	ld bc,bos.InputBuffer
 	push bc
-	call bos.gui_Input
+	call bos.gui_InputNoClear
 	or a,a
 	jq z,.exit
+	cp a,12
+	jq z,recall_last
+	cp a,10
+	jq z,enter_input
 	call ti._strlen
 	ex (sp),hl
 	pop bc
+	push bc,hl
+	inc bc
+	ld de,(ix-3)
+	ldir
+	pop hl,bc,de
+.get_args:
 	push hl
 	ld a,' '
 	cpir
@@ -155,17 +267,23 @@ enter_input:
 	ld a,(bos.ScrapMem+2)
 	or a,h
 	or a,l
-	jq z,enter_input
+	jq z,enter_input_clear
 	push hl
 	call bos.gfx_BlitBuffer
+	ld hl,str_ProgramFailedWithCode
+	call bos.gui_Print
 	pop hl
 	call bos.gui_PrintInt
 	call bos.gui_NewLine
 	or a,$FF
 	call bos.gfx_BlitBuffer
-	jq enter_input
+	jq enter_input_clear
 .exit:
 	pop bc,bc
+	xor a,a
+	sbc hl,hl
+	ld sp,ix
+	pop ix
 	ret
 .system_exe:
 	call ti._strlen
@@ -198,6 +316,8 @@ enter_input:
 str_system_drive:
 	db "/bin/"
 .len:=$-.
+str_ProgramFailedWithCode:
+	db $9,$9,$9,$9,$9,"Error Code",0
 str_exe_ext:
 	db ".exe",0
 
@@ -210,6 +330,13 @@ fs_file boot_exe
 	jq boot_main
 	db "FEX",0
 boot_main:
+	call bos.fs_InitClusterMap
+	call bos.sys_FlashUnlock
+	ld de,boot_main
+	ld hl,$FF0000
+	ld bc,4
+	call bos.sys_WriteFlash
+	call bos.sys_FlashLock
 .loop:
 	call clean_main
 	call cls_main
@@ -310,6 +437,10 @@ cd_main:
 	ex (sp),hl
 	pop bc
 	push hl
+	dec bc
+	ld a,c
+	or a,b
+	jq z,.return
 	add hl,bc
 	ld a,'/'
 	cpdr
@@ -322,13 +453,13 @@ cd_main:
 	jq .return
 .not_dot:
 	push hl
-	call bos.fs_CheckDirExists
-	pop hl
-	jq c,.fail
-	push hl
 	call bos.fs_AbsPath
 	pop bc
 .abspath:
+	push hl
+	call bos.fs_CheckDirExists
+	pop hl
+	jq c,.fail
 	push hl
 	call ti._strlen
 	ex (sp),hl
@@ -438,9 +569,20 @@ ls_main:
 	ld a,$1F
 	jq .set_cursor_color
 .not_hidden:
+	bit bos.fd_subdir,(iy+$B)
+	jq z,.not_dir
+	ld a,$07
+	jq .set_cursor_color
+.not_dir:
 	ld a,$FF
 .set_cursor_color:
 	ld (bos.lcd_text_fg),a
+	bit bos.fd_readonly,(iy+$B)
+	jq z,.not_readonly
+	db $3E ;ld a,... (0xAF happens to be a good color for this)
+.not_readonly:
+	xor a,a
+	ld (bos.lcd_text_bg),a
 	ld hl,bos.fsOP6+1
 	push iy,hl
 	call bos.fs_CopyFileName
@@ -470,6 +612,10 @@ end fs_file
 
 fs_file fileioc_lll
 	file '../obj/fileioc.bin'
+end fs_file
+
+fs_file fontlibc_lll
+	file '../obj/fontlibc.bin'
 end fs_file
 
 fs_file graphx_lll
@@ -675,27 +821,78 @@ fs_file mkdir_exe
 	jq mkdir_main
 	db "FEX",0
 mkdir_main:
-	pop bc,hl
-	push hl,bc
+	ld hl,-19
+	call ti._frameset
+	ld hl,(ix+6)
 	push hl
-	call bos.fs_OpenFile
+	call bos.fs_AbsPath
 	ex (sp),hl
-	pop iy
+	call bos.fs_ParentDir
+	ld (ix-3),hl
+	inc hl
+	ld a,(hl)
+	dec hl
+	or a,a
+	call nz,bos.fs_OpenFile
 	jq nc,.fail
+.create:
+	pop bc
 	ld c,f_subdir
 	push bc,hl
 	call bos.fs_CreateFile
+	jq c,.fail
 	pop bc,bc
+	inc bc
+	ld a,(bc)
+	or a,a
+	jq z,.fail ;TODO
+	ld bc,0
+	push bc,hl
+	ld c,1
+	push bc
+	ld c,16
+	push bc
+	lea de,ix-19
+	push de
+	ld hl,.path_back_entry
+	ld c,11
+	ldir
+	ld hl,(ix-3) ;open the created directory
+	push hl
+	call bos.fs_OpenFile
+	jq c,.fail
+	pop bc
+	xor a,a
+	ld (ix + $C - 19), hl
+	ld (ix + $E - 19), a
+	ld (ix + $F - 19), a
+	call bos.fs_Write
+	pop bc,bc,bc,hl,bc
+	ld bc,16
+	push bc
+	ld e,1
+	push de
+	push bc
+	ld bc,$FF0000
+	push bc
+	call bos.fs_Write
+	pop bc,bc,bc,bc,bc
 	xor a,a
 	sbc hl,hl
+	ld sp,ix
+	pop ix
 	ret
 .fail:
 	ld hl,.string_fileexists
 	call bos.gui_Print
 	ld hl,1
+	ld sp,ix
+	pop ix
 	ret
 .string_fileexists:
 	db $9,"File/Dir already exists.",$A,0
+.path_back_entry:
+	db "..         ",$10
 end fs_file
 
 

@@ -17,29 +17,18 @@ macro StopAllThreads?
 	db $76
 end macro
 
-macro StartThread? resource_flags:0
+macro EndThread?
 	rst $10
-	db $3E
-	db resource_flags
+	ret
+end macro
+
+macro SpawnThread? start_pc, start_sp
+	rst $18
+	dl start_sp
+	dl start_pc
 end macro
 
 
-macro PauseThread
-	rst $10
-	db $FF
-end macro
-
-macro ResumeThread
-	rst $10
-	db $F7
-end macro
-
-macro SysCall? routine
-	if routine >= $020108
-		rst $18
-		dl routine
-	end if
-end macro
 
 
 

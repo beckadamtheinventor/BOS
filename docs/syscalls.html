@@ -2,7 +2,7 @@
 <tr><td>bos.handle_interrupt</td><td>02010C</td><td><a href="#handle_interrupt">doc</a></tr>
 <tr class="no_op"><td>bos.DONOTHING </td><td>020110</td><td><a href="#DONOTHING ">doc</a></tr>
 <tr class="no_op"><td>bos.DONOTHING </td><td>020114</td><td><a href="#DONOTHING ">doc</a></tr>
-<tr class="no_op"><td>bos.DONOTHING </td><td>020118</td><td><a href="#DONOTHING ">doc</a></tr>
+<tr><td>bos.handle_safeop </td><td>020118</td><td><a href="#handle_safeop ">doc</a></tr>
 <tr class="no_op"><td>bos.DONOTHING </td><td>02011C</td><td><a href="#DONOTHING ">doc</a></tr>
 <tr class="no_op"><td>bos.DONOTHING </td><td>020120</td><td><a href="#DONOTHING ">doc</a></tr>
 <tr><td>bos.sys_ExecuteFile</td><td>020124</td><td><a href="#sys_ExecuteFile">doc</a></tr>
@@ -68,6 +68,15 @@
 <tr><td>bos.fs_WriteFile</td><td>020214</td><td><a href="#fs_WriteFile">doc</a></tr>
 <tr><td>bos.sys_HLToString</td><td>020218</td><td><a href="#sys_HLToString">doc</a></tr>
 <tr><td>bos.fs_DeleteFile</td><td>02021C</td><td><a href="#fs_DeleteFile">doc</a></tr>
+<tr><td>bos._DelVar</td><td>020220</td><td><a href="#_DelVar">doc</a></tr>
+<tr><td>bos._CreateVar</td><td>020224</td><td><a href="#_CreateVar">doc</a></tr>
+<tr><td>bos.gui_InputNoClear</td><td>020228</td><td><a href="#gui_InputNoClear">doc</a></tr>
+<tr><td>bos.fs_InitClusterMap</td><td>02022C</td><td><a href="#fs_InitClusterMap">doc</a></tr>
+<tr><td>bos.sys_WriteFlash</td><td>020230</td><td><a href="#sys_WriteFlash">doc</a></tr>
+<tr><td>bos.sys_WriteFlashA</td><td>020234</td><td><a href="#sys_WriteFlashA">doc</a></tr>
+<tr><td>bos.sys_WriteFlashFull</td><td>020238</td><td><a href="#sys_WriteFlashFull">doc</a></tr>
+<tr><td>bos.sys_WriteFlashByteFull</td><td>02023C</td><td><a href="#sys_WriteFlashByteFull">doc</a></tr>
+<tr><td>bos.fs_ParentDir</td><td>020240</td><td><a href="#fs_ParentDir">doc</a></tr>
 </table><div id="boot_os"><h1>boot_os</h1><h3>syscall Adress 020108</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
@@ -76,6 +85,8 @@
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
 </td></tr>
+</table></div><div id="handle_safeop "><h1>handle_safeop </h1><h3>syscall Adress 020118</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 </table></div><div id="sys_ExecuteFile"><h1>sys_ExecuteFile</h1><h3>syscall Adress 020124</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td> int sys_ExecuteFile(char *path, char *args);</td><td> execute a file</td><td> -1 if file does not exist or is not a valid executable format</td><td> All, OP5, and OP6.</td><td>
@@ -123,7 +134,7 @@
  Disables interrupts during execution</td></tr>
 </table></div><div id="sys_FreeAll"><h1>sys_FreeAll</h1><h3>syscall Adress 020150</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td> void sys_FreeAll(void);</td><td> Free all memory malloc'd by sys_Malloc</td><td></td><td> hl</td><td>
+<tr><td> void sys_FreeAll(void);</td><td> Free all memory malloc'd by sys_Malloc</td><td></td><td> hl, de</td><td>
 </td></tr>
 </table></div><div id="sys_GetKey"><h1>sys_GetKey</h1><h3>syscall Adress 020154</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -169,7 +180,7 @@
  resets the text colors to white on black</td></tr>
 </table></div><div id="gui_Input"><h1>gui_Input</h1><h3>syscall Adress 020178</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td> bool gui_Input(char *buffer, int max_len);</td><td> get user input</td><td></td><td> All</td><td>
+<tr><td> uint8_t gui_Input(char *buffer, int max_len);</td><td> get user input</td><td> 0 if user exit, 1 if user enter, 9/12 if user presses down/up arrow key</td><td> All</td><td>
 </td></tr>
 </table></div><div id="gui_NewLine"><h1>gui_NewLine</h1><h3>syscall Adress 02017C</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -291,7 +302,7 @@
 </td></tr>
 </table></div><div id="fs_CreateFile"><h1>fs_CreateFile</h1><h3>syscall Adress 0201F4</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td> void *fs_CreateFile(const char *path, uint8_t flags);</td><td> Create a file given a path and return a file descriptor.</td><td> file descriptor. Returns 0 if failed to create file.</td><td></td><td>
+<tr><td> void *fs_CreateFile(const char *path, uint8_t flags, int len);</td><td> Create a file given a path and return a file descriptor.</td><td> file descriptor. Returns 0 if failed to create file.</td><td></td><td>
 </td></tr>
 </table></div><div id="strupper"><h1>strupper</h1><h3>syscall Adress 0201F8</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -320,7 +331,7 @@
  This only searches for short 8.3 file names.</td></tr>
 </table></div><div id="fs_SetSize"><h1>fs_SetSize</h1><h3>syscall Adress 020210</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td> int fs_SetSize(int len, void *fd);</td><td> Resizes a file descriptor.</td><td> number of bytes allocated to the file</td><td></td><td>
+<tr><td> bool fs_SetSize(int len, void *fd);</td><td> Resizes a file descriptor.</td><td> true if resizing succeeded</td><td></td><td>
  Will allocate enough sectors to contain len bytes.</td></tr>
 </table></div><div id="fs_WriteFile"><h1>fs_WriteFile</h1><h3>syscall Adress 020214</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -334,5 +345,43 @@
 </table></div><div id="fs_DeleteFile"><h1>fs_DeleteFile</h1><h3>syscall Adress 02021C</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td> bool fs_DeleteFile(void *fd);</td><td> delete a file given a file descriptor</td><td> true if success, otherwise fail</td><td></td><td>
+</td></tr>
+</table></div><div id="_DelVar"><h1>_DelVar</h1><h3>syscall Adress 020220</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> OP1 = type byte, 8 byte name of var to delete</td><td> delete a file in the /dev/tivars/ directory</td><td> Cf set if failed</td><td></td><td>
+</td></tr>
+</table></div><div id="_CreateVar"><h1>_CreateVar</h1><h3>syscall Adress 020224</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> OP1 = type byte, 8 byte name of var to create<br>
+ hl = length to allocate for file</td><td> create a file in the /dev/tivars/ directory</td><td> Cf set if failed</td><td></td><td>
+</td></tr>
+</table></div><div id="gui_InputNoClear"><h1>gui_InputNoClear</h1><h3>syscall Adress 020228</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> uint8_t gui_InputNoClear(char *buffer, int max_len);</td><td> get user input without clearing the provided buffer first.</td><td> 0 if user exit, 1 if user enter, 9/12 if user presses down/up arrow key</td><td> All</td><td>
+</td></tr>
+</table></div><div id="fs_InitClusterMap"><h1>fs_InitClusterMap</h1><h3>syscall Adress 02022C</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> void fs_InitClusterMap(void);</td><td> initialize cluster map given data within the file system.</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="sys_WriteFlash"><h1>sys_WriteFlash</h1><h3>syscall Adress 020230</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> HL, DE, BC</td><td> write BC bytes to flash from HL to DE.</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="sys_WriteFlashA"><h1>sys_WriteFlashA</h1><h3>syscall Adress 020234</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> A, DE</td><td> write a byte from A to flash at address DE</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="sys_WriteFlashFull"><h1>sys_WriteFlashFull</h1><h3>syscall Adress 020238</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td> store data to flash, surpassing flash AND logic using the swap sector.</td><td> bool sys_WriteFlashFull(void *dest, void *src, int len);</td><td></td><td>
+ erases swap sector, copies dest sector to swap sector excluding the data write area, writes data, erases dest sector, copies swap sector to dest sector.<br>
+ source and destination cannot be within the same sector.</td></tr>
+</table></div><div id="sys_WriteFlashByteFull"><h1>sys_WriteFlashByteFull</h1><h3>syscall Adress 02023C</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> bool sys_WriteFlashByteFull(void *dest, uint8_t byte);</td><td> Write a byte to flash, surpassing flash AND logic using the swap sector if needed.</td><td> true if success, false if failed</td><td></td><td>
+</td></tr>
+</table></div><div id="fs_ParentDir"><h1>fs_ParentDir</h1><h3>syscall Adress 020240</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> char *fs_ParentDir(const char *path);</td><td> return a string representing the parent directory of a given path</td><td></td><td></td><td>
 </td></tr>
 </table></div></body></html>

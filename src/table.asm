@@ -1,9 +1,9 @@
 
 	jp boot_os
 	jp handle_interrupt
-	jp DONOTHING ;handle_rst10
-	jp DONOTHING ;handle_rst18
-	jp DONOTHING ;handle_rst20
+	jp DONOTHING ;HandleInstruction ;thread control soon (tm)
+	jp DONOTHING ;HandleThreadSpawn ;spawn thread soon (tm)
+	jp handle_safeop ;handle_rst20
 	jp DONOTHING ;handle_rst28
 	jp DONOTHING ;handle_rst30
 	jp sys_ExecuteFile
@@ -69,4 +69,14 @@
 	jp fs_WriteFile
 	jp sys_HLToString
 	jp fs_DeleteFile
+	jp _DelVar
+	jp _CreateVar
+	jp gui_InputNoClear
+	jp fs_InitClusterMap
+	jp sys_WriteFlash
+	jp sys_WriteFlashA
+	jp sys_WriteFlashFull
+	jp sys_WriteFlashByteFull
+	jp fs_ParentDir
+
 

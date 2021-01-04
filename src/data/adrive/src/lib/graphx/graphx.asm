@@ -305,7 +305,7 @@ gfx_End:
 ; Returns:
 ;  None
 	call	_boot_ClearVRAM		; clear the screen
-	ld	de,lcdNormalMode
+	ld	de,lcdGraphxMode
 	ld	hl,mpLcdBase
 	jr	SetGfx			; restore the screen mode
 

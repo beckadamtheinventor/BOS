@@ -1,5 +1,5 @@
 
-;Each partition begins with a directory data section
+;Each partition begins with the root directory data section
 
 ;----------------------------------------------
 ;each directory data section
@@ -19,3 +19,78 @@
 ; -  starting with 0x2E,0x2E        Parent directory. Root directory should point to itself.
 ; -  starting with 0xF0             Deleted file
 ; -  starting with 0xF1             Long file name. Applies to previous file in directory. Each successive entry appends to the previous.
+
+
+
+;---------------------------------------------
+; device file format
+; Devices are specially formatted files which allow for control of peripherals
+
+; header:
+;	db	$C9, devtype
+;	device function jump table
+;	device function code
+
+; device type 0x00 - direct read/write
+; jump table entries:
+;	jp	device_init
+;	jp	device_deinit
+;	jp	get_device_address
+;	jp	read_from_device
+;	jp	write_to_device
+
+; device type 0x01 - indirect read/write
+; jump table entries:
+;	jp	device_init
+;	jp	device_deinit
+;	jp	read_from_device
+;	jp	write_to_device
+
+; device type 0x02 - direct write-only
+; jump table entries:
+;	jp	device_init
+;	jp	device_deinit
+;	jp	get_device_address
+;	jp	write_to_device
+
+; device type 0x03 - indirect write-only
+; jump table entries:
+;	jp	device_init
+;	jp	device_deinit
+;	jp	write_to_device
+
+; device type 0x04 - direct read-only
+; jump table entries:
+;	jp	device_init
+;	jp	device_deinit
+;	jp	get_device_address
+;	jp	read_from_device
+
+; device type 0x05 - indirect read-only
+; jump table entries:
+;	jp	device_init
+;	jp	device_deinit
+;	jp	read_from_device
+
+
+; device type 0x11 - read/write filesystem
+; jump table entries:
+;	jp	device_init
+;	jp	device_deinit
+;	jp	write_sector
+;	jp	read_sector
+
+; device type 0x13 - write-only filesystem
+; jump table entries:
+;	jp	device_init
+;	jp	device_deinit
+;	jp	write_sector
+
+; device type 0x15 - read-only filesystem
+; jump table entries:
+;	jp	device_init
+;	jp	device_deinit
+;	jp	read_sector
+
+
+

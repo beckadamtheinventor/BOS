@@ -3,6 +3,7 @@ mkdir obj
 fasmg src/lib/libload/bos_libload.asm obj/bos_libload.bin
 fasmg src/lib/fatdrvce/fatdrvce.asm obj/fatdrvce.bin
 fasmg src/lib/fileioc/fileioc.asm obj/fileioc.bin
+fasmg src/lib/fontlibc/fontlibc.asm obj/fontlibc.bin
 fasmg src/lib/graphx/graphx.asm obj/graphx.bin
 fasmg src/lib/keypadc/keypadc.asm obj/keypadc.bin
 fasmg src/lib/srldrvce/srldrvce.asm obj/srldrvce.bin

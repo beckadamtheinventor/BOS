@@ -1,6 +1,7 @@
 
 ;@DOES get user input
-;@INPUT bool gui_Input(char *buffer, int max_len);
+;@INPUT uint8_t gui_Input(char *buffer, int max_len);
+;@OUTPUT 0 if user exit, 1 if user enter, 9/12 if user presses down/up arrow key
 ;@DESTROYS All
 gui_Input:
 	ld hl,-8
@@ -17,6 +18,7 @@ gui_Input:
 	inc de
 	ld bc,(ix+9)
 	ldir
+.enter_no_clear_buffer:
 	ld a,(console_line)
 	ld (ix-5),a
 	jr .entry
@@ -44,6 +46,8 @@ gui_Input:
 	call gfx_BlitBuffer
 .keys:
 	call sys_WaitKeyCycle
+	cp a,5
+	jq c,.arrow_key
 	cp a,56
 	jq z,.delete
 	cp a,15
@@ -95,6 +99,13 @@ gui_Input:
 	ld (hl),0
 	ld (ix-3),bc
 	jq .draw
+.arrow_key:
+	cp a,3
+	jq z,.keys
+	cp a,2
+	jq z,.keys
+	add a,8
+	jq .return
 .enter:
 	ld a,1
 	jr .return

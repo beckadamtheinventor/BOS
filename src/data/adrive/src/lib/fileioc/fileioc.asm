@@ -193,52 +193,35 @@ ti_Resize:
 ;  sp + 6 : slot index
 ; return:
 ;  hl = new size if no failure
-	; pop	de
-	; pop	hl			; hl = new size
-	; pop	bc			; c = slot
-	; push	bc
-	; push	hl
-	; push	de
-	; call	util_is_slot_open
-	; jp	z, util_ret_neg_one
-	; push	hl
-	; call	util_is_in_ram
-	; pop	hl
-	; jp	c, util_ret_null
-	; ld	de, TI_MAX_SIZE
-	; or	a,a
-	; sbc	hl,de
-	; add	hl,de
-	; push	af
-	; push	hl
-	; call	ti_Rewind.rewind	; rewind file offset
-	; pop	hl
-	; pop	af
-	; jp	nc,util_ret_null	; return if too big
-	; push	hl
-	; call	util_get_slot_size
-	; pop	hl
-	; or	a,a
-	; sbc	hl,bc
-	; ld	(resize_amount), hl
-	; jr	z, .no_resize
-	; jr	c, .decrease
-; .increase:
-	; call	_EnoughMem
-	; jp	c, util_ret_null
-	; ex	de, hl
-	; call	util_insert_mem
-	; jr	.no_resize
-; .decrease:
-	; push	hl
-	; pop	bc
-	; or	a, a
-	; sbc	hl, hl
-	; sbc	hl, bc
-	; ld	(resize_amount), hl
-	; call	util_delete_mem
-; .no_resize:
-	; ld	hl, (resize_amount)
+	pop	de
+	pop	hl			; hl = new size
+	pop	bc			; c = slot
+	push	bc
+	push	hl
+	push	de
+	call	util_is_slot_open
+	jp	z, util_ret_neg_one
+	ld	de, TI_MAX_SIZE
+	or	a,a
+	sbc	hl,de
+	add	hl,de
+	push	af
+	push	hl
+	call	ti_Rewind.rewind	; rewind file offset
+	pop	hl
+	pop	af
+	jp	nc,util_ret_null	; return if too big
+	push	hl
+	call	util_get_slot_size
+	pop	hl
+	ret	z
+	push	hl
+	call	util_get_vat_ptr
+	ex	(sp),hl
+	push	hl
+	call	bos.fs_SetSize
+	pop	hl
+	pop	bc
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -248,10 +231,10 @@ ti_IsArchived:
 ;  sp + 3 : Slot number
 ; return:
 ;  0 if not archived
-	pop	de
-	pop	bc
-	push	bc
-	push	de
+	;pop	de
+	;pop	bc
+	;push	bc
+	;push	de
 	; call	util_is_slot_open
 	; jp	z, util_ret_null
 ; util_is_in_ram:
@@ -281,11 +264,11 @@ ti_OpenVar:
 ;  sp + 9 : variable Type
 ; return:
 ;  slot index if no error
-	; ld	iy, 0
-	; add	iy, sp
-	; ld	a, (iy + 9)
+	ld	iy, 0
+	add	iy, sp
+	ld	a, (iy + 9)
 ;	jr	ti_Open.start		; emulated by dummifying next instruction
-	; db	$fe			; ld a,appVarObj -> cp a,$3e \ dec d
+	db	$fe			; ld a,appVarObj -> cp a,$3e \ dec d
 ;assert appVarObj = $15
 
 ;-------------------------------------------------------------------------------
@@ -296,148 +279,94 @@ ti_Open:
 ;  sp + 6 : open flags
 ; return:
 ;  a = slot index if no error
-	; ld	a, appVarObj
-; .start:
-	; ld	(.smc_type), a
-	; ld	(OP1), a
-	; ld	iy, flags
-	; push	ix
-	; ld	ix, 0
-	; add	ix, sp
-	; xor	a, a
-	; ld	hl, (vat_ptr0)
-	; inc	a
-	; add	hl, hl
-	; jr	nc, .slot
-	; ld	hl, (vat_ptr1)
-	; inc	a
-	; add	hl,hl
-	; jr	nc, .slot
-	; ld	hl, (vat_ptr2)
-	; inc	a
-	; add	hl, hl
-	; jr	nc, .slot
-	; ld	hl, (vat_ptr3)
-	; inc	a
-	; add	hl, hl
-	; jr	nc, .slot
-	; ld	hl, (vat_ptr4)
-	; inc	a
-	; add	hl, hl
-	; jp	c, util_ret_null_pop_ix
-; .slot:
-	; ld	(curr_slot), a
-	; ld	hl, (ix + 6)
-	; ld	de, OP1 + 1
-	; call	_Mov8b
-	; xor	a, a
-	; ld	(de), a
-	; ld	hl, (ix + 9)
-	; ld	a, (hl)
-	; cp	a, 'w'
-	; ld	iy, flags
-	; jr	nz, .no_overwite
-	; call	_PushOP1
-	; call	_ChkFindSym
-	; call	nc, _DelVarArc
-	; call	_PopOP1
-; .no_overwite:
-	; ld	hl, (ix + 9)
-	; ld	a, (hl)
-	; cp	a, 'r'
-	; jr	z, .mode
-	; cp	a, 'a'
-	; jr	z, .mode
-	; cp	a, 'w'
-	; jp	nz, util_ret_null_pop_ix
-; .mode:
-	; inc	hl
-	; ld	a, (hl)
-	; cp	a, '+'
-	; jr	nz, .no_append
-; .archive_var:
-	; call	_PushOP1
-	; call	_ChkFindSym
-	; call	_ChkInRam
-	; jr	z, .in_ram
-	; or	a, a
-	; sbc	hl, hl
-	; ex	de, hl
-	; ld	e, (hl)
-	; inc	hl
-	; ld	d, (hl)
-	; ex	de, hl
-	; call	_EnoughMem
-	; push	af
-	; call	_PopOP1
-	; pop	af
-	; jp	c, util_ret_null_pop_ix
-	; call	_PushOP1
-	; call	_Arc_Unarc
-	; call	_PopOP1
-	; jr	.archive_var
-; .in_ram:
-	; call	_PopOP1
-; .no_append:
-	; call	_ChkFindSym
-	; jr	c, .not_found
-	; call	_ChkInRam
-	; jr	z, .save_ptrs
-	; push	hl
-	; ld	hl, (ix + 9)
-	; ld	a, (hl)
-	; cp	a, 'r'
-	; pop	hl
-	; jp	nz, util_ret_null_pop_ix
-	; call	util_skip_archive_header
-	; jr	.save_ptrs
-; .not_found:
-	; ld	hl, (ix + 9)
-	; ld	a, (hl)
-	; cp	a, 'r'
-	; jp	z, util_ret_null_pop_ix
-	; or	a, a
-	; sbc	hl, hl
-	; ld	a, 0
-; .smc_type := $-1
-	; ld	iy, flags
-	; call	_CreateVar
-; .save_ptrs:
-	; push	hl
-	; call	util_get_vat_ptr
-	; pop	bc
-	; ld	(hl), bc
-	; call	util_get_data_ptr
-	; ld	(hl), de
-	; ld	bc, 0
-	; ld	hl, (ix + 9)
-	; ld	a, 'a'
-	; cp	a, (hl)
-	; call	z, util_get_slot_size
-	; call	util_set_offset
-	; pop	ix
-	; xor	a, a
-	; sbc	hl, hl
-	; ld	a, (curr_slot)
-	; ld	l, a
-	pop bc
-	pop hl
-	push hl
-	push bc
-	push hl
-	call bos.fs_OpenFile
-	pop bc
-	jq c,util_ret_null
-	ex hl,de
-	call util_get_open_slot
-	jq c,util_ret_null
-	dec a
-	ld (hl),de
-	ld hl,variable_offsets
-	call bos.sys_AddHLAndA
-	ld bc,0
-	ld (hl),bc
-	inc a
+	ld	a, appVarObj
+.start:
+	ld	(.smc_type), a
+	ld	(bos.fsOP1), a
+	push	ix
+	ld	ix, 0
+	add	ix, sp
+	xor	a, a
+	ld	hl, (vat_ptr0)
+	inc	a
+	add	hl, hl
+	jr	nc, .slot
+	ld	hl, (vat_ptr1)
+	inc	a
+	add	hl,hl
+	jr	nc, .slot
+	ld	hl, (vat_ptr2)
+	inc	a
+	add	hl, hl
+	jr	nc, .slot
+	ld	hl, (vat_ptr3)
+	inc	a
+	add	hl, hl
+	jr	nc, .slot
+	ld	hl, (vat_ptr4)
+	inc	a
+	add	hl, hl
+	jp	c, util_ret_null_pop_ix
+.slot:
+	ld	(curr_slot), a
+	ld	hl, (ix + 6)
+	ld	de, bos.fsOP1 + 1
+	call	bos._Mov8b
+	xor	a, a
+	ld	(de), a
+	ld	hl, (ix + 9)
+	ld	a, (hl)
+	cp	a, 'w'
+	ld	iy, flags
+	jr	nz, .no_overwite
+	call	bos._DelVar
+.no_overwite:
+	ld	hl, (ix + 9)
+	ld	a, (hl)
+	cp	a, 'r'
+	jr	z, .mode
+	cp	a, 'a'
+	jr	z, .mode
+	cp	a, 'w'
+	jp	nz, util_ret_null_pop_ix
+.mode:
+	call	bos._ChkFindSym
+	jr	c, .not_found
+	push	hl
+	ld	hl, (ix + 9)
+	ld	a, (hl)
+	cp	a, 'r'
+	pop	hl
+	jp	nz, util_ret_null_pop_ix
+	jr	.save_ptrs
+.not_found:
+	ld	hl, (ix + 9)
+	ld	a, (hl)
+	cp	a, 'r'
+	jp	z, util_ret_null_pop_ix
+	or	a, a
+	sbc	hl, hl
+	ld	a, 0
+.smc_type := $-1
+	call	bos._CreateVar
+.save_ptrs:
+	push	hl
+	call	util_get_vat_ptr
+	pop	bc
+	ld	(hl), bc
+	call	util_get_data_ptr
+	ld	(hl), de
+	ld	bc, 0
+	ld	hl, (ix + 9)
+	ld	a, 'a'
+	cp	a, (hl)
+	call	z, util_get_slot_size
+	call	util_set_offset
+	pop	ix
+	xor	a, a
+	sbc	hl, hl
+	ld	a, (curr_slot)
+	ld	l, a
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -800,49 +729,41 @@ ti_Seek:
 ;  sp + 9 : slot index
 ; return:
 ;  hl = -1 if failure
-	; ld	iy, 0
-	; add	iy, sp
-	; ld	de, (iy + 3)
-	; ld	c, (iy + 9)
-	; call	util_is_slot_open
-	; jp	z, util_ret_neg_one
-	; ld	a, (iy + 6)		; origin location
-	; or	a, a
-	; jr	z, .seek_set
-	; dec	a
-	; jr	z, .seek_curr
-	; dec	a
-	; jp	nz, util_ret_neg_one
-; .seek_end:
-	; push	de
-	; call	util_get_slot_size
-; .seek_set_asm:
-	; pop	hl
-	; add	hl, bc
-	; ex	de, hl
-; .seek_set:
-	; call	util_get_slot_size
-	; push	bc
-	; pop	hl
-	; or	a, a
-	; sbc	hl, de
-	; push	de
-	; pop	bc
-	; jp	c, util_ret_neg_one
-	; jp	util_set_offset
-; .seek_curr:
-	; push	de
-	; call	util_get_offset
-	; jr	.seek_set_asm
-	call __frameset0
-	ld c,(ix+12)
-	call util_is_slot_open
-	jq nz, util_ret_neg_one
-	
-	
-	
-	pop ix
-	ret
+	ld	iy, 0
+	add	iy, sp
+	ld	de, (iy + 3)
+	ld	c, (iy + 9)
+	call	util_is_slot_open
+	jp	z, util_ret_neg_one
+	ld	a, (iy + 6)		; origin location
+	or	a, a
+	jr	z, .seek_set
+	dec	a
+	jr	z, .seek_curr
+	dec	a
+	jp	nz, util_ret_neg_one
+.seek_end:
+	push	de
+	call	util_get_slot_size
+.seek_set_asm:
+	pop	hl
+	add	hl, bc
+	ex	de, hl
+.seek_set:
+	call	util_get_slot_size
+	push	bc
+	pop	hl
+	or	a, a
+	sbc	hl, de
+	push	de
+	pop	bc
+	jp	c, util_ret_neg_one
+	jp	util_set_offset
+.seek_curr:
+	push	de
+	call	util_get_offset
+	jr	.seek_set_asm
+
 
 ;-------------------------------------------------------------------------------
 ti_DeleteVar:
@@ -852,15 +773,15 @@ ti_DeleteVar:
 ;  sp + 6 : variable type
 ; return:
 ;  hl = 0 if failure
-	; pop	hl
-	; pop	de
-	; pop	bc
-	; push	bc
-	; push	de
-	; push	hl
-	; ld	a, c
+	pop	hl
+	pop	de
+	pop	bc
+	push	bc
+	push	de
+	push	hl
+	ld	a, c
 ;	jr	ti_Delete.start		; emulated by dummifying next instruction:
-	; db	$fe			; ld a,appVarObj -> cp a,$3E \ dec d
+	db	$fe			; ld a,appVarObj -> cp a,$3E \ dec d
 ;assert appVarObj = $15
 
 ;-------------------------------------------------------------------------------
@@ -870,23 +791,22 @@ ti_Delete:
 ;  sp + 3 : pointer to appvar name
 ; return:
 ;  hl = 0 if failure
-	; ld	a,appVarObj
+	ld	a,appVarObj
 ; .start:
-	; pop	de
-	; pop	hl
-	; push	hl
-	; push	de
-	; dec	hl
-	; push	af
-	; call	_Mov9ToOP1
-	; pop	af
-	; ld	(OP1), a
-	; call	_ChkFindSym
-	; jp	c, util_ret_null
-	; ld	iy, flags
-	; call	_DelVarArc
-	; scf
-	; sbc	hl, hl
+	pop	de
+	pop	hl
+	push	hl
+	push	de
+	dec	hl
+	push	af
+	call	bos._Mov9ToOP1
+	pop	af
+	ld	(bos.fsOP1), a
+	call	bos._ChkFindSym
+	jp	c, util_ret_null
+	call	bos._DelVar
+	scf
+	sbc	hl, hl
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -1672,17 +1592,21 @@ util_get_data_ptr:
 	jp bos.sys_AddHLAndA
 util_get_offset_ptr:
 	push	bc
-	ld	hl, (curr_slot)
-	dec	l
-	ld	h, 3
-	mlt	hl
+	or	a,a
+	sbc	hl,hl
+	ld	a, (curr_slot)
+	ld	b,a
+	add	a,a
+	add	a,b
+	ld	l,a
 	ld	bc, variable_offsets
 	add	hl,bc
 	pop	bc
 	ret
 util_get_slot_size:
-	call	util_get_data_ptr
-	ld	hl, (hl)
+	call	util_get_vat_ptr
+	ld	bc, $C
+	add	hl, bc
 	ld	bc, 0
 	ld	c, (hl)
 	inc	hl

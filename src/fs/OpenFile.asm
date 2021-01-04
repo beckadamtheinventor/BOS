@@ -25,6 +25,10 @@ fs_OpenFile:
 	pop bc
 	inc hl
 	ld (ix-3),hl
+	ld iy,fs_filesystem_root_address
+	ld a,(hl)
+	or a,a
+	jq z,.return
 	ld iy,fs_filesystem_address
 .entry:
 .main_search_loop:
