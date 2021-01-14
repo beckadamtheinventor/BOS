@@ -3,14 +3,10 @@ An Operating system (WIP) for the TI-84+CE family (eZ80) graphing calculators
 
 
 # Building
-BOS requires some of the toolchain binaries, so it is best to install the ce c toolchain before building it.
+BOS requires the CE C toolchain version 9+ in order to build.
 
-Link to ce c toolchain:
+Link to CE C toolchain:
 https://github.com/CE-Programming/toolchain
-
-The version of fasmg required to build is different than the stable toolchain release. (toolchain dev version 9.0 and higher have it)
-See this link to locate the required version of fasmg to build this project:
-https://github.com/CE-Programming/toolchain/tree/fatdrvce/tools/fasmg
 
 
 # Building on Linux/Mac/Unix
@@ -24,7 +20,7 @@ Run the provided `build.bat` file, and the binary will be in the `bin` folder.
 # Updating BOS
 When building BOS there is a file that can be used to reinstall/update BOS from a FAT32-formatted USB flash drive.
 Send `bin/BOSUPDTR.BIN` to the root directory of a FAT32 formatted flash drive, and plug it into the calculator.
-Then from the console, type: `UPDATER`. The calc will read from `BOSUPDTR.BIN` and execute it from UserMem.
+Then from the console, type: `updater`. The calc will read from `BOSUPDTR.BIN` and execute it from UserMem.
 It is essentially the same program that initially installs BOS.
 
 
@@ -76,7 +72,7 @@ BOS comes pre-loaded with some libload libraries. Some of these libraries are un
 + fatdrvce (stable, subject to change)
 + fileioc (unstable)
 + graphx (stable)
-+ srldrvce (empty at the moment)
++ srldrvce (probably not the latest)
 + usbdrvce (stable, subject to change)
 
 Using these libraries requires your program to run from *RAM or USB* as a RAM executable.
@@ -114,6 +110,7 @@ Headers for libload libraries included in BOS:
 + fatdrvce: `db $C0,"FATDRVCE",0,1`
 + fileioc: `db $C0,"FILEIOC",0,6`
 + graphx: `db $C0,"GRAPHX",0,11`
++ srldrvce: `db $C0,"SRLDRVCE",0,0`
 + usbdrvce: `db $C0,"USBDRVCE",0,0`
 
 Note that fileioc is currently unstable/unusable in BOS.
