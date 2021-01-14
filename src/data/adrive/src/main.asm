@@ -441,7 +441,6 @@ boot_main:
 	call bos.sys_FlashLock
 .loop:
 	call clean_main
-	call cls_main
 	ld bc,$FF0000
 	push bc
 	ld bc,str_ExplorerExecutable

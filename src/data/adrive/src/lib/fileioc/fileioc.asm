@@ -509,6 +509,35 @@ util_get_data_offset:
 	; add	hl, bc
 	; inc	hl
 	; inc	hl
+	call __frameset0
+	ld c,(ix+15)
+	call util_is_slot_open
+	jq nz,util_ret_null_pop_ix
+	call util_get_vat_ptr
+	ld hl,(hl)
+	push hl
+	call util_get_offset
+	pop hl
+	push bc,hl
+	ld bc,(ix+12)
+	push bc
+	ld bc,(ix+9)
+	push bc
+	ld bc,(ix+6)
+	push bc
+	call bos.fs_Write
+	pop bc,de,hl,bc,bc
+	ld b,e
+	ex hl,de
+	or a,a
+	sbc hl,hl
+.count_loop:
+	add hl,de
+	djnz .count_loop
+	push hl
+	pop bc
+	pop ix
+	jq util_set_offset
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -718,6 +747,33 @@ ti_PutC:
 	; or	a, a
 	; sbc	hl, hl
 	; ld	l, a
+	pop hl
+	pop de
+	pop bc
+	push bc
+	push de
+	push hl
+	ld a,e
+	ld (.buffer),a
+	call util_is_slot_open
+	jq nz,util_ret_null
+	call util_get_vat_ptr
+	ld hl,(hl)
+	push hl
+	call util_get_offset
+	pop hl
+	push bc,hl
+	ld bc,1
+	push bc
+	push bc
+	ld bc,.buffer
+	push bc
+	call bos.fs_Write
+	pop bc,bc,bc,bc,bc
+	inc bc
+	ld a,0
+.buffer:=$-1
+	jq util_set_offset
 	ret
 
 ;-------------------------------------------------------------------------------

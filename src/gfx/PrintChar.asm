@@ -53,12 +53,13 @@ character_height := 8
 	pop	bc
 	pop	de
 	pop	af				; character
-	ld	hl,(font_spacing)
-	call sys_AddHLAndA
-	ld	a,(hl)				; amount to step per character
-	or	a,a
-	sbc	hl,hl
-	ld	l,a
+	ld	hl,8
+;	ld	hl,(font_spacing)
+;	call sys_AddHLAndA
+;	ld	a,(hl)				; amount to step per character
+;	or	a,a
+;	sbc	hl,hl
+;	ld	l,a
 	add	hl,bc
 	ld	(lcd_x),hl
 	pop	hl

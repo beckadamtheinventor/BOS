@@ -94,20 +94,35 @@ os_recovery_menu:
 	call gui_DrawConsoleWindow
 .keywait:
 	call sys_WaitKeyCycle
-	cp a,15
+	cp a,55
+	jq z,.reset_fs
+	cp a,54
 	jq z,.turn_off
 	cp a,9
 	jq z,.attempt_recovery
 	cp a,56
 	jq z,.uninstall
+	cp a,15
+	jq z,boot_os
 	
 	jq .keywait
+
+.reset_fs:
+	ld hl,string_press_enter_confirm
+	call gui_Print
+	call sys_WaitKeyCycle
+	cp a,9
+	jq nz,os_recovery_menu
+	call fs_Format
+	jq boot_os
+
 .turn_off:
-	ld a,100 ;delay one second
+	ld a,50 ;delay 500ms
 	call ti.DelayTenTimesAms
 	call ti.boot.TurnOffHardware
 	ei
 	halt
+	nop
 	rst $00
 
 .attempt_recovery:
@@ -115,6 +130,11 @@ os_recovery_menu:
 	jq os_recovery_menu
 
 .uninstall:
+	ld hl,string_press_enter_confirm
+	call gui_Print
+	call sys_WaitKeyCycle
+	cp a,9
+	jq nz,os_recovery_menu
 	ld hl,bos_UserMem
 	push hl ;return to usermem which immediately tells the calc to invalidate the OS and reboot
 	ld (hl),$CD
