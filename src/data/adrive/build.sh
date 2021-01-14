@@ -12,6 +12,7 @@ fasmg src/lib/usbdrvce/usbdrvce.asm obj/usbdrvce.bin
 fasmg src/lib/libload_alt/libload_alt.asm obj/libload_alt.bin
 
 fasmg src/explorer.asm obj/explorer.bin
+fasmg src/files.asm obj/files.bin
 fasmg src/fexplore.asm obj/fexplore.bin
 fasmg src/memedit.asm obj/memedit.bin
 fasmg src/usbrun.asm obj/usbrun.bin

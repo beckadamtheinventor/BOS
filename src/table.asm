@@ -81,5 +81,7 @@
 	jp fs_StrToFileEntry
 	jp fs_DirList
 	jp sys_Free
+	jp sys_CallExecuteFile
+	jp sys_JumpExecuteFile
 
 

@@ -80,6 +80,8 @@
 <tr><td>bos.fs_StrToFileEntry</td><td>020244</td><td><a href="#fs_StrToFileEntry">doc</a></tr>
 <tr><td>bos.fs_DirList</td><td>020248</td><td><a href="#fs_DirList">doc</a></tr>
 <tr><td>bos.sys_Free</td><td>02024C</td><td><a href="#sys_Free">doc</a></tr>
+<tr><td>bos.sys_CallExecuteFile</td><td>020250</td><td><a href="#sys_CallExecuteFile">doc</a></tr>
+<tr><td>bos.sys_JumpExecuteFile</td><td>020254</td><td><a href="#sys_JumpExecuteFile">doc</a></tr>
 </table><div id="boot_os"><h1>boot_os</h1><h3>syscall Adress 020108</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
@@ -399,5 +401,16 @@
 </table></div><div id="sys_Free"><h1>sys_Free</h1><h3>syscall Adress 02024C</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td> void sys_Free(void *ptr);</td><td> Free as block of memory malloc'd by sys_Malloc</td><td></td><td> All</td><td>
+</td></tr>
+</table></div><div id="sys_CallExecuteFile"><h1>sys_CallExecuteFile</h1><h3>syscall Adress 020250</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> hl = file to execute<br>
+ de = arguments<br>
+ bc = file to return to</td><td> Jump execution to an executable file and return to caller</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="sys_JumpExecuteFile"><h1>sys_JumpExecuteFile</h1><h3>syscall Adress 020254</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> hl = file to execute<br>
+ de = arguments</td><td> Jump execution to an executable file</td><td></td><td></td><td>
 </td></tr>
 </table></div></body></html>

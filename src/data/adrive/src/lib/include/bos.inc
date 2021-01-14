@@ -84,6 +84,8 @@ namespace bos
 ?fs_StrToFileEntry               := $20244
 ?fs_DirList                      := $20248
 ?sys_Free                        := $2024C
+?sys_CallExecuteFile             := $20250
+?sys_JumpExecuteFile             := $20254
 ;
 ;
 ?LCD_PAL    := 0E30200h

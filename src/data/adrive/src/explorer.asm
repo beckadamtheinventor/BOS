@@ -76,64 +76,7 @@ explorer_main:
 	jq z,_exit
 	cp a,9
 	jq nz,.key_loop
-explore_files:
-	ld hl,bos.current_working_dir
-explorer_path_ptr:=$-3
-	push hl
-	call bos.fs_OpenFile
-	pop bc
-	ld (explorer_curdir_ix),hl
-explore_files_main:
-	call gfx_ZeroScreen
-	ld ix,0
-explorer_curdir_ix:=$-3
-	ld c,$FF
-	push bc
-	call gfx_SetTextFGColor
-	pop bc
-	ld bc,(explorer_path_ptr)
-	or a,a
-	sbc hl,hl
-	push hl,hl,bc
-	call gfx_PrintStringXY
-	pop bc,bc,bc
-	call explorer_draw_files
-	ld hl,0
-explorer_cursor_y:=$-3
-	inc hl
-	push hl
-	add hl,hl
-	add hl,hl
-	add hl,hl
-	pop de
-	add hl,de
-	push hl
-	ld bc,0
-	push bc
-	ld bc,str_CursorString
-	push bc
-	call gfx_PrintStringXY
-	pop bc,bc,bc
-	call gfx_BlitBuffer
-.keyloop:
-	call bos.sys_WaitKeyCycle
-	cp a,15
-	jq z,explorer_main
-	ld bc,explore_files_main
-	push bc
-	cp a,2
-	jq z,explorer_path_out
-	cp a,3
-	jq z,explorer_path_into
-	cp a,9
-	jq z,explorer_path_into
-	cp a,1
-	jq z,explorer_scroll_down
-	cp a,4
-	jq z,explorer_scroll_up
-	
-	pop bc
-	jq .keyloop
+	jq explore_files_main
 _exit:
 	call gfx_ZeroScreen
 	call bos._HomeUp

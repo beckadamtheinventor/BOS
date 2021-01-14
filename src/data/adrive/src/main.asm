@@ -38,6 +38,7 @@ fs_dir bin_dir
 	fs_entry cls_exe, "cls", "exe", f_readonly+f_system
 	fs_entry explorer_exe, "explorer", "exe", f_readonly+f_system
 	fs_entry fexplore_exe, "fexplore", "exe", f_readonly+f_system
+	fs_entry files_exe, "files", "exe", f_readonly+f_system
 	fs_entry info_exe, "info", "exe", f_readonly+f_system
 	fs_entry ls_exe, "ls", "exe", f_readonly+f_system
 	fs_entry memedit_exe, "memedit","exe", f_readonly+f_system
@@ -1083,6 +1084,13 @@ mkdir_main:
 	db "..         ",$10
 end fs_file
 
+fs_file files_exe
+	file '../obj/files.bin'
+end fs_file
+
+
+; -- tester program --
+; should be removed upon release
 
 fs_file	test_exe
 	jr test_exe_main

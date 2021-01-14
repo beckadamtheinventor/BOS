@@ -1,5 +1,9 @@
 
+include 'include/ez80.inc'
+include 'include/ti84pceg.inc'
+include 'include/bos.inc'
 
+org ti.userMem
 	jr files_init
 	db "REX",0
 files_init:	
@@ -13,6 +17,16 @@ files_init:
 	sbc hl,hl
 	ret
 files_init_2:
+	ld hl,(_SaveSP)
+	inc hl
+	inc hl
+	inc hl
+	ld hl,(hl)
+	ld a,(hl)
+	or a,a
+	jq z,.no_args
+	ld (explorer_path_ptr),hl
+.no_args:
 	ld c,1
 	push bc
 	call gfx_SetDraw
@@ -27,9 +41,18 @@ files_init_2:
 explore_files:
 	ld hl,bos.current_working_dir
 explorer_path_ptr:=$-3
+	inc hl
+	ld a,(hl)
+	or a,a
+	jq z,.root_dir
+	dec hl
 	push hl
 	call bos.fs_OpenFile
 	pop bc
+	jq explorer_set_dir
+.root_dir:
+	ld hl,$040200
+explorer_set_dir:
 	ld (explorer_curdir_ix),hl
 explore_files_main:
 	call gfx_ZeroScreen
@@ -64,9 +87,13 @@ explorer_cursor_y:=$-3
 	pop bc,bc,bc
 	call gfx_BlitBuffer
 .keyloop:
-	call bos.sys_WaitKeyCycle
+	call bos.sys_WaitKey
+	push af
+	ld a,8
+	call ti.DelayTenTimesAms
+	pop af
 	cp a,15
-	jq z,explorer_main
+	jq z,_exit
 	ld bc,explore_files_main
 	push bc
 	cp a,2
@@ -90,6 +117,8 @@ _exit:
 .loadix:
 	ld ix,0
 _SaveIX:=$-3
+	ld sp,0
+_SaveSP:=$-3
 	ret
 _exit_return_1337:
 	call gfx_ZeroScreen
@@ -113,6 +142,19 @@ explorer_scroll_down:
 	sbc hl,bc
 	jq nc,explorer_page_down
 	add hl,bc
+	push hl
+	add hl,hl
+	add hl,hl
+	add hl,hl
+	add hl,hl
+	ld bc,(explorer_dir_offset)
+	add hl,bc
+	ld bc,(explorer_curdir_ix)
+	add hl,bc
+	ld a,(hl)
+	or a,a
+	pop hl
+	ret z
 	ld (explorer_cursor_y),hl
 	ret
 explorer_scroll_up:
@@ -145,7 +187,18 @@ explorer_page_up:
 	ret
 explorer_path_out:
 	ld ix,(explorer_curdir_ix)
-	jq explorer_path_into.entry
+.search:
+	ld a,(ix)
+	or a,a
+	ret z
+	cp a,'.'
+	jq nz,.search_next
+	ld a,(ix+1)
+	cp a,'.'
+	jq z,explorer_path_into.entry
+.search_next:
+	lea ix,ix+16
+	jq .search
 explorer_path_into:
 	ld hl,(explorer_cursor_y)
 	add hl,hl
@@ -303,7 +356,7 @@ gfx_PrintStrings:
 	pop hl
 	ret
 
-load_libload:
+libload_load:
 	ld hl,libload_name
 	push hl
 	call bos.fs_OpenFile
