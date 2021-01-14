@@ -4,10 +4,10 @@
 ;@OUTPUT true if success, otherwise fail
 fs_DeleteFile:
 	call ti._frameset0
-	push iy
-	ld iy,(ix+6)
-	bit fsbit_readonly,(iy+fsentry_fileattr)
-	pop iy
+	ld hl,(ix+6)
+	ld bc,fsentry_fileattr
+	add hl,bc
+	bit fsbit_readonly,(hl)
 	jq nz,.fail
 	ld de,(ix+6)
 	ld hl,.deleted_header

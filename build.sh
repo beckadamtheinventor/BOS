@@ -2,9 +2,9 @@
 mkdir bin
 mkdir obj
 echo "== Building noti-ez80 =="
-mkdir noti-ez80/obj
-mkdir noti-ez80/bin
-fasmg noti-ez80/src/main.asm noti-ez80/bin/NOTI.rom
+cd noti-ez80
+./build.sh
+cd ../
 echo "== Building bos.inc =="
 python build_bos.inc.py
 cp -f bos.inc src/include/bos.inc

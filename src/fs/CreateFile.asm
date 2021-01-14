@@ -2,8 +2,11 @@
 ;@INPUT void *fs_CreateFile(const char *path, uint8_t flags, int len);
 ;@OUTPUT file descriptor. Returns 0 if failed to create file.
 fs_CreateFile:
-	ld hl,-22
+	ld hl,-25
 	call ti._frameset
+	or a,a
+	sbc hl,hl
+	ld (ix-25),hl
 	ld hl,(ix+6)
 	ld a,(hl)
 	or a,a
@@ -20,8 +23,6 @@ fs_CreateFile:
 	pop bc
 	push hl
 	ld a,'/'
-	cp a,(hl)
-	jq nz,.fail
 	add hl,bc
 	cpdr ;find last '/' in path string
 	pop de
@@ -63,28 +64,27 @@ fs_CreateFile:
 	ld de,16
 	add hl,de
 	push iy,hl
-	call fs_SetSize
+	call fs_SetSize ;resize parent directory up 16 bytes
 	jq c,.fail
-	pop bc
 	ld hl,(ix+12)
 	push hl
-	call fs_Alloc
+	call fs_Alloc ;allocate space for new file
 	jq c,.fail
-	pop bc,iy
+	pop bc,bc,iy
 	ld a, (ix + 9)
-	ld (ix + fsentry_fileattr - 19), a
+	ld (ix + fsentry_fileattr - 19), a     ;setup new file descriptor contents
 	ld (ix + fsentry_filesector - 19),hl
 	ld (ix + fsentry_filelen - 19),c
 	ld (ix + fsentry_filelen+1 - 19),b
 
 	ld bc,(ix-22)
 	push bc,iy
-	ld c,1
+	ld bc,1
 	push bc
-	ld bc,16
+	ld c,16
 	push bc
 	pea ix-19
-	call fs_Write
+	call fs_Write ;write new file descriptor to parent directory
 	pop bc,bc,bc,de,hl
 	ld bc,16
 	add hl,bc
@@ -93,7 +93,7 @@ fs_CreateFile:
 	push bc
 	ld bc,$FF0000
 	push bc
-	call fs_Write
+	call fs_Write ;write end of directory marker to parent directory
 	pop bc,bc,bc,bc,bc
 	pop hl
 	ld bc,(ix-22)
@@ -104,6 +104,14 @@ fs_CreateFile:
 	sbc hl,hl
 	ld sp,ix
 	pop ix
+	push hl
+	ld hl,(ix-25)
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	push hl
+	call nz,sys_Free
+	pop bc,hl
 	ret
 .malloc_tail:
 	push de
@@ -111,6 +119,7 @@ fs_CreateFile:
 	push hl
 	call sys_Malloc
 	jq c,.fail
+	ld (ix-25),hl
 	pop bc
 	ex hl,de
 	pop hl

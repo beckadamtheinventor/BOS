@@ -77,6 +77,9 @@
 <tr><td>bos.sys_WriteFlashFull</td><td>020238</td><td><a href="#sys_WriteFlashFull">doc</a></tr>
 <tr><td>bos.sys_WriteFlashByteFull</td><td>02023C</td><td><a href="#sys_WriteFlashByteFull">doc</a></tr>
 <tr><td>bos.fs_ParentDir</td><td>020240</td><td><a href="#fs_ParentDir">doc</a></tr>
+<tr><td>bos.fs_StrToFileEntry</td><td>020244</td><td><a href="#fs_StrToFileEntry">doc</a></tr>
+<tr><td>bos.fs_DirList</td><td>020248</td><td><a href="#fs_DirList">doc</a></tr>
+<tr><td>bos.sys_Free</td><td>02024C</td><td><a href="#sys_Free">doc</a></tr>
 </table><div id="boot_os"><h1>boot_os</h1><h3>syscall Adress 020108</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
@@ -131,7 +134,7 @@
 </table></div><div id="sys_AnyKey"><h1>sys_AnyKey</h1><h3>syscall Adress 02014C</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td> Scans the keypad and updates data registers; checking if a key was pressed</td><td> 0 if no keys pressed</td><td> HL,AF</td><td>
- Disables interrupts during execution</td></tr>
+</td></tr>
 </table></div><div id="sys_FreeAll"><h1>sys_FreeAll</h1><h3>syscall Adress 020150</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td> void sys_FreeAll(void);</td><td> Free all memory malloc'd by sys_Malloc</td><td></td><td> hl, de</td><td>
@@ -383,5 +386,18 @@
 </table></div><div id="fs_ParentDir"><h1>fs_ParentDir</h1><h3>syscall Adress 020240</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td> char *fs_ParentDir(const char *path);</td><td> return a string representing the parent directory of a given path</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="fs_StrToFileEntry"><h1>fs_StrToFileEntry</h1><h3>syscall Adress 020244</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> char *fs_StrToFileEntry(char *dest, const char *src);</td><td> convert a file.ext string to a file entry</td><td> pointer to file entry, 0 if failed<br>
+ Cf set if failed</td><td></td><td>
+</td></tr>
+</table></div><div id="fs_DirList"><h1>fs_DirList</h1><h3>syscall Adress 020248</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> void **fs_DirList(void **buffer, const char *path, int num, int skip);</td><td> list items in a directory</td><td> pointer to array of dir entry pointers. Returns -1 and Cf on fail</td><td></td><td>
+</td></tr>
+</table></div><div id="sys_Free"><h1>sys_Free</h1><h3>syscall Adress 02024C</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> void sys_Free(void *ptr);</td><td> Free as block of memory malloc'd by sys_Malloc</td><td></td><td> All</td><td>
 </td></tr>
 </table></div></body></html>

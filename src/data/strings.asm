@@ -32,4 +32,14 @@ str_tivars_dir:
 .len:=$-.
 str_HexChars:
 	db "0123456789ABCDEF"
+string_booting_os:
+	db "BOS v1.00.0000 alpha",$A
+	db "Hold [y=]     for recovery mode",$A
+	db "Hold [window] for console only mode",$A,0
+string_os_recovery_menu:
+	db "--OS Recovery/Reset--",$A
+	db $9,"Press clear to turn off calculator",$A
+	db $9,"Press enter to attempt recovery",$A
+	db $9,"Press del to uninstall BOS and recieve OS",$A,0
+
 

@@ -41,10 +41,16 @@ sys_Malloc:
 	ld a,(hl)
 	or a,a
 	jq z,.found
+	cp a,$7F
+	jq z,.found
+.skip_block:
 	add hl,de
-	djnz .loop
-	dec c
+	ld a,(hl)
+	cp a,$7F
 	jq nz,.loop
+	djnz .skip_block
+	dec c
+	jq nz,.skip_block
 	pop bc
 .fail:
 	scf
@@ -82,11 +88,18 @@ sys_Malloc:
 	add hl,de
 	ex hl,de
 	ld hl,(ScrapMem)
+	ld (hl),1
+	inc hl
 	ld (hl),de
+	inc hl
+	inc hl
+	inc hl
 	pop bc
 	push bc
 	push de
 	ld b,c
+	dec b
+	jq c,.one_block
 	ld de,$7FFFFF
 .mark_loop:
 	ld (hl),de
@@ -96,6 +109,7 @@ sys_Malloc:
 	ld (hl),e
 	inc hl
 	djnz .mark_loop
+.one_block:
 	pop hl
 	ret
 .not_found:

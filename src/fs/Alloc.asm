@@ -1,6 +1,6 @@
 ;@DOES allocate space for a file
 ;@INPUT int fs_Alloc(int len);
-;@OUTPUT hl = first cluster allocated
+;@OUTPUT hl = first sector allocated
 fs_Alloc:
 	ld hl,-10
 	call ti._frameset

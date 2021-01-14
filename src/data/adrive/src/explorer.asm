@@ -13,6 +13,7 @@ explorer_init:
 	;push bc
 	;ld (explorer_args),hl
 	ld (_SaveIX),ix
+	ld (_SaveSP),sp
 	call load_libload
 	jq z,explorer_init_2
 	ld hl,str_FailedToLoadLibload
@@ -69,6 +70,8 @@ explorer_main:
 	call bos.sys_WaitKeyCycle
 	cp a,56
 	jq z,_uninstall_bos
+	cp a,53
+	jq z,_exit_return_1337
 	cp a,15
 	jq z,_exit
 	cp a,9
@@ -84,6 +87,10 @@ explore_files_main:
 	call gfx_ZeroScreen
 	ld ix,0
 explorer_curdir_ix:=$-3
+	ld c,$FF
+	push bc
+	call gfx_SetTextFGColor
+	pop bc
 	ld bc,(explorer_path_ptr)
 	or a,a
 	sbc hl,hl
@@ -130,11 +137,18 @@ explorer_cursor_y:=$-3
 _exit:
 	call gfx_ZeroScreen
 	call bos._HomeUp
-	ld ix,0
-_SaveIX:=$-3
 	xor a,a
 	sbc hl,hl
+.loadix:
+	ld ix,0
+_SaveIX:=$-3
 	ret
+_exit_return_1337:
+	call gfx_ZeroScreen
+	call bos._HomeUp
+	ld hl,1337
+	jq _exit.loadix
+
 _uninstall_bos:
 	ld bc,str_Uninstall
 	push bc
@@ -143,167 +157,19 @@ _uninstall_bos:
 	ret
 str_Uninstall:
 	db "/bin/uninstlr.exe",0
-explorer_scroll_down:
-	ld hl,(explorer_cursor_y)
-	inc hl
-	ld bc,23
-	or a,a
-	sbc hl,bc
-	jq nc,explorer_page_down
-	add hl,bc
-	ld (explorer_cursor_y),hl
-	ret
-explorer_scroll_up:
-	ld hl,(explorer_cursor_y)
-	add hl,bc
-	or a,a
-	sbc hl,bc
-	jq z,explorer_page_up
-	dec hl
-	ld (explorer_cursor_y),hl
-	ret
-explorer_page_down:
-	ld hl,(explorer_dir_offset)
-	ld b,16
-.loop:
-	inc hl
-	ld a,(hl)
-	or a,a
-	ret z
-	ld (explorer_dir_offset),hl
-	djnz .loop
-	ret
-explorer_page_up:
-	ld hl,(explorer_dir_offset)
-	ld bc,16
-	or a,a
-	sbc hl,bc
-	ret c
-	ld (explorer_dir_offset),hl
-	ret
-explorer_path_out:
-	ld ix,(explorer_curdir_ix)
-	jq explorer_path_into.entry
-explorer_path_into:
-	ld hl,(explorer_cursor_y)
-	add hl,hl
-	add hl,hl
-	add hl,hl
-	add hl,hl
-	ld bc,(explorer_dir_offset)
-	add hl,bc
-	ex hl,de
-	ld ix,(explorer_curdir_ix)
-	add ix,de
-.entry:
-	bit bos.fd_subdir,(ix+$B)
-	ret z
-	ld hl,(ix+$C)
-	push hl
-	call bos.fs_GetSectorAddress
-	pop bc
-	ld (explorer_curdir_ix),hl
-	or a,a
-	sbc hl,hl
-	ld (explorer_dir_offset),hl
-	ld (explorer_cursor_y),hl
-	ret
-explorer_draw_files:
-	ld bc,10
-	ld (.y_pos),bc
-	ld bc,0
-explorer_dir_offset:=$-3
-	add ix,bc
-.draw_loop:
-	ld a,(ix)
-	or a,a
-	ret z
-	call .setxy
-	bit bos.fd_subdir,(ix+$B)
-	call nz,.draw_dir
-	bit bos.fd_subdir,(ix+$B)
-	call z,.draw_file
-.next_file:
-	lea ix,ix+16
-	jq .draw_loop
-.setxy:
-	ld bc,10
-.y_pos:=$-3
-	push bc
-	ld bc,12
-.setxy_entry:
-	push bc
-	call gfx_SetTextXY
-	pop bc,bc
-	ret
-.setxy_2:
-	ld bc,(.y_pos)
-	push bc
-	ld bc,150
-	jq .setxy_entry
 
-.draw_file:
-	bit bos.fd_device,(ix+$B)
-	xor a,a
-	ld (bos.lcd_text_bg),a
-	jq z,.not_device
-	ld a,$75
-	jq .draw_file_name
-.not_device:
-	bit bos.fd_system,(ix+$B)
-	jq z,.not_system
-	ld a,$C0
-	jq .draw_file_name
-.not_system:
-	xor a,a
-	ld a,$FF
-	jq .draw_file_name
-.draw_dir:
-	xor a,a
-	ld a,$19
-.draw_file_name:
-	ld (bos.lcd_text_fg),a
-	ld hl,str_FileNameString
-	push ix,hl
-	call bos.fs_CopyFileName
-	call gfx_PrintString
-	call .setxy_2
-	pop bc,ix
-	bit bos.fd_system,(ix+$B)
-	call nz,.system
-	bit bos.fd_readonly,(ix+$B)
-	call nz,.readonly
-	bit bos.fd_device,(ix+$B)
-	call nz,.device
-.next_line:
-	ld hl,(.y_pos)
-	ld bc,9
-	add hl,bc
-	ld (.y_pos),hl
-	ret
-.device:
-	ld hl,str_Device
-	jq .print_hl
-.readonly:
-	ld hl,str_ReadOnly
-	jq .print_hl
-.system:
-	ld hl,str_System
-.print_hl:
-	push hl
-	call gfx_PrintString
-	pop bc
-	ret
-
-str_System:
-	db "SYS ",0
-str_ReadOnly:
-	db "R/O ",0
-str_CursorString:
-	db ">",0
-str_Device:
-	db "DEV",0
-
+explore_files_main:
+	ld sp,0
+_SaveSP:=$-3
+	ld ix,(_SaveIX)
+	ld hl,str_FilesExecutable
+	ld de,$FF0000
+	ld bc,str_ExplorerExecutable
+	jp bos.sys_CallExecuteFile
+str_FilesExecutable:
+	db "/bin/files.exe",0
+str_ExplorerExecutable:
+	db "/bin/explorer.exe",0
 
 gfx_PrintStrings:
 	ld bc,10
@@ -365,8 +231,6 @@ gfx_SetDraw:
 	jp 27
 gfx_Blit:
 	jp 33
-gfx_PrintInt:
-	jp 45
 gfx_PrintString:
 	jp 51
 gfx_PrintStringXY:
@@ -379,8 +243,6 @@ gfx_SetTextFGColor:
 	jp 63
 gfx_SetTextTransparentColor:
 	jp 66
-gfx_GetTextY:
-	jp 87
 gfx_ZeroScreen:
 	jp 228
 

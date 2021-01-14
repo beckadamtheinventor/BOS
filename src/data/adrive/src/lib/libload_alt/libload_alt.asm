@@ -115,7 +115,7 @@ disable_relocations
 
 	jp	_libloadstart.destination ; jump to execution block
 
-relocate _libloadstart, $D30000 - _libloadstart.length
+relocate _libloadstart, bos.reservedRAM + bos.reservedRAM_len - _libloadstart.length
 	pop	hl			; hl->start of library jump table
 
 	ld	(eSP),sp		; save the stack pointer if we hit an error
@@ -269,8 +269,8 @@ _goodversion:
 	inc	hl
 	ld	(endarclibrarylocations),hl
 
-	ld	hl,userMem		; this is where programs are extracted to
-	ld	de,(bos.asm_prgm_size)
+	ld	hl,bos.alt_UserMem		; this is where programs are extracted to
+	ld	de,(bos.alt_asm_prgm_size)
 	add	hl,de			; hl->end of program+libaries
 	ex	de,hl			; de->location to extract to
 
@@ -312,9 +312,9 @@ _needtoextractlib:
 	call	bos._InsertMem		; insert memory for the relocated library (de)
 
 	ld	hl,(extractedsize)	; extracted size = dependency jumps + library code
-	ld	de,(bos.asm_prgm_size)
+	ld	de,(bos.alt_asm_prgm_size)
 	add	hl,de
-	ld	(bos.asm_prgm_size),hl	; store new size of program+libraries
+	ld	(bos.alt_asm_prgm_size),hl	; store new size of program+libraries
 
 	ld	hl,(arclocation)	; hl->start of library code
 	ld	de,(ramlocation)	; de->insertion place

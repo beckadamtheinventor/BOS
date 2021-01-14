@@ -1,6 +1,10 @@
 ;@DOES write a byte from A to flash at address DE
 ;@INPUT A, DE
 sys_WriteFlashA:=$2E8
+;	di
+;	call $2E8
+;	ei
+;	ret
 	; push af
 	; ld	a,$8c
 	; out0	($24),a

@@ -78,5 +78,8 @@
 	jp sys_WriteFlashFull
 	jp sys_WriteFlashByteFull
 	jp fs_ParentDir
+	jp fs_StrToFileEntry
+	jp fs_DirList
+	jp sys_Free
 
 

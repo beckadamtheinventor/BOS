@@ -2,3 +2,11 @@
 *.idea
 *obj
 *threading*
+src/data/fs
+src/data/srcfs
+src/data/temp
+src/data/buildfs.py
+src/data/cache.json
+src/data/fs.bin
+src/data/fs_compressed.bin
+src/data/properties.json

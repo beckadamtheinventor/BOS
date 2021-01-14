@@ -2,11 +2,31 @@
 boot_os:
 ;	DisableMultithreading
 	call ti.boot.Set48MHzMode
+
+;	ld bc,64 ;setup gpt2
+;	xor a,a
+;	ld (ti.mpTmr2Load),bc
+;	ld (ti.mpTmr2Load+3),a
+;	ld hl,ti.mpTmrCtrl
+;	res ti.bTmr2Enable,(hl)
+;	set ti.bTmr2Crystal,(hl)
+;	set ti.bTmr2Overflow,(hl)
+;	inc hl
+;	res ti.bTmr2CountUp-8,(hl)
+;	dec hl
+;	set ti.bTmr2Enable,(hl)
+
 ;	ld hl,thread_map
 ;	ld de,thread_map+1
 ;	ld (hl),l
 ;	ld bc,thread_memory_end-thread_map
 ;	ldir
+;	ld hl,os_trapper
+;	ld (thread_temp_save),hl
+;	ld hl,ti.stackTop - 3
+;	ld (thread_temp_save+3),hl
+
+;boot_os_thread:
 	call flash_unlock
 	ld a,$04 ;set privleged code address to $040000
 	out0 ($1F),a
@@ -16,6 +36,8 @@ boot_os:
 	call flash_lock
 	ld a,4           ;set wait states to 4
 	ld ($E00005),a
+	call gfx_SetDefaultFont
+	call gfx_Set8bpp
 	ld hl,bos_UserMem
 	ld (bottom_of_RAM),hl
 	ld (top_of_UserMem),hl
@@ -29,17 +51,18 @@ boot_os:
 	ld (asm_prgm_size),hl
 	ld hl,op_stack_top
 	ld (op_stack_ptr),hl
-	call gfx_SetDefaultFont
-	call gfx_Set8bpp
+
+	ld hl,string_booting_os
+	call gui_DrawConsoleWindow
+
 	call fs_SanityCheck
 	ld hl,current_working_dir
 	ld bc,'/'
 	ld (hl),bc
-;	in0 a,($00) ;setup OS timer
-;	and a,$FC ;reset bits 0 and 1
-;	out0 ($00),a
-;	SpawnThread os_return, ti.stackTop - 18
+
 ;	EnableMultithreading
+;	SpawnThread os_return, ti.stackTop - 18
+;	ei
 ;os_trapper:
 ;	ld hl,ti.vRam
 ;	ld a,l
@@ -60,7 +83,7 @@ os_return:
 	ld hl,str_StartupProgram
 	push bc,hl
 	call sys_ExecuteFile
-	pop bc,bc ;we should only get back here in a severe error case
+	pop bc,bc ;we should only get back here in a severe error case or if the user opens this menu
 os_recovery_menu:
 	ld a,$FF
 	ld (lcd_bg_color),a
@@ -107,14 +130,6 @@ os_recovery_menu:
 	call sys_FlashUnlock
 	ld a,2
 	jq sys_EraseFlashSector ;erase first OS sector, bootcode will handle the rest
-
-
-string_os_recovery_menu:
-	db "--OS Recovery/Reset--",$A
-	db $9,"Press clear to turn off calculator",$A
-	db $9,"Press enter to attempt recovery",$A
-	db $9,"Press del to uninstall BOS and recieve OS",$A,0
-
 
 handle_interrupt:
 	ld bc,$5015
@@ -176,7 +191,7 @@ low_bit_1_int:
 	res 1,a
 	out (bc),a
 	jq return_from_interrupt
-low_bit_2_int:
+low_bit_2_int: ;gpt2 interrupt (used for "thread" switching)
 	ld a,1 shl 2
 	out (bc),a
 	ld c,4
@@ -184,6 +199,7 @@ low_bit_2_int:
 	res 2,a
 	out (bc),a
 	jq return_from_interrupt
+;	jq th_HandleInterrupt
 low_bit_3_int:
 	ld a,1 shl 3
 	out (bc),a
@@ -200,7 +216,6 @@ low_bit_4_int: ;OS timer interrupt
 	res 4,a
 	out (bc),a
 	jq return_from_interrupt
-;	jq th_HandleInterrupt
 high_bit_3_int:
 	ld a,1 shl 3
 	out (bc),a

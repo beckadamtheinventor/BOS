@@ -1,6 +1,5 @@
 ;-------------------------------------------------------------------------------
 ;@DOES Scans the keypad and updates data registers; checking if a key was pressed
-;@NOTE Disables interrupts during execution
 ;@DESTROYS HL,AF
 ;@OUTPUT 0 if no keys pressed
 kb_AnyKey:

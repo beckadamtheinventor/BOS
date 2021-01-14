@@ -12,12 +12,19 @@ fs_fs
 ;-------------------------------------------------------------
 
 ;filesystem root directory entries
+
+fs_dir root_of_roots_dir
+	fs_entry root_dir, "bosfs512", "fs", f_readonly+f_system+f_subdir
+end fs_dir
+
 fs_dir root_dir
 	fs_entry bin_dir, "bin", "", f_readonly+f_system+f_subdir
 	fs_entry dev_dir, "dev", "", f_readonly+f_system+f_subdir
 	fs_entry etc_dir, "etc", "", f_readonly+f_system+f_subdir
 	fs_entry home_dir, "home", "", f_subdir
 	fs_entry lib_dir, "lib", "", f_readonly+f_system+f_subdir
+	fs_entry usr_dir, "usr", "", f_readonly+f_system+f_subdir
+	fs_entry autotest_dir, "autotest", "", f_readonly+f_system+f_subdir
 end fs_dir
 
 ;"/bin/" directory
@@ -49,6 +56,7 @@ fs_dir dev_dir
 	fs_entry cluster_map_file, "cmap", "dat", f_readonly+f_system
 	fs_entry dev_lcd, "lcd", "", f_readonly+f_system+f_device
 	fs_entry dev_null, "null", "", f_readonly+f_system+f_device
+	fs_entry dev_mnt, "mnt", "", f_readonly+f_system+f_device
 	fs_entry tivars_dir, "tivars", "", f_subdir
 end fs_dir
 
@@ -60,6 +68,7 @@ end fs_dir
 ;"/lib/" directory
 fs_dir lib_dir
 	fs_entry root_dir, "..", "", f_subdir+f_system
+	fs_entry altload_lll, "AltLoad", "LLL", f_readonly+f_system
 	fs_entry fatdrvce_lll, "FATDRVCE","LLL", f_readonly+f_system
 	fs_entry fileioc_lll, "FILEIOC","LLL", f_readonly+f_system
 	fs_entry fontlibc_lll, "FONTLIBC","LLL", f_readonly+f_system
@@ -83,8 +92,26 @@ fs_dir user_home_dir
 	db 16 dup 0
 end fs_dir
 
+;"/dev/tivars/" directory
 fs_dir tivars_dir
 	fs_entry dev_dir, "..", "", f_subdir+f_system
+end fs_dir
+
+;"/usr/" directory
+fs_dir usr_dir
+	fs_entry root_dir, "..", "", f_subdir+f_system
+	fs_entry usr_bin_dir, "bin", "", f_subdir
+end fs_dir
+
+;"/usr/bin/" directory
+fs_dir usr_bin_dir
+	fs_entry usr_dir, "..", "", f_subdir+f_system
+end fs_dir
+
+;"/autotest/" directory
+fs_dir autotest_dir
+	fs_entry root_dir, "..", "", f_subdir+f_system
+	fs_entry test_exe, "test", "exe", f_readonly+f_system
 end fs_dir
 
 ;-------------------------------------------------------------
@@ -95,8 +122,60 @@ fs_file cluster_map_file
 	db 8192 dup $FF
 end fs_file
 
+
+fs_file dev_mnt
+	db $C9, 1
+	jp dev_mnt_init
+	jp dev_mnt_deinit
+	jp dev_mnt_get_address
+	jp dev_mnt_read
+	jp dev_mnt_write
+
+dev_mnt_get_address:
+	ld hl,bos.usb_sector_buffer
+	ret
+
+dev_mnt_init:
+	ld hl,.data
+	ld bc,.data_len
+dev_mnt_run_in_ram:
+	ld de,bos.reservedRAM+512
+	ld (bos.alt_asm_prgm_size),bc
+	push de
+	ldir
+	ret
+dev_mnt_init.data:
+	file 'dev_mnt/init.bin'
+dev_mnt_init.data_len:=$-dev_mnt_init.data
+
+dev_mnt_deinit:
+	ld hl,.data
+	ld bc,.data_len
+	jq dev_mnt_run_in_ram
+.data:
+	file 'dev_mnt/deinit.bin'
+.data_len:=$-.data
+
+dev_mnt_read:
+	ld hl,.data
+	ld bc,.data_len
+	jq dev_mnt_run_in_ram
+.data:
+	file 'dev_mnt/read.bin'
+.data_len:=$-.data
+
+dev_mnt_write:
+	ld hl,.data
+	ld bc,.data_len
+	jq dev_mnt_run_in_ram
+.data:
+	file 'dev_mnt/write.bin'
+.data_len:=$-.data
+end fs_file
+
 fs_file dev_null
 	db $C9, 1
+	jp dev_null_retnull
 	jp dev_null_retnull
 	jp dev_null_get_location
 	jp dev_null_read
@@ -196,8 +275,11 @@ fs_file cmd_exe
 	jq cmd_exe_main
 	db "FEX",0
 cmd_exe_main:
-	ld hl,-3
+	ld hl,-6
 	call ti._frameset
+	or a,a
+	sbc hl,hl
+	ld (ix-6),hl
 	ld hl,256
 	push hl
 	call bos.sys_Malloc
@@ -263,6 +345,18 @@ enter_input:
 .execute:
 	call bos.sys_ExecuteFile
 	pop bc,bc
+	push hl
+	ld hl,(ix-6)
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	push hl
+	call nz,bos.sys_Free
+	pop bc
+	or a,a
+	sbc hl,hl
+	ld (ix-6),hl
+	pop hl
 	ld (bos.ScrapMem),hl
 	ld a,(bos.ScrapMem+2)
 	or a,h
@@ -280,6 +374,13 @@ enter_input:
 	jq enter_input_clear
 .exit:
 	pop bc,bc
+	ld hl,(ix-3)
+	push hl
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	call nz,bos.sys_Free
+	pop bc
 	xor a,a
 	sbc hl,hl
 	ld sp,ix
@@ -346,6 +447,12 @@ boot_main:
 	push bc
 	call bos.sys_ExecuteFile
 	pop bc
+	ld bc,1337
+	or a,a
+	sbc hl,bc
+	pop bc
+	ret z
+	push bc
 	call cls_main
 	ld bc,str_CmdExecutable
 	push bc
@@ -540,10 +647,12 @@ fs_file ls_exe
 	jq ls_main
 	db "FEX",0
 ls_main:
-	pop bc
-	pop hl
-	push hl
-	push bc
+	ld hl,-3
+	call ti._frameset
+	or a,a
+	sbc hl,hl
+	ld (ix-6),hl
+	ld hl,(ix+6)
 	ld a,(hl)
 	or a,a
 	jq nz,.non_null_dir
@@ -552,12 +661,29 @@ ls_main:
 	push hl
 	call bos.gui_Print
 	call bos.gui_NewLine
-	call bos.fs_OpenFile
-	pop bc
-	jq c,.fail
+	or a,a
+	sbc hl,hl
+	ex (sp),hl
+	ld bc,64
+	push bc
 	push hl
-	pop iy
+	ld bc,64*3
+	push bc
+	call bos.sys_Malloc
+	pop bc
+	push hl
+	call bos.fs_DirList
+	pop hl,bc,bc,bc
+	ld (ix-6),hl
+	jq c,.fail
+	ld (ix-3),hl
 .loop:
+	ld hl,(ix-3)
+	ld iy,(hl)
+	inc hl
+	inc hl
+	inc hl
+	ld (ix-3),hl
 	ld a,(iy)
 	or a,a
 	jq z,.exit
@@ -597,13 +723,28 @@ ls_main:
 .exit_nopop:
 	xor a,a
 	sbc hl,hl
-	ret
+	db $01
 .fail:
 	scf
 	sbc hl,hl
+	push af,hl
+	ld hl,(ix-6)
+	push hl
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	call nz,bos.sys_Free
+	pop bc
+	pop hl,af
+	ld sp,ix
+	pop ix
 	ret
 .tab_str:
 	db $9,$9,0
+end fs_file
+
+fs_file altload_lll
+	file '../obj/libload_alt.bin'
 end fs_file
 
 fs_file fatdrvce_lll
@@ -638,6 +779,7 @@ fs_file libload_lll
 	file '../obj/bos_libload.bin'
 end fs_file
 
+
 fs_file uninstaller_exe
 	jq uninstall_main
 	db "FEX",0
@@ -669,7 +811,7 @@ updater_main:
 	pop bc,bc
 	ret
 str_UpdateProgram:
-	db "usbrun",0
+	db "/bin/usbrun.exe",0
 str_UpdateFile:
 	db "/BOSUPDTR.BIN",0
 end fs_file
@@ -838,14 +980,12 @@ mkdir_main:
 .create:
 	pop bc
 	ld c,f_subdir
-	push bc,hl
+	ld de,64
+	push de,bc,hl
 	call bos.fs_CreateFile
 	jq c,.fail
-	pop bc,bc
-	inc bc
-	ld a,(bc)
-	or a,a
-	jq z,.fail ;TODO
+	pop bc,bc,bc
+
 	ld bc,0
 	push bc,hl
 	ld c,1
@@ -857,7 +997,7 @@ mkdir_main:
 	ld hl,.path_back_entry
 	ld c,11
 	ldir
-	ld hl,(ix-3) ;open the created directory
+	ld hl,(ix-3) ;open the parent directory
 	push hl
 	call bos.fs_OpenFile
 	jq c,.fail
@@ -866,7 +1006,8 @@ mkdir_main:
 	ld (ix + $C - 19), hl
 	ld (ix + $E - 19), a
 	ld (ix + $F - 19), a
-	call bos.fs_Write
+	call bos.fs_Write ; point to the parent dir in the created dir
+	jq c,.fail
 	pop bc,bc,bc,hl,bc
 	ld bc,16
 	push bc
@@ -876,7 +1017,54 @@ mkdir_main:
 	ld bc,$FF0000
 	push bc
 	call bos.fs_Write
+	jq c,.fail
+	pop bc,bc,bc,hl,bc
+	ld c,16
+	push bc,hl
+	ld c,1
+	push bc
+	ld c,16
+	push bc
+	ld de,$FF0000
+	push de
+	call bos.fs_Write ;write the end-of-directory marker in created dir
+	jq c,.fail
+	ld hl,(ix-3)
+	push hl
+	call bos.fs_OpenFile ;open the parent dir
+	jq c,.fail
+	pop bc
+	push hl
+	ld bc,16
+	xor a,a
+.find_eod_loop:
+	or a,(hl)
+	jq z,.write_created_entry
+	add hl,bc
+	jq .find_eod_loop
+.write_created_entry:
+	pop bc
+	or a,a
+	sbc hl,bc
+	pop bc,bc,bc,de,bc
+
+	push hl,de
+	ld c,1
+	push bc
+	ld c,16
+	push bc
+	ld hl,(ix+6)
+	push hl
+	call bos.fs_GetPathLastName
+	ex (sp),hl
+	pea ix-19
+	call bos.fs_StrToFileEntry
+	pop hl
+	ex (sp),hl
+	call bos.fs_Write
+	jq c,.fail
 	pop bc,bc,bc,bc,bc
+
 	xor a,a
 	sbc hl,hl
 	ld sp,ix
@@ -896,5 +1084,84 @@ mkdir_main:
 end fs_file
 
 
+fs_file	test_exe
+	jr test_exe_main
+	db "FEX",0
+test_exe_main:
+	ld (bos.SaveSP),sp
+	ld hl,.tester_string
+	call bos.gui_Print
+	ld hl,.testing_file_creation
+	call bos.gui_Print
+	ld hl,.dir_to_create
+	ld c,f_subdir
+	push bc,hl
+	call bos.fs_OpenFile
+	push hl
+	call nc,bos.fs_DeleteFile
+	pop bc
+	call bos.fs_CreateFile
+	pop de,bc
+	call z,.fail
+	ld bc,0
+	push bc,hl
+	ld hl,.testing_file_writing
+	call bos.gui_Print
+	ld bc,1
+	push bc
+	ld c,16
+	push bc
+	call bos.sys_Malloc
+	jq c,.malloc_fail
+	ex hl,de
+	ld hl,.path_back_entry
+	pop bc
+	push bc,de
+	ldir
+	call bos.fs_Write
+	pop bc,bc,bc,bc,bc
+
+	ld hl,.file_to_create
+	ld c,0
+	push bc,hl
+	call bos.fs_OpenFile
+	push hl
+	call nc,bos.fs_DeleteFile
+	pop bc
+	call bos.fs_CreateFile
+	pop de,bc
+	call z,.fail
+	ld sp,(bos.SaveSP)
+	ld hl,.tests_finished_string
+	jp bos.gui_Print
+.malloc_fail:
+	ld sp,(bos.SaveSP)
+	ld hl,.malloc_fail_string
+	jp bos.gui_Print
+.fail:
+	ld hl,.test_failed_string
+	jp bos.gui_Print
+.tester_string:
+	db "--BOS Autotester--",$A
+	db $9,"Testing...",$A,0
+.tests_finished_string:
+	db "Tests complete",$A,0
+.testing_file_creation:
+	db "File deletion and creation",$A,0
+.testing_file_writing:
+	db "File writing",$A,0
+.test_failed_string:
+	db $9,"Test failed.",$A,0
+.malloc_fail_string:
+	db "Failed to malloc!",$A,0
+.path_back_entry:
+	db "..         ",f_subdir,0,0,0,0
+.dir_to_create:
+	db "/home/tester/",0
+.file_to_create:
+	db "/home/tester/test.txt",0
+end fs_file
 
 end fs_fs
+
+
