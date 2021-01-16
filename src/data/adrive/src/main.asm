@@ -36,13 +36,16 @@ fs_dir bin_dir
 	fs_entry cmd_exe, "cmd","exe", f_readonly+f_system
 	fs_entry clean_exe, "clean", "exe", f_readonly+f_system
 	fs_entry cls_exe, "cls", "exe", f_readonly+f_system
+	fs_entry dinitdev_exe, "dinitdev", "exe", f_readonly+f_system
 	fs_entry explorer_exe, "explorer", "exe", f_readonly+f_system
 	fs_entry fexplore_exe, "fexplore", "exe", f_readonly+f_system
 	fs_entry files_exe, "files", "exe", f_readonly+f_system
 	fs_entry info_exe, "info", "exe", f_readonly+f_system
+	fs_entry initdev_exe, "initdev", "exe", f_readonly+f_system
 	fs_entry ls_exe, "ls", "exe", f_readonly+f_system
 	fs_entry memedit_exe, "memedit","exe", f_readonly+f_system
 	fs_entry mkdir_exe, "mkdir", "exe", f_readonly+f_system
+	fs_entry mount_exe, "mount", "exe", f_readonly+f_system
 	fs_entry off_exe, "off","exe", f_readonly+f_system
 	fs_entry rm_exe, "rm", "exe", f_readonly+f_system
 	fs_entry uninstaller_exe, "uninstlr","exe", f_readonly+f_system
@@ -69,7 +72,6 @@ end fs_dir
 ;"/lib/" directory
 fs_dir lib_dir
 	fs_entry root_dir, "..", "", f_subdir+f_system
-	fs_entry altload_lll, "AltLoad", "LLL", f_readonly+f_system
 	fs_entry fatdrvce_lll, "FATDRVCE","LLL", f_readonly+f_system
 	fs_entry fileioc_lll, "FILEIOC","LLL", f_readonly+f_system
 	fs_entry fontlibc_lll, "FONTLIBC","LLL", f_readonly+f_system
@@ -140,8 +142,7 @@ dev_mnt_init:
 	ld hl,.data
 	ld bc,.data_len
 dev_mnt_run_in_ram:
-	ld de,bos.reservedRAM+512
-	ld (bos.alt_asm_prgm_size),bc
+	ld de,bos.driverExecRAM
 	push de
 	ldir
 	ret
@@ -743,10 +744,6 @@ ls_main:
 	db $9,$9,0
 end fs_file
 
-fs_file altload_lll
-	file '../obj/libload_alt.bin'
-end fs_file
-
 fs_file fatdrvce_lll
 	file '../obj/fatdrvce.bin'
 end fs_file
@@ -1083,8 +1080,58 @@ mkdir_main:
 	db "..         ",$10
 end fs_file
 
+
 fs_file files_exe
 	file '../obj/files.bin'
+end fs_file
+
+
+fs_file mount_exe
+	jr mount_exe_main
+	db "FEX",0
+mount_exe_main:
+	ld bc,.dev_mnt
+	push bc
+	call bos.sys_InitDevice
+	pop bc
+	push hl
+	call bos.sys_DeinitDevice
+	pop bc
+	ret
+.dev_mnt:
+	db "/dev/mnt",0
+end fs_file
+
+
+fs_file initdev_exe
+	jr initdev_exe_main
+	db "FEX",0
+initdev_exe_main:
+	pop bc,hl
+	push hl,bc
+	ld a,(hl)
+	or a,a
+	ret z
+	push hl
+	call bos.sys_InitDevice
+	pop bc
+	ret
+end fs_file
+
+
+fs_file dinitdev_exe
+	jr dinitdev_exe_main
+	db "FEX",0
+dinitdev_exe_main:
+	pop bc,hl
+	push hl,bc
+	ld a,(hl)
+	or a,a
+	ret z
+	push hl
+	call bos.sys_DeinitDevice
+	pop bc
+	ret
 end fs_file
 
 

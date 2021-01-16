@@ -3,10 +3,15 @@ include '../include/ti84pceg.inc'
 include '../include/bos.inc'
 include 'usbRAM.inc'
 
-org bos.alt_UserMem
+
+org bos.driverExecRAM
 	call load_libload
 	jq nz,_return_fail
 	ld (_ErrSP),sp
+	ld hl,main_event_handler.source
+	ld de,main_event_handler.destination
+	ld bc,main_event_handler.len
+	ldir
 ;init USB
 	ld bc, 12  ;USB_DEFAULT_INIT_FLAGS
 	push bc
@@ -14,7 +19,7 @@ org bos.alt_UserMem
 	push bc
 	ld bc, usb_device
 	push bc     ;and pass the usb device for the Opaque pointer
-	ld bc,main_event_handler
+	ld bc,main_event_handler.destination
 	push bc
 	call usb_Init
 	pop bc,bc,bc,bc
@@ -33,16 +38,17 @@ wait_for_device_loop:
 	or a,a
 	sbc hl,bc
 	jq z,wait_for_device_loop
+	call main_msd_Init
 	
-	
-	ret
+
+
 reset_smc_bytes:
 	ld a,$01 ;ld bc,...
 	ld (main_msd_Init),a
 	ld a,$0E ;ld c,...
 	ld (init_fat_partition),a
-	ld a,$AF ;xor a,a
-	ld (init_fat_volume),a
+;	ld a,$AF ;xor a,a
+;	ld (init_fat_volume),a
 	ret
 
 main_msd_Init:
@@ -52,11 +58,12 @@ main_msd_Init:
 	push bc,de,hl
 	call msd_Init
 	pop bc,bc,bc
-	ld a,$C9 ;smc to ret so this routine doesn't try to re-init the drive constantly.
-	ld (.),a
 	add hl,bc
 	or a,a
 	sbc hl,bc
+	ret nz
+	ld a,$C9 ;smc to ret so this routine doesn't try to re-init the drive constantly.
+	ld (.),a
 	ret
 
 
@@ -102,24 +109,6 @@ init_fat_partition:
 found_partitions:
 	dl 0
 
-
-init_fat_volume:
-	xor a,a
-	ld bc,fat_volume_label
-	ld (bc),a
-	push bc
-	ld bc,fat_device
-	push bc
-	call fat_GetVolumeLabel
-	pop bc,bc
-	ld a,$C9
-	ld (.),a
-	add hl,bc
-	or a,a
-	sbc hl,bc
-	ret
-
-
 _return_fail:
 	ld sp,0
 _ErrSP:=$-3
@@ -128,7 +117,7 @@ _ErrSP:=$-3
 	ret
 
 load_libload:
-	ld hl,alt_libload_file
+	ld hl,libload_file
 	push hl
 	call bos.fs_OpenFile
 	pop bc
@@ -146,8 +135,8 @@ load_libload:
 	xor a,a
 	inc a
 	ret
-alt_libload_file:
-	db "/lib/AltLoad.LLL",0
+libload_file:
+	db "/lib/LibLoad.LLL",0
 
 
 libload_relocations:
@@ -183,6 +172,8 @@ fat_GetVolumeLabel:
 	pop hl
 	ret
 
+main_event_handler.destination := bos.reservedRAM
+virtual at main_event_handler.destination
 ;usb_error_t main_event_handler(usb_event_t event, void *event_data, usb_callback_data_t *callback_data);
 main_event_handler:
 	call ti._frameset0
@@ -217,4 +208,9 @@ main_event_handler:
 	ld (hl),de
 	jq .success
 
+load main_event_handler.data: $-$$ from $$
+main_event_handler.len:=$-$$
+end virtual
+main_event_handler.source:
+	db main_event_handler.data
 

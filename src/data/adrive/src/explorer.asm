@@ -19,8 +19,6 @@ explorer_init:
 	ld (_SaveSP),sp
 	call load_libload
 	jq z,explorer_init_2
-	ld hl,str_FailedToLoadLibload
-	call bos.gui_Print
 	scf
 	sbc hl,hl
 	ret
@@ -71,15 +69,6 @@ explorer_main:
 	ld c,1
 	push bc
 	call gfx_SetDraw
-	ld l,$08
-	ex (sp),hl
-	call gfx_FillScreen
-	call gfx_SetTextTransparentColor
-	call gfx_SetTextBGColor
-	pop bc
-	ld c,$FF
-	push bc
-	call gfx_SetTextFGColor
 	pop bc
 	ld hl,explorer_gui_items
 .draw_items_loop:
@@ -99,9 +88,11 @@ explorer_main:
 	ld c,0
 	push bc
 	call gfx_SetDraw
+	ld l,1
+	ex (sp),hl
+	call gfx_Blit
 	pop bc
 .key_loop:
-	call gfx_BlitBuffer
 	ld c,$FF
 	push bc
 	call gfx_SetColor
@@ -133,6 +124,12 @@ explorer_main:
 	call bos.sys_AnyKey
 	jq z,.wait_for_key
 	ld hl,$F5001E
+	ld a,(hl)
+	or a,a
+	jq z,.get_key
+	push hl
+	call gfx_BlitBuffer
+	pop hl
 	bit 0,(hl)
 	call nz,explorer_cursor_down
 	bit 1,(hl)
@@ -141,20 +138,16 @@ explorer_main:
 	call nz,explorer_cursor_right
 	bit 3,(hl)
 	call nz,explorer_cursor_up
-	ld a,(hl)
-	or a,a
-	jq nz,.key_loop
+	call ti.Delay10ms
+	jq .key_loop
+.get_key:
 	call bos.sys_WaitKeyCycle
 	or a,a
 	jq z,.key_loop
-	cp a,56
-	jq z,_uninstall_bos
 	cp a,53
 	jq z,_exit_return_1337
 	cp a,15
-	jq z,_exit
-	cp a,55
-	jq z,explore_files_main
+	jq z,explorer_main
 	cp a,48
 	jq z,.click
 	cp a,9
@@ -216,56 +209,50 @@ _exit_return_1337:
 	ld hl,1337
 	jq _exit.loadix
 
-_uninstall_bos:
-	ld bc,str_Uninstall
-	push bc
-	call bos.sys_ExecuteFile
-	pop bc
-	ret
-str_Uninstall:
-	db "/bin/uninstlr.exe",0
-
 explore_files_main:
+	ld hl,str_FilesExecutable
+	ld de,$FF0000
+	jq explorer_call_file
+
+open_terminal:
+	ld hl,str_CmdExecutable
+	ld de,$FF0000
+explorer_call_file:
 	ld sp,0
 _SaveSP:=$-3
 	ld ix,(_SaveIX)
-	ld hl,str_FilesExecutable
-	ld de,$FF0000
 	ld bc,str_ExplorerExecutable
 	jp bos.sys_CallExecuteFile
-str_FilesExecutable:
-	db "/bin/files.exe",0
-str_ExplorerExecutable:
-	db "/bin/explorer.exe",0
 
-gfx_PrintStrings:
-	ld bc,30
-	ld (.y_pos),bc
-.loop:
-	push hl
-	ld hl,(hl)
-	ld a,(hl)
-	or a,a
-	jq z,.exit
-	ld bc,10
-.y_pos:=$-3
-	push bc
-	ld c,0
-	push bc,hl
-	call gfx_PrintStringXY
-	pop bc,bc,bc
-	ld hl,(.y_pos)
-	ld bc,10
-	add hl,bc
-	ld (.y_pos),hl
-	pop hl
-	inc hl
-	inc hl
-	inc hl
-	jq .loop
-.exit:
-	pop hl
-	ret
+;gfx_PrintStrings:
+;	ld bc,30
+;	ld (.y_pos),bc
+;.loop:
+;	push hl
+;	ld hl,(hl)
+;	ld a,(hl)
+;	or a,a
+;	jq z,.exit
+;	ld bc,10
+;.y_pos:=$-3
+;	push bc
+;	ld c,0
+;	push bc,hl
+;	call gfx_PrintStringXY
+;	pop bc,bc,bc
+;	ld hl,(.y_pos)
+;	ld bc,10
+;	add hl,bc
+;	ld (.y_pos),hl
+;	pop hl
+;	inc hl
+;	inc hl
+;	inc hl
+;	jq .loop
+;.exit:
+;	pop hl
+;	ret
+
 
 explorer_cursor_down:
 	ld a,(explorer_cursor_y)
@@ -283,9 +270,8 @@ explorer_cursor_up:
 	ret
 explorer_cursor_left:
 	ld a,(explorer_cursor_x)
-	cp a,2
-	ret c
 	sub a,2
+	ret c
 	ld (explorer_cursor_x),a
 	ret
 explorer_cursor_right:
@@ -330,6 +316,8 @@ gfx_SetDraw:
 	jp 27
 gfx_Blit:
 	jp 33
+gfx_BlitArea:
+	jp 39
 gfx_PrintString:
 	jp 51
 gfx_PrintStringXY:
@@ -358,20 +346,174 @@ libload_name:
 .len := $ - .
 
 gfx_BlitBuffer:
+	ld bc,10
+	push bc,bc
+	ld bc,(explorer_cursor_y)
+	push bc
+	ld a,(explorer_cursor_x)
+	or a,a
+	sbc hl,hl
+	ld l,a
+	add hl,hl
+	push hl
 	ld c,1
 	push bc
-	call gfx_Blit
-	pop bc
+	call gfx_BlitArea
+	pop bc,bc,bc,bc,bc
 	ret
 
 
 explorer_gui_items:
-	dl .info_strings
+	dl .background
 	dl .status_bar
+	dl .battery_indicator
+	dl .icon_files_app
+	dl .icon_terminal_app
+	dl .icon_updater_app
+	dl .icon_usbrun_app
 	db 0
 
+.icon_updater_app:
+	jp .run_updater_program
+	ret
+	dl 0
+	jp .draw_updater_app
+	db 122,40,160,100
+.draw_updater_app:
+	ld bc,41
+	push bc
+	ld bc,244
+	push bc
+	ld bc,.updater_app_string
+	push bc
+	call gfx_PrintStringXY
+	pop bc,bc,bc
+	ret
+.run_updater_program:
+	ld bc,1
+	push bc,bc
+	ld bc,str_PressEnterConfirm
+	push bc
+	call gfx_PrintStringXY
+	pop bc,bc,bc
+	call bos.sys_WaitKeyCycle
+	cp a,9
+	ret nz
+	ld hl,str_UpdaterExecutable
+	ld de,$FF0000
+	jq explorer_call_file
+.updater_app_string:
+	db "updater",0
+
+.icon_usbrun_app:
+	jp .run_usbrun_app
+	ret
+	dl 0
+	jp .draw_usbrun_app
+	db 82,40,121,100
+.draw_usbrun_app:
+	ld bc,41
+	push bc
+	ld bc,165
+	push bc
+	ld bc,.usbrun_app_string
+	push bc
+	call gfx_PrintStringXY
+	pop bc,bc,bc
+	ret
+.run_usbrun_app:
+	ld bc,255
+	push bc
+	call bos.sys_Malloc
+	pop bc
+	ret c
+	push bc,hl
+	ld (hl),b
+	push hl
+	pop de
+	inc de
+	ldir
+	ld hl,.input_program_string
+	call bos.gui_DrawConsoleWindow
+.usbrun_input_program:
+	call bos.gui_InputNoClear
+	cp a,2
+	jq nc,.usbrun_input_program
+	pop hl,bc
+	or a,a
+	ret z
+	ex hl,de
+	ld hl,str_UsbRunExecutable
+	jq explorer_call_file
+.usbrun_app_string:
+	db "usbrun",0
+.input_program_string:
+	db "Input path to binary on usb to execute.",$A,0
+
+
+.icon_files_app:
+	jp explore_files_main
+	ret
+	dl 0
+	jp .draw_files_app
+	db 2,40,41,100
+.draw_files_app:
+	ld bc,41
+	push bc
+	ld bc,5
+	push bc
+	ld bc,.files_app_string
+	push bc
+	call gfx_PrintStringXY
+	pop bc,bc,bc
+	ret
+.files_app_string:
+	db "files",0
+
+.icon_terminal_app:
+	jp open_terminal
+	ret
+	dl 0
+	jp .draw_terminal_app
+	db 42,40,81,100
+.draw_terminal_app:
+	ld bc,41
+	push bc
+	ld bc,85
+	push bc
+	ld bc,.terminal_app_string
+	push bc
+	call gfx_PrintStringXY
+	pop bc,bc,bc
+	ret
+.terminal_app_string:
+	db "terminal",0
+
+
+.background:
+	ret
+	dl 0
+	ret
+	dl 0
+	jp .draw_background
+	db 0,0,160,240
+.draw_background:
+	ld c,$08
+	push bc
+	call gfx_FillScreen
+	call gfx_SetTextTransparentColor
+	call gfx_SetTextBGColor
+	pop bc
+	ld c,$FF
+	push bc
+	call gfx_SetTextFGColor
+	pop bc
+.no_op:
+	ret
+
 .status_bar:
-	jp .no_op
+	ret
+	dl 0
 	ret
 	dl 0
 	jp .draw_status_bar
@@ -395,7 +537,7 @@ explorer_gui_items:
 	jp .get_battery_status
 	jp .get_battery_status
 	jp .draw_battery_indicator
-	db 140,2,160,18
+	db 130,2,160,18
 .draw_battery_indicator:
 	ld a,(.battery_status)
 	ld c,$07
@@ -425,33 +567,17 @@ explorer_gui_items:
 	ld (.battery_status),a
 	ret
 
+str_PressEnterConfirm:
+	db "Press enter to confirm.",0
+str_UsbRunExecutable:
+	db "/bin/usbrun.exe",0
+str_UpdaterExecutable:
+	db "/bin/updater.exe",0
+str_CmdExecutable:
+	db "/bin/cmd.exe",0
+str_FilesExecutable:
+	db "/bin/files.exe",0
+str_ExplorerExecutable:
+	db "/bin/explorer.exe",0
 
-.info_strings:
-	jp .remove_info_strings
-.no_op:
-	ret
-	dl 0
-	jp .draw_info_strings
-	db 0,30,160,78
-.draw_info_strings:
-	ld hl,initial_strings
-	jq gfx_PrintStrings
-.remove_info_strings:
-	ld a,$C9
-	ld (.info_strings),a ;smc the first jump into a ret so this item is skipped entirely
-	ret
 
-initial_strings:
-	dl str_HelloWorld, str_PressToDelete, str_PressForFiles, str_PressToConsole, $FF0000
-str_HelloWorld:
-	db "Hello World! Welcome to BOS!",0
-str_PressToDelete:
-	db "Press [del] to uninstall and receive TIOS",0
-str_PressForFiles:
-	db "Press [mode] to open file explorer",0
-str_PressToConsole:
-	db "or [clear] to open console",0
-str_FailedToLoadLibload:
-	db "Failed to load libload.",0
-str_FileNameString:
-	db 13 dup 0

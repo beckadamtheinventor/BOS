@@ -7,6 +7,7 @@ sys_ReadDevice:
 	call ti._frameset0
 	ld hl,(ix+15)
 	ld bc,$B
+	add hl,bc
 	bit fd_device,(hl)
 	jq z,.fail
 	inc hl
@@ -18,19 +19,15 @@ sys_ReadDevice:
 	pop bc
 	ld a,(hl)
 	cp a,$C9
-	pop de
 	jq c,.fail
 	inc hl
 	ld a,(hl)
 	cp a,2
 	jq nc,.fail
-	push de
 	ld l,18 ; fourth jump in device jump table. (4*4 + 2) (files are always 512 byte aligned)
 	ld a,(hl)
 	cp a,$C3
-	pop de
 	jq nz,.fail
-	ex hl,de
 	jp (hl)
 .fail:
 	xor a,a

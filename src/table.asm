@@ -83,5 +83,10 @@
 	jp sys_Free
 	jp sys_CallExecuteFile
 	jp sys_JumpExecuteFile
+	jp sys_InitDevice
+	jp sys_DeinitDevice
+	jp sys_GetDeviceAddress
+	jp sys_ReadDevice
+	jp sys_WriteDevice
 
 

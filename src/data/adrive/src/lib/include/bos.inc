@@ -86,6 +86,11 @@ namespace bos
 ?sys_Free                        := $2024C
 ?sys_CallExecuteFile             := $20250
 ?sys_JumpExecuteFile             := $20254
+?sys_InitDevice                  := $20258
+?sys_DeinitDevice                := $2025C
+?sys_GetDeviceAddress            := $20260
+?sys_ReadDevice                  := $20264
+?sys_WriteDevice                 := $20268
 ;
 ;
 ?LCD_PAL    := 0E30200h
@@ -124,6 +129,7 @@ namespace bos
 ?ScrapByte              := $D0027C
 ?ScrapWord              := $D0027D
 ?ScrapMem               := $D0027D
+?ExecutingFileFd        := $D00280 ; 3 bytes. Pointer to currently executing file descriptor. -1 if file not found. 0 if file descriptor is not applicable
 ?open_files_table       := $D00300
 ?InputBuffer            := $D00400
 ?gfx_string_temp        := $D00500
@@ -149,12 +155,12 @@ namespace bos
 ?usbRAM                 := $D05080 ;256 bytes, should not be tampered with while /dev/mnt or /dev/usb are active
 ?safeRAM                := $D08000 ; 65536 bytes scrap RAM
 ?safeRAM_len            := 65536
-?reservedRAM            := $D18000 ; 10369 bytes reserved RAM
-?reservedRAM_len        := 10369
-?alt_asm_prgm_size      := reservedRAM + 5
-?alt_UserMem            := reservedRAM + 8
+?reservedRAM            := $D18000 ; 2048 bytes reserved RAM
+?reservedRAM_len        := 2048
 ?bos_Stackbot           := $D1A87C
 ?bos_UserMem            := $D1A881
+?driverExecRAM          := $D2F000 ; 4096 bytes RAM reserved for driver code
+?driverExecRAM_len      := 4096
 ?bottom_of_malloc_RAM   := $D30000
 ?top_of_RAM             := $D40000
 ?thread_map             := $D02800 ; thread map. 256 threads. Active threads have bit 7 set.

@@ -82,6 +82,11 @@
 <tr><td>bos.sys_Free</td><td>02024C</td><td><a href="#sys_Free">doc</a></tr>
 <tr><td>bos.sys_CallExecuteFile</td><td>020250</td><td><a href="#sys_CallExecuteFile">doc</a></tr>
 <tr><td>bos.sys_JumpExecuteFile</td><td>020254</td><td><a href="#sys_JumpExecuteFile">doc</a></tr>
+<tr><td>bos.sys_InitDevice</td><td>020258</td><td><a href="#sys_InitDevice">doc</a></tr>
+<tr><td>bos.sys_DeinitDevice</td><td>02025C</td><td><a href="#sys_DeinitDevice">doc</a></tr>
+<tr><td>bos.sys_GetDeviceAddress</td><td>020260</td><td><a href="#sys_GetDeviceAddress">doc</a></tr>
+<tr><td>bos.sys_ReadDevice</td><td>020264</td><td><a href="#sys_ReadDevice">doc</a></tr>
+<tr><td>bos.sys_WriteDevice</td><td>020268</td><td><a href="#sys_WriteDevice">doc</a></tr>
 </table><div id="boot_os"><h1>boot_os</h1><h3>syscall Adress 020108</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
@@ -94,7 +99,8 @@
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 </table></div><div id="sys_ExecuteFile"><h1>sys_ExecuteFile</h1><h3>syscall Adress 020124</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td> int sys_ExecuteFile(char *path, char *args);</td><td> execute a file</td><td> -1 if file does not exist or is not a valid executable format</td><td> All, OP5, and OP6.</td><td>
+<tr><td> int sys_ExecuteFile(char *path, char *args);</td><td> execute a file</td><td> -1 if file does not exist or is not a valid executable format<br>
+ ExecutingFileFd set to point to file descriptor. -1 if file not found</td><td> All, OP6.</td><td>
 </td></tr>
 </table></div><div id="sys_ExecuteFileEntryPoint"><h1>sys_ExecuteFileEntryPoint</h1><h3>syscall Adress 020128</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -412,5 +418,29 @@
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td> hl = file to execute<br>
  de = arguments</td><td> Jump execution to an executable file</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="sys_InitDevice"><h1>sys_InitDevice</h1><h3>syscall Adress 020258</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> void *sys_InitDevice(const char *name);</td><td> Initialize a device given a path to it</td><td> pointer to device file descriptor<br>
+ hl=-1 and Cf set if failed</td><td></td><td>
+</td></tr>
+</table></div><div id="sys_DeinitDevice"><h1>sys_DeinitDevice</h1><h3>syscall Adress 02025C</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> int sys_DeinitDevice(void *fd);</td><td> Deinitialize a device given a pointer to its file descriptor</td><td> hl = -1 and Cf set if failed. Otherwise assume 0.</td><td></td><td>
+</td></tr>
+</table></div><div id="sys_GetDeviceAddress"><h1>sys_GetDeviceAddress</h1><h3>syscall Adress 020260</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> void *sys_GetDeviceAddress(void *dest, void *src, size_t len, void *fd);</td><td> Get a pointer for raw access to a device given a file descriptor</td><td> assume hl points to device address. Device return may vary. Some devices do not have a physical address.<br>
+ hl = 0 and Cf set if failed</td><td></td><td>
+</td></tr>
+</table></div><div id="sys_ReadDevice"><h1>sys_ReadDevice</h1><h3>syscall Adress 020264</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> int sys_ReadDevice(void *dest, void *src, size_t len, void *fd);</td><td> Read from a device given a file descriptor</td><td> assume hl = number of bytes read. Device return may vary.<br>
+ hl = 0 and Cf set if failed</td><td></td><td>
+</td></tr>
+</table></div><div id="sys_WriteDevice"><h1>sys_WriteDevice</h1><h3>syscall Adress 020268</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> int sys_WriteDevice(void *dest, void *src, size_t len, void *fd);</td><td> Write to a device given a file descriptor</td><td> assume hl = number of bytes written. Device return may vary.<br>
+ hl = 0 and Cf set if failed</td><td></td><td>
 </td></tr>
 </table></div></body></html>

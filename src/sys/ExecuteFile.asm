@@ -2,8 +2,12 @@
 ;@DOES execute a file
 ;@INPUT int sys_ExecuteFile(char *path, char *args);
 ;@OUTPUT -1 if file does not exist or is not a valid executable format
-;@DESTROYS All, OP5, and OP6.
+;@OUTPUT ExecutingFileFd set to point to file descriptor. -1 if file not found
+;@DESTROYS All, OP6.
 sys_ExecuteFile:
+	scf
+	sbc hl,hl
+	ld (ExecutingFileFd),hl
 	pop bc
 	pop hl
 	pop de
@@ -13,16 +17,16 @@ sys_ExecuteFile:
 	ld a,(hl)
 	or a,a
 	jq z,.fail
-	ld (fsOP6+6),de
+	ld (fsOP6),de
 	push hl
 	call fs_OpenFile
 	jq c,.fail_popbc
 .open_fd:
-	ld (fsOP6),hl ;save file descriptor for later
+	ld (ExecutingFileFd),hl
 	ld bc,$B
 	add hl,bc
 	bit 4,(hl)
-	ld hl,(fsOP6)
+	ld hl,(ExecutingFileFd)
 	pop bc
 	jq nz,.fail
 	ld de,fsentry_filesector
@@ -65,13 +69,9 @@ sys_ExecuteFile:
 
 	jq nz,.fail_popbc ;if it's neither a Flash Executable nor a Ram Executable, return -1
 
-	or a,a
-	sbc hl,hl
-	ld (fsOP6+3),hl
-
 .exec_rex:
 	pop hl      ;file data pointer (not needed, this is re-handled in fs_Read)
-	ld iy,(fsOP6) ;file descriptor
+	ld iy,(ExecutingFileFd) ;file descriptor
 	ld hl,(iy+fsentry_filesector)
 	push hl
 	call fs_GetSectorAddress
@@ -93,7 +93,7 @@ sys_ExecuteFile:
 	add hl,bc
 	ld (top_of_UserMem),hl ;save top of usermem
 .exec_fex:
-	ld hl,(fsOP6+6)
+	ld hl,(fsOP6)
 	ex (sp),hl ;push arguments to stack, pop jump location from the stack
 .run_hl:
 	call .normalize_lcd
@@ -117,8 +117,6 @@ sys_ExecuteFile:
 	ld a,(hl)
 	cp a,$7B
 	jq nz,.fail_popbc
-	ld hl,2
-	ld (fsOP6+3),hl
 	jq .exec_rex
 	
 .normalize_lcd:
