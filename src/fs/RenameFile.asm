@@ -1,18 +1,21 @@
 ;@DOES rename a file
-;@INPUT void *fs_RenameFile(void *directory, const char *old_name, const char *new_name);
+;@INPUT void *fs_RenameFile(const char *directory, const char *old_name, const char *new_name);
 ;@OUTPUT file descriptor. returns zero if failed
 fs_RenameFile:
 	ld hl,-16
 	call ti._frameset
 	push iy
-	ld iy,(ix+6)
-	bit fsbit_readonly,(iy+fsentry_fileattr)
-	pop iy
-	jq nz,.fail
 	ld hl,(ix+6)
-	ld a,(hl)
-	or a,a
-	jq z,.fail
+	push hl
+	call fs_OpenFile
+	jq c,.fail
+	pop bc
+	ld bc,fsentry_fileattr
+	push hl
+	add hl,bc
+	bit fsbit_readonly,(hl)
+	jq nz,.fail
+	pop hl
 	ld bc,(ix+9)
 	push hl,bc
 	call fs_OpenFileInDir

@@ -91,6 +91,10 @@ namespace bos
 ?sys_GetDeviceAddress            := $20260
 ?sys_ReadDevice                  := $20264
 ?sys_WriteDevice                 := $20268
+?fs_GetSector                    := $2026C
+?fs_WriteByte                    := $20270
+?fs_RenameFile                   := $20274
+?_SetCursorPos                   := $20278
 ;
 ;
 ?LCD_PAL    := 0E30200h

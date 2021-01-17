@@ -28,7 +28,7 @@ string_FilesystemCorrupt:
 string_FilesystemReformatted:
 	db "Format complete.",$A,"Press enter to continue to BOS.",$A,0
 str_tivars_dir:
-	db "/dev/tivars/"
+	db "/usr/tivars"
 .len:=$-.
 str_HexChars:
 	db "0123456789ABCDEF"

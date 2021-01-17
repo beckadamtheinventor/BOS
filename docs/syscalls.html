@@ -87,6 +87,10 @@
 <tr><td>bos.sys_GetDeviceAddress</td><td>020260</td><td><a href="#sys_GetDeviceAddress">doc</a></tr>
 <tr><td>bos.sys_ReadDevice</td><td>020264</td><td><a href="#sys_ReadDevice">doc</a></tr>
 <tr><td>bos.sys_WriteDevice</td><td>020268</td><td><a href="#sys_WriteDevice">doc</a></tr>
+<tr><td>bos.fs_GetSector</td><td>02026C</td><td><a href="#fs_GetSector">doc</a></tr>
+<tr><td>bos.fs_WriteByte</td><td>020270</td><td><a href="#fs_WriteByte">doc</a></tr>
+<tr><td>bos.fs_RenameFile</td><td>020274</td><td><a href="#fs_RenameFile">doc</a></tr>
+<tr><td>bos._SetCursorPos</td><td>020278</td><td><a href="#_SetCursorPos">doc</a></tr>
 </table><div id="boot_os"><h1>boot_os</h1><h3>syscall Adress 020108</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
@@ -243,9 +247,9 @@
 </td></tr>
 </table></div><div id="_ChkFindSym"><h1>_ChkFindSym</h1><h3>syscall Adress 0201AC</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td> OP1+1 8 byte file name</td><td> Search for a file (no extension) in the "/bin/" directory</td><td> HL = pointer to 2 byte file length<br>
+<tr><td> OP1 1 byte var type, 8 byte file name</td><td> Search for a TI variable in the "/usr/tivars/" directory</td><td> HL = pointer to 2 byte file length<br>
  DE = pointer to file data<br>
- Cf set if file not found or otherwise cannot be opened.</td><td> OP1</td><td>
+ Cf set if file not found or otherwise cannot be opened.</td><td> OP4,OP5</td><td>
 </td></tr>
 </table></div><div id="_LoadDEInd_s"><h1>_LoadDEInd_s</h1><h3>syscall Adress 0201B0</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -359,12 +363,12 @@
 </td></tr>
 </table></div><div id="_DelVar"><h1>_DelVar</h1><h3>syscall Adress 020220</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td> OP1 = type byte, 8 byte name of var to delete</td><td> delete a file in the /dev/tivars/ directory</td><td> Cf set if failed</td><td></td><td>
+<tr><td> OP1 = type byte, 8 byte name of var to delete</td><td> delete a file in the /usr/tivars/ directory</td><td> Cf set if failed</td><td></td><td>
 </td></tr>
 </table></div><div id="_CreateVar"><h1>_CreateVar</h1><h3>syscall Adress 020224</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td> OP1 = type byte, 8 byte name of var to create<br>
- hl = length to allocate for file</td><td> create a file in the /dev/tivars/ directory</td><td> Cf set if failed</td><td></td><td>
+ hl = length to allocate for file</td><td> create a file in the /usr/tivars/ directory</td><td> Cf set if failed</td><td></td><td>
 </td></tr>
 </table></div><div id="gui_InputNoClear"><h1>gui_InputNoClear</h1><h3>syscall Adress 020228</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -442,5 +446,21 @@
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td> int sys_WriteDevice(void *dest, void *src, size_t len, void *fd);</td><td> Write to a device given a file descriptor</td><td> assume hl = number of bytes written. Device return may vary.<br>
  hl = 0 and Cf set if failed</td><td></td><td>
+</td></tr>
+</table></div><div id="fs_GetSector"><h1>fs_GetSector</h1><h3>syscall Adress 02026C</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> int fs_GetSector(void *address);</td><td> get the sector a given address lies within</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="fs_WriteByte"><h1>fs_WriteByte</h1><h3>syscall Adress 020270</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> int fs_WriteByte(uint8_t byte, void *fd, int offset);</td><td> write a byte into a file</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="fs_RenameFile"><h1>fs_RenameFile</h1><h3>syscall Adress 020274</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> void *fs_RenameFile(const char *directory, const char *old_name, const char *new_name);</td><td> rename a file</td><td> file descriptor. returns zero if failed</td><td></td><td>
+</td></tr>
+</table></div><div id="_SetCursorPos"><h1>_SetCursorPos</h1><h3>syscall Adress 020278</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> void _SetCursorPos(uint8_t row, uint8_t col);</td><td> Set the text cursor position</td><td></td><td></td><td>
 </td></tr>
 </table></div></body></html>

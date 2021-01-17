@@ -1,4 +1,4 @@
-;@DOES delete a file in the /dev/tivars/ directory
+;@DOES delete a file in the /usr/tivars/ directory
 ;@INPUT OP1 = type byte, 8 byte name of var to delete
 ;@OUTPUT Cf set if failed
 ;DESTROYS All

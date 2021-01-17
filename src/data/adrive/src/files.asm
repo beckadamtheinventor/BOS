@@ -224,6 +224,12 @@ explorer_path_into:
 	ld (explorer_cursor_y),hl
 	ret
 explorer_draw_files:
+	ld bc,10
+	ld (.y_pos),bc
+	ld bc,0
+explorer_dir_offset:=$-3
+	add ix,bc
+.draw_loop:
 	ld c,0
 	push bc
 	call gfx_SetTextBGColor
@@ -231,12 +237,6 @@ explorer_draw_files:
 	ex (sp),hl
 	call gfx_SetTextFGColor
 	pop bc
-	ld bc,10
-	ld (.y_pos),bc
-	ld bc,0
-explorer_dir_offset:=$-3
-	add ix,bc
-.draw_loop:
 	ld a,(ix)
 	or a,a
 	ret z

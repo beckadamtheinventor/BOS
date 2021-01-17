@@ -66,18 +66,30 @@ library 'FILEIOC', 6
 
 
 ;-------------------------------------------------------------------------------
-vat_ptr0 := $d0244e
-vat_ptr1 := $d0257b
-vat_ptr2 := $d0257e
-vat_ptr3 := $d02581
-vat_ptr4 := $d02584
-data_ptr0 := $d0067e
-data_ptr1 := $d00681
-data_ptr2 := $d01fed
-data_ptr3 := $d01ff3
-data_ptr4 := $d01ff9
-resize_amount := $e30c0c
-curr_slot := $e30c11
+vat_ptr0:
+	dl 0
+vat_ptr1:
+	dl 0
+vat_ptr2:
+	dl 0
+vat_ptr3:
+	dl 0
+vat_ptr4:
+	dl 0
+data_ptr0:
+	dl 0
+data_ptr1:
+	dl 0
+data_ptr2:
+	dl 0
+data_ptr3:
+	dl 0
+data_ptr4:
+	dl 0
+resize_amount:
+	dl 0
+curr_slot:
+	dl 0
 TI_MAX_SIZE := 65505
 ;-------------------------------------------------------------------------------
 
@@ -448,67 +460,6 @@ ti_Write:
 ;  sp + 12 : slot index
 ; return:
 ;  hl = number of chunks written if success
-	; ld	iy, 0
-	; add	iy, sp
-	; ld	c,(iy + 12)
-	; call	util_is_slot_open
-	; jr	z, .ret0
-	; call	util_is_in_ram
-	; jr	z, .ret0
-	; ld	bc, (iy + 6)
-	; ld	hl, (iy + 9)
-	; call	__smulu
-	; add	hl, de
-	; xor	a, a
-	; sbc	hl, de
-	; ret	z
-	; ld	(.smc_copy_size), hl
-	; push	hl
-	; call	util_get_offset
-	; pop	hl
-	; add	hl, bc
-	; push	hl
-	; call	util_get_slot_size	; bc = size of file
-	; pop	hl			; hl = needed size
-	; or	a, a
-	; inc	bc
-	; sbc	hl, bc
-	; jr	c, .no_core_needed
-	; inc	hl
-	; ld	(resize_amount), hl
-	; call	util_insert_mem
-	; or	a, a
-	; jr	z, .ret0
-; .no_core_needed:
-	; call	util_get_data_offset
-	; ex	de, hl
-	; ld	hl, (iy + 3)
-	; ld	bc, 0
-; .smc_copy_size := $-3
-	; push	bc
-	; ldir
-	; call	util_get_offset
-	; pop	hl
-	; add	hl,bc
-	; ex	de,hl
-	; call	util_get_offset_ptr
-	; ld	(hl), de
-	; ld	hl, (iy + 9)
-	; ret
-; .ret0:
-	; xor	a, a
-	; sbc	hl, hl
-	ret
-
-util_get_data_offset:
-	; call	util_get_data_ptr
-	; ld	hl, (hl)
-	; push	hl
-	; call	util_get_offset
-	; pop	hl
-	; add	hl, bc
-	; inc	hl
-	; inc	hl
 	call __frameset0
 	ld c,(ix+15)
 	call util_is_slot_open
@@ -550,55 +501,6 @@ ti_Read:
 ;  sp + 12 : slot index
 ; return:
 ;  hl = number of chunks read if success
-	; ld	iy, 0
-	; add	iy, sp
-	; ld	c, (iy + 12)
-	; call	util_is_slot_open
-	; jr	z, .ret0
-	; call	util_get_slot_size
-	; push	bc
-	; call	util_get_offset
-	; pop	hl
-	; or	a, a
-	; sbc	hl, bc			; size - offset = bytes left to read
-	; jr	z, .ret0
-	; jr	c, .ret0
-	; ld	bc, (iy + 6)
-	; call	__sdivu			; (size - offset) / chunk_size
-	; ld	de, (iy + 9)		; number of chunks to read, hl = number of chunks left
-	; or	a, a
-	; sbc	hl, de
-	; add	hl, de			; check if left <= read
-	; jr	nc, .copy
-	; ex	de, hl
-; .copy:
-	; ex	de, hl
-	; ld	bc, (iy + 6)
-	; push	hl
-	; call	__smulu
-	; add	hl, de
-	; or	a, a
-	; sbc	hl, de
-	; jr	z, .ret0.pop
-	; push	hl
-	; call	util_get_data_offset
-	; ld	de, (iy + 3)
-	; pop	bc
-	; push	bc
-	; ldir
-	; call	util_get_offset
-	; pop	hl
-	; add	hl, bc
-	; ex	de, hl
-	; call	util_get_offset_ptr
-	; ld	(hl), de
-	; pop	hl
-	; ret				; return actual chunks read
-; .ret0.pop:
-	; pop	hl
-; .ret0:
-	; xor	a, a
-	; sbc	hl, hl
 	call __frameset0
 	ld c,(ix+15)
 	call util_is_slot_open
@@ -636,32 +538,6 @@ ti_GetC:
 ;  sp + 3 : slot index
 ; return:
 ;  a = character read if success
-	; pop	de
-	; pop	bc
-	; push	bc
-	; push	de
-	; call	util_is_slot_open
-	; jp	z, util_ret_neg_one
-	; call	util_get_slot_size
-	; push	bc
-	; call	util_get_offset
-	; pop	hl
-	; scf
-	; sbc	hl, bc			; size-offset
-	; jp	c, util_ret_neg_one
-	; push	bc
-	; call	util_get_data_ptr
-	; ld	hl, (hl)
-	; add	hl, bc
-	; inc	hl
-	; inc	hl			; bypass size bytes
-	; pop	bc
-	; inc	bc
-	; ld	a, (hl)
-	; call	util_set_offset
-	; or	a, a
-	; sbc	hl, hl
-	; ld	l, a
 	pop hl
 	pop bc
 	push bc
@@ -670,20 +546,17 @@ ti_GetC:
 	jq nz,util_ret_null
 	call util_get_vat_ptr
 	ld hl,(hl)
+	ld bc,$C
+	add hl,bc
+	ld hl,(hl)
 	push hl
+	call bos.fs_GetSectorAddress
+	ex (sp),hl
 	call util_get_offset
 	pop hl
-	push bc,hl
-	ld bc,1
-	push bc
-	push bc
-	ld bc,.buffer
-	push bc
-	call bos.fs_Read
-	pop bc,bc,bc,bc,bc
+	add hl,bc
+	ld a,(hl)
 	inc bc
-	ld a,0
-.buffer:=$-1
 	jq util_set_offset
 
 
@@ -695,58 +568,6 @@ ti_PutC:
 ;  sp + 6 : Slot number
 ; return:
 ;  Character written if no failure
-	; pop	de
-	; pop	hl
-	; pop	bc
-	; push	bc
-	; push	hl
-	; push	de
-	; ld	a, l
-	; ld	(char_in), a
-	; call	util_is_slot_open
-	; jp	z, util_ret_neg_one
-	; push	hl
-	; call	util_is_in_ram
-	; pop	hl
-	; jp	c, util_ret_neg_one
-; _PutChar:
-	; call	util_get_slot_size
-	; push	bc
-	; call	util_get_offset
-	; pop	hl
-	; or	a, a
-	; sbc	hl, bc
-	; jp	c, util_ret_neg_one
-	; jr	nz, .no_increment
-; .increment:
-	; push	bc
-	; inc	hl
-	; ld	(resize_amount), hl
-	; call	_EnoughMem
-	; pop	bc
-	; jp	c, util_ret_neg_one
-	; push	bc
-	; ex	de, hl
-	; call	util_insert_mem
-	; pop	bc
-	; or	a, a
-	; jp	z, util_ret_neg_one
-; .no_increment:
-	; call	util_get_data_ptr
-	; ld	hl, (hl)
-	; add	hl, bc
-	; inc	hl
-	; inc	hl
-	; ld	a, 0
-; char_in := $-1
-	; ld	(hl), a
-	; inc	bc
-	; push	af
-	; call	util_set_offset
-	; pop	af
-	; or	a, a
-	; sbc	hl, hl
-	; ld	l, a
 	pop hl
 	pop de
 	pop bc
@@ -758,23 +579,19 @@ ti_PutC:
 	call util_is_slot_open
 	jq nz,util_ret_null
 	call util_get_vat_ptr
-	ld hl,(hl)
 	push hl
 	call util_get_offset
 	pop hl
 	push bc,hl
-	ld bc,1
-	push bc
-	push bc
-	ld bc,.buffer
-	push bc
-	call bos.fs_Write
-	pop bc,bc,bc,bc,bc
-	inc bc
-	ld a,0
+	ld c,0
 .buffer:=$-1
+	push bc
+	call bos.fs_WriteByte
+	pop bc,bc,bc
+	inc bc
+	ld a,(.buffer)
 	jq util_set_offset
-	ret
+
 
 ;-------------------------------------------------------------------------------
 ti_Seek:
@@ -1098,6 +915,8 @@ ti_Detect:
 	; djnz	.loop
 	; xor	a, a
 	; ld	(de), a
+	scf
+	sbc hl,hl
 	ret
 
 ;.fdetectall:
@@ -1149,6 +968,8 @@ ti_GetTokenString:
 ; .smc_length := $-1
 ; .skipstore:
 	; ld	hl, OP3
+	scf
+	sbc hl,hl
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -1256,12 +1077,12 @@ ti_RenameVar:
 ;  a = 1 if new file already exists
 ;  a = 2 if old file does not exist
 ;  a = 3 if other error
-	; ld	iy, 0
-	; add	iy, sp
-	; ld	a, (iy + 9)
-	; ld	iy, flags		; probably not needed
+	ld	iy, 0
+	add	iy, sp
+	ld	a, (iy + 9)
+;	ld	iy, flags		; probably not needed
 ;	jr	ti_Rename.start		; emulated by dummifying next instruction
-	; db	$fe			; ld a,appVarObj -> cp a,$3E \ dec d
+	db	$fe			; ld a,appVarObj -> cp a,$3E \ dec d
 
 ;-------------------------------------------------------------------------------
 ti_Rename:
@@ -1274,87 +1095,47 @@ ti_Rename:
 ;  a = 1 if new file already exists
 ;  a = 2 if old file does not exist
 ;  a = 3 if other error
-	; ld	a,appVarObj		; file type
-; .start:
-	; pop	bc
-	; pop	hl
-	; pop	de
-	; push	de			; de -> new name
-	; push	hl			; hl -> old name
-	; push	bc
-	; push	de			; new
-	; push	de			; new
-	; ld	de, OP1
-	; ld	(de), a
-	; inc	de
-	; call	_Mov8b
-	; call	_PushOP1		; save old name
-	; ld	hl, util_Arc_Unarc
-	; ld	(.smc_archive), hl
-	; pop	hl			; new name
-	; ld	de, OP1 + 1
-	; call	_Mov8b
-	; call	_ChkFindSym
-	; push	af
-	; call	_PopOP1
-	; pop	af
-	; jr	nc, .return_1		; check if name already exists
-; .locate_program:
-	; call	_ChkFindSym		; find old name
-	; jr	c, .return_2
-	; call	_ChkInRam
-	; jr	nz, .in_archive
-	; ld	hl, util_no_op			; no-op routine instead of assuming $F8 points to a ret instruction lol
-	; ld	(.smc_archive), hl
-	; call	_PushOP1
-	; call	util_Arc_Unarc
-	; call	_PopOP1
-	; jr	.locate_program
-; .in_archive:
-	; ex	de, hl
-	; ld	de, 9
-	; add	hl, de			; skip vat stuff
-	; ld	e, (hl)
-	; add	hl, de
-	; inc	hl			; size of name
-	; call	_LoadDEInd_s
-	; pop	bc			; bc -> new name
-	; push	hl
-	; push	de
-	; push	bc
-	; call	_PushOP1		; old name
-	; pop	hl
-	; ld	de, OP1 + 1
-	; call	_Mov8b
-	; call	_PushOP1		; new name
-	; pop	hl
-	; push	hl
-	; ld	a, (OP1)
-	; call	_CreateVar
-	; inc	de
-	; inc	de
-	; pop	bc
-	; pop	hl
-	; call	_ChkBCIs0
-	; jr	z, .is_zero
-	; ldir
-; .is_zero:
-	; call	_PopOP1
-	; call	util_Arc_Unarc
-; .smc_archive := $-3
-	; call	_PopOP1
-	; call	_ChkFindSym
-	; call	_DelVarArc
-	; xor	a, a
-	; ret
-; .return_1:
-	; pop	de			; new name
-	; ld	a, 1
-	; ret
-; .return_2:
-	; pop	de			; new name
-	; ld	a, 2
+	ld	a,appVarObj		; file type
+.start:
+	pop	bc
+	pop	hl
+	pop	de
+	push	de			; de -> new name
+	push	hl			; hl -> old name
+	push	bc
+	push	de			; new
+	ld	de, bos.fsOP2
+	ld	(de), a
+	inc	de
+	call	bos._Mov8b
+	pop	hl			; new name
+	ld	de, bos.fsOP1 + 1
+	call	bos._Mov8b
+	call	bos._ChkFindSym
+	jr	nc, .return_1		; check if name already exists
+.locate_program:
+	call	bos._ChkFindSym		; find old name
+	jr	c, .return_2 ;fail if old name doesn't exist
+	ld a,e   ;zero the latter nibble to get the file descriptor
+	and a,$F
+	ld e,a
+	ld hl,bos.fsOP2+1 ;old name
+	ld bc,.tivars_dir
+	push de,hl,bc
+	call bos.fs_RenameFile
+	pop bc,bc,bc
+	xor	a, a
 	ret
+.return_1:
+	pop	de			; new name
+	ld	a, 1
+	ret
+.return_2:
+	pop	de			; new name
+	ld	a, 2
+	ret
+.tivars_dir:
+	db "/usr/tivars",0
 
 ;-------------------------------------------------------------------------------
 ti_SetVar:

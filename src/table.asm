@@ -88,5 +88,9 @@
 	jp sys_GetDeviceAddress
 	jp sys_ReadDevice
 	jp sys_WriteDevice
+	jp fs_GetSector
+	jp fs_WriteByte
+	jp fs_RenameFile
+	jp _SetCursorPos
 
 

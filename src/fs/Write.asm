@@ -39,6 +39,8 @@ fs_Write:
 	push hl
 	call fs_GetSectorAddress
 	pop bc
+	ld bc,(ix+18)
+	add hl,bc
 	ld bc,(ix-6)
 	ld de,(ix+6)
 	push bc,de,hl

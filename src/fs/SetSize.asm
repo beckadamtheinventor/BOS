@@ -22,6 +22,10 @@ fs_SetSize:
 	add hl,de
 	jq nc,.update_file_entry ;file resize does not require any more clusters
 
+	push iy
+	call fs_Free ;free the old file clusters
+	pop iy
+
 	ld hl,(iy+$E)
 	ex.s hl,de
 	push de
@@ -43,34 +47,7 @@ fs_SetSize:
 	call sys_WriteFlashFull
 	pop bc,bc,bc
 
-	ld de,(iy+$E)
-	ex.s hl,de
-	call fs_CeilDivBySector
-	push hl
-	ld hl,.cluster_file
-	push hl
-	call fs_OpenFile
-	pop bc
-	ld bc,$C
-	add hl,bc
-	ld hl,(hl)
-	push hl
-	call fs_GetSectorAddress
-	pop bc
-	push hl
 	ld iy,(ix+9)
-	ld de,(iy+$C) ;file's old address
-	ex.s hl,de
-	pop de
-	pop bc
-	add hl,de ;hl = &cluster_table[file_old_address];
-	ex hl,de
-	ld hl,$03FF80 ;should always read 128 bytes of 0xFF
-	push bc,hl,de
-	call sys_WriteFlashFull
-	pop bc,bc,bc
-	ld iy,(ix+9)
-
 .update_file_entry:
 	lea de,ix-16
 	lea hl,iy

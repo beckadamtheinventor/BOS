@@ -60,41 +60,47 @@ fs_CreateFile:
 	pop bc,bc
 	ld de,(iy+fsentry_filelen)
 	ex.s hl,de
-	ld (ix-22),hl
 	ld de,16
+	or a,a
+	sbc hl,de
+	ld (ix-22),hl
+	add hl,de
 	add hl,de
 	push iy,hl
 	call fs_SetSize ;resize parent directory up 16 bytes
 	jq c,.fail
 	ld hl,(ix+12)
+	ld (ix + fsentry_filelen - 19),l
+	ld (ix + fsentry_filelen+1 - 19),h
 	push hl
 	call fs_Alloc ;allocate space for new file
 	jq c,.fail
 	pop bc,bc,iy
 	ld a, (ix + 9)
 	ld (ix + fsentry_fileattr - 19), a     ;setup new file descriptor contents
-	ld (ix + fsentry_filesector - 19),hl
-	ld (ix + fsentry_filelen - 19),c
-	ld (ix + fsentry_filelen+1 - 19),b
+	ld (ix + fsentry_filesector - 19),l
+	ld (ix + fsentry_filesector+1 - 19),h
 
 	ld bc,(ix-22)
 	push bc,iy
-	ld bc,1
+	ld bc,16
 	push bc
-	ld c,16
+	ld c,1
 	push bc
 	pea ix-19
 	call fs_Write ;write new file descriptor to parent directory
-	pop bc,bc,bc,de,hl
-	ld bc,16
+	pop bc,bc
+
+	ld bc,(iy + fsentry_filesector) ;write end of directory marker directly for efficiency
+	push bc
+	call fs_GetSectorAddress
+	pop bc
+	pop bc,iy,de
 	add hl,bc
-	push hl,de,bc
-	ld c,1
-	push bc
-	ld bc,$FF0000
-	push bc
-	call fs_Write ;write end of directory marker to parent directory
-	pop bc,bc,bc,bc,bc
+	add hl,de
+	ex hl,de
+	ld hl,$FF0000
+	call sys_WriteFlash
 	pop hl
 	ld bc,(ix-22)
 	add hl,bc
@@ -104,14 +110,14 @@ fs_CreateFile:
 	sbc hl,hl
 	ld sp,ix
 	pop ix
-	push hl
+	push hl,af
 	ld hl,(ix-25)
 	add hl,bc
 	or a,a
 	sbc hl,bc
 	push hl
 	call nz,sys_Free
-	pop bc,hl
+	pop bc,af,hl
 	ret
 .malloc_tail:
 	push de

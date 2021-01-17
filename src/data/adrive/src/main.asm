@@ -24,7 +24,6 @@ fs_dir root_dir
 	fs_entry home_dir, "home", "", f_subdir
 	fs_entry lib_dir, "lib", "", f_readonly+f_system+f_subdir
 	fs_entry usr_dir, "usr", "", f_readonly+f_system+f_subdir
-	fs_entry autotest_dir, "autotest", "", f_readonly+f_system+f_subdir
 end fs_dir
 
 ;"/bin/" directory
@@ -61,7 +60,6 @@ fs_dir dev_dir
 	fs_entry dev_lcd, "lcd", "", f_readonly+f_system+f_device
 	fs_entry dev_null, "null", "", f_readonly+f_system+f_device
 	fs_entry dev_mnt, "mnt", "", f_readonly+f_system+f_device
-	fs_entry tivars_dir, "tivars", "", f_subdir
 end fs_dir
 
 ;"/etc/" directory
@@ -95,26 +93,21 @@ fs_dir user_home_dir
 	db 16 dup 0
 end fs_dir
 
-;"/dev/tivars/" directory
+;"/usr/tivars/" directory
 fs_dir tivars_dir
-	fs_entry dev_dir, "..", "", f_subdir+f_system
+	fs_entry usr_dir, "..", "", f_subdir+f_system
 end fs_dir
 
 ;"/usr/" directory
 fs_dir usr_dir
 	fs_entry root_dir, "..", "", f_subdir+f_system
 	fs_entry usr_bin_dir, "bin", "", f_subdir
+	fs_entry tivars_dir, "tivars", "", f_subdir
 end fs_dir
 
 ;"/usr/bin/" directory
 fs_dir usr_bin_dir
 	fs_entry usr_dir, "..", "", f_subdir+f_system
-end fs_dir
-
-;"/autotest/" directory
-fs_dir autotest_dir
-	fs_entry root_dir, "..", "", f_subdir+f_system
-	fs_entry test_exe, "test", "exe", f_readonly+f_system
 end fs_dir
 
 ;-------------------------------------------------------------
@@ -1135,86 +1128,6 @@ dinitdev_exe_main:
 end fs_file
 
 
-; -- tester program --
-; should be removed upon release
-
-fs_file	test_exe
-	jr test_exe_main
-	db "FEX",0
-test_exe_main:
-	ld (bos.SaveSP),sp
-	ld hl,.tester_string
-	call bos.gui_Print
-	ld hl,.testing_file_creation
-	call bos.gui_Print
-	ld hl,.dir_to_create
-	ld c,f_subdir
-	push bc,hl
-	call bos.fs_OpenFile
-	push hl
-	call nc,bos.fs_DeleteFile
-	pop bc
-	call bos.fs_CreateFile
-	pop de,bc
-	call z,.fail
-	ld bc,0
-	push bc,hl
-	ld hl,.testing_file_writing
-	call bos.gui_Print
-	ld bc,1
-	push bc
-	ld c,16
-	push bc
-	call bos.sys_Malloc
-	jq c,.malloc_fail
-	ex hl,de
-	ld hl,.path_back_entry
-	pop bc
-	push bc,de
-	ldir
-	call bos.fs_Write
-	pop bc,bc,bc,bc,bc
-
-	ld hl,.file_to_create
-	ld c,0
-	push bc,hl
-	call bos.fs_OpenFile
-	push hl
-	call nc,bos.fs_DeleteFile
-	pop bc
-	call bos.fs_CreateFile
-	pop de,bc
-	call z,.fail
-	ld sp,(bos.SaveSP)
-	ld hl,.tests_finished_string
-	jp bos.gui_Print
-.malloc_fail:
-	ld sp,(bos.SaveSP)
-	ld hl,.malloc_fail_string
-	jp bos.gui_Print
-.fail:
-	ld hl,.test_failed_string
-	jp bos.gui_Print
-.tester_string:
-	db "--BOS Autotester--",$A
-	db $9,"Testing...",$A,0
-.tests_finished_string:
-	db "Tests complete",$A,0
-.testing_file_creation:
-	db "File deletion and creation",$A,0
-.testing_file_writing:
-	db "File writing",$A,0
-.test_failed_string:
-	db $9,"Test failed.",$A,0
-.malloc_fail_string:
-	db "Failed to malloc!",$A,0
-.path_back_entry:
-	db "..         ",f_subdir,0,0,0,0
-.dir_to_create:
-	db "/home/tester/",0
-.file_to_create:
-	db "/home/tester/test.txt",0
-end fs_file
 
 end fs_fs
 
