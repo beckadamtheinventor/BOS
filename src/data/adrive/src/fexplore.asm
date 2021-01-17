@@ -38,6 +38,9 @@ libload_load:
 	inc   a
 	ret
 fexplore_main.main:
+	pop bc,hl
+	push hl,bc
+	ld (current_dir),hl
 	ld hl,str_DriveExplorer
 	call bos.gui_DrawConsoleWindow
 ;init USB
@@ -207,6 +210,9 @@ init_fat_volume:
 	ret
 
 list_fat_dirs:
+	ld hl,0
+current_dir:=$-3
+	call bos.gui_DrawConsoleWindow
 	ld hl,1
 	call .entry
 	or a,a
@@ -220,26 +226,33 @@ dir_skip:=$-3
 	ld bc,fat_dir_entries
 	push bc
 	push hl
-	ld bc,current_dir
+	ld bc,(current_dir)
 	push bc
 	ld bc,fat_device
 	push bc
 	call fat_DirList
 	pop bc,bc,bc,bc,bc,bc
-	ld bc,-1
-	add hl,bc
-	or a,a
-	sbc hl,bc
-	ret z
+
 	ld iy,fat_dir_entries
+	ld hl,16
 
 .display_loop:
+	ld a,(iy)
+	or a,a
+	ret z
+	dec hl
 	add hl,bc
 	or a,a
 	sbc hl,bc
 	ret z
 	dec hl
 	push hl,iy
+	bit 4,(iy+13)
+	ld hl,str_DirEntryStr
+	jq nz,.display_print
+	ld hl,str_FileEntryStr
+.display_print:
+	call bos.gui_Print
 	lea hl,iy
 	call bos.gui_Print
 	call bos.gui_NewLine
@@ -247,7 +260,10 @@ dir_skip:=$-3
 	lea iy,iy+18
 	jq .display_loop
 
-
+str_FileEntryStr:
+	db $9,0
+str_DirEntryStr:
+	db $9,"/",0
 
 ;usb_error_t main_event_handler(usb_event_t event, void *event_data, usb_callback_data_t *callback_data);
 main_event_handler:
@@ -312,8 +328,6 @@ fat_device:
 
 fat_volume_label:
 	db 18 dup 0
-
-current_dir := bos.open_files_table
 
 fat_dir_entries:
 	db 18*8 dup 0
@@ -433,9 +447,13 @@ fat_Delete:
 
 fexplore_explore_files:
 	call list_fat_dirs
-	
-	
-	jq main_exit
+.key_loop:
+	call bos.sys_WaitKeyCycle
+	or a,a
+	jq z,.key_loop
+	cp a,15
+	jq z,main_exit
+	jq fexplore_explore_files
 
 
 
