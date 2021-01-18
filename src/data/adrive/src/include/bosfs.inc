@@ -18,6 +18,13 @@ f_subdir     := $10
 f_archive    := $20
 f_device     := $40
 
+fb_readonly   := 0
+fb_hidden     := 1
+fb_system     := 2
+fb_volume     := 3
+fb_subdir     := 4
+fb_archive    := 5
+fb_device     := 6
 
 
 macro fs_fs?

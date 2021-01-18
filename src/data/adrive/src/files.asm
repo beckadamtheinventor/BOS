@@ -168,14 +168,12 @@ explorer_scroll_up:
 	ret
 explorer_page_down:
 	ld hl,(explorer_dir_offset)
-	ld b,16
-.loop:
-	inc hl
 	ld a,(hl)
 	or a,a
 	ret z
+	ld bc,16
+	add hl,bc
 	ld (explorer_dir_offset),hl
-	djnz .loop
 	ret
 explorer_page_up:
 	ld hl,(explorer_dir_offset)

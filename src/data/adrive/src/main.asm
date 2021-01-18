@@ -51,6 +51,7 @@ fs_dir bin_dir
 	fs_entry updater_exe, "updater", "exe", f_readonly+f_system
 	fs_entry usbrun_exe, "usbrun","exe", f_readonly+f_system
 	fs_entry usbsend_exe, "usbsend","exe", f_readonly+f_system
+	fs_entry userfsck_exe, "userfsck", "exe", f_readonly+f_system
 end fs_dir
 
 ;"/boot/" directory
@@ -69,11 +70,6 @@ fs_dir dev_dir
 	fs_entry dev_mnt, "mnt", "", f_readonly+f_system+f_device
 end fs_dir
 
-;"/etc/" directory
-fs_dir etc_dir
-	fs_entry root_dir, "..", "", f_subdir
-end fs_dir
-
 ;"/lib/" directory
 fs_dir lib_dir
 	fs_entry root_dir, "..", "", f_subdir
@@ -85,46 +81,6 @@ fs_dir lib_dir
 	fs_entry srldrvce_lll, "SRLDRVCE","LLL", f_readonly+f_system
 	fs_entry usbdrvce_lll, "USBDRVCE","LLL", f_readonly+f_system
 	fs_entry libload_lll, "LibLoad", "LLL", f_readonly+f_system
-end fs_dir
-
-;"/home/" directory
-fs_dir home_dir
-	fs_entry root_dir, "..", "", f_subdir
-	fs_entry user_home_dir, "user", "", f_subdir
-end fs_dir
-
-;"/home/user/" directory
-fs_dir user_home_dir
-	fs_entry home_dir, "..", "", f_subdir
-	fs_entry user_settings_dat, "settings", "dat", 0
-	db 16 dup 0
-end fs_dir
-
-;"/usr/tivars/" directory
-fs_dir tivars_dir
-	fs_entry usr_dir, "..", "", f_subdir
-end fs_dir
-
-;"/usr/" directory
-fs_dir usr_dir
-	fs_entry root_dir, "..", "", f_subdir
-	fs_entry usr_bin_dir, "bin", "", f_subdir
-	fs_entry usr_lib_dir, "lib", "", f_subdir
-	fs_entry tivars_dir, "tivars", "", f_subdir
-end fs_dir
-
-;"/usr/bin/" directory
-fs_dir usr_bin_dir
-	fs_entry usr_dir, "..", "", f_subdir
-end fs_dir
-
-;"/usr/lib/" directory
-fs_dir usr_lib_dir
-	fs_entry usr_dir, "..", "", f_subdir
-end fs_dir
-
-fs_dir boot_usr
-	fs_entry boot_dir, "..", "", f_subdir
 end fs_dir
 
 ;-------------------------------------------------------------
@@ -955,23 +911,29 @@ rm_main:
 	call bos.fs_OpenFile
 	ex (sp),hl
 	pop iy
-	bit f_readonly, (iy+$B)
-	jq nz,.fail
-	bit f_subdir, (iy+$B)
-	jq nz,.fail
+	bit fb_readonly, (iy+$B)
+	jq nz,.fail_readonly
+	bit fb_subdir, (iy+$B)
+	jq nz,.fail_subdir
 	push iy
 	call bos.fs_DeleteFile
 	pop bc
 	xor a,a
 	sbc hl,hl
 	ret
-.fail:
+.fail_subdir:
+	ld hl,.string_subdir
+	jq .error_print
+.fail_readonly:
 	ld hl,.string_readonly
+.error_print:
 	call bos.gui_Print
 	ld hl,1
 	ret
 .string_readonly:
 	db $9,"Read only file cannot be removed.",$A,0
+.string_subdir:
+	db $9,"Cannot remove subdirectory.",$A,0
 end fs_file
 
 
@@ -1113,7 +1075,83 @@ initdev_exe_main:
 	db $9,"dev -d file : deinit device",$A,0
 end fs_file
 
+fs_file userfsck_exe
+	jq userfsck_main
+	db "FEX",0
+userfsck_main:
+	push ix
+	ld ix,userfsck_default_dirs
+.loop:
+	ld a,(ix)
+	or a,a
+	jq z,.exit
+	pea ix
+	call bos.fs_OpenFile
+	call c,bos.fs_CreateDir
+	pop bc
+	lea ix,ix+16
+	jq .loop
+.exit:
+	pop ix
+	or a,a
+	sbc hl,hl
+	ret
+userfsck_default_dirs:
+	pad_db "/home/user", 0, 16
+	pad_db "/usr/bin", 0, 16
+	pad_db "/usr/tivars", 0, 16
+	pad_db "/usr/lib", 0, 16
+	db 0
+end fs_file
 
+assert $<$060000
+db $060000-$ dup $FF
+
+;"/boot/usr/" directory
+fs_dir boot_usr
+	fs_entry boot_dir, "..", "", f_subdir
+end fs_dir
+
+;"/etc/" directory
+fs_dir etc_dir
+	fs_entry root_dir, "..", "", f_subdir
+end fs_dir
+
+;"/home/" directory
+fs_dir home_dir
+	fs_entry root_dir, "..", "", f_subdir
+	fs_entry user_home_dir, "user", "", f_subdir
+end fs_dir
+
+;"/usr/" directory
+fs_dir usr_dir
+	fs_entry root_dir, "..", "", f_subdir
+	fs_entry usr_bin_dir, "bin", "", f_subdir
+	fs_entry usr_lib_dir, "lib", "", f_subdir
+	fs_entry tivars_dir, "tivars", "", f_subdir
+end fs_dir
+
+;"/home/user/" directory
+fs_dir user_home_dir
+	fs_entry home_dir, "..", "", f_subdir
+	fs_entry user_settings_dat, "settings", "dat", 0
+	db 16 dup 0
+end fs_dir
+
+;"/usr/tivars/" directory
+fs_dir tivars_dir
+	fs_entry usr_dir, "..", "", f_subdir
+end fs_dir
+
+;"/usr/bin/" directory
+fs_dir usr_bin_dir
+	fs_entry usr_dir, "..", "", f_subdir
+end fs_dir
+
+;"/usr/lib/" directory
+fs_dir usr_lib_dir
+	fs_entry usr_dir, "..", "", f_subdir
+end fs_dir
 
 
 end fs_fs

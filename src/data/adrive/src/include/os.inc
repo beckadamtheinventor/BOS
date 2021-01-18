@@ -32,7 +32,7 @@ macro os_private
 		jp os.end
 	end macro
 	
-	macro os_create?
+	macro os_create? final_sector
 		di
 		call	.create
 		jp	.continue
@@ -51,7 +51,7 @@ macro os_private
 		call	.sectorerase
 		pop	af
 		inc	a
-		cp	a,$0C
+		cp	a,final_sector
 		jr	nz,.erase
 
 		ld	hl,os.start

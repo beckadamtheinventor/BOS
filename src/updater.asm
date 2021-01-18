@@ -17,7 +17,7 @@ updater_start:
 	call bos._PutS
 
 ;-------------------------------------------------------------------------------
-	os_create
+	os_create $03 ;erase only OS sectors as to not clobber the filesystem. OS boot sequence will handle filesystem updates.
 ;-------------------------------------------------------------------------------
 
 installing_string:

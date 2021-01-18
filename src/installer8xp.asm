@@ -14,7 +14,7 @@ include 'include/defines.inc'
 	call ti.PutS
 
 ;-------------------------------------------------------------------------------
-	os_create
+	os_create $05 ;erase up until sector $05 to erase OS sectors and trigger BOS to format the filesystem.
 ;-------------------------------------------------------------------------------
 
 installing_string:
