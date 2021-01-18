@@ -50,6 +50,7 @@ fs_CreateFile:
 	push hl
 	call fs_OpenFile
 	jq c,.fail ;fail if parent dir doesn't exist
+	ld (ix-25),hl
 	ex (sp),hl
 	pop iy,hl
 	bit fsbit_subdirectory,(iy+fsentry_fileattr)
@@ -76,7 +77,7 @@ fs_CreateFile:
 	call fs_Alloc ;allocate space for new file
 	jq c,.fail
 	pop bc,bc,iy
-	ld a, (ix + 9)
+	ld a, (ix+9)
 	ld (ix + fsentry_fileattr - 19), a     ;setup new file descriptor contents
 	ld (ix + fsentry_filesector - 19),l
 	ld (ix + fsentry_filesector+1 - 19),h
@@ -89,8 +90,9 @@ fs_CreateFile:
 	push bc
 	pea ix-19
 	call fs_Write ;write new file descriptor to parent directory
-	pop bc,bc
+	pop bc,bc,bc,iy
 
+	push iy,bc
 	ld bc,(iy + fsentry_filesector) ;write end of directory marker directly for efficiency
 	push bc
 	call fs_GetSectorAddress
@@ -101,15 +103,14 @@ fs_CreateFile:
 	ex hl,de
 	ld hl,$FF0000
 	call sys_WriteFlash
-	pop hl
-	ld bc,(ix-22)
-	add hl,bc
+	ld bc,(ix+6)
+	push bc
+	call fs_OpenFile
+	pop bc
 	db $01
 .fail:
 	xor a,a
 	sbc hl,hl
-	ld sp,ix
-	pop ix
 	push hl,af
 	ld hl,(ix-25)
 	add hl,bc
@@ -118,6 +119,8 @@ fs_CreateFile:
 	push hl
 	call nz,sys_Free
 	pop bc,af,hl
+	ld sp,ix
+	pop ix
 	ret
 .malloc_tail:
 	push de

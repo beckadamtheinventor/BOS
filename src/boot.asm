@@ -28,7 +28,7 @@ boot_os:
 
 ;boot_os_thread:
 	call flash_unlock
-	ld a,$04 ;set privleged code address to $040000
+	ld a,$05 ;set privleged code end address to $050000 (up until and including first filesystem sector)
 	out0 ($1F),a
 	xor a,a
 	out0 ($1D),a
@@ -51,9 +51,6 @@ boot_os:
 	ld (asm_prgm_size),hl
 	ld hl,op_stack_top
 	ld (op_stack_ptr),hl
-
-	ld hl,string_booting_os
-	call gui_DrawConsoleWindow
 
 	call fs_SanityCheck
 	ld hl,current_working_dir
@@ -301,5 +298,9 @@ handle_safeop:
 	ld hl,(ScrapMem)
 	ldi
 	pop af
+	ret
+
+os_GetOSInfo:
+	ld hl,string_os_info
 	ret
 

@@ -10,7 +10,7 @@ namespace bos
 ;DONOTHING                       := $2011C
 ;DONOTHING                       := $20120
 ?sys_ExecuteFile                 := $20124
-?sys_ExecuteFileEntryPoint       := $20128
+?os_GetOSInfo                    := $20128
 ?fs_OpenFile                     := $2012C
 ?fs_GetSectorAddress             := $20130
 ?fs_CheckDirExists               := $20134
@@ -95,6 +95,7 @@ namespace bos
 ?fs_WriteByte                    := $20270
 ?fs_RenameFile                   := $20274
 ?_SetCursorPos                   := $20278
+?fs_CreateDir                    := $2027C
 ;
 ;
 ?LCD_PAL    := 0E30200h

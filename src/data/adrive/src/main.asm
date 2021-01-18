@@ -19,23 +19,22 @@ end fs_dir
 
 fs_dir root_dir
 	fs_entry bin_dir, "bin", "", f_readonly+f_system+f_subdir
+	fs_entry boot_dir, "boot", "", f_readonly+f_system+f_subdir
 	fs_entry dev_dir, "dev", "", f_readonly+f_system+f_subdir
-	fs_entry etc_dir, "etc", "", f_readonly+f_system+f_subdir
+	fs_entry etc_dir, "etc", "", f_subdir
 	fs_entry home_dir, "home", "", f_subdir
 	fs_entry lib_dir, "lib", "", f_readonly+f_system+f_subdir
-	fs_entry usr_dir, "usr", "", f_readonly+f_system+f_subdir
+	fs_entry usr_dir, "usr", "", f_subdir
 end fs_dir
 
 ;"/bin/" directory
 fs_dir bin_dir
-	fs_entry root_dir, "..", "", f_subdir+f_system
-	fs_entry boot_exe, "boot", "exe", f_readonly+f_system
+	fs_entry root_dir, "..", "", f_subdir
 	fs_entry cat_exe, "cat", "exe", f_readonly+f_system
 	fs_entry cd_exe, "cd", "exe", f_readonly+f_system
 	fs_entry cmd_exe, "cmd","exe", f_readonly+f_system
 	fs_entry clean_exe, "clean", "exe", f_readonly+f_system
 	fs_entry cls_exe, "cls", "exe", f_readonly+f_system
-	fs_entry dinitdev_exe, "dinitdev", "exe", f_readonly+f_system
 	fs_entry explorer_exe, "explorer", "exe", f_readonly+f_system
 	fs_entry fexplore_exe, "fexplore", "exe", f_readonly+f_system
 	fs_entry files_exe, "files", "exe", f_readonly+f_system
@@ -44,6 +43,7 @@ fs_dir bin_dir
 	fs_entry ls_exe, "ls", "exe", f_readonly+f_system
 	fs_entry memedit_exe, "memedit","exe", f_readonly+f_system
 	fs_entry mkdir_exe, "mkdir", "exe", f_readonly+f_system
+	fs_entry mkfile_exe, "mkfile", "exe", f_readonly+f_system
 	fs_entry mount_exe, "mount", "exe", f_readonly+f_system
 	fs_entry off_exe, "off","exe", f_readonly+f_system
 	fs_entry rm_exe, "rm", "exe", f_readonly+f_system
@@ -53,9 +53,16 @@ fs_dir bin_dir
 	fs_entry usbsend_exe, "usbsend","exe", f_readonly+f_system
 end fs_dir
 
+;"/boot/" directory
+fs_dir boot_dir
+	fs_entry root_dir, "..", "", f_subdir
+	fs_entry boot_exe, "boot", "exe", f_readonly+f_system
+	fs_entry boot_usr, "usr", "", f_subdir
+end fs_dir
+
 ;"/dev/" directory
 fs_dir dev_dir
-	fs_entry root_dir, "..", "", f_subdir+f_system
+	fs_entry root_dir, "..", "", f_subdir
 	fs_entry cluster_map_file, "cmap", "dat", f_readonly+f_system
 	fs_entry dev_lcd, "lcd", "", f_readonly+f_system+f_device
 	fs_entry dev_null, "null", "", f_readonly+f_system+f_device
@@ -64,12 +71,12 @@ end fs_dir
 
 ;"/etc/" directory
 fs_dir etc_dir
-	fs_entry root_dir, "..", "", f_subdir+f_system
+	fs_entry root_dir, "..", "", f_subdir
 end fs_dir
 
 ;"/lib/" directory
 fs_dir lib_dir
-	fs_entry root_dir, "..", "", f_subdir+f_system
+	fs_entry root_dir, "..", "", f_subdir
 	fs_entry fatdrvce_lll, "FATDRVCE","LLL", f_readonly+f_system
 	fs_entry fileioc_lll, "FILEIOC","LLL", f_readonly+f_system
 	fs_entry fontlibc_lll, "FONTLIBC","LLL", f_readonly+f_system
@@ -95,19 +102,29 @@ end fs_dir
 
 ;"/usr/tivars/" directory
 fs_dir tivars_dir
-	fs_entry usr_dir, "..", "", f_subdir+f_system
+	fs_entry usr_dir, "..", "", f_subdir
 end fs_dir
 
 ;"/usr/" directory
 fs_dir usr_dir
-	fs_entry root_dir, "..", "", f_subdir+f_system
+	fs_entry root_dir, "..", "", f_subdir
 	fs_entry usr_bin_dir, "bin", "", f_subdir
+	fs_entry usr_lib_dir, "lib", "", f_subdir
 	fs_entry tivars_dir, "tivars", "", f_subdir
 end fs_dir
 
 ;"/usr/bin/" directory
 fs_dir usr_bin_dir
-	fs_entry usr_dir, "..", "", f_subdir+f_system
+	fs_entry usr_dir, "..", "", f_subdir
+end fs_dir
+
+;"/usr/lib/" directory
+fs_dir usr_lib_dir
+	fs_entry usr_dir, "..", "", f_subdir
+end fs_dir
+
+fs_dir boot_usr
+	fs_entry boot_dir, "..", "", f_subdir
 end fs_dir
 
 ;-------------------------------------------------------------
@@ -118,6 +135,26 @@ fs_file cluster_map_file
 	db 8192 dup $FF
 end fs_file
 
+fs_file off_exe
+	jq turn_off_main
+	db "FEX",0
+turn_off_main:
+	call ti.boot.TurnOffHardware
+	call .wait
+	call .wait
+	jp ti.boot.InitializeHardware
+.wait:
+	di
+	ld hl,ti.mpIntMask
+	set ti.bIntOn,(hl)
+	ld l,ti.intAck
+	set ti.bIntOn,(hl)
+	ei
+	halt
+	nop
+	ret
+
+end fs_file
 
 fs_file dev_mnt
 	db $C9, 1
@@ -335,6 +372,9 @@ enter_input:
 .noargs:
 	ex (sp),hl ;args
 	push hl ;path
+	ld a,(hl)
+	or a,a
+	jq z,.dont_execute_null
 	call bos.fs_OpenFile
 	jq c,.system_exe
 .execute:
@@ -364,8 +404,11 @@ enter_input:
 	pop hl
 	call bos.gui_PrintInt
 	call bos.gui_NewLine
-	or a,$FF
+	ld a,$FF
 	call bos.gfx_BlitBuffer
+	jq enter_input_clear
+.dont_execute_null:
+	pop bc,bc
 	jq enter_input_clear
 .exit:
 	pop bc,bc
@@ -810,25 +853,6 @@ fs_file memedit_exe
 	file '../obj/memedit.bin'
 end fs_file
 
-
-fs_file off_exe
-	jq turn_off_main
-	db "FEX",0
-turn_off_main:
-	call ti.boot.TurnOffHardware
-	di
-	ld hl,ti.mpIntMask
-	set ti.bIntOn,(hl)
-	ld l,ti.intAck
-	set ti.bIntOn,(hl)
-	ei
-	halt
-	nop
-	nop
-	jp ti.boot.InitializeHardware
-end fs_file
-
-
 fs_file usbrun_exe
 	file "../obj/usbrun.bin"
 end fs_file
@@ -933,6 +957,8 @@ rm_main:
 	pop iy
 	bit f_readonly, (iy+$B)
 	jq nz,.fail
+	bit f_subdir, (iy+$B)
+	jq nz,.fail
 	push iy
 	call bos.fs_DeleteFile
 	pop bc
@@ -953,126 +979,72 @@ fs_file mkdir_exe
 	jq mkdir_main
 	db "FEX",0
 mkdir_main:
-	ld hl,-19
-	call ti._frameset
-	ld hl,(ix+6)
-	push hl
-	call bos.fs_AbsPath
-	ex (sp),hl
-	call bos.fs_ParentDir
-	ld (ix-3),hl
-	inc hl
+	pop bc,hl
+	push hl,bc
 	ld a,(hl)
-	dec hl
 	or a,a
-	call nz,bos.fs_OpenFile
-	jq nc,.fail
+	jq z,.info
+	cp a,'-'
+	jq nz,.create
+.info:
+	ld hl,.info_string
+	call bos.gui_Print
+	jq .return
 .create:
-	pop bc
-	ld c,f_subdir
-	ld de,64
-	push de,bc,hl
-	call bos.fs_CreateFile
-	jq c,.fail
-	pop bc,bc,bc
-
-	ld bc,0
+	ld c,1 shl bos.fd_subdir
 	push bc,hl
-	ld c,1
-	push bc
-	ld c,16
-	push bc
-	lea de,ix-19
-	push de
-	ld hl,.path_back_entry
-	ld c,11
-	ldir
-	ld hl,(ix-3) ;open the parent directory
-	push hl
-	call bos.fs_OpenFile
-	jq c,.fail
-	pop bc
-	xor a,a
-	ld (ix + $C - 19), hl
-	ld (ix + $E - 19), a
-	ld (ix + $F - 19), a
-	call bos.fs_Write ; point to the parent dir in the created dir
-	jq c,.fail
-	pop bc,bc,bc,hl,bc
-	ld bc,16
-	push bc
-	ld e,1
-	push de
-	push bc
-	ld bc,$FF0000
-	push bc
-	call bos.fs_Write
-	jq c,.fail
-	pop bc,bc,bc,hl,bc
-	ld c,16
-	push bc,hl
-	ld c,1
-	push bc
-	ld c,16
-	push bc
-	ld de,$FF0000
-	push de
-	call bos.fs_Write ;write the end-of-directory marker in created dir
-	jq c,.fail
-	ld hl,(ix-3)
-	push hl
-	call bos.fs_OpenFile ;open the parent dir
-	jq c,.fail
-	pop bc
-	push hl
-	ld bc,16
-	xor a,a
-.find_eod_loop:
-	or a,(hl)
-	jq z,.write_created_entry
-	add hl,bc
-	jq .find_eod_loop
-.write_created_entry:
-	pop bc
+	call bos.fs_CreateDir
+	pop bc,bc
+.return:
 	or a,a
-	sbc hl,bc
-	pop bc,bc,bc,de,bc
-
-	push hl,de
-	ld c,1
-	push bc
-	ld c,16
-	push bc
-	ld hl,(ix+6)
-	push hl
-	call bos.fs_GetPathLastName
-	ex (sp),hl
-	pea ix-19
-	call bos.fs_StrToFileEntry
-	pop hl
-	ex (sp),hl
-	call bos.fs_Write
-	jq c,.fail
-	pop bc,bc,bc,bc,bc
-
-	xor a,a
 	sbc hl,hl
-	ld sp,ix
-	pop ix
 	ret
 .fail:
 	ld hl,.string_fileexists
 	call bos.gui_Print
 	ld hl,1
-	ld sp,ix
-	pop ix
 	ret
 .string_fileexists:
 	db $9,"File/Dir already exists.",$A,0
-.path_back_entry:
-	db "..         ",$10
+.info_string:
+	db $9,"mkdir -h",$A
+	db $9,"mkdir [dirname]",$A,0
 end fs_file
 
+
+fs_file mkfile_exe
+	jq mkfile_main
+	db "FEX",0
+mkfile_main:
+	pop bc,hl
+	push hl,bc
+	ld a,(hl)
+	or a,a
+	jq z,.info
+	cp a,'-'
+	jq nz,.create
+.info:
+	ld hl,.info_string
+	call bos.gui_Print
+	jq .return
+.create:
+	ld c,0
+	push bc,hl
+	call bos.fs_CreateFile
+	pop bc,bc
+.return:
+	or a,a
+	sbc hl,hl
+	ret
+.fail:
+	ld hl,mkdir_main.string_fileexists
+	call bos.gui_Print
+	ld hl,1
+	ret
+.info_string:
+	db $9,"mkfile -h",$A
+	db $9,"mkfile [filename]",$A,0
+end fs_file
 
 fs_file files_exe
 	file '../obj/files.bin'
@@ -1105,27 +1077,42 @@ initdev_exe_main:
 	ld a,(hl)
 	or a,a
 	ret z
+	cp a,'-'
+	jq nz,.info
+	inc hl
+	ld a,(hl)
+	inc hl
+	cp a,'h'
+	jq z,.info
+	cp a,'d'
+	jq z,.deinitdev
+	cp a,'i'
+	jq z,.initdev
+.info:
+	ld hl,.info_string
+	call bos.gui_Print
+	jq .return
+.initdev:
 	push hl
 	call bos.sys_InitDevice
 	pop bc
-	ret
-end fs_file
-
-
-fs_file dinitdev_exe
-	jr dinitdev_exe_main
-	db "FEX",0
-dinitdev_exe_main:
-	pop bc,hl
-	push hl,bc
-	ld a,(hl)
-	or a,a
-	ret z
+	jq .return
+.deinitdev:
 	push hl
-	call bos.sys_DeinitDevice
+	call bos.fs_OpenFile
+	ex (sp),hl
+	call nc,bos.sys_DeinitDevice
 	pop bc
+.return:
+	or a,a
+	sbc hl,hl
 	ret
+.info_string:
+	db $9,"dev -h : display this info",$A
+	db $9,"dev -i file : init device",$A
+	db $9,"dev -d file : deinit device",$A,0
 end fs_file
+
 
 
 

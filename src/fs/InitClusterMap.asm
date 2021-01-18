@@ -1,7 +1,7 @@
 ;@DOES initialize cluster map given data within the file system.
 ;@INPUT void fs_InitClusterMap(void);
 fs_InitClusterMap:
-	ld hl,-6
+	ld hl,-3
 	call ti._frameset
 	call sys_FlashUnlock
 	ld hl,.cluster_file
@@ -26,7 +26,6 @@ fs_InitClusterMap:
 	call fs_GetSectorAddress
 	pop bc
 	ld (ix-3),hl
-	ld (ix-6),hl
 	ex hl,de
 	ld a,$FE
 	call sys_WriteFlashA
@@ -43,14 +42,15 @@ fs_InitClusterMap:
 	ret z
 	cp a,'.'
 	jq z,.traverse_next
-	ld hl,(iy+fsentry_filelen)
-	ld bc,512
-	call ti._idivu
+	ld de,(iy+fsentry_filelen)
+	ex.s hl,de
+	push iy
+	call fs_CeilDivBySector
+	pop iy
 	ld b,l
-	inc b
 	ld de,(iy+fsentry_filesector)
 	ex.s hl,de
-	ld de,(ix-6)
+	ld de,(ix-3)
 	add hl,de
 	ex hl,de
 	push iy

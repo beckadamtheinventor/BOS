@@ -11,6 +11,7 @@ _OP1ToPath:
 	push hl
 	ex hl,de
 	ld hl,str_tivars_dir
+	ld bc,str_tivars_dir.len
 	ldir
 	ld bc,8
 	ld hl,fsOP1+1
@@ -25,28 +26,26 @@ _OP1ToPath:
 	ld (hl),'v'
 	inc hl
 	ex hl,de
+	ld a,(fsOP1)
+	rrca
+	rrca
+	rrca
+	rrca
+	and a,$F
+	ld hl,str_HexChars
 	ld bc,0
-	ld a,(fsOP1)
-	rrca
-	rrca
-	rrca
-	rrca
-	and a,$F
-	ld hl,str_HexChars
 	ld c,a
 	add hl,bc
-	ex hl,de
 	ldi
-	ex hl,de
 	ld a,(fsOP1)
-	ld c,a
+	ld bc,0
 	and a,$F
+	ld c,a
 	ld hl,str_HexChars
 	add hl,bc
-	ex hl,de
 	ldi
-	ex hl,de
-	ld (hl),b
+	xor a,a
+	ld (de),a
 	pop hl
 	ret
 

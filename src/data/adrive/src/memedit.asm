@@ -41,10 +41,13 @@ mem_edit_main:
 	ld c,1
 	push bc ;uint8_t count
 	ld (ix-11),de
+	ld a,(ix-9)
+	or a,e
+	or a,d
 	push de ;int len
 	ld bc,bos.safeRAM
 	push bc ;void *dest
-	call bos.fs_Read
+	call nz,bos.fs_Read
 	pop hl,bc,bc,bc,bc
 	jq .init_editor
 .seek_to_offset:

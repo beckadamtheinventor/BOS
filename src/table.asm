@@ -7,7 +7,7 @@
 	jp DONOTHING ;handle_rst28
 	jp DONOTHING ;handle_rst30
 	jp sys_ExecuteFile
-	jp sys_ExecuteFileEntryPoint
+	jp os_GetOSInfo
 	jp fs_OpenFile
 	jp fs_GetSectorAddress
 	jp fs_CheckDirExists
@@ -92,5 +92,6 @@
 	jp fs_WriteByte
 	jp fs_RenameFile
 	jp _SetCursorPos
+	jp fs_CreateDir
 
 

@@ -7,7 +7,10 @@ _DelVar:
 	ret c
 	push hl
 	call fs_DeleteFile
-	pop bc
+	ex (sp),hl
+	push af,hl
+	call sys_Free
+	pop bc,af,hl
 	ret
 
 

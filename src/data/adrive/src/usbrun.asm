@@ -381,13 +381,18 @@ _Args:=$-3
 	ld hl,str_FileNotFound
 	jq main_print_and_exit
 .copy_file_opened:
-	ld bc,$D2E000
+	ld bc,$D40000             ;set LCD to draw from the first buffer
+	ld (ti.mpLcdUpbase),bc
+	ld bc,$D52C00             ;use back buffer as RAM
 	ld (.copy_file_dest),bc
 	ld de,0
 .copy_file_sectors:=$-3
 	push bc,de,hl
 	call fat_ReadSectors
-	pop bc,bc,bc
+	pop hl,bc,bc
+	push hl
+	call msd_Deinit
+	pop bc
 	call usb_Cleanup
 	ld hl,(.copy_file_dest)
 	ld a,(hl)
@@ -399,6 +404,7 @@ _Args:=$-3
 	cp a,$7B
 	jq nz,.invalid_executable
 	ld (.copy_file_dest),hl
+
 	ld hl,program_loader
 	ld de,ti.cursorImage
 	ld bc,program_loader.len

@@ -16,11 +16,11 @@ str_PressAnyKey:
 str_Prompt:
 	db ">",$A,0
 str_CmdExecutable:
-	db "/bin/cmd"
+	db "/bin/cmd",0
+str_StartupProgram:
+	db "/boot/boot"
 str_dotEXE:
 	db ".exe",0
-str_StartupProgram:
-	db "/bin/boot.exe",0
 fs_cluster_map_file:
 	db "/dev/cmap.dat",0
 string_FilesystemCorrupt:
@@ -28,14 +28,13 @@ string_FilesystemCorrupt:
 string_FilesystemReformatted:
 	db "Format complete.",$A,"Press enter to continue to BOS.",$A,0
 str_tivars_dir:
-	db "/usr/tivars"
+	db "/usr/tivars/"
 .len:=$-.
 str_HexChars:
 	db "0123456789ABCDEF"
-string_booting_os:
-	db "BOS v1.00.0100 alpha",$A
-	db "Hold [y=]     for recovery mode",$A
-	db "Hold [window] for console only mode",$A,0
+string_os_info:
+	file 'buildno.txt'
+	db 0
 string_os_recovery_menu:
 	db "--OS Recovery/Reset--",$A
 	db $9,"Press clear to reboot",$A

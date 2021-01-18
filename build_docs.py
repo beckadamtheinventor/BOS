@@ -50,10 +50,20 @@ except:
 
 with open("docs/style.css","w") as f:
 	f.write("""
-body{
-	color: white;
+html{
 	background-color: black;
+}
+body{
+	margin: 0 auto;
+	width: 960px;
+	font-size: 100%;
+	line-height: 1.5;
+	color: white;
+	background-color: #111;
 	text-align: center;
+}
+ul{
+	text-align: left;
 }
 th,tr,td{
 	border-left: 1px solid white;
@@ -87,7 +97,7 @@ table{
 
 
 
-print("Generating index.html")
+print("Generating syscalls.html")
 with open("docs/syscalls.html","w") as f:
 	f.write("<html><head><title>bos.inc docs</title>\
 <link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\"></head>\

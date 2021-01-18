@@ -298,28 +298,41 @@ ti_Open:
 	push	ix
 	ld	ix, 0
 	add	ix, sp
-	xor	a, a
-	ld	hl, (vat_ptr0)
-	inc	a
-	add	hl, hl
-	jr	nc, .slot
-	ld	hl, (vat_ptr1)
-	inc	a
-	add	hl,hl
-	jr	nc, .slot
-	ld	hl, (vat_ptr2)
-	inc	a
-	add	hl, hl
-	jr	nc, .slot
-	ld	hl, (vat_ptr3)
-	inc	a
-	add	hl, hl
-	jr	nc, .slot
-	ld	hl, (vat_ptr4)
-	inc	a
-	add	hl, hl
-	jp	c, util_ret_null_pop_ix
+	ld	c,1
+	ld	a,$80
+	ld	hl, vat_ptr0+2
+	cp	a,(hl)
+	jr	z, .slot
+	inc c
+	inc hl
+	inc hl
+	inc hl
+	ld	hl, vat_ptr1+2
+	cp	a,(hl)
+	jr	z, .slot
+	inc c
+	inc hl
+	inc hl
+	inc hl
+	ld	hl, vat_ptr2+2
+	cp	a,(hl)
+	jr	z, .slot
+	inc c
+	inc hl
+	inc hl
+	inc hl
+	ld	hl, vat_ptr3+2
+	cp	a,(hl)
+	jr	z, .slot
+	inc c
+	inc hl
+	inc hl
+	inc hl
+	ld	hl, vat_ptr4+2
+	cp	a,(hl)
+	jp	nz, util_ret_null_pop_ix
 .slot:
+	ld	a,c
 	ld	(curr_slot), a
 	ld	hl, (ix + 6)
 	ld	de, bos.fsOP1 + 1
@@ -470,6 +483,15 @@ ti_Write:
 	call util_get_offset
 	pop hl
 	push bc,hl
+	ld de,$E
+	add hl,de
+	ld de,(hl)
+	ex.s hl,de
+	or a,a
+	sbc hl,bc
+	pop hl
+	push hl
+	call c,.resize
 	ld bc,(ix+12)
 	push bc
 	ld bc,(ix+9)
@@ -490,6 +512,12 @@ ti_Write:
 	pop ix
 	jq util_set_offset
 	ret
+.resize:
+	push bc,hl
+	call bos.fs_SetSize
+	pop hl,bc
+	ret
+
 
 ;-------------------------------------------------------------------------------
 ti_Read:
@@ -583,6 +611,15 @@ ti_PutC:
 	call util_get_offset
 	pop hl
 	push bc,hl
+	ld de,$E
+	add hl,de
+	ld de,(hl)
+	ex.s hl,de
+	or a,a
+	sbc hl,bc
+	pop hl
+	push hl
+	call c,ti_Write.resize
 	ld c,0
 .buffer:=$-1
 	push bc

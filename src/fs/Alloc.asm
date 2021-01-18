@@ -27,24 +27,27 @@ fs_Alloc:
 	add hl,bc
 	ld (ix-7),hl
 	ld hl,(ix-3)
+	dec hl
 .search_loop_entry:
 	ld a,$FF
-	ld bc,(ix-7)
+	ld de,(ix-7)
 .search_loop:
 	or a,a
-	sbc hl,bc
+	sbc hl,de
 	jq nc,.garbage_collect ;we've hit the end of the cluster map, and we need to do a garbage collect
-	add hl,bc
+	adc hl,de
 	cp a,(hl)
-	inc hl
 	jq nz,.search_loop
 
 	ld (ix-3),hl
 	ld b,(ix-4)
 	ld a,$FF
 .len_loop:
+	or a,a
+	sbc hl,de
+	jq nc,.garbage_collect ;we've hit the end of the cluster map, and we need to do a garbage collect
+	adc hl,de
 	cp a,(hl)
-	inc hl
 	jq nz,.search_loop_entry ;area not long enough
 	djnz .len_loop
 ;if we're here, we succeeded :D
@@ -53,11 +56,12 @@ fs_Alloc:
 
 	ld de,(ix-3)
 	ld b,(ix-4)
-	ld a,$FE
+	ld c,$FE
 .reserve_loop:
-	push af,bc,de
-	call sys_WriteFlashByteFull
-	pop de,bc,af
+	push bc,de
+	ld a,c
+	call sys_WriteFlashA
+	pop de,bc
 	inc de
 	djnz .reserve_loop
 

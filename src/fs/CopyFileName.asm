@@ -2,6 +2,7 @@
 ;@DOES copies file name from file descriptor
 ;@INPUT char *fs_CopyFileName(char *dest, void *fd);
 ;@OUTPUT first byte of dest will be null if failed.
+;@NOTE dest must be allocated at least 14 bytes
 fs_CopyFileName:
 	pop bc
 	pop de
@@ -19,7 +20,7 @@ fs_CopyFileName:
 	ld (de),a
 	inc de
 	cp a,fsentry_dot
-	jq z,.enda
+	jq z,.dotentry
 .enterloop:
 	inc hl
 	push hl
@@ -52,18 +53,24 @@ fs_CopyFileName:
 	ld (de),a
 	inc de
 	djnz .extloop
+	jq .end
+.dotentry:
+	inc hl
+	ld a,(hl)
+	db $2E ;ld l,...
 .end:
 	xor a,a
 .enda:
 	ld (de),a
-	xor a,a
 	inc de
+	xor a,a
 	ld (de),a
 	pop bc
 	pop hl
 	push hl
 	push bc
 	ret
+
 
 
 

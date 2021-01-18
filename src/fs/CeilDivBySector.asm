@@ -4,8 +4,9 @@
 fs_CeilDivBySector:
 	ld bc,512
 	call ti._idvrmu
-	ld a,c
-	or a,b
+	ld a,l
+	or a,h
+	ex hl,de
 	ret z
 	inc hl
 	ret

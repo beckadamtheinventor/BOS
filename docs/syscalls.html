@@ -6,7 +6,7 @@
 <tr class="no_op"><td>bos.DONOTHING </td><td>02011C</td><td><a href="#DONOTHING ">doc</a></tr>
 <tr class="no_op"><td>bos.DONOTHING </td><td>020120</td><td><a href="#DONOTHING ">doc</a></tr>
 <tr><td>bos.sys_ExecuteFile</td><td>020124</td><td><a href="#sys_ExecuteFile">doc</a></tr>
-<tr><td>bos.sys_ExecuteFileEntryPoint</td><td>020128</td><td><a href="#sys_ExecuteFileEntryPoint">doc</a></tr>
+<tr><td>bos.os_GetOSInfo</td><td>020128</td><td><a href="#os_GetOSInfo">doc</a></tr>
 <tr><td>bos.fs_OpenFile</td><td>02012C</td><td><a href="#fs_OpenFile">doc</a></tr>
 <tr><td>bos.fs_GetSectorAddress</td><td>020130</td><td><a href="#fs_GetSectorAddress">doc</a></tr>
 <tr><td>bos.fs_CheckDirExists</td><td>020134</td><td><a href="#fs_CheckDirExists">doc</a></tr>
@@ -91,6 +91,7 @@
 <tr><td>bos.fs_WriteByte</td><td>020270</td><td><a href="#fs_WriteByte">doc</a></tr>
 <tr><td>bos.fs_RenameFile</td><td>020274</td><td><a href="#fs_RenameFile">doc</a></tr>
 <tr><td>bos._SetCursorPos</td><td>020278</td><td><a href="#_SetCursorPos">doc</a></tr>
+<tr><td>bos.fs_CreateDir</td><td>02027C</td><td><a href="#fs_CreateDir">doc</a></tr>
 </table><div id="boot_os"><h1>boot_os</h1><h3>syscall Adress 020108</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
@@ -106,10 +107,10 @@
 <tr><td> int sys_ExecuteFile(char *path, char *args);</td><td> execute a file</td><td> -1 if file does not exist or is not a valid executable format<br>
  ExecutingFileFd set to point to file descriptor. -1 if file not found</td><td> All, OP6.</td><td>
 </td></tr>
-</table></div><div id="sys_ExecuteFileEntryPoint"><h1>sys_ExecuteFileEntryPoint</h1><h3>syscall Adress 020128</h3>
+</table></div><div id="os_GetOSInfo"><h1>os_GetOSInfo</h1><h3>syscall Adress 020128</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td> int sys_ExecuteFileEntryPoint(char *path, char *args);</td><td> execute a file from a given entry point</td><td> -1 if file does not exist or is not a valid executable format</td><td></td><td>
- entry point is essentially "file.whatever:entrypoint/whatever"</td></tr>
+<tr><td></td><td></td><td></td><td></td><td>
+</td></tr>
 </table></div><div id="fs_OpenFile"><h1>fs_OpenFile</h1><h3>syscall Adress 02012C</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td> void *fs_OpenFile(char *path);</td><td> Opens a file from a path and returns file descriptor.</td><td> hl = file descriptor. hl is -1 if file does not exist.</td><td> All</td><td>
@@ -129,7 +130,7 @@
 </table></div><div id="fs_CopyFileName"><h1>fs_CopyFileName</h1><h3>syscall Adress 02013C</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td> char *fs_CopyFileName(char *dest, void *fd);</td><td> copies file name from file descriptor</td><td> first byte of dest will be null if failed.</td><td></td><td>
-</td></tr>
+ dest must be allocated at least 14 bytes</td></tr>
 </table></div><div id="fs_Read"><h1>fs_Read</h1><h3>syscall Adress 020140</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td> int fs_Read(void *dest, int len, uint8_t count, void *fd, int offset);</td><td> read data from a file into RAM</td><td> number of bytes read</td><td> All</td><td>
@@ -367,7 +368,8 @@
 </td></tr>
 </table></div><div id="_CreateVar"><h1>_CreateVar</h1><h3>syscall Adress 020224</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td> OP1 = type byte, 8 byte name of var to create<br>
+<tr><td> OP1+1 = 8 byte name of var to create<br>
+ A = var type<br>
  hl = length to allocate for file</td><td> create a file in the /usr/tivars/ directory</td><td> Cf set if failed</td><td></td><td>
 </td></tr>
 </table></div><div id="gui_InputNoClear"><h1>gui_InputNoClear</h1><h3>syscall Adress 020228</h3>
@@ -462,5 +464,9 @@
 </table></div><div id="_SetCursorPos"><h1>_SetCursorPos</h1><h3>syscall Adress 020278</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td> void _SetCursorPos(uint8_t row, uint8_t col);</td><td> Set the text cursor position</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="fs_CreateDir"><h1>fs_CreateDir</h1><h3>syscall Adress 02027C</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> void *fs_CreateDir(const char *path, uint8_t flags);</td><td> Create a directory given a path and return a file descriptor.</td><td> file descriptor. Returns 0 if failed to create directory. </td><td></td><td>
 </td></tr>
 </table></div></body></html>

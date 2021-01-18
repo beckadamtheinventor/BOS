@@ -371,7 +371,80 @@ explorer_gui_items:
 	dl .icon_terminal_app
 	dl .icon_updater_app
 	dl .icon_usbrun_app
+	dl .icon_fexplore_app
+	dl .icon_power_app
 	db 0
+
+
+.icon_fexplore_app:
+	jp .run_fexplore_app
+	ret
+	dl 0
+	jp .draw_fexplore_app
+	db 82,100,121,160
+.run_fexplore_app:
+	ld bc,255
+	push bc
+	call bos.sys_Malloc
+	pop bc
+	ret c
+	push bc,hl
+	ld (hl),b
+	push hl
+	pop de
+	inc de
+	ldir
+	ld hl,.input_dir_string
+	call bos.gui_DrawConsoleWindow
+.fexplore_input_dir:
+	call bos.gui_InputNoClear
+	cp a,2
+	jq nc,.fexplore_input_dir
+	pop hl,bc
+	or a,a
+	ret z
+	ex hl,de
+	ld hl,str_FExploreExecutable
+	jq explorer_call_file
+.draw_fexplore_app:
+	ld bc,101
+	push bc
+	ld bc,165
+	push bc
+	ld bc,.fexplore_app_string
+	push bc
+	call gfx_PrintStringXY
+	pop bc,bc,bc
+	ret
+.fexplore_app_string:
+	db "usb files",0
+.input_dir_string:
+	db "Input path on usb to explore.",$A,0
+
+
+.icon_power_app:
+	jp .run_power_app
+	ret
+	dl 0
+	jp .draw_power_app
+	db 2,200,41,240
+.run_power_app:
+	ld sp,(_SaveSP)
+	ld ix,(_SaveIX)
+	ld hl,str_OffExecutable
+	jq explorer_call_file
+.draw_power_app:
+	ld bc,201
+	push bc
+	ld bc,5
+	push bc
+	ld bc,.power_app_string
+	push bc
+	call gfx_PrintStringXY
+	pop bc,bc,bc
+	ret
+.power_app_string:
+	db "power",0
 
 .icon_updater_app:
 	jp .run_updater_program
@@ -569,6 +642,10 @@ explorer_gui_items:
 
 str_PressEnterConfirm:
 	db "Press enter to confirm.",0
+str_FExploreExecutable:
+	db "/bin/fexplore.exe",0
+str_OffExecutable:
+	db "/bin/off.exe",0
 str_UsbRunExecutable:
 	db "/bin/usbrun.exe",0
 str_UpdaterExecutable:

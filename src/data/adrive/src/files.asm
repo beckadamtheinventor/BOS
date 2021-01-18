@@ -224,6 +224,8 @@ explorer_path_into:
 	ld (explorer_cursor_y),hl
 	ret
 explorer_draw_files:
+	ld a,5
+	ld (.current_row_color),a
 	ld bc,10
 	ld (.y_pos),bc
 	ld bc,0
@@ -290,6 +292,17 @@ explorer_dir_offset:=$-3
 	call bos.fs_CopyFileName
 	call gfx_PrintString
 	call .setxy_2
+	ld c,$FF
+	push bc
+	call gfx_SetTextFGColor
+	ld a,5
+.current_row_color:=$-1
+	xor a,5
+	ld (.current_row_color),a
+	ld l,a
+	ex (sp),hl
+	call gfx_SetTextBGColor
+	pop bc
 	pop bc,ix
 	bit bos.fd_system,(ix+$B)
 	call nz,.system
@@ -297,6 +310,15 @@ explorer_dir_offset:=$-3
 	call nz,.readonly
 	bit bos.fd_device,(ix+$B)
 	call nz,.device
+	ld de,(ix+$E)
+	ex.s hl,de
+	call bos.sys_HLToString
+	ld bc,(.y_pos)
+	push bc
+	ld bc,260
+	push bc,de
+	call gfx_PrintStringXY
+	pop bc,bc,bc
 .next_line:
 	ld hl,(.y_pos)
 	ld bc,9

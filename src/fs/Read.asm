@@ -38,7 +38,15 @@ fs_Read:
 	add hl,bc
 	pop bc,bc
 	ld de,(ix+6)
+	ld (ScrapMem),bc
+	ld a,(ScrapMem+2)
+	or a,c
+	or a,b
+	push bc
+	jq z,.zero_copy_len
 	ldir
+.zero_copy_len:
+	pop hl
 	db $01 ;ld bc,...
 .fail:
 	scf

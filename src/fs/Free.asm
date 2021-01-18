@@ -23,10 +23,11 @@ fs_Free:
 	ex.s hl,de
 	pop de
 	add hl,de
-	ld de,$03FF80
-	push bc,de,hl
-	call sys_WriteFlashFull
-	pop bc,bc,bc
+	ex hl,de
+	ld hl,$FF0000
+	push bc
+	call sys_WriteFlash
+	pop hl
 	or a,a
 	ret
 
