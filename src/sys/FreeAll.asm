@@ -6,9 +6,9 @@ sys_FreeAll:
 	ld (free_RAM_ptr),hl
 	ld hl,top_of_RAM - bottom_of_malloc_RAM
 	ld (remaining_free_RAM),hl
-	ld hl,malloc_cache
+	ld hl,malloc_cache   ;clear out the malloc cache
 	ld de,malloc_cache+1
-	ld bc,$1000 ;4096
+	ld bc,$800 ;2048
 	ld (hl),c
 	ldir
 	ld hl,argument_stack_top

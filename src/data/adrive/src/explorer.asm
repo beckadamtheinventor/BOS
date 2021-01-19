@@ -372,8 +372,73 @@ explorer_gui_items:
 	dl .icon_updater_app
 	dl .icon_usbrun_app
 	dl .icon_fexplore_app
+	dl .icon_usbrecv_app
 	dl .icon_power_app
 	db 0
+
+.icon_usbrecv_app:
+	jp .run_usbrecv_app
+	ret
+	dl 0
+	jp .draw_usbrecv_app
+	db 122,100,160,160
+.run_usbrecv_app:
+	ld bc,255
+	push bc
+	call bos.sys_Malloc
+	pop bc
+	ret c
+	push bc,hl
+	ld (hl),b
+	push hl
+	pop de
+	inc de
+	ldir
+	ld hl,.input_source_string
+	call bos.gui_DrawConsoleWindow
+.usbrecv_input_src:
+	call bos.gui_InputNoClear
+	cp a,2
+	jq nc,.usbrecv_input_src
+	pop hl,bc
+	or a,a
+	ret z
+	push hl
+	xor a,a
+	cpir
+	dec hl
+	ld (hl),' '
+	inc hl
+	push bc,hl
+	call bos.gui_NewLine
+	ld hl,.input_dest_string
+	call bos.gui_Print
+.usbrecv_input_dest:
+	call bos.gui_InputNoClear
+	cp a,2
+	jq nc,.usbrecv_input_dest
+	pop bc,bc,hl
+	or a,a
+	ret z
+	ex hl,de
+	ld hl,str_UsbRecvExecutable
+	jq explorer_call_file
+.draw_usbrecv_app:
+	ld bc,101
+	push bc
+	ld bc,245
+	push bc
+	ld bc,.usbrecv_app_string
+	push bc
+	call gfx_PrintStringXY
+	pop bc,bc,bc
+	ret
+.usbrecv_app_string:
+	db "usb recv",0
+.input_source_string:
+	db "Input file on usb to recieve.",$A,0
+.input_dest_string:
+	db "Input destination file in filesystem.",$A,0
 
 
 .icon_fexplore_app:
@@ -642,6 +707,8 @@ explorer_gui_items:
 
 str_PressEnterConfirm:
 	db "Press enter to confirm.",0
+str_UsbRecvExecutable:
+	db "/bin/usbrecv.exe",0
 str_FExploreExecutable:
 	db "/bin/fexplore.exe",0
 str_OffExecutable:

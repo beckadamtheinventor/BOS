@@ -49,6 +49,7 @@ fs_dir bin_dir
 	fs_entry rm_exe, "rm", "exe", f_readonly+f_system
 	fs_entry uninstaller_exe, "uninstlr","exe", f_readonly+f_system
 	fs_entry updater_exe, "updater", "exe", f_readonly+f_system
+	fs_entry usbrecv_exe, "usbrecv","exe", f_readonly+f_system
 	fs_entry usbrun_exe, "usbrun","exe", f_readonly+f_system
 	fs_entry usbsend_exe, "usbsend","exe", f_readonly+f_system
 	fs_entry userfsck_exe, "userfsck", "exe", f_readonly+f_system
@@ -990,10 +991,10 @@ mkfile_main:
 	call bos.gui_Print
 	jq .return
 .create:
-	ld c,0
-	push bc,hl
+	ld bc,0
+	push bc,bc,hl
 	call bos.fs_CreateFile
-	pop bc,bc
+	pop bc,bc,bc
 .return:
 	or a,a
 	sbc hl,hl
@@ -1103,6 +1104,11 @@ userfsck_default_dirs:
 	pad_db "/usr/lib", 0, 16
 	db 0
 end fs_file
+
+fs_file usbrecv_exe
+	file '../obj/usbrecv.bin'
+end fs_file
+
 
 assert $<$060000
 db $060000-$ dup $FF

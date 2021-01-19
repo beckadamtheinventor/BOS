@@ -26,6 +26,10 @@ fs_StrToFileEntry:
 	ld (de),a
 	inc de
 	djnz .copy_file_name_loop
+	ld a,(hl)
+	cp a,'.'
+	jq nz,.fail
+	inc hl
 	jq .copy_file_name_ext
 .pad_file_name:
 	ld a,' '
@@ -53,8 +57,17 @@ fs_StrToFileEntry:
 	ld (de),a
 	inc de
 	djnz .pad_file_ext_loop
+	ld a,(hl)
+	or a,a
+	jq nz,.fail
 .finished_copying_name:
 	pop hl
 	or a,a
 	ret
+.fail:
+	pop bc
+	scf
+	sbc hl,hl
+	ret
+
 

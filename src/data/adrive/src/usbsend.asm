@@ -118,6 +118,9 @@ main_exit:
 	ld bc,msd_device
 	push bc
 	call msd_Deinit
+	ld hl,usb_device
+	ex (sp),hl
+	call usb_DisableDevice
 	pop bc
 	call usb_Cleanup
 	ld hl,ti.mpIntAck
@@ -345,6 +348,8 @@ usb_WaitForInterrupt:
 	jp 15
 usb_ResetDevice:
 	jp 39
+usb_DisableDevice:
+	jp 42
 
 db $C0,"FATDRVCE",0,1
 msd_Init:
@@ -380,12 +385,8 @@ _Args:=$-3
 	push hl
 	call bos.fs_OpenFile
 	pop bc
-	ld (.source_fd),hl
 	jq c,error_file_not_found
-	ld bc,$1C
-	add hl,bc
-	ld hl,(hl) ;get local file size in bytes
-	push hl
+	ld (.source_fd),hl
 	ld hl,0
 _Arg2:=$-3
 	ld bc,fat_device
@@ -400,27 +401,44 @@ _Arg2:=$-3
 	call fat_Open
 	pop bc,bc,bc
 	ld (.dest_fd),hl
-	or a,a
-	sbc hl,hl
-.write_file_loop:
-	push hl
+
 	ld hl,0
 .source_fd:=$-3
 	ld bc,$0C
 	add hl,bc
-	ld hl,(hl)
+	ld bc,(hl)  ;source file pointer
+	inc hl
+	inc hl
+	ld de,(hl)  ;source file len
+	ex.s hl,de
+	ld (.file_len),hl
+	push bc
 	call bos.fs_GetSectorAddress
-	ld a,(bos.current_sectors_per_cluster)
-	ld bc,0
-	ld c,a
+	pop bc
+	ld (.file_ptr),hl
 	ld de,0
+	ld bc,(.file_len)
+	push de,bc
+	ld bc,(_Arg2)
+	push bc
+	ld bc,fat_device
+	push bc
+	call fat_SetSize
+	pop bc,bc,bc,bc,hl
+
+	ld bc,0
+.file_ptr:=$-3
+	push bc
+	ld hl,0
+.file_len:=$-3
+	ld bc,512
+	call ti._idivu
+	push hl
+	ld bc,0
 .dest_fd:=$-3
-	push hl,bc,de
+	push bc
 	call fat_WriteSectors
 	pop bc,bc,bc
-	pop hl
-	inc hl
-	jr .write_file_loop
 .finished:
 	ld bc,(.source_fd)
 	push bc

@@ -8,7 +8,7 @@ sys_Malloc:
 	pop hl
 	push hl
 	push bc
-	ld de,16384
+	ld de,8192
 	or a,a
 	sbc hl,de
 	jq nc,.fail
@@ -21,30 +21,22 @@ sys_Malloc:
 	sbc hl,de
 	jq c,.fail
 	ld (remaining_free_RAM),hl
-	ld b,6
-	xor a,a
-.shift_loop:
-	rr d
-	rr e
-	adc a,a
-	djnz .shift_loop
-	or a,a
+	ld bc,32
+	call ti._idvrmu
+	ld a,l
+	or a,h
 	jq z,.exact_fit
 	inc de
 .exact_fit:
 	push de
 	ld hl,malloc_cache
-	ld de,4
-	ld c,e
-	ld b,d
+	ld bc,32 ;b = 0, c = 32. Loop 32*256 times.
 .loop:
 	ld a,(hl)
-	or a,a
-	jq z,.found
-	cp a,$7F
-	jq z,.found
+	adc a,a
+	jq nc,.found
 .skip_block:
-	add hl,de
+	inc hl
 	ld a,(hl)
 	cp a,$7F
 	jq nz,.loop
@@ -58,16 +50,12 @@ sys_Malloc:
 	ret
 .found:
 	ld (ScrapMem),hl
-	add hl,de
 	pop de
 	push de
 .len_loop:
 	ld a,(hl)
-	or a,a
-	jq nz,.not_found
-	inc hl
-	inc hl
-	inc hl
+	adc a,a
+	jq c,.loop
 	inc hl
 	ex hl,de
 	dec hl
@@ -84,15 +72,12 @@ sys_Malloc:
 	add hl,hl
 	add hl,hl
 	add hl,hl
+	add hl,hl
 	ld de,bottom_of_malloc_RAM
 	add hl,de
 	ex hl,de
 	ld hl,(ScrapMem)
-	ld (hl),1
-	inc hl
-	ld (hl),de
-	inc hl
-	inc hl
+	ld (hl),$FF
 	inc hl
 	pop bc
 	push bc
@@ -100,20 +85,11 @@ sys_Malloc:
 	ld b,c
 	dec b
 	jq c,.one_block
-	ld de,$7FFFFF
 .mark_loop:
-	ld (hl),de
-	inc hl
-	inc hl
-	inc hl
-	ld (hl),e
+	ld (hl),$FF
 	inc hl
 	djnz .mark_loop
 .one_block:
 	pop hl
 	ret
-.not_found:
-	ld hl,(ScrapMem)
-	add hl,de
-	jq .loop
 

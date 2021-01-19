@@ -20,5 +20,6 @@ _ChkFindSym:
 	pop bc,hl
 	ld bc,fsentry_filesector - fsentry_filelen
 	add hl,bc
+	or a,a
 	ret
 

@@ -20,42 +20,44 @@ sys_ExecuteFile:
 	ld (fsOP6),de
 	push hl
 	call fs_OpenFile
-	jq c,.fail_popbc
+	pop bc
+	jq c,.fail
 .open_fd:
 	ld (ExecutingFileFd),hl
-	ld bc,$B
+	ld bc,fsentry_fileattr
 	add hl,bc
 	bit 4,(hl)
 	ld hl,(ExecutingFileFd)
-	pop bc
-	jq nz,.fail
+	jq nz,.fail ;can't execute a directory
 	ld de,fsentry_filesector
 	add hl,de
 	ld hl,(hl)
 	push hl
 	call fs_GetSectorAddress
 	pop bc
-	push hl
+	ld (fsOP6+3),hl
+.exec_check_loop:
 	ld a,(hl)
+	inc hl
 	cp a,$18 ;jr
-	jq z,.skip2
+	jq z,.skip1
 	cp a,$C3 ;jp
-	jq z,.skip4
-.fail_popbc:
-	pop bc
+	jq z,.skip3
+	cp a,$EF
+	jq nz,.fail
+	ld a,(hl)
+	inc hl
+	cp a,$7B
+	jq z,.exec_rex_entryhl
 .fail:
 	scf
 	sbc hl,hl
 	ret
-.skip4:
+.skip3:
 	inc hl
 	inc hl
-.skip2:
+.skip1:
 	inc hl
-	inc hl
-	ld a,(hl)
-	cp a,$EF
-	jq z,.check_ef7b
 	ld de,(hl)
 	db $21 ;ld hl,...
 	db 'FEX' ;Flash EXecutable
@@ -66,16 +68,15 @@ sys_ExecuteFile:
 	db 'REX' ;Ram EXecutable
 	or a,a
 	sbc hl,de
-
-	jq nz,.fail_popbc ;if it's neither a Flash Executable nor a Ram Executable, return -1
+	jq nz,.fail ;if it's neither a Flash Executable nor a Ram Executable, return -1
 
 .exec_rex:
-	pop hl      ;file data pointer (not needed, this is re-handled in fs_Read)
 	ld iy,(ExecutingFileFd) ;file descriptor
 	ld hl,(iy+fsentry_filesector)
 	push hl
 	call fs_GetSectorAddress
 	pop bc
+.exec_rex_entryhl:
 	push hl
 	ld hl,(iy+fsentry_filelen)
 	ex.s hl,de
@@ -85,16 +86,16 @@ sys_ExecuteFile:
 	ld de,bos_UserMem
 	push de ;save jump address
 	ld (asm_prgm_size),bc
-	push bc ;save program size
+	push bc
 	ldir
 	pop bc
 	pop hl  ;usermem
-	push hl
+	ld (fsOP6+3),hl
 	add hl,bc
 	ld (top_of_UserMem),hl ;save top of usermem
 .exec_fex:
-	ld hl,(fsOP6)
-	ex (sp),hl ;push arguments to stack, pop jump location from the stack
+	ld hl,(fsOP6) ;push arguments
+	push hl
 .run_hl:
 	call .normalize_lcd
 	call .jphl
@@ -110,15 +111,8 @@ sys_ExecuteFile:
 	pop hl
 	ret
 .jphl:
+	ld hl,(fsOP6+3)
 	jp (hl)
-
-.check_ef7b:
-	inc hl
-	ld a,(hl)
-	cp a,$7B
-	jq nz,.fail_popbc
-	jq .exec_rex
-	
 .normalize_lcd:
 	ld bc,ti.vRam
 	ld (ti.mpLcdUpbase),bc

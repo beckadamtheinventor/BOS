@@ -5,9 +5,9 @@ include 'include/ti84pceg.inc'
 include 'include/bos.inc'
 
 org $D1A881
-	jq usbrun_main
+	jq usbrecv_main
 	db "REX",0
-usbrun_main:
+usbrecv_main:
 	pop bc
 	pop hl
 	push hl
@@ -15,7 +15,7 @@ usbrun_main:
 	ld (_Args),hl
 	ld (_ErrSP),sp
 	call libload_load
-	jq z,usbrun_main.main
+	jq z,usbrecv_main.main
 	ld hl,str_FailedToLoadLibload
 	call bos.gui_Print
 	scf
@@ -43,8 +43,8 @@ libload_load:
 	xor   a,a
 	inc   a
 	ret
-usbrun_main.main:
-	ld hl,str_UsbRun
+usbrecv_main.main:
+	ld hl,str_usbrecv
 	call bos.gui_DrawConsoleWindow
 ;init USB
 	ld bc, 12  ;USB_DEFAULT_INIT_FLAGS
@@ -89,6 +89,11 @@ init_explore_drive:
 	jq z,open_file
 .init_fat_fail:
 	ld hl,str_FailedToInitFat
+	jq main_print_and_exit
+
+main_fail_file_creation:
+	ld hl,str_FailedToCreateFile
+	jq main_print_and_exit
 
 main_fail_memory:
 	ld hl,str_MemoryError
@@ -281,8 +286,8 @@ str_InitializingPartition:
 	db "Initializing partition...",$A,0
 found_partitions:
 	dl 0
-str_UsbRun:
-	db "USB Program Executor",$A,0
+str_usbrecv:
+	db "USB Program Reciever",$A,0
 str_WaitingForDevice:
 	db $9,"Waiting for device...",$A
 	db "Please insert USB flash drive.",$A,0
@@ -307,9 +312,10 @@ str_FileNotFound:
 	db $9,"File not found.",$A,0
 str_MemoryError:
 	db $9,"Not Enough Memory.",$A,0
-str_InavlidExecutable:
-	db "Invalid Executable Format. Aborting.",$A,0
-
+str_FailedToCreateFile:
+	db $9,"Failed to create file.",$A,0
+str_Success:
+	db $9,"Successfuly recieved file.",$A,0
 
 libload_relocations:
 db $C0,"USBDRVCE",0,0
@@ -366,12 +372,30 @@ _Args:=$-3
 	dec hl
 	ld (hl),0
 .end_of_string:
+	inc hl
+	ld (_Arg2),hl
 	pop hl
 	ld c,1 shl 0
 	ld de,fat_device
 	push bc,hl,de
 	call fat_GetSize
 	ld (.copy_file_length),hl
+	ld bc,0
+_Arg2:=$-3
+	push bc
+	call bos.fs_OpenFile
+	call nc,bos.fs_DeleteFile
+	ld hl,0
+.copy_file_length:=$-3
+	ex (sp),hl
+	ld c,0
+	push bc,hl
+	call bos.fs_CreateFile
+	pop bc,bc,bc
+	jq c,main_fail_file_creation
+	ld (.dest_fd),hl
+
+	ld hl,(.copy_file_length)
 	xor a,a
 	ld bc,9
 	call ti._lshru
@@ -404,37 +428,20 @@ _Args:=$-3
 	pop bc
 	call usb_Cleanup
 
-	ld hl,(.copy_file_dest)
-	ld a,(hl)
-	inc hl
-	cp a,$EF
-	jq nz,.invalid_executable
-	ld a,(hl)
-	inc hl
-	cp a,$7B
-	jq nz,.invalid_executable
-	ld (.copy_file_dest),hl
-
-	ld hl,program_loader
-	ld de,ti.cursorImage
-	ld bc,program_loader.len
-	ld sp,(_ErrSP)
-	push de
-	ldir
 	ld hl,0
-.copy_file_dest:=$-3
+.dest_fd:=$-3
 	ld bc,0
-.copy_file_length:=$-3
-	ld de,ti.userMem
-	ret
-.invalid_executable:
-	ld hl,str_InavlidExecutable
-	call bos.gui_Print
-	jp bos.sys_WaitKeyCycle
+	push bc,hl
+	ld c,1
+	push bc
+	ld bc,(.copy_file_length)
+	push bc
+	ld bc,$D52C00
+.copy_file_dest:=$-3
+	push bc
+	call bos.fs_Write
+	pop bc,bc,bc,bc,bc
 
+	ld hl,str_Success
+	jq main_print_and_exit
 
-program_loader:
-	push de
-	ldir
-	ret ;jump to program
-.len:=$-.

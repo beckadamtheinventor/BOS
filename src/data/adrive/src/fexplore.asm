@@ -103,6 +103,9 @@ main_exit:
 	ld bc,msd_device
 	push bc
 	call msd_Deinit
+	ld hl,usb_device
+	ex (sp),hl
+	call usb_DisableDevice
 	pop bc
 	call usb_Cleanup
 	ld hl,ti.mpIntAck
@@ -398,6 +401,8 @@ usb_WaitForInterrupt:
 	jp 15
 usb_ResetDevice:
 	jp 39
+usb_DisableDevice:
+	jp 42
 
 db $C0,"FATDRVCE",0,1
 msd_Init:

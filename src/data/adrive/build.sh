@@ -15,6 +15,7 @@ fasmg src/fexplore.asm obj/fexplore.bin
 fasmg src/memedit.asm obj/memedit.bin
 fasmg src/usbrun.asm obj/usbrun.bin
 fasmg src/usbsend.asm obj/usbsend.bin
+fasmg src/usbrecv.asm obj/usbrecv.bin
 
 fasmg src/dev_mnt/init.asm src/dev_mnt/init.bin
 fasmg src/dev_mnt/deinit.asm src/dev_mnt/deinit.bin
