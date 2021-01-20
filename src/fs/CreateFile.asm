@@ -4,6 +4,9 @@
 fs_CreateFile:
 	ld hl,-25
 	call ti._frameset
+	ld hl,flashStatusByte
+	set bKeepFlashUnlocked,(hl)
+	call sys_FlashUnlock
 	or a,a
 	sbc hl,hl
 	ld (ix-25),hl
@@ -103,6 +106,9 @@ fs_CreateFile:
 	ex hl,de
 	ld hl,$FF0000
 	call sys_WriteFlash
+	ld hl,flashStatusByte
+	res bKeepFlashUnlocked,(hl)
+	call sys_FlashLock
 	ld bc,(ix+6)
 	push bc
 	call fs_OpenFile

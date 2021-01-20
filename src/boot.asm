@@ -2,6 +2,8 @@
 boot_os:
 ;	DisableMultithreading
 	call ti.boot.Set48MHzMode
+	xor a,a
+	ld (flashStatusByte),a
 
 ;	ld bc,64 ;setup gpt2
 ;	xor a,a
