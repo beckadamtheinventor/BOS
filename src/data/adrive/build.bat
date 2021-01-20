@@ -9,6 +9,7 @@ fasmg src/lib/keypadc/keypadc.asm obj/keypadc.bin
 fasmg src/lib/srldrvce/srldrvce.asm obj/srldrvce.bin
 fasmg src/lib/usbdrvce/usbdrvce.asm obj/usbdrvce.bin
 
+fasmg src/bpkload.asm obj/bpkload.bin
 fasmg src/explorer.asm obj/explorer.bin
 fasmg src/files.asm obj/files.bin
 fasmg src/fexplore.asm obj/fexplore.bin

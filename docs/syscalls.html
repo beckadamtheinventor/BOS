@@ -92,6 +92,8 @@
 <tr><td>bos.fs_RenameFile</td><td>020274</td><td><a href="#fs_RenameFile">doc</a></tr>
 <tr><td>bos._SetCursorPos</td><td>020278</td><td><a href="#_SetCursorPos">doc</a></tr>
 <tr><td>bos.fs_CreateDir</td><td>02027C</td><td><a href="#fs_CreateDir">doc</a></tr>
+<tr><td>bos.gfx_BufClear</td><td>020280</td><td><a href="#gfx_BufClear">doc</a></tr>
+<tr><td>bos.gfx_LcdClear</td><td>020284</td><td><a href="#gfx_LcdClear">doc</a></tr>
 </table><div id="boot_os"><h1>boot_os</h1><h3>syscall Adress 020108</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
@@ -370,7 +372,8 @@
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td> OP1+1 = 8 byte name of var to create<br>
  A = var type<br>
- hl = length to allocate for file</td><td> create a file in the /usr/tivars/ directory</td><td> Cf set if failed</td><td></td><td>
+ hl = length to allocate for file</td><td> create a file in the /usr/tivars/ directory</td><td> hl = pointer to 2 byte file length, de = pointer to file data section<br>
+ Cf set if failed</td><td></td><td>
 </td></tr>
 </table></div><div id="gui_InputNoClear"><h1>gui_InputNoClear</h1><h3>syscall Adress 020228</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -390,7 +393,7 @@
 </td></tr>
 </table></div><div id="sys_WriteFlashFull"><h1>sys_WriteFlashFull</h1><h3>syscall Adress 020238</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td></td><td> store data to flash, surpassing flash AND logic using the swap sector.</td><td> bool sys_WriteFlashFull(void *dest, void *src, int len);</td><td></td><td>
+<tr><td></td><td> store data to flash, surpassing flash AND logic using the swap sector.</td><td> uint8_t sys_WriteFlashFull(void *dest, void *src, int len);</td><td></td><td>
  erases swap sector, copies dest sector to swap sector excluding the data write area, writes data, erases dest sector, copies swap sector to dest sector.<br>
  source and destination cannot be within the same sector.</td></tr>
 </table></div><div id="sys_WriteFlashByteFull"><h1>sys_WriteFlashByteFull</h1><h3>syscall Adress 02023C</h3>
@@ -468,5 +471,13 @@
 </table></div><div id="fs_CreateDir"><h1>fs_CreateDir</h1><h3>syscall Adress 02027C</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td> void *fs_CreateDir(const char *path, uint8_t flags);</td><td> Create a directory given a path and return a file descriptor.</td><td> file descriptor. Returns 0 if failed to create directory. </td><td></td><td>
+</td></tr>
+</table></div><div id="gfx_BufClear"><h1>gfx_BufClear</h1><h3>syscall Adress 020280</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> A color to fill with</td><td> clears the back buffer</td><td></td><td> HL,DE,BC,F(P/V)</td><td>
+</td></tr>
+</table></div><div id="gfx_LcdClear"><h1>gfx_LcdClear</h1><h3>syscall Adress 020284</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> A color to fill with</td><td> clears the lcd</td><td></td><td> HL,DE,BC,F(P/V)</td><td>
 </td></tr>
 </table></div></body></html>

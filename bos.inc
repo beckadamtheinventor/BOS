@@ -96,6 +96,8 @@ namespace bos
 ?fs_RenameFile                   := $20274
 ?_SetCursorPos                   := $20278
 ?fs_CreateDir                    := $2027C
+?gfx_BufClear                    := $20280
+?gfx_LcdClear                    := $20284
 ;
 ;
 ?LCD_PAL    := 0E30200h
@@ -158,9 +160,9 @@ namespace bos
 ?usb_sector_buffer      := $D02000 ;512 bytes
 ?malloc_cache           := $D03000 ;4096 bytes
 ?usbRAM                 := $D05080 ;256 bytes, should not be tampered with while /dev/mnt or /dev/usb are active
-?safeRAM                := $D08000 ; 65536 bytes scrap RAM
+?safeRAM                := $D05200 ; 65536 bytes scrap RAM
 ?safeRAM_len            := 65536
-?reservedRAM            := $D18000 ; 2048 bytes reserved RAM
+?reservedRAM            := $D15200 ; 2048 bytes RAM reserved for 
 ?reservedRAM_len        := 2048
 ?bos_Stackbot           := $D1A87C
 ?bos_UserMem            := $D1A881

@@ -12,6 +12,19 @@ fs_SetSize:
 	ld de,(iy+$E)
 	ex.s hl,de
 	call fs_CeilDivBySector
+	ld a,l
+	or a,h
+	jq nz,.allocate_from_nonempty_file
+
+	ld hl,(ix+6)
+	push hl
+	call fs_Alloc ;allocate space for new file
+	jq c,.fail
+	pop bc
+	ld (ix-19),hl
+	jq .update_file_entry
+
+.allocate_from_nonempty_file:
 	ld b,9
 .mult_loop:
 	add hl,hl
@@ -47,8 +60,8 @@ fs_SetSize:
 	call sys_WriteFlashFull
 	pop bc,bc,bc
 
-	ld iy,(ix+9)
 .update_file_entry:
+	ld iy,(ix+9)
 	lea de,ix-16
 	lea hl,iy
 	ld bc,16

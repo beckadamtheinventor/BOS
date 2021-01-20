@@ -7,6 +7,8 @@ include 'include/bos.inc'
 org $040000
 fs_fs
 
+
+
 ;-------------------------------------------------------------
 ;directory listings section
 ;-------------------------------------------------------------
@@ -30,6 +32,7 @@ end fs_dir
 ;"/bin/" directory
 fs_dir bin_dir
 	fs_entry root_dir, "..", "", f_subdir
+	fs_entry bpkload_exe, "bpk", "exe", f_readonly+f_system
 	fs_entry cat_exe, "cat", "exe", f_readonly+f_system
 	fs_entry cd_exe, "cd", "exe", f_readonly+f_system
 	fs_entry cmd_exe, "cmd","exe", f_readonly+f_system
@@ -83,6 +86,54 @@ fs_dir lib_dir
 	fs_entry usbdrvce_lll, "USBDRVCE","LLL", f_readonly+f_system
 	fs_entry libload_lll, "LibLoad", "LLL", f_readonly+f_system
 end fs_dir
+
+;"/boot/usr/" directory
+fs_dir boot_usr
+	fs_entry boot_dir, "..", "", f_subdir
+end fs_dir
+
+;"/etc/" directory
+fs_dir etc_dir
+	fs_entry root_dir, "..", "", f_subdir
+end fs_dir
+
+;"/home/" directory
+fs_dir home_dir
+	fs_entry root_dir, "..", "", f_subdir
+	fs_entry user_home_dir, "user", "", f_subdir
+end fs_dir
+
+;"/usr/" directory
+fs_dir usr_dir
+	fs_entry root_dir, "..", "", f_subdir
+	fs_entry usr_bin_dir, "bin", "", f_subdir
+	fs_entry usr_lib_dir, "lib", "", f_subdir
+	fs_entry tivars_dir, "tivars", "", f_subdir
+end fs_dir
+
+;"/home/user/" directory
+fs_dir user_home_dir
+	fs_entry home_dir, "..", "", f_subdir
+	fs_entry user_settings_dat, "settings", "dat", 0
+	db 16 dup 0
+end fs_dir
+
+;"/usr/tivars/" directory
+fs_dir tivars_dir
+	fs_entry usr_dir, "..", "", f_subdir
+end fs_dir
+
+;"/usr/bin/" directory
+fs_dir usr_bin_dir
+	fs_entry usr_dir, "..", "", f_subdir
+end fs_dir
+
+;"/usr/lib/" directory
+fs_dir usr_lib_dir
+	fs_entry usr_dir, "..", "", f_subdir
+end fs_dir
+
+
 
 ;-------------------------------------------------------------
 ;file data section
@@ -1109,55 +1160,9 @@ fs_file usbrecv_exe
 	file '../obj/usbrecv.bin'
 end fs_file
 
-
-assert $<$060000
-db $060000-$ dup $FF
-
-;"/boot/usr/" directory
-fs_dir boot_usr
-	fs_entry boot_dir, "..", "", f_subdir
-end fs_dir
-
-;"/etc/" directory
-fs_dir etc_dir
-	fs_entry root_dir, "..", "", f_subdir
-end fs_dir
-
-;"/home/" directory
-fs_dir home_dir
-	fs_entry root_dir, "..", "", f_subdir
-	fs_entry user_home_dir, "user", "", f_subdir
-end fs_dir
-
-;"/usr/" directory
-fs_dir usr_dir
-	fs_entry root_dir, "..", "", f_subdir
-	fs_entry usr_bin_dir, "bin", "", f_subdir
-	fs_entry usr_lib_dir, "lib", "", f_subdir
-	fs_entry tivars_dir, "tivars", "", f_subdir
-end fs_dir
-
-;"/home/user/" directory
-fs_dir user_home_dir
-	fs_entry home_dir, "..", "", f_subdir
-	fs_entry user_settings_dat, "settings", "dat", 0
-	db 16 dup 0
-end fs_dir
-
-;"/usr/tivars/" directory
-fs_dir tivars_dir
-	fs_entry usr_dir, "..", "", f_subdir
-end fs_dir
-
-;"/usr/bin/" directory
-fs_dir usr_bin_dir
-	fs_entry usr_dir, "..", "", f_subdir
-end fs_dir
-
-;"/usr/lib/" directory
-fs_dir usr_lib_dir
-	fs_entry usr_dir, "..", "", f_subdir
-end fs_dir
+fs_file bpkload_exe
+	file '../obj/bpkload.bin'
+end fs_file
 
 
 end fs_fs

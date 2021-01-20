@@ -96,6 +96,8 @@ namespace bos
 ?fs_RenameFile                   := $20274
 ?_SetCursorPos                   := $20278
 ?fs_CreateDir                    := $2027C
+?gfx_BufClear                    := $20280
+?gfx_LcdClear                    := $20284
 ;
 ;
 ?LCD_PAL    := 0E30200h

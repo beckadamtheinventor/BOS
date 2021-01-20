@@ -93,5 +93,7 @@
 	jp fs_RenameFile
 	jp _SetCursorPos
 	jp fs_CreateDir
+	jp gfx_BufClear
+	jp gfx_LcdClear
 
 

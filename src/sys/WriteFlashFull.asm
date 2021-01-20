@@ -1,6 +1,6 @@
 
 ;@DOES store data to flash, surpassing flash AND logic using the swap sector.
-;@OUTPUT bool sys_WriteFlashFull(void *dest, void *src, int len);
+;@OUTPUT uint8_t sys_WriteFlashFull(void *dest, void *src, int len);
 ;@NOTE erases swap sector, copies dest sector to swap sector excluding the data write area, writes data, erases dest sector, copies swap sector to dest sector.
 ;@NOTE source and destination cannot be within the same sector.
 sys_WriteFlashFull:
@@ -19,7 +19,23 @@ sys_WriteFlashFull:
 	or a,a
 	sbc hl,de
 	jq nc,.two_writes
-	
+
+	ld de,(ix+6)
+	ld hl,(ix+9)
+	ld bc,(ix+12)
+	push bc,hl,de
+	call .write_flash_full
+	pop bc,bc,bc
+	pop ix
+	ret
+
+.write_flash_full:
+	call ti._frameset0
+	ld a,(ix+8) ;high byte of destination
+	cp a,4
+	jq c,.fail
+	cp a,$3F
+	jq nc,.fail
 
 	call sys_FlashUnlock
 .main:
@@ -87,18 +103,21 @@ sys_WriteFlashFull:
 .two_writes:
 
 ;write first sector
-	ld hl,(ix+9)
+	ld hl,(ix+6)
 	ex.s hl,de
-	ld hl,$010000
-	or a,a
+	ld a,e
+	or a,d
+	jq z,.full_sector
+	ld hl,$00FFFF
 	sbc hl,de ;length until sector boundary
 	ld de,(ix+6)
-	jq z,.full_sector
 	ld bc,(ix+9)
 	push hl,bc,de
-	call sys_WriteFlashFull
-	pop de,bc,hl
-	jq c,.fail
+	call .write_flash_full
+	pop de,hl,bc
+	or a,a
+	jq z,.fail
+	inc bc
 
 ;write next sector(s)
 	add hl,bc ;src is now at next sector boundary
@@ -113,9 +132,10 @@ sys_WriteFlashFull:
 	pop bc ;bc is now len - prev write len
 	pop hl
 	push bc,hl,de
-	call sys_WriteFlashFull
+	call nz,.write_flash_full
 	pop bc,bc,bc
-	jq c,.fail
+	or a,a
+	jq z,.fail
 	jq .success
 
 ;write an entire sector

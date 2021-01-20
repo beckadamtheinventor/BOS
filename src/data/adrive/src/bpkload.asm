@@ -5,9 +5,9 @@ include 'include/ti84pceg.inc'
 include 'include/bos.inc'
 
 org $D1A881
-	jq usbrecv_main
+	jq bpkload_main
 	db "REX",0
-usbrecv_main:
+bpkload_main:
 	pop bc
 	pop hl
 	push hl
@@ -15,7 +15,7 @@ usbrecv_main:
 	ld (_Args),hl
 	ld (_ErrSP),sp
 	call libload_load
-	jq z,usbrecv_main.main
+	jq z,bpkload_main.main
 	ld hl,str_FailedToLoadLibload
 	call bos.gui_Print
 	scf
@@ -43,8 +43,8 @@ libload_load:
 	xor   a,a
 	inc   a
 	ret
-usbrecv_main.main:
-	ld hl,str_usbrecv
+bpkload_main.main:
+	ld hl,str_bpkload
 	call bos.gui_DrawConsoleWindow
 ;init USB
 	ld bc, 12  ;USB_DEFAULT_INIT_FLAGS
@@ -92,13 +92,18 @@ init_explore_drive:
 	jq main_print_and_exit
 
 main_fail_file_creation:
+	call bos.gfx_BufClear
 	ld hl,str_FailedToCreateFile
 	jq main_print_and_exit
 
 main_fail_memory:
+	call bos.gfx_BufClear
 	ld hl,str_MemoryError
 
 main_print_and_exit:
+	push hl
+	call bos.gfx_BufClear
+	pop hl
 	call bos.gui_Print
 	call bos.sys_WaitKeyCycle
 ;Cleanup USB
@@ -286,8 +291,8 @@ str_InitializingPartition:
 	db "Initializing partition...",$A,0
 found_partitions:
 	dl 0
-str_usbrecv:
-	db "USB Program Reciever",$A,0
+str_bpkload:
+	db "USB BPK Installer",$A,0
 str_WaitingForDevice:
 	db $9,"Waiting for device...",$A
 	db "Please insert USB flash drive.",$A,0
@@ -313,9 +318,12 @@ str_FileNotFound:
 str_MemoryError:
 	db $9,"Not Enough Memory.",$A,0
 str_FailedToCreateFile:
-	db $9,"Failed to create file.",$A,0
+	db $9,"Failed to create file(s).",$A,0
 str_Success:
-	db $9,"Successfuly recieved file.",$A,0
+	db $9,"Successfuly recieved files.",$A,0
+str_ReceivingBPK:
+	db $9,"Receiving BPK",$A,0
+
 
 libload_relocations:
 db $C0,"USBDRVCE",0,0
@@ -358,7 +366,7 @@ fat_ReadSectors:
 	pop   hl      ; pop error return
 	ret
 
-open_file:
+transfer_file:
 	ld hl,0
 _Args:=$-3
 	push hl
@@ -410,10 +418,7 @@ _Arg2:=$-3
 	ld hl,str_FileNotFound
 	jq main_print_and_exit
 .copy_file_opened:
-	ld bc,$D40000             ;set LCD to draw from the first half of VRAM
-	ld (ti.mpLcdUpbase),bc
-	ld bc,$D52C00             ;use back buffer as RAM
-	ld (.copy_file_dest),bc
+	ld bc,$D52C00
 	ld de,0
 .copy_file_sectors:=$-3
 	push bc,de,hl
@@ -433,19 +438,128 @@ _Arg2:=$-3
 	push bc
 	call bos.fs_Write
 	pop bc,bc,bc,bc,bc
+	ret
 
-	call bos.gfx_BufClear
+open_file:
+	ld hl,str_ReceivingBPK
+	call bos.gui_DrawConsoleWindow
+	ld bc,$D52C00
+	ld (transfer_file.copy_file_dest),bc
 
-	ld bc,msd_device
-	push bc
-	call msd_Deinit
-	ld hl,usb_device
+	ld hl,(_Args)
+	ld c,1 shl 0
+	ld de,fat_device
+	push bc,hl,de
+	call fat_GetSize
+	pop bc,bc
 	ex (sp),hl
-	call usb_DisableDevice
-	pop bc
-	call usb_Cleanup
+	call bos.sys_Malloc
+	jq c,main_fail_memory
+	ld (.mallocd_memory),hl
+	pop hl
+	ld (.copy_file_len),hl
+	xor a,a
+	ld bc,9
+	call ti._lshru
+	inc hl
+	ld (.copy_file_sectors),hl
+	ld hl,(_Args)
+	ld c,1 shl 0
+	ld de,fat_device
+	push bc,hl,de
+	call fat_Open
+	pop bc,bc,bc
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	jq nz,.copy_file_opened
+	ld hl,str_FileNotFound
+	jq main_print_and_exit
+.copy_file_opened:
+	ld bc,$D40000             ;set LCD to draw from the first buffer
+	ld (ti.mpLcdUpbase),bc
+	ld bc,(.mallocd_memory)
+	ld de,0
+.copy_file_sectors:=$-3
+	push bc,de,hl
+	call fat_ReadSectors
+	pop hl,bc,bc
 
+	ld hl,0
+.mallocd_memory:=$-3
+	ld bc,0
+.copy_file_len:=$-3
+	add hl,bc
+	ld (.eof),hl
+	or a,a
+	sbc hl,bc
+	call .remove_cr_lf
+	ld hl,(.mallocd_memory)
+.receive_files_loop:
+	ld a,(hl)
+	cp a,'/'
+	jq z,.is_abs_path
+	inc hl
+	cp a,':'
+	call z,.print
+	ld de,0
+.eof:=$-3
+	add hl,de
+	or a,a
+	sbc hl,de
+	jq c,.receive_files_loop
+
+.finish:
+	call bos.gfx_BufClear
 	ld hl,str_Success
 	call bos.gui_DrawConsoleWindow
 	jq main_exit
+
+.is_abs_path:
+	ld (_Args),hl
+	push hl
+	call transfer_file
+	ld hl,(.eof)
+	pop de
+	or a,a
+	sbc hl,de
+	push hl
+	pop bc
+	ex hl,de
+	xor a,a
+	cpir
+	jp po,.finish
+	cpir
+	jp po,.finish
+	jq .receive_files_loop
+
+.print:
+	push hl
+	call bos.gui_Print
+.bypass_line:
+	ld hl,(.eof)
+	pop de
+	or a,a
+	sbc hl,de
+	push hl
+	pop bc
+	ex hl,de
+	xor a,a
+	cpir
+	ret
+
+.remove_cr_lf:
+	ld a,$D
+	push hl,bc
+	call .remove
+	pop bc,hl
+	ld a,$A
+.remove:
+	cpir
+	ret po
+	dec hl
+	ld (hl),0
+	jq .remove
+
+
 

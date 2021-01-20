@@ -4,5 +4,5 @@
 gfx_LcdClear:
 	ld	hl,LCD_VRAM
 	ld	bc,LCD_WIDTH * LCD_HEIGHT - 1
-	jr	gfx_BufClear.clear
+	jq	gfx_BufClear.clear
 

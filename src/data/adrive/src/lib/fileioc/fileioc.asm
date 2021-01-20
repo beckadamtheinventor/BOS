@@ -479,43 +479,43 @@ ti_Write:
 	jq nz,util_ret_null_pop_ix
 	call util_get_vat_ptr
 	ld hl,(hl)
+	ld bc,-$E
+	add hl,bc
 	push hl
 	call util_get_offset
 	pop hl
 	push bc,hl
-	ld de,$E
-	add hl,de
-	ld de,(hl)
-	ex.s hl,de
+	push bc
+	ld bc,0
+	ld c,(ix+12)
+	ld hl,(ix+9)
+	call __imulu
+	ld (.write_total_size),hl
+	pop bc
+	add hl,bc
+	push hl
+	call util_get_slot_size
+	pop hl
 	or a,a
 	sbc hl,bc
-	pop hl
-	push hl
-	call c,.resize
-	ld bc,(ix+12)
+	add hl,bc
+	pop bc
 	push bc
+	push bc,hl
+	call nc,bos.fs_SetSize
+	pop bc
+	ld hl,(ix+12)
+	ex (sp),hl
 	ld bc,(ix+9)
 	push bc
 	ld bc,(ix+6)
 	push bc
 	call bos.fs_Write
 	pop bc,de,hl,bc,bc
-	ld b,e
-	ex hl,de
-	or a,a
-	sbc hl,hl
-.count_loop:
-	add hl,de
-	djnz .count_loop
-	push hl
-	pop bc
+	ld bc,0
+.write_total_size:=$-3
 	pop ix
 	jq util_set_offset
-	ret
-.resize:
-	push bc,hl
-	call bos.fs_SetSize
-	pop hl,bc
 	ret
 
 
@@ -535,6 +535,8 @@ ti_Read:
 	jq nz,util_ret_null_pop_ix
 	call util_get_vat_ptr
 	ld hl,(hl)
+	ld bc,-$E
+	add hl,bc
 	push hl
 	call util_get_offset
 	pop hl
@@ -572,16 +574,10 @@ ti_GetC:
 	push hl
 	call util_is_slot_open
 	jq nz,util_ret_null
-	call util_get_vat_ptr
-	ld hl,(hl)
-	ld bc,$C
-	add hl,bc
-	ld hl,(hl)
-	push hl
-	call bos.fs_GetSectorAddress
-	ex (sp),hl
+	call util_get_data_ptr
+	ld de,(hl)
 	call util_get_offset
-	pop hl
+	ex hl,de
 	add hl,bc
 	ld a,(hl)
 	inc bc
@@ -607,19 +603,25 @@ ti_PutC:
 	call util_is_slot_open
 	jq nz,util_ret_null
 	call util_get_vat_ptr
+	ld bc,-$E
+	add hl,bc
 	push hl
 	call util_get_offset
 	pop hl
 	push bc,hl
-	ld de,$E
-	add hl,de
-	ld de,(hl)
-	ex.s hl,de
+	push bc
+	call util_get_slot_size
+	pop hl
+	inc hl
 	or a,a
 	sbc hl,bc
-	pop hl
-	push hl
-	call c,ti_Write.resize
+	add hl,bc
+	pop bc
+	push bc
+	push bc,hl
+	call nc,bos.fs_SetSize
+	pop hl,bc
+
 	ld c,0
 .buffer:=$-1
 	push bc
@@ -1022,29 +1024,12 @@ ti_GetDataPtr:
 	push	de
 	call	util_is_slot_open
 	jq	nz, util_ret_null
-	call	util_get_vat_ptr
+	call	util_get_data_ptr
 	ld hl,(hl)
 	push hl
-	call util_get_offset
-	push bc
-	push bc
-	pop hl
-	ld bc,1024
-	call __idivu   ;offset>>10
-	push hl
-	pop bc
-	pop de
-	pop hl
-	push de
-	ld bc,0
-	push bc,hl
-;	call bos.fs_GetClusterPtr
-	pop bc,bc
-	pop de
-	ld e,0   ;offset&=0x3FF
-	res 0,d
-	res 1,d
-	add hl,de
+	call	util_get_offset
+	pop	hl
+	add	hl,bc
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -1274,7 +1259,9 @@ ti_RclVar:
 	; jp	nz, util_ret_neg_one_byte
 	; ld	hl, (iy + 9)
 	; ld	(hl), de
-	; ret
+	scf
+	sbc	a,a
+	ret
 
 ;-------------------------------------------------------------------------------
 ti_ArchiveHasRoom:
@@ -1479,8 +1466,7 @@ util_get_offset_ptr:
 	ret
 util_get_slot_size:
 	call	util_get_vat_ptr
-	ld	bc, $C
-	add	hl, bc
+	ld	hl,(hl)
 	ld	bc, 0
 	ld	c, (hl)
 	inc	hl

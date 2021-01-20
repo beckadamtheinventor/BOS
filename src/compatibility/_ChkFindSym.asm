@@ -18,8 +18,8 @@ _ChkFindSym:
 	call fs_GetSectorAddress
 	ex hl,de
 	pop bc,hl
-	ld bc,fsentry_filesector - fsentry_filelen
-	add hl,bc
+	inc hl
+	inc hl
 	or a,a
 	ret
 
