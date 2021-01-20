@@ -162,7 +162,7 @@ namespace bos
 ?usbRAM                 := $D05080 ;256 bytes, should not be tampered with while /dev/mnt or /dev/usb are active
 ?safeRAM                := $D05200 ; 65536 bytes scrap RAM
 ?safeRAM_len            := 65536
-?reservedRAM            := $D15200 ; 2048 bytes RAM reserved for 
+?reservedRAM            := $D15200 ; 2048 bytes reserved RAM
 ?reservedRAM_len        := 2048
 ?bos_Stackbot           := $D1A87C
 ?bos_UserMem            := $D1A881
