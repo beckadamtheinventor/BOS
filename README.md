@@ -35,7 +35,24 @@ Currently this OS is lacking in system executables. Said programs go into the `/
 These programs must be referenced in `/src/data/adrive/src/main.asm` as well as built in both build.bat and build.sh.
 If you decide to make a program for BOS that you feel should be included in the OS binaries, feel free to make a pull request!
 
-# Writing programs for BOS
+
+# Installing programs on BOS
+Programs written for BOS can be transferred to BOS via a FAT32 formatted USB drive.
+Threre are two ways that BOS programs can be installed, and it depends on how the author chooses to package.
+In any case, read the README file (chances are the author has provided one) and look for how to install on BOS.
+
+## If you do not see a ".bpk" file
+Place the ".bin" file onto the drive, open BOS's USB program receiver, enter the path to the file transferred to the USB drive, enter the file you want the program to be written to within BOS's filesystem, and wait for the transfer to complete.
+
+## If you see a ".bpk" file
+Place the ".bpk" file and the "bpk/" directory on the drive, and run the bpk loader with the path to the ".bpk" file on the drive. Once the transfer is complete, the program should show up in the "/usr/bin/" directory under the same name as the ".bpk" file. (likely wity the ".exe" extension)
+
+# Writing C programs for BOS
+I am currently working on a toolchain fork that targets BOS: https://github.com/beckadamtheinventor/toolchain
+Many programs that compile on the standard CE C toolchain will compile in the BOS C toolchain, but steer clear from using OS routines; many of them are not implemented in BOS and will cause crashes and other unexpected issues.
+As well, do not directly write directly to variables in BOS! All files are currently stored in flash/archive, so attempting to write to them directly will almost certainly cause a crash.
+
+# Writing assembly programs for BOS
 The header of your program is different depending if it is meant to run from RAM/USB, or flash.
 
 ## If your program runs from RAM or USB
@@ -70,9 +87,10 @@ main:
 ## Using libload
 BOS comes pre-loaded with some libload libraries. Some of these libraries are unstable at the moment.
 + fatdrvce (stable, subject to change)
-+ fileioc (unstable)
++ fontlibc (stable)
++ fileioc (semi-stable)
 + graphx (stable)
-+ srldrvce (probably not the latest)
++ srldrvce (stable, subject to change)
 + usbdrvce (stable, subject to change)
 
 Using these libraries requires your program to run from *RAM or USB* as a RAM executable.
@@ -108,12 +126,11 @@ The library include header starts with the byte 0xC0 ($C0) and is followed by th
 Note that the version byte for each library is different. Since BOS comes pre-loaded with some of the latest libload libraries, it is unlikely that you will see a version error.
 Headers for libload libraries included in BOS:
 + fatdrvce: `db $C0,"FATDRVCE",0,1`
++ fontlibc: `db $C0, "FONTLIBC",0,2`
 + fileioc: `db $C0,"FILEIOC",0,6`
 + graphx: `db $C0,"GRAPHX",0,11`
 + srldrvce: `db $C0,"SRLDRVCE",0,0`
 + usbdrvce: `db $C0,"USBDRVCE",0,0`
-
-Note that fileioc is currently unstable/unusable in BOS.
 
 Example usage:
 ```
