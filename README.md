@@ -46,14 +46,15 @@ From there, you can reboot, attempt filesystem recovery, reset the filesystem, a
 
 # Documentation
 `bos.inc` docs https://beckadamtheinventor.github.io/BOS/
-`ti84pceg.inc` is somewhat lacking in documentation, and many of the routines are not applicable in BOS.
+OS calls in `ti84pceg.inc` are mostly unimplemented and most of them will likely not be implemented.
 However, syscall addresses below 0x020000 are bootcode calls and can be used as normal.
 
 
 # Contributing
 Currently this OS is lacking in system executables. Said programs go into the `/src/data/adrive/src` directory.
-These programs must be referenced in `/src/data/adrive/src/main.asm` as well as built in both build.bat and build.sh.
-If you decide to make a program for BOS that you feel should be included in the OS binaries, feel free to make a pull request!
+BOS is especially in need of a text editor.
+System executables must be referenced in `/src/data/adrive/src/main.asm` as well as built in both build.bat and build.sh.
+If you decide to make a program for BOS that you feel should be included in the OS binaries, feel free to make a pull request! I'll link them into the filesystem and provide credit.
 
 
 # Installing programs on BOS
