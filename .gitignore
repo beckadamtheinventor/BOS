@@ -2,6 +2,7 @@
 *.idea
 *obj
 *threading*
+*.rom
 src/data/fs
 src/data/srcfs
 src/data/temp
@@ -10,4 +11,4 @@ src/data/cache.json
 src/data/fs.bin
 src/data/fs_compressed.bin
 src/data/properties.json
-add_file_to_rom.py
+
