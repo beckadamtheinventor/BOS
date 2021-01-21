@@ -197,6 +197,7 @@ if __name__=='__main__':
 				exit(1)
 			else:
 				add_file_to_rom(rom, fout, 0x00, fin_data)
+				build_cluster_map(rom)
 		except IOError:
 			print(f"Could not open file: {fin}")
 			exit(1)

@@ -967,7 +967,7 @@ rm_main:
 	jq nz,.fail_readonly
 	bit fb_subdir, (iy+$B)
 	jq nz,.fail_subdir
-	push iy
+	push hl
 	call bos.fs_DeleteFile
 	pop bc
 	xor a,a
