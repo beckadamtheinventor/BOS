@@ -1,7 +1,7 @@
 
-define bos? bos
-namespace bos
-;
+	define bos? bos
+	namespace bos
+	;
 ?boot_os                         := $20108
 ?handle_interrupt                := $2010C
 ;DONOTHING                       := $20110
@@ -98,7 +98,9 @@ namespace bos
 ?fs_CreateDir                    := $2027C
 ?gfx_BufClear                    := $20280
 ?gfx_LcdClear                    := $20284
-;
+?fs_SanityCheck                  := $20288
+?sys_SetupOnInterruptHandler     := $2028C
+?gui_PrintChar                   := $20290
 ;
 ?LCD_PAL    := 0E30200h
 ?LCD_CTRL   := 0E30018h
@@ -132,6 +134,7 @@ namespace bos
 ?bottom_of_RAM          := $D0022D
 ?flashStatusByte        := $D00230
 ?filesystem_driver      := $D00231
+?on_interrupt_handler   := $D00234 ;4 bytes. Jump to on key interrupt handler
 ?ScrapMem2              := $D00279
 ?ScrapByte              := $D0027C
 ?ScrapWord              := $D0027D

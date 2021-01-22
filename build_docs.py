@@ -29,152 +29,152 @@ def myfinder(d,df):
 			pass
 	return [],0
 
+def build_docs():
+	try:
+		with open("src/table.asm") as f:
+			data=f.read().splitlines()
+	except Exception as e:
+		error(e)
+	try:
+		with open("src/include/defines.inc") as f:
+			defines=f.read().splitlines()
+	except Exception as e:
+		error(e)
 
-try:
-	with open("src/table.asm") as f:
-		data=f.read().splitlines()
-except Exception as e:
-	error(e)
-try:
-	with open("src/include/defines.inc") as f:
-		defines=f.read().splitlines()
-except Exception as e:
-	error(e)
+	counter=0x020108
 
-counter=0x020108
+	try:
+		os.makedirs("docs")
+	except:
+		pass
 
-try:
-	os.makedirs("docs")
-except:
-	pass
-
-with open("docs/style.css","w") as f:
-	f.write("""
-html{
-	background-color: black;
-}
-body{
-	margin: 0 auto;
-	width: 960px;
-	font-size: 100%;
-	line-height: 1.5;
-	color: white;
-	background-color: #111;
-	text-align: center;
-}
-ul{
-	text-align: left;
-}
-th,tr,td{
-	border-left: 1px solid white;
-	border-top: 1px solid white;
-}
-th,td{
-	width: 20%;
-}
-table{
-	border-right: 1px solid white;
-	border-bottom: 1px solid white;
-	position: relative;
-	left: 2%;
-	width: 96%;
-}
-.no_op{
-	color: #C02020;
-}
-.assembly{
-	color: #4F1;
-	background-color: #111;
-	border: 1px dotted black;
-	padding-left: 45%;
-	text-align: left;
-}
-.stupid_tabs{
-	color: #111;
-	font-size: 2.5;
-}
-""")
+	with open("docs/style.css","w") as f:
+		f.write("""
+	html{
+		background-color: black;
+	}
+	body{
+		margin: 0 auto;
+		width: 960px;
+		font-size: 100%;
+		line-height: 1.5;
+		color: white;
+		background-color: #111;
+		text-align: center;
+	}
+	ul{
+		text-align: left;
+	}
+	th,tr,td{
+		border-left: 1px solid white;
+		border-top: 1px solid white;
+	}
+	th,td{
+		width: 20%;
+	}
+	table{
+		border-right: 1px solid white;
+		border-bottom: 1px solid white;
+		position: relative;
+		left: 2%;
+		width: 96%;
+	}
+	.no_op{
+		color: #C02020;
+	}
+	.assembly{
+		color: #4F1;
+		background-color: #111;
+		border: 1px dotted black;
+		padding-left: 45%;
+		text-align: left;
+	}
+	.stupid_tabs{
+		color: #111;
+		font-size: 2.5;
+	}
+	""")
 
 
 
-print("Generating syscalls.html")
-with open("docs/syscalls.html","w") as f:
-	f.write("<html><head><title>bos.inc docs</title>\
-<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\"></head>\
-<body>\
-<h1>\"bos.inc\" documentation</h1>\
-<h3>syscalls marked in <a class=\"no_op\">red</a> are no-ops and do nothing.</h3>\
-<table><th>syscall name</th><th>syscall adress</th><th>links</th>\
-")
-	with open("docs/tmp","w") as f2:
-		for line in data:
-			if "jp " in line:
-				e=[]
-				line=line[line.find("jp ")+3:]
-				if ";" in line:
-					line=line[:line.find(";")]
-				if line.strip(" \t")=="DONOTHING":
-					f.write("<tr class=\"no_op\">")
-				else:
-					f.write("<tr>")
-					f2.write("<div id=\""+line+"\"><h1>"+line+"</h1>\
-<h3>syscall Adress "+myhex(counter)+"</h3>\n")
-					f2.write("<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>\n")
-					a=[]; b=[]; c=[]; d=[]
-					dt,ix=myfinder("src",line+":")
-					if ix:
-						try:
-							while not dt[ix].startswith(";@DOES"):
-								ix-=1
-								if not ix: break
-							while not dt[ix].startswith(line):
-								if len(dt[ix])>1:
-									t=dt[ix][1:]
-									if t.startswith("@INPUT"):
-										a.append(t.replace("@INPUT","").replace("\\n","<br>\n"))
-									elif t.startswith("@DOES"):
-										b.append(t.replace("@DOES","").replace("\\n","<br>\n"))
-									elif t.startswith("@OUTPUT"):
-										c.append(t.replace("@OUTPUT","").replace("\\n","<br>\n"))
-									elif t.startswith("@DESTROYS"):
-										d.append(t.replace("@DESTROYS","").replace("\\n","<br>\n"))
-									elif t.startswith("@NOTE"):
-										e.append(t.replace("@NOTE","").replace("\\n","<br>\n"))
-									elif dt[ix][0]==";":
-										pass
-									else:
-										break
-								ix+=1
-							f2.write("<tr><td>"+("<br>\n".join(a))+"</td><td>"+("<br>\n".join(b))+"</td><td>"+("<br>\n".join(c))+\
-								"</td><td>"+("<br>\n".join(d))+"</td><td>\n"+("<br>\n".join(e))+"</td></tr>\n")
-							a.clear(); b.clear(); c.clear(); d.clear(); e.clear()
-						except:
-							pass
-					f2.write("</table></div>")
-					# if ix and ":" not in dt[ix]:
-						# f2.write("<div class=\"assembly\">\n")
-						# while len(dt[ix]):
-							# f2.write(dt[ix].replace("\t","<a class=\"stupid_tabs\">am I a tab to you?</a>",1)+"<br>\n")
-							# ix+=1
-							# if ix>=len(dt):
-								# break
-						# f2.write("</div>")
+	print("Generating syscalls.html")
+	with open("docs/syscalls.html","w") as f:
+		f.write("<html><head><title>bos.inc docs</title>\
+	<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\"></head>\
+	<body>\
+	<h1>\"bos.inc\" documentation</h1>\
+	<h3>syscalls marked in <a class=\"no_op\">red</a> are no-ops and do nothing.</h3>\
+	<table><th>syscall name</th><th>syscall adress</th><th>links</th>\
+	")
+		with open("docs/tmp","w") as f2:
+			for line in data:
+				if "jp " in line:
+					e=[]
+					line=line[line.find("jp ")+3:]
+					if ";" in line:
+						line=line[:line.find(";")]
+					if line.strip(" \t")=="DONOTHING":
+						f.write("<tr class=\"no_op\">")
+					else:
+						f.write("<tr>")
+						f2.write("<div id=\""+line+"\"><h1>"+line+"</h1>\
+	<h3>syscall Adress "+myhex(counter)+"</h3>\n")
+						f2.write("<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>\n")
+						a=[]; b=[]; c=[]; d=[]
+						dt,ix=myfinder("src",line+":")
+						if ix:
+							try:
+								while not dt[ix].startswith(";@DOES"):
+									ix-=1
+									if not ix: break
+								while not dt[ix].startswith(line):
+									if len(dt[ix])>1:
+										t=dt[ix][1:]
+										if t.startswith("@INPUT"):
+											a.append(t.replace("@INPUT","").replace("\\n","<br>\n"))
+										elif t.startswith("@DOES"):
+											b.append(t.replace("@DOES","").replace("\\n","<br>\n"))
+										elif t.startswith("@OUTPUT"):
+											c.append(t.replace("@OUTPUT","").replace("\\n","<br>\n"))
+										elif t.startswith("@DESTROYS"):
+											d.append(t.replace("@DESTROYS","").replace("\\n","<br>\n"))
+										elif t.startswith("@NOTE"):
+											e.append(t.replace("@NOTE","").replace("\\n","<br>\n"))
+										elif dt[ix][0]==";":
+											pass
+										else:
+											break
+									ix+=1
+								f2.write("<tr><td>"+("<br>\n".join(a))+"</td><td>"+("<br>\n".join(b))+"</td><td>"+("<br>\n".join(c))+\
+									"</td><td>"+("<br>\n".join(d))+"</td><td>\n"+("<br>\n".join(e))+"</td></tr>\n")
+								a.clear(); b.clear(); c.clear(); d.clear(); e.clear()
+							except:
+								pass
+						f2.write("</table></div>")
+						# if ix and ":" not in dt[ix]:
+							# f2.write("<div class=\"assembly\">\n")
+							# while len(dt[ix]):
+								# f2.write(dt[ix].replace("\t","<a class=\"stupid_tabs\">am I a tab to you?</a>",1)+"<br>\n")
+								# ix+=1
+								# if ix>=len(dt):
+									# break
+							# f2.write("</div>")
 
-				f.write("<td>bos."+line+"</td><td>"+myhex(counter)+"</td><td><a href=\"#"+line+"\">doc</a></tr>\n")
-				counter+=4
-		
-	f.write("</table>")
-	print("Writing to syscalls.html")
-	with open("docs/tmp") as f2:
-		f.write(f2.read())
-	os.remove("docs/tmp")
-	f.write("</body></html>")
+					f.write("<td>bos."+line+"</td><td>"+myhex(counter)+"</td><td><a href=\"#"+line+"\">doc</a></tr>\n")
+					counter+=4
+			
+		f.write("</table>")
+		print("Writing to syscalls.html")
+		with open("docs/tmp") as f2:
+			f.write(f2.read())
+		os.remove("docs/tmp")
+		f.write("</body></html>")
 
-print("Archiving \"src\" directory")
-with zipfile.ZipFile("./docs/sources.zip",'w') as zf:
-	for fname in fwalk("./src"):
-		zf.write(fname)
-	for fname in ["build.bat","build.sh","bos.inc","build_bos.inc.py","build_docs.py","LICENSE","README.md"]:
-		zf.write(fname)
+	print("Archiving \"src\" directory")
+	with zipfile.ZipFile("./docs/sources.zip",'w') as zf:
+		for fname in fwalk("./src"):
+			zf.write(fname)
+		for fname in ["build.py","bos.inc","build_bos_inc.py","build_docs.py","LICENSE","README.md"]:
+			zf.write(fname)
 
-print("Done.")
+	print("Done.")

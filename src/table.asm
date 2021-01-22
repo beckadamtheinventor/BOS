@@ -95,5 +95,7 @@
 	jp fs_CreateDir
 	jp gfx_BufClear
 	jp gfx_LcdClear
-
+	jp fs_SanityCheck
+	jp sys_SetupOnInterruptHandler
+	jp gui_PrintChar
 

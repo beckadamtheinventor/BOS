@@ -1,5 +1,9 @@
 
 gui_NewLine:
+	xor a,a
+	ld (curcol),a
+	sbc hl,hl
+	ld (lcd_x),hl
 	ld a,(console_line)
 	cp a,25
 	jq nc,.scroll

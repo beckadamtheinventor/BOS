@@ -10,6 +10,7 @@ fs_CopyFileName:
 	push hl
 	push de
 	push bc
+	push de
 	ld a,(hl)
 	or a,a
 	jq z,.enda
@@ -19,7 +20,7 @@ fs_CopyFileName:
 	jq z,.end
 	ld (de),a
 	inc de
-	cp a,fsentry_dot
+	cp a,'.'
 	jq z,.dotentry
 .enterloop:
 	inc hl
@@ -57,7 +58,8 @@ fs_CopyFileName:
 .dotentry:
 	inc hl
 	ld a,(hl)
-	db $2E ;ld l,...
+	cp a,'.'
+	jq z,.enda
 .end:
 	xor a,a
 .enda:
@@ -65,12 +67,6 @@ fs_CopyFileName:
 	inc de
 	xor a,a
 	ld (de),a
-	pop bc
 	pop hl
-	push hl
-	push bc
 	ret
-
-
-
 

@@ -2,8 +2,6 @@
 boot_os:
 ;	DisableMultithreading
 	call ti.boot.Set48MHzMode
-	xor a,a
-	ld (flashStatusByte),a
 
 ;	ld bc,64 ;setup gpt2
 ;	xor a,a
@@ -53,6 +51,13 @@ boot_os:
 	ld (asm_prgm_size),hl
 	ld hl,op_stack_top
 	ld (op_stack_ptr),hl
+	ld de,os_DoNothing
+	ld hl,on_interrupt_handler
+	ld (hl),$C3 ;jp opcode byte
+	inc hl
+	ld (hl),de
+	xor a,a
+	ld (flashStatusByte),a
 
 	call fs_SanityCheck
 	ld hl,current_working_dir
@@ -201,7 +206,7 @@ low_bit_0_int:
 	in a,(bc)
 	res 0,a
 	out (bc),a
-	jq return_from_interrupt
+	jq on_interrupt_handler
 low_bit_1_int:
 	ld a,1 shl 1
 	out (bc),a
@@ -210,7 +215,7 @@ low_bit_1_int:
 	res 1,a
 	out (bc),a
 	jq return_from_interrupt
-low_bit_2_int: ;gpt2 interrupt (used for "thread" switching)
+low_bit_2_int: ;gpt2 interrupt (used for "thread" switching) (soon :tm:)
 	ld a,1 shl 2
 	out (bc),a
 	ld c,4
@@ -304,5 +309,6 @@ handle_safeop:
 
 os_GetOSInfo:
 	ld hl,string_os_info
+os_DoNothing:
 	ret
 

@@ -86,7 +86,7 @@ sys_Malloc:
 	dec b
 	jq c,.one_block
 .mark_loop:
-	ld (hl),$FF
+	ld (hl),$7F
 	inc hl
 	djnz .mark_loop
 .one_block:

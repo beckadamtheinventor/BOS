@@ -16,7 +16,7 @@ fs_OpenFile:
 	ld hl,fs_filesystem_address
 	ret ;return root directory
 .pathnonzero:
-	ld hl,-20
+	ld hl,-26
 	call ti._frameset
 	ld (ix-20),iy
 	ld hl,(ix+6)
@@ -33,26 +33,40 @@ fs_OpenFile:
 .entry:
 .main_search_loop:
 	ld hl,(ix-3)
+	ld (ix-26),hl
 	ld a,(hl)
 	or a,a
 	jq z,.return
-	call .search_loop ;returns Zf if failed
-	jq z,.fail
-.into_dir:
-	ld hl,(ix-3)
-	push hl
+	push hl,hl
 	call ti._strlen
+	ld (ix-23),hl
 	ex (sp),hl
 	pop bc
 	ld a,'/'
 	cpir         ;get next path string
-	jq nz,.return ;no more '/' found
+	jq nz,.no_more_slash ;no more '/' found
+	push bc
 	dec hl
 .next_path_skip_slash_loop:
 	cpi
 	jq z,.next_path_skip_slash_loop
+	pop bc
+	inc bc
 	dec hl
+.no_more_slash:
 	ld (ix-3),hl ;advance path entry
+	ld hl,(ix-23)
+	or a,a
+	sbc hl,bc ;how long was the string?
+	ld (ix-23),hl
+	pop hl
+	call .search_loop ;returns Zf if failed
+	jq z,.fail
+	ld hl,(ix-3)
+	ld a,(hl)
+	or a,a
+	jq z,._return
+.into_dir:
 	bit fsbit_subdirectory,(iy + fsentry_fileattr) ;check if we're entering a directory
 	jq z,.fail ;trying to path into a file?
 .step_into_dir:
@@ -91,11 +105,16 @@ fs_OpenFile:
 	push iy,bc
 	call fs_CopyFileName ;get file name string from file entry
 	call ti._strlen ;get length of file name string from file entry
-	ex (sp),hl
-	push hl
-	ld bc,(ix-3)
+	ld bc,(ix-23)
+	or a,a
+	sbc hl,bc
+	add hl,bc
+	pop bc,iy
+	jq nz,.search_next
+	push iy,hl,bc
+	ld bc,(ix-26)
 	push bc
-	call ti._strncmp ;compare with the target directory
+	call ti._strncmp ;compare with the target directory if the lengths are the same
 	pop bc,bc,bc,iy
 	add hl,bc
 	or a,a

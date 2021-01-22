@@ -59,9 +59,9 @@ fs_CreateFile:
 	bit fsbit_subdirectory,(iy+fsentry_fileattr)
 	jq z,.fail ;fail if parent dir is not a dir
 	lea de,ix-19
-	push hl,de
+	push iy,hl,de
 	call fs_StrToFileEntry
-	pop bc,bc
+	pop bc,bc,iy
 	ld de,(iy+fsentry_filelen)
 	ex.s hl,de
 	ld de,16

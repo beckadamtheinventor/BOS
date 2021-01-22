@@ -1,7 +1,7 @@
 
 ;@DOES Create and write a new file
 ;@INPUT void *fs_WriteNewFile(const char *name, uint8_t properties, void *data, int len);
-;@OUTPUT pointer to file descriptor
+;@OUTPUT file descriptor
 fs_WriteNewFile:
 	ld hl,-22
 	call ti._frameset
@@ -22,7 +22,7 @@ fs_WriteNewFile:
 	push bc
 	call fs_Write
 	jq c,.fail
-	pop bc,bc,bc,bc,bc
+	pop bc,bc,bc,hl,bc
 	db $01 ;ld bc,...
 .fail:
 	scf

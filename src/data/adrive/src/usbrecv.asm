@@ -64,6 +64,8 @@ usbrecv_main.main:
 main_init_start:
 	ld hl,str_WaitingForDevice
 	call bos.gui_Print
+	ld hl,main_exit_cleanup
+	call bos.sys_SetupOnInterruptHandler
 .loop:
 	call usb_WaitForInterrupt
 	add hl,bc
@@ -110,11 +112,9 @@ main_exit:
 	ex (sp),hl
 	call usb_DisableDevice
 	pop bc
+main_exit_cleanup:
 	call usb_Cleanup
-	ld hl,ti.mpIntAck
-	set ti.bIntOn,(hl)
 	jq _exit
-
 
 
 reset_smc_bytes:

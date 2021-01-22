@@ -46,6 +46,7 @@ console_line           := $D0022C
 bottom_of_RAM          := $D0022D
 flashStatusByte        := $D00230
 filesystem_driver      := $D00231
+on_interrupt_handler   := $D00234 ;4 bytes. Jump to on key interrupt handler
 ScrapMem2              := $D00279
 ScrapByte              := $D0027C
 ScrapWord              := $D0027D

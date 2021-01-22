@@ -18,24 +18,40 @@ fs_ParentDir:
 	push hl
 	ld a,'/'
 	add hl,bc
+	dec hl
 	cp a,(hl)
 	jq nz,.doesnt_end_with_slash
 	dec hl
 .doesnt_end_with_slash:
 	cpdr ;find last '/' in path string
+	inc hl
 	pop de
 	sbc hl,de
+	jq c,.return_root_dir
 	inc hl
+	jq z,.return_root_dir
 	push de,hl
 	call sys_Malloc
 	ex hl,de
 	pop bc,hl
 	ret c
 	push de
+	dec bc
 	ldir ;copy the path up until last '/'
 	xor a,a
 	ld (de),a ;terminate the string
 .return:
 	pop hl
+	ret
+.return_root_dir:
+	ld hl,2
+	push hl
+	call sys_Malloc
+	pop bc
+	ret c
+	ld (hl),'/'
+	inc hl
+	ld (hl),b
+	dec hl
 	ret
 
