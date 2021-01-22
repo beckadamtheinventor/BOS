@@ -22,14 +22,8 @@ BOS requires the CE C toolchain version 9+ in order to build.
 Link to CE C toolchain:
 https://github.com/CE-Programming/toolchain
 
-
-# Building on Linux/Mac/Unix
-Run the provided `build.sh` file in bash, and the binary will be in the `bin` folder.
-Note for Mac users: You may have to install bash and run build.sh with bash
-
-
-# Building on Windows
-Run the provided `build.bat` file, and the binaries will be in the `bin` folder.
+Once the toolchain is installed, run `build.py` with python 3.7 or higher.
+If you would prefer to use the build script via the command line, type `python3 build.py -h` for a list of options.
 
 
 # Updating BOS
