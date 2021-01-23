@@ -210,7 +210,10 @@ BOS build script v3.0 build options
 		f.write(" ".join(data))
 
 	if fullBuild:
-		os.remove("obj/build_hashes.json")
+		try:
+			os.remove("obj/build_hashes.json")
+		except OSError:
+			pass
 
 	if doBuild:
 		b = Build(" ".join(data))
