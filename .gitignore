@@ -3,6 +3,7 @@
 *obj
 *threading*
 *.rom
+*__pycache__*
 src/data/fs
 src/data/srcfs
 src/data/temp

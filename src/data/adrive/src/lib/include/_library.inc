@@ -1,4 +1,3 @@
-
 macro library? name*, version*, magic: <192,193>
 	local lib
 	element lib.base
@@ -15,6 +14,7 @@ macro library? name*, version*, magic: <192,193>
 		lib.relocations.area::
 	end virtual
 
+	;format ti archived appvar name
 	org 0
 	db magic,version
 	dw lib.exports
@@ -44,7 +44,7 @@ macro library? name*, version*, magic: <192,193>
 		end macro
 	end iterate
 
-	macro @ez80.word @size*, @value*
+	macro @ez80.word @value*
 		local value, address
 		value = @value
 		address = $
@@ -52,9 +52,9 @@ macro library? name*, version*, magic: <192,193>
 			virtual lib.relocations.area
 				dw address-lib.base
 			end virtual
-			@ez80.word @size, value-lib.base
+			@ez80.word value-lib.base
 		else
-			@ez80.word @size, value
+			@ez80.word value
 		end if
 	end macro
 
