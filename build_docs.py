@@ -179,11 +179,11 @@ def build_docs():
 		os.remove("docs/tmp")
 		f.write("</body></html>")
 
-	print("Archiving \"src\" directory")
-	with zipfile.ZipFile("./docs/sources.zip",'w') as zf:
-		for fname in fwalk("./src"):
-			zf.write(fname)
-		for fname in ["build.py","bos.inc","build_bos_inc.py","build_docs.py","LICENSE","README.md"]:
-			zf.write(fname)
-
-	print("Done.")
+#	print("Archiving \"src\" directory")
+#	with zipfile.ZipFile("./docs/sources.zip",'w') as zf:
+#		for fname in fwalk("./src"):
+#			zf.write(fname)
+#		for fname in ["build.py","bos.inc","build_bos_inc.py","build_docs.py","LICENSE","README.md"]:
+#			zf.write(fname)
+#
+#	print("Done.")
