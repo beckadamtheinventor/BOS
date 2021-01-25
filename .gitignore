@@ -1,9 +1,12 @@
-*bin
-*.idea
-*obj
+/bin
+/obj
+/noti-ez80/bin
+/src/data/adrive/obj
+/.idea
+/__pycache__
+*.bin
 *threading*
 *.rom
-*__pycache__*
 src/data/fs
 src/data/srcfs
 src/data/temp
