@@ -96,7 +96,9 @@ macro ?!
      end match
     end while
    end match
-	op	bsr idx,val
+   match v, val
+	op	bsr idx,v
+   end match
   end macro
  end iterate
 
@@ -501,22 +503,22 @@ DEFAULT_RETRIES := 10
 ;-------------------------------------------------------------------------------
 usb_Init:
 	call	_usb_DisableTimer
-	call	bos._os_GetSystemInfo
-	ld	de,4
-	add	hl,de
-	bit	0,(hl)
-	jq	z,.84pce
-	ld	a,$60
-	ld	(_DefaultStandardDescriptors.device+deviceDescriptor.bcdDevice),a
-	ld	hl,_DefaultStandardDescriptors.string83
-	ld	(_DefaultStandardDescriptors.model),hl
-.84pce:
+;	call	_os_GetSystemInfo
+;	ld	de,4
+;	add	hl,de
+;	bit	0,(hl)
+;	jq	z,.84pce
+;	ld	a,$60
+;	ld	(_DefaultStandardDescriptors.device+deviceDescriptor.bcdDevice),a
+;	ld	hl,_DefaultStandardDescriptors.string83
+;	ld	(_DefaultStandardDescriptors.model),hl
+;.84pce:
 	ld	a,1 ; mark pointers as invalid
 	call	_Init
 	set	5,(hl)
 	ld	hl,mpTmr2Load
 	ld	c,12
-	call	bos._MemClear
+	call	_MemClear
 	ld	l,tmrCtrl+1
 	set	bTmr2CountUp-8,(hl)
 	dec	l;tmrCtrl

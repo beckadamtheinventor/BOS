@@ -79,6 +79,19 @@ macro smcByte name*, addr: $-1
 	name equ link
 end macro
 
+virtual at 0
+	Z_ASSET_SPRITE: rb 1
+	Z_ASSET_TILEMAP: rb 1
+	Z_ASSET_FONTSPRITE: rb 1
+	Z_ASSET_1BPPSPRITE: rb 1
+	Z_ASSET_2BPPSPRITE: rb 1
+	Z_ASSET_4BPPSPRITE: rb 1
+	Z_ASSET_COMPRESSEDSPRITE: rb 1
+	Z_ASSET_RLETSPRITE: rb 1
+
+	Z_ASSET_LAST := $-1
+end virtual
+
 
 ;-------------------------------------------------------------------------------
 ; code
@@ -95,17 +108,204 @@ zgx_Init:
 	ret
 
 ;-------------------------------------------------------------------------------
-; gfx_sprite_t *zgx_Extract(zgx_pack_t *pack, const char *asset);
-;	arg 0: pointer to asset pack
-;	arg 1: title of asset to extract
+; gfx_sprite_t *zgx_Extract(gfx_sprite_t *dest, zgx_pack_t *pack, const char *asset);
+;	arg 0: pointer to destination sprite
+;	arg 1: pointer to asset pack
+;	arg 2: title of asset to extract
+;	return 0 if destination sprite dimensions are not the same as the asset sprite dimensions
+;	return -1 if asset sprite not found
+;	return -2 if asset pack invalid
+;	return -3 if asset type invalid
 zgx_Extract:
 	call ti._frameset0
+
+	ld iy,(ix+9)
+	ld hl,(iy)
+	ld a,(iy+4)
+	db $11,"ZGX"
+	or a,a
+	jq nz,util_return_negtwo
+	sbc hl,de
 	
-	ramspace
+	
+	ld bc,(iy+16) ;number of assets in pack
+	ld a,c
+	or a,b
+	jq z,util_return_negone
+
+	ld de,(ix+12) ;asset name to search for
+	ld hl,(ix+6)
+	push hl,iy
+	lea ix,iy+18 ;item array
+.find_asset_loop:
+	push bc
+	ld bc,8
+	push bc,de
+	push ix
+	call ti._strncmp
+	pop ix,de,bc
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	jq z,.found_asset
+	lea ix,ix+16
+	ld a,c
+	or a,b
+	dec bc
+	jq nz,.find_asset_loop
+
+util_retnull:
+	or a,a
+	db $3E ;dummify next instruction
+util_return_negone:
+	scf
+	sbc hl,hl
+	jq util_return
+
+util_return_negthree:
+	ld hl,-3
+	jq util_return
+
+util_return_negtwo:
+	ld hl,-2
+util_return:
+	ld sp,ix
+	pop ix
+	ret
+
+zgx_Extract.found_asset:
+	pop de,hl ;de = asset pack, hl = destination sprite
+
+	ld a,(ix+8)
+	cp a,Z_ASSET_SPRITE
+	jq z,util_extract_sprite
+	cp a,Z_ASSET_COMPRESSEDSPRITE
+	jq nz,util_return_negthree
+
+	push hl,de
+	ld hl,(ix+9)
+	ex.s hl,de
+	pop hl
+	add hl,de
+	ex (sp),hl
+	push hl
+	call util_decompress
+	pop hl,bc
+	jq util_return
 
 
+util_extract_sprite:
+	push hl,de
+	ld hl,(ix+9)
+	ex.s hl,de
+	pop hl
+	add hl,de
+	pop de
+	ld bc,(hl)
+	mlt bc
+	push de
+	ldir
+	pop hl
+	jq util_return
 
 
+; Code from CE Toolchain by Einar Saukas & Urusergi
+util_decompress:
+        pop     bc
+        pop     de
+        pop     hl
+        push    hl
+        push    de
+        push    bc
 
+        ld      a, 128
+
+zx7t_copy_byte_loop:
+
+        ldi                             ; copy literal byte
+
+zx7t_main_loop:
+
+        add     a, a                    ; check next bit
+        call    z, zx7t_load_bits      ; no more bits left?
+        jr      nc, zx7t_copy_byte_loop ; next bit indicates either literal or sequence
+
+; determine number of bits used for length (Elias gamma coding)
+
+        push    de
+        ld      de, 0
+        ld      bc, 1
+
+zx7t_len_size_loop:
+
+        inc     d
+        add     a, a                    ; check next bit
+        call    z, zx7t_load_bits      ; no more bits left?
+        jr      nc, zx7t_len_size_loop
+        jp      zx7t_len_value_start
+
+; determine length
+
+zx7t_len_value_loop:
+
+        add     a, a                    ; check next bit
+        call    z, zx7t_load_bits      ; no more bits left?
+        rl      c
+        rl      b
+        jr      c, zx7t_exit           ; check end marker
+
+zx7t_len_value_start:
+
+        dec     d
+        jr      nz, zx7t_len_value_loop
+        inc     bc                      ; adjust length
+
+; determine offset
+
+        ld      e, (hl)                 ; load offset flag (1 bit) + offset value (7 bits)
+        inc     hl
+
+        sla e
+        inc e
+
+        jr      nc, zx7t_offset_end    ; if offset flag is set, load 4 extra bits
+        add     a, a                    ; check next bit
+        call    z, zx7t_load_bits      ; no more bits left?
+        rl      d                       ; insert first bit into D
+        add     a, a                    ; check next bit
+        call    z, zx7t_load_bits      ; no more bits left?
+        rl      d                       ; insert second bit into D
+        add     a, a                    ; check next bit
+        call    z, zx7t_load_bits      ; no more bits left?
+        rl      d                       ; insert third bit into D
+        add     a, a                    ; check next bit
+        call    z, zx7t_load_bits      ; no more bits left?
+        ccf
+        jr      c, zx7t_offset_end
+        inc     d                       ; equivalent to adding 128 to DE
+
+zx7t_offset_end:
+
+        rr      e                       ; insert inverted fourth bit into E
+
+; copy previous sequence
+
+        ex      (sp), hl                ; store source, restore destination
+        push    hl                      ; store destination
+        sbc     hl, de                  ; HL = destination - offset - 1
+        pop     de                      ; DE = destination
+        ldir
+
+zx7t_exit:
+
+        pop     hl                      ; restore source address (compressed data)
+        jp      nc, zx7t_main_loop
+
+zx7t_load_bits:
+
+        ld      a, (hl)                 ; load another group of 8 bits
+        inc     hl
+        rla
+        ret
 
 
