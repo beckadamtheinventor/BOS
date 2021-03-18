@@ -51,7 +51,7 @@ def build_docs():
 	with open("docs/style.css","w") as f:
 		f.write("""
 	html{
-		background-color: black;
+		background-color: #100;
 	}
 	body{
 		margin: 0 auto;
@@ -59,15 +59,15 @@ def build_docs():
 		font-size: 100%;
 		line-height: 1.5;
 		color: white;
-		background-color: #111;
+		background-color: #121;
 		text-align: center;
 	}
 	ul{
 		text-align: left;
 	}
 	th,tr,td{
-		border-left: 1px solid white;
-		border-top: 1px solid white;
+		border-left: 1px solid #eef;
+		border-top: 1px solid #dde;
 	}
 	th,td{
 		width: 20%;
@@ -78,6 +78,15 @@ def build_docs():
 		position: relative;
 		left: 2%;
 		width: 96%;
+	}
+	a {
+		color: #aaa;
+	}
+	a:visited {
+		color: #11f;
+	}
+	a:hover {
+		color: #22e;
 	}
 	.no_op{
 		color: #C02020;
@@ -170,11 +179,11 @@ def build_docs():
 		os.remove("docs/tmp")
 		f.write("</body></html>")
 
-	print("Archiving \"src\" directory")
-	with zipfile.ZipFile("./docs/sources.zip",'w') as zf:
-		for fname in fwalk("./src"):
-			zf.write(fname)
-		for fname in ["build.py","bos.inc","build_bos_inc.py","build_docs.py","LICENSE","README.md"]:
-			zf.write(fname)
-
-	print("Done.")
+#	print("Archiving \"src\" directory")
+#	with zipfile.ZipFile("./docs/sources.zip",'w') as zf:
+#		for fname in fwalk("./src"):
+#			zf.write(fname)
+#		for fname in ["build.py","bos.inc","build_bos_inc.py","build_docs.py","LICENSE","README.md"]:
+#			zf.write(fname)
+#
+#	print("Done.")

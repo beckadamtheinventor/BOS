@@ -88,9 +88,17 @@ cp -rf src/data/adrive/src/include src/data/adrive/src/lib/""")
 
 	def build_filesystem(self):
 		self.path = "src/data/adrive/"
+		if sys.platform.startswith('win') or sys.platform.startswith("cygwin"):
+			os.system("cd src\\data\\adrive\\")
+		else:
+			os.system("cd src/data/adrive/")
 		for cmd in self.os_build_files:
 			self.build_one(cmd)
 		os.system(f"fasmg {self.path}src/main.asm {self.path}obj/main.bin\nconvbin -i {self.path}obj/main.bin -o {self.path}data.bin -j bin -k bin -c zx7")
+		if sys.platform.startswith('win') or sys.platform.startswith("cygwin"):
+			os.system("cd ..\\..\\..\\")
+		else:
+			os.system("cd ../../../")
 		self.path = ""
 
 	def build_os(self):
@@ -162,7 +170,10 @@ cp -rf src/data/adrive/src/include src/data/adrive/src/lib/""")
 
 if __name__=='__main__':
 	d = os.path.dirname(__file__)
-	with open(d+"src/data/buildno.txt") as f:
+	if len(d):
+		os.system("cd "+d)
+
+	with open("src/data/buildno.txt") as f:
 		data = f.read().split(" ",maxsplit=3)
 
 	if len(sys.argv)<2:
@@ -190,14 +201,12 @@ if __name__=='__main__':
 				print("release type:",data[2])
 		elif sys.argv[1].startswith("-?") or sys.argv[i].startswith("--get-version"):
 			print(" ".join(data))
-		elif sys.argv[1].startswith("--build-noti"):
-			buildNoti = True
 		elif sys.argv[1].startswith("-r") or sys.argv[1].startswith("--rebuild"):
 			fullBuild = buildNoti = doBuild = True
 		elif sys.argv[1].startswith("-h") or sys.argv[1].startswith("--help"):
 			print("""
-BOS build script v3.0 build options
--b  --build                build BOS
+Becks build script v3.1 build options
+-b  --build                build unbuilt sources
 -v  --version [num]        increment or set version number
 -t  --release-type         show or modify release type
 -?  --get-version          show current version number
@@ -206,7 +215,7 @@ BOS build script v3.0 build options
 """)
 		i+=1
 
-	with open(d+"src/data/buildno.txt","w") as f:
+	with open("src/data/buildno.txt","w") as f:
 		f.write(" ".join(data))
 
 	if fullBuild:

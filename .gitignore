@@ -1,6 +1,7 @@
-*bin
+/bin
+/noti-ez80/bin
 *.idea
-*obj
+/obj
 *threading*
 *.rom
 *__pycache__*
