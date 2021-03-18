@@ -4,6 +4,7 @@
 /obj
 *threading*
 *.rom
+*.bin
 *__pycache__*
 src/data/fs
 src/data/srcfs
