@@ -1,4 +1,4 @@
-;@DOES draws a filled rectangle to the back buffer
+;@DOES draws a filled rectangle to the current lcd buffer
 ;@INPUT BC rectangle width
 ;@INPUT HL rectangle X coordinate
 ;@INPUT E rectangle Y coordinate
@@ -12,7 +12,7 @@ gfx_FillRectangle:
 	ex	de,hl
 .computed:
 	ld	(ScrapWord),bc
-	ld  hl,LCD_BUFFER			; de -> place to begin drawing
+	ld  hl,(lcd_buffer)			; de -> place to begin drawing
 .loop:
 	ld	(ScrapByte),a
 	ld	bc,(ScrapWord)

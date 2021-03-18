@@ -1,4 +1,4 @@
-;@DOES print a string to the back buffer
+;@DOES print a string to the current lcd buffer
 ;@INPUT HL pointer to string
 ;@OUTPUT HL pointer to character after the last one printed
 ;@OUTPUT Cf set if a control code is encountered or if the text would overflow the line.

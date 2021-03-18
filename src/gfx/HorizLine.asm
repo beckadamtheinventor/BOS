@@ -1,4 +1,4 @@
-;@DOES draws a horizontal line
+;@DOES draws a horizontal line to the current buffer
 ;@INPUT HL line X coordinate
 ;@INPUT E line Y coordinate
 ;@INPUT BC line length
