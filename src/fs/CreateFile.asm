@@ -101,11 +101,6 @@ fs_CreateFile:
 	call fs_GetSectorAddress
 	pop bc
 	pop bc,iy,de
-	add hl,bc
-	add hl,de
-	ex hl,de
-	ld hl,$FF0000
-	call sys_WriteFlash
 	ld hl,flashStatusByte
 	res bKeepFlashUnlocked,(hl)
 	call sys_FlashLock

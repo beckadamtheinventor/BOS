@@ -12,6 +12,34 @@ sys_WriteFlashFull:
 	jq nc,.fail
 
 	ld de,(ix+6)
+	ld hl,(ix+9)
+	ld bc,(ix+12)
+.check_write_needs_swap_loop:
+	ld a,(de)
+	and a,(hl)
+	cp a,(hl)
+	jq nz,.write_needs_swap
+	inc hl
+	inc de
+	dec bc
+	ld a,b
+	or a,c
+	jq nz,.check_write_needs_swap_loop
+
+; no need to use swap sector if there aren't any 0 bits needing to be turned into 1 bits (flash AND logic)
+	call sys_FlashUnlock
+	ld de,(ix+6)
+	ld hl,(ix+9)
+	ld bc,(ix+12)
+	call sys_WriteFlash
+	call sys_FlashLock
+	xor a,a
+	inc a
+	pop ix
+	ret
+
+.write_needs_swap:
+	ld de,(ix+6)
 	ex.s hl,de
 	ld de,(ix+12)
 	add hl,de
@@ -97,6 +125,7 @@ sys_WriteFlashFull:
 	db $3E ;ld a,... ;a will be non-zero because "xor a,a" is not zero
 .fail:
 	xor a,a
+	or a,a
 	pop ix
 	ret
 
