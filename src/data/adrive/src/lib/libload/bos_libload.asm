@@ -208,15 +208,11 @@ _findbinary:
 ;	call	ti.PopOP1
 ;	jr	_findbinary
 _libinarc:
-	ex	de,hl
-	ld	de,9
-	add	hl,de
-	ld	e,(hl)
-	add	hl,de
-	inc	hl			; hl->size bytes
+	push de
 	call	bos._LoadDEInd_s		; de=total size of library
 	push	de
 	pop	bc			; bc=total size of library
+	pop hl
 ;	ld	(totallibsize),bc
 	ld	(appvarstartptr),hl	; hl->start of appvar in archived memory
 

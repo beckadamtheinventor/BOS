@@ -40,6 +40,8 @@ boot_os:
 	ld (hl),de
 	xor a,a
 	ld (flashStatusByte),a
+	inc a
+	call gfx_SetDraw
 
 	call fs_SanityCheck
 	ld hl,current_working_dir

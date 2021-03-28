@@ -98,4 +98,5 @@
 	jp fs_SanityCheck
 	jp sys_SetupOnInterruptHandler
 	jp gui_PrintChar
+	jp gfx_SetDraw
 

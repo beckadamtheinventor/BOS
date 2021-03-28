@@ -101,6 +101,7 @@
 ?fs_SanityCheck                  := $20288
 ?sys_SetupOnInterruptHandler     := $2028C
 ?gui_PrintChar                   := $20290
+?gfx_SetDraw                     := $20294
 ;
 ?LCD_PAL?    := 0E30200h
 ?LCD_CTRL?   := 0E30018h

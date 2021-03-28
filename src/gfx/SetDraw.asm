@@ -4,9 +4,9 @@
 gfx_SetDraw:
 	ld hl,LCD_VRAM
 	or a,a
-	jr z,.set
+	jr z,.setvram
 	ld hl,LCD_BUFFER
-.set:
+.setvram:
 	ld (lcd_buffer),hl
 	ret
 
