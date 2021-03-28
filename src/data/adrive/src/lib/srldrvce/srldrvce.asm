@@ -921,7 +921,7 @@ end repeat
 
 	pop	af,bc
 
-	call	__ldivu				; euhl / aubc -> euhl
+	call	$0001B8 ;__ldivu				; euhl / aubc -> euhl
 
 	ld	bc,.bmNums
 

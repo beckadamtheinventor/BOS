@@ -135,10 +135,10 @@ library 'GRAPHX', 11
 	export gfx_CopyRectangle
 
 ;-------------------------------------------------------------------------------
-LcdSize            := ti.LcdWidth*ti.LcdHeight
+LcdSize            := lcdWidth*lcdHeight
 ; minimum stack size to provide for interrupts if moving the stack
 InterruptStackSize := 4000
-CurrentBuffer      := ti.mpLcdLpbase
+CurrentBuffer      := mpLcdLpbase
 TRASPARENT_COLOR   := 0
 TEXT_FG_COLOR      := 0
 TEXT_BG_COLOR      := 255
@@ -250,7 +250,7 @@ lcdGraphxMode := lcdWatermark+lcdIntFront+lcdPwr+lcdBgr+lcdBpp8
 SetGfx:
 	ld	bc,VRAM
 	ld	(hl),bc			; set the current draw to the screen
-assert CurrentBuffer and -$100 = ti.mpLcdRange
+assert CurrentBuffer and -$100 = mpLcdRange
 	ld	l,lcdCtrl
 	ld	(hl),de			; set lots of control parameters
 	ld	l,lcdTiming0+1
@@ -275,7 +275,7 @@ gfx_SetDefaultPalette:
 ;  None
 ; Returns:
 ;  None
-	ld	de,ti.mpLcdPalette		; address of mmio palette
+	ld	de,mpLcdPalette		; address of mmio palette
 	ld	b,e			; b = 0
 .loop:
 	ld	a,b
@@ -306,7 +306,7 @@ gfx_End:
 ;  None
 	call	_boot_ClearVRAM		; clear the screen
 	ld	de,lcdGraphxMode
-	ld	hl,ti.mpLcdBase
+	ld	hl,mpLcdBase
 	jr	SetGfx			; restore the screen mode
 
 ;-------------------------------------------------------------------------------
@@ -525,7 +525,7 @@ FillScreen_BytesToLddr   := LcdSize-FillScreen_BytesToPush
 	ret
 
 _FillScreen_FastCode_Src:
-	org ti.mpLcdCrsrImage
+	org mpLcdCrsrImage
 _FillScreen_FastCode_Dest:
 	org	$ + 1
 .loop:
@@ -570,7 +570,7 @@ gfx_SetPalette:
 	push	de
 	ld	a,l
 ;assert mpLcdPalette and 1 = 0
-	ld	hl,ti.mpLcdPalette shr 1
+	ld	hl,mpLcdPalette shr 1
 	ld	l,a			; hl = (palette >> 1) + offset
 	add	hl,hl			; hl = &palette[offset] = dest
 	ex	de,hl			; de = dest, hl = src
@@ -595,18 +595,18 @@ gfx_GetPixel:
 	inc	hl			; hl = &y
 	ld	e,(hl)			; e = y
 _GetPixel:
-	ld	d,ti.LcdWidth/2
-	mlt	de			; de = y * (ti.LcdWidth / 2)
+	ld	d,lcdWidth/2
+	mlt	de			; de = y * (lcdWidth / 2)
 	ld	hl,(CurrentBuffer)	; hl = buffer
 	add	hl,bc
 	add	hl,de
-	add	hl,de			; hl = buffer + y * (ti.LcdWidth / 2)*2 + (uint16_t)x
-					;    = buffer + y * ti.LcdWidth + (uint16_t)x
+	add	hl,de			; hl = buffer + y * (lcdWidth / 2)*2 + (uint16_t)x
+					;    = buffer + y * lcdWidth + (uint16_t)x
 					;    = &buffer[y][x]
 ; No clipping is necessary, because if the pixel is offscreen, the result is
 ; undefined. All that is necessary is to ensure that there are no side effects
 ; of reading outside of the buffer. In this case, the largest possible offset
-; into the buffer is 255 * ti.LcdWidth + 65535 = 147135 bytes. Even in the case
+; into the buffer is 255 * lcdWidth + 65535 = 147135 bytes. Even in the case
 ; that the current buffer is the second half of VRAM, the largest that this
 ; pointer can be is $D52C00 + 147135 = $D76ABF. This goes beyond the end of
 ; mapped RAM, but only into unmapped memory with no read side effects.
@@ -630,15 +630,15 @@ gfx_SetPixel:
 _SetPixel:
 	wait_quick
 _SetPixel_NoWait:
-	ld	hl,-ti.LcdWidth
+	ld	hl,-lcdWidth
 	add	hl,bc
 	ret	c			; return if out of bounds
-	ld	hl,-ti.LcdHeight
+	ld	hl,-lcdHeight
 	add	hl,de
 	ret	c			; return if out of bounds
 	ld	hl,(CurrentBuffer)
 	add	hl,bc
-	ld	d,ti.LcdWidth/2
+	ld	d,lcdWidth/2
 	mlt	de
 	add	hl,de
 	add	hl,de
@@ -702,7 +702,7 @@ gfx_FillRectangle_NoClip:
 	ld	hl,(iy+3)		; hl = x coordinate
 	ld	e,(iy+6)		; e = y coordinate
 _FillRectangle_NoClip:
-	ld	d,ti.LcdWidth / 2
+	ld	d,lcdWidth / 2
 	mlt	de
 	add	hl,de
 	add	hl,de
@@ -722,7 +722,7 @@ _FillRectangle_NoClip:
 	dec	a
 	ret	z
 	inc	b
-	ld	c,$40			; = slightly faster "ld bc,ti.LcdWidth"
+	ld	c,$40			; = slightly faster "ld bc,lcdWidth"
 .loop:
 	add	hl,bc
 	dec	de
@@ -732,14 +732,14 @@ _FillRectangle_NoClip:
 	lddr
 	dec	a
 	ret	z
-	ld	bc,(2 * ti.LcdWidth) + 1
+	ld	bc,(2 * lcdWidth) + 1
 	add	hl,bc
 	inc	de
 	ex	de,hl
 .width2 = $ + 1
 	ld	bc,0
 	ldir
-	ld	bc,(2 * ti.LcdWidth) - 1
+	ld	bc,(2 * lcdWidth) - 1
 	dec	a
 	jr	nz,.loop
 	ret
@@ -823,7 +823,7 @@ gfx_Rectangle_NoClip:
 	ld	e,(iy+6)		; e = y
 	call	_VertLine_NoClip_NotDegen_StackX ; draw left vertical line
 						 ; hl = &buf[y+height][x]
-						 ; de = ti.LcdWidth
+						 ; de = lcdWidth
 	sbc	hl,de			; hl = &buf[y+height-1][x]
 	pop	bc			; bc = width
 	jp	_HorizLine_NoClip_Draw	; draw bottom horizontal line
@@ -890,7 +890,7 @@ _HorizLine_NoClip_NotDegen_StackXY:
 _HorizLine_NoClip_NotDegen:
 	wait_quick
 _HorizLine_NoClip_NotDegen_NoWait:
-	ld	d,ti.LcdWidth/2
+	ld	d,lcdWidth/2
 	mlt	de
 	add	hl,de
 	add	hl,de
@@ -965,14 +965,14 @@ _VertLine_NoClip_StackX:
 	ret	z			; abort if length == 0
 _VertLine_NoClip_NotDegen_StackX:
 	ld	hl,(iy+3)		; hl = x
-	ld	d,ti.LcdWidth/2
+	ld	d,lcdWidth/2
 	mlt	de
 	add	hl,de
 	add	hl,de
 	ld	de,(CurrentBuffer)
 	add	hl,de			; hl -> drawing location
 _VertLine_NoClip_Draw:
-	ld	de,ti.LcdWidth
+	ld	de,lcdWidth
 	ld	a,0
 smcByte _Color
 	wait_quick
@@ -994,7 +994,7 @@ gfx_SetDraw:
 	ex	(sp),hl
 	ld	a,l
 	or	a,a
-	ld	hl,(ti.mpLcdBase)		; get current base
+	ld	hl,(mpLcdBase)		; get current base
 	ld	bc,vram
 	jr	z,.match
 	sbc	hl,bc
@@ -1017,7 +1017,7 @@ gfx_GetDraw:
 ;  None
 ; Returns:
 ;  Returns true if drawing on the buffer
-	ld	a,(ti.mpLcdBase+2)		; comparing upper byte only is sufficient
+	ld	a,(mpLcdBase+2)		; comparing upper byte only is sufficient
 	ld	hl,CurrentBuffer+2
 	xor	a,(hl)			; always 0 or 1
 	ret
@@ -1060,14 +1060,14 @@ gfx_Wait:
 ;  None
 	ret				; will be SMC'd into push hl
 	push	af
-	ld	a,(ti.mpLcdRis)
+	ld	a,(mpLcdRis)
 	bit	bLcdIntVcomp,a
 	jr	nz,.WaitDone
 	push	de
 .WaitLoop:
 .ReadLcdCurr:
-	ld	a,(ti.mpLcdCurr+2)		; a = *mpLcdCurr>>16
-	ld	hl,(ti.mpLcdCurr+1)	; hl = *mpLcdCurr>>8
+	ld	a,(mpLcdCurr+2)		; a = *mpLcdCurr>>16
+	ld	hl,(mpLcdCurr+1)	; hl = *mpLcdCurr>>8
 	sub	a,h
 	jr	nz,.ReadLcdCurr		; nz ==> lcdCurr may have updated
 					;        mid-read; retry read
@@ -1101,13 +1101,13 @@ gfx_SwapDraw:
 ;  None
 ; Returns:
 ;  None
-	ld	iy,ti.mpLcdRange
+	ld	iy,mpLcdRange
 .WaitLoop:
 	bit	bLcdIntLNBU,(iy+lcdRis)
 	jr	z,.WaitLoop
 assert vRam and $FF = 0
 assert LcdSize and $FF = 0
-	ld	bc,(iy-ti.mpLcdRange+CurrentBuffer+1) ; bc = old_draw>>8
+	ld	bc,(iy-mpLcdRange+CurrentBuffer+1) ; bc = old_draw>>8
 .LcdSizeH := (LcdSize shr 8) and $FF
 assert .LcdSizeH and lcdIntVcomp
 assert .LcdSizeH and lcdIntLNBU
@@ -1123,7 +1123,7 @@ assert .LcdSizeH and lcdIntLNBU
 					;   = (old_draw>>16)^(LcdSize>>16)
 					; bc = (old_draw>>8)^(LcdSize>>8)
 					;    = new_draw>>8
-	ld	(iy-ti.mpLcdRange+CurrentBuffer+1),bc
+	ld	(iy-mpLcdRange+CurrentBuffer+1),bc
 	ld	hl,gfx_Wait
 	ld	(hl),$E5		; push hl; enable wait logic
 	push	hl
@@ -1802,7 +1802,7 @@ gfx_BlitLines:
 	ex	(sp),hl			; l = y coordinate
 	push	de
 	push	bc
-	ld	h,ti.LcdWidth/2
+	ld	h,lcdWidth/2
 	ld	d,h
 	mlt	hl
 	add	hl,hl			; hl -> number of bytes to copy
@@ -1835,7 +1835,7 @@ gfx_BlitRectangle:
 	add	iy,sp
 	ld	de,(iy+6)		; de = x coordinate
 	ld	l,(iy+9)		; l = y coordinate
-	ld	h,ti.LcdWidth/2
+	ld	h,lcdWidth/2
 	mlt	hl
 	add	hl,hl
 	add	hl,de			; hl = amount to increment
@@ -1850,7 +1850,7 @@ gfx_BlitRectangle:
 	ld	bc,(iy+12)		; the width of things
 	ld	(.width),bc
 	push	hl
-	ld	hl,ti.LcdWidth
+	ld	hl,lcdWidth
 	or	a,a
 	sbc	hl,bc			; change in width for rectangle
 	ld	(.delta),hl
@@ -1892,7 +1892,7 @@ gfx_CopyRectangle:
 	add	iy,sp
 	ld	de,(iy + 9)		; de = x coordinate src
 	ld	l,(iy + 12)		; l = y coordinate src
-	ld	h,ti.LcdWidth/2
+	ld	h,lcdWidth/2
 	mlt	hl
 	add	hl,hl
 	add	hl,de			; hl = offset in src
@@ -1904,7 +1904,7 @@ gfx_CopyRectangle:
 	push	hl
 	ld	de,(iy + 15)		; de = x coordinate dst
 	ld	l,(iy + 18)		; l = y coordinate dst
-	ld	h,ti.LcdWidth/2
+	ld	h,lcdWidth/2
 	mlt	hl
 	add	hl,hl
 	add	hl,de			; hl = offset in dst
@@ -1916,7 +1916,7 @@ gfx_CopyRectangle:
 	ex	de,hl			; de = start of copy dst
 	ld	bc,(iy + 21)		; rectangle width
 	ld	(.width),bc
-	ld	hl,ti.LcdWidth
+	ld	hl,lcdWidth
 	or	a,a
 	sbc	hl,bc			; rectangle stride
 	ld	(.stride),hl
@@ -1970,7 +1970,7 @@ gfx_ShiftUp:
 	sbc	hl,de
 	ld	(ShiftCopyAmount),hl
 	ex	de,hl
-	ld	hl,ti.LcdWidth
+	ld	hl,lcdWidth
 	sbc	hl,de
 	ld	(ShiftLineOff),hl
 	ld	hl,_YMax
@@ -2016,7 +2016,7 @@ gfx_ShiftDown:
 	ld	de,(_XMin)
 	sbc	hl,de
 	ld	(ShiftCopyAmount),hl
-	ld	de,0 - ti.LcdWidth
+	ld	de,0 - lcdWidth
 	add	hl,de
 	ld	(ShiftLineOff),hl
 	ld	hl,_YMax
@@ -2025,7 +2025,7 @@ gfx_ShiftDown:
 	dec	e
 
 _Shift:
-	ld	d,ti.LcdWidth/2
+	ld	d,lcdWidth/2
 	mlt	de
 	ld	hl,(CurrentBuffer)
 	add	hl,de
@@ -2079,7 +2079,7 @@ gfx_ScaledSprite_NoClip:
 	ld	iy,0
 	add	iy,sp
 	push	ix
-	ld	h,ti.LcdWidth/2
+	ld	h,lcdWidth/2
 	ld	l,(iy+15)		; height of scale
 	ld	a,l
 	ld	(NcSprHscl+1),a
@@ -2103,7 +2103,7 @@ gfx_ScaledSprite_NoClip:
 	ld	hl,(CurrentBuffer)
 	add	hl,de
 	inc	hl
-	ld	b,ti.LcdWidth/2
+	ld	b,lcdWidth/2
 	mlt	bc
 	add	hl,bc
 	call	gfx_Wait
@@ -2135,7 +2135,7 @@ NcSprHscl:
 	dec	a
 	jr	z,NcSprW_end
 	inc	b
-	ld	c,$40			; bc = ti.LcdWidth
+	ld	c,$40			; bc = lcdWidth
 NcSprLineCopy:
 	add	hl,bc
 	dec	de
@@ -2158,7 +2158,7 @@ SprWxSclW2:
 NcSprW_end:
 	pop	hl
 NcSprHscl320:
-	ld	bc,0			; ti.LcdWidth x heightScale
+	ld	bc,0			; lcdWidth x heightScale
 	dec	ixh
 	jr	nz,NcSprBigLoop
 	pop	ix			; restore ix sp
@@ -2181,12 +2181,12 @@ gfx_ScaledTransparentSprite_NoClip:
 	ld	c,(iy+9)		; c = y coordniate
 	ld	de,(CurrentBuffer)
 	add	hl,de
-	ld	b,ti.LcdWidth/2
+	ld	b,lcdWidth/2
 	mlt	bc
 	add	hl,bc
 	add	hl,bc
 	ex	de,hl			; de -> start draw location
-	ld	hl,ti.LcdWidth
+	ld	hl,lcdWidth
 	ld	a,(iy+15)
 	ld	(.heightscale),a
 	ld	a,(iy+12)
@@ -2263,7 +2263,7 @@ gfx_TransparentSprite:
 	ld	a,(iy+0)		; _TmpWidth
 	ld	(.next),a
 	ld	a,(iy+3)		; tmpHeight
-	ld	h,ti.LcdWidth/2
+	ld	h,lcdWidth/2
 	mlt	hl
 	ld	bc,0			; zero ubc
 	add	hl,hl
@@ -2286,7 +2286,7 @@ smcByte _TransparentColor
 	ld	c,0
 .amount := $-1
 	add	hl,bc
-	ld	de,ti.LcdWidth		; move to next row
+	ld	de,lcdWidth		; move to next row
 	add	iy,de
 	dec	ixh
 	jr	nz,.loop
@@ -2357,7 +2357,7 @@ gfx_Sprite:
 	ld	a,(iy+0)		; a = _TmpWidth
 	ld	(.next),a
 	ld	a,(iy+3)		; a = tmpHeight
-	ld	h,ti.LcdWidth/2
+	ld	h,lcdWidth/2
 	mlt	hl
 	add	hl,hl
 	add	hl,de
@@ -2373,7 +2373,7 @@ gfx_Sprite:
 .next := $-1
 	lea	de,iy
 	ldir
-	ld	de,ti.LcdWidth
+	ld	de,lcdWidth
 	add	iy,de
 	ld	c,0
 .amount := $-1
@@ -2396,7 +2396,7 @@ gfx_Sprite_NoClip:
 	ld	hl,(CurrentBuffer)
 	ld	bc,(iy+6)		;  x coordinate
 	add	hl,bc
-	ld	d,ti.LcdWidth/2
+	ld	d,lcdWidth/2
 	ld	e,(iy+9)		;  y coordinate
 	mlt	de
 	add	hl,de
@@ -2411,9 +2411,9 @@ gfx_Sprite_NoClip:
 	srl	c
 	sbc	a,.step - .evenw
 	ld	(.step - 1),a
-	ld	a,ti.LcdWidth/2
+	ld	a,lcdWidth/2
 	sub	a,c
-	ld	iyl,a			; (ti.LcdWidth/2)-(spriteWidth/2)
+	ld	iyl,a			; (lcdWidth/2)-(spriteWidth/2)
 	ld	a,(hl)			; spriteHeight
 	inc	hl
 	wait_quick
@@ -2421,7 +2421,7 @@ gfx_Sprite_NoClip:
 .loop:
 	dec	de			; needed if sprite width is odd
 .evenw:
-	ld	c,iyl			; (ti.LcdWidth/2)-(spriteWidth/2)
+	ld	c,iyl			; (lcdWidth/2)-(spriteWidth/2)
 	ex	de,hl
 	add	hl,bc
 	add	hl,bc
@@ -2447,13 +2447,13 @@ gfx_GetSprite:
 	add	iy,sp
 	ld	bc,(iy+9)		; bc = y coordinate
 	bit	0,b			; check if negative y
-	ld	b,ti.LcdWidth/2
+	ld	b,lcdWidth/2
 	mlt	bc
 	ld	hl,(CurrentBuffer)
 	add	hl,bc
 	add	hl,bc			; hl -> place to begin drawing
 	jr	z,.next
-	ld	de,(-ti.LcdWidth)*256
+	ld	de,(-lcdWidth)*256
 	add	hl,de			; fix if negative
 .next:
 	ld	de,(iy+6)
@@ -2464,7 +2464,7 @@ gfx_GetSprite:
 	inc	de
 	ld	(.amount),a		; amount to copy per line
 	ld	c,a
-	ld	a,ti.LcdWidth and $ff
+	ld	a,lcdWidth and $ff
 	sub	a,c
 	ld	c,a
 	sbc	a,a
@@ -2501,7 +2501,7 @@ gfx_TransparentSprite_NoClip:
 	ld	iy,(iy+3)		; iy -> sprite struct
 	ld	de,(CurrentBuffer)
 	add	hl,de
-	ld	b,ti.LcdWidth/2
+	ld	b,lcdWidth/2
 	mlt	bc
 	add	hl,bc
 	add	hl,bc			; hl -> place to draw
@@ -2522,7 +2522,7 @@ smcByte _TransparentColor
 .next := $-1
 	lea	de,iy
 	call	_TransparentPlot	; call the plotter
-	ld	de,ti.LcdWidth
+	ld	de,lcdWidth
 	add	iy,de
 	dec	ixh			; loop for height
 	jr	nz,.loop
@@ -3155,7 +3155,7 @@ _TextXPos := $-3
 	ld	(_TextXPos),hl
 	ld	hl,0
 _TextYPos := $-3
-	ld	h,ti.LcdWidth/2
+	ld	h,lcdWidth/2
 	mlt	hl
 	add	hl,hl
 	add	hl,bc
@@ -3197,7 +3197,7 @@ smcByte _TextTPColor
 .transparent:
 	inc	de			; move to next pixel
 	djnz	.nextpixel
-	ld	de,ti.LcdWidth
+	ld	de,lcdWidth
 	inc	hl
 	dec	ixl
 	jr	nz,.loop
@@ -3250,7 +3250,7 @@ smcByte _TextTPColor
 	jr	nz,.wscale1		; move to next pixel
 	djnz	.inner
 .done:
-	ld	de,ti.LcdWidth
+	ld	de,lcdWidth
 
 	pop	bc
 	djnz	.hscale
@@ -4566,7 +4566,7 @@ _RotatedScaledSprite:
 	or	a,a
 	sbc	hl,hl
 	ld	l,a
-	ld	de,ti.LcdWidth
+	ld	de,lcdWidth
 	ex	de,hl
 	sbc	hl,de
 	ld	(.line_add),hl
@@ -5017,7 +5017,7 @@ gfx_FloodFill:
 	ld	hl,(CurrentBuffer)
 	add	hl,bc
 	ld	e,a
-	ld	d,ti.LcdWidth/2
+	ld	d,lcdWidth/2
 	mlt	de
 	add	hl,de
 	add	hl,de
@@ -5092,7 +5092,7 @@ gfx_FloodFill:
 	ld	hl,(CurrentBuffer)
 	add	hl,bc
 	ld	e,(ix+9)
-	ld	d,ti.LcdWidth/2
+	ld	d,lcdWidth/2
 	mlt	de
 	add	hl,de
 	add	hl,de
@@ -5186,7 +5186,7 @@ gfx_FloodFill:
 	ld	hl,(CurrentBuffer)
 	add	hl,bc
 	ld	e,(ix+9)
-	ld	d,ti.LcdWidth/2
+	ld	d,lcdWidth/2
 	mlt	de
 	add	hl,de
 	add	hl,de
@@ -5321,7 +5321,7 @@ _RLETSprite_SkipClipRight:
 	ld	bc,(iy+6)		; bc = x (clipped)
 	add	hl,bc
 	ld	c,(iy+9)		; c = y (clipped)
-	ld	b,ti.LcdWidth/2
+	ld	b,lcdWidth/2
 	mlt	bc			; bc = y*160
 	add	hl,bc
 	add	hl,bc
@@ -5365,8 +5365,8 @@ _RLETSprite_ClipTop_End:		; a = 0, hl = start of (clipped) sprite data
 	ld	a,iyl			; a = width on-screen
 	jp	z,_RLETSprite_NoClip_Begin
 	cpl				; a = 255-(width on-screen)
-	add	a,ti.LcdWidth-255		; a = (ti.LcdWidth-(width on-screen))&0FFh
-	rra				; a = (ti.LcdWidth-(width on-screen))/2
+	add	a,lcdWidth-255		; a = (lcdWidth-(width on-screen))&0FFh
+	rra				; a = (lcdWidth-(width on-screen))/2
 	dec	b
 	wait_quick
 	jr	z,_RLETSprite_ClipLeftMiddle
@@ -5432,7 +5432,7 @@ _RLETSprite_ClipRight_OpaqueSkip:
 	jr	nz,_RLETSprite_ClipRight_Trans ; nz ==> width remaining off-screen != 0
 _RLETSprite_ClipRight_RowEnd:
 	ex	de,hl			; de = sprite, hl = buffer
-	ld	c,0			; c = (ti.LcdWidth-(width on-screen))/2
+	ld	c,0			; c = (lcdWidth-(width on-screen))/2
 _RLETSprite_ClipRight_HalfRowDelta_SMC := $-1
 	add	hl,bc			; advance buffer to next row
 	add	hl,bc
@@ -5514,7 +5514,7 @@ gfx_RLETSprite_NoClip:
 	ld	bc,(iy+6)		; bc = x
 	add	hl,bc
 	ld	c,(iy+9)		; c = y
-	ld	b,ti.LcdWidth/2
+	ld	b,lcdWidth/2
 	mlt	bc			; bc = y*160
 	add	hl,bc
 	add	hl,bc
@@ -5531,8 +5531,8 @@ gfx_RLETSprite_NoClip:
 _RLETSprite_NoClip_Begin:
 ; Generate the code to advance the buffer pointer to the start of the next row.
 	cpl				; a = 255-width
-	add	a,ti.LcdWidth-255		; a = (ti.LcdWidth-width)&0FFh
-	rra				; a = (ti.LcdWidth-width)/2
+	add	a,lcdWidth-255		; a = (lcdWidth-width)&0FFh
+	rra				; a = (lcdWidth-width)/2
 	ld	(_RLETSprite_NoClip_HalfRowDelta_SMC),a
 	sbc	a,a
 	s8	sub a,_RLETSprite_NoClip_LoopJr_SMC+1-_RLETSprite_NoClip_Row_WidthEven
@@ -5569,7 +5569,7 @@ _RLETSprite_NoClip_OpaqueCopy:
 ;; }
 _RLETSprite_NoClip_RowEnd:
 ;; Advance buffer pointer to the next row (minus one if width is odd).
-	ld	c,0			; c = (ti.LcdWidth-width)/2
+	ld	c,0			; c = (lcdWidth-width)/2
 _RLETSprite_NoClip_HalfRowDelta_SMC := $-1
 	add	hl,bc			; advance buffer to next row
 	add	hl,bc
@@ -6114,7 +6114,7 @@ _ComputeOutcode:
 ;-------------------------------------------------------------------------------
 util.getbuffer:
 	ld	hl,vram + LcdSize
-	ld	de,(ti.mpLcdBase)
+	ld	de,(mpLcdBase)
 	or	a,a
 	sbc	hl,de
 	add	hl,de
@@ -6135,7 +6135,7 @@ _ShiftCalculate:
 	ld	hl,(hl)
 	and	a,l
 	ret	z
-	ld	h,ti.LcdWidth/2
+	ld	h,lcdWidth/2
 	mlt	hl
 	add	hl,hl
 	ret
@@ -6335,15 +6335,15 @@ _XMin:
 _YMin:
 	dl	0
 _XMax:
-	dl	ti.LcdWidth
+	dl	lcdWidth
 _YMax:
-	dl	ti.LcdHeight
+	dl	lcdHeight
 
 _ClipRegion_Full:
 	dl	0
 	dl	0
-	dl	ti.LcdWidth
-	dl	ti.LcdHeight
+	dl	lcdWidth
+	dl	lcdHeight
 
 _TmpWidth:
 	dl	0,0,0

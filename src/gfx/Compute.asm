@@ -8,7 +8,7 @@ gfx_Compute:
 	mlt	de
 	add	hl,de
 	add	hl,de
-	ld	de,(lcd_buffer)
+	ld	de,(LCD_BUFFER)
 	add	hl,de
 	ret
 

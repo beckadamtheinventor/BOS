@@ -299,10 +299,10 @@ end struct
 ;-------------------------------------------------------------------------------
 ; memory locations
 ;-------------------------------------------------------------------------------
-virtual at (ti.saveSScreen+$FFFF) and not $FFFF
-	cHeap			dbx (ti.saveSScreen+21945) and not $FF - $: ?
+virtual at (saveSScreen+$FFFF) and not $FFFF
+	cHeap			dbx (saveSScreen+21945) and not $FF - $: ?
 end virtual
-virtual at ti.usbArea
+virtual at usbArea
 				rb (-$) and 7
 	?setupPacket		setup
 				rb (-$) and $1F
@@ -310,7 +310,7 @@ virtual at ti.usbArea
 				rb (-$) and $FFF
 ; FIXME: 0xD141B2 is used by GetCSC :(
 	?periodicList		dbx $400: ?
-	?usbMem			dbx ti.usbInited and not $FF - $: ?
+	?usbMem			dbx usbInited and not $FF - $: ?
 				rb (-$) and $FF
 	?dummyHead		endpoint
 				rb (-$) and $1F
@@ -331,10 +331,10 @@ assert cleanupListReady+1 = cleanupListPending
 	?cleanupListPending	rb 1
 assert cleanupListPending+1 = $
 				rb 1 ; always -1
-	assert $ <= ti.usbInited
+	assert $ <= usbInited
 end virtual
-virtual at (ti.ramCodeTop+$FF) and not $FF
-	osHeap			dbx ti.heapTop and not $FF - $: ?
+virtual at (ramCodeTop+$FF) and not $FF
+	osHeap			dbx heapTop and not $FF - $: ?
 end virtual
 ;-------------------------------------------------------------------------------
 
@@ -1834,7 +1834,7 @@ end iterate
 	ld	a,(mpUsbSts)
 	and	a,bmUsbIntHostSysErr
 	jq	nz,.SYSTEM
-	ld	a,(ti.usbInited)
+	ld	a,(usbInited)
 	dec	a
 	jq	nz,.SYSTEM
 	ex	de,hl
@@ -1857,7 +1857,7 @@ end iterate
 ;  bc = 0
 ;  hl = flags+$1B
 _Init:
-	ld	de,ti.usbInited
+	ld	de,usbInited
 	ld	(de),a
 ;	ld	hl,mpUsbCmd
 ;	ld	(hl),2 shl bUsbFrameListSize
@@ -1871,9 +1871,9 @@ _Init:
 ;	bit	bUsbHcReset,(hl)
 ;	jq	nz,.waitForReset
 ;.notHalted: ; rip memory?
-	ld	hl,ti.usbInited
+	ld	hl,usbInited
 	dec	de
-	ld	bc,ti.usbInited-ti.usbArea
+	ld	bc,usbInited-usbArea
 	lddr
 	ld	hl,flags+$1B
 	ret

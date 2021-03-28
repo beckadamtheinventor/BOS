@@ -28,24 +28,24 @@ define VERSION_MAJOR       3
 define VERSION_MINOR       1
 
 ; global equates
-arclibrarylocations        = ti.cursorImage + 000 ; place to store locations of archived libraries
-dependencyqueuelocation    = ti.cursorImage + 450 ; queue for keeping track of which libraries still need to be resolved
+arclibrarylocations        = cursorImage + 000 ; place to store locations of archived libraries
+dependencyqueuelocation    = cursorImage + 450 ; queue for keeping track of which libraries still need to be resolved
 
-eSP                        = ti.cursorImage + 950 ; save sp for errors
-totallibsize               = ti.cursorImage + 953 ; total size of the library appvar (not used)
-extractedsize              = ti.cursorImage + 956 ; holds extracted size of the library
-arclocation                = ti.cursorImage + 959 ; pointer to place to begin extraction from the archive
-ramlocation                = ti.cursorImage + 962 ; pointer to place to extract in usermem
-endarclibrarylocations     = ti.cursorImage + 965 ; pointer to end of archived library locations in arclibrarylocations
-enddependencyqueue         = ti.cursorImage + 968 ; pointer to end of dependency stack
-nextlibptr                 = ti.cursorImage + 971 ; pointer to save location of next lib place that needs to be relocated
-jumptblptr                 = ti.cursorImage + 974 ; pointer to start of function table for each library in the program
-vectortblptr               = ti.cursorImage + 977 ; pointer to start of archived function vector table
-relocationtblptr           = ti.cursorImage + 980 ; pointer to start of relocation table
-endrelocationtbl           = ti.cursorImage + 983 ; pointer to end of relocation table
-prgmstart                  = ti.cursorImage + 986 ; pointer to start of actual program when dealing with dependencies
-appvarstartptr             = ti.cursorImage + 989 ; pointer to start of library appvar in archive
-libnameptr                 = ti.cursorImage + 992 ; pointer to name of library to extract
+eSP                        = cursorImage + 950 ; save sp for errors
+totallibsize               = cursorImage + 953 ; total size of the library appvar (not used)
+extractedsize              = cursorImage + 956 ; holds extracted size of the library
+arclocation                = cursorImage + 959 ; pointer to place to begin extraction from the archive
+ramlocation                = cursorImage + 962 ; pointer to place to extract in usermem
+endarclibrarylocations     = cursorImage + 965 ; pointer to end of archived library locations in arclibrarylocations
+enddependencyqueue         = cursorImage + 968 ; pointer to end of dependency stack
+nextlibptr                 = cursorImage + 971 ; pointer to save location of next lib place that needs to be relocated
+jumptblptr                 = cursorImage + 974 ; pointer to start of function table for each library in the program
+vectortblptr               = cursorImage + 977 ; pointer to start of archived function vector table
+relocationtblptr           = cursorImage + 980 ; pointer to start of relocation table
+endrelocationtbl           = cursorImage + 983 ; pointer to end of relocation table
+prgmstart                  = cursorImage + 986 ; pointer to start of actual program when dealing with dependencies
+appvarstartptr             = cursorImage + 989 ; pointer to start of library appvar in archive
+libnameptr                 = cursorImage + 992 ; pointer to name of library to extract
 
 ; macro definitions
 define lib_byte            $C0		; library signifier byte
@@ -84,7 +84,7 @@ library 'LibLoad', VERSION_MAJOR*10+VERSION_MINOR, <libmagic1alt,libmagic2alt>
 ; We *are* the relocator, so we can't use relocations here. Set origin to 0
 ; (shifted by library stuff before this) and perform any relocations manually.
 disable_relocations
-	ld	iy,ti.flags		; make sure iy is correct
+	ld	iy,$D00080 ;ti.flags		; make sure iy is correct
 	push	de
 	push	hl
 
@@ -96,7 +96,7 @@ disable_relocations
 	res	showmsgs,(iy + asmflag)
 .showmsgs:
 	ld	bc,1020
-	ld	hl,ti.cursorImage
+	ld	hl,cursorImage
 	call	bos._MemClear		; initialize to wipe out past runs
 
 	ld	hl,arclibrarylocations
@@ -129,7 +129,7 @@ _startrelocating:
 ;	call	ti.PushOP1		; save program name
 ;	pop	hl
 _extractlib:				; hl->NULL terminated libray name string -> $C0,"LIBNAME",0
-	ld	(hl),ti.AppVarObj	; change $C0 byte to mark as extracted
+	ld	(hl),AppVarObj	; change $C0 byte to mark as extracted
 	push	hl
 	call	bos._Mov9ToOP1		; move name of library to op1
 	pop	hl
@@ -187,7 +187,7 @@ _donesearch:				; hl->location of library in ram, hl+3->location of library vect
 _notextracted:
 	ld	hl,(libnameptr)
 	ld	de,(endarclibrarylocations)
-	call	ti.Mov8b		; copy the string. it shouldn't be bigger than this
+	call	bos._Mov8b		; copy the string. it shouldn't be bigger than this
 	xor	a
 	ld	(de),a
 	inc	de
@@ -267,8 +267,8 @@ _goodversion:
 	inc	hl
 	ld	(endarclibrarylocations),hl
 
-	ld	hl,ti.userMem		; this is where programs are extracted to
-	ld	de,(ti.asm_prgm_size)
+	ld	hl,userMem		; this is where programs are extracted to
+	ld	de,(bos.asm_prgm_size)
 	add	hl,de			; hl->end of program+libaries
 	ex	de,hl			; de->location to extract to
 
@@ -330,7 +330,7 @@ _resloveentrypointsloop:
 	push	hl
 	ld	hl,(hl)			; offset in vector table (0,3,6, etc.)
 	ld	bc,3
-	call	ti._idivs		; originally the offset was just added because vectors were stored in three bytes, now it is just 2 to save space
+	call	$00013C ;_idivs		; originally the offset was just added because vectors were stored in three bytes, now it is just 2 to save space
 	add	hl,hl			; (offset/3) * 2
 	ld	de,(vectortblptr)	; hl->start of vector table
 	add	hl,de			; hl->correct vector entry
@@ -445,7 +445,7 @@ _movetonextjump:
 	inc	hl			; jp address
 	jr	_movetonextjump
 _checkextracteddependent:
-	cp	a,ti.AppVarObj
+	cp	a,AppVarObj
 	jr	z,_skipdependencystore	; keep going
 	ret
 

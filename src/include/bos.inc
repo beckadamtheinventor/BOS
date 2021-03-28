@@ -102,14 +102,14 @@
 ?sys_SetupOnInterruptHandler     := $2028C
 ?gui_PrintChar                   := $20290
 ;
-?LCD_PAL    := 0E30200h
-?LCD_CTRL   := 0E30018h
-?LCD_VRAM   := 0D40000h
-?LCD_BUFFER := LCD_VRAM + LCD_WIDTH*LCD_HEIGHT
-?LCD_WIDTH  := 320
-?LCD_HEIGHT := 240
-?LCD_8BPP   := $27
-?LCD_16BPP  := $2D
+?LCD_PAL?    := 0E30200h
+?LCD_CTRL?   := 0E30018h
+?LCD_VRAM?   := 0D40000h
+?LCD_BUFFER? := LCD_VRAM + LCD_WIDTH*LCD_HEIGHT
+?LCD_WIDTH?  := 320
+?LCD_HEIGHT? := 240
+?LCD_8BPP?   := $27
+?LCD_16BPP?  := $2D
 ?TEXT_MAX_ROW    := 231
 ?RAM_START  := 0D00400h
 ?flag_start             := $D00000
