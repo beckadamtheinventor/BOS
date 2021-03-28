@@ -20,7 +20,7 @@ mem_edit_main:
 	pop bc
 	call mem_edit_readme
 	cp a,15
-	jq z,.exit_nocls
+	jq z,.exit
 	ld hl,(ix+6)
 	ld a,(hl)
 	or a,a
@@ -31,6 +31,15 @@ mem_edit_main:
 	call bos.fs_OpenFile
 	pop bc
 	jq c,.dont_open_file
+	push hl
+	ld hl,bos.safeRAM
+	ld bc,65536
+	push hl
+	pop de
+	inc de
+	ld (hl),c
+	ldir
+	pop hl
 	ld bc,$E
 	push hl
 	add hl,bc
@@ -284,7 +293,6 @@ mem_edit_main:
 .exit:
 	call gfx_ZeroScreen
 	call gfx_BlitBuffer
-.exit_nocls:
 	ld sp,ix
 	pop ix
 	xor a,a
@@ -638,12 +646,12 @@ str_WriteFileAreYouSure:
 	db "Write buffer to file? Press enter to confirm.",0
 readme_strings:
 	dl ._1, ._2, ._3, ._4, ._5, ._6, ._7, ._8, ._9, ._10, ._11, ._12, ._13, $FF0000
-._1: db "--MEMEDIT v1.0 by BeckATI--",0
+._1: db "--MEMEDIT v1.2 by BeckATI--",0
 ._2: db "Arrow keys navigate the cursor.",0
 ._3: db "Clear quits. +/- scroll up/down.",0
 ._4: db "0-9,A-F write hex nibbles.",0
-._5: db " two of these must be pressed",0
-._6: db " in order to write a byte",0
+._5: db "  (two of these must be pressed",0
+._6: db "in order to write a byte)",0
 ._7: db "This program will only edit RAM.",0
 ._8: db "Because editing flash directly is",0
 ._9: db "usually a bad idea.",0

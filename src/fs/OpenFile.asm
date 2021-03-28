@@ -113,9 +113,11 @@ fs_OpenFile:
 	ld a,(iy)
 	or a,a
 	ret z ;reached end of directory
-	cp a,fsentry_deleted
+	inc a
+	ret z ;reached end of directory
+	cp a,fsentry_deleted+1
 	jq z,.search_next
-	cp a,fsentry_longfilename
+	cp a,fsentry_longfilename+1
 	jq z,.search_next
 	lea bc,ix-17
 	push iy,bc

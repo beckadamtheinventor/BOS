@@ -9,10 +9,11 @@ fsbit_subfile        := 3 ;file is a sub-file. Contents are at (fsentry&0x1FF) +
 fsbit_subdirectory   := 4
 fsbit_archive        := 5 ;has been changed since last backup
 
-fsentry_avalible     := $00
+fsentry_endofdir     := $00
 fsentry_dot          := $2E
 fsentry_deleted      := $F0
 fsentry_longfilename := $F1
+fsentry_endofdir2    := $FF
 
 fsentry_filename            := $00
 fsentry_filename.len        := 8

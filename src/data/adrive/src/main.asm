@@ -35,7 +35,7 @@ fs_dir bin_dir
 	fs_entry cd_exe, "cd", "bin", f_readonly+f_system
 	fs_entry cmd_exe, "cmd", "bin", f_readonly+f_system
 	fs_entry cls_exe, "cls", "bin", f_readonly+f_system
-	fs_entry initdev_exe, "dev", "bin", f_readonly+f_system
+	fs_entry initdev_exe, "device", "bin", f_readonly+f_system
 	fs_entry explorer_exe, "explorer", "bin", f_readonly+f_system
 	fs_entry fexplore_exe, "fexplore", "bin", f_readonly+f_system
 	fs_entry files_exe, "files", "bin", f_readonly+f_system
@@ -270,7 +270,7 @@ end fs_file
 
 
 fs_file initdev_exe
-	include 'fs/bin/dev.asm'
+	include 'fs/bin/device.asm'
 end fs_file
 
 fs_file userfsck_exe

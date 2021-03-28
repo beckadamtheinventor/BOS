@@ -4,15 +4,22 @@ initdev_exe_main:
 	pop bc,hl
 	push hl,bc
 	ld a,(hl)
-	or a,a
-	ret z
 	cp a,'-'
 	jq nz,.info
 	inc hl
 	ld a,(hl)
-	inc hl
 	cp a,'h'
 	jq z,.info
+	ld b,a
+	inc hl
+	ld a,(hl)
+	inc hl
+	cp a,' '
+	jq nz,.info
+	ld a,(hl)
+	or a,a
+	jq z,.info
+	ld a,b
 	cp a,'d'
 	jq z,.deinitdev
 	cp a,'i'
@@ -37,7 +44,7 @@ initdev_exe_main:
 	sbc hl,hl
 	ret
 .info_string:
-	db $9,"dev -h : display this info",$A
-	db $9,"dev -i file : init device",$A
-	db $9,"dev -d file : deinit device",$A,0
+	db $9,"device -h : display this info",$A
+	db $9,"device -i file : init device",$A
+	db $9,"device -d file : deinit device",$A,0
 

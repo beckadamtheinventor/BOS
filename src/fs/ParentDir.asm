@@ -28,8 +28,10 @@ fs_ParentDir:
 	pop de
 	sbc hl,de
 	jq c,.return_root_dir
-	inc hl
+	ld a,l
+	or a,h
 	jq z,.return_root_dir
+	inc hl
 	push de,hl
 	call sys_Malloc
 	ex hl,de

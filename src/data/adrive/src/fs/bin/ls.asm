@@ -38,7 +38,9 @@ ls_main:
 	ld a,(iy)
 	or a,a
 	jq z,.exit
-	cp a,'.'
+	inc a
+	jq z,.exit
+	cp a,'.'+1
 	jq z,.hidden
 	bit bos.fd_hidden,(iy+$B) ;check if file is hidden
 	jq z,.not_hidden

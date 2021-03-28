@@ -40,7 +40,9 @@ fs_InitClusterMap:
 	ld a,(iy)
 	or a,a
 	ret z
-	cp a,'.'
+	inc a
+	ret z
+	cp a,'.'+1
 	jq z,.traverse_next
 	ld de,(iy+fsentry_filelen)
 	ex.s hl,de

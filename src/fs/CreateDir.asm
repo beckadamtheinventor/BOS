@@ -10,6 +10,7 @@ fs_CreateDir:
 	call fs_ParentDir
 	jq c,.fail
 	ex (sp),hl
+	call sys_Free ;free memory malloc'd by fs_ParentDir
 	call fs_OpenFile
 	jq c,.fail  ; fail if parent dir not found
 	ld bc,$C
@@ -41,7 +42,6 @@ fs_CreateDir:
 	call sys_Malloc
 	jq c,.fail
 	pop bc
-	ex hl,de
 	ld hl,.path_back_entry
 	ld (ix-12),de ; save pointer to malloc'd memory to free later
 	ldir
@@ -67,7 +67,7 @@ fs_CreateDir:
 	ld (hl),b
 	ld de,(ix-9)
 	ld hl,(ix-12)
-	ld bc,48
+	ld bc,32
 	push hl
 	call sys_WriteFlash ; assume file contents are cleared already
 	call sys_FlashLock
@@ -83,7 +83,6 @@ fs_CreateDir:
 	pop ix
 	ret
 .path_back_entry:
-	db ".          ",(1 shl fd_subdir),0,0,0,0
-	db "..         ",(1 shl fd_subdir),0,0,0,0
-	db 16 dup 0
+	db ".          ",f_subdir,0,0,0,0
+	db "..         ",f_subdir,0,0,0,0
 

@@ -232,6 +232,8 @@ explorer_dir_offset:=$-3
 	ld a,(ix)
 	or a,a
 	ret z
+	inc a
+	ret z
 	call .setxy
 	bit bos.fd_subdir,(ix+$B)
 	call nz,.draw_dir
