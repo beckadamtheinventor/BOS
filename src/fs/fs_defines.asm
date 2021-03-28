@@ -5,7 +5,7 @@ fs_filesystem_address := $040200
 fsbit_readonly       := 0
 fsbit_hidden         := 1
 fsbit_system         := 2
-fsbit_volumeid       := 3 ;file name is volume ID
+fsbit_subfile        := 3 ;file is a sub-file. Contents are at (fsentry&0x1FF) + *fsentry_filesector
 fsbit_subdirectory   := 4
 fsbit_archive        := 5 ;has been changed since last backup
 

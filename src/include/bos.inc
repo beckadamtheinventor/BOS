@@ -135,7 +135,7 @@
 ?bottom_of_RAM          := $D0022D
 ?flashStatusByte        := $D00230
 ?filesystem_driver      := $D00231
-?on_interrupt_handler   := $D00234 ;4 bytes. Jump to on key interrupt handler
+?on_interrupt_handler   := $D00235 ;3 bytes. Jump to on key interrupt handler. Byte preceeding this must be $C3 or $C9
 ?cur_lcd_buffer         := $D00238 ;3 bytes. Points to current LCD buffer
 ?ScrapMem2              := $D00279
 ?ScrapByte              := $D0027C

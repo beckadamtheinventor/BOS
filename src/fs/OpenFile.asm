@@ -37,7 +37,7 @@ fs_OpenFile:
 	ld a,(hl)
 	or a,a
 	jq z,.return
-	push hl,hl
+	push hl
 	call ti._strlen
 	ld (ix-23),hl
 	ex (sp),hl
@@ -55,11 +55,13 @@ fs_OpenFile:
 	dec hl
 .no_more_slash:
 	ld (ix-3),hl ;advance path entry
+	ld a,(hl)
+	cp a,'$'
+	jq z,.return_file_entry_point
 	ld hl,(ix-23)
 	or a,a
 	sbc hl,bc ;how long was the string?
 	ld (ix-23),hl
-	pop hl
 	call .search_loop ;returns Zf if failed
 	jq z,.fail
 	ld hl,(ix-3)
@@ -89,6 +91,20 @@ fs_OpenFile:
 	ld sp,ix
 	pop ix
 	ret
+
+.return_file_entry_point:
+	ld bc,(ix-26)
+	inc bc
+	ld (ix-26),bc
+	ld hl,(iy+$C)
+	push hl
+	call fs_GetSectorAddress
+	ex (sp),hl
+	pop iy
+	call .search_loop
+	jq z,.fail
+	jq .return
+
 
 ;searches for a file name in a directory listing
 .search_next:

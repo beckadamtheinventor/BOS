@@ -708,20 +708,20 @@ explorer_gui_items:
 str_PressEnterConfirm:
 	db "Press enter to confirm.",0
 str_UsbRecvExecutable:
-	db "/bin/usbrecv.exe",0
+	db "/bin/usbrecv.bin",0
 str_FExploreExecutable:
-	db "/bin/fexplore.exe",0
+	db "/bin/fexplore.bin",0
 str_OffExecutable:
-	db "/bin/off.exe",0
+	db "/bin/off.bin",0
 str_UsbRunExecutable:
-	db "/bin/usbrun.exe",0
+	db "/bin/usbrun.bin",0
 str_UpdaterExecutable:
-	db "/bin/updater.exe",0
+	db "/bin/updater.bin",0
 str_CmdExecutable:
-	db "/bin/cmd.exe",0
+	db "/bin/cmd.bin",0
 str_FilesExecutable:
-	db "/bin/files.exe",0
+	db "/bin/files.bin",0
 str_ExplorerExecutable:
-	db "/bin/explorer.exe",0
+	db "/bin/explorer.bin",0
 
 

@@ -11,6 +11,8 @@ mem_edit:
 	call ti._frameset
 	call libload_load
 	ret nz
+	xor a,a
+	ld (ix-12),a
 mem_edit_main:
 	ld c,1
 	push bc
@@ -181,15 +183,21 @@ mem_edit_main:
 	sbc hl,hl
 	ld a,(ix-7) ;cursor offset
 	call .lcd_ptr_from_cursor
+	ld bc,320*9
+	add hl,bc
 	ld bc,17
 	ld (hl),$FF
 	push hl
 	pop de
 	inc de
 	ldir
-;draw end of file marker if it's in view
+;draw end of file marker if we're editing a file and it's in view
+	ld a,(ix-12)
+	or a,a
+	jq z,.done_drawing
 	ld hl,(ix-14)
-	inc hl
+	ld de,bos.safeRAM+1
+	add hl,de
 	ld de,(ix-3)
 	or a,a
 	sbc hl,de
@@ -399,8 +407,8 @@ mem_edit_main:
 	ld e,27
 	mlt de    ;col*27
 	add hl,de ;col*27 + row*9*320
-	ld de,$D52C00
-	add hl,de ;&vRamBuffer[col*27 + row*9*320]
+	ld de,$D52C02
+	add hl,de ;&vRamBuffer[col*27 + row*9*320 + 2]
 	ret
 .write_file:
 	ld hl,(ix+6) ;args

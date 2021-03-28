@@ -30,34 +30,34 @@ end fs_dir
 ;"/bin/" directory
 fs_dir bin_dir
 	fs_entry root_dir, "..", "", f_subdir
-	fs_entry bpkload_exe, "bpk", "exe", f_readonly+f_system
-	fs_entry cat_exe, "cat", "exe", f_readonly+f_system
-	fs_entry cd_exe, "cd", "exe", f_readonly+f_system
-	fs_entry cmd_exe, "cmd","exe", f_readonly+f_system
-	fs_entry cls_exe, "cls", "exe", f_readonly+f_system
-	fs_entry initdev_exe, "dev", "exe", f_readonly+f_system
-	fs_entry explorer_exe, "explorer", "exe", f_readonly+f_system
-	fs_entry fexplore_exe, "fexplore", "exe", f_readonly+f_system
-	fs_entry files_exe, "files", "exe", f_readonly+f_system
-	fs_entry info_exe, "info", "exe", f_readonly+f_system
-	fs_entry ls_exe, "ls", "exe", f_readonly+f_system
-	fs_entry memedit_exe, "memedit","exe", f_readonly+f_system
-	fs_entry mkdir_exe, "mkdir", "exe", f_readonly+f_system
-	fs_entry mkfile_exe, "mkfile", "exe", f_readonly+f_system
-	fs_entry off_exe, "off","exe", f_readonly+f_system
-	fs_entry rm_exe, "rm", "exe", f_readonly+f_system
-	fs_entry uninstaller_exe, "uninstlr","exe", f_readonly+f_system
-	fs_entry updater_exe, "updater", "exe", f_readonly+f_system
-	fs_entry usbrecv_exe, "usbrecv","exe", f_readonly+f_system
-	fs_entry usbrun_exe, "usbrun","exe", f_readonly+f_system
-	fs_entry usbsend_exe, "usbsend","exe", f_readonly+f_system
-	fs_entry userfsck_exe, "userfsck", "exe", f_readonly+f_system
+	fs_entry bpkload_exe, "bpk", "bin", f_readonly+f_system
+	fs_entry cat_exe, "cat", "bin", f_readonly+f_system
+	fs_entry cd_exe, "cd", "bin", f_readonly+f_system
+	fs_entry cmd_exe, "cmd", "bin", f_readonly+f_system
+	fs_entry cls_exe, "cls", "bin", f_readonly+f_system
+	fs_entry initdev_exe, "dev", "bin", f_readonly+f_system
+	fs_entry explorer_exe, "explorer", "bin", f_readonly+f_system
+	fs_entry fexplore_exe, "fexplore", "bin", f_readonly+f_system
+	fs_entry files_exe, "files", "bin", f_readonly+f_system
+	fs_entry info_exe, "info", "bin", f_readonly+f_system
+	fs_entry ls_exe, "ls", "bin", f_readonly+f_system
+	fs_entry memedit_exe, "memedit", "bin", f_readonly+f_system
+	fs_entry mkdir_exe, "mkdir", "bin", f_readonly+f_system
+	fs_entry mkfile_exe, "mkfile", "bin", f_readonly+f_system
+	fs_entry off_exe, "off", "bin", f_readonly+f_system
+	fs_entry rm_exe, "rm", "bin", f_readonly+f_system
+	fs_entry uninstaller_exe, "uninstlr", "bin", f_readonly+f_system
+	fs_entry updater_exe, "updater", "bin", f_readonly+f_system
+	fs_entry usbrecv_exe, "usbrecv", "bin", f_readonly+f_system
+	fs_entry usbrun_exe, "usbrun", "bin", f_readonly+f_system
+	fs_entry usbsend_exe, "usbsend", "bin", f_readonly+f_system
+	fs_entry userfsck_exe, "userfsck", "bin", f_readonly+f_system
 end fs_dir
 
 ;"/boot/" directory
 fs_dir boot_dir
 	fs_entry root_dir, "..", "", f_subdir
-	fs_entry boot_exe, "boot", "exe", f_readonly+f_system
+	fs_entry boot_exe, "boot", "bin", f_readonly+f_system
 	fs_entry boot_usr, "usr", "", f_subdir
 end fs_dir
 

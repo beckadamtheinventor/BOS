@@ -70,10 +70,10 @@ class Build:
 	def build_include(self):
 		from build_bos_inc import build_bos_inc
 		build_bos_inc()
-		if sys.platform.startswith('win') or sys.platform.startswith("cygwin"):
-			os.system("""xcopy /Y bos.inc src\\include\\
-xcopy /Y src\\include src\\data\adrive\\src\\include\\
-xcopy /Y src\\data\\adrive\\src\\include src\\data\\adrive\\src\\lib\\include\\""")
+		if 'win' in sys.platform or "nt" in sys.platform:
+			os.system("copy bos.inc src\\include\\ /Y")
+			os.system("xcopy src\\include\\ src\\data\\adrive\\src\\include\\ /Y /C /E ")
+			os.system("xcopy src\\include\\ src\\data\\adrive\\src\\lib\\include\\ /Y /C /E ")
 		else:
 			os.system("""cp -f bos.inc src/include/bos.inc
 cp -rf src/include src/data/adrive/src/
@@ -192,10 +192,8 @@ if __name__=='__main__':
 		elif sys.argv[i].startswith("-v") or sys.argv[i].startswith("--version"):
 			if i+1<len(sys.argv):
 				if not sys.argv[i+1].startswith("-"):
-					ver = verdata[1].split(".")
-					ver[2] = sys.argv[i+1]
-					verdata[1] = ".".join(ver)
-					i+=1
+					verdata[1] = sys.argv[i+1]
+					i+=2
 					continue
 			ver = verdata[1].split(".")
 			ver[2] = str(int(ver[2])+1).rjust(4,"0")
@@ -203,7 +201,7 @@ if __name__=='__main__':
 		elif sys.argv[i].startswith("-t") or sys.argv[i].startswith("--release-type"):
 			if i+1<len(sys.argv):
 				data[2] = sys.argv[i+1]
-				i+=1
+				i+=2
 			else:
 				print("release type:",data[2])
 		elif sys.argv[1].startswith("-?") or sys.argv[i].startswith("--get-version"):

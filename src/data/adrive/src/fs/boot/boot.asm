@@ -55,17 +55,17 @@ boot_fail:
 	jq bos.sys_WaitKey
 
 str_PressAnyKey:
-	db "Press any key to continue.",$A,0
+	db $A,"Press any key to continue.",$A,0
 str_BootFailedNoExplorer:
-	db "Boot failed. /bin/explorer.exe not found!",$A
+	db "Boot failed. /bin/explorer.bin not found!",$A
 	db "Press any key to open recovery menu.",$A,0
 str_CmdExecutable:
-	db "/bin/cmd.exe",0
+	db "/bin/cmd.bin",0
 str_ExplorerExecutable:
-	db "/bin/explorer.exe",0
+	db "/bin/explorer.bin",0
 str_ClusterMapFile:
 	db "/dev/cmap.dat",0
 str_UsrBootFile:
-	db "/boot/usr/onboot.exe",0
+	db "/boot/usr/onboot.bin",0
 str_UsrExplorerFile:
-	db "/boot/usr/explorer.exe",0
+	db "/boot/usr/explorer.bin",0

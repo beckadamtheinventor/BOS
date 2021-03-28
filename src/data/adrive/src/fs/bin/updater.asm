@@ -8,7 +8,7 @@ updater_main:
 	pop bc,bc
 	ret
 str_UpdateProgram:
-	db "/bin/usbrun.exe",0
+	db "/bin/usbrun.bin",0
 str_UpdateFile:
 	db "/BOSUPDTR.BIN",0
 

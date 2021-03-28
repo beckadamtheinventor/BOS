@@ -158,7 +158,7 @@ str_system_drive:
 str_ProgramFailedWithCode:
 	db $9,$9,$9,$9,$9,"Error Code",0
 str_exe_ext:
-	db ".exe",0
+	db ".bin",0
 
 str_CouldNotLocateExecutable:
 	db $9,"Could not locate executable",$A,0

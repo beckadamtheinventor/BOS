@@ -20,7 +20,8 @@ str_CmdExecutable:
 str_StartupProgram:
 	db "/boot/boot"
 str_dotEXE:
-	db ".exe",0
+str_dotBIN:
+	db ".bin",0
 fs_cluster_map_file:
 	db "/dev/cmap.dat",0
 string_FilesystemCorrupt:

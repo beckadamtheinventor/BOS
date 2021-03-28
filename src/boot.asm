@@ -33,8 +33,8 @@ boot_os:
 	ld (asm_prgm_size),hl
 	ld hl,op_stack_top
 	ld (op_stack_ptr),hl
-	ld de,os_DoNothing
-	ld hl,on_interrupt_handler
+	ld de,os_recovery_menu
+	ld hl,on_interrupt_handler-1
 	ld (hl),$C3 ;jp opcode byte
 	inc hl
 	ld (hl),de
@@ -45,8 +45,9 @@ boot_os:
 
 	call fs_SanityCheck
 	ld hl,current_working_dir
-	ld bc,'/'
-	ld (hl),bc
+	ld (hl),'/'
+	inc hl
+	ld (hl),0
 
 os_return:
 	call sys_GetKey
@@ -176,7 +177,7 @@ low_bit_0_int:
 	in a,(bc)
 	res 0,a
 	out (bc),a
-	jq on_interrupt_handler
+	jq on_interrupt_handler-1
 low_bit_1_int:
 	ld a,1 shl 1
 	out (bc),a

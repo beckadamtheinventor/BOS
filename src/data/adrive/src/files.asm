@@ -126,14 +126,6 @@ _exit_return_1337:
 	ld hl,1337
 	jq _exit.loadix
 
-_uninstall_bos:
-	ld bc,str_Uninstall
-	push bc
-	call bos.sys_ExecuteFile
-	pop bc
-	ret
-str_Uninstall:
-	db "/bin/uninstlr.exe",0
 explorer_scroll_down:
 	ld hl,(explorer_cursor_y)
 	inc hl
