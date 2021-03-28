@@ -12,7 +12,7 @@ gfx_FillRectangle:
 	ex	de,hl
 .computed:
 	ld	(ScrapWord),bc
-	ld  hl,(lcd_buffer)			; de -> place to begin drawing
+	ld  hl,(cur_lcd_buffer)			; de -> place to begin drawing
 .loop:
 	ld	(ScrapByte),a
 	ld	bc,(ScrapWord)

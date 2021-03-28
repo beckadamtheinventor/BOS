@@ -5,8 +5,8 @@ gfx_SetDraw:
 	ld hl,LCD_VRAM
 	or a,a
 	jr z,.setvram
-	ld hl,LCD_BUFFER
+	ld hl,cur_lcd_buffer
 .setvram:
-	ld (lcd_buffer),hl
+	ld (cur_lcd_buffer),hl
 	ret
 

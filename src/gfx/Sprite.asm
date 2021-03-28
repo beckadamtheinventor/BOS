@@ -8,7 +8,7 @@ gfx_Sprite:
 	sbc	hl,hl
 	ld	l,b
 	add	hl,hl
-	ld	de,(lcd_buffer)
+	ld	de,(cur_lcd_buffer)
 	add	hl,de
 	ld	b,LCD_WIDTH / 2
 	mlt	bc

@@ -14,7 +14,7 @@ character_height := 8
 	ld	h,LCD_WIDTH / 2
 	mlt	hl
 	add	hl,hl
-	ld	de,(lcd_buffer)
+	ld	de,(cur_lcd_buffer)
 	add	hl,de
 	add	hl,bc				; add x value
 	push	hl

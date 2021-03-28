@@ -25,7 +25,7 @@ gfx_Sprite:
 	ld	h,ti.lcdWidth / 2
 	mlt	hl
 	add	hl,hl
-	ld	de,(lcd_buffer)
+	ld	de,(cur_lcd_buffer)
 	add	hl,de
 	push	hl
 	sbc	hl,hl

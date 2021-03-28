@@ -2,7 +2,7 @@
 ;@INPUT A color to fill with
 ;@DESTROYS HL,DE,BC,F(P/V)
 gfx_BufClear:
-	ld	hl,(lcd_buffer)
+	ld	hl,(cur_lcd_buffer)
 	ld	bc,LCD_WIDTH * LCD_HEIGHT - 1
 .clear:
 	push hl
