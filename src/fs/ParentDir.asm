@@ -38,7 +38,6 @@ fs_ParentDir:
 	pop bc,hl
 	ret c
 	push de
-	dec bc
 	ldir ;copy the path up until last '/'
 	xor a,a
 	ld (de),a ;terminate the string

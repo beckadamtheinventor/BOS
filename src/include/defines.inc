@@ -108,6 +108,26 @@ fd_subdir     := 4
 fd_archive    := 5
 fd_device     := 6
 
+; file entry first byte
+fsentry_endofdir     := $00
+fsentry_dot          := $2E
+fsentry_deleted      := $F0
+fsentry_longfilename := $F1
+fsentry_endofdir2    := $FF
+
+; file entry offsets
+fsentry_filename            := $00
+fsentry_filename.len        := 8
+fsentry_fileext             := $08
+fsentry_fileext.len         := 3
+fsentry_fileattr            := $0B
+fsentry_fileattr.len        := 1
+fsentry_filesector          := $0C
+fsentry_filesector.len      := 2
+fsentry_filelen             := $0E
+fsentry_filelen.len         := 2
+
+
 ; flashStatusByte flags
 bIsFlashUnlocked     := 0
 bKeepFlashUnlocked   := 1

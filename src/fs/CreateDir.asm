@@ -19,8 +19,8 @@ fs_CreateDir:
 	ex.s hl,de
 	pop bc
 	ld (ix-3),hl ; save parent directory sector
+	ld hl,32
 	ld de,(ix+9)
-	ld hl,48
 	ld bc,(ix+6)
 	push hl,de,bc
 	call fs_CreateFile
@@ -37,7 +37,7 @@ fs_CreateDir:
 	call fs_GetSectorAddress
 	pop bc
 	ld (ix-9),hl ; save pointer to current directory data section
-	ld bc,48
+	ld bc,32
 	push bc
 	call sys_Malloc
 	jq c,.fail

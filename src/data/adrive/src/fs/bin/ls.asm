@@ -40,6 +40,8 @@ ls_main:
 	jq z,.exit
 	inc a
 	jq z,.exit
+	cp a,bos.fsentry_deleted+1
+	jq z,.next
 	cp a,'.'+1
 	jq z,.hidden
 	bit bos.fd_hidden,(iy+$B) ;check if file is hidden
@@ -70,6 +72,7 @@ ls_main:
 	ld (hl),$9
 	call bos.gui_Print
 	call bos.gui_NewLine
+.next:
 	lea iy,iy+16
 	jq .loop
 .exit:

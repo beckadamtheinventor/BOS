@@ -25,9 +25,17 @@ fs_CreateFile:
 	ex (sp),hl
 	pop bc
 	push hl
+	ld a,c
+	or a,b
+	jq z,.found_last_slash
 	ld a,'/'
 	add hl,bc
+	cp a,(hl)
+	jq nz,.find_last_slash
+	dec hl
+.find_last_slash:
 	cpdr ;find last '/' in path string
+.found_last_slash:
 	pop de
 	push hl
 	sbc hl,de
