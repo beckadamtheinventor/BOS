@@ -174,10 +174,10 @@ if __name__=='__main__':
 		os.system("cd "+d)
 
 	with open("src/data/buildno.txt") as f:
-		data = f.read().split(" ",maxsplit=3)
+		verdata = f.read().split(" ",maxsplit=3)
 
 	if len(sys.argv)<2:
-		Build(" ".join(data)).build()
+		Build(" ".join(verdata)).build()
 		exit(0)
 
 	fullBuild = doBuild = buildNoti = False
@@ -187,12 +187,15 @@ if __name__=='__main__':
 			doBuild = True
 		elif sys.argv[i].startswith("-v") or sys.argv[i].startswith("--version"):
 			if i+1<len(sys.argv):
-				if sys.argv[i+1].startswith("-"):
+				if not sys.argv[i+1].startswith("-"):
+					ver = verdata[1].split(".")
+					ver[2] = sys.argv[i+1]
+					verdata[1] = ".".join(ver)
 					i+=1
 					continue
-			ver = data[1].split(".")
+			ver = verdata[1].split(".")
 			ver[2] = str(int(ver[2])+1).rjust(4,"0")
-			data[1] = ".".join(ver)
+			verdata[1] = ".".join(ver)
 		elif sys.argv[i].startswith("-t") or sys.argv[i].startswith("--release-type"):
 			if i+1<len(sys.argv):
 				data[2] = sys.argv[i+1]
@@ -216,7 +219,7 @@ Becks build script v3.1 build options
 		i+=1
 
 	with open("src/data/buildno.txt","w") as f:
-		f.write(" ".join(data))
+		f.write(" ".join(verdata))
 
 	if fullBuild:
 		try:
@@ -225,7 +228,7 @@ Becks build script v3.1 build options
 			pass
 
 	if doBuild:
-		b = Build(" ".join(data))
+		b = Build(" ".join(verdata))
 		if buildNoti:
 			b.build_noti()
 		b.build()

@@ -7,9 +7,10 @@ macro DisableMultithreading?
 	db $00
 end macro
 
+;disabled for now
 macro EnableMultiThreading?
-	rst $10
-	db $F7
+;	rst $10
+;	db $F7
 end macro
 
 macro StopAllThreads?

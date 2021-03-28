@@ -68,15 +68,11 @@ fs_SetSize:
 	push bc
 	ld c,12
 	ldir
-	lea hl,ix-4
 	ld bc,(ix-19)
-	ld (hl),bc
-	inc hl
-	inc hl
+	ld (ix-4),bc
 	ld bc,(ix+6)
-	ld (hl),c
-	inc hl
-	ld (hl),b
+	ld (ix-2),c
+	ld (ix-1),b
 	pea ix-16
 	push iy
 	call sys_WriteFlashFull
@@ -86,6 +82,7 @@ fs_SetSize:
 	db $3E
 .fail:
 	xor a,a
+	or a,a
 	ld sp,ix
 	pop ix
 	ret

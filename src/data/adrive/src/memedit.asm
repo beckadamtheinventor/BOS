@@ -7,7 +7,7 @@ org ti.userMem
 	jq mem_edit
 	db "REX",0
 mem_edit:
-	ld hl,-11
+	ld hl,-14
 	call ti._frameset
 	call libload_load
 	ret nz
@@ -41,6 +41,7 @@ mem_edit_main:
 	ld c,1
 	push bc ;uint8_t count
 	ld (ix-11),de
+	ld (ix-14),de
 	ld a,(ix-9)
 	or a,e
 	or a,d
@@ -175,31 +176,37 @@ mem_edit_main:
 	ld (curcol),a
 	dec c
 	jq nz,.outer
+;draw cursor
 	or a,a
 	sbc hl,hl
 	ld a,(ix-7) ;cursor offset
-	ld c,a
-	rra
-	rra
-	rra
-	and a,$F
-	inc a
-	inc a
-	inc a
-	ld l,a
-	ld h,9
-	mlt hl
-	ld a,c
-	and a,$7
-	ld d,a
-	ld e,27
-	mlt de
-	ld bc,8
-	add hl,bc
-	ld c,18
-	push bc,hl,de
-	call gfx_HorizLine
-	pop bc,bc,bc
+	call .lcd_ptr_from_cursor
+	ld bc,17
+	ld (hl),$FF
+	push hl
+	pop de
+	inc de
+	ldir
+;draw end of file marker if it's in view
+	ld hl,(ix-14)
+	inc hl
+	ld de,(ix-3)
+	or a,a
+	sbc hl,de
+	jq c,.done_drawing
+	ld de,8*16
+	or a,a
+	ld a,l
+	sbc hl,de
+	jq c,.done_drawing
+	call .lcd_ptr_from_cursor
+	ld de,320
+	ld b,9
+.draw_eof_loop:
+	ld (hl),$C0
+	add hl,de
+	djnz .draw_eof_loop
+.done_drawing:
 	call gfx_BlitBuffer
 .keys:
 	call bos.sys_WaitKey
@@ -370,6 +377,31 @@ mem_edit_main:
 	call gfx_BlitBuffer
 	or a,a
 	ret
+.lcd_ptr_from_cursor:
+	ld c,a
+	rra
+	rra
+	rra
+	and a,$F
+	inc a
+	inc a
+	inc a
+	ld l,a
+	ld h,9*20
+	mlt hl    ;row*9*20
+	add hl,hl ;row*9*40
+	add hl,hl ;row*9*80
+	add hl,hl ;row*9*160
+	add hl,hl ;row*9*320
+	ld a,c
+	and a,$7
+	ld d,a
+	ld e,27
+	mlt de    ;col*27
+	add hl,de ;col*27 + row*9*320
+	ld de,$D52C00
+	add hl,de ;&vRamBuffer[col*27 + row*9*320]
+	ret
 .write_file:
 	ld hl,(ix+6) ;args
 	ld a,(hl)
@@ -389,15 +421,22 @@ mem_edit_main:
 	ld hl,(ix+6) ;args
 	push hl
 	call bos.fs_OpenFile
+	jq c,.write_new_file
+	ex (sp),hl
+	ld bc,(ix-11)
+	push bc
+	call bos.fs_SetSize
+	pop bc,hl
+	jq z,.main_loop
+	jq .write_file_data
+.write_new_file:
+	ld bc,(ix-11)
+	push bc
 	ld c,0
 	push bc
-	call c,bos.fs_CreateFile
-	pop bc
-	pop bc
-	ld bc,(ix-11)
-	push bc,hl
-	call bos.fs_SetSize
-	pop hl,bc
+	call bos.fs_CreateFile
+	pop bc,bc,bc
+.write_file_data:
 	ld bc,0
 	push bc,hl
 	ld c,1
@@ -406,7 +445,7 @@ mem_edit_main:
 	push bc
 	ld bc,bos.safeRAM
 	push bc
-	call bos.fs_Write
+	call nc,bos.fs_Write
 	pop bc,bc,bc,bc,bc
 	jq .main_loop
 .exitaddrloop:
@@ -429,20 +468,18 @@ mem_edit_main:
 	sbc hl,bc
 	add hl,bc
 	jq c,.main_draw
-	ld hl,256
-	push hl
-	call bos._EnoughMem
-	pop hl
-	jq c,.main_draw
-	ld bc,(bos.asm_prgm_size)
+	ld bc,256
 	push bc
-	call bos._InsertMem
+	call bos.sys_Malloc
 	pop bc
-	ld hl,bos.bos_UserMem
-	add hl,bc
-	push hl
+	jq c,.main_draw
+	push bc,hl
+	xor a,a
+	ld (bos.curcol),a
+	inc a
+	ld (bos.currow),a
 	call bos.gui_Input
-	pop hl
+	pop hl,bc
 	or a,a
 	jq z,.main_draw
 	ex hl,de
@@ -453,9 +490,10 @@ mem_edit_main:
 	call ti._strlen
 	ex (sp),hl
 	pop bc,de
-	push bc
+	push bc,hl
 	ldir
-	pop hl
+	call bos.sys_Free
+	pop bc,hl
 	ld a,(ix-7)
 	call bos.sys_AddHLAndA
 	ld bc,8*16

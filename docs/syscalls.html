@@ -1,102 +1,102 @@
-<html><head><title>bos.inc docs</title>	<link rel="stylesheet" type="text/css" href="style.css"></head>	<body>	<h1>"bos.inc" documentation</h1>	<h3>syscalls marked in <a class="no_op">red</a> are no-ops and do nothing.</h3>	<table><th>syscall name</th><th>syscall adress</th><th>links</th>	<tr><td>bos.boot_os</td><td>020108</td><td><a href="#boot_os">doc</a></tr>
-<tr><td>bos.handle_interrupt</td><td>02010C</td><td><a href="#handle_interrupt">doc</a></tr>
-<tr class="no_op"><td>bos.DONOTHING </td><td>020110</td><td><a href="#DONOTHING ">doc</a></tr>
-<tr class="no_op"><td>bos.DONOTHING </td><td>020114</td><td><a href="#DONOTHING ">doc</a></tr>
-<tr><td>bos.handle_safeop </td><td>020118</td><td><a href="#handle_safeop ">doc</a></tr>
-<tr class="no_op"><td>bos.DONOTHING </td><td>02011C</td><td><a href="#DONOTHING ">doc</a></tr>
-<tr class="no_op"><td>bos.DONOTHING </td><td>020120</td><td><a href="#DONOTHING ">doc</a></tr>
-<tr><td>bos.sys_ExecuteFile</td><td>020124</td><td><a href="#sys_ExecuteFile">doc</a></tr>
-<tr><td>bos.os_GetOSInfo</td><td>020128</td><td><a href="#os_GetOSInfo">doc</a></tr>
-<tr><td>bos.fs_OpenFile</td><td>02012C</td><td><a href="#fs_OpenFile">doc</a></tr>
-<tr><td>bos.fs_GetSectorAddress</td><td>020130</td><td><a href="#fs_GetSectorAddress">doc</a></tr>
-<tr><td>bos.fs_CheckDirExists</td><td>020134</td><td><a href="#fs_CheckDirExists">doc</a></tr>
-<tr><td>bos.fs_GetPathLastName</td><td>020138</td><td><a href="#fs_GetPathLastName">doc</a></tr>
-<tr><td>bos.fs_CopyFileName</td><td>02013C</td><td><a href="#fs_CopyFileName">doc</a></tr>
-<tr><td>bos.fs_Read</td><td>020140</td><td><a href="#fs_Read">doc</a></tr>
-<tr><td>bos.fs_Write</td><td>020144</td><td><a href="#fs_Write">doc</a></tr>
-<tr><td>bos.sys_AddHLAndA</td><td>020148</td><td><a href="#sys_AddHLAndA">doc</a></tr>
-<tr><td>bos.sys_AnyKey</td><td>02014C</td><td><a href="#sys_AnyKey">doc</a></tr>
-<tr><td>bos.sys_FreeAll</td><td>020150</td><td><a href="#sys_FreeAll">doc</a></tr>
-<tr><td>bos.sys_GetKey</td><td>020154</td><td><a href="#sys_GetKey">doc</a></tr>
-<tr><td>bos.sys_KbScan</td><td>020158</td><td><a href="#sys_KbScan">doc</a></tr>
-<tr><td>bos.sys_Malloc</td><td>02015C</td><td><a href="#sys_Malloc">doc</a></tr>
-<tr><td>bos.sys_MemCmp</td><td>020160</td><td><a href="#sys_MemCmp">doc</a></tr>
-<tr><td>bos.sys_MemSet</td><td>020164</td><td><a href="#sys_MemSet">doc</a></tr>
-<tr><td>bos.sys_Mult24x8</td><td>020168</td><td><a href="#sys_Mult24x8">doc</a></tr>
-<tr><td>bos.sys_WaitKey</td><td>02016C</td><td><a href="#sys_WaitKey">doc</a></tr>
-<tr><td>bos.sys_WaitKeyCycle</td><td>020170</td><td><a href="#sys_WaitKeyCycle">doc</a></tr>
-<tr><td>bos.gui_DrawConsoleWindow</td><td>020174</td><td><a href="#gui_DrawConsoleWindow">doc</a></tr>
-<tr><td>bos.gui_Input</td><td>020178</td><td><a href="#gui_Input">doc</a></tr>
-<tr><td>bos.gui_NewLine</td><td>02017C</td><td><a href="#gui_NewLine">doc</a></tr>
-<tr><td>bos.gui_Print</td><td>020180</td><td><a href="#gui_Print">doc</a></tr>
-<tr><td>bos.gui_PrintInt</td><td>020184</td><td><a href="#gui_PrintInt">doc</a></tr>
-<tr><td>bos.gui_Scroll</td><td>020188</td><td><a href="#gui_Scroll">doc</a></tr>
-<tr><td>bos.gfx_BlitBuffer</td><td>02018C</td><td><a href="#gfx_BlitBuffer">doc</a></tr>
-<tr><td>bos.gfx_PrintString</td><td>020190</td><td><a href="#gfx_PrintString">doc</a></tr>
-<tr><td>bos._MemClear</td><td>020194</td><td><a href="#_MemClear">doc</a></tr>
-<tr><td>bos._PushOP1</td><td>020198</td><td><a href="#_PushOP1">doc</a></tr>
-<tr><td>bos._PopOP1</td><td>02019C</td><td><a href="#_PopOP1">doc</a></tr>
-<tr><td>bos._Mov9ToOP1</td><td>0201A0</td><td><a href="#_Mov9ToOP1">doc</a></tr>
-<tr><td>bos._CpHLDE</td><td>0201A4</td><td><a href="#_CpHLDE">doc</a></tr>
-<tr><td>bos._Mov8b</td><td>0201A8</td><td><a href="#_Mov8b">doc</a></tr>
-<tr><td>bos._ChkFindSym</td><td>0201AC</td><td><a href="#_ChkFindSym">doc</a></tr>
-<tr><td>bos._LoadDEInd_s</td><td>0201B0</td><td><a href="#_LoadDEInd_s">doc</a></tr>
-<tr><td>bos._EnoughMem</td><td>0201B4</td><td><a href="#_EnoughMem">doc</a></tr>
-<tr><td>bos._InsertMem</td><td>0201B8</td><td><a href="#_InsertMem">doc</a></tr>
-<tr><td>bos._SetHLUTo0</td><td>0201BC</td><td><a href="#_SetHLUTo0">doc</a></tr>
-<tr><td>bos._PutS</td><td>0201C0</td><td><a href="#_PutS">doc</a></tr>
-<tr><td>bos._GetCSC</td><td>0201C4</td><td><a href="#_GetCSC">doc</a></tr>
-<tr><td>bos._NewLine</td><td>0201C8</td><td><a href="#_NewLine">doc</a></tr>
-<tr><td>bos._ClrScrn</td><td>0201CC</td><td><a href="#_ClrScrn">doc</a></tr>
-<tr><td>bos._HomeUp</td><td>0201D0</td><td><a href="#_HomeUp">doc</a></tr>
-<tr><td>bos._ErrMemory</td><td>0201D4</td><td><a href="#_ErrMemory">doc</a></tr>
-<tr><td>bos._DrawStatusBar</td><td>0201D8</td><td><a href="#_DrawStatusBar">doc</a></tr>
-<tr><td>bos._os_GetSystemInfo</td><td>0201DC</td><td><a href="#_os_GetSystemInfo">doc</a></tr>
-<tr><td>bos._UsbPowerVbus</td><td>0201E0</td><td><a href="#_UsbPowerVbus">doc</a></tr>
-<tr><td>bos._UsbUnpowerVbus</td><td>0201E4</td><td><a href="#_UsbUnpowerVbus">doc</a></tr>
-<tr><td>bos.sys_EraseFlashSector</td><td>0201E8</td><td><a href="#sys_EraseFlashSector">doc</a></tr>
-<tr><td>bos.sys_FlashUnlock</td><td>0201EC</td><td><a href="#sys_FlashUnlock">doc</a></tr>
-<tr><td>bos.sys_FlashLock</td><td>0201F0</td><td><a href="#sys_FlashLock">doc</a></tr>
-<tr><td>bos.fs_CreateFile</td><td>0201F4</td><td><a href="#fs_CreateFile">doc</a></tr>
-<tr><td>bos.strupper</td><td>0201F8</td><td><a href="#strupper">doc</a></tr>
-<tr><td>bos.strlower</td><td>0201FC</td><td><a href="#strlower">doc</a></tr>
-<tr><td>bos.fs_AbsPath</td><td>020200</td><td><a href="#fs_AbsPath">doc</a></tr>
-<tr><td>bos.fs_MultByBytesPerSector</td><td>020204</td><td><a href="#fs_MultByBytesPerSector">doc</a></tr>
-<tr><td>bos._LoadLibraryOP1</td><td>020208</td><td><a href="#_LoadLibraryOP1">doc</a></tr>
-<tr><td>bos.fs_OpenFileInDir</td><td>02020C</td><td><a href="#fs_OpenFileInDir">doc</a></tr>
-<tr><td>bos.fs_SetSize</td><td>020210</td><td><a href="#fs_SetSize">doc</a></tr>
-<tr><td>bos.fs_WriteFile</td><td>020214</td><td><a href="#fs_WriteFile">doc</a></tr>
-<tr><td>bos.sys_HLToString</td><td>020218</td><td><a href="#sys_HLToString">doc</a></tr>
-<tr><td>bos.fs_DeleteFile</td><td>02021C</td><td><a href="#fs_DeleteFile">doc</a></tr>
-<tr><td>bos._DelVar</td><td>020220</td><td><a href="#_DelVar">doc</a></tr>
-<tr><td>bos._CreateVar</td><td>020224</td><td><a href="#_CreateVar">doc</a></tr>
-<tr><td>bos.gui_InputNoClear</td><td>020228</td><td><a href="#gui_InputNoClear">doc</a></tr>
-<tr><td>bos.fs_InitClusterMap</td><td>02022C</td><td><a href="#fs_InitClusterMap">doc</a></tr>
-<tr><td>bos.sys_WriteFlash</td><td>020230</td><td><a href="#sys_WriteFlash">doc</a></tr>
-<tr><td>bos.sys_WriteFlashA</td><td>020234</td><td><a href="#sys_WriteFlashA">doc</a></tr>
-<tr><td>bos.sys_WriteFlashFull</td><td>020238</td><td><a href="#sys_WriteFlashFull">doc</a></tr>
-<tr><td>bos.sys_WriteFlashByteFull</td><td>02023C</td><td><a href="#sys_WriteFlashByteFull">doc</a></tr>
-<tr><td>bos.fs_ParentDir</td><td>020240</td><td><a href="#fs_ParentDir">doc</a></tr>
-<tr><td>bos.fs_StrToFileEntry</td><td>020244</td><td><a href="#fs_StrToFileEntry">doc</a></tr>
-<tr><td>bos.fs_DirList</td><td>020248</td><td><a href="#fs_DirList">doc</a></tr>
-<tr><td>bos.sys_Free</td><td>02024C</td><td><a href="#sys_Free">doc</a></tr>
-<tr><td>bos.sys_CallExecuteFile</td><td>020250</td><td><a href="#sys_CallExecuteFile">doc</a></tr>
-<tr><td>bos.sys_JumpExecuteFile</td><td>020254</td><td><a href="#sys_JumpExecuteFile">doc</a></tr>
-<tr><td>bos.sys_InitDevice</td><td>020258</td><td><a href="#sys_InitDevice">doc</a></tr>
-<tr><td>bos.sys_DeinitDevice</td><td>02025C</td><td><a href="#sys_DeinitDevice">doc</a></tr>
-<tr><td>bos.sys_GetDeviceAddress</td><td>020260</td><td><a href="#sys_GetDeviceAddress">doc</a></tr>
-<tr><td>bos.sys_ReadDevice</td><td>020264</td><td><a href="#sys_ReadDevice">doc</a></tr>
-<tr><td>bos.sys_WriteDevice</td><td>020268</td><td><a href="#sys_WriteDevice">doc</a></tr>
-<tr><td>bos.fs_GetSector</td><td>02026C</td><td><a href="#fs_GetSector">doc</a></tr>
-<tr><td>bos.fs_WriteByte</td><td>020270</td><td><a href="#fs_WriteByte">doc</a></tr>
-<tr><td>bos.fs_RenameFile</td><td>020274</td><td><a href="#fs_RenameFile">doc</a></tr>
-<tr><td>bos._SetCursorPos</td><td>020278</td><td><a href="#_SetCursorPos">doc</a></tr>
-<tr><td>bos.fs_CreateDir</td><td>02027C</td><td><a href="#fs_CreateDir">doc</a></tr>
-<tr><td>bos.gfx_BufClear</td><td>020280</td><td><a href="#gfx_BufClear">doc</a></tr>
-<tr><td>bos.gfx_LcdClear</td><td>020284</td><td><a href="#gfx_LcdClear">doc</a></tr>
-<tr><td>bos.fs_SanityCheck</td><td>020288</td><td><a href="#fs_SanityCheck">doc</a></tr>
-<tr><td>bos.sys_SetupOnInterruptHandler</td><td>02028C</td><td><a href="#sys_SetupOnInterruptHandler">doc</a></tr>
-<tr><td>bos.gui_PrintChar</td><td>020290</td><td><a href="#gui_PrintChar">doc</a></tr>
+<html><head><title>bos.inc docs</title>	<link rel="stylesheet" type="text/css" href="style.css"></head>	<body>	<h1>"bos.inc" documentation</h1>	<h3>syscalls marked in <a class="no_op">red</a> are no-ops and do nothing.</h3>	<table><th>syscall name</th><th>syscall adress</th>	<tr><td><a href="#boot_os">bos.boot_os</a></td><td><a href="#boot_os">020108</a></td></tr>
+<tr><td><a href="#handle_interrupt">bos.handle_interrupt</a></td><td><a href="#handle_interrupt">02010C</a></td></tr>
+<tr><td><a href="#HandleInstruction ">bos.HandleInstruction </a></td><td><a href="#HandleInstruction ">020110</a></td></tr>
+<tr><td><a href="#HandleThreadSpawn ">bos.HandleThreadSpawn </a></td><td><a href="#HandleThreadSpawn ">020114</a></td></tr>
+<tr><td><a href="#handle_safeop ">bos.handle_safeop </a></td><td><a href="#handle_safeop ">020118</a></td></tr>
+<tr class="no_op"><td><a href="#DONOTHING ">bos.DONOTHING </a></td><td><a href="#DONOTHING ">02011C</a></td></tr>
+<tr class="no_op"><td><a href="#DONOTHING ">bos.DONOTHING </a></td><td><a href="#DONOTHING ">020120</a></td></tr>
+<tr><td><a href="#sys_ExecuteFile">bos.sys_ExecuteFile</a></td><td><a href="#sys_ExecuteFile">020124</a></td></tr>
+<tr><td><a href="#os_GetOSInfo">bos.os_GetOSInfo</a></td><td><a href="#os_GetOSInfo">020128</a></td></tr>
+<tr><td><a href="#fs_OpenFile">bos.fs_OpenFile</a></td><td><a href="#fs_OpenFile">02012C</a></td></tr>
+<tr><td><a href="#fs_GetSectorAddress">bos.fs_GetSectorAddress</a></td><td><a href="#fs_GetSectorAddress">020130</a></td></tr>
+<tr><td><a href="#fs_CheckDirExists">bos.fs_CheckDirExists</a></td><td><a href="#fs_CheckDirExists">020134</a></td></tr>
+<tr><td><a href="#fs_GetPathLastName">bos.fs_GetPathLastName</a></td><td><a href="#fs_GetPathLastName">020138</a></td></tr>
+<tr><td><a href="#fs_CopyFileName">bos.fs_CopyFileName</a></td><td><a href="#fs_CopyFileName">02013C</a></td></tr>
+<tr><td><a href="#fs_Read">bos.fs_Read</a></td><td><a href="#fs_Read">020140</a></td></tr>
+<tr><td><a href="#fs_Write">bos.fs_Write</a></td><td><a href="#fs_Write">020144</a></td></tr>
+<tr><td><a href="#sys_AddHLAndA">bos.sys_AddHLAndA</a></td><td><a href="#sys_AddHLAndA">020148</a></td></tr>
+<tr><td><a href="#sys_AnyKey">bos.sys_AnyKey</a></td><td><a href="#sys_AnyKey">02014C</a></td></tr>
+<tr><td><a href="#sys_FreeAll">bos.sys_FreeAll</a></td><td><a href="#sys_FreeAll">020150</a></td></tr>
+<tr><td><a href="#sys_GetKey">bos.sys_GetKey</a></td><td><a href="#sys_GetKey">020154</a></td></tr>
+<tr><td><a href="#sys_KbScan">bos.sys_KbScan</a></td><td><a href="#sys_KbScan">020158</a></td></tr>
+<tr><td><a href="#sys_Malloc">bos.sys_Malloc</a></td><td><a href="#sys_Malloc">02015C</a></td></tr>
+<tr><td><a href="#sys_MemCmp">bos.sys_MemCmp</a></td><td><a href="#sys_MemCmp">020160</a></td></tr>
+<tr><td><a href="#sys_MemSet">bos.sys_MemSet</a></td><td><a href="#sys_MemSet">020164</a></td></tr>
+<tr><td><a href="#sys_Mult24x8">bos.sys_Mult24x8</a></td><td><a href="#sys_Mult24x8">020168</a></td></tr>
+<tr><td><a href="#sys_WaitKey">bos.sys_WaitKey</a></td><td><a href="#sys_WaitKey">02016C</a></td></tr>
+<tr><td><a href="#sys_WaitKeyCycle">bos.sys_WaitKeyCycle</a></td><td><a href="#sys_WaitKeyCycle">020170</a></td></tr>
+<tr><td><a href="#gui_DrawConsoleWindow">bos.gui_DrawConsoleWindow</a></td><td><a href="#gui_DrawConsoleWindow">020174</a></td></tr>
+<tr><td><a href="#gui_Input">bos.gui_Input</a></td><td><a href="#gui_Input">020178</a></td></tr>
+<tr><td><a href="#gui_NewLine">bos.gui_NewLine</a></td><td><a href="#gui_NewLine">02017C</a></td></tr>
+<tr><td><a href="#gui_Print">bos.gui_Print</a></td><td><a href="#gui_Print">020180</a></td></tr>
+<tr><td><a href="#gui_PrintInt">bos.gui_PrintInt</a></td><td><a href="#gui_PrintInt">020184</a></td></tr>
+<tr><td><a href="#gui_Scroll">bos.gui_Scroll</a></td><td><a href="#gui_Scroll">020188</a></td></tr>
+<tr><td><a href="#gfx_BlitBuffer">bos.gfx_BlitBuffer</a></td><td><a href="#gfx_BlitBuffer">02018C</a></td></tr>
+<tr><td><a href="#gfx_PrintString">bos.gfx_PrintString</a></td><td><a href="#gfx_PrintString">020190</a></td></tr>
+<tr><td><a href="#_MemClear">bos._MemClear</a></td><td><a href="#_MemClear">020194</a></td></tr>
+<tr><td><a href="#_PushOP1">bos._PushOP1</a></td><td><a href="#_PushOP1">020198</a></td></tr>
+<tr><td><a href="#_PopOP1">bos._PopOP1</a></td><td><a href="#_PopOP1">02019C</a></td></tr>
+<tr><td><a href="#_Mov9ToOP1">bos._Mov9ToOP1</a></td><td><a href="#_Mov9ToOP1">0201A0</a></td></tr>
+<tr><td><a href="#_CpHLDE">bos._CpHLDE</a></td><td><a href="#_CpHLDE">0201A4</a></td></tr>
+<tr><td><a href="#_Mov8b">bos._Mov8b</a></td><td><a href="#_Mov8b">0201A8</a></td></tr>
+<tr><td><a href="#_ChkFindSym">bos._ChkFindSym</a></td><td><a href="#_ChkFindSym">0201AC</a></td></tr>
+<tr><td><a href="#_LoadDEInd_s">bos._LoadDEInd_s</a></td><td><a href="#_LoadDEInd_s">0201B0</a></td></tr>
+<tr><td><a href="#_EnoughMem">bos._EnoughMem</a></td><td><a href="#_EnoughMem">0201B4</a></td></tr>
+<tr><td><a href="#_InsertMem">bos._InsertMem</a></td><td><a href="#_InsertMem">0201B8</a></td></tr>
+<tr><td><a href="#_SetHLUTo0">bos._SetHLUTo0</a></td><td><a href="#_SetHLUTo0">0201BC</a></td></tr>
+<tr><td><a href="#_PutS">bos._PutS</a></td><td><a href="#_PutS">0201C0</a></td></tr>
+<tr><td><a href="#_GetCSC">bos._GetCSC</a></td><td><a href="#_GetCSC">0201C4</a></td></tr>
+<tr><td><a href="#_NewLine">bos._NewLine</a></td><td><a href="#_NewLine">0201C8</a></td></tr>
+<tr><td><a href="#_ClrScrn">bos._ClrScrn</a></td><td><a href="#_ClrScrn">0201CC</a></td></tr>
+<tr><td><a href="#_HomeUp">bos._HomeUp</a></td><td><a href="#_HomeUp">0201D0</a></td></tr>
+<tr><td><a href="#_ErrMemory">bos._ErrMemory</a></td><td><a href="#_ErrMemory">0201D4</a></td></tr>
+<tr><td><a href="#_DrawStatusBar">bos._DrawStatusBar</a></td><td><a href="#_DrawStatusBar">0201D8</a></td></tr>
+<tr><td><a href="#_os_GetSystemInfo">bos._os_GetSystemInfo</a></td><td><a href="#_os_GetSystemInfo">0201DC</a></td></tr>
+<tr><td><a href="#_UsbPowerVbus">bos._UsbPowerVbus</a></td><td><a href="#_UsbPowerVbus">0201E0</a></td></tr>
+<tr><td><a href="#_UsbUnpowerVbus">bos._UsbUnpowerVbus</a></td><td><a href="#_UsbUnpowerVbus">0201E4</a></td></tr>
+<tr><td><a href="#sys_EraseFlashSector">bos.sys_EraseFlashSector</a></td><td><a href="#sys_EraseFlashSector">0201E8</a></td></tr>
+<tr><td><a href="#sys_FlashUnlock">bos.sys_FlashUnlock</a></td><td><a href="#sys_FlashUnlock">0201EC</a></td></tr>
+<tr><td><a href="#sys_FlashLock">bos.sys_FlashLock</a></td><td><a href="#sys_FlashLock">0201F0</a></td></tr>
+<tr><td><a href="#fs_CreateFile">bos.fs_CreateFile</a></td><td><a href="#fs_CreateFile">0201F4</a></td></tr>
+<tr><td><a href="#strupper">bos.strupper</a></td><td><a href="#strupper">0201F8</a></td></tr>
+<tr><td><a href="#strlower">bos.strlower</a></td><td><a href="#strlower">0201FC</a></td></tr>
+<tr><td><a href="#fs_AbsPath">bos.fs_AbsPath</a></td><td><a href="#fs_AbsPath">020200</a></td></tr>
+<tr><td><a href="#fs_MultByBytesPerSector">bos.fs_MultByBytesPerSector</a></td><td><a href="#fs_MultByBytesPerSector">020204</a></td></tr>
+<tr><td><a href="#_LoadLibraryOP1">bos._LoadLibraryOP1</a></td><td><a href="#_LoadLibraryOP1">020208</a></td></tr>
+<tr><td><a href="#fs_OpenFileInDir">bos.fs_OpenFileInDir</a></td><td><a href="#fs_OpenFileInDir">02020C</a></td></tr>
+<tr><td><a href="#fs_SetSize">bos.fs_SetSize</a></td><td><a href="#fs_SetSize">020210</a></td></tr>
+<tr><td><a href="#fs_WriteFile">bos.fs_WriteFile</a></td><td><a href="#fs_WriteFile">020214</a></td></tr>
+<tr><td><a href="#sys_HLToString">bos.sys_HLToString</a></td><td><a href="#sys_HLToString">020218</a></td></tr>
+<tr><td><a href="#fs_DeleteFile">bos.fs_DeleteFile</a></td><td><a href="#fs_DeleteFile">02021C</a></td></tr>
+<tr><td><a href="#_DelVar">bos._DelVar</a></td><td><a href="#_DelVar">020220</a></td></tr>
+<tr><td><a href="#_CreateVar">bos._CreateVar</a></td><td><a href="#_CreateVar">020224</a></td></tr>
+<tr><td><a href="#gui_InputNoClear">bos.gui_InputNoClear</a></td><td><a href="#gui_InputNoClear">020228</a></td></tr>
+<tr><td><a href="#fs_InitClusterMap">bos.fs_InitClusterMap</a></td><td><a href="#fs_InitClusterMap">02022C</a></td></tr>
+<tr><td><a href="#sys_WriteFlash">bos.sys_WriteFlash</a></td><td><a href="#sys_WriteFlash">020230</a></td></tr>
+<tr><td><a href="#sys_WriteFlashA">bos.sys_WriteFlashA</a></td><td><a href="#sys_WriteFlashA">020234</a></td></tr>
+<tr><td><a href="#sys_WriteFlashFull">bos.sys_WriteFlashFull</a></td><td><a href="#sys_WriteFlashFull">020238</a></td></tr>
+<tr><td><a href="#sys_WriteFlashByteFull">bos.sys_WriteFlashByteFull</a></td><td><a href="#sys_WriteFlashByteFull">02023C</a></td></tr>
+<tr><td><a href="#fs_ParentDir">bos.fs_ParentDir</a></td><td><a href="#fs_ParentDir">020240</a></td></tr>
+<tr><td><a href="#fs_StrToFileEntry">bos.fs_StrToFileEntry</a></td><td><a href="#fs_StrToFileEntry">020244</a></td></tr>
+<tr><td><a href="#fs_DirList">bos.fs_DirList</a></td><td><a href="#fs_DirList">020248</a></td></tr>
+<tr><td><a href="#sys_Free">bos.sys_Free</a></td><td><a href="#sys_Free">02024C</a></td></tr>
+<tr><td><a href="#sys_CallExecuteFile">bos.sys_CallExecuteFile</a></td><td><a href="#sys_CallExecuteFile">020250</a></td></tr>
+<tr><td><a href="#sys_JumpExecuteFile">bos.sys_JumpExecuteFile</a></td><td><a href="#sys_JumpExecuteFile">020254</a></td></tr>
+<tr><td><a href="#sys_InitDevice">bos.sys_InitDevice</a></td><td><a href="#sys_InitDevice">020258</a></td></tr>
+<tr><td><a href="#sys_DeinitDevice">bos.sys_DeinitDevice</a></td><td><a href="#sys_DeinitDevice">02025C</a></td></tr>
+<tr><td><a href="#sys_GetDeviceAddress">bos.sys_GetDeviceAddress</a></td><td><a href="#sys_GetDeviceAddress">020260</a></td></tr>
+<tr><td><a href="#sys_ReadDevice">bos.sys_ReadDevice</a></td><td><a href="#sys_ReadDevice">020264</a></td></tr>
+<tr><td><a href="#sys_WriteDevice">bos.sys_WriteDevice</a></td><td><a href="#sys_WriteDevice">020268</a></td></tr>
+<tr><td><a href="#fs_GetSector">bos.fs_GetSector</a></td><td><a href="#fs_GetSector">02026C</a></td></tr>
+<tr><td><a href="#fs_WriteByte">bos.fs_WriteByte</a></td><td><a href="#fs_WriteByte">020270</a></td></tr>
+<tr><td><a href="#fs_RenameFile">bos.fs_RenameFile</a></td><td><a href="#fs_RenameFile">020274</a></td></tr>
+<tr><td><a href="#_SetCursorPos">bos._SetCursorPos</a></td><td><a href="#_SetCursorPos">020278</a></td></tr>
+<tr><td><a href="#fs_CreateDir">bos.fs_CreateDir</a></td><td><a href="#fs_CreateDir">02027C</a></td></tr>
+<tr><td><a href="#gfx_BufClear">bos.gfx_BufClear</a></td><td><a href="#gfx_BufClear">020280</a></td></tr>
+<tr><td><a href="#gfx_LcdClear">bos.gfx_LcdClear</a></td><td><a href="#gfx_LcdClear">020284</a></td></tr>
+<tr><td><a href="#fs_SanityCheck">bos.fs_SanityCheck</a></td><td><a href="#fs_SanityCheck">020288</a></td></tr>
+<tr><td><a href="#sys_SetupOnInterruptHandler">bos.sys_SetupOnInterruptHandler</a></td><td><a href="#sys_SetupOnInterruptHandler">02028C</a></td></tr>
+<tr><td><a href="#gui_PrintChar">bos.gui_PrintChar</a></td><td><a href="#gui_PrintChar">020290</a></td></tr>
 </table><div id="boot_os"><h1>boot_os</h1>	<h3>syscall Adress 020108</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
@@ -105,6 +105,10 @@
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
 </td></tr>
+</table></div><div id="HandleInstruction "><h1>HandleInstruction </h1>	<h3>syscall Adress 020110</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+</table></div><div id="HandleThreadSpawn "><h1>HandleThreadSpawn </h1>	<h3>syscall Adress 020114</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 </table></div><div id="handle_safeop "><h1>handle_safeop </h1>	<h3>syscall Adress 020118</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 </table></div><div id="sys_ExecuteFile"><h1>sys_ExecuteFile</h1>	<h3>syscall Adress 020124</h3>
@@ -118,7 +122,7 @@
 </td></tr>
 </table></div><div id="fs_OpenFile"><h1>fs_OpenFile</h1>	<h3>syscall Adress 02012C</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td> void *fs_OpenFile(char *path);</td><td> Opens a file from a path and returns file descriptor.</td><td> hl = file descriptor. hl is -1 if file does not exist.</td><td> All</td><td>
+<tr><td> void *fs_OpenFile(char *path);</td><td> Opens a file from a path and returns file descriptor.</td><td> hl = file descriptor. hl is -1 and Cf set if file does not exist.</td><td> All</td><td>
  This only searches for short 8.3 file names.</td></tr>
 </table></div><div id="fs_GetSectorAddress"><h1>fs_GetSectorAddress</h1>	<h3>syscall Adress 020130</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>

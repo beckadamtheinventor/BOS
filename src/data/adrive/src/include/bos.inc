@@ -4,8 +4,8 @@
 	;
 ?boot_os                         := $20108
 ?handle_interrupt                := $2010C
-;DONOTHING                       := $20110
-;DONOTHING                       := $20114
+?HandleInstruction               := $20110
+?HandleThreadSpawn               := $20114
 ?handle_safeop                   := $20118
 ;DONOTHING                       := $2011C
 ;DONOTHING                       := $20120

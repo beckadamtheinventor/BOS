@@ -1,7 +1,7 @@
 
 ;@DOES Opens a file from a path and returns file descriptor.
 ;@INPUT void *fs_OpenFile(char *path);
-;@OUTPUT hl = file descriptor. hl is -1 if file does not exist.
+;@OUTPUT hl = file descriptor. hl is -1 and Cf set if file does not exist.
 ;@DESTROYS All
 ;@NOTE This only searches for short 8.3 file names.
 fs_OpenFile:

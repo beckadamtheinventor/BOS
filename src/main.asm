@@ -8,7 +8,7 @@ org $020108
 
 include 'table.asm'
 include 'boot.asm'
-;include 'threading.inc' ;soon (tm)
+include 'threading.inc' ;soon (tm)
 include 'gfx.inc'
 include 'str.inc'
 include 'sys.inc'

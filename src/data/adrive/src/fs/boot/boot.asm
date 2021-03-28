@@ -17,33 +17,45 @@ boot_main:
 	ld a,(hl)
 	cp a,$FE
 	jq nz,.init_cmap
-	ld a,50
-	call ti.DelayTenTimesAms
 .start:
 	call bos.sys_GetKey
 	cp a,53
 	ret z
-	ld bc,str_ExplorerExecutable
+	ld bc,str_UsrBootFile
 	push bc
 	call bos.fs_OpenFile
-	jq c,boot_fail
 	ld hl,$FF0000
 	ex (sp),hl
 	push hl
+	call nc,bos.sys_ExecuteFile
+	ld hl,str_UsrExplorerFile
+	ex (sp),hl
+	call bos.fs_OpenFile
+	jq nc,.run_user_explorer
+	ld hl,str_ExplorerExecutable
+	ex (sp),hl
+	call bos.fs_OpenFile
+	jq c,boot_fail
+.run_user_explorer:
 	call bos.sys_ExecuteFile
 	pop bc
 	pop bc
 	ret
 .init_cmap:
 	call bos.fs_InitClusterMap
+	ld hl,str_PressAnyKey
+	call bos.gui_Print
+	call bos.sys_WaitKeyCycle
 	jq .start
 
 boot_fail:
-	pop bc
+	pop bc,bc
 	ld hl,str_BootFailedNoExplorer
 	call bos.gui_DrawConsoleWindow
 	jq bos.sys_WaitKey
 
+str_PressAnyKey:
+	db "Press any key to continue.",$A,0
 str_BootFailedNoExplorer:
 	db "Boot failed. /bin/explorer.exe not found!",$A
 	db "Press any key to open recovery menu.",$A,0
@@ -53,4 +65,7 @@ str_ExplorerExecutable:
 	db "/bin/explorer.exe",0
 str_ClusterMapFile:
 	db "/dev/cmap.dat",0
-
+str_UsrBootFile:
+	db "/boot/usr/onboot.exe",0
+str_UsrExplorerFile:
+	db "/boot/usr/explorer.exe",0

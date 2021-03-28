@@ -39,8 +39,11 @@ fs_Alloc:
 	cp a,(hl)
 	jq nz,.search_loop
 
+;found an empty cluster
 	ld (ix-3),hl
 	ld b,(ix-4)
+	dec b
+	jq z,.success
 	ld a,$FF
 .len_loop:
 	or a,a
@@ -50,8 +53,9 @@ fs_Alloc:
 	cp a,(hl)
 	jq nz,.search_loop_entry ;area not long enough
 	djnz .len_loop
-;if we're here, we succeeded :D
 
+;if we're here, we succeeded :D
+.success:
 	call sys_FlashUnlock
 
 	ld de,(ix-3)

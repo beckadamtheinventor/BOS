@@ -35,7 +35,8 @@ fs_Write:
 	jq nc,.fail ;check if write length + write offset > 65535
 	add hl,de
 
-	ld hl,(iy+$C) ;file first sector
+	ld de,(iy + fsentry_filesector) ;file first sector
+	ex.s hl,de
 	push hl
 	call fs_GetSectorAddress
 	pop bc

@@ -1,30 +1,12 @@
 
 boot_os:
-;	DisableMultithreading
 	call ti.boot.Set48MHzMode
 
-;	ld bc,64 ;setup gpt2
-;	xor a,a
-;	ld (ti.mpTmr2Load),bc
-;	ld (ti.mpTmr2Load+3),a
-;	ld hl,ti.mpTmrCtrl
-;	res ti.bTmr2Enable,(hl)
-;	set ti.bTmr2Crystal,(hl)
-;	set ti.bTmr2Overflow,(hl)
-;	inc hl
-;	res ti.bTmr2CountUp-8,(hl)
-;	dec hl
-;	set ti.bTmr2Enable,(hl)
-
-;	ld hl,thread_map
-;	ld de,thread_map+1
-;	ld (hl),l
-;	ld bc,thread_memory_end-thread_map
-;	ldir
-;	ld hl,os_trapper
-;	ld (thread_temp_save),hl
-;	ld hl,ti.stackTop - 3
-;	ld (thread_temp_save+3),hl
+	ld hl,thread_map
+	ld de,thread_map+1
+	ld (hl),l
+	ld bc,thread_memory_end-thread_map
+	ldir
 
 ;boot_os_thread:
 	call flash_unlock
@@ -63,20 +45,6 @@ boot_os:
 	ld hl,current_working_dir
 	ld bc,'/'
 	ld (hl),bc
-
-;	EnableMultithreading
-;	SpawnThread os_return, ti.stackTop - 18
-;	ei
-;os_trapper:
-;	ld hl,ti.vRam
-;	ld a,l
-;.loop:
-;	ld b,$FF
-;.inner:
-;	ld (hl),b
-;	inc l
-;	djnz .inner
-;	jq .loop
 
 os_return:
 	call sys_GetKey
@@ -121,13 +89,13 @@ os_recovery_menu:
 	jq boot_os
 
 .turn_off:
-	ld a,50 ;delay 500ms
-	call ti.DelayTenTimesAms
+;	ld a,50 ;delay 500ms
+;	call ti.DelayTenTimesAms
 	call ti.boot.TurnOffHardware
 	ei
 	halt
 	nop
-	rst $00
+	jq boot_os
 
 .attempt_recovery:
 	call fs_SanityCheck
@@ -175,7 +143,7 @@ handle_interrupt:
 handle_interrupt_2:
 	ld c,$14
 	in a,(bc)
-	jr z,return_from_interrupt
+	jq z,return_from_interrupt
 	ld c,$08
 	rra
 	jq c,low_bit_0_int
@@ -215,7 +183,7 @@ low_bit_1_int:
 	res 1,a
 	out (bc),a
 	jq return_from_interrupt
-low_bit_2_int: ;gpt2 interrupt (used for "thread" switching) (soon :tm:)
+low_bit_2_int:
 	ld a,1 shl 2
 	out (bc),a
 	ld c,4
@@ -223,7 +191,6 @@ low_bit_2_int: ;gpt2 interrupt (used for "thread" switching) (soon :tm:)
 	res 2,a
 	out (bc),a
 	jq return_from_interrupt
-;	jq th_HandleInterrupt
 low_bit_3_int:
 	ld a,1 shl 3
 	out (bc),a

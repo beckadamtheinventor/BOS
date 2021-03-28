@@ -83,7 +83,7 @@ def build_docs():
 		color: #aaa;
 	}
 	a:visited {
-		color: #11f;
+		color: #aae;
 	}
 	a:hover {
 		color: #22e;
@@ -113,7 +113,7 @@ def build_docs():
 	<body>\
 	<h1>\"bos.inc\" documentation</h1>\
 	<h3>syscalls marked in <a class=\"no_op\">red</a> are no-ops and do nothing.</h3>\
-	<table><th>syscall name</th><th>syscall adress</th><th>links</th>\
+	<table><th>syscall name</th><th>syscall adress</th>\
 	")
 		with open("docs/tmp","w") as f2:
 			for line in data:
@@ -169,7 +169,7 @@ def build_docs():
 									# break
 							# f2.write("</div>")
 
-					f.write("<td>bos."+line+"</td><td>"+myhex(counter)+"</td><td><a href=\"#"+line+"\">doc</a></tr>\n")
+					f.write("<td><a href=\"#"+line+"\">bos."+line+"</a></td><td><a href=\"#"+line+"\">"+myhex(counter)+"</a></td></tr>\n")
 					counter+=4
 			
 		f.write("</table>")
