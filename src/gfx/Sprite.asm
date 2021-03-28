@@ -1,4 +1,4 @@
-;@DOES draws a sprite to the back buffer
+;@DOES draws a sprite to the current lcd buffer
 ;@INPUT HL pointer to sprite
 ;@INPUT BC X<<8 + Y
 ;@DESTROYS HL,DE,BC,AF
@@ -8,7 +8,7 @@ gfx_Sprite:
 	sbc	hl,hl
 	ld	l,b
 	add	hl,hl
-	ld	de,LCD_BUFFER
+	ld	de,(lcd_buffer)
 	add	hl,de
 	ld	b,LCD_WIDTH / 2
 	mlt	bc

@@ -1,4 +1,4 @@
-;@DOES print a character to the back buffer
+;@DOES print a character to the current lcd buffer
 ;@INPUT A character to draw
 ;@DESTROYS all except DE
 gfx_PrintChar:
@@ -14,7 +14,7 @@ character_height := 8
 	ld	h,LCD_WIDTH / 2
 	mlt	hl
 	add	hl,hl
-	ld	de,LCD_BUFFER
+	ld	de,(lcd_buffer)
 	add	hl,de
 	add	hl,bc				; add x value
 	push	hl

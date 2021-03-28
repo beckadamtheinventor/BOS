@@ -1,4 +1,4 @@
-;@DOES print a number to the back buffer
+;@DOES print a number to the current lcd buffer
 ;@INPUT HL number to display
 ;@INPUT A characters to use (8-nchars)
 ;@OUTPUT string stored at gfx_string_temp

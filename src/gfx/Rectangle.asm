@@ -1,4 +1,4 @@
-;@DOES draws a rectangle outline to the back buffer
+;@DOES draws a rectangle outline to the current lcd buffer
 ;@INPUT BC rectangle width
 ;@INPUT HL rectangle X coordinate
 ;@INPUT E rectangle Y coordinate

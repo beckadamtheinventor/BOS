@@ -1,4 +1,4 @@
-;@DOES compute draw location on the back buffer from XY coodinate.
+;@DOES compute draw location on the current lcd buffer from XY coodinate.
 ;@INPUT HL X coordinate
 ;@INPUT E Y coordinate
 ;@OUTPUT HL pointer to draw location
@@ -8,7 +8,7 @@ gfx_Compute:
 	mlt	de
 	add	hl,de
 	add	hl,de
-	ld	de,LCD_BUFFER
+	ld	de,(lcd_buffer)
 	add	hl,de
 	ret
 

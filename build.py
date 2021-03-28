@@ -87,6 +87,10 @@ cp -rf src/data/adrive/src/include src/data/adrive/src/lib/""")
 			os.system("cd noti-ez80\nbash build.sh\ncd ..")
 
 	def build_filesystem(self):
+		try:
+			os.mkdir("src/data/adrive/obj")
+		except FileExistsError:
+			pass
 		self.path = "src/data/adrive/"
 		if sys.platform.startswith('win') or sys.platform.startswith("cygwin"):
 			os.system("cd src\\data\\adrive\\")
@@ -169,7 +173,7 @@ cp -rf src/data/adrive/src/include src/data/adrive/src/lib/""")
 		return i
 
 if __name__=='__main__':
-	d = os.path.dirname(__file__)
+	d = os.path.dirname(os.path.abspath(__file__))
 	if len(d):
 		os.system("cd "+d)
 
