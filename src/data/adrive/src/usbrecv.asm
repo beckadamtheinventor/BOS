@@ -276,7 +276,7 @@ _ErrSP:=$-3
 	ret
 
 libload_name:
-	db   "/lib/LibLoad.LLL",0
+	db   "/lib/LibLoad.dll",0
 .len := $ - .
 str_NoParitions:
 	db "No Partitions found.",$A,0

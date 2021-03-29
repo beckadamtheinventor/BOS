@@ -425,7 +425,7 @@ gfx_ZeroScreen:
 	ret
 
 libload_name:
-	db   "/lib/LibLoad.LLL", 0
+	db   "/lib/LibLoad.dll", 0
 .len := $ - .
 
 gfx_BlitBuffer:

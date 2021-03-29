@@ -355,7 +355,7 @@ _ErrSP:=$-3
 	ret
 
 libload_name:
-	db   "/lib/LibLoad.LLL",0
+	db   "/lib/LibLoad.dll",0
 .len := $ - .
 str_DriveExplorer:
 	db "FAT32 Flash Drive explorer",$A,0

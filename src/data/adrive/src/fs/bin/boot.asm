@@ -1,0 +1,115 @@
+
+	jq boot_main
+	db "FEX",0
+boot_main:
+	call bos.os_GetOSInfo
+	call bos.gui_DrawConsoleWindow
+	call bos.fs_SanityCheck
+	ld hl,str_ClusterMapFile
+	push hl
+	call bos.fs_OpenFile
+	ld bc,$C
+	add hl,bc
+	ld hl,(hl)
+	ex (sp),hl
+	call bos.fs_GetSectorAddress
+	pop bc
+	ld a,(hl)
+	cp a,$FE
+	call bos.sys_GetKey
+	cp a,53
+	ret z
+	call nz,bos.fs_InitClusterMap
+	call bos.sys_GetKey
+	cp a,53
+	ret z
+	ld bc,str_BootConfigFile
+	push bc
+	call bos.fs_OpenFile
+	pop bc
+	call c,generate_boot_configs
+	ld bc,$C
+	ld de,(hl)
+	inc hl
+	inc hl
+	ld c,(hl)
+	inc hl
+	ld b,(hl)
+	push bc,de
+	call bos.fs_GetSectorAddress
+	pop bc,bc
+
+	;TODO - interpret config file
+
+	call bos.sys_GetKey
+	cp a,53
+	ret z
+
+	ld bc,$FF0000
+	push bc
+	ld bc,str_ExplorerExecutable
+	push bc
+	call bos.fs_OpenFile
+	jq c,boot_fail
+.run_user_explorer:
+	call bos.sys_ExecuteFile
+	pop bc
+	pop bc
+	ret
+
+generate_boot_configs:
+	ld bc,str_EtcConfigDir
+	ld e,1 shl bos.fd_subdir
+	push de,bc
+	call bos.fs_CreateDir
+	ld hl,str_EtcConfigBootDir
+	ex (sp),hl
+	call bos.fs_CreateDir
+	pop bc
+	ld hl,.onbootconfig.len
+	ld e,0
+	ld bc,str_BootConfigFile
+	ex (sp),hl
+	push de,bc
+	call bos.fs_CreateFile
+	pop bc,bc,bc
+	ret c
+	ld de,0
+	push de,hl ;offset, file descriptor
+	ld e,1
+	push de,bc ;count, len
+	ld hl,.onbootconfig
+	push hl
+	call bos.fs_Write
+	pop bc,bc,bc,bc,bc
+	ret
+.onbootconfig:
+	db "#TODO, NOT YET IMPLEMENTED.",$A
+	db "#Modify the following lines to control what programs run on boot.",$A
+	db "explorer",$A
+.onbootconfig.len:=$-.onbootconfig
+
+
+boot_fail:
+	pop bc,bc
+	ld hl,str_BootFailedNoExplorer
+	call bos.gui_DrawConsoleWindow
+	jq bos.sys_WaitKey
+
+str_PressAnyKey:
+	db $A,"Press any key to continue.",$A,0
+str_BootFailedNoExplorer:
+	db "Boot failed. /bin/explorer not found!",$A
+	db "Press any key to open recovery menu.",$A,0
+str_CmdExecutable:
+	db "/bin/cmd",0
+str_ExplorerExecutable:
+	db "/bin/explorer",0
+str_ClusterMapFile:
+	db "/dev/cmap.dat",0
+str_EtcConfigDir:
+	db "/etc/config",0
+str_EtcConfigBootDir:
+	db "/etc/config/boot",0
+str_BootConfigFile:
+	db "/etc/config/boot/onboot.cfg",0

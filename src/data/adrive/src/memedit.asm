@@ -678,7 +678,7 @@ libload_load:
 	ld   bc,$aa55aa
 	jp   (hl)
 .libload_name:
-	db "/lib/LibLoad.LLL",0
+	db "/lib/LibLoad.dll",0
 
 .notfound:
 	xor   a,a

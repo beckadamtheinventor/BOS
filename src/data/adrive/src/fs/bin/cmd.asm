@@ -129,7 +129,7 @@ enter_input:
 	ex (sp),hl
 	pop bc
 	push bc,hl
-	ld hl,5+str_system_drive.len
+	ld hl,str_system_drive.len
 	add hl,bc
 	push hl
 	call bos.sys_Malloc
@@ -142,9 +142,8 @@ enter_input:
 	ldir
 	pop hl,bc
 	ldir
-	ld hl,str_exe_ext
-	ld bc,5
-	ldir
+	xor a,a
+	ld (de),a
 	call bos.fs_OpenFile
 	jq nc,.execute
 .fail:
@@ -157,8 +156,6 @@ str_system_drive:
 .len:=$-.
 str_ProgramFailedWithCode:
 	db $9,$9,$9,$9,$9,"Error Code",0
-str_exe_ext:
-	db ".bin",0
 
 str_CouldNotLocateExecutable:
 	db $9,"Could not locate executable",$A,0

@@ -30,35 +30,33 @@ end fs_dir
 ;"/bin/" directory
 fs_dir bin_dir
 	fs_entry root_dir, "..", "", f_subdir
-	fs_entry bpkload_exe, "bpk", "bin", f_readonly+f_system
-	fs_entry cat_exe, "cat", "bin", f_readonly+f_system
-	fs_entry cd_exe, "cd", "bin", f_readonly+f_system
-	fs_entry cmd_exe, "cmd", "bin", f_readonly+f_system
-	fs_entry cls_exe, "cls", "bin", f_readonly+f_system
-	fs_entry initdev_exe, "device", "bin", f_readonly+f_system
-	fs_entry explorer_exe, "explorer", "bin", f_readonly+f_system
-	fs_entry fexplore_exe, "fexplore", "bin", f_readonly+f_system
-	fs_entry files_exe, "files", "bin", f_readonly+f_system
-	fs_entry info_exe, "info", "bin", f_readonly+f_system
-	fs_entry ls_exe, "ls", "bin", f_readonly+f_system
-	fs_entry memedit_exe, "memedit", "bin", f_readonly+f_system
-	fs_entry mkdir_exe, "mkdir", "bin", f_readonly+f_system
-	fs_entry mkfile_exe, "mkfile", "bin", f_readonly+f_system
-	fs_entry off_exe, "off", "bin", f_readonly+f_system
-	fs_entry rm_exe, "rm", "bin", f_readonly+f_system
-	fs_entry uninstaller_exe, "uninstlr", "bin", f_readonly+f_system
-	fs_entry updater_exe, "updater", "bin", f_readonly+f_system
-	fs_entry usbrecv_exe, "usbrecv", "bin", f_readonly+f_system
-	fs_entry usbrun_exe, "usbrun", "bin", f_readonly+f_system
-	fs_entry usbsend_exe, "usbsend", "bin", f_readonly+f_system
-	fs_entry userfsck_exe, "userfsck", "bin", f_readonly+f_system
+	fs_entry boot_exe, "boot", "", f_readonly+f_system
+	fs_entry bpkload_exe, "bpk", "", f_readonly+f_system
+	fs_entry cat_exe, "cat", "", f_readonly+f_system
+	fs_entry cd_exe, "cd", "", f_readonly+f_system
+	fs_entry cmd_exe, "cmd", "", f_readonly+f_system
+	fs_entry cls_exe, "cls", "", f_readonly+f_system
+	fs_entry initdev_exe, "device", "", f_readonly+f_system
+	fs_entry explorer_exe, "explorer", "", f_readonly+f_system
+	fs_entry fexplore_exe, "fexplore", "", f_readonly+f_system
+	fs_entry files_exe, "files", "", f_readonly+f_system
+	fs_entry info_exe, "info", "", f_readonly+f_system
+	fs_entry ls_exe, "ls", "", f_readonly+f_system
+	fs_entry memedit_exe, "memedit", "", f_readonly+f_system
+	fs_entry mkdir_exe, "mkdir", "", f_readonly+f_system
+	fs_entry mkfile_exe, "mkfile", "", f_readonly+f_system
+	fs_entry off_exe, "off", "", f_readonly+f_system
+	fs_entry rm_exe, "rm", "", f_readonly+f_system
+	fs_entry uninstaller_exe, "uninstlr", "", f_readonly+f_system
+	fs_entry updater_exe, "updater", "", f_readonly+f_system
+	fs_entry usbrecv_exe, "usbrecv", "", f_readonly+f_system
+	fs_entry usbrun_exe, "usbrun", "", f_readonly+f_system
+	fs_entry usbsend_exe, "usbsend", "", f_readonly+f_system
 end fs_dir
 
 ;"/boot/" directory
 fs_dir boot_dir
 	fs_entry root_dir, "..", "", f_subdir
-	fs_entry boot_exe, "boot", "bin", f_readonly+f_system
-	fs_entry boot_usr, "usr", "", f_subdir
 end fs_dir
 
 ;"/dev/" directory
@@ -73,14 +71,14 @@ end fs_dir
 ;"/lib/" directory
 fs_dir lib_dir
 	fs_entry root_dir, "..", "", f_subdir
-	fs_entry fatdrvce_lll, "FATDRVCE","LLL", f_readonly+f_system
-	fs_entry fileioc_lll, "FILEIOC","LLL", f_readonly+f_system
-	fs_entry fontlibc_lll, "FONTLIBC","LLL", f_readonly+f_system
-	fs_entry graphx_lll, "GRAPHX","LLL", f_readonly+f_system
-	fs_entry keypadc_lll, "KEYPADC", "LLL", f_readonly+f_system
-	fs_entry srldrvce_lll, "SRLDRVCE","LLL", f_readonly+f_system
-	fs_entry usbdrvce_lll, "USBDRVCE","LLL", f_readonly+f_system
-	fs_entry libload_lll, "LibLoad", "LLL", f_readonly+f_system
+	fs_entry fatdrvce_lll, "FATDRVCE","dll", f_readonly+f_system
+	fs_entry fileioc_lll, "FILEIOC","dll", f_readonly+f_system
+	fs_entry fontlibc_lll, "FONTLIBC","dll", f_readonly+f_system
+	fs_entry graphx_lll, "GRAPHX","dll", f_readonly+f_system
+	fs_entry keypadc_lll, "KEYPADC", "dll", f_readonly+f_system
+	fs_entry srldrvce_lll, "SRLDRVCE","dll", f_readonly+f_system
+	fs_entry usbdrvce_lll, "USBDRVCE","dll", f_readonly+f_system
+	fs_entry libload_lll, "LibLoad", "dll", f_readonly+f_system
 end fs_dir
 
 ;"/boot/usr/" directory
@@ -91,6 +89,7 @@ end fs_dir
 ;"/etc/" directory
 fs_dir etc_dir
 	fs_entry root_dir, "..", "", f_subdir
+	fs_entry config_dir, "..", "", f_subdir+f_readonly
 end fs_dir
 
 ;"/home/" directory
@@ -127,6 +126,10 @@ fs_dir usr_lib_dir
 	fs_entry usr_dir, "..", "", f_subdir
 end fs_dir
 
+;
+fs_dir config_dir
+	fs_entry etc_dir, "..", "", f_subdir
+end fs_dir
 
 
 ;-------------------------------------------------------------
@@ -160,7 +163,7 @@ end fs_file
 
 
 fs_file boot_exe
-	include 'fs/boot/boot.asm'
+	include 'fs/bin/boot.asm'
 end fs_file
 
 fs_file cat_exe
@@ -271,10 +274,6 @@ end fs_file
 
 fs_file initdev_exe
 	include 'fs/bin/device.asm'
-end fs_file
-
-fs_file userfsck_exe
-	include 'fs/bin/userfsck.asm'
 end fs_file
 
 fs_file usbrecv_exe

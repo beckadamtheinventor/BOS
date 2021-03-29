@@ -39,5 +39,5 @@ _LoadLibraryOP1:
 	db "/lib/"
 .dir_len:=$-.dir_name
 .ext_name:
-	db ".LLL",0
+	db ".dll",0
 .ext_len:=$-.ext_name

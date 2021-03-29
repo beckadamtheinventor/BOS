@@ -342,7 +342,7 @@ gfx_ZeroScreen:
 	ret
 
 libload_name:
-	db   "/lib/LibLoad.LLL", 0
+	db   "/lib/LibLoad.dll", 0
 .len := $ - .
 
 gfx_BlitBuffer:
@@ -708,20 +708,20 @@ explorer_gui_items:
 str_PressEnterConfirm:
 	db "Press enter to confirm.",0
 str_UsbRecvExecutable:
-	db "/bin/usbrecv.bin",0
+	db "/bin/usbrecv",0
 str_FExploreExecutable:
-	db "/bin/fexplore.bin",0
+	db "/bin/fexplore",0
 str_OffExecutable:
-	db "/bin/off.bin",0
+	db "/bin/off",0
 str_UsbRunExecutable:
-	db "/bin/usbrun.bin",0
+	db "/bin/usbrun",0
 str_UpdaterExecutable:
-	db "/bin/updater.bin",0
+	db "/bin/updater",0
 str_CmdExecutable:
-	db "/bin/cmd.bin",0
+	db "/bin/cmd",0
 str_FilesExecutable:
-	db "/bin/files.bin",0
+	db "/bin/files",0
 str_ExplorerExecutable:
-	db "/bin/explorer.bin",0
+	db "/bin/explorer",0
 
 
