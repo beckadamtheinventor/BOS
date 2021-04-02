@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import sys,os,json
+import sys,os,json,hashlib
 
 
 class Build:
@@ -16,19 +16,19 @@ class Build:
 			"src/lib/srldrvce/srldrvce.asm obj/srldrvce.bin",
 			"src/lib/usbdrvce/usbdrvce.asm obj/usbdrvce.bin",
 
-			"src/bpkload.asm obj/bpkload.bin",
-			"src/explorer.asm obj/explorer.bin",
-			"src/files.asm obj/files.bin",
-			"src/fexplore.asm obj/fexplore.bin",
-			"src/memedit.asm obj/memedit.bin",
-			"src/usbrun.asm obj/usbrun.bin",
-			"src/usbsend.asm obj/usbsend.bin",
-			"src/usbrecv.asm obj/usbrecv.bin",
+			"src/fs/bin/bpkload.asm obj/bpkload.bin",
+			"src/fs/bin/explorer.asm obj/explorer.bin",
+			"src/fs/bin/files.asm obj/files.bin",
+			"src/fs/bin/fexplore.asm obj/fexplore.bin",
+			"src/fs/bin/memedit.asm obj/memedit.bin",
+			"src/fs/bin/usbrun.asm obj/usbrun.bin",
+			"src/fs/bin/usbsend.asm obj/usbsend.bin",
+			"src/fs/bin/usbrecv.asm obj/usbrecv.bin",
 
-			"src/dev_mnt/init.asm src/dev_mnt/init.bin",
-			"src/dev_mnt/deinit.asm src/dev_mnt/deinit.bin",
-			"src/dev_mnt/read.asm src/dev_mnt/read.bin",
-			"src/dev_mnt/write.asm src/dev_mnt/write.bin"
+			"src/dev_mnt/init.asm obj/dev_mnt/init.bin",
+			"src/dev_mnt/deinit.asm obj/dev_mnt/deinit.bin",
+			"src/dev_mnt/read.asm obj/dev_mnt/read.bin",
+			"src/dev_mnt/write.asm obj/dev_mnt/write.bin"
 
 		]
 		try:
@@ -74,10 +74,12 @@ class Build:
 			os.system("copy bos.inc src\\include\\ /Y")
 			os.system("xcopy src\\include\\ src\\data\\adrive\\src\\include\\ /Y /C /E ")
 			os.system("xcopy src\\include\\ src\\data\\adrive\\src\\lib\\include\\ /Y /C /E ")
+			os.system("xcopy src\\include\\ src\\data\\adrive\\src\\fs\\bin\\include\\ /Y /C /E ")
 		else:
 			os.system("""cp -f bos.inc src/include/bos.inc
 cp -rf src/include src/data/adrive/src/
-cp -rf src/data/adrive/src/include src/data/adrive/src/lib/""")
+cp -rf src/include src/data/adrive/src/lib/
+cp -rf src/include src/data/adrive/src/fs/bin/""")
 
 	def build_noti(self):
 		print("Building noti-ez80")
@@ -89,6 +91,10 @@ cp -rf src/data/adrive/src/include src/data/adrive/src/lib/""")
 	def build_filesystem(self):
 		try:
 			os.mkdir("src/data/adrive/obj")
+		except FileExistsError:
+			pass
+		try:
+			os.mkdir("src/data/adrive/obj/dev_mnt")
 		except FileExistsError:
 			pass
 		self.path = "src/data/adrive/"
@@ -117,7 +123,7 @@ cp -rf src/data/adrive/src/include src/data/adrive/src/lib/""")
 		bin_file = self.path+bin_file
 		try:
 			with open(src_file,"rb") as f:
-				data = list(f.read())
+				data = bytes(f.read())
 				h = self.xsum(data)
 				l = len(data)
 		except IOError:
@@ -160,11 +166,10 @@ cp -rf src/data/adrive/src/include src/data/adrive/src/lib/""")
 			print("Failed to dump source hashes!")
 			return False
 
-	def xsum(self,data):
-		i = 0xFFFFFFFF
-		for c in data:
-			i = i^(c*(0x100**(i&3))) + c
-		return i
+	def xsum(self, data):
+		m = hashlib.sha256()
+		m.update(bytes(data))
+		return m.hexdigest()
 
 if __name__=='__main__':
 	d = os.path.dirname(os.path.abspath(__file__))

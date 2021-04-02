@@ -19,7 +19,7 @@ dev_mnt_run_in_ram:
 	ldir
 	ret
 dev_mnt_init.data:
-	file '../../dev_mnt/init.bin'
+	file '../../../obj/dev_mnt/init.bin'
 dev_mnt_init.data_len:=$-dev_mnt_init.data
 
 dev_mnt_deinit:
@@ -27,7 +27,7 @@ dev_mnt_deinit:
 	ld bc,.data_len
 	jq dev_mnt_run_in_ram
 .data:
-	file '../../dev_mnt/deinit.bin'
+	file '../../../obj/dev_mnt/deinit.bin'
 .data_len:=$-.data
 
 dev_mnt_read:
@@ -35,7 +35,7 @@ dev_mnt_read:
 	ld bc,.data_len
 	jq dev_mnt_run_in_ram
 .data:
-	file '../../dev_mnt/read.bin'
+	file '../../../obj/dev_mnt/read.bin'
 .data_len:=$-.data
 
 dev_mnt_write:
@@ -43,6 +43,6 @@ dev_mnt_write:
 	ld bc,.data_len
 	jq dev_mnt_run_in_ram
 .data:
-	file '../../dev_mnt/write.bin'
+	file '../../../obj/dev_mnt/write.bin'
 .data_len:=$-.data
 
