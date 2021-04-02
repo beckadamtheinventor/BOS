@@ -64,7 +64,7 @@ Place the ".bin" file onto the drive, open BOS's USB program receiver, enter the
 Place the ".bpk" file and the "bpk/" directory on the drive, and run the bpk loader with the path to the ".bpk" file on the drive. Once the transfer is complete, the program should show up in the "/usr/bin/" directory under the same name as the ".bpk" file. (likely wity the ".exe" extension)
 
 # Writing C programs for BOS
-I am currently working on a toolchain fork that targets BOS: [https://github.com/beckadamtheinventor/toolchain]
+I am currently working on a toolchain fork that targets BOS: [https://github.com/beckadamtheinventor/toolchain/] Under the llvm-bos branch: [https://github.com/beckadamtheinventor/toolchain/tree/llvm-bos]
 Many programs that compile on the standard CE C toolchain will compile in the BOS C toolchain, but steer clear from using OS routines; many of them are not implemented in BOS and will cause crashes and other unexpected issues.
 As well, do not directly write directly to variables in BOS! All files are currently stored in flash/archive, so attempting to write to them directly will almost certainly cause a crash.
 
