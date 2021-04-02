@@ -17,7 +17,7 @@ fs_WriteByte:
 	add hl,bc
 	ld c,(ix+6)
 	push bc,hl
-	call sys_WriteFlashByteFull
+	call sys_WriteFlashByteFullRam
 	pop hl,bc
 	or a,a
 	sbc hl,hl

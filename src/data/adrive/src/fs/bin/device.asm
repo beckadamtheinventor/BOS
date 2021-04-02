@@ -26,7 +26,7 @@ initdev_exe_main:
 	jq z,.initdev
 .info:
 	ld hl,.info_string
-	call bos.gui_Print
+	call bos.gui_PrintLine
 	jq .return
 .initdev:
 	push hl

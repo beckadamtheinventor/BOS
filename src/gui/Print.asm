@@ -1,19 +1,7 @@
 
 gui_Print:
-	ld a,(console_line)
-	push hl
-	ld c,a
-;multiply line by 9 to get Y position
-	add a,a
-	add a,a
-	add a,a
-	add a,c
-	or a,a
-	sbc hl,hl
-	call gfx_SetTextXY
-	pop hl
 .print:
-	call gfx_PrintString
+	call gui_PrintString
 	jq c,.controlcode
 	ret
 
@@ -31,17 +19,18 @@ gui_Print:
 	cp a,$09 ;TAB
 	jq nz,.print
 .tab:
-	ld a,(lcd_x)
-	and a,$F0
-	add a,$10
-	ld (lcd_x),a
+	ld a,(curcol)
+	add a,3
+	ld (curcol),a
 	jq .print
 .nextline:
-	ld a,(console_line)
+	xor a,a
+	ld (curcol),a
+	ld a,(currow)
 	cp a,25
 	jq nc,.scroll
 	inc a
-	ld (console_line),a
+	ld (currow),a
 	push hl
 	call gfx_BlitBuffer
 	pop hl

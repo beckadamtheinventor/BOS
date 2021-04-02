@@ -4,9 +4,6 @@
 cmd_exe_main:
 	ld hl,bos.current_working_dir
 	call bos.gui_DrawConsoleWindow
-	ld hl,str_Prompt
-	call bos.gfx_PrintString
-	call bos.gui_NewLine
 	ld hl,-6
 	call ti._frameset
 	or a,a
@@ -46,6 +43,8 @@ enter_input:
 	push bc
 	ld bc,bos.InputBuffer
 	push bc
+	ld hl,str_Prompt
+	call bos.gui_PrintString
 	call bos.gui_InputNoClear
 	or a,a
 	jq z,.exit
@@ -99,8 +98,10 @@ enter_input:
 	jq z,enter_input_clear
 	push hl
 	call bos.gfx_BlitBuffer
+	xor a,a
+	ld (bos.curcol),a
 	ld hl,str_ProgramFailedWithCode
-	call bos.gui_Print
+	call bos.gui_PrintString
 	pop hl
 	call bos.gui_PrintInt
 	call bos.gui_NewLine
@@ -155,7 +156,7 @@ str_system_drive:
 	db "/bin/"
 .len:=$-.
 str_ProgramFailedWithCode:
-	db $9,$9,$9,$9,$9,"Error Code",0
+	db "Error Code ",0
 
 str_CouldNotLocateExecutable:
 	db $9,"Could not locate executable",$A,0

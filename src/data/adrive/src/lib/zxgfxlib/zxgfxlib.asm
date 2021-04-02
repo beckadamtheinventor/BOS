@@ -16,7 +16,8 @@ include_library '../graphx/graphx.asm'
 
 	export zgx_Init
 	export zgx_Extract
-
+	export zgx_Sprite
+	export zgx_ScaledSprite
 
 
 
@@ -173,6 +174,93 @@ util_return:
 	pop ix
 	ret
 
+;-------------------------------------------------------------------------------
+; Draws a zgx-format compressed sprite to the current lcd buffer
+; void zgx_Sprite(void *data, int x, int y);
+zgx_Sprite:
+	ld hl,-6
+	call ti._frameset
+	ld hl,(ix+6)
+	ld (.pallette),hl
+	ld bc,8
+	add hl,bc
+	ld (ix-3),hl
+	call gfx_GetDraw
+	ld hl,(ti.mpLcdUpBase)
+	or a,a
+	jq z,.setbuffer
+	ld a,(ti.mpLcdUpBase+2)
+	ld hl,$D52C00
+	cp a,$D4
+	jq z,.setbuffer
+	ld hl,$D40000
+.setbuffer:
+	ld (ix-6),hl
+	ex hl,de
+	ld hl,(ix-3)
+	ld b,(hl)
+	inc hl
+	ld c,(hl)
+	inc hl
+	ld (ix-3),hl
+	ld a,b
+	ld (.spritewidth),a
+.outerloop:
+	push de
+.loop:
+	push bc
+	ld hl,(ix-3)
+	ld a,(hl)
+	ld c,a
+	rlca
+	rlca
+	and a,3
+	ld b,a
+	inc b
+.inner_loop:
+	ld a,c
+	push bc
+	call .draw
+	pop bc
+	djnz .inner_loop
+	pop bc
+	djnz .loop
+	ld b,0
+.spritewidth:=$-1
+	pop de
+	ld hl,320
+	add hl,de
+	dec c
+	jq nz,.outerloop
+	ret
+.draw:
+	and a,7
+	ld (.lowernibble),a
+	ld a,(hl)
+	inc hl
+	ld (ix-3),hl
+	rrca
+	rrca
+	rrca
+	and a,7
+	ld hl,0
+.palette:=$-3
+	ld bc,0
+	ld c,a
+	add hl,bc
+	ld a,(hl)
+	ld (de),a
+	inc de
+	sbc hl,bc
+	ld c,0
+.lowernibble:=$-1
+	add hl,bc
+	ld a,(hl)
+	ld (de),a
+	inc de
+	ret
+
+;-------------------------------------------------------------------------------
 zgx_Extract.found_asset:
 	pop de,hl ;de = asset pack, hl = destination sprite
 
@@ -194,6 +282,10 @@ zgx_Extract.found_asset:
 	jq util_return
 
 
+;-------------------------------------------------------------------------------
+; helper functions
+;-------------------------------------------------------------------------------
+
 util_extract_sprite:
 	push hl,de
 	ld hl,(ix+9)
@@ -207,6 +299,7 @@ util_extract_sprite:
 	ldir
 	pop hl
 	jq util_return
+
 
 
 ; Code from CE Toolchain by Einar Saukas & Urusergi

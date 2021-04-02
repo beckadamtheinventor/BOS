@@ -99,4 +99,9 @@
 	jp sys_SetupOnInterruptHandler
 	jp gui_PrintChar
 	jp gfx_SetDraw
+	jp gui_PrintString
+	jp gui_PrintLine
+	jp gui_PrintUInt
+	jp sys_WriteFlashFullRam
+	jp sys_WriteFlashByteFullRam
 

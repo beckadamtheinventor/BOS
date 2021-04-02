@@ -45,7 +45,7 @@ fs_Write:
 	ld bc,(ix-6)
 	ld de,(ix+6)
 	push bc,de,hl
-	call sys_WriteFlashFull
+	call sys_WriteFlashFullRam
 	pop bc,bc,bc
 	
 	ld hl,(ix-6)

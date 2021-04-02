@@ -81,7 +81,7 @@ cp -rf src/data/adrive/src/include src/data/adrive/src/lib/""")
 
 	def build_noti(self):
 		print("Building noti-ez80")
-		if sys.platform.startswith('win') or sys.platform.startswith("cygwin"):
+		if 'win' in sys.platform or "nt" in sys.platform:
 			os.system("cd noti-ez80\ncall build.bat\ncd ..")
 		else:
 			os.system("cd noti-ez80\nbash build.sh\ncd ..")
@@ -92,17 +92,11 @@ cp -rf src/data/adrive/src/include src/data/adrive/src/lib/""")
 		except FileExistsError:
 			pass
 		self.path = "src/data/adrive/"
-		if sys.platform.startswith('win') or sys.platform.startswith("cygwin"):
-			os.system("cd src\\data\\adrive\\")
-		else:
-			os.system("cd src/data/adrive/")
 		for cmd in self.os_build_files:
 			self.build_one(cmd)
-		os.system(f"fasmg {self.path}src/main.asm {self.path}obj/main.bin\nconvbin -i {self.path}obj/main.bin -o {self.path}data.bin -j bin -k bin -c zx7")
-		if sys.platform.startswith('win') or sys.platform.startswith("cygwin"):
-			os.system("cd ..\\..\\..\\")
-		else:
-			os.system("cd ../../../")
+		os.system(f"fasmg {self.path}src/main.asm {self.path}obj/main.bin")
+		print("Compressing filesystem...")
+		os.system(f"convbin -i {self.path}obj/main.bin -o {self.path}data.bin -j bin -k bin -c zx7")
 		self.path = ""
 
 	def build_os(self):

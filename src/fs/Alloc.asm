@@ -7,7 +7,12 @@ fs_Alloc:
 	ld hl,(ix+6)
 	call fs_CeilDivBySector
 
-	ld (ix-4),l
+	ld a,l
+	or a,a
+	jq nz,.notonesector
+	inc a
+.notonesector:
+	ld (ix-4),a
 
 	ld hl,fs_cluster_map_file
 	push hl

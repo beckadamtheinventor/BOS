@@ -72,11 +72,8 @@ fs_CreateFile:
 	pop bc,bc,iy
 	ld de,(iy+fsentry_filelen)
 	ex.s hl,de
-	ld de,16
-	or a,a
-	sbc hl,de
 	ld (ix-22),hl
-	add hl,de
+	ld de,16
 	add hl,de
 	push iy,hl
 	call fs_SetSize ;resize parent directory up 16 bytes
@@ -93,7 +90,13 @@ fs_CreateFile:
 	ld (ix + fsentry_filesector - 19),l
 	ld (ix + fsentry_filesector+1 - 19),h
 
+	ld de,(iy + fsentry_filesector)
+	push de
+	call fs_GetSectorAddress
+	pop bc
 	ld bc,(ix-22)
+	add hl,bc
+	ld (ix-22),hl
 	push bc,iy
 	ld bc,16
 	push bc
@@ -103,19 +106,10 @@ fs_CreateFile:
 	call fs_Write ;write new file descriptor to parent directory
 	pop bc,bc,bc,iy
 
-	push iy,bc
-	ld bc,(iy + fsentry_filesector) ;write end of directory marker directly for efficiency
-	push bc
-	call fs_GetSectorAddress
-	pop bc
-	pop bc,iy,de
 	ld hl,flashStatusByte
 	res bKeepFlashUnlocked,(hl)
 	call sys_FlashLock
-	ld bc,(ix+6)
-	push bc
-	call fs_OpenFile
-	pop bc
+	ld hl,(ix-22)
 	db $01
 .fail:
 	xor a,a

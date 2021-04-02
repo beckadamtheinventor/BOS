@@ -307,7 +307,7 @@ explorer_dir_offset:=$-3
 	call bos.sys_HLToString
 	ld bc,(.y_pos)
 	push bc
-	ld bc,260
+	ld bc,250
 	push bc,de
 	call gfx_PrintStringXY
 	pop bc,bc,bc

@@ -57,7 +57,7 @@ fs_SetSize:
 	pop bc
 	ex (sp),hl
 	push hl
-	call sys_WriteFlashFull
+	call sys_WriteFlashFullRam
 	pop bc,bc,bc
 
 .update_file_entry:
@@ -75,7 +75,7 @@ fs_SetSize:
 	ld (ix-1),b
 	pea ix-16
 	push iy
-	call sys_WriteFlashFull
+	call sys_WriteFlashFullRam
 	pop bc,bc,bc
 
 .success:

@@ -27,10 +27,12 @@ gui_Input:
 	ld (console_line),a
 .entry:
 	call .clear_line
+	xor a,a
+	ld (curcol),a
 	ld bc,$FF
 	ld (lcd_text_fg),bc
 	ld hl,(ix+6)
-	call gui_Print
+	call gui_PrintString
 	ld a,7
 	ld (lcd_text_fg),a
 	ld bc,0
@@ -169,4 +171,3 @@ gui_Input:
 	db "+-*/^  ;369)$@ .258(&~ 0147,][  '<=>}{"
 .overtypes:
 	db "Aa1"
-

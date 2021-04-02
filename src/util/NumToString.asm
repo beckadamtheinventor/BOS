@@ -12,6 +12,8 @@ sys_HLToString:
 	pop	de
 	ret
 .entry:
+	ld	bc,-10000000
+	call	.aqu
 	ld	bc,-1000000
 	call	.aqu
 	ld	bc,-100000

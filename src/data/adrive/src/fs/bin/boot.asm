@@ -2,24 +2,16 @@
 	jq boot_main
 	db "FEX",0
 boot_main:
+	ld a,1
+	call bos.gfx_SetDraw
 	call bos.os_GetOSInfo
 	call bos.gui_DrawConsoleWindow
-	call bos.fs_SanityCheck
-	ld hl,str_ClusterMapFile
-	push hl
-	call bos.fs_OpenFile
-	ld bc,$C
-	add hl,bc
-	ld hl,(hl)
-	ex (sp),hl
-	call bos.fs_GetSectorAddress
-	pop bc
-	ld a,(hl)
-	cp a,$FE
+	ld hl,str_Booting
+	call bos.gui_PrintLine
 	call bos.sys_GetKey
 	cp a,53
 	ret z
-	call nz,bos.fs_InitClusterMap
+	call bos.fs_SanityCheck
 	call bos.sys_GetKey
 	cp a,53
 	ret z
@@ -96,6 +88,8 @@ boot_fail:
 	call bos.gui_DrawConsoleWindow
 	jq bos.sys_WaitKey
 
+str_Booting:
+	db "Starting up...",$A,0
 str_PressAnyKey:
 	db $A,"Press any key to continue.",$A,0
 str_BootFailedNoExplorer:

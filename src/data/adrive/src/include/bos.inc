@@ -102,6 +102,11 @@
 ?sys_SetupOnInterruptHandler     := $2028C
 ?gui_PrintChar                   := $20290
 ?gfx_SetDraw                     := $20294
+?gui_PrintString                 := $20298
+?gui_PrintLine                   := $2029C
+?gui_PrintUInt                   := $202A0
+?sys_WriteFlashFullRam           := $202A4
+?sys_WriteFlashByteFullRam       := $202A8
 ;
 ?LCD_PAL?    := 0E30200h
 ?LCD_CTRL?   := 0E30018h

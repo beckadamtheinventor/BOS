@@ -51,20 +51,25 @@ typedef struct __zgx_item_t__ {
 /* Library functions */
 
 /** Initialize the library
-* @param ramspace pointer to scrap ram used for executing and writing sprite shaders
+* @param ramspace Pointer to scrap ram used for executing and writing sprite shaders.
 * @note If you don't know what this means, use ZGX_DEFAULT_RAMSPACE.
 */
 void zgx_Init(void *ramspace);
 
 /** Extract a sprite from an asset pack
-* @param dest pointer to sprite in ram used to store the extracted sprite
-* @param pack pointer to asset pack
-* @param asset name of asset to extract
+* @param dest Pointer to sprite in ram used to store the extracted sprite.
+* @param pack Pointer to asset pack.
+* @param asset Name of asset to extract.
+* @note not yet implemented fully
 */
 gfx_sprite_t *zgx_Extract(gfx_sprite_t *dest, zgx_pack_t *pack, const char *asset);
 
-
-
+/** Draw a zgx-format compressed sprite to the current lcd buffer
+ * @param data Pointer to sprite data.
+ * @param x X position to draw sprite at
+ * @param y Y position to draw sprite at
+ */
+void zgx_Sprite(void *data, int x, int y);
 
 #endif
 

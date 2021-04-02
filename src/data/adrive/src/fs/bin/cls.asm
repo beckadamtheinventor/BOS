@@ -4,7 +4,7 @@ cls_main:
 	ld hl,bos.current_working_dir
 	call bos.gui_DrawConsoleWindow
 	ld hl,str_Prompt
-	call bos.gfx_PrintString
+	call bos.gui_PrintString
 	call bos.gui_NewLine
 	xor a,a
 	sbc hl,hl

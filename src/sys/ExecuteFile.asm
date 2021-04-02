@@ -118,6 +118,8 @@ sys_ExecuteFile:
 	ld (ti.mpLcdUpbase),bc
 	ld a,ti.lcdBpp8
 	ld (ti.mpLcdCtrl),a
+	xor a,a
+	ld (curcol),a
 	ret
 
 

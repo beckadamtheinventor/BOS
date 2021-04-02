@@ -32,7 +32,7 @@ fs_WriteFile:
 	pop hl
 	ld de,(ix+6)
 	push bc,de,hl
-	call sys_WriteFlashFull
+	call sys_WriteFlashFullRam
 	jq c,.fail
 	pop bc,bc,bc
 

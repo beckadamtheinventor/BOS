@@ -4,15 +4,20 @@ fs_InitClusterMap:
 	ld hl,-3
 	call ti._frameset
 	call sys_FlashUnlock
-	ld hl,.cluster_file
-	push hl
+	ld bc,7040
+	push bc
+	ld c,0
+	push bc
+	ld bc,.cluster_file
+	push bc
 	call fs_OpenFile
-	pop bc
+	call c,fs_CreateFile
+	pop bc,bc,bc
 	ld bc,0
 	push bc,hl
 	ld c,1
 	push bc
-	ld bc,8192
+	ld bc,7040
 	push bc
 	ld bc,$03E000
 	push bc

@@ -57,8 +57,7 @@ cd_main:
 	ret
 .fail:
 	ld hl,str_DirDoesNotExist
-	call bos.gui_Print
-	call bos.gui_NewLine
+	call bos.gui_PrintLine
 	ld hl,-2
 	ret
 .help:

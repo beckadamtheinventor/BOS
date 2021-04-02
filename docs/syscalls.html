@@ -98,6 +98,11 @@
 <tr><td><a href="#sys_SetupOnInterruptHandler">bos.sys_SetupOnInterruptHandler</a></td><td><a href="#sys_SetupOnInterruptHandler">02028C</a></td></tr>
 <tr><td><a href="#gui_PrintChar">bos.gui_PrintChar</a></td><td><a href="#gui_PrintChar">020290</a></td></tr>
 <tr><td><a href="#gfx_SetDraw">bos.gfx_SetDraw</a></td><td><a href="#gfx_SetDraw">020294</a></td></tr>
+<tr><td><a href="#gui_PrintString">bos.gui_PrintString</a></td><td><a href="#gui_PrintString">020298</a></td></tr>
+<tr><td><a href="#gui_PrintLine">bos.gui_PrintLine</a></td><td><a href="#gui_PrintLine">02029C</a></td></tr>
+<tr><td><a href="#gui_PrintUInt">bos.gui_PrintUInt</a></td><td><a href="#gui_PrintUInt">0202A0</a></td></tr>
+<tr><td><a href="#sys_WriteFlashFullRam">bos.sys_WriteFlashFullRam</a></td><td><a href="#sys_WriteFlashFullRam">0202A4</a></td></tr>
+<tr><td><a href="#sys_WriteFlashByteFullRam">bos.sys_WriteFlashByteFullRam</a></td><td><a href="#sys_WriteFlashByteFullRam">0202A8</a></td></tr>
 </table><div id="boot_os"><h1>boot_os</h1>	<h3>syscall Adress 020108</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
@@ -345,7 +350,7 @@
 </td></tr>
 </table></div><div id="fs_MultByBytesPerSector"><h1>fs_MultByBytesPerSector</h1>	<h3>syscall Adress 020204</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td> HL = number</td><td> multiply by the number of bytes per sector</td><td> HL*=256</td><td> BC,DE,AF</td><td>
+<tr><td> HL = number</td><td> multiply by the number of bytes per sector</td><td> HL*=512</td><td> BC,DE,AF</td><td>
 </td></tr>
 </table></div><div id="_LoadLibraryOP1"><h1>_LoadLibraryOP1</h1>	<h3>syscall Adress 020208</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -503,5 +508,27 @@
 </table></div><div id="gfx_SetDraw"><h1>gfx_SetDraw</h1>	<h3>syscall Adress 020294</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="gui_PrintString"><h1>gui_PrintString</h1>	<h3>syscall Adress 020298</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> HL pointer to string</td><td> print a string to the current lcd buffer, advancing curcol</td><td> HL pointer to character after the last one printed<br>
+ Cf set if a control code is encountered or if the text would overflow the line.<br>
+ A = control code if a control code is encountered. (Cf will be set)</td><td> All</td><td>
+ If you need a routine callable from C, this is not the one you'll want to use.</td></tr>
+</table></div><div id="gui_PrintLine"><h1>gui_PrintLine</h1>	<h3>syscall Adress 02029C</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td></td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="gui_PrintUInt"><h1>gui_PrintUInt</h1>	<h3>syscall Adress 0202A0</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> hl = integer</td><td> Print an unsigned integer. Dos not swap buffers.</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="sys_WriteFlashFullRam"><h1>sys_WriteFlashFullRam</h1>	<h3>syscall Adress 0202A4</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td> store data to flash, surpassing flash AND logic using the first half of VRAM for swap if needed.</td><td> uint8_t sys_WriteFlashFullRam(void *dest, void *src, int len);</td><td></td><td>
+ source and destination cannot be within the same sector.</td></tr>
+</table></div><div id="sys_WriteFlashByteFullRam"><h1>sys_WriteFlashByteFullRam</h1>	<h3>syscall Adress 0202A8</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> bool sys_WriteFlashByteFullRam(void *dest, uint8_t byte);</td><td> Write a byte to flash, surpassing flash AND logic using the first half of VRAM for swap if needed.</td><td> true if success, false if failed</td><td></td><td>
 </td></tr>
 </table></div></body></html>

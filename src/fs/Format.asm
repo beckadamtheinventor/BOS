@@ -13,6 +13,8 @@ fs_Format:
 .erase_loop: ;erase all system and user flash sectors
 	push af
 	call sys_EraseFlashSector
+	xor a,a
+	ld (curcol),a
 	ld hl,str_ErasingSector
 	call gui_Print
 	pop af
@@ -25,17 +27,17 @@ fs_Format:
 	jr nz,.erase_loop
 
 	ld hl,str_ErasedUserMemory
-	call gui_Print
+	call gui_PrintLine
 
 	ld hl,str_WritingFilesystem
-	call gui_Print
+	call gui_PrintLine
 	
-	ld hl,fs_drive_a_data_compressed_bin
-	push hl
-	ld hl,$040000
-	push hl
+	ld bc,fs_drive_a_data_compressed_bin
+	push bc
+	ld bc,$040000
+	push bc
 	call util_Zx7DecompressToFlash
-	pop hl,hl
+	pop bc,bc
 
 	call fs_InitClusterMap
 	ld hl,flashStatusByte

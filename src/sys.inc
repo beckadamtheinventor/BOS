@@ -37,5 +37,7 @@ include 'sys/WriteFlash.asm'
 include 'sys/WriteFlashA.asm'
 include 'sys/WriteFlashByteFull.asm'
 include 'sys/WriteFlashFull.asm'
+include 'sys/WriteFlashByteFullRam.asm'
+include 'sys/WriteFlashFullRam.asm'
 
 

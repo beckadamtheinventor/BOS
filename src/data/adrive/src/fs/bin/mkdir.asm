@@ -10,7 +10,7 @@ mkdir_main:
 	jq nz,.create
 .info:
 	ld hl,.info_string
-	call bos.gui_Print
+	call bos.gui_PrintLine
 	jq .return
 .create:
 	ld c,1 shl bos.fd_subdir
@@ -23,7 +23,7 @@ mkdir_main:
 	ret
 .fail:
 	ld hl,.string_fileexists
-	call bos.gui_Print
+	call bos.gui_PrintLine
 	ld hl,1
 	ret
 .string_fileexists:

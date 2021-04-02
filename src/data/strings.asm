@@ -14,7 +14,7 @@ str_WritingFilesystem:
 str_PressAnyKey:
 	db "Press any key to continue...",$A,0
 str_Prompt:
-	db ">",$A,0
+	db ">",0
 str_CmdExecutable:
 	db "/bin/cmd",0
 str_StartupProgram:

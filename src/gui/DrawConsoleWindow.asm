@@ -12,4 +12,4 @@ gui_DrawConsoleWindow:
 	ld (console_line),a
 	call gfx_BufClear
 	pop hl
-	jp gui_Print
+	jp gui_PrintLine

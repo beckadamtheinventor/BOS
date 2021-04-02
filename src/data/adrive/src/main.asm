@@ -13,9 +13,10 @@ fs_fs
 
 ;filesystem root directory entries
 
-fs_dir root_of_roots_dir
+;fs_dir root_of_roots_dir
 	fs_entry root_dir, "bosfs512", "fs", f_readonly+f_system+f_subdir
-end fs_dir
+	db 496 dup $FF
+;end fs_dir
 
 fs_dir root_dir
 	fs_entry bin_dir, "bin", "", f_readonly+f_system+f_subdir
@@ -37,6 +38,7 @@ fs_dir bin_dir
 	fs_entry cmd_exe, "cmd", "", f_readonly+f_system
 	fs_entry cls_exe, "cls", "", f_readonly+f_system
 	fs_entry initdev_exe, "device", "", f_readonly+f_system
+	fs_entry df_exe, "df", "", f_readonly+f_system
 	fs_entry explorer_exe, "explorer", "", f_readonly+f_system
 	fs_entry fexplore_exe, "fexplore", "", f_readonly+f_system
 	fs_entry files_exe, "files", "", f_readonly+f_system
@@ -137,7 +139,7 @@ end fs_dir
 ;-------------------------------------------------------------
 
 fs_file cluster_map_file
-	db 8192 dup $FF
+	db 7040 dup $FF
 end fs_file
 
 fs_file off_exe
@@ -284,6 +286,9 @@ fs_file bpkload_exe
 	file '../obj/bpkload.bin'
 end fs_file
 
+fs_file df_exe
+	include 'fs/bin/df.asm'
+end fs_file
 
 end fs_fs
 

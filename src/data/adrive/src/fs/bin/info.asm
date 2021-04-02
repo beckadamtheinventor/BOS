@@ -17,7 +17,7 @@ info_exe_main:
 	ex.s hl,de
 	call bos.sys_HLToString
 	ex hl,de
-	call bos.gfx_PrintString
+	call bos.gui_PrintString
 	pop hl
 	ld a,(hl)
 	cp a,$18
@@ -60,8 +60,7 @@ info_exe_main:
 	push hl
 	call bos.gui_NewLine
 	pop hl
-	call bos.gui_Print
-	call bos.gui_NewLine
+	call bos.gui_PrintLine
 	or a,a
 	sbc hl,hl
 	ret

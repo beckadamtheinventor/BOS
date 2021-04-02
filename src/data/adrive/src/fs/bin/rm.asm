@@ -23,7 +23,7 @@ rm_main:
 .fail_readonly:
 	ld hl,.string_readonly
 .error_print:
-	call bos.gui_Print
+	call bos.gui_PrintLine
 	ld hl,1
 	ret
 .string_readonly:

@@ -1,7 +1,7 @@
 ;@DOES Free space allocated to a file
 ;@INPUT int fs_Free(void *fd);
 ;@OUTPUT number of sectors freed.
-;@NOTE will sanity-check the filesystem if cluster map file is not found.
+;@NOTE will sanity check the filesystem if cluster map file is not found.
 fs_Free:
 	ld bc,fs_cluster_map_file
 	push bc
@@ -24,9 +24,9 @@ fs_Free:
 	pop de
 	add hl,de
 	ex hl,de
-	ld hl,$FF0000
+	ld hl,$03FF80
 	push bc
-	call sys_WriteFlash
+	call sys_WriteFlashFullRam
 	pop hl
 	or a,a
 	ret
