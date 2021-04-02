@@ -1,1 +1,1 @@
-BOS 1.05.0099 alpha
+BOS v1.06.0000 alpha
