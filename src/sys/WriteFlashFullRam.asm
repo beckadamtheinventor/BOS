@@ -15,15 +15,11 @@ sys_WriteFlashFullRam:
 	ld bc,(ix+12)
 .check_write_needs_swap_loop:
 	ld a,(de)
-	and a,(hl)
-	cp a,(hl)
-	jq nz,.write_needs_swap
-	inc hl
 	inc de
-	dec bc
-	ld a,b
-	or a,c
-	jq nz,.check_write_needs_swap_loop
+	and a,(hl)
+	cpi
+	jq nz,.write_needs_swap
+	jp pe,.check_write_needs_swap_loop
 
 ; no need to use swap sector if there aren't any 0 bits needing to be turned into 1 bits (flash AND logic)
 	call sys_FlashUnlock

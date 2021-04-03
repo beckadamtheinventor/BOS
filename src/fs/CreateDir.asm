@@ -41,6 +41,7 @@ fs_CreateDir:
 	push bc
 	call sys_Malloc
 	jq c,.fail
+	ex hl,de
 	pop bc
 	ld hl,.path_back_entry
 	ld (ix-12),de ; save pointer to malloc'd memory to free later

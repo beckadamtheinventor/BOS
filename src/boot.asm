@@ -9,10 +9,12 @@ boot_os:
 	ldir
 
 ;boot_os_thread:
-	ld	hl,$000f00		; 0/Wait 15*256 APB cycles before scanning each row/Mode 0/
-	ld	(ti.DI_Mode),hl
-	ld	hl,$08080f		; (nb of columns,nb of row) to scan/Wait 15 APB cycles before each scan
-	ld	(ti.DI_Mode+3),hl
+	ld hl,$000f00		; 0/Wait 15*256 APB cycles before scanning each row/Mode 0/
+	ld (ti.DI_Mode),hl
+	ld hl,$08080f		; (nb of columns,nb of row) to scan/Wait 15 APB cycles before each scan
+	ld (ti.DI_Mode+3),hl
+	ld a,1
+	ld (running_process_id),a
 
 	call flash_unlock
 	ld a,$05 ;set privleged code end address to $050000 (up until and including first filesystem sector)
@@ -28,7 +30,7 @@ boot_os:
 	ld hl,bos_UserMem
 	ld (bottom_of_RAM),hl
 	ld (top_of_UserMem),hl
-	ld hl,top_of_RAM
+	ld hl,top_of_RAM-$010000
 	ld (free_RAM_ptr),hl
 	ld bc,-bos_UserMem
 	add hl,bc
@@ -97,12 +99,7 @@ os_recovery_menu:
 	jq boot_os
 
 .turn_off:
-;	ld a,50 ;delay 500ms
-;	call ti.DelayTenTimesAms
-	call ti.boot.TurnOffHardware
-	ei
-	halt
-	nop
+	call sys_TurnOff
 	jq boot_os
 
 .attempt_recovery:

@@ -1,29 +1,27 @@
-;@DOES Jump execution to an executable file and return to caller
+;@DOES Jump execution to an executable file and return to caller afterwards
 ;@INPUT hl = file to execute
 ;@INPUT de = arguments
 ;@INPUT bc = file to return to
 sys_CallExecuteFile:
 	push hl,de,bc
+	call sys_FreeRunningProcessId
 	call ti._strlen
+	inc hl
 	push hl
 	call sys_Malloc
 	ex hl,de
-	pop bc
-	pop hl
+	pop bc,hl
 	jq c,.fail
 	push de
 	ldir
+	xor a,a
+	ld (de),a
 	pop bc,de,hl
 	push bc,de,hl
 	call sys_ExecuteFile
-	pop hl,de,bc
-	ld de,$FF0000
-	push de,bc
-	call sys_ExecuteFile
-	call sys_Free
-	pop bc,bc
-	ret
+	pop bc,bc,hl
+	jq sys_ExecuteFileHL
 .fail:
 	pop bc,bc
-	ret
+	jq sys_ExecuteFileHL
 

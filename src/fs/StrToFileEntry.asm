@@ -26,9 +26,7 @@ fs_StrToFileEntry:
 	ld (de),a
 	inc de
 	djnz .copy_file_name_loop
-	ld a,(hl)
-	cp a,'.'
-	jq nz,.fail
+	ld c,(hl)
 	inc hl
 	jq .copy_file_name_ext
 .pad_file_name:
@@ -39,8 +37,8 @@ fs_StrToFileEntry:
 	djnz .pad_file_name_loop
 .copy_file_name_ext:
 	ld b,3
-	xor a,a
-	or a,c
+	ld a,c
+	or a,a
 	jq z,.pad_file_ext
 .copy_file_name_ext_loop:
 	ld a,(hl)

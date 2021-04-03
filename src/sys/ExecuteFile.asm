@@ -14,6 +14,7 @@ sys_ExecuteFile:
 	push de
 	push hl
 	push bc
+.entryhlde:
 	ld a,(hl)
 	or a,a
 	jq z,.fail
@@ -88,6 +89,11 @@ sys_ExecuteFile:
 	ld (asm_prgm_size),bc
 	push bc
 	ldir
+	ld hl,top_of_RAM-$010000
+	ld (free_RAM_ptr),hl
+	ld bc,-bos_UserMem
+	add hl,bc
+	ld (remaining_free_RAM),hl
 	pop bc
 	pop hl  ;usermem
 	ld (fsOP6+3),hl
@@ -96,9 +102,10 @@ sys_ExecuteFile:
 .exec_fex:
 	ld hl,(fsOP6) ;push arguments
 	push hl
-.run_hl:
+	call sys_NextProcessId
+	call sys_FreeRunningProcessId
 	call .normalize_lcd
-	call .jphl
+	call .jptoprogram
 	pop bc
 	push hl
 	call .normalize_lcd
@@ -107,10 +114,19 @@ sys_ExecuteFile:
 	ld (asm_prgm_size),hl
 	ld hl,bos_UserMem
 	ld (top_of_UserMem),hl
-	call sys_FreeAll
+	call sys_FreeRunningProcessId ;free memory allocated by the program
+	ld bc,(running_process_id)
+	ld b,c
+	ld a,1
+	ld c,a
+	ld (running_process_id),a
+	push bc
+	call sys_FreeProcessId
+	pop bc
+	
 	pop hl
 	ret
-.jphl:
+.jptoprogram:
 	ld hl,(fsOP6+3)
 	jp (hl)
 .normalize_lcd:

@@ -2,9 +2,7 @@
 ;@INPUT bool sys_WriteFlashByteFullRam(void *dest, uint8_t byte);
 ;@OUTPUT true if success, false if failed
 sys_WriteFlashByteFullRam:
-	scf
-	sbc hl,hl
-	call ti._frameset
+	call ti._frameset0
 	ld a,(ix+8)
 	cp a,$04
 	jq c,.fail
@@ -14,9 +12,9 @@ sys_WriteFlashByteFullRam:
 	ld hl,(ix+6)
 	ld a,(ix+9)
 	ld c,a
-	ld (ix-1),a
 	and a,(hl)
 	cp a,c
+	ld a,c
 	jq z,.dont_use_swap
 
 	ld hl,(ti.mpLcdUpbase)
@@ -64,7 +62,6 @@ sys_WriteFlashByteFullRam:
 
 .dont_use_swap:
 	ld de,(ix+6)
-	ld a,(ix+9)
 	call sys_WriteFlashA
 
 .success:
@@ -72,7 +69,6 @@ sys_WriteFlashByteFullRam:
 	db $3E
 .fail:
 	xor a,a
-	ld sp,ix
 	pop ix
 	ret
 

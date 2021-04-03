@@ -46,12 +46,14 @@ enter_input:
 	ld hl,str_Prompt
 	call bos.gui_PrintString
 	call bos.gui_InputNoClear
+	pop bc,hl
 	or a,a
 	jq z,.exit
 	cp a,12
 	jq z,recall_last
 	cp a,10
 	jq z,enter_input
+	push hl,bc
 	call ti._strlen
 	ex (sp),hl
 	pop bc
@@ -81,11 +83,8 @@ enter_input:
 	pop bc,bc
 	push hl
 	ld hl,(ix-6)
-	add hl,bc
-	or a,a
-	sbc hl,bc
 	push hl
-	call nz,bos.sys_Free
+	call bos.sys_Free
 	pop bc
 	or a,a
 	sbc hl,hl
@@ -112,13 +111,9 @@ enter_input:
 	pop bc,bc
 	jq enter_input_clear
 .exit:
-	pop bc,bc
 	ld hl,(ix-3)
 	push hl
-	add hl,bc
-	or a,a
-	sbc hl,bc
-	call nz,bos.sys_Free
+	call bos.sys_Free
 	pop bc
 	xor a,a
 	sbc hl,hl

@@ -12,15 +12,8 @@ sys_Malloc:
 	or a,a
 	sbc hl,de
 	jq nc,.fail
-	or a,a
-	adc hl,de
+	add hl,de
 	jq z,.fail
-	ld de,(remaining_free_RAM)
-	or a,a
-	ex hl,de
-	sbc hl,de
-	jq c,.fail
-	ld (remaining_free_RAM),hl
 	ld bc,32
 	call ti._idvrmu
 	ld a,l
@@ -28,68 +21,69 @@ sys_Malloc:
 	jq z,.exact_fit
 	inc de
 .exact_fit:
-	push de
 	ld hl,malloc_cache
-	ld bc,32 ;b = 0, c = 32. Loop 32*256 times.
+	ld bc,4096
+	push de
 .loop:
-	ld a,(hl)
-	adc a,a
-	jq nc,.found
-.skip_block:
-	inc hl
-	ld a,(hl)
-	cp a,$7F
-	jq nz,.loop
-	djnz .skip_block
-	dec c
-	jq nz,.skip_block
-	pop bc
+	xor a,a
+	cpir
+	jq z,.checklen
+	pop hl ;fail if no 0x00 (free blocks) found
 .fail:
 	scf
 	sbc hl,hl
 	ret
-.found:
+.checklen:
+	dec hl
 	ld (ScrapMem),hl
 	pop de
 	push de
+	dec de
+	ld a,e
+	or a,d
+	jq z,.found_enough
+	inc hl
 .len_loop:
 	ld a,(hl)
-	adc a,a
-	jq c,.loop
-	inc hl
-	ex hl,de
-	dec hl
 	or a,a
-	add hl,de
-	sbc hl,de
-	ex hl,de
+	jq nz,.loop
+	cpi
+	dec de
+	ld a,e
+	or a,d
 	jq nz,.len_loop
-	pop bc
+
+.found_enough:
 	ld hl,(ScrapMem)
 	ld de,-malloc_cache
-	add hl,de
+	add hl,de ; get offset from malloc_cache
+	add hl,hl ; multiply by 32
 	add hl,hl
 	add hl,hl
 	add hl,hl
 	add hl,hl
-	add hl,hl
-	ld de,bottom_of_malloc_RAM
+	ld de,bottom_of_malloc_RAM ;index malloc ram with offset*32
 	add hl,de
 	ex hl,de
 	ld hl,(ScrapMem)
+	ld a,(running_process_id)
+	ld (hl),a
+	inc hl
+
+	pop bc
+	dec bc
+	ld a,b
+	or a,c
+	ex hl,de
+	ret z
+	ex hl,de
+.mark_loop:
 	ld (hl),$FF
 	inc hl
-	pop bc
-	push bc
-	push de
-	ld b,c
-	dec b
-	jq c,.one_block
-.mark_loop:
-	ld (hl),$7F
-	inc hl
-	djnz .mark_loop
-.one_block:
-	pop hl
+	dec bc
+	ld a,b
+	or a,c
+	jq nz,.mark_loop
+	ex hl,de
 	ret
 

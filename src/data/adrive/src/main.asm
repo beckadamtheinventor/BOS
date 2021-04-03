@@ -91,7 +91,6 @@ end fs_dir
 ;"/etc/" directory
 fs_dir etc_dir
 	fs_entry root_dir, "..", "", f_subdir
-	fs_entry config_dir, "..", "", f_subdir+f_readonly
 end fs_dir
 
 ;"/home/" directory

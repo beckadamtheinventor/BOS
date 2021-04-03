@@ -3,7 +3,7 @@
 ;@INPUT de = arguments
 sys_JumpExecuteFile:
 	push de,hl
-	call sys_ExecuteFile
-	pop hl,de
-	ret
+	call sys_FreeProcessId
+	call sys_PrevProcessId
+	jq sys_ExecuteFile
 

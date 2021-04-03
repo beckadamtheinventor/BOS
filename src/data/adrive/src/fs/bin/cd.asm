@@ -32,10 +32,14 @@ cd_main:
 	pop bc
 .abspath:
 	push hl
-	call bos.fs_CheckDirExists
-	pop hl
+	call bos.fs_OpenFile
+	pop de
 	jq c,.fail
-	push hl
+	ld bc,$B
+	add hl,bc
+	bit bos.fd_subdir,(hl)
+	jq z,.fail
+	push de
 	call ti._strlen
 	ex (sp),hl
 	pop bc

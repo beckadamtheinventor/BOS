@@ -48,6 +48,7 @@ flashStatusByte        := $D00230
 filesystem_driver      := $D00231
 on_interrupt_handler   := $D00235 ;3 bytes. Jump to on key interrupt handler. Byte preceeding this must be $C3 or $C9
 cur_lcd_buffer         := $D00238 ;3 bytes. Points to current LCD buffer
+running_process_id     := $D0023B ;1 byte. Current process ID (used for per-program memory allocation)
 ScrapMem2              := $D00279
 ScrapByte              := $D0027C
 ScrapWord              := $D0027D

@@ -9,6 +9,7 @@ fs_CheckDirExists:
 	push bc
 	push hl
 	call fs_OpenFile
-	pop hl
-	neg
+	pop bc
+	ccf
+	sbc a,a
 	ret

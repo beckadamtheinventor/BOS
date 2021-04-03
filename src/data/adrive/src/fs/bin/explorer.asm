@@ -15,6 +15,7 @@ explorer_init:
 	;push hl
 	;push bc
 	;ld (explorer_args),hl
+	di
 	ld (_SaveIX),ix
 	ld (_SaveSP),sp
 	call load_libload
@@ -23,6 +24,18 @@ explorer_init:
 	sbc hl,hl
 	ret
 explorer_init_2:
+	push iy
+	ld de,explorer_config_file
+	push de
+	call bos.fs_GetFilePtr
+	ex (sp),hl
+	pop iy
+	jq c,.dontloadconfig
+	ld a,b
+	or a,c
+	call nz,explorer_load_config
+.dontloadconfig:
+	pop iy
 	ld a,(explorer_cursor_x)
 	or a,a
 	sbc hl,hl
@@ -94,6 +107,7 @@ explorer_main:
 	pop bc
 .key_loop:
 	ld c,$FF
+explorer_cursor_color:=$-1
 	push bc
 	call gfx_SetColor
 	pop bc
@@ -252,6 +266,105 @@ _SaveSP:=$-3
 ;.exit:
 ;	pop hl
 ;	ret
+
+explorer_load_config:
+.loop:
+	ld a,c
+	or a,b
+	ret z
+	call .getline
+	ret po
+	ld a,(hl)
+	cp a,'#'
+	jq z,.loop
+	ld de,(hl)
+	inc hl
+	inc hl
+	inc hl
+	inc hl
+	dec bc
+	dec bc
+	dec bc
+	dec bc
+	push hl
+	db $21,'BGC'
+	or a,a
+	sbc hl,de
+	jq z,.setbgc
+	db $21,'FGC'
+	or a,a
+	sbc hl,de
+	jq z,.setfgc
+	db $21,'CSR'
+	or a,a
+	sbc hl,de
+	jq z,.setcursor
+	db $21,'SBC'
+	or a,a
+	sbc hl,de
+	jq nz,.loop
+.setsbc:
+	pop de
+	call .gethex
+	ld (explorer_statusbar_color),a
+	jq .loop
+.setcursor:
+	pop de
+	call .gethex
+	ld (explorer_cursor_color),a
+	jq .loop
+.setbgc:
+	pop de
+	call .gethex
+	ld (explorer_background_color),a
+	jq .loop
+.setfgc:
+	pop de
+	call .gethex
+	ld (explorer_foreground_color),a
+	jq .loop
+
+.gethex:
+	ld a,(de)
+	inc de
+	dec bc
+	push bc
+	ld hl,.hexc
+	ld bc,16
+	cpir
+	dec c
+	or a,a
+	sbc hl,hl
+	ld l,c
+	pop bc
+	ld a,c
+	or a,b
+	ret z
+	push bc,hl
+	ld hl,.hexc
+	ld bc,16
+	cpir
+	dec c
+	pop hl
+	ld a,l
+	add a,a
+	add a,a
+	add a,a
+	add a,a
+	add a,c
+	pop bc
+	ret
+.getline:
+	lea hl,iy
+	push hl
+	ld a,$A
+	cpir
+	ex (sp),hl
+	pop iy
+	ret
+
+.hexc:
+	db "0123456789ABCDEF",0
 
 
 explorer_cursor_down:
@@ -494,8 +607,6 @@ explorer_gui_items:
 	jp .draw_power_app
 	db 2,200,41,240
 .run_power_app:
-	ld sp,(_SaveSP)
-	ld ix,(_SaveIX)
 	ld hl,str_OffExecutable
 	jq explorer_call_file
 .draw_power_app:
@@ -637,12 +748,14 @@ explorer_gui_items:
 	db 0,0,160,240
 .draw_background:
 	ld c,$08
+explorer_background_color:=$-1
 	push bc
 	call gfx_FillScreen
 	call gfx_SetTextTransparentColor
 	call gfx_SetTextBGColor
 	pop bc
 	ld c,$FF
+explorer_foreground_color:=$-1
 	push bc
 	call gfx_SetTextFGColor
 	pop bc
@@ -658,6 +771,7 @@ explorer_gui_items:
 	db 0,0,160,20
 .draw_status_bar:
 	ld c,$11
+explorer_statusbar_color:=$-1
 	push bc
 	call gfx_SetColor
 	ld hl,19
@@ -723,5 +837,6 @@ str_FilesExecutable:
 	db "/bin/files",0
 str_ExplorerExecutable:
 	db "/bin/explorer",0
-
+explorer_config_file:
+	db "/etc/config/explorer/colors.cfg",0
 

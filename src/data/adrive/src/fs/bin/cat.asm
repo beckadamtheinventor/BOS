@@ -1,10 +1,11 @@
 	jq cat_main
 	db "FEX",0
 cat_main:
-	pop bc
-	pop hl
-	push hl
-	push bc
+	ld hl,-2
+	call ti._frameset
+	xor a,a
+	ld (ix-1),a
+	ld hl,(ix+6)
 	ld a,(hl)
 	or a,a
 	jq z,.help
@@ -20,31 +21,30 @@ cat_main:
 	ld de,(hl)
 	inc hl
 	inc hl
-	ld bc,(hl)
-	push bc,de
+	ld hl,(hl)
+	ex.s hl,de
+	push de,hl
 	call bos.gui_NewLine
 	call bos.fs_GetSectorAddress
-	pop bc,de
-	ld bc,0
-	ld c,e
-	ld b,d
+	pop bc,bc
 	ld a,c
 	or a,b
 	jq z,.done ;nothing to print
 .print_loop:
 	ld a,(hl)
 	inc hl
-	push bc
-	call bos.gui_PrintChar
-	pop bc
+	ld (ix-2),a
+	push hl,bc
+	lea hl,ix-2
+	call bos.gui_Print
+	pop bc,hl
 .print_next:
 	dec bc
 	ld a,b
 	or a,c
 	jq nz,.print_loop
-.done:
-	sbc hl,hl ;Cf is already unset
-	ret
+	call bos.gui_NewLine
+	jq .done
 .fail_dir:
 	ld hl,str_FailSubdir
 	jq .print
@@ -52,12 +52,15 @@ cat_main:
 	ld hl,str_CatHelp
 .print:
 	call bos.gui_Print
+.done:
 	xor a,a
 	sbc hl,hl
-	ret
+	db $01
 .fail:
 	scf
-	sbc hl,hl
+	sbc hl,hl ;Cf is already unset
+	ld sp,ix
+	pop ix
 	ret
 str_CatHelp:
 	db $9,"Usage: CAT [file]",$A,0

@@ -103,6 +103,13 @@
 <tr><td><a href="#gui_PrintUInt">bos.gui_PrintUInt</a></td><td><a href="#gui_PrintUInt">0202A0</a></td></tr>
 <tr><td><a href="#sys_WriteFlashFullRam">bos.sys_WriteFlashFullRam</a></td><td><a href="#sys_WriteFlashFullRam">0202A4</a></td></tr>
 <tr><td><a href="#sys_WriteFlashByteFullRam">bos.sys_WriteFlashByteFullRam</a></td><td><a href="#sys_WriteFlashByteFullRam">0202A8</a></td></tr>
+<tr><td><a href="#fs_GetFilePtr">bos.fs_GetFilePtr</a></td><td><a href="#fs_GetFilePtr">0202AC</a></td></tr>
+<tr><td><a href="#sys_ExecuteFileFromPtr">bos.sys_ExecuteFileFromPtr</a></td><td><a href="#sys_ExecuteFileFromPtr">0202B0</a></td></tr>
+<tr><td><a href="#sys_ExecuteFileHL">bos.sys_ExecuteFileHL</a></td><td><a href="#sys_ExecuteFileHL">0202B4</a></td></tr>
+<tr><td><a href="#sys_TurnOff">bos.sys_TurnOff</a></td><td><a href="#sys_TurnOff">0202B8</a></td></tr>
+<tr><td><a href="#sys_NextProcessId">bos.sys_NextProcessId</a></td><td><a href="#sys_NextProcessId">0202BC</a></td></tr>
+<tr><td><a href="#sys_PrevProcessId">bos.sys_PrevProcessId</a></td><td><a href="#sys_PrevProcessId">0202C0</a></td></tr>
+<tr><td><a href="#sys_FreeProcessId">bos.sys_FreeProcessId</a></td><td><a href="#sys_FreeProcessId">0202C4</a></td></tr>
 </table><div id="boot_os"><h1>boot_os</h1>	<h3>syscall Adress 020108</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
@@ -434,7 +441,7 @@
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td> hl = file to execute<br>
  de = arguments<br>
- bc = file to return to</td><td> Jump execution to an executable file and return to caller</td><td></td><td></td><td>
+ bc = file to return to</td><td> Jump execution to an executable file and return to caller afterwards</td><td></td><td></td><td>
 </td></tr>
 </table></div><div id="sys_JumpExecuteFile"><h1>sys_JumpExecuteFile</h1>	<h3>syscall Adress 020254</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -530,5 +537,33 @@
 </table></div><div id="sys_WriteFlashByteFullRam"><h1>sys_WriteFlashByteFullRam</h1>	<h3>syscall Adress 0202A8</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td> bool sys_WriteFlashByteFullRam(void *dest, uint8_t byte);</td><td> Write a byte to flash, surpassing flash AND logic using the first half of VRAM for swap if needed.</td><td> true if success, false if failed</td><td></td><td>
+</td></tr>
+</table></div><div id="fs_GetFilePtr"><h1>fs_GetFilePtr</h1>	<h3>syscall Adress 0202AC</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> void *fs_GetFilePtr(const char *path);</td><td> get a pointer to a file's data section</td><td> HL = file data pointer, BC = file data length, Cf set and HL = -1 if failed</td><td></td><td>
+</td></tr>
+</table></div><div id="sys_ExecuteFileFromPtr"><h1>sys_ExecuteFileFromPtr</h1>	<h3>syscall Adress 0202B0</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> int sys_ExecuteFileFromPtr(void *ptr, char *args);</td><td> execute a file given a pointer to it's data section</td><td> -1 if file is not a valid executable format</td><td> All, OP6.</td><td>
+</td></tr>
+</table></div><div id="sys_ExecuteFileHL"><h1>sys_ExecuteFileHL</h1>	<h3>syscall Adress 0202B4</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> HL = pointer to file data section</td><td> execute a file given a pointer to it's data section in HL</td><td> -1 if file is not a valid executable format</td><td> All, OP6.</td><td>
+</td></tr>
+</table></div><div id="sys_TurnOff"><h1>sys_TurnOff</h1>	<h3>syscall Adress 0202B8</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td> turns off the calculator until the on key is pressed.</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="sys_NextProcessId"><h1>sys_NextProcessId</h1>	<h3>syscall Adress 0202BC</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> void sys_NextProcessId(void);</td><td> Increment the process ID.</td><td></td><td></td><td>
+ Used for categorizing malloc'd memory</td></tr>
+</table></div><div id="sys_PrevProcessId"><h1>sys_PrevProcessId</h1>	<h3>syscall Adress 0202C0</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> void sys_PrevProcessId(void);</td><td> Decrement the process ID.</td><td></td><td></td><td>
+ Used for categorizing malloc'd memory</td></tr>
+</table></div><div id="sys_FreeProcessId"><h1>sys_FreeProcessId</h1>	<h3>syscall Adress 0202C4</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> void sys_FreeProcessId(uint8_t id);</td><td> Free all memory allocated by a given process ID</td><td></td><td></td><td>
 </td></tr>
 </table></div></body></html>

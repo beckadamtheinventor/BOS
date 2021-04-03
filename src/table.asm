@@ -104,4 +104,11 @@
 	jp gui_PrintUInt
 	jp sys_WriteFlashFullRam
 	jp sys_WriteFlashByteFullRam
+	jp fs_GetFilePtr
+	jp sys_ExecuteFileFromPtr
+	jp sys_ExecuteFileHL
+	jp sys_TurnOff
+	jp sys_NextProcessId
+	jp sys_PrevProcessId
+	jp sys_FreeProcessId
 

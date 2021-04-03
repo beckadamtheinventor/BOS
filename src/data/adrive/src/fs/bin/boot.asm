@@ -43,7 +43,7 @@ boot_main:
 	push bc
 	call bos.fs_OpenFile
 	jq c,boot_fail
-.run_user_explorer:
+	call bos.sys_FreeAll
 	call bos.sys_ExecuteFile
 	pop bc
 	pop bc

@@ -17,16 +17,6 @@ files_init:
 	sbc hl,hl
 	ret
 files_init_2:
-	ld hl,(_SaveSP)
-	inc hl
-	inc hl
-	inc hl
-	ld hl,(hl)
-	ld a,(hl)
-	or a,a
-	jq z,.no_args
-	ld (explorer_path_ptr),hl
-.no_args:
 	ld c,1
 	push bc
 	call gfx_SetDraw
@@ -38,6 +28,52 @@ files_init_2:
 	ex (sp),hl
 	call gfx_SetTextFGColor
 	pop bc
+	pop bc,hl
+	push hl,bc
+	ld a,(hl)
+	or a,a
+	jq z,.no_args
+	ld a,(hl)
+	cp a,'$'
+	jq nz,.set_path
+	ex hl,de
+	or a,a
+	sbc hl,hl
+	ld b,6
+.nibble_loop:
+	call .nibble
+	jq c,.set_path
+	djnz .nibble_loop
+	jq explorer_set_dir
+.nibble:
+	ld a,(de)
+	inc de
+	cp a,'0'
+	ret c
+	cp a,'F'
+	ccf
+	ret c
+	sub a,'0'
+	cp a,10
+	jq c,.underA
+	sub a,'A'-'9'
+	ret c
+.underA:
+	add hl,hl
+	add hl,hl
+	add hl,hl
+	add hl,hl
+	push bc
+	ld bc,0
+	ld c,a
+	add hl,bc
+	pop bc
+	ret
+.set_path:
+	pop bc,hl
+	push hl,bc
+	ld (explorer_path_ptr),hl
+.no_args:
 explore_files:
 	ld hl,bos.current_working_dir
 explorer_path_ptr:=$-3
@@ -120,11 +156,6 @@ _SaveIX:=$-3
 	ld sp,0
 _SaveSP:=$-3
 	ret
-_exit_return_1337:
-	call gfx_ZeroScreen
-	call bos._HomeUp
-	ld hl,1337
-	jq _exit.loadix
 
 explorer_scroll_down:
 	ld hl,(explorer_cursor_y)
@@ -144,8 +175,10 @@ explorer_scroll_down:
 	ld bc,(explorer_curdir_ix)
 	add hl,bc
 	ld a,(hl)
-	or a,a
 	pop hl
+	or a,a
+	ret z
+	inc a
 	ret z
 	ld (explorer_cursor_y),hl
 	ret
@@ -201,17 +234,61 @@ explorer_path_into:
 	ld ix,(explorer_curdir_ix)
 	add ix,de
 .entry:
-	bit bos.fd_subdir,(ix+$B)
-	ret z
 	ld hl,(ix+$C)
 	push hl
 	call bos.fs_GetSectorAddress
 	pop bc
+	bit bos.fd_subdir,(ix+$B)
+	jq z,.tryrun
 	ld (explorer_curdir_ix),hl
 	or a,a
 	sbc hl,hl
 	ld (explorer_dir_offset),hl
 	ld (explorer_cursor_y),hl
+	ret
+.tryrun:
+	; push hl
+	; ld bc,8
+	; push bc
+	; call bos.sys_Malloc
+	; pop bc
+	; pop de
+	; ret c
+	; push de,hl
+	; ld (hl),'$'
+	; inc hl
+	; ex hl,de
+	; ld hl,explorer_curdir_ix
+	; ld b,3
+; .gethexloop:
+	; ld a,(hl)
+	; inc hl
+	; ld c,a
+	; rlca
+	; rlca
+	; rlca
+	; rlca
+	; and a,$F
+	; call .nibble
+	; ld (de),a
+	; inc de
+	; ld a,c
+	; call .nibble
+	; ld (de),a
+	; inc de
+	; djnz .gethexloop
+	; pop de,hl ;de points to return arguments, hl points to file data
+	ld ix,(_SaveIX)
+	ld sp,(_SaveSP)
+	ret
+.nibble:
+	and a,$F
+	cp a,10
+	jr c,.underA
+	add a,'A'-10
+	ret
+.underA:
+	add a,'0'
 	ret
 explorer_draw_files:
 	ld a,5
