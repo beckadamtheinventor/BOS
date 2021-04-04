@@ -90,17 +90,9 @@ fs_CreateFile:
 	ld (ix + fsentry_filesector - 19),l
 	ld (ix + fsentry_filesector+1 - 19),h
 
-	ld hl,(iy+fsentry_filesector)
-	push hl
-	call fs_GetSectorAddress ; grab pointer to parent directory contents
-	pop bc
-	ld bc,(ix-22)
-	add hl,bc
-	ld de,-16
-	add hl,de
-	push hl ; push pointer to new file descriptor using parent directory data section + parent directory old length
-
-	ex hl,de ;write 16 bytes behind the end of file, to overwrite the end of directory marker
+	ld de,(iy+fsentry_filelen)
+	ex.s hl,de
+	ld bc,-32 ;write 32 bytes behind the new end of file, to overwrite the end of directory marker
 	add hl,bc
 	push hl,iy
 	ld bc,16
@@ -111,11 +103,27 @@ fs_CreateFile:
 	call fs_Write ;write new file descriptor to parent directory
 	pop bc,bc,bc,iy,bc
 
+	ld de,(iy+fsentry_filelen)
+	ex.s hl,de
+	ld bc,-16 ;write 16 bytes behind the new end of file to write new end of directory marker
+	add hl,bc
+	push hl,iy
+	ld bc,16
+	push bc
+	ld c,1
+	push bc
+	ld bc,$03FFF0
+	push bc
+	call fs_Write ;write new file descriptor to parent directory
+	pop bc,bc,bc,iy,bc
+
 	ld hl,flashStatusByte
 	res bKeepFlashUnlocked,(hl)
 	call sys_FlashLock
-
-	pop hl ; pop pointer to new file descriptor
+	ld hl,(ix+6)
+	push hl
+	call fs_OpenFile ; get pointer to new file descriptor
+	pop bc
 	db $01
 .fail:
 	xor a,a

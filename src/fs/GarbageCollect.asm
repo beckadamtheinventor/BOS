@@ -8,7 +8,7 @@ fs_GarbageCollect:
 	call ti._frameset
 	ld bc,fs_cluster_map_file
 	push bc
-	call fs_OpenFile
+	call fs_GetFilePtr
 	pop bc
 	jq c,fs_SanityCheck
 	ld (ix-3),hl
@@ -17,48 +17,85 @@ fs_GarbageCollect:
 	add hl,bc
 	ld (ix-12),hl
 
+	call sys_FlashUnlock
+
+	ld hl,(ti.mpLcdUpbase)
+	push hl
+	ld bc,$D40000
+	or a,a
+	sbc hl,bc
+	jq nz,.no_buffer_swap
+	ld de,$D52C00
+	ld hl,$D40000
+	ld bc,$010000
+	ld (ti.mpLcdUpbase),de
+	ldir
+.no_buffer_swap:
+	ld a,1
+	call gfx_SetDraw
+	ld hl,$D50000 ;set to 0xff to be used later
+	push hl
+	pop de
+	inc de
+	ld (hl),$FF
+	ld bc,512
+	ldir
 ; clean up freed sectors
 	ld bc,$040000
 	ld (ix-6),bc
 .cleanup_freed_loop_outer:
+	xor a,a
+	ld (curcol),a
+	ld (currow),a
+	ld hl,.str_cleaning_up
+	call gui_PrintString
+	ld a,(ix-4)
+	call gfx_PrintHexA
 	ld hl,(ix-6)
 	call .check_sector
 	cp a,$FF
 	jq z,.cleanup_next
-	ld a,$3F
-	call sys_EraseFlashSector
-	ld hl,(ix-3)
-	ld b,128
+	ld b,65536/512
 .cleanup_freed_loop:
+	ld hl,(ix-3)
 	ld a,(hl)
-	cp a,$FF
-	jq z,.cleanup_next
+	inc hl
+	ld (ix-3),hl
+	push bc
 	or a,a
-	jq z,.cleanup_next
-	push hl,bc
+	jq z,.copy_ff
+	inc a
+	jq nz,.copy_sector
+.copy_ff:
+	ld hl,$D50000
 	ld a,128
 	sub a,b
 	add a,a
-	ld de,$3F0000
+	jq .copy_512_to_vram
+.copy_sector:
 	ld hl,(ix-6)
-	ld d,a
+	ld a,128
+	sub a,b
+	add a,a
 	ld h,a
+.copy_512_to_vram:
+	ld de,$D40000
+	ld d,a
 	ld bc,512
-	call sys_WriteFlash
-	pop bc,hl
-.cleanup_next:
-	inc hl
+	ldir
+	pop bc
 	djnz .cleanup_freed_loop
 	ld a,(ix-4)
 	call sys_EraseFlashSector
-	ld hl,$3F0000
+	ld hl,$D40000
 	ld de,(ix-6)
 	ld bc,$010000
 	call sys_WriteFlash
+.cleanup_next:
 	ld a,(ix-4)
 	inc a
 	ld (ix-4),a
-	cp a,$3F
+	cp a,$3B
 	jq nz,.cleanup_freed_loop_outer
 
 ;TODO: move files around to free up space
@@ -86,20 +123,35 @@ fs_GarbageCollect:
 ;	cpir
 
 ;.done_reallocating:
+	call sys_FlashLock
 	call fs_InitClusterMap
 
+	pop hl
+	ld bc,$D40000
+	or a,a
+	sbc hl,bc
+	jq z,.no_restore_vram
+	ld hl,$D52C00
+	ld de,$D40000
+	ld bc,$010000
+	ld (ti.mpLcdUpbase),hl
+	ldir
+.no_restore_vram:
 	ld sp,ix
 	pop ix
 	ret
 
 .check_sector:
-	ld a,(hl)
+	ld a,$FF
 	ld bc,0
 .check_sector_loop:
 	and a,(hl)
+	cp a,$FF
+	ret nz
 	inc hl
 	djnz .check_sector_loop
 	dec c
 	jq nz,.check_sector_loop
 	ret
-
+.str_cleaning_up:
+	db "Cleaning up sector: $",0

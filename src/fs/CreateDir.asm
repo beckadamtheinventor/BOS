@@ -69,12 +69,13 @@ fs_CreateDir:
 	ld de,(ix-9)
 	ld hl,(ix-12)
 	ld bc,32
-	push hl
+	push bc,hl,de
 	call sys_WriteFlashFullRam
+	pop bc
 ;maybe verify end of directory marker here
 	call sys_FlashLock
 	call sys_Free ; free previously malloc'd memory
-	pop bc
+	pop bc,bc
 	ld hl,(ix-6)
 	xor a,a
 	db $01

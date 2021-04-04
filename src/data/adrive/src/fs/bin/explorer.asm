@@ -28,8 +28,7 @@ explorer_init_2:
 	ld de,explorer_config_file
 	push de
 	call bos.fs_GetFilePtr
-	ex (sp),hl
-	pop iy
+	pop bc
 	jq c,.dontloadconfig
 	ld a,b
 	or a,c
@@ -268,104 +267,19 @@ _SaveSP:=$-3
 ;	ret
 
 explorer_load_config:
-.loop:
-	ld a,c
-	or a,b
-	ret z
-	call .getline
-	ret po
 	ld a,(hl)
-	cp a,'#'
-	jq z,.loop
-	ld de,(hl)
 	inc hl
-	inc hl
-	inc hl
-	inc hl
-	dec bc
-	dec bc
-	dec bc
-	dec bc
-	push hl
-	db $21,'BGC'
-	or a,a
-	sbc hl,de
-	jq z,.setbgc
-	db $21,'FGC'
-	or a,a
-	sbc hl,de
-	jq z,.setfgc
-	db $21,'CSR'
-	or a,a
-	sbc hl,de
-	jq z,.setcursor
-	db $21,'SBC'
-	or a,a
-	sbc hl,de
-	jq nz,.loop
-.setsbc:
-	pop de
-	call .gethex
-	ld (explorer_statusbar_color),a
-	jq .loop
-.setcursor:
-	pop de
-	call .gethex
-	ld (explorer_cursor_color),a
-	jq .loop
-.setbgc:
-	pop de
-	call .gethex
 	ld (explorer_background_color),a
-	jq .loop
-.setfgc:
-	pop de
-	call .gethex
+	ld a,(hl)
+	inc hl
 	ld (explorer_foreground_color),a
-	jq .loop
-
-.gethex:
-	ld a,(de)
-	inc de
-	dec bc
-	push bc
-	ld hl,.hexc
-	ld bc,16
-	cpir
-	dec c
-	or a,a
-	sbc hl,hl
-	ld l,c
-	pop bc
-	ld a,c
-	or a,b
-	ret z
-	push bc,hl
-	ld hl,.hexc
-	ld bc,16
-	cpir
-	dec c
-	pop hl
-	ld a,l
-	add a,a
-	add a,a
-	add a,a
-	add a,a
-	add a,c
-	pop bc
+	ld a,(hl)
+	inc hl
+	ld (explorer_cursor_color),a
+	ld a,(hl)
+	inc hl
+	ld (explorer_statusbar_color),a
 	ret
-.getline:
-	lea hl,iy
-	push hl
-	ld a,$A
-	cpir
-	ex (sp),hl
-	pop iy
-	ret
-
-.hexc:
-	db "0123456789ABCDEF",0
-
 
 explorer_cursor_down:
 	ld a,(explorer_cursor_y)
@@ -838,5 +752,5 @@ str_FilesExecutable:
 str_ExplorerExecutable:
 	db "/bin/explorer",0
 explorer_config_file:
-	db "/etc/config/explorer/colors.cfg",0
+	db "/etc/config/explorer/colors.dat",0
 

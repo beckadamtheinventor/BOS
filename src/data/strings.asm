@@ -6,7 +6,7 @@ str_Filesystem_Corrupt:
 str_Formatting:
 	db "Formatting...",$A,0
 str_ErasingSector:
-	db "Erasing Sector ",0
+	db "Erasing Sector: $",0
 str_ErasedUserMemory:
 	db "Erased user memory.",$A,0
 str_WritingFilesystem:

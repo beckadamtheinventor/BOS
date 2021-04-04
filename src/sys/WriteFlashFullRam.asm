@@ -1,7 +1,6 @@
 
 ;@DOES store data to flash, surpassing flash AND logic using the first half of VRAM for swap if needed.
 ;@OUTPUT uint8_t sys_WriteFlashFullRam(void *dest, void *src, int len);
-;@NOTE source and destination cannot be within the same sector.
 sys_WriteFlashFullRam:
 	call ti._frameset0
 	ld a,(ix+8) ;high byte of destination

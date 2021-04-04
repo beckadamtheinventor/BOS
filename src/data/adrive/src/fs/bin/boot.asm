@@ -50,6 +50,7 @@ boot_main:
 	ret
 
 generate_boot_configs:
+	push bc
 	ld bc,str_EtcConfigDir
 	ld e,1 shl bos.fd_subdir
 	push de,bc
@@ -73,6 +74,9 @@ generate_boot_configs:
 	push hl
 	call bos.fs_Write
 	pop bc,bc,bc,bc,bc
+	call bos.sys_FreeAll
+	call bos.fs_OpenFile
+	pop bc
 	ret
 .onbootconfig:
 	db "#TODO, NOT YET IMPLEMENTED.",$A

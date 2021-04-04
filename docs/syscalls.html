@@ -534,7 +534,7 @@
 </table></div><div id="sys_WriteFlashFullRam"><h1>sys_WriteFlashFullRam</h1>	<h3>syscall Adress 0202A4</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td> store data to flash, surpassing flash AND logic using the first half of VRAM for swap if needed.</td><td> uint8_t sys_WriteFlashFullRam(void *dest, void *src, int len);</td><td></td><td>
- source and destination cannot be within the same sector.</td></tr>
+</td></tr>
 </table></div><div id="sys_WriteFlashByteFullRam"><h1>sys_WriteFlashByteFullRam</h1>	<h3>syscall Adress 0202A8</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td> bool sys_WriteFlashByteFullRam(void *dest, uint8_t byte);</td><td> Write a byte to flash, surpassing flash AND logic using the first half of VRAM for swap if needed.</td><td> true if success, false if failed</td><td></td><td>
