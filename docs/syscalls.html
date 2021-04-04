@@ -111,6 +111,7 @@
 <tr><td><a href="#sys_PrevProcessId">bos.sys_PrevProcessId</a></td><td><a href="#sys_PrevProcessId">0202C0</a></td></tr>
 <tr><td><a href="#sys_FreeProcessId">bos.sys_FreeProcessId</a></td><td><a href="#sys_FreeProcessId">0202C4</a></td></tr>
 <tr><td><a href="#fs_GarbageCollect">bos.fs_GarbageCollect</a></td><td><a href="#fs_GarbageCollect">0202C8</a></td></tr>
+<tr><td><a href="#gfx_SwapTextColors">bos.gfx_SwapTextColors</a></td><td><a href="#gfx_SwapTextColors">0202CC</a></td></tr>
 </table><div id="boot_os"><h1>boot_os</h1>	<h3>syscall Adress 020108</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
@@ -216,7 +217,7 @@
 </table></div><div id="gui_DrawConsoleWindow"><h1>gui_DrawConsoleWindow</h1>	<h3>syscall Adress 020174</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td> hl = string</td><td> clear the screen and display a string</td><td></td><td></td><td>
- resets the text colors to white on black</td></tr>
+</td></tr>
 </table></div><div id="gui_Input"><h1>gui_Input</h1>	<h3>syscall Adress 020178</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td> uint8_t gui_Input(char *buffer, int max_len);</td><td> get user input</td><td> 0 if user exit, 1 if user enter, 9/12 if user presses down/up arrow key</td><td> All</td><td>
@@ -571,4 +572,8 @@
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td> None</td><td> Clean up and optimize the filesystem, and reset freed areas.</td><td> None</td><td> All</td><td>
  will sanity-check the filesystem if the cluster map is not found.</td></tr>
+</table></div><div id="gfx_SwapTextColors"><h1>gfx_SwapTextColors</h1>	<h3>syscall Adress 0202CC</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td> Swap lcd_text_fg and lcd_text_fg2</td><td></td><td></td><td>
+</td></tr>
 </table></div></body></html>

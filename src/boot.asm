@@ -67,11 +67,14 @@ os_return:
 	call sys_ExecuteFile
 	pop bc,bc ;we should only get back here in a severe error case or if the user opens this menu
 os_recovery_menu:
-	ld a,$FF
-	ld (lcd_bg_color),a
-	ld (text_bg),a
 	xor a,a
-	ld (text_fg),a
+	ld (lcd_bg_color),a
+	ld (lcd_text_bg),a
+	ld (lcd_text_bg2),a
+	dec a
+	ld (lcd_text_fg),a
+	ld a,7
+	ld (lcd_text_fg2),a
 	ld hl,string_os_recovery_menu
 	call gui_DrawConsoleWindow
 .keywait:

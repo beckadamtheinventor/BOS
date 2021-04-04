@@ -29,12 +29,9 @@ gui_Input:
 	call .clear_line
 	xor a,a
 	ld (curcol),a
-	ld bc,$FF
-	ld (lcd_text_fg),bc
 	ld hl,(ix+6)
 	call gui_PrintString
-	ld a,7
-	ld (lcd_text_fg),a
+	call gfx_SwapTextColors
 	ld bc,0
 	ld hl,.overtypes
 	ld c,(ix-4)
@@ -43,8 +40,7 @@ gui_Input:
 	ld (ix-8),bc
 	ld a,(hl)
 	call gfx_PrintChar
-	ld a,$FF
-	ld (lcd_text_fg),a
+	call gfx_SwapTextColors
 	call gfx_BlitBuffer
 .keys:
 	call sys_WaitKeyCycle
@@ -139,7 +135,8 @@ gui_Input:
 	push hl
 	pop de
 	inc de
-	ld (hl),0
+	ld a,(lcd_text_bg)
+	ld (hl),a
 	ld bc,320*9
 	ldir
 	ret

@@ -112,4 +112,5 @@
 	jp sys_PrevProcessId
 	jp sys_FreeProcessId
 	jp fs_GarbageCollect
+	jp gfx_SwapTextColors
 

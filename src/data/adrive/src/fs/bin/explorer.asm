@@ -24,7 +24,6 @@ explorer_init:
 	sbc hl,hl
 	ret
 explorer_init_2:
-	push iy
 	ld de,explorer_config_file
 	push de
 	call bos.fs_GetFilePtr
@@ -34,7 +33,13 @@ explorer_init_2:
 	or a,c
 	call nz,explorer_load_config
 .dontloadconfig:
-	pop iy
+	ld a,(explorer_foreground_color)
+	ld (bos.lcd_text_fg),a
+	ld a,(explorer_background_color)
+	ld (bos.lcd_text_bg),a
+	ld a,7
+explorer_foreground2_color:=$-1
+	ld (bos.lcd_text_fg2),a
 	ld a,(explorer_cursor_x)
 	or a,a
 	sbc hl,hl
@@ -279,6 +284,9 @@ explorer_load_config:
 	ld a,(hl)
 	inc hl
 	ld (explorer_statusbar_color),a
+	ld a,(hl)
+	inc hl
+	ld (explorer_foreground2_color),a
 	ret
 
 explorer_cursor_down:

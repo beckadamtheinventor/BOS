@@ -43,8 +43,6 @@ enter_input:
 	push bc
 	ld bc,bos.InputBuffer
 	push bc
-	ld hl,str_Prompt
-	call bos.gui_PrintString
 	call bos.gui_InputNoClear
 	pop bc,hl
 	or a,a

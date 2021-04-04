@@ -4,6 +4,10 @@
 boot_main:
 	ld a,1
 	call bos.gfx_SetDraw
+	xor a,a
+	ld (bos.lcd_text_bg),a
+	dec a
+	ld (bos.lcd_text_fg),a
 	call bos.os_GetOSInfo
 	call bos.gui_DrawConsoleWindow
 	ld hl,str_Booting

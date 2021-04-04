@@ -1,8 +1,12 @@
 	jq ls_main
 	db "FEX",0
 ls_main:
-	ld hl,-9
+	ld hl,-11
 	call ti._frameset
+	ld a,(bos.lcd_text_bg)
+	ld (ix-10),a
+	ld a,(bos.lcd_text_fg)
+	ld (ix-11),a
 	or a,a
 	sbc hl,hl
 	ld (ix-6),hl
@@ -57,6 +61,7 @@ ls_main:
 	push hl,bc
 	push de
 	pop iy
+	ld bc,(bos.lcd_text_bg)
 	cp a,'.'+1
 	jq z,.hidden
 	bit bos.fd_hidden,(iy+$B) ;check if file is hidden
@@ -68,7 +73,6 @@ ls_main:
 	bit bos.fd_readonly,(iy+$B)
 	jq nz,.readonly
 	ld a,$FF
-	ld c,0
 	jq .set_colors
 .readonly:
 	ld a,$A0
@@ -80,11 +84,9 @@ ls_main:
 	jq .set_colors
 .device:
 	ld a,$B5
-	ld c,0
 	jq .set_colors
 .hidden:
 	ld a,$1F
-	ld c,0
 .set_colors:
 	ld (bos.lcd_text_fg),a
 	ld a,c
@@ -96,7 +98,10 @@ ls_main:
 	pop hl,iy
 	dec hl
 	ld (hl),$9
-	call bos.gui_PrintLine
+	call bos.gui_Print
+	ld a,(ix-10)
+	ld (bos.lcd_text_bg),a
+	call bos.gui_NewLine
 .next:
 	pop bc,hl
 	djnz .inner_loop
@@ -109,6 +114,10 @@ ls_main:
 .fail:
 	scf
 	sbc hl,hl
+	ld a,(ix-10)
+	ld (bos.lcd_text_bg),a
+	ld a,(ix-11)
+	ld (bos.lcd_text_fg),a
 	ld sp,ix
 	pop ix
 	ret
