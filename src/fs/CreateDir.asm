@@ -70,7 +70,7 @@ fs_CreateDir:
 	ld hl,(ix-12)
 	ld bc,32
 	push hl
-	call sys_WriteFlash ; assume file contents are cleared already
+	call sys_WriteFlashFullRam
 	call sys_FlashLock
 	call sys_Free ; free previously malloc'd memory
 	pop bc

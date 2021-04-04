@@ -114,6 +114,7 @@
 ?sys_NextProcessId               := $202BC
 ?sys_PrevProcessId               := $202C0
 ?sys_FreeProcessId               := $202C4
+?fs_GarbageCollect               := $202C8
 ;
 ?LCD_PAL?    := 0E30200h
 ?LCD_CTRL?   := 0E30018h

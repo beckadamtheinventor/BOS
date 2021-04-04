@@ -111,4 +111,5 @@
 	jp sys_NextProcessId
 	jp sys_PrevProcessId
 	jp sys_FreeProcessId
+	jp fs_GarbageCollect
 

@@ -88,6 +88,8 @@ fs_Alloc:
 	ld sp,ix
 	pop ix
 	ret
-.garbage_collect:=.fail ;TODO
+.garbage_collect:
+	call fs_GarbageCollect
+	jq .fail ;still make it a fail case for now, until garbage collect actually moves things around
 
 

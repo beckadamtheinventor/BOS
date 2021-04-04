@@ -42,6 +42,7 @@ fs_dir bin_dir
 	fs_entry explorer_exe, "explorer", "", f_readonly+f_system
 	fs_entry fexplore_exe, "fexplore", "", f_readonly+f_system
 	fs_entry files_exe, "files", "", f_readonly+f_system
+	fs_entry fsutil_exe, "fsutil", "", f_readonly+f_system
 	fs_entry info_exe, "info", "", f_readonly+f_system
 	fs_entry ls_exe, "ls", "", f_readonly+f_system
 	fs_entry memedit_exe, "memedit", "", f_readonly+f_system
@@ -287,6 +288,10 @@ end fs_file
 
 fs_file df_exe
 	include 'fs/bin/df.asm'
+end fs_file
+
+fs_file fsutil_exe
+	include 'fs/bin/fsutil.asm'
 end fs_file
 
 end fs_fs
