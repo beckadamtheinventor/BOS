@@ -19,7 +19,7 @@ fs_CreateDir:
 	ex.s hl,de
 	pop bc
 	ld (ix-3),hl ; save parent directory sector
-	ld hl,32
+	ld hl,48 ;minimum directory size
 	ld de,(ix+9)
 	ld bc,(ix+6)
 	push hl,de,bc
@@ -29,14 +29,14 @@ fs_CreateDir:
 	or a,a
 	sbc hl,bc
 	jq z,.fail
-	ld (ix-6),hl ; save current directory file descriptor
+	ld (ix-6),hl ; save new directory file descriptor
 	ld bc,$C
 	add hl,bc
 	ld hl,(hl)
 	push hl
 	call fs_GetSectorAddress
 	pop bc
-	ld (ix-9),hl ; save pointer to current directory data section
+	ld (ix-9),hl ; save pointer to new directory data section
 	ld bc,32
 	push bc
 	call sys_Malloc
@@ -46,7 +46,6 @@ fs_CreateDir:
 	ld hl,.path_back_entry
 	ld (ix-12),de ; save pointer to malloc'd memory to free later
 	ldir
-	call sys_FlashUnlock
 	ld hl,(ix-12)
 	ld c,$C
 	add hl,bc
@@ -66,11 +65,13 @@ fs_CreateDir:
 	ld (hl),c  ; write ".." entry to point to parent directory
 	inc hl
 	ld (hl),b
+	call sys_FlashUnlock
 	ld de,(ix-9)
 	ld hl,(ix-12)
 	ld bc,32
 	push hl
 	call sys_WriteFlashFullRam
+;maybe verify end of directory marker here
 	call sys_FlashLock
 	call sys_Free ; free previously malloc'd memory
 	pop bc

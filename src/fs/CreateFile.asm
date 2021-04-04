@@ -42,6 +42,7 @@ fs_CreateFile:
 	inc hl
 	push de,hl
 	call sys_Malloc
+	ld (ix-25),hl
 	ex hl,de
 	pop bc,hl
 	push de
@@ -56,12 +57,10 @@ fs_CreateFile:
 	ld a,(hl)
 	cp a,'/'
 	call z,.malloc_tail
-	ex hl,de
-	ex (sp),hl
-	push hl
+	pop hl
+	push de,hl
 	call fs_OpenFile
 	jq c,.fail ;fail if parent dir doesn't exist
-	ld (ix-25),hl
 	ex (sp),hl
 	pop iy,hl
 	bit fsbit_subdirectory,(iy+fsentry_fileattr)
@@ -85,31 +84,38 @@ fs_CreateFile:
 	call fs_Alloc ;allocate space for new file
 	jq c,.fail
 	pop bc,bc,iy
+
 	ld a, (ix+9)
 	ld (ix + fsentry_fileattr - 19), a     ;setup new file descriptor contents
 	ld (ix + fsentry_filesector - 19),l
 	ld (ix + fsentry_filesector+1 - 19),h
 
-	ld de,(iy + fsentry_filesector)
-	push de
-	call fs_GetSectorAddress
+	ld hl,(iy+fsentry_filesector)
+	push hl
+	call fs_GetSectorAddress ; grab pointer to parent directory contents
 	pop bc
 	ld bc,(ix-22)
 	add hl,bc
-	ld (ix-22),hl
-	push bc,iy
+	ld de,-16
+	add hl,de
+	push hl ; push pointer to new file descriptor using parent directory data section + parent directory old length
+
+	ex hl,de ;write 16 bytes behind the end of file, to overwrite the end of directory marker
+	add hl,bc
+	push hl,iy
 	ld bc,16
 	push bc
 	ld c,1
 	push bc
 	pea ix-19
 	call fs_Write ;write new file descriptor to parent directory
-	pop bc,bc,bc,iy
+	pop bc,bc,bc,iy,bc
 
 	ld hl,flashStatusByte
 	res bKeepFlashUnlocked,(hl)
 	call sys_FlashLock
-	ld hl,(ix-22)
+
+	pop hl ; pop pointer to new file descriptor
 	db $01
 .fail:
 	xor a,a

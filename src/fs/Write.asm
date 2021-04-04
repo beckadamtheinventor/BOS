@@ -36,8 +36,7 @@ fs_Write:
 	add hl,de
 
 	ld de,(iy + fsentry_filesector) ;file first sector
-	ex.s hl,de
-	push hl
+	push de
 	call fs_GetSectorAddress
 	pop bc
 	ld bc,(ix+18)

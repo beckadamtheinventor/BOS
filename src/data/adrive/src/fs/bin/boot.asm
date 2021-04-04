@@ -57,17 +57,16 @@ generate_boot_configs:
 	ld hl,str_EtcConfigBootDir
 	ex (sp),hl
 	call bos.fs_CreateDir
-	pop bc
-	ld hl,.onbootconfig.len
+	pop bc,bc
+	ld hl,.onbootconfig_len
 	ld e,0
 	ld bc,str_BootConfigFile
-	ex (sp),hl
-	push de,bc
+	push hl,de,bc
 	call bos.fs_CreateFile
 	pop bc,bc,bc
-	ret c
 	ld de,0
 	push de,hl ;offset, file descriptor
+	ld bc,.onbootconfig_len
 	ld e,1
 	push de,bc ;count, len
 	ld hl,.onbootconfig
@@ -79,7 +78,7 @@ generate_boot_configs:
 	db "#TODO, NOT YET IMPLEMENTED.",$A
 	db "#Modify the following lines to control what programs run on boot.",$A
 	db "explorer",$A
-.onbootconfig.len:=$-.onbootconfig
+.onbootconfig_len:=$-.onbootconfig
 
 
 boot_fail:
