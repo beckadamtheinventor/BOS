@@ -83,12 +83,15 @@ cp -rf src/include src/data/adrive/src/fs/bin/""")
 
 	def build_noti(self):
 		print("Building noti-ez80")
-		if 'win' in sys.platform or "nt" in sys.platform:
-			os.system("cd noti-ez80")
-			os.system("call build.bat")
-			os.system("cd ..")
-		else:
-			os.system("cd noti-ez80\nbash build.sh\ncd ..")
+		os.system("cd noti-ez80")
+		os.system("mkdir bin")
+		os.system("fasmg src/BareOS/usbrun.asm src/BareOS/usbrun.bin")
+		os.system("fasmg src/lib/fatdrvce/fatdrvce.asm src/lib/fatdrvce/fatdrvce.bin")
+		os.system("fasmg src/lib/srldrvce/srldrvce.asm src/lib/srldrvce/srldrvce.bin")
+		os.system("fasmg src/lib/usbdrvce/usbdrvce.asm src/lib/usbdrvce/usbdrvce.bin")
+		os.system("fasmg src/lib/libload/libload.asm src/lib/libload/libload.bin")
+		os.system("fasmg src/main.asm bin/NOTI.rom")
+		os.system("cd ..")
 
 	def build_filesystem(self):
 		try:
