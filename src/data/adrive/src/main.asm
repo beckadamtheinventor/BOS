@@ -37,6 +37,7 @@ fs_dir bin_dir
 	fs_entry cd_exe, "cd", "", f_readonly+f_system
 	fs_entry cmd_exe, "cmd", "", f_readonly+f_system
 	fs_entry cls_exe, "cls", "", f_readonly+f_system
+	fs_entry cp_exe, "cp", "", f_readonly+f_system
 	fs_entry initdev_exe, "device", "", f_readonly+f_system
 	fs_entry df_exe, "df", "", f_readonly+f_system
 	fs_entry explorer_exe, "explorer", "", f_readonly+f_system
@@ -196,6 +197,10 @@ end fs_file
 
 fs_file ls_exe
 	include 'fs/bin/ls.asm'
+end fs_file
+
+fs_file cp_exe
+	include 'fs/bin/cp.asm'
 end fs_file
 
 fs_file fatdrvce_lll

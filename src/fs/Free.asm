@@ -5,7 +5,7 @@
 fs_Free:
 	ld bc,fs_cluster_map_file
 	push bc
-	call fs_OpenFile
+	call fs_GetFilePtr
 	pop bc
 	jq c,fs_SanityCheck
 	pop bc,de
@@ -22,12 +22,15 @@ fs_Free:
 	ld b,(hl)
 	ex.s hl,de
 	pop de
-	add hl,de
-	ex hl,de
-	ld hl,$03FF80
-	push bc
-	call sys_WriteFlashFullRam
+	add hl,de ;hl points to cluster map at file sector#
+	push hl,bc
 	pop hl
+	call fs_CeilDivBySector
+	ex (sp),hl ;push number of file sectors, pop cluster map at file sector#
+	ld de,$03FF80
+	push de,hl ;push source and destination pointers
+	call sys_WriteFlashFullRam
+	pop bc,bc,hl ;return number of sectors freed
 	or a,a
 	ret
 

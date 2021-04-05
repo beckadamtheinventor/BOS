@@ -1,8 +1,8 @@
 ;@DOES get the physical address of a given sector.
 ;@INPUT void *fs_GetSectorAddress(uint16_t sector);
 fs_GetSectorAddress:
-	pop bc,de
-	push de,bc
+	pop hl,de
+	push de,hl
 	ex.s hl,de
 	ld a,(filesystem_driver)
 	or a,a

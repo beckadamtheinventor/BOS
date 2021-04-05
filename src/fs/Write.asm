@@ -1,12 +1,12 @@
 ;@DOES write data to a file
 ;@INPUT int fs_Write(void *data, int len, uint8_t count, void *fd, int offset);
-;@OUTPUT Returns -1 if failed to write
+;@OUTPUT Returns -1 and Cf set if failed to write
 ;@DESTROYS All. Assume OP5, OP6
 ;@NOTE file must be at least offset + len * count bytes in size.
 fs_Write:
-	ld hl,-6
+	ld hl,-3
 	call ti._frameset
-	ld (ix-3),iy
+	push iy
 	ld iy,(ix+15) ;void *fd
 	bit fsbit_readonly,(iy+fsentry_fileattr)
 	jq nz,.fail
@@ -17,7 +17,7 @@ fs_Write:
 .mult_loop:
 	add hl,de
 	djnz .mult_loop
-	ld (ix-6),hl
+	ld (ix-3),hl
 	ld de,(ix+18) ;int offset
 	add hl,de
 	push hl
@@ -41,19 +41,20 @@ fs_Write:
 	pop bc
 	ld bc,(ix+18)
 	add hl,bc
-	ld bc,(ix-6)
+	ld bc,(ix-3)
 	ld de,(ix+6)
 	push bc,de,hl
 	call sys_WriteFlashFullRam
 	pop bc,bc,bc
 	
-	ld hl,(ix-6)
+	ld hl,(ix-3)
+	or a,a
 	db $01 ;ld bc,...
 .fail:
 	scf
 	sbc hl,hl
 
-	ld iy,(ix-3)
+	pop iy
 	ld sp,ix
 	pop ix
 	ret

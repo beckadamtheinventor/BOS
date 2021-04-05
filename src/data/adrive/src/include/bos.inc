@@ -116,6 +116,7 @@
 ?sys_FreeProcessId               := $202C4
 ?fs_GarbageCollect               := $202C8
 ?gfx_SwapTextColors              := $202CC
+?fs_WriteNewFile                 := $202D0
 ;
 ?LCD_PAL?    := 0E30200h
 ?LCD_CTRL?   := 0E30018h

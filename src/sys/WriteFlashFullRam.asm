@@ -85,39 +85,30 @@ sys_WriteFlashFullRam:
 	ld a,c
 	or a,b
 	jq z,.zero_len_write
-	push de,bc
 	ldir
-	pop bc,hl
-	add hl,bc
 .zero_len_write:
 
-	ex hl,de
 	ld hl,(ix+9)
 	ld bc,(ix+12)
 	ld a,c
 	or a,b
 	jq z,.zero_len_write_2
-	push de,bc
 	ldir
-	pop bc,hl
-	add hl,bc
 .zero_len_write_2:
 
-	ld de,(ix+6)
-	ld e,l
-	ld d,h
-	push hl,hl
-	pop bc
+	ld hl,(ix+6)
+	ld l,e
+	ld h,d
+	push hl
 	ld hl,LCD_VRAM+$FFFF
 	or a,a
-	sbc hl,bc
+	sbc hl,de
 	push hl
 	pop bc
 	pop hl
 	ld a,b
 	or a,c
 	jq z,.zero_len_write_3
-	ex hl,de
 	ldir
 .zero_len_write_3:
 

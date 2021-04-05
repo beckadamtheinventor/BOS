@@ -113,4 +113,5 @@
 	jp sys_FreeProcessId
 	jp fs_GarbageCollect
 	jp gfx_SwapTextColors
+	jp fs_WriteNewFile
 

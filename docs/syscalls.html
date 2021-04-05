@@ -112,6 +112,7 @@
 <tr><td><a href="#sys_FreeProcessId">bos.sys_FreeProcessId</a></td><td><a href="#sys_FreeProcessId">0202C4</a></td></tr>
 <tr><td><a href="#fs_GarbageCollect">bos.fs_GarbageCollect</a></td><td><a href="#fs_GarbageCollect">0202C8</a></td></tr>
 <tr><td><a href="#gfx_SwapTextColors">bos.gfx_SwapTextColors</a></td><td><a href="#gfx_SwapTextColors">0202CC</a></td></tr>
+<tr><td><a href="#fs_WriteNewFile">bos.fs_WriteNewFile</a></td><td><a href="#fs_WriteNewFile">0202D0</a></td></tr>
 </table><div id="boot_os"><h1>boot_os</h1>	<h3>syscall Adress 020108</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
@@ -161,7 +162,7 @@
 </td></tr>
 </table></div><div id="fs_Write"><h1>fs_Write</h1>	<h3>syscall Adress 020144</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td> int fs_Write(void *data, int len, uint8_t count, void *fd, int offset);</td><td> write data to a file</td><td> Returns -1 if failed to write</td><td> All. Assume OP5, OP6</td><td>
+<tr><td> int fs_Write(void *data, int len, uint8_t count, void *fd, int offset);</td><td> write data to a file</td><td> Returns -1 and Cf set if failed to write</td><td> All. Assume OP5, OP6</td><td>
  file must be at least offset + len * count bytes in size.</td></tr>
 </table></div><div id="sys_AddHLAndA"><h1>sys_AddHLAndA</h1>	<h3>syscall Adress 020148</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -542,7 +543,7 @@
 </td></tr>
 </table></div><div id="fs_GetFilePtr"><h1>fs_GetFilePtr</h1>	<h3>syscall Adress 0202AC</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td> void *fs_GetFilePtr(const char *path);</td><td> get a pointer to a file's data section</td><td> HL = file data pointer, BC = file data length, Cf set and HL = -1 if failed</td><td></td><td>
+<tr><td> void *fs_GetFilePtr(const char *path);</td><td> get a pointer to a file's data section</td><td> HL = file data pointer, BC = file data length, A = file flags, Cf set and HL = -1 if failed</td><td></td><td>
 </td></tr>
 </table></div><div id="sys_ExecuteFileFromPtr"><h1>sys_ExecuteFileFromPtr</h1>	<h3>syscall Adress 0202B0</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -575,5 +576,9 @@
 </table></div><div id="gfx_SwapTextColors"><h1>gfx_SwapTextColors</h1>	<h3>syscall Adress 0202CC</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td> Swap lcd_text_fg and lcd_text_fg2</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="fs_WriteNewFile"><h1>fs_WriteNewFile</h1>	<h3>syscall Adress 0202D0</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> void *fs_WriteNewFile(const char *name, uint8_t properties, void *data, int len);</td><td> Create and write a new file</td><td> HL = file descriptor. HL = -1 and Cf set if failed.</td><td></td><td>
 </td></tr>
 </table></div></body></html>
