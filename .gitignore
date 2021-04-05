@@ -4,6 +4,7 @@
 /obj
 /src/threading/
 /src/threading.inc
+/src/include/threading.inc
 *.rom
 *.bin
 *__pycache__*
