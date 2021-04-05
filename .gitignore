@@ -1,8 +1,9 @@
 /bin
-/noti-ez80/bin
-*.idea
+/.idea
+/__pycache__
 /obj
-*threading*
+/src/threading/
+/src/threading.inc
 *.rom
 *.bin
 *__pycache__*
@@ -14,4 +15,4 @@ src/data/cache.json
 src/data/fs.bin
 src/data/fs_compressed.bin
 src/data/properties.json
-
+src/data/adrive/obj
