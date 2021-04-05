@@ -7,8 +7,12 @@ include 'include/os.inc'
 include 'include/defines.inc'
 include 'include/bos.inc'
 
-
 org ti.userMem-2
+
+os_rom
+	file '../obj/bosos.bin'
+end os_rom
+
 	db $EF,$7B
 updater_start:
 	call bos._ClrScrn
@@ -16,16 +20,10 @@ updater_start:
 	ld hl,installing_string
 	call bos._PutS
 
-;-------------------------------------------------------------------------------
 	os_create $03 ;erase only OS sectors as to not clobber the filesystem.
-;-------------------------------------------------------------------------------
 
 installing_string:
-	db "Installing BOS...",0
+	db "Updating BOS...",0
 
-;-------------------------------------------------------------------------------
-	os_rom
-;-------------------------------------------------------------------------------
-
-file '../obj/bosos.bin'
+write_os_binary
 

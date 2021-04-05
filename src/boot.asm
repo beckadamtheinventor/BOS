@@ -9,12 +9,6 @@ boot_os:
 	ldir
 
 ;boot_os_thread:
-	ld hl,$000f00		; 0/Wait 15*256 APB cycles before scanning each row/Mode 0/
-	ld (ti.DI_Mode),hl
-	ld hl,$08080f		; (nb of columns,nb of row) to scan/Wait 15 APB cycles before each scan
-	ld (ti.DI_Mode+3),hl
-	ld a,1
-	ld (running_process_id),a
 
 	call flash_unlock
 	ld a,$05 ;set privleged code end address to $050000 (up until and including first filesystem sector)
@@ -25,8 +19,25 @@ boot_os:
 	call flash_lock
 	ld a,4           ;set wait states to 4
 	ld ($E00005),a
+
 	call gfx_SetDefaultFont
 	call gfx_Set8bpp
+
+	ld hl,$000f00		; 0/Wait 15*256 APB cycles before scanning each row/Mode 0/
+	ld (ti.DI_Mode),hl
+	ld hl,$08080f		; (nb of columns,nb of row) to scan/Wait 15 APB cycles before each scan
+	ld (ti.DI_Mode+3),hl
+	ld a,1
+	ld (running_process_id),a
+	xor a,a
+	ld (lcd_bg_color),a
+	ld (lcd_text_bg),a
+	ld (lcd_text_bg2),a
+	dec a
+	ld (lcd_text_fg),a
+	ld a,7
+	ld (lcd_text_fg2),a
+
 	ld hl,bos_UserMem
 	ld (bottom_of_RAM),hl
 	ld (top_of_UserMem),hl
