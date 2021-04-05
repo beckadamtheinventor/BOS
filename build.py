@@ -83,15 +83,16 @@ cp -rf src/include src/data/adrive/src/fs/bin/""")
 
 	def build_noti(self):
 		print("Building noti-ez80")
-		os.system("cd noti-ez80")
-		os.system("mkdir bin")
-		os.system("fasmg src/BareOS/usbrun.asm src/BareOS/usbrun.bin")
-		os.system("fasmg src/lib/fatdrvce/fatdrvce.asm src/lib/fatdrvce/fatdrvce.bin")
-		os.system("fasmg src/lib/srldrvce/srldrvce.asm src/lib/srldrvce/srldrvce.bin")
-		os.system("fasmg src/lib/usbdrvce/usbdrvce.asm src/lib/usbdrvce/usbdrvce.bin")
-		os.system("fasmg src/lib/libload/libload.asm src/lib/libload/libload.bin")
-		os.system("fasmg src/main.asm bin/NOTI.rom")
-		os.system("cd ..")
+		if 'win' in sys.platform or "nt" in sys.platform:
+			os.system("mkdir noti-ez80\\bin")
+		else:
+			os.system("mkdir noti-ez80/bin")
+		os.system("fasmg noti-ez80/src/BareOS/usbrun.asm noti-ez80/src/BareOS/usbrun.bin")
+		os.system("fasmg noti-ez80/src/lib/fatdrvce/fatdrvce.asm noti-ez80/src/lib/fatdrvce/fatdrvce.bin")
+		os.system("fasmg noti-ez80/src/lib/srldrvce/srldrvce.asm noti-ez80/src/lib/srldrvce/srldrvce.bin")
+		os.system("fasmg noti-ez80/src/lib/usbdrvce/usbdrvce.asm noti-ez80/src/lib/usbdrvce/usbdrvce.bin")
+		os.system("fasmg noti-ez80/src/lib/libload/libload.asm noti-ez80/src/lib/libload/libload.bin")
+		os.system("fasmg noti-ez80/src/main.asm noti-ez80/bin/NOTI.rom")
 
 	def build_filesystem(self):
 		try:
