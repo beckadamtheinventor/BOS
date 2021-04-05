@@ -84,7 +84,9 @@ cp -rf src/include src/data/adrive/src/fs/bin/""")
 	def build_noti(self):
 		print("Building noti-ez80")
 		if 'win' in sys.platform or "nt" in sys.platform:
-			os.system("cd noti-ez80\ncall build.bat\ncd ..")
+			os.system("cd noti-ez80")
+			os.system("call build.bat")
+			os.system("cd ..")
 		else:
 			os.system("cd noti-ez80\nbash build.sh\ncd ..")
 
