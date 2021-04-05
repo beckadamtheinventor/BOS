@@ -2,11 +2,11 @@
 boot_os:
 	call ti.boot.Set48MHzMode
 
-	ld hl,thread_map
-	ld de,thread_map+1
-	ld (hl),l
-	ld bc,thread_memory_end-thread_map
-	ldir
+	; ld hl,thread_map
+	; ld de,thread_map+1
+	; ld (hl),l
+	; ld bc,thread_memory_end-thread_map
+	; ldir
 
 ;boot_os_thread:
 

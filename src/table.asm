@@ -1,8 +1,8 @@
 
 	jp boot_os
 	jp handle_interrupt
-	jp HandleInstruction ;thread control soon (tm)
-	jp HandleThreadSpawn ;spawn thread soon (tm)
+	jp DONOTHING ;HandleInstruction ;thread control soon (tm)
+	jp DONOTHING ;HandleThreadSpawn ;spawn thread soon (tm)
 	jp handle_safeop ;handle_rst20
 	jp DONOTHING ;handle_rst28
 	jp DONOTHING ;handle_rst30
