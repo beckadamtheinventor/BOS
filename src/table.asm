@@ -114,4 +114,5 @@
 	jp fs_GarbageCollect
 	jp gfx_SwapTextColors
 	jp fs_WriteNewFile
+	jp gfx_SetFont
 

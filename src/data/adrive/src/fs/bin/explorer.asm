@@ -27,11 +27,14 @@ explorer_init_2:
 	ld de,explorer_config_file
 	push de
 	call bos.fs_GetFilePtr
-	pop bc
+	pop de
 	jq c,.dontloadconfig
 	ld a,b
 	or a,c
-	call nz,explorer_load_config
+	jq z,.dontloadconfig
+	push bc,hl
+	call explorer_load_config
+	pop bc,bc
 .dontloadconfig:
 	ld a,(explorer_foreground_color)
 	ld (bos.lcd_text_fg),a
@@ -272,21 +275,173 @@ _SaveSP:=$-3
 ;	ret
 
 explorer_load_config:
+	ld hl,-6
+	call ti._frameset
+	ld hl,(ix+6)
+	ld bc,(ix+9)
+.loop:
+	ld a,(hl)
+	cp a,'#'
+	jq z,.nextline
+.check:
+	push hl,bc
+	ld bc,(hl)
+	ld (ix-3),bc
+	inc hl
+	inc hl
+	inc hl
 	ld a,(hl)
 	inc hl
+	cp a,'='
+	jq nz,.next ;fail if invalid statement
+	ld a,(hl)
+	inc hl
+	cp a,'x'
+	jq z,.hexbytearg
+	cp a,'"'
+	jq nz,.next
+	pop bc
+	push bc
+	ld (ix-6),hl
+.readstringloop:
+	cpir ;find end of string
+	dec hl
+	dec hl
+	ld a,(hl)
+	cp a,$5C
+	jq nz,.foundendofstring
+	inc hl
+	inc hl
+	ld a,'"'
+	jq .readstringloop
+.foundendofstring:
+	ld de,(ix-6)
+	or a,a
+	sbc hl,de
+	inc hl
+	push de,hl
+	call bos.sys_Malloc
+	ex hl,de
+	pop bc,hl
+	jq c,.next ;go to next line if failed to malloc
+	dec bc
+	ld (ix-6),de
+	ldir
+	xor a,a
+	ld (de),a
+	ld bc,(ix-3)
+	db $21,"FNT"
+	or a,a
+	sbc hl,bc
+	jq nz,.next
+.setfont:
+	ld hl,(ix-6)
+	push hl
+	call bos.fs_GetFilePtr
+	pop de
+	jq c,.next
+	ld bc,(hl)
+	inc hl
+	inc hl
+	inc hl
+	ex hl,de
+	db $21,"FNT"
+	or a,a
+	sbc hl,bc
+	jq nz,.next
+	push hl
+	call bos.gfx_SetFont
+	pop bc
+	ret
+.hexbytearg:
+	push bc
+	ld a,(hl)
+	inc hl
+	call .nibble
+	inc a
+	jq z,.next_extrapop ;if a=0xff then we encountered an invalid hex character, so we should probably skip this line
+	dec a
+	add a,a
+	add a,a
+	add a,a
+	add a,a
+	ld c,a
+	ld a,(hl)
+	inc hl
+	call .nibble
+	inc a
+	jq z,.next_extrapop ;if a=0xff then we encountered an invalid hex character, so we should probably skip this line
+	dec a
+	add a,c
+	pop bc
+	db $21, "BGC"
+	or a,a
+	sbc hl,bc
+	jq z,.setbgcolor
+	db $21, "FGC"
+	or a,a
+	sbc hl,bc
+	jq z,.setfgcolor
+	db $21, "CSR"
+	or a,a
+	sbc hl,bc
+	jq z,.setcursorcolor
+	db $21, "SBC"
+	or a,a
+	sbc hl,bc
+	jq z,.setstatusbarcolor
+	db $21, "FG2"
+	or a,a
+	sbc hl,bc
+	jq z,.setfg2color
+	db $3E
+.next_extrapop:
+	pop bc
+.next:
+	pop bc,hl
+.nextline:
+	ld a,$A
+	cpir
+	jp pe,.loop
+.done:
+	ld sp,ix
+	pop ix
+	ret
+
+.setbgcolor:
 	ld (explorer_background_color),a
-	ld a,(hl)
-	inc hl
+	jq .next
+
+.setfgcolor:
 	ld (explorer_foreground_color),a
-	ld a,(hl)
-	inc hl
+	jq .next
+
+.setcursorcolor:
 	ld (explorer_cursor_color),a
-	ld a,(hl)
-	inc hl
+	jq .next
+
+.setstatusbarcolor:
 	ld (explorer_statusbar_color),a
-	ld a,(hl)
-	inc hl
+	jq .next
+
+.setfg2color:
 	ld (explorer_foreground2_color),a
+	jq .next
+
+.nibble:
+	sub a,'0'
+	jq c,.invalid
+	cp a,10
+	ret c
+	sub a,7 ;subtract this from 'A'-'0' to get 10
+	cp a,16 ;check if in range 'A'-'F'
+	ret c ;return if in range
+	sub a,$20 ;subtract 'a'-'A' to interpret lowercase
+	cp a,16
+	ret c ;return if within range 'a'-'f'
+	ccf
+.invalid:
+	sbc a,a
 	ret
 
 explorer_cursor_down:

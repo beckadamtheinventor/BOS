@@ -117,6 +117,7 @@
 ?fs_GarbageCollect               := $202C8
 ?gfx_SwapTextColors              := $202CC
 ?fs_WriteNewFile                 := $202D0
+?gfx_SetFont                     := $202D4
 ;
 ?LCD_PAL?    := 0E30200h
 ?LCD_CTRL?   := 0E30018h
