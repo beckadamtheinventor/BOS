@@ -283,7 +283,10 @@ open_terminal:
 explorer_call_file:
 	ld sp,(_SaveSP)
 	ld ix,(_SaveIX)
+	push hl,de
+	call bos.sys_FreeRunningProcessId
 	call bos.gfx_SetDefaultFont
+	pop de,hl
 	ld bc,str_ExplorerExecutable
 	jp bos.sys_CallExecuteFile
 
@@ -630,7 +633,7 @@ load_libload:
 	ld   de,.relocations
 	ld   bc,.notfound
 	push   bc
-;	ld   bc,$aa55aa
+	ld   bc,$aa5aa5
 	jp   (hl)
 
 .notfound:

@@ -5,6 +5,10 @@
 sys_CallExecuteFile:
 	push hl,de,bc
 	call sys_FreeRunningProcessId
+	ld a,(running_process_id)
+	ld (fsOP6+15),a
+	ld a,1
+	ld (running_process_id),a
 	call ti._strlen
 	inc hl
 	push hl
@@ -18,9 +22,16 @@ sys_CallExecuteFile:
 	ld (de),a
 	pop bc,de,hl
 	push bc,de,hl
+	ld a,(fsOP6+15)
+	ld (running_process_id),a
 	call sys_ExecuteFile
+	call sys_PrevProcessId
 	pop bc,bc,hl
-	jq sys_ExecuteFileHL
+	push hl
+	call sys_ExecuteFileHL
+	call sys_Free
+	pop bc
+	ret
 .fail:
 	pop bc,bc
 	jq sys_ExecuteFileHL

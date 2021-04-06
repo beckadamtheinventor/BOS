@@ -1,6 +1,6 @@
 
-;@DOES execute a file given a pointer to it's data section in HL
-;@INPUT HL = pointer to file data section
+;@DOES execute a file given a pointer to it's path in HL
+;@INPUT HL = pointer to file path
 ;@OUTPUT -1 if file is not a valid executable format
 ;@DESTROYS All, OP6.
 sys_ExecuteFileHL:

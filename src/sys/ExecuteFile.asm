@@ -103,7 +103,7 @@ sys_ExecuteFile:
 	ld hl,(fsOP6) ;push arguments
 	push hl
 	call sys_NextProcessId
-	call sys_FreeRunningProcessId
+	call sys_FreeRunningProcessId ;free memory allocated by the new process ID, though there shouldn't be any in the first place
 	call .normalize_lcd
 	call .jptoprogram
 	pop bc
@@ -115,15 +115,7 @@ sys_ExecuteFile:
 	ld hl,bos_UserMem
 	ld (top_of_UserMem),hl
 	call sys_FreeRunningProcessId ;free memory allocated by the program
-	ld bc,(running_process_id)
-	ld b,c
-	ld a,1
-	ld c,a
-	ld (running_process_id),a
-	push bc
-	call sys_FreeProcessId
-	pop bc
-	
+	call sys_PrevProcessId
 	pop hl
 	ret
 .jptoprogram:

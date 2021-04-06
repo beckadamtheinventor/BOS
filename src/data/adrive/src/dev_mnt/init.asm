@@ -3,15 +3,82 @@ include '../include/ti84pceg.inc'
 include '../include/bos.inc'
 include 'usbRAM.inc'
 
-
-org bos.driverExecRAM
-	call load_libload
-	jq nz,_return_fail
-	ld (_ErrSP),sp
-	ld hl,main_event_handler.source
-	ld de,main_event_handler.destination
-	ld bc,main_event_handler.len
+; files are passed a pointer to themselves in HL when run, so should device driver routines
+virtual at 0
+	ld bc,main_code.source
+	add hl,bc
+	ld de,main_code.destination
+	ld bc,main_code.len
 	ldir
+	jp main_code.start
+main_code.source:
+	db main_code.data
+load dev_init_code:$-$$ from $$
+end virtual
+
+	db dev_init_code
+
+virtual at bos.reservedRAM
+main_code.destination:
+libload_relocations:
+	db $C0,"USBDRVCE",0,0
+	jp 0
+	jp 3
+	jp 9
+	jp 15
+	jp 39
+	db $C0,"FATDRVCE",0,1
+	jp 0
+	jp 3
+	jp 6
+	jp 9
+	jp 12
+	jp 15
+	jp 18
+	jp 21
+	jp 24
+	jp 27
+	jp 30
+	jp 33
+	jp 36
+	jp 39
+	jp 42
+	jp 45
+	jp 48
+	jp 51
+	jp 54
+	jp 57
+	jp 60
+	jp 63
+	jp 66
+	jp 69
+	jp 72
+
+	xor a,a
+	pop hl
+	ret
+
+libload_load:
+	ld hl,.file
+	push de,hl
+	call bos.fs_GetFilePtr
+	pop bc,bc
+	jr c,.fail
+	ld de,.fail
+	push de
+	ld de,libload_relocations
+	ld bc,$aa5aa5
+	jp (hl)
+.fail:
+	scf
+	sbc a,a
+	sbc hl,hl
+	ret
+.file:
+	db "/lib/LibLoad.dll",0
+main_code.start:
+	ld (_ErrSP),sp
+	call libload_load
 ;init USB
 	ld bc, 12  ;USB_DEFAULT_INIT_FLAGS
 	push bc
@@ -19,7 +86,7 @@ org bos.driverExecRAM
 	push bc
 	ld bc, usb_device
 	push bc     ;and pass the usb device for the Opaque pointer
-	ld bc,main_event_handler.destination
+	ld bc,main_event_handler
 	push bc
 	call usb_Init
 	pop bc,bc,bc,bc
@@ -27,6 +94,12 @@ org bos.driverExecRAM
 	add hl,bc
 	sbc hl,bc
 	jq nz,_return_fail
+	ld bc,2
+	push bc
+	call bos.sys_Malloc
+	pop bc
+	jq c,_return_fail
+	ld (current_dir_ptr),hl
 wait_for_device_loop:
 	call usb_WaitForInterrupt
 	add hl,bc
@@ -108,72 +181,13 @@ init_fat_partition:
 	ret
 found_partitions:
 	dl 0
-
-_return_fail:
+ _return_fail:
 	ld sp,0
 _ErrSP:=$-3
 	scf
 	sbc hl,hl
 	ret
 
-load_libload:
-	ld hl,libload_file
-	push hl
-	call bos.fs_OpenFile
-	pop bc
-	jq c,.fail
-	ld bc,$0C
-	add hl,bc
-	ld hl,(hl)
-	push hl
-	call bos.fs_GetSectorAddress
-	pop bc
-	ld de,libload_relocations
-	ld bc,$aa55aa
-	jp (hl)
-.fail:
-	xor a,a
-	inc a
-	ret
-libload_file:
-	db "/lib/LibLoad.LLL",0
-
-
-libload_relocations:
-db $C0,"USBDRVCE",0,0
-usb_Init:
-	jp 0
-usb_Cleanup:
-	jp 3
-usb_HandleEvents:
-	jp 9
-usb_WaitForInterrupt:
-	jp 15
-usb_ResetDevice:
-	jp 39
-
-db $C0,"FATDRVCE",0,1
-msd_Init:
-	jp 0
-msd_Reset:
-	jp 9
-fat_Find:
-	jp 24
-fat_Init:
-	jp 27
-fat_Deinit:
-	jp 30
-fat_DirList:
-	jp 33
-fat_GetVolumeLabel:
-	jp 36
-
-	xor a,a
-	pop hl
-	ret
-
-main_event_handler.destination := bos.reservedRAM
-virtual at main_event_handler.destination
 ;usb_error_t main_event_handler(usb_event_t event, void *event_data, usb_callback_data_t *callback_data);
 main_event_handler:
 	call ti._frameset0
@@ -208,9 +222,6 @@ main_event_handler:
 	ld (hl),de
 	jq .success
 
-load main_event_handler.data: $-$$ from $$
-main_event_handler.len:=$-$$
+	load main_code.data: $-$$ from $$
+	main_code.len:=$-$$
 end virtual
-main_event_handler.source:
-	db main_event_handler.data
-

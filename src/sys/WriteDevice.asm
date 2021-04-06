@@ -28,6 +28,8 @@ sys_WriteDevice:
 	ld a,(hl)
 	cp a,$C3
 	jq nz,.fail
+	inc hl
+	ld hl,(hl)
 	jp (hl)
 .fail:
 	or a,a

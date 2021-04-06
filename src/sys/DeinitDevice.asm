@@ -27,6 +27,8 @@ sys_DeinitDevice:
 	ld a,(hl)
 	cp a,$C3
 	jq nz,.fail
+	inc hl
+	ld hl,(hl)
 	jp (hl)
 .fail:
 	xor a,a

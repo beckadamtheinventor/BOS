@@ -115,6 +115,7 @@
 <tr><td><a href="#fs_WriteNewFile">bos.fs_WriteNewFile</a></td><td><a href="#fs_WriteNewFile">0202D0</a></td></tr>
 <tr><td><a href="#gfx_SetFont">bos.gfx_SetFont</a></td><td><a href="#gfx_SetFont">0202D4</a></td></tr>
 <tr><td><a href="#gfx_SetDefaultFont">bos.gfx_SetDefaultFont</a></td><td><a href="#gfx_SetDefaultFont">0202D8</a></td></tr>
+<tr><td><a href="#sys_FreeRunningProcessId">bos.sys_FreeRunningProcessId</a></td><td><a href="#sys_FreeRunningProcessId">0202DC</a></td></tr>
 </table><div id="boot_os"><h1>boot_os</h1>	<h3>syscall Adress 020108</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
@@ -549,7 +550,7 @@
 </td></tr>
 </table></div><div id="sys_ExecuteFileHL"><h1>sys_ExecuteFileHL</h1>	<h3>syscall Adress 0202B4</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td> HL = pointer to file data section</td><td> execute a file given a pointer to it's data section in HL</td><td> -1 if file is not a valid executable format</td><td> All, OP6.</td><td>
+<tr><td> HL = pointer to file path</td><td> execute a file given a pointer to it's path in HL</td><td> -1 if file is not a valid executable format</td><td> All, OP6.</td><td>
 </td></tr>
 </table></div><div id="sys_TurnOff"><h1>sys_TurnOff</h1>	<h3>syscall Adress 0202B8</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -566,7 +567,7 @@
 </table></div><div id="sys_FreeProcessId"><h1>sys_FreeProcessId</h1>	<h3>syscall Adress 0202C4</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td> void sys_FreeProcessId(uint8_t id);</td><td> Free all memory allocated by a given process ID</td><td></td><td></td><td>
-</td></tr>
+ DO NOT free process ID 1 since it is used by the OS and should be preserved.</td></tr>
 </table></div><div id="fs_GarbageCollect"><h1>fs_GarbageCollect</h1>	<h3>syscall Adress 0202C8</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td> None</td><td> Clean up and optimize the filesystem, and reset freed areas.</td><td> None</td><td> All</td><td>
@@ -587,4 +588,8 @@
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td> Reset the current font to the default built-in font</td><td></td><td> BC</td><td>
 </td></tr>
+</table></div><div id="sys_FreeRunningProcessId"><h1>sys_FreeRunningProcessId</h1>	<h3>syscall Adress 0202DC</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td> void sys_FreeProcessId(void);</td><td> Free all memory allocated by the current process ID</td><td></td><td></td><td>
+ Automatically called after program runs</td></tr>
 </table></div></body></html>

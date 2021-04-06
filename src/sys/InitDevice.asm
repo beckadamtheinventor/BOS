@@ -45,5 +45,7 @@ sys_InitDevice:
 	sbc hl,hl
 	ret
 .jumphl:
+	inc hl
+	ld hl,(hl)
 	jp (hl)
 

@@ -109,6 +109,6 @@ str_EtcConfigDir:
 str_EtcConfigBootDir:
 	db "/etc/config/boot",0
 str_BootConfigFile:
-	db "/etc/config/boot/onboot.cfg",0
+	db "/etc/config/boot/onboot.cmd",0
 str_HomeDir:
 	db "/home",0

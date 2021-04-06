@@ -116,4 +116,5 @@
 	jp fs_WriteNewFile
 	jp gfx_SetFont
 	jp gfx_SetDefaultFont
+	jp sys_FreeRunningProcessId
 

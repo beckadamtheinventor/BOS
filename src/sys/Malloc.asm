@@ -8,12 +8,10 @@ sys_Malloc:
 	pop hl
 	push hl
 	push bc
-	ld de,8192
+	add hl,de
 	or a,a
 	sbc hl,de
-	jq nc,.fail
-	add hl,de
-	jq z,.fail
+	jq z,.fail ;can't malloc 0 bytes
 	ld bc,32
 	call ti._idvrmu
 	ld a,l

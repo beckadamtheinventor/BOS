@@ -119,6 +119,7 @@
 ?fs_WriteNewFile                 := $202D0
 ?gfx_SetFont                     := $202D4
 ?gfx_SetDefaultFont              := $202D8
+?sys_FreeRunningProcessId        := $202DC
 ;
 ?LCD_PAL?    := 0E30200h
 ?LCD_CTRL?   := 0E30018h

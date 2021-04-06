@@ -5,5 +5,6 @@ sys_JumpExecuteFile:
 	push de,hl
 	call sys_FreeProcessId
 	call sys_PrevProcessId
-	jq sys_ExecuteFile
+	pop hl,de
+	jq sys_ExecuteFileHLDE
 

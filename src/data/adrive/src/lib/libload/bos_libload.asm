@@ -60,6 +60,7 @@ define prevextracted       0
 define foundprgmstart      1
 define keeplibinarc        2
 define showmsgs            3
+define usemallocmem          4
 
 macro relocate? name, address*
 	name.source? := $
@@ -88,13 +89,20 @@ disable_relocations
 	push	de
 	push	hl
 
-	set	showmsgs,(iy + asmflag)
+	res	showmsgs,(iy + asmflag)
+	res	usemallocmem,(iy + asmflag)
 	ld	hl,$aa55aa
 	xor	a,a
 	sbc	hl,bc
-	jr	nz,.showmsgs
+	jr	z,.loadlibloadcode
+	set	showmsgs,(iy + asmflag)
+	ld	hl,$aa5aa5
+	or	a,a
+	sbc	hl,bc
+	jr	nz,.loadlibloadcode
 	res	showmsgs,(iy + asmflag)
-.showmsgs:
+	set	usemallocmem,(iy + asmflag)
+.loadlibloadcode:
 	ld	bc,1020
 	ld	hl,cursorImage
 	call	bos._MemClear		; initialize to wipe out past runs
@@ -125,9 +133,14 @@ relocate _libloadstart, $D30000 - _libloadstart.length
 	jr	z,_startrelocating	; if not, just run it from wherever de was pointing
 	jp	(hl)			; return to execution if there are no libs
 _startrelocating:
-;	push	hl
-;	call	ti.PushOP1		; save program name
-;	pop	hl
+	push	hl
+	ld	hl,_libloadstart.length  ;because we're running from the tail of usermem we should allocate ourselves properly
+	push	hl
+	call	bos._EnoughMem
+	jq	c,_throw_memoryerror  ;fail if not enough memory
+	pop	hl
+	call	bos._InsertMem
+	pop	hl
 _extractlib:				; hl->NULL terminated libray name string -> $C0,"LIBNAME",0
 	ld	(hl),AppVarObj	; change $C0 byte to mark as extracted
 	push	hl
@@ -263,13 +276,6 @@ _goodversion:
 	inc	hl
 	ld	(endarclibrarylocations),hl
 
-	ld	hl,userMem		; this is where programs are extracted to
-	ld	de,(bos.asm_prgm_size)
-	add	hl,de			; hl->end of program+libaries
-	ex	de,hl			; de->location to extract to
-
-	ld	(ramlocation),de	; save this pointer
-
 	res	keeplibinarc,(iy + asmflag)
 	ld	hl,(arclocation)	; hl->start of library code in archive
 	ld	de,(extractedsize)
@@ -277,10 +283,28 @@ _goodversion:
 	ld	(relocationtblptr),hl	; store this
 	ld	de,(endrelocationtbl)
 	call	bos._CpHLDE		; check and see if they match -- if so, this library is going to remain in the archive
-	jr	nz,_needtoextractlib
+	jr	nz,.getramlocation
 	ld	hl,(arclocation)
 	ld	(ramlocation),hl	; okay, not a ram location, but it's use is still the same
 	set	keeplibinarc,(iy + asmflag)
+	jr _needtoextractlib
+.getramlocation:
+	bit	usemallocmem,(iy + asmflag)
+	jr	z,.useusermem
+	ld	hl,(extractedsize)
+	push	hl
+	call	bos.sys_Malloc
+	pop	bc
+	jr .setramlocation
+.useusermem:
+	ld	hl,userMem		; this is where programs are extracted to
+	ld	de,(bos.asm_prgm_size)
+	add	hl,de			; hl->end of program+libaries
+.setramlocation:
+	ex	de,hl			; de->location to extract to
+
+	ld	(ramlocation),de	; save this pointer
+
 _needtoextractlib:
 
 	ld	de,(ramlocation)
@@ -292,17 +316,17 @@ _needtoextractlib:
 	ld	(endarclibrarylocations),hl
 
 	bit	keeplibinarc,(iy + asmflag)
-	jr	nz,_resloveentrypoints	; only need to resolve entry points if in the archive
+	jr	nz,_resloveentrypoints	; resolve entry points in place if in the archive
 
+;otherwise copy into ram
+	bit	usemallocmem,(iy + asmflag)
+	jr	nz,.load
+; hl=size of library
 	ld	hl,(extractedsize)
-	push	hl
-	push	de
-	push	bc
-	call	bos._EnoughMem		; hl=size of library
-	pop	bc
-	pop	de
-	pop	hl
-	jp	c,bos._ErrMemory		; throw a memory error -- need more ram!
+	push	bc,de,hl
+	call	bos._EnoughMem
+	pop	hl,de,bc
+	jq	c,_throw_memoryerror		; throw a memory error -- need more ram!
 	call	bos._InsertMem		; insert memory for the relocated library (de)
 
 	ld	hl,(extractedsize)	; extracted size = dependency jumps + library code
@@ -310,6 +334,7 @@ _needtoextractlib:
 	add	hl,de
 	ld	(bos.asm_prgm_size),hl	; store new size of program+libraries
 
+.load:
 	ld	hl,(arclocation)	; hl->start of library code
 	ld	de,(ramlocation)	; de->insertion place
 	ld	bc,(extractedsize)	; bc=extracted library size
@@ -498,6 +523,11 @@ _waitkeyloop:
 _exitwaitloop:
 	call	bos._ClrScrn
 	jp	bos._HomeUp			; stop execution of the program
+
+_throw_memoryerror:
+	ld	sp,(eSP)
+	call	bos._ErrMemory
+	jr	_waitkeyloop
 
 _versionlibstr:				; strings for LibLoad Errors
 	db	"ERROR: Library Version",0
