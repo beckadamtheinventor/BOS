@@ -6,7 +6,7 @@ src/threading/
 src/threading.inc
 src/include/threading.inc
 src/data/adrive/src/fs/bin/include/threading.inc
-src/data/adrive/
+src/data/adrive/data.bin
 *.rom
 *.bin
 *__pycache__*
