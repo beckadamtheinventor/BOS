@@ -20,11 +20,14 @@ fs_fs
 
 fs_dir root_dir
 	fs_entry bin_dir, "bin", "", f_readonly+f_system+f_subdir
-	fs_entry boot_dir, "boot", "", f_readonly+f_system+f_subdir
 	fs_entry dev_dir, "dev", "", f_readonly+f_system+f_subdir
+	fs_entry boot_dir, "boot", "", f_readonly+f_system+f_subdir
 	fs_entry etc_dir, "etc", "", f_subdir
 	fs_entry home_dir, "home", "", f_subdir
 	fs_entry lib_dir, "lib", "", f_readonly+f_system+f_subdir
+	fs_entry opt_dir, "opt", "", f_subdir
+	fs_entry sbin_dir, "sbin", "", f_readonly+f_system+f_subdir
+	fs_entry tmp_dir, "tmp", "", f_subdir
 	fs_entry usr_dir, "usr", "", f_subdir
 end fs_dir
 
@@ -43,7 +46,6 @@ fs_dir bin_dir
 	fs_entry explorer_exe, "explorer", "", f_readonly+f_system
 	fs_entry fexplore_exe, "fexplore", "", f_readonly+f_system
 	fs_entry files_exe, "files", "", f_readonly+f_system
-	fs_entry fsutil_exe, "fsutil", "", f_readonly+f_system
 	fs_entry info_exe, "info", "", f_readonly+f_system
 	fs_entry ls_exe, "ls", "", f_readonly+f_system
 	fs_entry memedit_exe, "memedit", "", f_readonly+f_system
@@ -51,14 +53,11 @@ fs_dir bin_dir
 	fs_entry mkfile_exe, "mkfile", "", f_readonly+f_system
 	fs_entry off_exe, "off", "", f_readonly+f_system
 	fs_entry rm_exe, "rm", "", f_readonly+f_system
-	fs_entry uninstaller_exe, "uninstlr", "", f_readonly+f_system
-	fs_entry updater_exe, "updater", "", f_readonly+f_system
 	fs_entry usbrecv_exe, "usbrecv", "", f_readonly+f_system
 	fs_entry usbrun_exe, "usbrun", "", f_readonly+f_system
 	fs_entry usbsend_exe, "usbsend", "", f_readonly+f_system
 end fs_dir
 
-;"/boot/" directory
 fs_dir boot_dir
 	fs_entry root_dir, "..", "", f_subdir
 end fs_dir
@@ -70,6 +69,11 @@ fs_dir dev_dir
 	fs_entry dev_lcd, "lcd", "", f_readonly+f_system+f_device
 	fs_entry dev_null, "null", "", f_readonly+f_system+f_device
 	fs_entry dev_mnt, "mnt", "", f_readonly+f_system+f_device
+end fs_dir
+
+;"/etc/" directory
+fs_dir etc_dir
+	fs_entry root_dir, "..", "", f_subdir
 end fs_dir
 
 ;"/lib/" directory
@@ -85,20 +89,22 @@ fs_dir lib_dir
 	fs_entry libload_lll, "LibLoad", "dll", f_readonly+f_system
 end fs_dir
 
-;"/boot/usr/" directory
-fs_dir boot_usr
-	fs_entry boot_dir, "..", "", f_subdir
-end fs_dir
-
-;"/etc/" directory
-fs_dir etc_dir
+;"/opt/" directory
+fs_dir opt_dir
 	fs_entry root_dir, "..", "", f_subdir
 end fs_dir
 
-;"/home/" directory
-fs_dir home_dir
+;"/sbin/" directory
+fs_dir sbin_dir
 	fs_entry root_dir, "..", "", f_subdir
-	fs_entry user_home_dir, "user", "", f_subdir
+	fs_entry fsutil_exe, "fsutil", "", f_readonly+f_system
+	fs_entry uninstaller_exe, "uninstlr", "", f_readonly+f_system
+	fs_entry updater_exe, "updater", "", f_readonly+f_system
+end fs_dir
+
+;"/tmp/" directory
+fs_dir tmp_dir
+	fs_entry root_dir, "..", "", f_subdir
 end fs_dir
 
 ;"/usr/" directory
@@ -107,11 +113,6 @@ fs_dir usr_dir
 	fs_entry usr_bin_dir, "bin", "", f_subdir
 	fs_entry usr_lib_dir, "lib", "", f_subdir
 	fs_entry tivars_dir, "tivars", "", f_subdir
-end fs_dir
-
-;"/home/user/" directory
-fs_dir user_home_dir
-	fs_entry home_dir, "..", "", f_subdir
 end fs_dir
 
 ;"/usr/tivars/" directory
@@ -129,11 +130,16 @@ fs_dir usr_lib_dir
 	fs_entry usr_dir, "..", "", f_subdir
 end fs_dir
 
-;
-fs_dir config_dir
-	fs_entry etc_dir, "..", "", f_subdir
+;"/home/" directory
+fs_dir home_dir
+	fs_entry root_dir, "..", "", f_subdir
+	fs_entry user_dir, "user", "", f_subdir
 end fs_dir
 
+;"/home/user/" directory
+fs_dir user_dir
+	fs_entry home_dir, "..", "", f_subdir
+end fs_dir
 
 ;-------------------------------------------------------------
 ;file data section
