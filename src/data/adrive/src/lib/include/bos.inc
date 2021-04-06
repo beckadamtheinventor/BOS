@@ -118,6 +118,7 @@
 ?gfx_SwapTextColors              := $202CC
 ?fs_WriteNewFile                 := $202D0
 ?gfx_SetFont                     := $202D4
+?gfx_SetDefaultFont              := $202D8
 ;
 ?LCD_PAL?    := 0E30200h
 ?LCD_CTRL?   := 0E30018h
@@ -202,9 +203,8 @@
 ?fd_readonly   := 0
 ?fd_hidden     := 1
 ?fd_system     := 2
-?fd_volume     := 3
+?fd_subfile    := 3
 ?fd_subdir     := 4
-?fd_archive    := 5
 ?fd_device     := 6
 ?fsentry_endofdir     := $00
 ?fsentry_dot          := $2E

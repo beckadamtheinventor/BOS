@@ -27,7 +27,7 @@ sys_ExecuteFile:
 	ld (ExecutingFileFd),hl
 	ld bc,fsentry_fileattr
 	add hl,bc
-	bit 4,(hl)
+	bit fd_subdir,(hl)
 	ld hl,(ExecutingFileFd)
 	jq nz,.fail ;can't execute a directory
 	ld de,fsentry_filesector

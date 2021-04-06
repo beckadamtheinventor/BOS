@@ -114,6 +114,7 @@
 <tr><td><a href="#gfx_SwapTextColors">bos.gfx_SwapTextColors</a></td><td><a href="#gfx_SwapTextColors">0202CC</a></td></tr>
 <tr><td><a href="#fs_WriteNewFile">bos.fs_WriteNewFile</a></td><td><a href="#fs_WriteNewFile">0202D0</a></td></tr>
 <tr><td><a href="#gfx_SetFont">bos.gfx_SetFont</a></td><td><a href="#gfx_SetFont">0202D4</a></td></tr>
+<tr><td><a href="#gfx_SetDefaultFont">bos.gfx_SetDefaultFont</a></td><td><a href="#gfx_SetDefaultFont">0202D8</a></td></tr>
 </table><div id="boot_os"><h1>boot_os</h1>	<h3>syscall Adress 020108</h3>
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
@@ -582,4 +583,8 @@
 <table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td> void *gfx_SetFont(void *data)</td><td> set the current font</td><td> HL = old font data</td><td></td><td>
  data structure: uint8_t spacing_len, uint8_t spacing[], uint8_t data[]</td></tr>
+</table></div><div id="gfx_SetDefaultFont"><h1>gfx_SetDefaultFont</h1>	<h3>syscall Adress 0202D8</h3>
+<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td> Reset the current font to the default built-in font</td><td></td><td> BC</td><td>
+</td></tr>
 </table></div></body></html>

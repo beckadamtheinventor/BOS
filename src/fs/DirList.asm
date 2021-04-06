@@ -25,14 +25,15 @@ fs_DirList:
 	or a,b
 	jq z,.list_loop_entry
 	dec bc
+.skip_loop_bypass_deleted:
 	ld a,(iy)
 	or a,a
 	jq z,.fail
 	inc a
 	jq z,.fail
-	cp a,fsentry_deleted+1
-	jq z,.skip_loop
 	lea iy,iy+16
+	cp a,fsentry_deleted+1
+	jq z,.skip_loop_bypass_deleted
 	jq .skip_loop
 .list_loop_entry:
 	ld hl,(ix+6)
@@ -49,6 +50,8 @@ fs_DirList:
 	jq z,.endofdir
 	cp a,fsentry_deleted+1
 	jq z,.list_loop_next
+	bit fd_hidden,(iy+fsentry_fileattr)
+	jq nz,.list_loop_next
 	ld (hl),iy
 	inc hl
 	inc hl

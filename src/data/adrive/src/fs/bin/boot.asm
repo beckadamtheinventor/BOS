@@ -19,21 +19,20 @@ boot_main:
 	call bos.sys_GetKey
 	cp a,53
 	ret z
+	ld hl,str_HomeDir
+	ld e,1 shl bos.fd_subdir
+	push de,hl
+	call bos.fs_CreateDir
+	pop hl,bc
+	call bos.sys_GetKey
+	cp a,53
+	ret z
 	ld bc,str_BootConfigFile
 	push bc
 	call bos.fs_OpenFile
 	pop bc
 	call c,generate_boot_configs
-	ld bc,$C
-	ld de,(hl)
-	inc hl
-	inc hl
-	ld c,(hl)
-	inc hl
-	ld b,(hl)
-	push bc,de
-	call bos.fs_GetSectorAddress
-	pop bc,bc
+	jq c,boot_fail
 
 	;TODO - interpret config file
 
@@ -62,36 +61,32 @@ generate_boot_configs:
 	ld hl,str_EtcConfigBootDir
 	ex (sp),hl
 	call bos.fs_CreateDir
-	pop bc,bc
+	pop bc
 	ld hl,.onbootconfig_len
+	ex (sp),hl
+	ld hl,.onbootconfig
 	ld e,0
 	ld bc,str_BootConfigFile
 	push hl,de,bc
-	call bos.fs_CreateFile
-	pop bc,bc,bc
-	ld de,0
-	push de,hl ;offset, file descriptor
-	ld bc,.onbootconfig_len
-	ld e,1
-	push de,bc ;count, len
-	ld hl,.onbootconfig
-	push hl
-	call bos.fs_Write
-	pop bc,bc,bc,bc,bc
+	call bos.fs_WriteNewFile
+	pop bc,bc,bc,bc
 	call bos.sys_FreeAll
 	call bos.fs_OpenFile
 	pop bc
 	ret
 .onbootconfig:
 	db "#TODO, NOT YET IMPLEMENTED.",$A
-	db "#Modify the following lines to control what programs run on boot.",$A
+	db "login",$A
+	db "#insert boot-time programs to run here",$A
+	db $A
+	db "#dont remove this line",$A
 	db "explorer",$A
 .onbootconfig_len:=$-.onbootconfig
 
 
 boot_fail:
 	pop bc,bc
-	ld hl,str_BootFailedNoExplorer
+	ld hl,str_BootFailed
 	call bos.gui_DrawConsoleWindow
 	jq bos.sys_WaitKey
 
@@ -99,9 +94,10 @@ str_Booting:
 	db "Starting up...",$A,0
 str_PressAnyKey:
 	db $A,"Press any key to continue.",$A,0
-str_BootFailedNoExplorer:
-	db "Boot failed. /bin/explorer not found!",$A
-	db "Press any key to open recovery menu.",$A,0
+str_BootFailed:
+	db "Boot has encountered a critical error",$A
+	db "and cannot complete boot process.",$A
+	db "Press any key to open recovery options.",$A,0
 str_CmdExecutable:
 	db "/bin/cmd",0
 str_ExplorerExecutable:
@@ -114,3 +110,5 @@ str_EtcConfigBootDir:
 	db "/etc/config/boot",0
 str_BootConfigFile:
 	db "/etc/config/boot/onboot.cfg",0
+str_HomeDir:
+	db "/home",0

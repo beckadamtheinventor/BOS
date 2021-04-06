@@ -30,7 +30,7 @@ gui_Input:
 	xor a,a
 	ld (curcol),a
 	ld hl,(ix+6)
-	call gui_PrintString
+	call gui_Print
 	call gfx_SwapTextColors
 	ld bc,0
 	ld hl,.overtypes
@@ -68,7 +68,8 @@ gui_Input:
 	sub a,10
 	ld c,a
 	add hl,bc
-	ex hl,de
+	ld a,(hl)
+.inserta:
 	ld hl,(ix-3)
 	ld bc,(ix+9)
 	or a,a
@@ -78,7 +79,6 @@ gui_Input:
 	add hl,bc
 	ld (ix-3),hl
 	dec hl
-	ld a,(de)
 	ld bc,(ix+6)
 	add hl,bc
 	ld (hl),a
@@ -105,6 +105,12 @@ gui_Input:
 	add a,8
 	jq .return
 .enter:
+	ld a,(ix-4)
+	cp a,3
+	jq nz,.actuallyenter
+	ld a,$A ;insert a newline char if pressing enter on 'x' overtype
+	jq .inserta
+.actuallyenter:
 	ld a,1
 	jr .return
 .exit:
@@ -144,7 +150,7 @@ gui_Input:
 	ld a,(ix-4)
 	or a,a
 	jr nz,.decmap
-	ld a,3
+	ld a,4
 .decmap:
 	dec a
 .setmap:
@@ -153,18 +159,20 @@ gui_Input:
 .nextmap:
 	ld a,(ix-4)
 	inc a
-	cp a,3
-	jr nz,.setmap
+	cp a,4
+	jr c,.setmap
 	xor a,a
 	jr .setmap
 
 .keymaps:
-	dl .keymap_A,.keymap_a,.keymap_1,0
+	dl .keymap_A,.keymap_a,.keymap_1,.keymap_x
 .keymap_A:
-	db '"',"WRMH  ?!VQLG  :ZUPKFC  YTOJEB  XSNIDA"
+	db '"',"WRMH",0,0,"?!VQLG",0,0,":ZUPKFC",0," YTOJEB",0,0,"XSNIDA"
 .keymap_a:
-	db '"',"wrmh  ?!vqlg  :zupkfc  ytojeb  xsnida"
+	db '"',"wrmh",0,0,"?!vqlg",0,0,":zupkfc",0," ytojeb",0,0,"xsnida"
 .keymap_1:
-	db "+-*/^  ;369)$@ .258(&~ 0147,][  '<=>}{"
+	db "+-*/^",0,0,";369)$@",0,".258(&~",0,"0147,][",0,0,"'<=>}{"
+.keymap_x:
+	db "'][",0,0,0,0,";369}$@ =258{&~ ",$7F,"147,][  '<=>}{"
 .overtypes:
-	db "Aa1"
+	db "Aa1x"

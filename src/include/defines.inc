@@ -104,9 +104,9 @@ end_of_user_archive    := $3B0000 ;sector $3B, start of certificate
 fd_readonly   := 0
 fd_hidden     := 1
 fd_system     := 2
-fd_volume     := 3
+fd_subfile    := 3
 fd_subdir     := 4
-fd_archive    := 5
+;fd_archive    := 5
 fd_device     := 6
 
 ; file entry first byte
