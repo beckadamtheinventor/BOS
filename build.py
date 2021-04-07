@@ -64,13 +64,11 @@ class Build:
 		self.build_installer()
 		self.build_updater()
 		self.write_hashes()
-		from build_docs import build_docs
-		build_docs()
 
 	def build_include(self):
 		from build_bos_inc import build_bos_inc
 		build_bos_inc()
-		if 'win' in sys.platform or "nt" in sys.platform:
+		if 'win' in sys.platform:
 			os.system("copy bos.inc src\\include\\ /Y")
 			os.system("xcopy src\\include\\ src\\data\\adrive\\src\\include\\ /Y /C /E ")
 			os.system("xcopy src\\include\\ src\\data\\adrive\\src\\lib\\include\\ /Y /C /E ")
@@ -83,7 +81,7 @@ cp -rf src/include src/data/adrive/src/fs/bin/""")
 
 	def build_noti(self):
 		print("Building noti-ez80")
-		if 'win' in sys.platform or "nt" in sys.platform:
+		if 'win' in sys.platform:
 			os.system("mkdir noti-ez80\\bin")
 		else:
 			os.system("mkdir noti-ez80/bin")
@@ -165,7 +163,7 @@ cp -rf src/include src/data/adrive/src/fs/bin/""")
 
 	def write_hashes(self):
 		try:
-			with open(self.hash_file,"w") as f:
+			with open(self.hash_file,'w') as f:
 				json.dump({"hashes":self.hash_table,"lengths":self.len_table}, f)
 			return True
 		except IOError:
@@ -189,12 +187,13 @@ if __name__=='__main__':
 		Build(" ".join(verdata)).build()
 		exit(0)
 
-	fullBuild = doBuild = buildNoti = False
+	fullBuild = doBuild = buildNoti = dobuilddocs = newVersion = False
 	i = 1
 	while i<len(sys.argv):
 		if sys.argv[i].startswith("-b") or sys.argv[i].startswith("--build"):
 			doBuild = True
 		elif sys.argv[i].startswith("-v") or sys.argv[i].startswith("--version"):
+			newVersion = True
 			if i+1<len(sys.argv):
 				if not sys.argv[i+1].startswith("-"):
 					verdata[1] = sys.argv[i+1]
@@ -203,30 +202,37 @@ if __name__=='__main__':
 			ver = verdata[1].split(".")
 			ver[2] = str(int(ver[2])+1).rjust(4,"0")
 			verdata[1] = ".".join(ver)
-		elif sys.argv[i].startswith("-t") or sys.argv[i].startswith("--release-type"):
+		elif sys.argv[i].startswith("-t") or sys.argv[i].startswith("--releasetype"):
 			if i+1<len(sys.argv):
 				data[2] = sys.argv[i+1]
 				i+=2
 			else:
 				print("release type:",data[2])
-		elif sys.argv[1].startswith("-?") or sys.argv[i].startswith("--get-version"):
+		elif sys.argv[i].startswith("-?") or sys.argv[i].startswith("--getversion"):
 			print(" ".join(data))
-		elif sys.argv[1].startswith("-r") or sys.argv[1].startswith("--rebuild"):
+		elif sys.argv[i].startswith("-r") or sys.argv[i].startswith("--rebuild"):
 			fullBuild = buildNoti = doBuild = True
-		elif sys.argv[1].startswith("-h") or sys.argv[1].startswith("--help"):
+		elif sys.argv[i].startswith("-d") or sys.argv[i].startswith("--builddocs"):
+			dobuilddocs = True
+		elif sys.argv[i].startswith("-n") or sys.argv[i].startswith("--buildnoti"):
+			buildNoti = True
+		elif sys.argv[i].startswith("-h") or sys.argv[i].startswith("--help"):
 			print("""
-Becks build script v3.1 build options
+Becks build script v3.2 build options
 -b  --build                build unbuilt sources
 -v  --version [num]        increment or set version number
--t  --release-type         show or modify release type
--?  --get-version          show current version number
+-t  --releasetype          show or modify release type
+-?  --getversion           show current version number
 -r  --rebuild              rebuild all sources
+-d  --builddocs            build documentation
+-n  --buildnoti            build noti-ez80
 -h  --help                 display help info
 """)
 		i+=1
 
-	with open("src/data/buildno.txt","w") as f:
-		f.write(" ".join(verdata))
+	if newVersion:
+		with open("src/data/buildno.txt",'w') as f:
+			f.write(" ".join(verdata))
 
 	if fullBuild:
 		try:
@@ -234,10 +240,14 @@ Becks build script v3.1 build options
 		except OSError:
 			pass
 
+	b = Build(" ".join(verdata))
+	if buildNoti:
+		b.build_noti()
 	if doBuild:
-		b = Build(" ".join(verdata))
-		if buildNoti:
-			b.build_noti()
 		b.build()
+
+	if dobuilddocs:
+		from build_docs import build_docs
+		build_docs()
 
 

@@ -17,8 +17,8 @@ def fwalk(d):
 		for file in files:
 			yield root+"/"+file
 
-def myfinder(d,df):
-	for fname in fwalk(d):
+def myfinder(dirlist,df):
+	for fname in dirlist:
 		try:
 			with open(fname) as fp:
 				dt=fp.read().splitlines()
@@ -40,6 +40,8 @@ def build_docs():
 			defines=f.read().splitlines()
 	except Exception as e:
 		error(e)
+
+	SrcDirListing = fwalk("src")
 
 	counter=0x020108
 
@@ -115,7 +117,7 @@ def build_docs():
 	<h3>syscalls marked in <a class=\"no_op\">red</a> are no-ops and do nothing.</h3>\
 	<table><th>syscall name</th><th>syscall adress</th>\
 	")
-		with open("docs/tmp","w") as f2:
+		with open("docs/tmp.html","w") as f2:
 			for line in data:
 				if "jp " in line:
 					e=[]
@@ -130,7 +132,7 @@ def build_docs():
 	<h3>syscall Adress "+myhex(counter)+"</h3>\n")
 						f2.write("<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>\n")
 						a=[]; b=[]; c=[]; d=[]
-						dt,ix=myfinder("src",line+":")
+						dt,ix=myfinder(SrcDirListing,line+":")
 						if ix:
 							try:
 								while not dt[ix].startswith(";@DOES"):
@@ -174,9 +176,9 @@ def build_docs():
 			
 		f.write("</table>")
 		print("Writing to syscalls.html")
-		with open("docs/tmp") as f2:
+		with open("docs/tmp.html") as f2:
 			f.write(f2.read())
-		os.remove("docs/tmp")
+		os.remove("docs/tmp.html")
 		f.write("</body></html>")
 
 #	print("Archiving \"src\" directory")

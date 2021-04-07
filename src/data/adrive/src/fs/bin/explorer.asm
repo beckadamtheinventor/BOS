@@ -17,9 +17,9 @@ statusbar_y           := 0
 
 taskbar_height        := 18
 taskbar_y             := 240-taskbar_height
-taskbar_margin_left   := 5
+taskbar_item_x        := 33
 taskbar_item_y        := 241-taskbar_height
-taskbar_item_width    := 62
+taskbar_item_width    := 64
 
 assert taskbar_height < 231
 
@@ -144,28 +144,37 @@ end if
 	ld bc,taskbar_y
 	push bc,hl
 	call gfx_FillRectangle
-	pop bc,bc,bc,bc
+	call gfx_HorizLine
+	pop bc,bc,bc
 
 ;draw taskbar items
-	push ix
-	ld hl,taskbar_margin_left
-	ld (.taskbar_x_pos),hl
+	ex (sp),ix
 	ld ix,taskbar_item_strings
 	ld b,5
+	ld hl,taskbar_item_x
+	ld (.taskbar_item_x),hl
 .draw_taskbar_loop:
 	push bc
-	ld de,(ix)
-	lea ix,ix+3
+	ld hl,taskbar_item_y
+	push hl
+	ld bc,(ix)
+	push bc
+	call gfx_GetStringWidth
+	pop bc
+	srl l ;divide by 2, hl should be less than 256 in this use case
+	ex hl,de
 	ld hl,0
-.taskbar_x_pos:=$-3
-	ld bc,taskbar_item_y
-	push bc,hl,de
-	ld bc,taskbar_item_width
-	add hl,bc
-	ld (.taskbar_x_pos),hl
+.taskbar_item_x:=$-3
+	or a,a
+	sbc hl,de
+	push hl,bc
+	add hl,de
+	ld e,taskbar_item_width
+	add hl,de
+	ld (.taskbar_item_x),hl
 	call gfx_PrintStringXY
 	pop bc,bc,bc
-	pop bc
+	lea ix,ix+3
 	djnz .draw_taskbar_loop
 	pop ix
 
@@ -251,6 +260,7 @@ explorer_cursor_x:=$-3
 	cp a,54
 	jq z,.key_loop
 .click:
+	
 	jq explorer_main
 .filemenu:
 	jq explorer_main
@@ -274,7 +284,7 @@ _SaveSP:=$-3
 
 explore_files_main:
 	ld hl,str_FilesExecutable
-	ld de,$FF0000
+	ld de,(current_working_dir)
 	jq explorer_call_file
 
 open_terminal:
@@ -525,13 +535,13 @@ explorer_cursor_right:
 
 explorer_display_diritems:
 	push ix
-	ld hl,display_margin_top
+	ld hl,display_margin_top+2
 	ld (.y_pos),hl
 	ld ix,(explorer_dirlist_buffer)
 	ld c,display_items_num_y
 .outer_loop:
 	ld b,display_items_num_x
-	ld hl,display_margin_left
+	ld hl,display_margin_left+1
 	ld (.x_pos),hl
 .inner_loop:
 	push bc
@@ -547,26 +557,72 @@ explorer_display_diritems:
 	ld a,(ix+2)
 	or a,c
 	or a,b
-	jq z,.skip_null_entry
+	call nz,.main
+	pop bc
+	djnz .inner_loop
+	ld hl,(.y_pos)
+	ld de,display_item_height
+	add hl,de
+	ld (.y_pos),hl
+	dec c
+	jq nz,.outer_loop
+	pop ix
+	ret
+.main:
 	lea ix,ix+3
 	push bc
 	ld bc,0
 explorer_dirname_buffer:=$-3
 	push bc
 	call bos.fs_CopyFileName
-	call gfx_PrintString
-	pop bc,hl
-
+	call ti._strlen
+	ld a,l
+	cp a,9
+	jq c,.nameunder9chars ;if name is less than 9 characters there's no need to split the string
+	ex (sp),hl
+	pop bc
+	push hl
+	ld a,'.'
+	cpir
+	dec hl
+	ld (hl),0
+	inc hl
+	push hl
 	ld hl,(.y_pos)
 	ld bc,9
+	add hl,bc
+	push hl
+	ld hl,(.x_pos)
+	ld c,display_item_width-40
+	add hl,bc
+	push hl
+	call gfx_SetTextXY ;set text position a line down for extension
+	pop bc
+	ld l,a
+	ex (sp),hl
+	call gfx_PrintChar
+	pop bc
+	call gfx_PrintString
+	ld hl,(.y_pos)
+	ex (sp),hl
+	ld bc,(.x_pos)
+	push bc
+	call gfx_SetTextXY
+	pop bc,bc
+.nameunder9chars:
+	call gfx_PrintString
+	ld hl,(.y_pos)
+	ld bc,18
 	add hl,bc
 	ld bc,(.x_pos)
 	push hl,bc
 	ld hl,display_item_width
 	add hl,bc
 	ld (.x_pos),hl
-	call gfx_SetTextXY
+	call gfx_SetTextXY ;set text position two lines down for file flags
 	pop bc,bc
+
+	pop bc,hl
 
 	ld bc,bos.fsentry_fileattr
 	add hl,bc
@@ -578,25 +634,12 @@ explorer_dirname_buffer:=$-3
 	bit bos.fd_device,a
 	call nz,.device
 	bit bos.fd_subdir,a
-	call nz,.subdir
-
-.skip_null_entry:
-	pop bc
-	djnz .inner_loop
-	ld hl,(.y_pos)
-	ld de,display_item_height
-	add hl,de
-	ld (.y_pos),hl
-	dec c
-	jq nz,.outer_loop
-	pop ix
-	ret
-
-.system:
-	ld hl,.system_str
-	jq .printflagstr
+	ret z
 .subdir:
 	ld hl,.subdir_str
+	jq .printflagstr
+.system:
+	ld hl,.system_str
 	jq .printflagstr
 .device:
 	ld hl,.device_str
@@ -651,8 +694,8 @@ gfx_SetDraw:
 	jp 27
 gfx_Blit:
 	jp 33
-gfx_BlitArea:
-	jp 39
+gfx_PrintChar:
+	jp 42
 gfx_PrintString:
 	jp 51
 gfx_PrintStringXY:
@@ -669,8 +712,10 @@ gfx_SetFontData:
 	jp 69
 gfx_SetFontSpacing:
 	jp 72
-gfx_Line:
-	jp 90
+gfx_GetStringWidth:
+	jp 78
+gfx_HorizLine:
+	jp 93
 gfx_Rectangle:
 	jp 105
 gfx_FillRectangle:
@@ -801,7 +846,7 @@ usbrun_input_program:
 taskbar_item_strings:
 	dl .l1, .l2, .l3, .l4, .l5
 .l1:
-	db "recovry",0
+	db "recovery",0
 .l2:
 	db "ctrl",0
 .l3:
