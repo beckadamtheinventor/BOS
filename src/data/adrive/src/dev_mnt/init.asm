@@ -3,14 +3,33 @@ include '../include/ti84pceg.inc'
 include '../include/bos.inc'
 include 'usbRAM.inc'
 
+macro CallOffset? offset
+	rst $28
+	dl offset
+end macro
+
 ; files are passed a pointer to themselves in HL when run, so should device driver routines
 virtual at 0
+	ld a,(bos.running_process_id)
+	ld (bos.fsOP6+15),a
+	ld a,1
+	ld (bos.running_process_id),a
 	ld bc,main_code.source
 	add hl,bc
-	ld de,main_code.destination
 	ld bc,main_code.len
+	push hl,bc
+	call bos.sys_Malloc
+	ex hl,de
+	pop bc,hl
+	ret c
+	push de
 	ldir
-	jp main_code.start
+	ld a,(bos.fsOP6+15)
+	ld (bos.running_process_id),a
+	pop hl
+	ld bc,main_code.start
+	add hl,bc
+	jp (hl)
 main_code.source:
 	db main_code.data
 load dev_init_code:$-$$ from $$
@@ -18,8 +37,7 @@ end virtual
 
 	db dev_init_code
 
-virtual at bos.reservedRAM
-main_code.destination:
+virtual at 0
 libload_relocations:
 	db $C0,"USBDRVCE",0,0
 	jp 0
@@ -66,8 +84,12 @@ libload_load:
 	jr c,.fail
 	ld de,.fail
 	push de
-	ld de,libload_relocations
-	ld bc,$aa5aa5
+	ex hl,de
+	ld hl,libload_relocations
+	ld bc,(bos.running_program_ptr)
+	add hl,bc
+	ex hl,de
+	ld bc,$aa5aa5 ;tell libload to use malloc
 	jp (hl)
 .fail:
 	scf
@@ -77,8 +99,7 @@ libload_load:
 .file:
 	db "/lib/LibLoad.dll",0
 main_code.start:
-	ld (_ErrSP),sp
-	call libload_load
+	CallOffset libload_load
 ;init USB
 	ld bc, 12  ;USB_DEFAULT_INIT_FLAGS
 	push bc
@@ -87,8 +108,10 @@ main_code.start:
 	ld bc, usb_device
 	push bc     ;and pass the usb device for the Opaque pointer
 	ld bc,main_event_handler
-	push bc
-	call usb_Init
+	ld hl,(bos.running_program_ptr)
+	add hl,bc
+	push hl
+	CallOffset usb_Init
 	pop bc,bc,bc,bc
 	or a,a
 	add hl,bc
@@ -101,7 +124,7 @@ main_code.start:
 	jq c,_return_fail
 	ld (current_dir_ptr),hl
 wait_for_device_loop:
-	call usb_WaitForInterrupt
+	CallOffset usb_WaitForInterrupt
 	add hl,bc
 	or a,a
 	sbc hl,bc
@@ -111,51 +134,64 @@ wait_for_device_loop:
 	or a,a
 	sbc hl,bc
 	jq z,wait_for_device_loop
-	call main_msd_Init
-	
+	CallOffset main_msd_init
+	ret
 
 
 reset_smc_bytes:
 	ld a,$01 ;ld bc,...
-	ld (main_msd_Init),a
+	ld hl,main_msd_init
+	ld bc,(bos.running_program_ptr)
+	add hl,bc
+	ld (hl),a
 	ld a,$0E ;ld c,...
-	ld (init_fat_partition),a
+	ld hl,init_fat_partition
+	add hl,bc
+	ld (hl),a
 ;	ld a,$AF ;xor a,a
 ;	ld (init_fat_volume),a
 	ret
 
-main_msd_Init:
+main_msd_init:
 	ld bc,bos.usb_sector_buffer
 	ld hl,msd_device
 	ld de,(hl)
 	push bc,de,hl
-	call msd_Init
+	CallOffset msd_Init
 	pop bc,bc,bc
 	add hl,bc
 	or a,a
 	sbc hl,bc
 	ret nz
-	ld a,$C9 ;smc to ret so this routine doesn't try to re-init the drive constantly.
-	ld (.),a
+	ld hl,.
+	ld bc,(bos.running_program_ptr)
+	add hl,bc
+	ld a,$C9
+	ld (hl),a ;smc so we don't run this code again
 	ret
 
 
 init_fat_partition:
 	ld c,1
 	push bc
-	ld bc,found_partitions
+	ld hl,found_partitions
+	ld bc,(bos.running_program_ptr)
+	add hl,bc
 	push bc
 	ld bc,partition_descriptor
 	push bc
 	ld bc,msd_device
 	push bc
-	call fat_Find
+	CallOffset fat_Find
 	pop bc,bc,bc,bc
 	add hl,bc
 	or a,a
 	sbc hl,bc
 	ret nz
-	ld hl,(found_partitions)
+	ld hl,found_partitions
+	ld bc,(bos.running_program_ptr)
+	add hl,bc
+	ld hl,(hl)
 	add hl,bc
 	or a,a
 	sbc hl,bc
@@ -164,14 +200,17 @@ init_fat_partition:
 	push bc
 	ld bc,fat_device
 	push bc
-	call fat_Init
+	CallOffset fat_Init
 	pop bc,bc
 	add hl,bc
 	or a,a
 	sbc hl,bc
 	ret nz
+	ld hl,.
+	ld bc,(bos.running_program_ptr)
+	add hl,bc
 	ld a,$C9
-	ld (.),a ;smc so we don't run this code again
+	ld (hl),a ;smc so we don't run this code again
 	or a,a
 	sbc hl,hl
 	ret
@@ -182,8 +221,6 @@ init_fat_partition:
 found_partitions:
 	dl 0
  _return_fail:
-	ld sp,0
-_ErrSP:=$-3
 	scf
 	sbc hl,hl
 	ret
@@ -213,7 +250,7 @@ main_event_handler:
 .device_connected:
 	ld de,(ix+9)
 	push de
-	call usb_ResetDevice
+	CallOffset usb_ResetDevice
 	pop bc
 	jq .success
 .device_disconnected:

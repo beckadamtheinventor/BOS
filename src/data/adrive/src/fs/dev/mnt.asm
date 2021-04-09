@@ -18,9 +18,9 @@ dev_mnt_command:
 	; file '../../../obj/dev_mnt/command.bin'
 
 dev_mnt_init:
-	; ld hl,.data
-; .data:
-	; file '../../../obj/dev_mnt/init.bin'
+	ld hl,.data
+.data:
+	file '../../../obj/dev_mnt/init.bin'
 
 dev_mnt_deinit:
 	; ld hl,.data

@@ -676,7 +676,6 @@ load_libload:
 	ld   de,.relocations
 	ld   bc,.notfound
 	push   bc
-	ld   bc,$aa5aa5
 	jp   (hl)
 
 .notfound:

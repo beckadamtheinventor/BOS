@@ -49,6 +49,7 @@ cur_lcd_buffer         := $D00238 ;3 bytes. Points to current LCD buffer
 running_process_id     := $D0023B ;1 byte. Current process ID (used for per-program memory allocation)
 lcd_text_fg2           := $D0023C
 lcd_text_bg2           := $D0023D
+running_program_ptr    := $D0023E ;3 bytes. Stores pointer to currently running program
 ScrapMem2              := $D00279
 ScrapByte              := $D0027C
 ScrapWord              := $D0027D
@@ -135,5 +136,3 @@ bKeepFlashUnlocked   := 1
 
 mIsFlashUnlocked     := 1
 mKeepFlashUnlocked   := 2
-
-

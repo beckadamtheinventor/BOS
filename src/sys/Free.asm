@@ -8,7 +8,7 @@ sys_Free:
 	or a,a
 	sbc hl,de ;ptr - bottom_of_malloc_RAM
 	ret c
-	ld hl,65536
+	ld bc,65536
 	sbc hl,bc
 	ccf
 	ret c
@@ -17,15 +17,18 @@ sys_Free:
 	call ti._idivu
 	ld de,malloc_cache ;index the malloc cache
 	add hl,de ;hl now points to 8-bit malloc cache entry
-	ld bc,4096
+	ld bc,malloc_cache+4096
+	ld (hl),c
+	inc hl
+	dec bc
 .loop2:
 	ld a,(hl)
 	inc a
 	ret nz
 	ld (hl),a
 	dec bc
-	ld a,c
-	or a,b
-	jq nz,.loop2
+	sbc hl,bc
+	add hl,bc
+	jq c,.loop2
 	ret
 

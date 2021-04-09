@@ -4,6 +4,7 @@
 include 'sys/AddHLAndA.asm'
 include 'sys/AnyKey.asm'
 include 'sys/CallExecuteFile.asm'
+include 'sys/CallProgramOffset.asm'
 include 'sys/DeinitDevice.asm'
 include 'sys/EraseFlashSector.asm'
 include 'sys/ExecuteFileEntryPoint.asm'

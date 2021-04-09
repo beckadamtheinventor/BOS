@@ -36,7 +36,7 @@ sys_ExecuteFile:
 	push hl
 	call fs_GetSectorAddress
 	pop bc
-	ld (fsOP6+3),hl
+	ld (running_program_ptr),hl
 .exec_check_loop:
 	ld a,(hl)
 	inc hl
@@ -96,7 +96,7 @@ sys_ExecuteFile:
 	ld (remaining_free_RAM),hl
 	pop bc
 	pop hl  ;usermem
-	ld (fsOP6+3),hl
+	ld (running_program_ptr),hl
 	add hl,bc
 	ld (top_of_UserMem),hl ;save top of usermem
 .exec_fex:
@@ -119,7 +119,7 @@ sys_ExecuteFile:
 	pop hl
 	ret
 .jptoprogram:
-	ld hl,(fsOP6+3)
+	ld hl,(running_program_ptr)
 	jp (hl)
 .normalize_lcd:
 	ld bc,ti.vRam

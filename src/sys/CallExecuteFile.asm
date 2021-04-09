@@ -28,10 +28,9 @@ sys_CallExecuteFile:
 	call sys_PrevProcessId
 	pop bc,bc,hl
 	push hl
-	call sys_ExecuteFileHL
 	call sys_Free
-	pop bc
-	ret
+	pop hl
+	jq sys_ExecuteFileHL
 .fail:
 	pop bc,bc
 	jq sys_ExecuteFileHL

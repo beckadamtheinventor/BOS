@@ -4,7 +4,7 @@
 	jp DONOTHING ;HandleInstruction ;thread control soon (tm)
 	jp DONOTHING ;HandleThreadSpawn ;spawn thread soon (tm)
 	jp handle_safeop ;handle_rst20
-	jp DONOTHING ;handle_rst28
+	jp handle_offsetcall ;handle_rst28
 	jp DONOTHING ;handle_rst30
 	jp sys_ExecuteFile
 	jp os_GetOSInfo

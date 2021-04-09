@@ -7,7 +7,7 @@
 ;DONOTHING                       := $20110
 ;DONOTHING                       := $20114
 ?handle_safeop                   := $20118
-;DONOTHING                       := $2011C
+?handle_offsetcall               := $2011C
 ;DONOTHING                       := $20120
 ?sys_ExecuteFile                 := $20124
 ?os_GetOSInfo                    := $20128
@@ -156,6 +156,7 @@
 ?running_process_id     := $D0023B ;1 byte. Current process ID (used for per-program memory allocation)
 ?lcd_text_fg2           := $D0023C
 ?lcd_text_bg2           := $D0023D
+?running_program_ptr    := $D0023E ;3 bytes. Stores pointer to currently running program
 ?ScrapMem2              := $D00279
 ?ScrapByte              := $D0027C
 ?ScrapWord              := $D0027D
