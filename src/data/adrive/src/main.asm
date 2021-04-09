@@ -45,7 +45,6 @@ fs_dir bin_dir
 	fs_entry df_exe, "df", "", f_readonly+f_system
 	fs_entry explorer_exe, "explorer", "", f_readonly+f_system
 	fs_entry fexplore_exe, "fexplore", "", f_readonly+f_system
-	fs_entry files_exe, "files", "", f_readonly+f_system
 	fs_entry info_exe, "info", "", f_readonly+f_system
 	fs_entry ls_exe, "ls", "", f_readonly+f_system
 	fs_entry memedit_exe, "memedit", "", f_readonly+f_system
@@ -275,15 +274,9 @@ fs_file mkdir_exe
 	include 'fs/bin/mkdir.asm'
 end fs_file
 
-
 fs_file mkfile_exe
 	include 'fs/bin/mkfile.asm'
 end fs_file
-
-fs_file files_exe
-	file '../obj/files.bin'
-end fs_file
-
 
 fs_file initdev_exe
 	include 'fs/bin/device.asm'

@@ -18,7 +18,6 @@ class Build:
 
 			"src/fs/bin/bpkload.asm obj/bpkload.bin",
 			"src/fs/bin/explorer.asm obj/explorer.bin",
-			"src/fs/bin/files.asm obj/files.bin",
 			"src/fs/bin/fexplore.asm obj/fexplore.bin",
 			"src/fs/bin/memedit.asm obj/memedit.bin",
 			"src/fs/bin/usbrun.asm obj/usbrun.bin",
