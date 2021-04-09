@@ -10,7 +10,7 @@ fs_Format:
 	call sys_FlashUnlock
 
 	ld a,$04
-.erase_loop: ;erase all system and user flash sectors
+.erase_loop: ;erase all filesystem flash sectors
 	push af
 	call sys_EraseFlashSector
 	xor a,a
@@ -23,7 +23,7 @@ fs_Format:
 	call gfx_BlitBuffer
 	pop af
 	inc a
-	cp a,$3B
+	cp a,end_of_user_archive shr 16
 	jr nz,.erase_loop
 
 	ld hl,str_ErasedUserMemory

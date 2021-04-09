@@ -43,7 +43,7 @@ macro os_private
 	macro os_create? final_sector
 		di
 		call	.create
-		jp	.continue
+		jp 0
 .create:
 		ld	a,$d1
 		ld	mb,a
@@ -98,8 +98,7 @@ macro os_private
 		ret.l
 
 		assume adl = 1
-.continue:
-		jp	0
+;		jp	0
 
 	end macro
 

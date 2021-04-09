@@ -260,12 +260,114 @@ explorer_cursor_x:=$-3
 	cp a,54
 	jq z,.key_loop
 .click:
-	
+	ld a,(explorer_cursor_y)
+assert display_items_num_x = 4
+	add a,a ;multiply y by 4
+	add a,a
+	sbc hl,hl
+	ld l,a
+	ld a,(explorer_cursor_x)
+	add a,l ;add x
+	ld l,a
+	add a,a ;multiply result by 3
+	add a,l
+	ld l,a
+	ld bc,(explorer_dirlist_buffer)
+	add hl,bc ;index directory list buffer
+	push iy
+	ld iy,(hl)
+	bit bos.fd_subdir,(iy+bos.fsentry_fileattr)
+	jq z,.dont_path_into
+	push iy
+	call .path_into
+	pop bc,iy
+	jq explorer_dirlist
+.dont_path_into:
+	pop iy
 	jq explorer_main
 .filemenu:
 	jq explorer_main
 .quickmenu:
 	jq explorer_main
+.path_into:
+	ld hl,-9
+	call ti._frameset
+	ld hl,(ix+6)
+	ld a,(hl)
+	cp a,'.'
+	jq nz,.path_into_dir
+	inc hl
+	cp a,(hl)
+	ld a,' '
+	jq nz,.path_into_checkspace
+	inc hl
+	cp a,(hl)
+	jq nz,.path_into_dir ;'..something' entry, though idk why you'd do that anyways
+	ld hl,(current_working_dir) ;path into '..' entry
+	push hl
+	call bos.fs_ParentDir ;get parent directory of working directory
+	jq c,.path_into_return ;if failed to malloc within fs_ParentDir
+	ld (ix-9),hl
+	call bos.sys_Free ;free old working directory
+	pop bc
+	jq .path_into_setcurdir
+.path_into_checkspace:
+	cp a,(hl)
+	jq z,.path_into_return ;return if pathing into '.' entry
+.path_into_dir:
+	ld hl,(explorer_dirname_buffer)
+	ld bc,(ix+6)
+	push bc,hl
+	call bos.fs_CopyFileName
+	call ti._strlen ;get length of directory we're pathing into
+	ld (ix-3),hl
+	ex (sp),hl
+	ld hl,(current_working_dir)
+	push hl
+	call ti._strlen ;get length of current working directory
+	ld (ix-6),hl
+	pop bc,bc
+	add hl,bc
+	inc hl
+	inc hl
+	push hl
+	call bos.sys_Malloc
+	ld (ix-9),hl
+	ex hl,de
+	pop bc
+	jr c,.path_into_return
+	ld hl,(current_working_dir)
+	ld bc,(ix-6)
+	ldir ;copy current working directory
+	dec de
+	ld a,(de)
+	inc de
+	ld c,'/'
+	cp a,c
+	jq z,.path_into_dontaddpathsep
+	ld a,c
+	ld (de),a
+	inc de
+.path_into_dontaddpathsep:
+	ld hl,(explorer_dirname_buffer)
+	ld bc,(ix-3)
+	ldir ;copy directory we're pathing into
+	xor a,a
+	ld (de),a
+	ld hl,(current_working_dir)
+	push hl
+	call bos.sys_Free ;free old working directory
+	pop bc
+.path_into_setcurdir:
+	ld hl,(ix-9)
+	ld (current_working_dir),hl ;set new working directory
+	xor a,a
+	ld (explorer_cursor_x),a
+	ld (explorer_cursor_y),a
+.path_into_return:
+	ld sp,ix
+	pop ix
+	ret
 
 _exit_return_1337:
 	call bos._HomeUp
@@ -281,11 +383,6 @@ _SaveIX:=$-3
 	ld sp,0
 _SaveSP:=$-3
 	jp bos.gfx_SetDefaultFont
-
-explore_files_main:
-	ld hl,str_FilesExecutable
-	ld de,(current_working_dir)
-	jq explorer_call_file
 
 open_terminal:
 	ld hl,str_CmdExecutable
@@ -504,34 +601,54 @@ explorer_load_config:
 	sbc a,a
 	ret
 
+explorer_cursor_rightoverflow:
+	xor a,a
+	ld (explorer_cursor_x),a
 explorer_cursor_down:
 	ld a,(explorer_cursor_y)
-	cp a,4
-	jq nc,explorer_main
+	cp a,display_items_num_y-1
+	jq nc,explorer_page_down
 	inc a
 	ld (explorer_cursor_y),a
 	jq explorer_main
+explorer_cursor_leftoverflow:
+	ld a,display_items_num_x-1
+	ld (explorer_cursor_x),a
 explorer_cursor_up:
 	ld a,(explorer_cursor_y)
 	or a,a
-	jq z,explorer_main
+	jq z,explorer_page_up
 	dec a
 	ld (explorer_cursor_y),a
 	jq explorer_main
 explorer_cursor_left:
 	ld a,(explorer_cursor_x)
 	or a,a
-	jq z,explorer_main
+	jq z,explorer_cursor_leftoverflow
 	dec a
 	ld (explorer_cursor_x),a
 	jq explorer_main
 explorer_cursor_right:
 	ld a,(explorer_cursor_x)
-	cp a,3
-	jq nc,explorer_main
+	cp a,display_items_num_x-1
+	jq nc,explorer_cursor_rightoverflow
 	inc a
 	ld (explorer_cursor_x),a
 	jq explorer_main
+explorer_page_down:
+	ld hl,(explorer_files_skip)
+	ld bc,display_items_num_x
+	add hl,bc
+	ld (explorer_files_skip),hl
+	jq explorer_dirlist
+explorer_page_up:
+	ld hl,(explorer_files_skip)
+	ld bc,display_items_num_x
+	sbc hl,bc
+	jq c,explorer_main
+	ld (explorer_files_skip),hl
+	jq explorer_dirlist
+
 
 explorer_display_diritems:
 	push ix

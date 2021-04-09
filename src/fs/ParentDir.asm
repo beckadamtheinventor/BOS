@@ -1,6 +1,7 @@
 
-;@DOES return a string representing the parent directory of a given path
+;@DOES return a string representing the parent directory of a given path.
 ;@INPUT char *fs_ParentDir(const char *path);
+;@OUTPUT HL = string representing path to parent directory. Returns -1 and Cf on fail.
 fs_ParentDir:
 	pop bc,hl
 	push hl,bc
