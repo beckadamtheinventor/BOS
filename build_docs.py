@@ -15,33 +15,37 @@ def myhex(n):
 def fwalk(d):
 	for root, dirs, files in os.walk(d):
 		for file in files:
-			yield root+"/"+file
+			yield root.replace("\\","/")+"/"+file
 
-def myfinder(dirlist,df):
+def FindTextInFiles(dirlist, df):
 	for fname in dirlist:
-		try:
-			with open(fname) as fp:
-				dt=fp.read().splitlines()
+		if fname.endswith(".asm"):
+			try:
+				with open(fname) as fp:
+					dt=fp.read().split("\n")
+			except FileNotFoundError:
+				print("failed to read file",fname)
+				continue
 			for ix in range(len(dt)):
 				if dt[ix].startswith(df):
 					return dt,ix
-		except:
-			pass
 	return [],0
 
 def build_docs():
 	try:
 		with open("src/table.asm") as f:
-			data=f.read().splitlines()
+			data=f.read().split("\n")
 	except Exception as e:
 		error(e)
 	try:
 		with open("src/include/defines.inc") as f:
-			defines=f.read().splitlines()
+			defines=f.read().split("\n")
 	except Exception as e:
 		error(e)
 
-	SrcDirListing = fwalk("src")
+	SrcDirListing = [fname for fname in fwalk("src")]
+	# for fname in SrcDirListing:
+		# print(fname)
 
 	counter=0x020108
 
@@ -118,49 +122,43 @@ def build_docs():
 	<table><th>syscall name</th><th>syscall adress</th>\
 	")
 		with open("docs/tmp.html","w") as f2:
-			for line in data:
+			for lx in range(len(data)):
+				line = data[lx]
+				# print(line)
 				if "jp " in line:
 					e=[]
 					line=line[line.find("jp ")+3:]
 					if ";" in line:
 						line=line[:line.find(";")]
-					if line.strip(" \t")=="DONOTHING":
+					if line.strip(" \t").startswith("DONOTHING"):
 						f.write("<tr class=\"no_op\">")
 					else:
 						f.write("<tr>")
 						f2.write("<div id=\""+line+"\"><h1>"+line+"</h1>\
 	<h3>syscall Adress "+myhex(counter)+"</h3>\n")
-						f2.write("<table><th>Inputs</th><th>What it does</th><th>Outputs</th><th>Destroys</th><th>Notes</th>\n")
+						f2.write("<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>\n")
 						a=[]; b=[]; c=[]; d=[]
-						dt,ix=myfinder(SrcDirListing,line+":")
-						if ix:
-							try:
-								while not dt[ix].startswith(";@DOES"):
-									ix-=1
-									if not ix: break
-								while not dt[ix].startswith(line):
-									if len(dt[ix])>1:
-										t=dt[ix][1:]
-										if t.startswith("@INPUT"):
-											a.append(t.replace("@INPUT","").replace("\\n","<br>\n"))
-										elif t.startswith("@DOES"):
-											b.append(t.replace("@DOES","").replace("\\n","<br>\n"))
-										elif t.startswith("@OUTPUT"):
-											c.append(t.replace("@OUTPUT","").replace("\\n","<br>\n"))
-										elif t.startswith("@DESTROYS"):
-											d.append(t.replace("@DESTROYS","").replace("\\n","<br>\n"))
-										elif t.startswith("@NOTE"):
-											e.append(t.replace("@NOTE","").replace("\\n","<br>\n"))
-										elif dt[ix][0]==";":
-											pass
-										else:
-											break
-									ix+=1
-								f2.write("<tr><td>"+("<br>\n".join(a))+"</td><td>"+("<br>\n".join(b))+"</td><td>"+("<br>\n".join(c))+\
-									"</td><td>"+("<br>\n".join(d))+"</td><td>\n"+("<br>\n".join(e))+"</td></tr>\n")
-								a.clear(); b.clear(); c.clear(); d.clear(); e.clear()
-							except:
-								pass
+						dt,ix=FindTextInFiles(SrcDirListing,line+":")
+						if ix>0:
+							while not dt[ix].startswith(";@DOES"):
+								ix-=1
+								if not ix: break
+							while not dt[ix].startswith(line):
+								if len(dt[ix])>1:
+									t=dt[ix][1:]
+									if t.startswith("@DOES "):
+										a.append(t.replace("@DOES ","").replace("\\n","<br>\n"))
+									elif t.startswith("@INPUT "):
+										b.append(t.replace("@INPUT ","").replace("\\n","<br>\n"))
+									elif t.startswith("@OUTPUT "):
+										c.append(t.replace("@OUTPUT ","").replace("\\n","<br>\n"))
+									elif t.startswith("@DESTROYS "):
+										d.append(t.replace("@DESTROYS ","").replace("\\n","<br>\n"))
+									elif t.startswith("@NOTE "):
+										e.append(t.replace("@NOTE ","").replace("\\n","<br>\n"))
+								ix+=1
+							f2.write("<tr><td>"+("<br>\n".join(a))+"</td><td>"+("<br>\n".join(b))+"</td><td>"+("<br>\n".join(c))+\
+								"</td><td>"+("<br>\n".join(d))+"</td><td>\n"+("<br>\n".join(e))+"</td></tr>\n")
 						f2.write("</table></div>")
 						# if ix and ":" not in dt[ix]:
 							# f2.write("<div class=\"assembly\">\n")
