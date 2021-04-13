@@ -42,7 +42,7 @@ class Build:
 		self.path = ""
 		self.ver = ver
 
-	def build(self):
+	def build(self,copyincludes=False):
 		print("building",self.ver)
 		try:
 			os.mkdir("bin")
@@ -52,7 +52,7 @@ class Build:
 			os.mkdir("obj")
 		except FileExistsError:
 			pass
-		self.build_include()
+		self.build_include(copyincludes)
 		try:
 			with open("noti-ez80/bin/NOTI.rom","rb") as f:
 				pass
@@ -65,16 +65,17 @@ class Build:
 		self.build_updater()
 		self.write_hashes()
 
-	def build_include(self):
+	def build_include(self, copyincludes=False):
 		from build_bos_inc import build_bos_inc
 		build_bos_inc()
-		if 'win' in sys.platform:
-			os.system("copy bos.inc src\\include\\ /Y")
-			os.system("xcopy src\\include\\ src\\data\\adrive\\src\\include\\ /Y /C /E ")
-			os.system("xcopy src\\include\\ src\\data\\adrive\\src\\lib\\include\\ /Y /C /E ")
-			os.system("xcopy src\\include\\ src\\data\\adrive\\src\\fs\\bin\\include\\ /Y /C /E ")
-		else:
-			os.system("""cp -f bos.inc src/include/bos.inc
+		if copyincludes:
+			if 'win' in sys.platform:
+				os.system("copy bos.inc src\\include\\ /Y")
+				os.system("xcopy src\\include\\ src\\data\\adrive\\src\\include\\ /Y /C /E ")
+				os.system("xcopy src\\include\\ src\\data\\adrive\\src\\lib\\include\\ /Y /C /E ")
+				os.system("xcopy src\\include\\ src\\data\\adrive\\src\\fs\\bin\\include\\ /Y /C /E ")
+			else:
+				os.system("""cp -f bos.inc src/include/bos.inc
 cp -rf src/include src/data/adrive/src/
 cp -rf src/include src/data/adrive/src/lib/
 cp -rf src/include src/data/adrive/src/fs/bin/""")
@@ -187,7 +188,7 @@ if __name__=='__main__':
 		Build(" ".join(verdata)).build()
 		exit(0)
 
-	fullBuild = doBuild = buildNoti = dobuilddocs = newVersion = False
+	fullBuild = doBuild = buildNoti = dobuilddocs = newVersion = copyIncludes = False
 	i = 1
 	while i<len(sys.argv):
 		if sys.argv[i].startswith("-b") or sys.argv[i].startswith("--build"):
@@ -216,6 +217,8 @@ if __name__=='__main__':
 			dobuilddocs = True
 		elif sys.argv[i].startswith("-n") or sys.argv[i].startswith("--buildnoti"):
 			buildNoti = True
+		elif sys.argv[i].startswith("-i") or sys.argv[i].startswith("--copyincludes"):
+			copyIncludes = True
 		elif sys.argv[i].startswith("-h") or sys.argv[i].startswith("--help"):
 			print("""
 Becks build script v3.2 build options
@@ -226,6 +229,7 @@ Becks build script v3.2 build options
 -r  --rebuild              rebuild all sources
 -d  --builddocs            build documentation
 -n  --buildnoti            build noti-ez80
+-i  --copyincludes         copy include file directories (not usually needed)
 -h  --help                 display help info
 """)
 		i+=1
@@ -244,7 +248,7 @@ Becks build script v3.2 build options
 	if buildNoti:
 		b.build_noti()
 	if doBuild:
-		b.build()
+		b.build(copyIncludes)
 
 	if dobuilddocs:
 		from build_docs import build_docs
