@@ -1,7 +1,7 @@
 ;@DOES clears the current buffer
 ;@INPUT A color to fill with
 ;@DESTROYS HL,DE,BC,F(P/V)
-gfx_BufClear:
+gfx_FillScreen:
 	ld	hl,(cur_lcd_buffer)
 	ld	bc,LCD_WIDTH * LCD_HEIGHT - 1
 .clear:

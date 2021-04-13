@@ -2,7 +2,7 @@
 ;@INPUT HL pointer to sprite
 ;@INPUT BC X<<8 + Y
 ;@DESTROYS HL,DE,BC,AF,fsOP6
-gfx_Sprite:
+gfx_Sprite2x:
 	xor a,a
 	ld (fsOP6+1),a
 	ld (fsOP6+2),a

@@ -118,4 +118,22 @@
 	jp gfx_SetDefaultFont
 	jp sys_FreeRunningProcessId
 	jp util_Zx7Decompress
+	jp gfx_BlitBuffer
+	jp gfx_Compute
+	jp gfx_FillRectangle
+	jp gfx_FillScreen
+	jp gfx_GetFontPtr
+	jp gfx_HorizLine
+	jp gfx_InitStdPalette
+	jp gfx_NextLine
+	jp gfx_PrintChar
+	jp gfx_PrintHexA
+	jp gfx_PrintUInt
+	jp gfx_Rectangle
+	jp gfx_Set8bpp
+	jp gfx_Set16bpp
+	jp gfx_SetTextXY
+	jp gfx_Sprite
+	jp gfx_Sprite2x
+	jp gfx_VertLine
 
