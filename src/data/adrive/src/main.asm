@@ -36,6 +36,7 @@ fs_dir bin_dir
 	fs_entry root_dir, "..", "", f_subdir
 	fs_entry boot_exe, "boot", "", f_readonly+f_system
 	fs_entry bpkload_exe, "bpk", "", f_readonly+f_system
+	fs_entry bpm_exe, "bpm", "", f_readonly+f_system
 	fs_entry cat_exe, "cat", "", f_readonly+f_system
 	fs_entry cd_exe, "cd", "", f_readonly+f_system
 	fs_entry cmd_exe, "cmd", "", f_readonly+f_system
@@ -296,6 +297,10 @@ end fs_file
 
 fs_file fsutil_exe
 	include 'fs/bin/fsutil.asm'
+end fs_file
+
+fs_file bpm_exe
+	file '../obj/bpm.bin'
 end fs_file
 
 end fs_fs

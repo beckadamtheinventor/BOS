@@ -11,9 +11,9 @@ fs_UpdateFileHeader:
 	jq c,.fail
 	ld de,(ix+6)
 	ld hl,(ix+9)
-	ld bc,8+3+1 ;update 8.3 file name and attribute byte
+	ld bc,16 ;update full header
 	push bc,hl,de
-	call sys_WriteFlashFull
+	call sys_WriteFlashFullRam
 	pop bc,bc,bc
 	db $3E ;ld a,...
 .fail:

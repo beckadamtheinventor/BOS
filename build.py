@@ -17,6 +17,7 @@ class Build:
 			"src/lib/usbdrvce/usbdrvce.asm obj/usbdrvce.bin",
 
 			"src/fs/bin/bpkload.asm obj/bpkload.bin",
+			"src/fs/bin/bpm.asm obj/bpm.bin",
 			"src/fs/bin/explorer.asm obj/explorer.bin",
 			"src/fs/bin/fexplore.asm obj/fexplore.bin",
 			"src/fs/bin/memedit.asm obj/memedit.bin",

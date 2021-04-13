@@ -19,11 +19,11 @@ boot_main:
 	call bos.sys_GetKey
 	cp a,53
 	ret z
-	ld hl,str_HomeDir
-	ld e,1 shl bos.fd_subdir
-	push de,hl
-	call bos.fs_CreateDir
-	pop hl,bc
+	; ld hl,str_HomeDir
+	; ld e,1 shl bos.fd_subdir
+	; push de,hl
+	; call bos.fs_CreateDir
+	; pop hl,bc
 	call bos.sys_GetKey
 	cp a,53
 	ret z
@@ -42,8 +42,14 @@ boot_main:
 
 	ld bc,$FF0000
 	push bc
-	ld bc,str_ExplorerExecutable
+
+;Easter egg
+	ld bc,str_EggExecutable
 	push bc
+	call bos.sys_ExecuteFile
+
+	ld hl,str_ExplorerExecutable
+	ex (sp),hl
 	call bos.fs_OpenFile
 	jq c,boot_fail
 	call bos.sys_FreeAll
@@ -112,3 +118,5 @@ str_BootConfigFile:
 	db "/etc/config/boot/onboot.cmd",0
 str_HomeDir:
 	db "/home",0
+str_EggExecutable:
+	db "/tmp/egg",0

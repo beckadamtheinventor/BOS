@@ -117,4 +117,5 @@
 	jp gfx_SetFont
 	jp gfx_SetDefaultFont
 	jp sys_FreeRunningProcessId
+	jp util_Zx7Decompress
 

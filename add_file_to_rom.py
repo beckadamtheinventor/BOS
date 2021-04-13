@@ -7,19 +7,20 @@ default_dir_entry = [
 ]
 
 def search_for_entry(rom, path):
-#	print("searching for", path)
+	# print("searching for", path)
+	if not path.startswith("/"):
+		path = "/"+path
 	while "//" in path:
 		path = path.replace("//","/")
 	path = path.rstrip("/").split("/")[1:]
 	L = len(path)-1
-#	print(L, path)
+	# print(L, path)
 
 	ptr = 0x040200
 	dnum = 0
-	while rom[ptr] not in [0x00, 0xFF]:
-#		print("ptr:",hex(ptr),"entry:","".join([chr(c) if c in range(0x20,0x80) else "\\x"+hex(c) for c in rom[ptr:ptr+16]]))
+	while rom[i] != 0x00 and rom[i] != 0xFF:
 		fn = copy_file_name(rom[ptr:ptr+16])
-#		print("file name:",fn)
+		# print("ptr:",hex(ptr),"entry:","".join([chr(c) if c in range(0x20,0x80) else "\\x"+hex(c) for c in rom[ptr:ptr+16]]),"file name",fn)
 		if not rom[ptr]:
 			return None
 		elif path[dnum] == fn:
@@ -39,9 +40,12 @@ def copy_file_name(entry):
 	elif chr(entry[0]) == '.':
 		return "."
 	if chr(entry[8]) == ' ':
-		return "".join(chr(c) for c in entry[:8]).rstrip(" ")
+		name = "".join(chr(c) for c in entry[:8])
+		return name[:name.find(" ")]
 	else:
-		return "".join(chr(c) for c in entry[:8]).rstrip(" ") + "." + "".join(chr(c) for c in entry[8:11]).rstrip(" ")
+		name = "".join(chr(c) for c in entry[:8])
+		name = name[:name.find(" ")]
+		return name + "." + "".join(chr(c) for c in entry[8:11]).rstrip(" ")
 
 def alloc_space_for_file(rom, length):
 	cmap = search_for_entry(rom, "/dev/cmap.dat")
@@ -51,36 +55,44 @@ def alloc_space_for_file(rom, length):
 
 	cmap_data = 0x040000+(rom[cmap+0xC]+rom[cmap+0xD]*0x100)*0x200
 	cmap_len = rom[cmap+0xE]+rom[cmap+0xF]*0x100
-	i = j = l = 0
-	while l<length and i+j<cmap_len:
-		i += j+1
-		if i<cmap_len:
-			while rom[cmap_data+i] == 0xFE: i+=1
-			j = 0; l = 0x200
-			while rom[cmap_data+i+j] == 0xFF and l<length: j+=1; l+=0x200
-	if i+j<cmap_len:
-		for k in range(i,j):
-			rom[cmap_data+k] = 0xFE
-		return i
-	return None
+	i = j = 2
+	l = 0
+	while l<length and i<cmap_len:
+		while rom[cmap_data+i] == 0xFE and i<cmap_len:
+			i+=1
+		j = i
+		l = 0x200
+		if l<length:
+			while rom[cmap_data+i] != 0xFE and i<cmap_len and l<length:
+				i+=1
+				l+=0x200
+	for k in range(j,i+1):
+		rom[cmap_data+k] = 0xFE
+	return j
 
 
 def build_cluster_map(rom):
 	cmap = search_for_entry(rom, "/dev/cmap.dat")
 	if cmap is None:
-		print("/dev/cmap.dat not found on rom!")
+		print("/dev/cmap.dat not found in rom!")
 		exit(1)
 
 	cmap_data = 0x040000+(rom[cmap+0xC]+rom[cmap+0xD]*0x100)*0x200
+	rom[cmap_data] = 0xFE
 	build_cluster_map_dir(rom, cmap_data, 0x040000)
 
 
 def build_cluster_map_dir(rom, cmap, entry):
 	i = 0x040000+(rom[entry+0xC]+rom[entry+0xD]*0x100)*0x200
-	while rom[i]:
+	maxi = i+(rom[entry+0xE]+rom[entry+0xF]*0x100)-16
+	while True:
+		if i>=maxi:
+			return False
+		if rom[i] == 0x00 or rom[i] == 0xFF:
+			return True
 		for j in range(rom[i+0xF]//2 if not rom[i+0xE]|rom[i+0xF]&1 else rom[i+0xF]//2+1):
 			rom[cmap + rom[i+0xC]+rom[i+0xD]*256 + j] = 0xFE
-		if rom[i+0xB] & 0x10 and rom[i]!=ord('.'): #check if a directory and not '.' or '..'
+		if (rom[i+0xB]&0x10) and rom[i]!=ord('.'): #check if a directory and not '.' or '..'
 			build_cluster_map_dir(rom, cmap, 0x040000+(rom[i+0xC]+rom[i+0xD]*0x100)*0x200)
 		i+=16
 
@@ -101,8 +113,9 @@ def add_file_to_rom(rom, fout, flags, fin_data):
 
 	ptr = dptr_content = 0x040000 + 0x200 * (rom[dptr+0xC]+rom[dptr+0xD]*0x200)
 	dptr_len = rom[dptr+0xE]+rom[dptr+0xF]*0x200
+	# print("found parent directory. ptr:",hex(ptr),"len:",hex(dptr_len))
 
-	while rom[ptr]: ptr+=16
+	while rom[ptr] != 0x00 and rom[ptr] != 0xFF: ptr+=16
 	fn = fout.rsplit("/",maxsplit=1)[1]
 	if "." in fn:
 		name, ext = fn.rsplit(".",maxsplit=1)
@@ -110,7 +123,7 @@ def add_file_to_rom(rom, fout, flags, fin_data):
 		name = fn
 		ext = ""
 	sector = alloc_space_for_file(rom, len(fin_data))
-	if sector is None:
+	if not sector:
 		print(f"Failed to allocate space for file on rom: {fout}")
 		exit(1)
 	for i in range(8):
@@ -119,8 +132,7 @@ def add_file_to_rom(rom, fout, flags, fin_data):
 	for i in range(3):
 		if i<len(ext): rom[ptr+8+i] = ord(ext[i])
 		else: rom[ptr+8+i] = 0x20
-	for i in range(16,32):
-		rom[ptr+i] = 0
+	rom[ptr+0xB] = flags
 	rom[ptr+0xC] = sector&0xFF
 	rom[ptr+0xD] = sector//0x100
 	rom[ptr+0xE] = len(fin_data)&0xFF
@@ -133,16 +145,14 @@ def add_file_to_rom(rom, fout, flags, fin_data):
 if __name__=='__main__':
 	fnamein = []
 	fnameout = []
+	fname__out = "bin/BOSOS_appended.rom"
+	fname__in = "bin/BOSOS.rom"
+
 	if len(sys.argv)>1:
 		if len(sys.argv) & 1:
-			fname__out = fname__in = "BOSOS_appended.rom"
-			try:
-				with open(fname__in, "rb") as f:
-					pass
-			except IOError:
-				fname__in = "bin/BOSOS.rom"
-			i=1
+			i = 1
 		else:
+			i = 2
 			fname__out = fname__in = sys.argv[1]
 		while i<len(sys.argv):
 			fnamein.append(sys.argv[i])
@@ -150,9 +160,7 @@ if __name__=='__main__':
 			fnameout.append(sys.argv[i])
 			i+=1
 
-	if not len(fnamein) or not len(fnameout):
-		fname__in = "bin/BOSOS.rom"
-		fname__out = "BOSOS_appended.rom"
+	else:
 		while True:
 			i = input("File/Dir to add?")
 			if i != "\n" and len(i):
@@ -175,12 +183,12 @@ if __name__=='__main__':
 	try:
 		with open(fname__in, 'rb') as f:
 			rom = list(f.read())
-	except IOError:
+	except FileNotFoundError:
 		print('Could not locate rom image "{fname__in}". Did you build BOS yet?')
 		exit(1)
 
-	if len(rom) < 0x400000:
-		rom.extend([0xFF]*(0x400000-len(rom)))
+	if len(rom) < 0x3B0000:
+		rom.extend([0xFF]*(0x3B0000-len(rom)))
 
 	build_cluster_map(rom)
 	for i in range(len(fnamein)):
@@ -196,7 +204,7 @@ if __name__=='__main__':
 			else:
 				add_file_to_rom(rom, fout, 0x00, fin_data)
 				build_cluster_map(rom)
-		except IOError:
+		except FileNotFoundError:
 			print(f"Could not open file: {fin}")
 			exit(1)
 

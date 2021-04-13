@@ -29,6 +29,7 @@ fs_WriteNewFile:
 .fail:
 	scf
 	sbc hl,hl
+	ld sp,ix
 	pop ix
 	ret
 

@@ -10,15 +10,16 @@ fs_CreateDir:
 	call fs_ParentDir
 	jq c,.fail
 	ex (sp),hl
-	call sys_Free ;free memory malloc'd by fs_ParentDir
 	call fs_OpenFile
 	jq c,.fail  ; fail if parent dir not found
+	ld (ix-3),hl
 	ld bc,$C
 	add hl,bc
 	ld de,(hl)
 	ex.s hl,de
-	pop bc
 	ld (ix-3),hl ; save parent directory sector
+	call sys_Free ;free memory malloc'd by fs_ParentDir
+	pop bc
 	ld hl,48 ;minimum directory size
 	ld de,(ix+9)
 	ld bc,(ix+6)

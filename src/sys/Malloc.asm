@@ -1,6 +1,6 @@
 ;@DOES Allocate memory
 ;@INPUT void *sys_Malloc(size_t amt);
-;@OUTPUT hl = malloc'd bytes. hl = -1 if failed to malloc
+;@OUTPUT hl = malloc'd bytes. hl = 0 if failed to malloc
 ;@OUTPUT Cf set if failed to malloc
 ;@DESTROYS All
 sys_Malloc:
@@ -28,8 +28,9 @@ sys_Malloc:
 	jq z,.checklen
 	pop hl ;fail if no 0x00 (free blocks) found
 .fail:
-	scf
+	or a,a
 	sbc hl,hl
+	scf
 	ret
 .checklen:
 	dec hl

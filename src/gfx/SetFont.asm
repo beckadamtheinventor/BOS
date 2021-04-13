@@ -2,7 +2,7 @@
 ;@DOES set the current font
 ;@INPUT void *gfx_SetFont(void *data)
 ;@OUTPUT HL = old font data
-;@NOTE data structure: uint8_t spacing_len, uint8_t spacing[], uint8_t data[]
+;@NOTE data structure: uint8_t num_bitmaps, uint8_t spacing[], uint8_t data[]
 gfx_SetFont:
 	ld de,(font_spacing)
 	pop bc,hl
@@ -15,4 +15,5 @@ gfx_SetFont:
 	add hl,bc
 	ld (font_data),hl
 	ex hl,de
+	dec hl
 	ret
