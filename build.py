@@ -69,7 +69,7 @@ class Build:
 		from build_bos_inc import build_bos_inc
 		build_bos_inc()
 		if copyincludes:
-			if 'win' in sys.platform:
+			if sys.platform.startswith("win"):
 				os.system("copy bos.inc src\\include\\ /Y")
 				os.system("xcopy src\\include\\ src\\data\\adrive\\src\\include\\ /Y /C /E ")
 				os.system("xcopy src\\include\\ src\\data\\adrive\\src\\lib\\include\\ /Y /C /E ")
@@ -82,7 +82,7 @@ cp -rf src/include src/data/adrive/src/fs/bin/""")
 
 	def build_noti(self):
 		print("Building noti-ez80")
-		if 'win' in sys.platform:
+		if sys.platform.startswith("win"):
 			os.system("mkdir noti-ez80\\bin")
 		else:
 			os.system("mkdir noti-ez80/bin")
