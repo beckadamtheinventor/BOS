@@ -14,20 +14,20 @@ main_init:
 main_edit_open:
 	pop bc,hl
 	push hl,bc
+	ld (header_string),hl
 	push hl
-	call bos.fs_OpenFile
-	pop bc
-	jq c,failed_to_open
-	ld bc,$C
-	add hl,bc
-	ld de,(hl)
-	inc hl
-	inc hl
-	ld c,(hl)
-	inc hl
-	ld b,(hl)
-	ex.s hl,de
+	call bos.fs_GetFilePtr
+	pop de
+	jq nc,.load
+	ld hl,bos.safeRAM
+	ld (hl),0
+	push hl
+	pop de
+	inc de
+	jq .copy
+.load:
 	ld de,bos.safeRAM
+.copy:
 	ldir
 	call main_edit_loop
 	xor a,a
@@ -35,7 +35,7 @@ main_edit_open:
 	ret
 
 main_edit_loop:
-	ld hl,0
+	ld hl,bos.safeRAM
 edit_pointer:=$-3
 	ld de,0
 edit_page_offset:=$-3
@@ -130,7 +130,8 @@ main_draw:
 	xor a,a
 	ld (bos.currow),a
 	ld (bos.curcol),a
-	ld hl,header_string
+	ld hl,0
+header_string:=$-3
 	call bos.gui_DrawConsoleWindow
 	pop hl
 	call bos.gui_Print
@@ -177,14 +178,16 @@ print_and_fail:
 str_FailedToOpen:
 	db "Failed to open file.",$A,0
 
-__keymaps:
-	dl .keymap_A,.keymap_a,.keymap_1,0
-.keymap_A:
-	db '"',"WRMH  ?!VQLG  :ZUPKFC  YTOJEB  XSNIDA"
-.keymap_a:
-	db '"',"wrmh  ?!vqlg  :zupkfc  ytojeb  xsnida"
-.keymap_1:
-	db "+-*/^  ;369)$@ .258(&~ 0147,][  '<=>}{"
-__overtypes:
-	db "Aa1"
 
+__keymaps:
+	dl .keymap_A,.keymap_a,.keymap_1,.keymap_x
+.keymap_A:
+	db '"',"WRMH",0,0,"?!VQLG",0,0,":ZUPKFC",0," YTOJEB",0,0,"XSNIDA"
+.keymap_a:
+	db '"',"wrmh",0,0,"?!vqlg",0,0,":zupkfc",0," ytojeb",0,0,"xsnida"
+.keymap_1:
+	db "+-*/^",0,0,";369)$@",0,".258(&~",0,"0147,][",0,0,"'<=>}{"
+.keymap_x:
+	db "'][",0,0,0,0,";369}$@ =258{&~ ",$7F,"147,][  '<=>}{"
+.overtypes:
+	db "Aa1x"

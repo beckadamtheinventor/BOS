@@ -100,7 +100,7 @@ sys_WriteFlashFullRam:
 	ld l,e
 	ld h,d
 	push hl
-	ld hl,LCD_VRAM+$FFFF
+	ld hl,LCD_VRAM+$010000
 	or a,a
 	sbc hl,de
 	push hl

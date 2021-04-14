@@ -7,10 +7,10 @@ org ti.userMem
 	jq mem_edit
 	db "REX",0
 mem_edit:
-	ld hl,-14
-	call ti._frameset
 	call libload_load
 	ret nz
+	ld hl,-14
+	call ti._frameset
 	xor a,a
 	ld (ix-12),a
 mem_edit_main:
@@ -28,10 +28,11 @@ mem_edit_main:
 	cp a,'$'
 	jq z,.seek_to_offset
 	push hl
-	call bos.fs_OpenFile
-	pop bc
+	call bos.fs_GetFilePtr
+	pop de
 	jq c,.dont_open_file
-	push hl
+	ld (ix-11),bc
+	push bc,hl,bc
 	ld hl,bos.safeRAM
 	ld bc,65536
 	push hl
@@ -39,28 +40,15 @@ mem_edit_main:
 	inc de
 	ld (hl),c
 	ldir
-	pop hl
-	ld bc,$E
-	push hl
-	add hl,bc
-	ld hl,(hl)
-	ex.s hl,de
-	pop hl
-	ld bc,0
-	push bc ;int offset
-	push hl ;void *fd
-	ld c,1
-	push bc ;uint8_t count
-	ld (ix-11),de
-	ld (ix-14),de
-	ld a,(ix-9)
-	or a,e
-	or a,d
-	push de ;int len
-	ld bc,bos.safeRAM
-	push bc ;void *dest
-	call nz,bos.fs_Read
-	pop hl,bc,bc,bc,bc
+	pop bc,hl
+	inc bc
+	ld de,bos.safeRAM
+	push de
+	ldir
+	pop de,hl
+	add hl,de
+	ld (ix-14),hl
+	ex hl,de
 	jq .init_editor
 .seek_to_offset:
 	ex hl,de
@@ -118,6 +106,9 @@ mem_edit_main:
 	ld (ix-7),a
 	jq .backwardpage
 .main_set_file_max:
+	ld a,(ix-12)
+	or a,a
+	jq z,.main_draw
 	ld bc,(ix-3)
 	or a,a
 	sbc hl,hl
@@ -133,6 +124,9 @@ mem_edit_main:
 	jq c,.main_draw
 	add hl,bc
 	ld (ix-11),hl
+	ld bc,bos.safeRAM
+	add hl,bc
+	ld (ix-14),hl
 .main_draw:
 	call .clearscreen
 	call _setdefaultcolors
@@ -142,6 +136,13 @@ mem_edit_main:
 	sbc hl,hl
 	ld l,(ix-7)
 	add hl,bc ;add cursor offset
+	ld a,(ix-12)
+	or a,a
+	jq z,.draw_address
+	ld bc,bos.safeRAM
+	or a,a
+	sbc hl,bc
+.draw_address:
 	call _print24h
 	pop hl
 	ld a,3
@@ -205,17 +206,15 @@ mem_edit_main:
 	or a,a
 	jq z,.done_drawing
 	ld hl,(ix-14)
-	ld de,bos.safeRAM+1
-	add hl,de
 	ld de,(ix-3)
 	or a,a
 	sbc hl,de
-	jq c,.done_drawing
+	jq c,.done_drawing ;end of file before start of page
 	ld de,8*16
 	or a,a
 	ld a,l
 	sbc hl,de
-	jq c,.done_drawing
+	jq nc,.done_drawing ;end of file after end of page
 	call .lcd_ptr_from_cursor
 	ld de,320
 	ld b,9
@@ -260,16 +259,12 @@ mem_edit_main:
 	jq z,.forwardfullpage
 	cp a,11 ;"-" key
 	jq z,.backwardfullpage
-	ld bc,16
-	ld hl,.nibblekeys+15
-	cpdr
+	call getnibble
 	jq nz,.keys
 	push bc
 	call gfx_BlitBuffer
 	call bos.sys_WaitKeyCycle
-	ld bc,16
-	ld hl,.nibblekeys+15
-	cpdr
+	call getnibble
 	pop de
 	jq nz,.keys
 	ld a,e
@@ -364,18 +359,14 @@ mem_edit_main:
 	push hl
 	call gfx_BlitBuffer
 	call bos.sys_WaitKeyCycle
-	ld bc,16
-	ld hl,.nibblekeys+15
-	cpdr
+	call getnibble
 	jq nz,.exitaddrloop
 	ld (ix-8),c
 	ld a,c
 	call _print4h
 	call gfx_BlitBuffer
 	call bos.sys_WaitKeyCycle
-	ld bc,16
-	ld hl,.nibblekeys+15
-	cpdr
+	call getnibble
 	jq nz,.exitaddrloop
 	ld a,c
 	ld l,a
@@ -498,6 +489,9 @@ mem_edit_main:
 	pop hl,bc
 	or a,a
 	jq z,.main_draw
+	ld a,(hl)
+	or a,a
+	jq z,.main_draw
 	ex hl,de
 	ld hl,(ix-3)
 	ld a,(ix-7)
@@ -528,8 +522,13 @@ mem_edit_main:
 	add hl,bc
 	ld (ix-7),l
 	jq .main_set_file_max
-.nibblekeys:
 	db 33,34,26,18,35,27,19,36,28,20,47,39,31,46,38,30
+nibblekeys:=$-1
+getnibble:
+	ld hl,nibblekeys
+	ld bc,16
+	cpdr
+	ret
 _setdefaultcolors:
 	ld c,0
 	push bc

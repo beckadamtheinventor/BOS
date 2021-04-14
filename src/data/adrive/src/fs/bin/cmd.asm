@@ -2,26 +2,43 @@
 	jq cmd_exe_main
 	db "FEX",0
 cmd_exe_main:
-	ld hl,-13
+	ld hl,-22
 	call ti._frameset
 	xor a,a
 	sbc hl,hl
 	ld (ix-10),a
 	ld (ix-6),hl
 	ld (ix-9),hl
+	ld (ix-22),hl
 	ld hl,(ix+6)
+	push hl
+	call ti._strlen
+	ld (ix-19),hl
+	pop hl
 	ld a,(hl)
 	or a,a
 	jq z,cmd_no_cmd_args
 
+	ld (ix-16),hl
 	cp a,'-'
 	jq nz,cmd_execute_next_line ;if first argument isn't a flag
 	inc hl
 	ld a,(hl)
 	inc hl
 	inc hl
+	ld (ix-16),hl
 	cp a,'h'
 	jq z,cmd_print_help_info
+	cp a,'x'
+	jq nz,.not_exec_file
+	push hl
+	call bos.fs_GetFilePtr
+	jq c,cmd_exit_retneg1
+	ld (ix-16),hl
+	ld (ix-19),bc
+	pop hl
+	jq cmd_execute_next_line
+.not_exec_file:
 	ld (ix-10),a
 	cp a,'a'
 	jq z,cmd_execute_next_line
@@ -35,19 +52,45 @@ cmd_print_help_info:
 
 ;execute argument as if from command line if argument passed
 cmd_execute_next_line:
+.loop:
+	ld bc,(ix-19)
+	ld a,b
+	or a,c
+	jq z,cmd_exit_retzero
+	ld hl,(ix-16)
+	ld de,(ix-22)
+	push de
+	call bos.sys_Free
+	pop bc
+	ld hl,(ix-16)
+	ld bc,(ix-19)
+	call .linelen
+	ld a,e
+	or a,d
+	jq z,.dontexit
+	ld a,b
+	or a,c
+	jq z,.dontdec0bc
+	dec bc
+.dontdec0bc:
+	ld (ix-19),bc
+	ld (ix-13),de
+	push de
+	call bos.sys_Malloc
+	pop bc
+	jq c,cmd_exit_retneg2 ;return if failed to malloc
+	ld (ix-22),hl
+	ex hl,de
+	ld hl,(ix-16)
 	push hl
-	ld bc,$A
-	push bc,hl
-	call ti._strchr
-	pop bc,bc
 	add hl,bc
-	xor a,a
-	sbc hl,bc
-	jq z,.dontwritetonull
-	ld (hl),a
 	inc hl
-.dontwritetonull:
-	ld (ix-13),hl
+	ld (ix-16),hl
+	pop hl
+	push de
+	ldir
+	xor a,a
+	ld (de),a
 	pop hl
 	ld a,(hl)
 	cp a,'#'
@@ -66,12 +109,31 @@ cmd_execute_next_line:
 	add hl,bc
 	or a,a
 	sbc hl,bc
-	jq nz,cmd_execute_next_line ;execute next line if newline is present
+	jq nz,.loop ;execute next line if newline is present
 	ld a,(ix-10)
 	cp a,'i'
 	jq nz,.returnerrorcode
 	sbc hl,hl
 	jq cmd_exit
+
+.linelen:
+	ld de,0
+	ld a,b
+	or a,c
+	ret z
+.linelenloop:
+	ld a,(hl)
+	or a,a
+	ret z
+	cp a,$A
+	ret z
+	inc de
+	inc hl
+	dec bc
+	ld a,b
+	or a,c
+	jq nz,.linelenloop
+	ret
 
 ;exit returning last executable's error code
 .returnerrorcode:
@@ -212,6 +274,13 @@ execute_program_string:
 	ld hl,str_CouldNotLocateExecutable
 	jp bos.gui_Print
 
+cmd_exit_retneg1:
+	scf
+	sbc hl,hl
+	jr cmd_exit
+cmd_exit_retneg2:
+	ld hl,-2
+	db $01
 cmd_exit_retzero:
 	or a,a
 	sbc hl,hl
@@ -229,8 +298,9 @@ cmd_exit:
 cmd_help_info:
 	db " cmd -h",$A,$9,"show this info",$A
 	db " cmd commands",$A,$9,"run command(s) but exit if one returns an error",$A
-	db " cmd -a commands",$A,$9,"run all commands(s) regardless of error codes",$A,0
+	db " cmd -a commands",$A,$9,"run all commands(s) regardless of error codes",$A
 	db " cmd -i commands",$A,$9,"run commands(s), ignoring all errors",$A
+	db " cmd -x file",$A,$9,"run a command file",$A,0
 
 str_system_path:
 	db "/bin/"

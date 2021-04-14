@@ -31,15 +31,22 @@ fs_CreateFile:
 	call ti._strlen
 	ex (sp),hl
 	pop bc
-	ld a,'/'
 	add hl,bc
-	cp a,(hl)
-	jq nz,.endswithslash
 	dec hl
-.endswithslash:
+	dec bc
+	ld a,(hl)
+	or a,a
+	jq z,.fail
+	ld a,'/'
+	cp a,(hl)
+	jq nz,.doesntendwithslash
+	dec hl
+.doesntendwithslash:
 	cpdr
+	jq nz,.doesntstartwithslash
 	inc hl
 	inc hl
+.doesntstartwithslash:
 	push hl
 	pea ix-19
 	call fs_StrToFileEntry
