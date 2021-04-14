@@ -33,18 +33,15 @@ fs_CreateFile:
 	pop bc
 	add hl,bc
 	dec hl
-	dec bc
-	ld a,(hl)
-	or a,a
-	jq z,.fail
 	ld a,'/'
 	cp a,(hl)
 	jq nz,.doesntendwithslash
 	dec hl
+	dec bc
 .doesntendwithslash:
 	cpdr
-	jq nz,.doesntstartwithslash
 	inc hl
+	jq nz,.doesntstartwithslash
 	inc hl
 .doesntstartwithslash:
 	push hl
