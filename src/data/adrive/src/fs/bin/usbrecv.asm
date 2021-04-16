@@ -359,6 +359,12 @@ fat_ReadSectors:
 	ret
 
 open_file:
+	ld hl,512
+	push hl
+	call bos.sys_Malloc
+	pop bc
+	jq c,main_fail_file_creation
+	ld (.copy_file_dest),hl
 	ld hl,0
 _Args:=$-3
 	push hl
@@ -395,46 +401,47 @@ _Arg2:=$-3
 	jq c,main_fail_file_creation
 	ld (.dest_fd),hl
 
-	ld hl,(.copy_file_length)
-	xor a,a
-	ld bc,9
-	call ti._lshru
-	inc hl
-	ld (.copy_file_sectors),hl
+	ld a,(.copy_file_length+1)
+	srl a
+	ld (.copy_file_sectors),a
 	call fat_Open
 	pop bc,bc,bc
 	add hl,bc
 	or a,a
 	sbc hl,bc
+	ld b,0
+.copy_file_sectors:=$-1
 	jq nz,.copy_file_opened
 	ld hl,str_FileNotFound
 	jq main_print_and_exit
 .copy_file_opened:
-	ld bc,$D40000             ;set LCD to draw from the first half of VRAM
-	ld (ti.mpLcdUpbase),bc
-	ld bc,$D52C00             ;use back buffer as RAM
-	ld (.copy_file_dest),bc
-	ld de,0
-.copy_file_sectors:=$-3
+	push bc
+	ld bc,(.copy_file_dest)
+	ld de,1
 	push bc,de,hl
 	call fat_ReadSectors
-	pop hl,bc,bc
 
-	ld hl,0
-.dest_fd:=$-3
 	ld bc,0
-	push bc,hl
-	ld c,1
+.dest_fd:=$-3
+	ld de,0
+.dest_offset:=$-3
+	ld hl,512
+	add hl,de
+	ld (.dest_offset),hl
+	push de,bc ;offset, outputfd
+	ld bc,1
 	push bc
-	ld bc,(.copy_file_length)
+	ld c,b
+	ld b,512 shr 8
 	push bc
-	ld bc,$D52C00
+	ld bc,0
 .copy_file_dest:=$-3
 	push bc
 	call bos.fs_Write
 	pop bc,bc,bc,bc,bc
-
-	call bos.gfx_BufClear
+	pop hl,bc,bc
+	pop bc
+	djnz .copy_file_opened
 
 	ld bc,msd_device
 	push bc

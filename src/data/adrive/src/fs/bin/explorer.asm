@@ -48,7 +48,7 @@ explorer_init_2:
 	pop bc
 	jq c,explorer_init.fail
 	ld (explorer_dirname_buffer),hl
-	ld hl,explorer_default_directory
+	ld hl,bos.current_working_dir
 	ld (current_working_dir),hl
 	ld bc,display_items_num_x * display_items_num_y * 3
 	push bc
@@ -99,84 +99,11 @@ explorer_dirlist_buffer:=$-3
 	call nz,bos.fs_DirList
 	pop bc,bc,bc,bc
 explorer_main:
-	ld c,1
-	push bc
-	call gfx_SetDraw
-;draw background
-	ld l,$08
-explorer_background_color:=$-1
-	ex (sp),hl
-	call gfx_FillScreen
-	call gfx_SetTextTransparentColor
-	call gfx_SetTextBGColor
-	ld l,$FF
-explorer_foreground_color:=$-1
-	ex (sp),hl
-	call gfx_SetTextFGColor
-
-;draw status bar
-	ld l,$11
-explorer_statusbar_color:=$-1
-	ex (sp),hl
-	call gfx_SetColor
-	ld hl,statusbar_height
-	ex (sp),hl
-	ld bc,320
-	push bc
-	or a,a
-	sbc hl,hl
-if statusbar_y = 0
-	push hl,hl
-else
-	ld bc,statusbar_y
-	push bc,hl
-end if
-	call gfx_FillRectangle
-	pop bc,bc,bc
+	call draw_background
 
 ;draw taskbar
-	ld hl,taskbar_height
-	ex (sp),hl
-	ld hl,320
-	push hl
-	or a,a
-	sbc hl,hl
-	ld bc,taskbar_y
-	push bc,hl
-	call gfx_FillRectangle
-	call gfx_HorizLine
-	pop bc,bc,bc
-
-;draw taskbar items
-	ex (sp),ix
-	ld ix,taskbar_item_strings
-	ld b,5
-	ld hl,taskbar_item_x
-	ld (.taskbar_item_x),hl
-.draw_taskbar_loop:
-	push bc
-	ld hl,taskbar_item_y
-	push hl
-	ld bc,(ix)
-	push bc
-	call gfx_GetStringWidth
-	pop bc
-	srl l ;divide by 2, hl should be less than 256 in this use case
-	ex hl,de
-	ld hl,0
-.taskbar_item_x:=$-3
-	or a,a
-	sbc hl,de
-	push hl,bc
-	add hl,de
-	ld e,taskbar_item_width
-	add hl,de
-	ld (.taskbar_item_x),hl
-	call gfx_PrintStringXY
-	pop bc,bc,bc
-	lea ix,ix+3
-	djnz .draw_taskbar_loop
-	pop ix
+	ld hl,taskbar_item_strings
+	call draw_taskbar
 
 	; ld a,(battery_status)
 	; ld l,$07
@@ -227,12 +154,8 @@ explorer_cursor_x:=$-3
 	add hl,bc
 	push hl
 	call gfx_Rectangle
-	pop bc,bc,bc
-
-	ld l,1
-	ex (sp),hl
-	call gfx_Blit
-	pop bc
+	pop bc,bc,bc,bc
+	call gfx_BlitBuffer
 .key_loop:
 	call bos.sys_WaitKeyCycle
 	or a,a
@@ -249,6 +172,8 @@ explorer_cursor_x:=$-3
 	jq z,_exit_return_1337
 	cp a,15
 	jq z,explorer_main
+	cp a,52
+	jq z,.optionsmenu
 	cp a,51
 	jq z,.quickmenu
 	cp a,49
@@ -276,18 +201,80 @@ assert display_items_num_x = 4
 	add hl,bc ;index directory list buffer
 	push iy
 	ld iy,(hl)
+	ld bc,(explorer_dirname_buffer)
+	push iy,bc
+	call bos.fs_CopyFileName
+	pop bc,iy
 	bit bos.fd_subdir,(iy+bos.fsentry_fileattr)
-	jq z,.dont_path_into
 	push iy
+	jq z,.open_file
 	call .path_into
 	pop bc,iy
 	jq explorer_dirlist
-.dont_path_into:
-	pop iy
-	jq explorer_main
+.open_file:
+	ld hl,(iy+bos.fsentry_filesector)
+	ex (sp),hl
+	call bos.fs_GetSectorAddress
+	pop bc,iy
+	ld a,c
+	or a,b
+	jq z,.edit_file
+	ld a,(hl)
+	inc hl
+	cp a,$18 ;jr
+	jq z,.skip1
+	cp a,$C3 ;jp
+	jq z,.skip3
+	cp a,$EF
+	jq nz,.edit_file
+	ld a,(hl)
+	inc hl
+	cp a,$7B
+	jq z,.exec_file
+.edit_file:
+	ld hl,str_memeditexe
+	ld de,(explorer_dirname_buffer)
+	jq explorer_call_file
+.skip3:
+	inc hl
+	inc hl
+.skip1:
+	inc hl
+	ld de,(hl)
+	db $21 ;ld hl,...
+	db 'FEX' ;Flash EXecutable
+	or a,a
+	sbc hl,de
+	jq z,.exec_file
+	db $21 ;ld hl,...
+	db 'REX' ;Ram EXecutable
+	or a,a
+	sbc hl,de
+	jq nz,.edit_file ;if it's neither a Flash Executable nor a Ram Executable, open it in memedit
+.exec_file:
+	ld hl,(explorer_dirname_buffer)
+	jq explorer_call_file_noargs
 .filemenu:
 	jq explorer_main
 .quickmenu:
+;draw background
+	call draw_background
+;draw quick menu taskbar strings
+	ld hl,quickmenu_item_strings
+	call draw_taskbar
+	call bos.sys_WaitKeyCycle
+	; - TODO - actually make quickmenu functionality
+	jq explorer_main
+.optionsmenu:
+;draw background
+	call draw_background
+;draw options menu taskbar strings
+	ld hl,options_item_strings
+	call draw_taskbar
+	call gfx_BlitBuffer
+	call bos.sys_WaitKeyCycle
+	cp a,53
+	jq z,run_power_app
 	jq explorer_main
 .path_into:
 	ld hl,-9
@@ -308,7 +295,6 @@ assert display_items_num_x = 4
 	call bos.fs_ParentDir ;get parent directory of working directory
 	jq c,.path_into_return ;if failed to malloc within fs_ParentDir
 	ld (ix-9),hl
-	call bos.sys_Free ;free old working directory
 	pop bc
 	jq .path_into_setcurdir
 .path_into_checkspace:
@@ -354,13 +340,18 @@ assert display_items_num_x = 4
 	ldir ;copy directory we're pathing into
 	xor a,a
 	ld (de),a
-	ld hl,(current_working_dir)
-	push hl
-	call bos.sys_Free ;free old working directory
-	pop bc
 .path_into_setcurdir:
 	ld hl,(ix-9)
-	ld (current_working_dir),hl ;set new working directory
+	push hl
+	ld de,(current_working_dir)
+	push de,hl
+	call ti._strlen
+	ex (sp),hl
+	pop bc,de
+	inc bc
+	ldir ;copy new working directory
+	call bos.sys_Free ;free temp working directory
+	pop bc
 	xor a,a
 	ld (explorer_cursor_x),a
 	ld (explorer_cursor_y),a
@@ -368,6 +359,39 @@ assert display_items_num_x = 4
 	ld sp,ix
 	pop ix
 	ret
+
+explorer_join_file_name:
+	ld hl,(explorer_dirname_buffer)
+	push hl
+	call ti._strlen
+	ld (.tmplen),hl
+	ld hl,(current_working_dir)
+	ex (sp),hl
+	call ti._strlen
+	ld (.tmplen2),hl
+	pop bc
+	ld bc,0
+.tmplen:=$-3
+	add hl,bc
+	inc hl
+	push hl
+	call bos.sys_Malloc
+	pop bc
+	ret c
+	push hl
+	ex hl,de
+	ld hl,(current_working_dir)
+	ld bc,0
+.tmplen2:=$-3
+	ldir
+	ld hl,(explorer_dirname_buffer)
+	ld bc,(.tmplen)
+	ldir
+	xor a,a
+	ld (de),a
+	pop hl
+	ret
+
 
 _exit_return_1337:
 	call bos._HomeUp
@@ -386,14 +410,15 @@ _SaveSP:=$-3
 
 open_terminal:
 	ld hl,str_CmdExecutable
+explorer_call_file_noargs:
 	ld de,$FF0000
 explorer_call_file:
 	ld sp,(_SaveSP)
 	ld ix,(_SaveIX)
-	push hl,de
+	push de,hl
 	call bos.sys_FreeRunningProcessId
 	call bos.gfx_SetDefaultFont
-	pop de,hl
+	pop hl,de
 	ld bc,str_ExplorerExecutable
 	jp bos.sys_CallExecuteFile
 
@@ -777,19 +802,94 @@ explorer_dirname_buffer:=$-3
 .subdir_str:
 	db "dir ",0
 
+draw_background:
+	ld c,1
+	push bc
+	call gfx_SetDraw
+;draw background
+	ld l,$08
+explorer_background_color:=$-1
+	ex (sp),hl
+	call gfx_FillScreen
+	call gfx_SetTextTransparentColor
+	call gfx_SetTextBGColor
+	ld l,$FF
+explorer_foreground_color:=$-1
+	ex (sp),hl
+	call gfx_SetTextFGColor
+
+;draw status bar
+	ld l,$11
+explorer_statusbar_color:=$-1
+	ex (sp),hl
+	call gfx_SetColor
+	ld hl,statusbar_height
+	ex (sp),hl
+	ld bc,320
+	push bc
+	or a,a
+	sbc hl,hl
+if statusbar_y = 0
+	push hl,hl
+else
+	ld bc,statusbar_y
+	push bc,hl
+end if
+	call gfx_FillRectangle
+	pop bc,bc,bc,bc
+	ret
+
+draw_taskbar:
+	push hl
+	ex (sp),ix
+	ld hl,taskbar_height
+	push hl
+	ld hl,320
+	push hl
+	or a,a
+	sbc hl,hl
+	ld bc,taskbar_y
+	push bc,hl
+	call gfx_FillRectangle
+	call gfx_HorizLine
+	pop bc,bc,bc,bc
+
+;draw taskbar items
+	ld b,5
+	ld hl,taskbar_item_x
+	ld (.taskbar_item_x),hl
+.draw_taskbar_loop:
+	push bc
+	ld hl,taskbar_item_y
+	push hl
+	ld bc,(ix)
+	push bc
+	call gfx_GetStringWidth
+	pop bc
+	srl l ;divide by 2, hl should be less than 256 in this use case
+	ex hl,de
+	ld hl,0
+.taskbar_item_x:=$-3
+	or a,a
+	sbc hl,de
+	push hl,bc
+	add hl,de
+	ld e,taskbar_item_width
+	add hl,de
+	ld (.taskbar_item_x),hl
+	call gfx_PrintStringXY
+	pop bc,bc,bc,bc
+	lea ix,ix+3
+	djnz .draw_taskbar_loop
+	pop ix
+	ret
 
 load_libload:
 	ld hl,libload_name
 	push hl
-	call bos.fs_OpenFile
+	call bos.fs_GetFilePtr
 	pop bc
 	jq c,.notfound
-	ld bc,$0C
-	add hl,bc
-	ld hl,(hl)
-	push hl
-	call bos.fs_GetSectorAddress
-	pop bc
 	ld   de,.relocations
 	ld   bc,.notfound
 	push   bc
@@ -845,119 +945,123 @@ libload_name:
 	db   "/lib/LibLoad.dll", 0
 .len := $ - .
 
-
-
-
-run_usbrecv_app:
-	ld bc,255
+gfx_BlitBuffer:
+	ld c,1
 	push bc
-	call bos.sys_Malloc
+	call gfx_Blit
 	pop bc
-	ret c
-	push bc,hl
-	ld (hl),b
-	push hl
-	pop de
-	inc de
-	ldir
-	ld hl,input_source_string
-	call bos.gui_DrawConsoleWindow
-usbrecv_input_src:
-	call bos.gui_InputNoClear
-	cp a,2
-	jq nc,usbrecv_input_src
-	pop hl,bc
-	or a,a
-	ret z
-	push hl
-	xor a,a
-	cpir
-	dec hl
-	ld (hl),' '
-	inc hl
-	push bc,hl
-	call bos.gui_NewLine
-	ld hl,input_dest_string
-	call bos.gui_Print
-usbrecv_input_dest:
-	call bos.gui_InputNoClear
-	cp a,2
-	jq nc,usbrecv_input_dest
-	pop bc,bc,hl
-	or a,a
-	ret z
-	ex hl,de
-	ld hl,str_UsbRecvExecutable
-	jq explorer_call_file
+	ret
 
-run_fexplore_app:
-	ld bc,255
-	push bc
-	call bos.sys_Malloc
-	pop bc
-	ret c
-	push bc,hl
-	ld (hl),b
-	push hl
-	pop de
-	inc de
-	ldir
-	ld hl,input_dir_string
-	call bos.gui_DrawConsoleWindow
-fexplore_input_dir:
-	call bos.gui_InputNoClear
-	cp a,2
-	jq nc,fexplore_input_dir
-	pop hl,bc
-	or a,a
-	ret z
-	ex hl,de
-	ld hl,str_FExploreExecutable
-	jq explorer_call_file
+; run_usbrecv_app:
+	; ld bc,255
+	; push bc
+	; call bos.sys_Malloc
+	; pop bc
+	; ret c
+	; push bc,hl
+	; ld (hl),b
+	; push hl
+	; pop de
+	; inc de
+	; ldir
+	; ld hl,input_source_string
+	; call bos.gui_DrawConsoleWindow
+; usbrecv_input_src:
+	; call bos.gui_InputNoClear
+	; cp a,2
+	; jq nc,usbrecv_input_src
+	; pop hl,bc
+	; or a,a
+	; ret z
+	; push hl
+	; xor a,a
+	; cpir
+	; dec hl
+	; ld (hl),' '
+	; inc hl
+	; push bc,hl
+	; call bos.gui_NewLine
+	; ld hl,input_dest_string
+	; call bos.gui_Print
+; usbrecv_input_dest:
+	; call bos.gui_InputNoClear
+	; cp a,2
+	; jq nc,usbrecv_input_dest
+	; pop bc,bc,hl
+	; or a,a
+	; ret z
+	; ex hl,de
+	; ld hl,str_UsbRecvExecutable
+	; jq explorer_call_file
+
+; run_fexplore_app:
+	; ld bc,255
+	; push bc
+	; call bos.sys_Malloc
+	; pop bc
+	; ret c
+	; push bc,hl
+	; ld (hl),b
+	; push hl
+	; pop de
+	; inc de
+	; ldir
+	; ld hl,input_dir_string
+	; call bos.gui_DrawConsoleWindow
+; fexplore_input_dir:
+	; call bos.gui_InputNoClear
+	; cp a,2
+	; jq nc,fexplore_input_dir
+	; pop hl,bc
+	; or a,a
+	; ret z
+	; ex hl,de
+	; ld hl,str_FExploreExecutable
+	; jq explorer_call_file
 
 
 run_power_app:
 	ld hl,str_OffExecutable
 	jq explorer_call_file
 
-run_updater_program:
-	ld bc,1
-	push bc,bc
-	ld bc,str_PressEnterConfirm
-	push bc
-	call gfx_PrintStringXY
-	pop bc,bc,bc
-	call bos.sys_WaitKeyCycle
-	cp a,9
-	ret nz
-	ld hl,str_UpdaterExecutable
-	ld de,$FF0000
-	jq explorer_call_file
+; run_updater_program:
+	; ld bc,1
+	; push bc,bc
+	; ld bc,str_PressEnterConfirm
+	; push bc
+	; call gfx_PrintStringXY
+	; pop bc,bc,bc
+	; call bos.sys_WaitKeyCycle
+	; cp a,9
+	; ret nz
+	; ld hl,str_UpdaterExecutable
+	; ld de,$FF0000
+	; jq explorer_call_file
 
-run_usbrun_app:
-	ld bc,255
-	push bc
-	call bos.sys_Malloc
-	pop bc
-	ret c
-	push bc,hl
-	ld (hl),b
-	push hl
-	pop de
-	inc de
-	ldir
-	ld hl,input_program_string
-	call bos.gui_DrawConsoleWindow
-usbrun_input_program:
-	call bos.gui_InputNoClear
-	cp a,2
-	jq nc,usbrun_input_program
-	pop hl,bc
-	or a,a
-	ret z
-	ex hl,de
-	ld hl,str_UsbRunExecutable
-	jq explorer_call_file
+; run_usbrun_app:
+	; ld bc,255
+	; push bc
+	; call bos.sys_Malloc
+	; pop bc
+	; ret c
+	; push bc,hl
+	; ld (hl),b
+	; push hl
+	; pop de
+	; inc de
+	; ldir
+	; ld hl,input_program_string
+	; call bos.gui_DrawConsoleWindow
+; usbrun_input_program:
+	; call bos.gui_InputNoClear
+	; cp a,2
+	; jq nc,usbrun_input_program
+	; pop hl,bc
+	; or a,a
+	; ret z
+	; ex hl,de
+	; ld hl,str_UsbRunExecutable
+	; jq explorer_call_file
 
 taskbar_item_strings:
 	dl .l1, .l2, .l3, .l4, .l5
@@ -968,9 +1072,35 @@ taskbar_item_strings:
 .l3:
 	db "file",0
 .l4:
-	db 0
+	db "options",0
 .l5:
 	db "cmd",0
+
+options_item_strings:
+dl .l1, .l2, .l3, .l4, .l5
+.l1:
+	db "power",0
+.l2:
+	db 0
+.l3:
+	db 0
+.l4:
+	db 0
+.l5:
+	db 0
+
+quickmenu_item_strings:
+dl .l1, .l2, .l3, .l4, .l5
+.l1:
+	db "new",0
+.l2:
+	db "copy",0
+.l3:
+	db "cut",0
+.l4:
+	db "paste",0
+.l5:
+	db "edit",0
 
 input_dir_string:
 	db "Input path on usb to explore.",$A,0
@@ -1002,3 +1132,6 @@ explorer_config_file:
 	db "/etc/config/explorer/explorer.cfg",0
 explorer_default_directory:
 	db "/home/user",0
+str_memeditexe:
+	db "/bin/memedit",0
+

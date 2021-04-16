@@ -118,7 +118,7 @@
 	jp gfx_SetDefaultFont
 	jp sys_FreeRunningProcessId
 	jp util_Zx7Decompress
-	jp gfx_BlitBuffer
+	jp DONOTHING
 	jp gfx_Compute
 	jp gfx_FillRectangle
 	jp gfx_FillScreen
