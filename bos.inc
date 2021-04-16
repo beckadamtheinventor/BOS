@@ -121,7 +121,7 @@
 ?gfx_SetDefaultFont              := $202D8
 ?sys_FreeRunningProcessId        := $202DC
 ?util_Zx7Decompress              := $202E0
-?gfx_BlitBuffer                  := $202E4
+;DONOTHING                       := $202E4
 ?gfx_Compute                     := $202E8
 ?gfx_FillRectangle               := $202EC
 ?gfx_FillScreen                  := $202F0
