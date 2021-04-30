@@ -74,7 +74,21 @@ end fs_dir
 ;"/etc/" directory
 fs_dir etc_dir
 	fs_entry root_dir, "..", "", f_subdir
+	fs_entry etc_config_dir, "config", "", f_subdir
 end fs_dir
+
+;"/etc/config/" directory
+fs_dir etc_config_dir
+	fs_entry etc_dir, "..", "", f_subdir
+	fs_entry etc_config_explorer_dir, "explorer", "", f_subdir
+end fs_dir
+
+;"/etc/config/explorer/" directory
+fs_dir etc_config_explorer_dir
+	fs_entry etc_config_dir, "..", "", f_subdir
+	fs_entry missing_icon, "missing", "ico", 0
+end fs_dir
+
 
 ;"/lib/" directory
 fs_dir lib_dir
@@ -301,6 +315,10 @@ end fs_file
 
 fs_file bpm_exe
 	file '../obj/bpm.bin'
+end fs_file
+
+fs_file missing_icon
+	include 'fs/etc/config/explorer/missing.asm'
 end fs_file
 
 end fs_fs

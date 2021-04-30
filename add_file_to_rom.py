@@ -184,7 +184,7 @@ if __name__=='__main__':
 		with open(fname__in, 'rb') as f:
 			rom = list(f.read())
 	except FileNotFoundError:
-		print('Could not locate rom image "{fname__in}". Did you build BOS yet?')
+		print(f'Could not locate rom image "{fname__in}". Did you build BOS yet?')
 		exit(1)
 
 	if len(rom) < 0x3B0000:

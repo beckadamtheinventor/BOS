@@ -48,6 +48,14 @@ explorer_init_2:
 	pop bc
 	jq c,explorer_init.fail
 	ld (explorer_dirname_buffer),hl
+	ld bc,258
+	push bc
+	call bos.sys_Malloc
+	pop bc
+	jq c,explorer_init.fail
+	ld (explorer_sprite_temp),hl
+	ld bc,$1010
+	ld (hl),bc
 	ld hl,bos.current_working_dir
 	ld (current_working_dir),hl
 	ld bc,display_items_num_x * display_items_num_y * 3
@@ -687,22 +695,28 @@ explorer_display_diritems:
 	ld (.x_pos),hl
 .inner_loop:
 	push bc
-	ld hl,0
-.y_pos:=$-3
-	push hl
-	ld hl,0
-.x_pos:=$-3
-	push hl
+	ld hl,(.x_pos)
+	ld de,(.y_pos)
+	push de,hl
 	call gfx_SetTextXY
 	pop bc,bc
 	ld bc,(ix)
 	ld a,(ix+2)
 	or a,c
 	or a,b
-	call nz,.main
+	jq z,.skip
+	call .main
+	lea ix,ix+3
+.skip:
+	ld bc,0
+.x_pos:=$-3
+	ld hl,display_item_width
+	add hl,bc
+	ld (.x_pos),hl
 	pop bc
 	djnz .inner_loop
-	ld hl,(.y_pos)
+	ld hl,0
+.y_pos:=$-3
 	ld de,display_item_height
 	add hl,de
 	ld (.y_pos),hl
@@ -711,7 +725,6 @@ explorer_display_diritems:
 	pop ix
 	ret
 .main:
-	lea ix,ix+3
 	push bc
 	ld bc,0
 explorer_dirname_buffer:=$-3
@@ -758,9 +771,6 @@ explorer_dirname_buffer:=$-3
 	add hl,bc
 	ld bc,(.x_pos)
 	push hl,bc
-	ld hl,display_item_width
-	add hl,bc
-	ld (.x_pos),hl
 	call gfx_SetTextXY ;set text position two lines down for file flags
 	pop bc,bc
 
@@ -769,6 +779,9 @@ explorer_dirname_buffer:=$-3
 	ld bc,bos.fsentry_fileattr
 	add hl,bc
 	ld a,(hl)
+	inc hl
+	ld de,(hl)
+	push de
 	bit bos.fd_readonly,a
 	call nz,.readonly
 	bit bos.fd_system,a
@@ -776,7 +789,103 @@ explorer_dirname_buffer:=$-3
 	bit bos.fd_device,a
 	call nz,.device
 	bit bos.fd_subdir,a
+	call nz,.subdir
+	call bos.fs_GetSectorAddress
+	pop bc
+	ld a,(hl)
+	inc hl
+	cp a,$EF
+	jq nz,.notEF7B
+	ld a,(hl)
+	dec hl
+	cp a,$7B
+	jq nz,.notEF7B
+	inc hl
+	inc hl
+	ld a,(hl)
+	dec hl
+	dec hl
+	dec hl
+	cp a,$18 ;jr opcode
+	jq z,.skip2
+	cp a,$C3 ;jp opcode
+	ret nz
+	jq .skip4
+.notEF7B:
+	cp a,$18 ;jr opcode
+	jq z,.skip2
+	cp a,$C3 ;jp opcode
+	ret nz
+.skip4:
+	inc hl
+	inc hl
+.skip2:
+	inc hl
+	inc hl ;bypass 4-byte header
+	inc hl
+	inc hl
+	inc hl
+	ld a,(hl)
+	inc hl
+	cp a,7 ;denotes external icon
+	jq z,.external_icon
+	cp a,1
+	ret nz ;don't display an icon if there isn't one
+.display_icon:
+	ld bc,0
+explorer_sprite_temp:=$-3
+	push bc,hl
+	call gfx_ScaleSprite
+	pop bc,bc
+	ld hl,(.y_pos)
+	ld bc,display_item_height-17
+	add hl,bc
+	push hl
+	ld hl,(.x_pos)
+	ld bc,display_item_width-17
+	add hl,bc
+	ld de,(explorer_sprite_temp)
+	push hl,de
+	call gfx_TransparentSprite
+	pop bc,bc,bc
+	ret
+.external_icon:
+	push hl
+	call bos.fs_GetFilePtr
+	pop de
+	jq c,.display_missing_icon
+.load_icon_file:
+	ld a,c
+	or a,b
 	ret z
+	ld bc,(hl)
+	ex hl,de
+	db $21,"ICO"
+	xor a,a
+	sbc hl,de
+	ret nz
+	ex hl,de
+	inc hl
+	inc hl
+	inc hl
+	or a,(hl)
+	ret nz
+	inc hl
+	or a,(hl)
+	inc hl
+	ret z
+	ld a,(hl)
+	or a,a
+	ret z
+	dec hl
+	jq .display_icon
+.display_missing_icon:
+	ld hl,str_MissingIconFile
+	push hl
+	call bos.fs_GetFilePtr
+	pop de
+	ret c
+	jq .display_icon
 .subdir:
 	ld hl,.subdir_str
 	jq .printflagstr
@@ -803,8 +912,11 @@ explorer_dirname_buffer:=$-3
 	db "dir ",0
 
 draw_background:
-	ld c,1
+	ld c,0
 	push bc
+	call gfx_SetTransparentColor
+	ld l,1
+	ex (sp),hl
 	call gfx_SetDraw
 ;draw background
 	ld l,$08
@@ -936,6 +1048,12 @@ gfx_Rectangle:
 	jp 105
 gfx_FillRectangle:
 	jp 108
+gfx_TransparentSprite:
+	jp 174
+gfx_SetTransparentColor:
+	jp 225
+gfx_ScaleSprite:
+	jp 246
 
 	xor   a,a      ; return z (loaded)
 	pop   hl      ; pop error return
@@ -1134,4 +1252,5 @@ explorer_default_directory:
 	db "/home/user",0
 str_memeditexe:
 	db "/bin/memedit",0
-
+str_MissingIconFile:
+	db "/etc/config/explorer/missing.ico",0
