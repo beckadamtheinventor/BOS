@@ -21,21 +21,25 @@ gfx_Sprite:
 	ld	(ScrapByte),a			; width
 	inc	hl
 	ld	a,(hl)
-	ld (ScrapWord),a            ; height
+	ld	(ScrapWord),a			; height
 	inc	hl
 .loop:
-	ld a,(ScrapByte)
-	ld c,a
-	push de
+	ld	a,(ScrapByte)
+	ld	c,a
+	push	de
 	ldir
+	push	hl
 	ld	hl,ScrapWord
-	dec (hl) ; for height
-	ld a,(hl)
+	dec	(hl)				; for height
+	ld	a,(hl)
+	pop	de
+	pop	hl
+	push	de
 	ld	de,LCD_WIDTH
-	pop hl
-	add hl,de
-	ex hl,de
-	or a,a
+	add	hl,de
+	ex	hl,de
+	pop	hl
+	or	a,a
 	jr	nz,.loop
 	ret
 
