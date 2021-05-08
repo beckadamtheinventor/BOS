@@ -13,12 +13,14 @@ def search_for_entry(rom, path):
 	while "//" in path:
 		path = path.replace("//","/")
 	path = path.rstrip("/").split("/")[1:]
+	if not len(path):
+		return 0x040000
 	L = len(path)-1
 	# print(L, path)
 
 	ptr = 0x040200
 	dnum = 0
-	while rom[i] != 0x00 and rom[i] != 0xFF:
+	while rom[ptr] != 0x00 and rom[ptr] != 0xFF:
 		fn = copy_file_name(rom[ptr:ptr+16])
 		# print("ptr:",hex(ptr),"entry:","".join([chr(c) if c in range(0x20,0x80) else "\\x"+hex(c) for c in rom[ptr:ptr+16]]),"file name",fn)
 		if not rom[ptr]:
@@ -70,6 +72,33 @@ def alloc_space_for_file(rom, length):
 		rom[cmap_data+k] = 0xFE
 	return j
 
+def free_file_descriptor(rom, ptr):
+	cmap = search_for_entry(rom, "/dev/cmap.dat")
+	if cmap is None:
+		print("/dev/cmap.dat not found on rom!")
+		exit(1)
+
+	cmap_data = 0x040000+(rom[cmap+0xC]+rom[cmap+0xD]*0x100)*0x200
+	cmap_len = rom[cmap+0xE]+rom[cmap+0xF]*0x100
+	i = cmap_data+rom[ptr+0xC]+rom[ptr+0xD]*0x100
+	data = 0x040000+(rom[ptr+0xC]+rom[ptr+0xD]*0x100)*0x200
+	data_len = rom[ptr+0xE]+rom[ptr+0xF]*0x100
+	j = 0
+	while j<data_len:
+		rom[i] = 0xFF
+		for k in range(0x200):
+			rom[data+j+k]=0xFF
+		j += 0x200
+		i += 1
+
+	while rom[ptr] != 0x00 and rom[ptr] != 0xFF:
+		for k in range(0x10):
+			rom[ptr+k] = rom[ptr+0x10+k]
+		ptr+=0x10
+
+	for k in range(0x10):
+		rom[ptr+k] = 0xFF
+
 
 def build_cluster_map(rom):
 	cmap = search_for_entry(rom, "/dev/cmap.dat")
@@ -111,12 +140,19 @@ def add_file_to_rom(rom, fout, flags, fin_data):
 		rom[dptr+0x1C] = ((dptr_parent-0x040000)//0x200)&0xFF
 		rom[dptr+0x1D] = (dptr_parent-0x040000)//0x20000
 
+	f = search_for_entry(rom, fout)
+	if f is not None:
+		free_file_descriptor(rom, f)
+
 	ptr = dptr_content = 0x040000 + 0x200 * (rom[dptr+0xC]+rom[dptr+0xD]*0x200)
 	dptr_len = rom[dptr+0xE]+rom[dptr+0xF]*0x200
 	# print("found parent directory. ptr:",hex(ptr),"len:",hex(dptr_len))
 
 	while rom[ptr] != 0x00 and rom[ptr] != 0xFF: ptr+=16
-	fn = fout.rsplit("/",maxsplit=1)[1]
+	if '/' in fout:
+		fn = fout.rsplit("/",maxsplit=1)[1]
+	else:
+		fn = fout
 	if "." in fn:
 		name, ext = fn.rsplit(".",maxsplit=1)
 	else:

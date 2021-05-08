@@ -307,28 +307,24 @@ ti_Open:
 	inc hl
 	inc hl
 	inc hl
-	ld	hl, vat_ptr1+2
 	cp	a,(hl)
 	jr	z, .slot
 	inc c
 	inc hl
 	inc hl
 	inc hl
-	ld	hl, vat_ptr2+2
 	cp	a,(hl)
 	jr	z, .slot
 	inc c
 	inc hl
 	inc hl
 	inc hl
-	ld	hl, vat_ptr3+2
 	cp	a,(hl)
 	jr	z, .slot
 	inc c
 	inc hl
 	inc hl
 	inc hl
-	ld	hl, vat_ptr4+2
 	cp	a,(hl)
 	jp	nz, util_ret_null_pop_ix
 .slot:
@@ -516,7 +512,6 @@ ti_Write:
 .write_total_size:=$-3
 	pop ix
 	jq util_set_offset
-	ret
 
 
 ;-------------------------------------------------------------------------------
@@ -1522,7 +1517,7 @@ util_get_open_slot:
 
 
 vat_ptrs:
-	dl	5 dup 1 shl 23
+	dl	5 dup $800000
 data_ptrs:
 	dl	5 dup 0
 variable_offsets:

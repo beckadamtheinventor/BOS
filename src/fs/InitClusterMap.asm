@@ -49,17 +49,37 @@ fs_InitClusterMap:
 	ret z
 	cp a,'.'+1
 	jq z,.traverse_next
+	bit fsbit_subfile, (iy+fsentry_fileattr)
+	jq z,.regular_file
+	ld hl,(iy+fsentry_filesector)
+	ex.s hl,de
+	lea hl,iy
+	ld l,0
+	res 0,h
+	add hl,de
+	ld de,-$040000
+	add hl,de
+	call fs_CeilDivBySector
+	ld de,(ix-3)
+	add hl,de
+	push hl
 	ld de,(iy+fsentry_filelen)
 	ex.s hl,de
-	push iy
 	call fs_CeilDivBySector
-	pop iy
+	pop de
+	ld b,l
+	jq .mark_file_entry
+.regular_file:
+	ld de,(iy+fsentry_filelen)
+	ex.s hl,de
+	call fs_CeilDivBySector
 	ld b,l
 	ld de,(iy+fsentry_filesector)
 	ex.s hl,de
 	ld de,(ix-3)
 	add hl,de
 	ex hl,de
+.mark_file_entry:
 	push iy
 	ld c,$FE
 .mark_file_loop:

@@ -21,7 +21,6 @@ fs_fs
 fs_dir root_dir
 	fs_entry bin_dir, "bin", "", f_readonly+f_system+f_subdir
 	fs_entry dev_dir, "dev", "", f_readonly+f_system+f_subdir
-	fs_entry boot_dir, "boot", "", f_readonly+f_system+f_subdir
 	fs_entry etc_dir, "etc", "", f_subdir
 	fs_entry home_dir, "home", "", f_subdir
 	fs_entry lib_dir, "lib", "", f_readonly+f_system+f_subdir
@@ -34,42 +33,106 @@ end fs_dir
 ;"/bin/" directory
 fs_dir bin_dir
 	fs_entry root_dir, "..", "", f_subdir
-	fs_entry boot_exe, "boot", "", f_readonly+f_system
+	fs_sfentry boot_exe, "boot", "", f_readonly+f_system+f_subfile
 	fs_entry bpkload_exe, "bpk", "", f_readonly+f_system
 	fs_entry bpm_exe, "bpm", "", f_readonly+f_system
-	fs_entry cat_exe, "cat", "", f_readonly+f_system
-	fs_entry cd_exe, "cd", "", f_readonly+f_system
-	fs_entry cmd_exe, "cmd", "", f_readonly+f_system
-	fs_entry cls_exe, "cls", "", f_readonly+f_system
-	fs_entry cp_exe, "cp", "", f_readonly+f_system
-	fs_entry initdev_exe, "device", "", f_readonly+f_system
-	fs_entry df_exe, "df", "", f_readonly+f_system
+	fs_sfentry cat_exe, "cat", "", f_readonly+f_system+f_subfile
+	fs_sfentry cd_exe, "cd", "", f_readonly+f_system+f_subfile
+	fs_sfentry cmd_exe, "cmd", "", f_readonly+f_system+f_subfile
+	fs_sfentry cls_exe, "cls", "", f_readonly+f_system+f_subfile
+	fs_sfentry cp_exe, "cp", "", f_readonly+f_system+f_subfile
+	fs_sfentry initdev_exe, "device", "", f_readonly+f_system+f_subfile
+	fs_sfentry df_exe, "df", "", f_readonly+f_system+f_subfile
 	fs_entry explorer_exe, "explorer", "", f_readonly+f_system
 	fs_entry fexplore_exe, "fexplore", "", f_readonly+f_system
-	fs_entry info_exe, "info", "", f_readonly+f_system
-	fs_entry ls_exe, "ls", "", f_readonly+f_system
+	fs_sfentry info_exe, "info", "", f_readonly+f_system+f_subfile
+	fs_sfentry ls_exe, "ls", "", f_readonly+f_system+f_subfile
 	fs_entry memedit_exe, "memedit", "", f_readonly+f_system
-	fs_entry mkdir_exe, "mkdir", "", f_readonly+f_system
-	fs_entry mkfile_exe, "mkfile", "", f_readonly+f_system
-	fs_entry off_exe, "off", "", f_readonly+f_system
-	fs_entry rm_exe, "rm", "", f_readonly+f_system
+	fs_sfentry mkdir_exe, "mkdir", "", f_readonly+f_system+f_subfile
+	fs_sfentry mkfile_exe, "mkfile", "", f_readonly+f_system+f_subfile
+	fs_sfentry off_exe, "off", "", f_readonly+f_system+f_subfile
+	fs_sfentry rm_exe, "rm", "", f_readonly+f_system+f_subfile
 	fs_entry usbrecv_exe, "usbrecv", "", f_readonly+f_system
 	fs_entry usbrun_exe, "usbrun", "", f_readonly+f_system
 	fs_entry usbsend_exe, "usbsend", "", f_readonly+f_system
 end fs_dir
 
-fs_dir boot_dir
-	fs_entry root_dir, "..", "", f_subdir
-end fs_dir
+fs_subfile boot_exe, bin_dir
+	include 'fs/bin/boot.asm'
+end fs_subfile
+
+fs_subfile cat_exe, bin_dir
+	include 'fs/bin/cat.asm'
+end fs_subfile
+
+fs_subfile cd_exe, bin_dir
+	include 'fs/bin/cd.asm'
+end fs_subfile
+
+fs_subfile cls_exe, bin_dir
+	include 'fs/bin/cls.asm'
+end fs_subfile
+
+fs_subfile initdev_exe, bin_dir
+	include 'fs/bin/device.asm'
+end fs_subfile
+
+fs_subfile df_exe, bin_dir
+	include 'fs/bin/df.asm'
+end fs_subfile
+
+fs_subfile cmd_exe, bin_dir
+	include 'fs/bin/cmd.asm'
+end fs_subfile
+
+fs_subfile ls_exe, bin_dir
+	include 'fs/bin/ls.asm'
+end fs_subfile
+
+fs_subfile cp_exe, bin_dir
+	include 'fs/bin/cp.asm'
+end fs_subfile
+
+fs_subfile info_exe, bin_dir
+	include 'fs/bin/info.asm'
+end fs_subfile
+
+fs_subfile rm_exe, bin_dir
+	include 'fs/bin/rm.asm'
+end fs_subfile
+
+fs_subfile mkdir_exe, bin_dir
+	include 'fs/bin/mkdir.asm'
+end fs_subfile
+
+fs_subfile mkfile_exe, bin_dir
+	include 'fs/bin/mkfile.asm'
+end fs_subfile
+
+fs_subfile off_exe, bin_dir
+	include 'fs/bin/off.asm'
+end fs_subfile
 
 ;"/dev/" directory
 fs_dir dev_dir
 	fs_entry root_dir, "..", "", f_subdir
 	fs_entry cluster_map_file, "cmap", "dat", f_readonly+f_system
-	fs_entry dev_lcd, "lcd", "", f_readonly+f_system+f_device
-	fs_entry dev_null, "null", "", f_readonly+f_system+f_device
-	fs_entry dev_mnt, "mnt", "", f_readonly+f_system+f_device
+	fs_sfentry dev_lcd, "lcd", "", f_readonly+f_system+f_device+f_subfile
+	fs_sfentry dev_null, "null", "", f_readonly+f_system+f_device+f_subfile
+	fs_sfentry dev_mnt, "mnt", "", f_readonly+f_system+f_device+f_subfile
 end fs_dir
+
+fs_subfile dev_mnt, dev_dir
+	include 'fs/dev/mnt.asm'
+end fs_subfile
+
+fs_subfile dev_null, dev_dir
+	include 'fs/dev/null.asm'
+end fs_subfile
+
+fs_subfile dev_lcd, dev_dir
+	include 'fs/dev/lcd.asm'
+end fs_subfile
 
 ;"/etc/" directory
 fs_dir etc_dir
@@ -86,6 +149,7 @@ end fs_dir
 ;"/etc/config/explorer/" directory
 fs_dir etc_config_explorer_dir
 	fs_entry etc_config_dir, "..", "", f_subdir
+	fs_entry explorer_cfg, "explorer", "cfg", 0
 	fs_entry missing_icon, "missing", "ico", 0
 end fs_dir
 
@@ -163,47 +227,6 @@ fs_file cluster_map_file
 	db 7040 dup $FF
 end fs_file
 
-fs_file off_exe
-	include 'fs/bin/off.asm'
-end fs_file
-
-fs_file dev_mnt
-	include 'fs/dev/mnt.asm'
-end fs_file
-
-fs_file dev_null
-	include 'fs/dev/null.asm'
-end fs_file
-
-fs_file dev_lcd
-	include 'fs/dev/lcd.asm'
-end fs_file
-
-
-fs_file cmd_exe
-	include 'fs/bin/cmd.asm'
-end fs_file
-
-
-fs_file boot_exe
-	include 'fs/bin/boot.asm'
-end fs_file
-
-fs_file cat_exe
-	include 'fs/bin/cat.asm'
-end fs_file
-
-
-fs_file cd_exe
-	include 'fs/bin/cd.asm'
-end fs_file
-
-
-fs_file cls_exe
-	include 'fs/bin/cls.asm'
-end fs_file
-
-
 fs_file explorer_exe
 	file '../obj/explorer.bin'
 end fs_file
@@ -211,16 +234,6 @@ end fs_file
 
 fs_file fexplore_exe
 	file '../obj/fexplore.bin'
-end fs_file
-
-
-
-fs_file ls_exe
-	include 'fs/bin/ls.asm'
-end fs_file
-
-fs_file cp_exe
-	include 'fs/bin/cp.asm'
 end fs_file
 
 fs_file fatdrvce_lll
@@ -255,7 +268,6 @@ fs_file libload_lll
 	file '../obj/bos_libload.bin'
 end fs_file
 
-
 fs_file uninstaller_exe
 	include 'fs/bin/uninstlr.asm'
 end fs_file
@@ -276,37 +288,12 @@ fs_file usbsend_exe
 	file "../obj/usbsend.bin"
 end fs_file
 
-fs_file info_exe
-	include 'fs/bin/info.asm'
-end fs_file
-
-fs_file rm_exe
-	include 'fs/bin/rm.asm'
-end fs_file
-
-
-fs_file mkdir_exe
-	include 'fs/bin/mkdir.asm'
-end fs_file
-
-fs_file mkfile_exe
-	include 'fs/bin/mkfile.asm'
-end fs_file
-
-fs_file initdev_exe
-	include 'fs/bin/device.asm'
-end fs_file
-
 fs_file usbrecv_exe
 	file '../obj/usbrecv.bin'
 end fs_file
 
 fs_file bpkload_exe
 	file '../obj/bpkload.bin'
-end fs_file
-
-fs_file df_exe
-	include 'fs/bin/df.asm'
 end fs_file
 
 fs_file fsutil_exe
@@ -319,6 +306,10 @@ end fs_file
 
 fs_file missing_icon
 	include 'fs/etc/config/explorer/missing.asm'
+end fs_file
+
+fs_file explorer_cfg
+	file 'fs/etc/config/explorer/explorer.cfg'
 end fs_file
 
 end fs_fs

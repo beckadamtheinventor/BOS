@@ -3,7 +3,9 @@
 ;@OUTPUT HL = result
 fs_CeilDivBySector:
 	ld bc,512
+	push iy
 	call ti._idvrmu
+	pop iy
 	ld a,e
 	or a,d
 	jq z,.return1

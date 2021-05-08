@@ -4,15 +4,26 @@
 fs_WriteByte:
 	call ti._frameset0
 	ld hl,(ix+9)
-	ld bc,$B
+	ld bc,fsentry_fileattr
 	add hl,bc
-	bit f_readonly,(hl)
+	bit fsbit_readonly,(hl)
 	jq nz,.fail
+	bit fsbit_subfile,(hl)
 	inc hl
-	ld hl,(hl)
+	ld de,(hl)
+	jq z,.get_sector_address
 	push hl
+	ex.s hl,de
+	pop de
+	ld e,0
+	res 0,d
+	add hl,de
+	jq .got_file_ptr
+.get_sector_address:
+	push de
 	call fs_GetSectorAddress
 	pop bc
+.got_file_ptr:
 	ld bc,(ix+12)
 	add hl,bc
 	ld c,(ix+6)

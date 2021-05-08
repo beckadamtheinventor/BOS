@@ -1,6 +1,6 @@
 
 ;@DOES execute a file
-;@INPUT int sys_ExecuteFile(char *path, char *args);
+;@INPUT int sys_ExecuteFile(const char *path, char *args);
 ;@OUTPUT -1 if file does not exist or is not a valid executable format
 ;@OUTPUT ExecutingFileFd set to point to file descriptor. -1 if file not found
 ;@DESTROYS All, OP6.
@@ -28,14 +28,23 @@ sys_ExecuteFile:
 	ld bc,fsentry_fileattr
 	add hl,bc
 	bit fd_subdir,(hl)
-	ld hl,(ExecutingFileFd)
 	jq nz,.fail ;can't execute a directory
-	ld de,fsentry_filesector
-	add hl,de
-	ld hl,(hl)
+	bit fsbit_subfile,(hl)
+	inc hl
+	ld de,(hl)
+	jq z,.get_file_ptr
 	push hl
+	ex.s hl,de
+	pop de
+	ld e,0
+	res 0,d
+	add hl,de
+	jq .got_file_ptr
+.get_file_ptr:
+	push de
 	call fs_GetSectorAddress
 	pop bc
+.got_file_ptr:
 	ld (running_program_ptr),hl
 .exec_check_loop:
 	ld a,(hl)

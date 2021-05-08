@@ -121,6 +121,24 @@
 ?gfx_SetDefaultFont              := $202D8
 ?sys_FreeRunningProcessId        := $202DC
 ?util_Zx7Decompress              := $202E0
+;DONOTHING                       := $202E4
+?gfx_Compute                     := $202E8
+?gfx_FillRectangle               := $202EC
+?gfx_FillScreen                  := $202F0
+?gfx_GetFontPtr                  := $202F4
+?gfx_HorizLine                   := $202F8
+?gfx_InitStdPalette              := $202FC
+?gfx_NextLine                    := $20300
+?gfx_PrintChar                   := $20304
+?gfx_PrintHexA                   := $20308
+?gfx_PrintUInt                   := $2030C
+?gfx_Rectangle                   := $20310
+?gfx_Set8bpp                     := $20314
+?gfx_Set16bpp                    := $20318
+?gfx_SetTextXY                   := $2031C
+?gfx_Sprite                      := $20320
+?gfx_Sprite2x                    := $20324
+?gfx_VertLine                    := $20328
 ;
 ?LCD_PAL?    := 0E30200h
 ?LCD_CTRL?   := 0E30018h

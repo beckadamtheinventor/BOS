@@ -35,10 +35,20 @@ fs_Write:
 	jq nc,.fail ;check if write length + write offset > 65535
 	add hl,de
 
+	bit fsbit_subfile,(iy + fsentry_fileattr)
 	ld de,(iy + fsentry_filesector) ;file first sector
+	jq z,.get_sector_ptr
+	ex.s hl,de
+	lea de,iy
+	ld e,0
+	res 0,d
+	add hl,de
+	jq .got_file_ptr
+.get_sector_ptr:
 	push de
 	call fs_GetSectorAddress
 	pop bc
+.got_file_ptr:
 	ld bc,(ix+18)
 	add hl,bc
 	ld bc,(ix-3)

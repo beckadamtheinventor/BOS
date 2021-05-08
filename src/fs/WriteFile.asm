@@ -15,9 +15,19 @@ fs_WriteFile:
 	or a,a
 	sbc hl,bc
 	jq nc,.fail
+	bit fsbit_subfile,(iy+fsentry_fileattr)
 	ld hl,(iy+fsentry_filesector)
 	push hl
+	jq z,.regular_file
+	ex.s hl,de
+	lea hl,iy
+	ld l,0
+	res 0,h
+	add hl,de
+	jq .got_file_ptr
+.regular_file:
 	call fs_GetSectorAddress
+.got_file_ptr:
 	ex (sp),hl
 	ld hl,(iy+fsentry_filelen)
 	ld de,(ix+9)
