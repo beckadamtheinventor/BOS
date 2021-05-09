@@ -70,6 +70,11 @@ sys_ExecuteFile:
 	inc hl
 	ld de,(hl)
 	db $21 ;ld hl,...
+	db 'CRX' ;Compressed Ram eXecutable
+	or a,a
+	sbc hl,de
+	jq z,.exec_compressed_rex
+	db $21 ;ld hl,...
 	db 'FEX' ;Flash EXecutable
 	or a,a
 	sbc hl,de
@@ -81,11 +86,7 @@ sys_ExecuteFile:
 	jq nz,.fail ;if it's neither a Flash Executable nor a Ram Executable, return -1
 
 .exec_rex:
-	ld iy,(ExecutingFileFd) ;file descriptor
-	ld hl,(iy+fsentry_filesector)
-	push hl
-	call fs_GetSectorAddress
-	pop bc
+	ld hl,(running_program_ptr)
 .exec_rex_entryhl:
 	push hl
 	ld hl,(iy+fsentry_filelen)
@@ -95,15 +96,16 @@ sys_ExecuteFile:
 	pop hl
 	ld de,bos_UserMem
 	push de ;save jump address
-	ld (asm_prgm_size),bc
 	push bc
 	ldir
+	pop bc
+.exec_setup_usermem_bc:
+	ld (asm_prgm_size),bc
 	ld hl,top_of_RAM-$010000
 	ld (free_RAM_ptr),hl
-	ld bc,-bos_UserMem
-	add hl,bc
+	ld de,-bos_UserMem
+	add hl,de
 	ld (remaining_free_RAM),hl
-	pop bc
 	pop hl  ;usermem
 	ld (running_program_ptr),hl
 	add hl,bc
@@ -127,6 +129,38 @@ sys_ExecuteFile:
 	call sys_PrevProcessId
 	pop hl
 	ret
+.exec_compressed_rex:
+	ld hl,(running_program_ptr)
+	ld a,(hl)
+	cp a,$18 ;jr
+	jq z,.compressed_rex_skip2
+	cp a,$C3 ;jp
+	jq nz,.fail
+.compressed_rex_skip4:
+	inc hl
+	inc hl
+.compressed_rex_skip2:
+	ld bc,6
+	add hl,bc ;skip "CRX\0"
+	ld de,(hl)
+	ld c,4
+	add hl,bc ;skip "zx7\0" or whatnot
+	ex hl,de
+	db $01,"zx7" ;ld bc,...
+	or a,a
+	sbc hl,bc
+	jq nz,.fail ;fail if not zx7 compressed
+	ex hl,de
+	ld bc,(hl) ;load extracted size
+	inc hl
+	inc hl
+	inc hl
+	ld de,bos_UserMem
+	push bc,hl,de
+	call util_Zx7Decompress
+	pop de,hl,bc
+	push de
+	jq .exec_setup_usermem_bc
 .jptoprogram:
 	ld hl,(running_program_ptr)
 	jp (hl)
@@ -138,5 +172,3 @@ sys_ExecuteFile:
 	xor a,a
 	ld (curcol),a
 	ret
-
-

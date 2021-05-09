@@ -16,14 +16,14 @@ class Build:
 			"src/lib/srldrvce/srldrvce.asm obj/srldrvce.bin",
 			"src/lib/usbdrvce/usbdrvce.asm obj/usbdrvce.bin",
 
-			"src/fs/bin/bpkload.asm obj/bpkload.bin",
-			"src/fs/bin/bpm.asm obj/bpm.bin",
-			"src/fs/bin/explorer.asm obj/explorer.bin",
-			"src/fs/bin/fexplore.asm obj/fexplore.bin",
-			"src/fs/bin/memedit.asm obj/memedit.bin",
-			"src/fs/bin/usbrun.asm obj/usbrun.bin",
-			"src/fs/bin/usbsend.asm obj/usbsend.bin",
-			"src/fs/bin/usbrecv.asm obj/usbrecv.bin",
+			"-c src/fs/bin/bpkload.asm obj/bpkload.bin",
+			"-c src/fs/bin/bpm.asm obj/bpm.bin",
+			"-c src/fs/bin/explorer.asm obj/explorer.bin",
+			"-c src/fs/bin/fexplore.asm obj/fexplore.bin",
+			"-c src/fs/bin/memedit.asm obj/memedit.bin",
+			"-c src/fs/bin/usbrun.asm obj/usbrun.bin",
+			"-c src/fs/bin/usbsend.asm obj/usbsend.bin",
+			"-c src/fs/bin/usbrecv.asm obj/usbrecv.bin",
 
 			"src/dev_mnt/init.asm obj/dev_mnt/init.bin",
 			"src/dev_mnt/deinit.asm obj/dev_mnt/deinit.bin",
@@ -123,7 +123,13 @@ cp -rf src/include src/data/adrive/src/fs/bin/""")
 		os.system(f"fasmg {self.path}src/updater.asm bin/BOSUPDTR.bin")
 
 	def build_one(self, file):
-		src_file, bin_file = file.split(" ")
+		a = file.split(" ")
+		if a[0].startswith("-c"):
+			src_file, bin_file = a[1:]
+			compressed = True
+		else:
+			src_file, bin_file = a
+			compressed = False
 		src_file = self.path+src_file
 		bin_file = self.path+bin_file
 		try:
@@ -141,10 +147,10 @@ cp -rf src/include src/data/adrive/src/fs/bin/""")
 		print("Building:",src_file,end="  ")
 		if src_file not in self.hash_table.keys():
 			print("building binary:",bin_file)
-			os.system(f"fasmg {src_file} {bin_file}")
+			self.build_commands(src_file, bin_file, compressed)
 		elif self.hash_table[src_file] != h or self.len_table[src_file] != l:
 			print("updating existing binary:",bin_file)
-			os.system(f"fasmg {src_file} {bin_file}")
+			self.build_commands(src_file, bin_file, compressed)
 		else:
 			print("skipping already built file:",file)
 		try:
@@ -156,6 +162,19 @@ cp -rf src/include src/data/adrive/src/fs/bin/""")
 			print("\tFailed to build!",src_file)
 			self.exit()
 		print()
+
+	def build_commands(self, src_file, bin_file, compressed):
+		os.system(f"fasmg {src_file} {bin_file}")
+		if compressed:
+			with open(bin_file,"rb") as f:
+				f.seek(0,2)
+				olen = f.tell()
+			os.system(f"convbin -i {bin_file} -o {bin_file} -j bin -k bin -c zx7")
+			with open(bin_file,"rb") as f:
+				fin_data = [0x18,0x0C,0x43,0x52,0x58,0x00,0x7A,0x78,0x37,0x00]+\
+					list(olen.to_bytes(3, 'little'))+list(f.read())
+			with open(bin_file,"wb") as f:
+				f.write(bytes(fin_data))
 
 
 	def exit(self):
