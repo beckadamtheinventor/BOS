@@ -4,7 +4,7 @@
 ;@DESTROYS All
 ;@NOTE will sanity-check the filesystem if the cluster map is not found.
 fs_GarbageCollect:
-	ld hl,-12
+	ld hl,-18
 	call ti._frameset
 	ld bc,fs_cluster_map_file
 	push bc
@@ -99,30 +99,36 @@ fs_GarbageCollect:
 	jq nz,.cleanup_freed_loop_outer
 
 ;TODO: move files around to free up space
-;	ld hl,(ix-9)
-;	ld bc,(ix-12)
-;.find_free_space_loop:
-;	or a,a
-;	sbc hl,bc
-;	jq nc,.done_reallocating
-;	adc hl,bc
-;	ld a,(hl)
-;	cp a,$FE
-;	jq z,.find_free_space_loop
-;	inc hl
-;
-;; found a free cluster
-;	ex hl,de
-;	ld hl,(ix-12)
-;	or a,a
-;	sbc hl,de
-;	push hl
-;	pop bc
-;	ex hl,de
-;	ld a,$FE ;search for in-use cluster following free clusters
-;	cpir
+; .shuffle_files:
+	; ld hl,(ix-9)
+	; ld bc,(ix-12)
+; .find_free_space_loop:
+	; or a,a
+	; sbc hl,bc
+	; jq nc,.done_shuffling
+	; adc hl,bc
+	; ld a,(hl)
+	; cp a,$FE
+	; jq z,.find_free_space_loop
+	; ld (ix-15),hl
+	; inc hl
 
-;.done_reallocating:
+;; found a free cluster
+	; ex hl,de
+	; ld hl,(ix-12)
+	; or a,a
+	; sbc hl,de
+	; push hl
+	; pop bc
+	; ex hl,de
+	; ld a,$FE ;search for in-use cluster following free clusters
+	; cpir
+	; jp po,.done_shuffling
+	; ld (ix-18),hl
+	
+	
+	; jq .shuffle_files
+; .done_shuffling:
 	call sys_FlashLock
 	call fs_InitClusterMap
 

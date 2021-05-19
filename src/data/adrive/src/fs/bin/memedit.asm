@@ -4,8 +4,8 @@ include 'include/ti84pceg.inc'
 include 'include/bos.inc'
 
 org ti.userMem
-	jq mem_edit
-	db "REX",0
+	; jq mem_edit
+	; db "REX",0
 mem_edit:
 	call libload_load
 	ret nz
@@ -216,12 +216,19 @@ mem_edit_main:
 	sbc hl,de
 	jq nc,.done_drawing ;end of file after end of page
 	call .lcd_ptr_from_cursor
-	ld de,320
-	ld b,9
-.draw_eof_loop:
-	ld (hl),$C0
+	ld de,-331
 	add hl,de
+	ld de,312
+	ld c,11
+.draw_eof_loop_outer:
+	ld b,8
+.draw_eof_loop:
+	ld (hl),$E0
+	inc hl
 	djnz .draw_eof_loop
+	add hl,de
+	dec c
+	jq nz,.draw_eof_loop_outer
 .done_drawing:
 	call gfx_BlitBuffer
 .keys:

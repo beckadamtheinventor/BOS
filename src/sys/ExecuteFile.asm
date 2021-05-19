@@ -1,5 +1,5 @@
 
-;@DOES execute a file
+;@DOES execute a file given a relative or absolute path
 ;@INPUT int sys_ExecuteFile(const char *path, char *args);
 ;@OUTPUT -1 if file does not exist or is not a valid executable format
 ;@OUTPUT ExecutingFileFd set to point to file descriptor. -1 if file not found
@@ -20,6 +20,8 @@ sys_ExecuteFile:
 	jq z,.fail
 	ld (fsOP6),de
 	push hl
+	call fs_AbsPath
+	ex (sp),hl
 	call fs_OpenFile
 	pop bc
 	jq c,.fail

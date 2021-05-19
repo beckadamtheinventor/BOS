@@ -4,8 +4,8 @@ include 'include/ti84pceg.inc'
 include 'include/bos.inc'
 
 org ti.userMem
-	jr bpm_outer_main
-	db "REX",0
+	; jr bpm_outer_main
+	; db "REX",0
 bpm_outer_main:
 	push ix
 	call bpm_main

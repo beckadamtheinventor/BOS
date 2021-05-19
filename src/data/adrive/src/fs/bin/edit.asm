@@ -4,13 +4,13 @@ include 'include/ti84pceg.inc'
 include 'include/bos.inc'
 
 org ti.userMem
-	jr main_init
-	db "REX",0
+	; jr main_init
+	; db "REX",0
 main_init:
 	xor a,a
-	ld (bos.text_bg),a
+	ld (bos.lcd_text_bg),a
 	dec a
-	ld (bos.text_fg),a
+	ld (bos.lcd_text_fg),a
 main_edit_open:
 	pop bc,hl
 	push hl,bc
@@ -70,10 +70,10 @@ cursor_right:
 	add hl,de
 	ld de,(cursor_x)
 	add hl,de
-	ld a,(hl)
 	or a,a
 	sbc hl,bc
 	jq nc,main_edit_loop
+	ld a,(hl)
 	cp a,$A
 	jq nz,.inc
 	
@@ -127,14 +127,14 @@ page_up:
 
 main_draw:
 	push hl
-	xor a,a
-	ld (bos.currow),a
-	ld (bos.curcol),a
+	ld bc,0
+	push bc,bc
 	ld hl,0
 header_string:=$-3
-	call bos.gui_DrawConsoleWindow
+	push hl
+	call gfx_PrintStringXY
+	pop bc,bc,bc
 	pop hl
-	call bos.gui_Print
 .loop:
 	ld de,(end_of_file)
 	or a,a
@@ -150,8 +150,7 @@ header_string:=$-3
 	ld bc,310
 	or a,a
 	sbc hl,bc
-	jq nc,.next_line
-	call gfx_PrintChar
+	call c,gfx_PrintChar
 	pop bc,hl
 	jq .loop
 .next_line:

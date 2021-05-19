@@ -23,9 +23,11 @@ taskbar_item_width    := 64
 
 assert taskbar_height < 231
 
+explorer_dirname_buffer := bos.safeRAM
+
 org ti.userMem
-	jq explorer_init
-	db "REX",0
+	; jq explorer_init
+	; db "REX",0
 explorer_init:
 	;pop bc
 	;pop hl
@@ -42,12 +44,6 @@ explorer_init:
 	sbc hl,hl
 	ret
 explorer_init_2:
-	ld bc,16
-	push bc
-	call bos.sys_Malloc
-	pop bc
-	jq c,explorer_init.fail
-	ld (explorer_dirname_buffer),hl
 	ld bc,258
 	push bc
 	call bos.sys_Malloc
@@ -209,7 +205,7 @@ assert display_items_num_x = 4
 	add hl,bc ;index directory list buffer
 	push iy
 	ld iy,(hl)
-	ld bc,(explorer_dirname_buffer)
+	ld bc,explorer_dirname_buffer
 	push iy,bc
 	call bos.fs_CopyFileName
 	pop bc,iy
@@ -221,9 +217,20 @@ assert display_items_num_x = 4
 	jq explorer_dirlist
 .open_file:
 	ld hl,(iy+bos.fsentry_filesector)
+	bit bos.fd_subfile,(iy + bos.fsentry_fileattr)
+	jq z,.open_file_by_sector
+	ex.s hl,de
+	lea hl,iy
+	ld l,0
+	res 0,h
+	add hl,de
+	jq .check_file_magic
+.open_file_by_sector:
 	ex (sp),hl
 	call bos.fs_GetSectorAddress
-	pop bc,iy
+.check_file_magic:
+	pop bc
+	pop iy
 	ld a,c
 	or a,b
 	jq z,.edit_file
@@ -241,7 +248,7 @@ assert display_items_num_x = 4
 	jq z,.exec_file
 .edit_file:
 	ld hl,str_memeditexe
-	ld de,(explorer_dirname_buffer)
+	ld de,explorer_dirname_buffer
 	jq explorer_call_file
 .skip3:
 	inc hl
@@ -258,9 +265,14 @@ assert display_items_num_x = 4
 	db 'REX' ;Ram EXecutable
 	or a,a
 	sbc hl,de
+	jq z,.exec_file
+	db $21 ;ld hl,...
+	db 'CRX' ;Compressed Ram Executable
+	or a,a
+	sbc hl,de
 	jq nz,.edit_file ;if it's neither a Flash Executable nor a Ram Executable, open it in memedit
 .exec_file:
-	ld hl,(explorer_dirname_buffer)
+	ld hl,explorer_dirname_buffer
 	jq explorer_call_file_noargs
 .filemenu:
 	jq explorer_main
@@ -309,7 +321,7 @@ assert display_items_num_x = 4
 	cp a,(hl)
 	jq z,.path_into_return ;return if pathing into '.' entry
 .path_into_dir:
-	ld hl,(explorer_dirname_buffer)
+	ld hl,explorer_dirname_buffer
 	ld bc,(ix+6)
 	push bc,hl
 	call bos.fs_CopyFileName
@@ -322,6 +334,7 @@ assert display_items_num_x = 4
 	ld (ix-6),hl
 	pop bc,bc
 	add hl,bc
+	inc hl
 	inc hl
 	inc hl
 	push hl
@@ -343,9 +356,12 @@ assert display_items_num_x = 4
 	ld (de),a
 	inc de
 .path_into_dontaddpathsep:
-	ld hl,(explorer_dirname_buffer)
+	ld hl,explorer_dirname_buffer
 	ld bc,(ix-3)
 	ldir ;copy directory we're pathing into
+	ld a,'/'
+	ld (de),a
+	inc de
 	xor a,a
 	ld (de),a
 .path_into_setcurdir:
@@ -369,7 +385,7 @@ assert display_items_num_x = 4
 	ret
 
 explorer_join_file_name:
-	ld hl,(explorer_dirname_buffer)
+	ld hl,explorer_dirname_buffer
 	push hl
 	call ti._strlen
 	ld (.tmplen),hl
@@ -392,7 +408,7 @@ explorer_join_file_name:
 	ld bc,0
 .tmplen2:=$-3
 	ldir
-	ld hl,(explorer_dirname_buffer)
+	ld hl,explorer_dirname_buffer
 	ld bc,(.tmplen)
 	ldir
 	xor a,a
@@ -726,8 +742,7 @@ explorer_display_diritems:
 	ret
 .main:
 	push bc
-	ld bc,0
-explorer_dirname_buffer:=$-3
+	ld bc,explorer_dirname_buffer
 	push bc
 	call bos.fs_CopyFileName
 	call ti._strlen

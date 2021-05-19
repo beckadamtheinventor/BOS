@@ -57,7 +57,7 @@ def alloc_space_for_file(rom, length):
 
 	cmap_data = 0x040000+(rom[cmap+0xC]+rom[cmap+0xD]*0x100)*0x200
 	cmap_len = rom[cmap+0xE]+rom[cmap+0xF]*0x100
-	i = j = 2
+	i = j = 3
 	l = 0
 	while l<length and i<cmap_len:
 		while rom[cmap_data+i] == 0xFE and i<cmap_len:
@@ -68,6 +68,7 @@ def alloc_space_for_file(rom, length):
 			while rom[cmap_data+i] != 0xFE and i<cmap_len and l<length:
 				i+=1
 				l+=0x200
+	print(f"allocated sectors {j} to {i}")
 	for k in range(j,i+1):
 		rom[cmap_data+k] = 0xFE
 		if 0x040000 + k*0x200 >= len(rom):
@@ -121,10 +122,20 @@ def build_cluster_map_dir(rom, cmap, entry):
 			return False
 		if rom[i] == 0x00 or rom[i] == 0xFF:
 			return True
-		for j in range(rom[i+0xF]//2 if not rom[i+0xE]|rom[i+0xF]&1 else rom[i+0xF]//2+1):
-			rom[cmap + rom[i+0xC]+rom[i+0xD]*256 + j] = 0xFE
-		if (rom[i+0xB]&0x10) and rom[i]!=ord('.'): #check if a directory and not '.' or '..'
-			build_cluster_map_dir(rom, cmap, 0x040000+(rom[i+0xC]+rom[i+0xD]*0x100)*0x200)
+		if rom[i+0xB] & 0x08:
+			l = rom[i+0xE]+rom[i+0xF]*0x100
+			ptr = i&0xFFFE00 + rom[i+0xC] + rom[i+0xD]*0x100
+			k = (ptr-0x040000)//0x200
+			i = 0
+			while i<l:
+				rom[cmap + k] = 0xFE
+				k+=1
+				i+=0x200
+		else:
+			for j in range(rom[i+0xF]//2 if not rom[i+0xE]|rom[i+0xF]&1 else rom[i+0xF]//2+1):
+				rom[cmap + rom[i+0xC]+rom[i+0xD]*256 + j] = 0xFE
+			if (rom[i+0xB]&0x10) and rom[i]!=ord('.'): #check if a directory and not '.' or '..'
+				build_cluster_map_dir(rom, cmap, 0x040000+(rom[i+0xC]+rom[i+0xD]*0x100)*0x200)
 		i+=16
 
 def add_file_to_rom(rom, fout, flags, fin_data):
@@ -137,10 +148,12 @@ def add_file_to_rom(rom, fout, flags, fin_data):
 			print(f"Failed to add file to rom: {fout}")
 			exit(1)
 		dptr = search_for_entry(rom, os.path.dirname(fout))
-		rom[dptr+0xC] = ((dptr-0x040000)//0x200)&0xFF
-		rom[dptr+0xD] = (dptr-0x040000)//0x20000
-		rom[dptr+0x1C] = ((dptr_parent-0x040000)//0x200)&0xFF
-		rom[dptr+0x1D] = (dptr_parent-0x040000)//0x20000
+		dptr_ds = 0x040000 + (rom[dptr+0xC] + rom[dptr+0xD]*0x100)*0x200
+		dptr_parent = 0x040000 + (rom[dptr_parent+0xC] + rom[dptr_parent+0xD]*0x100)*0x200
+		rom[dptr_ds+0xC] = ((dptr_ds-0x040000)//0x200)&0xFF
+		rom[dptr_ds+0xD] = (dptr_ds-0x040000)//0x20000
+		rom[dptr_ds+0x1C] = ((dptr_parent-0x040000)//0x200)&0xFF
+		rom[dptr_ds+0x1D] = (dptr_parent-0x040000)//0x20000
 
 	f = search_for_entry(rom, fout)
 	if f is not None:
@@ -176,6 +189,8 @@ def add_file_to_rom(rom, fout, flags, fin_data):
 	rom[ptr+0xE] = len(fin_data)&0xFF
 	rom[ptr+0xF] = len(fin_data)//0x100
 	sptr = 0x040000+sector*0x200
+	while sptr+len(fin_data) > len(rom):
+		rom.extend([0xFF]*512)
 	for i in range(len(fin_data)):
 		rom[sptr+i] = fin_data[i]
 
@@ -201,40 +216,40 @@ if __name__=='__main__':
 			fin = _argv.pop(0)
 			if fin.startswith("-c") or fin.startswith("--compressed-rex"):
 				compress_file = True
+				fin = _argv.pop(0)
 			else:
-				fout = _argv.pop(0)
-				print(f"writing file to rom image: {fin} --> {fout}")
+				compress_file = False
+			fout = _argv.pop(0)
+			print(f"writing file to rom image: {fin} --> {fout}")
+			if compress_file:
+				print("\tCompressing file as zx7-compressed RAM Executable.")
+			try:
 				if compress_file:
-					print("\tCompressing file as zx7-compressed RAM Executable.")
-				try:
-					if compress_file:
-						with open(fin, "rb") as f:
-							f.seek(0, 2)
-							original_len = f.tell()
-						if original_len >= 0xD30000 - 0xD1A881:
-							print(f"File to be compressed would overflow usermem if executed: {fin}\nAborting.")
-							exit(1)
-						os.system(f"convbin -i {fin} -o {fin}.zx7 -j bin -k bin -c zx7")
-						fin_data = [0x18,0x0C,0x43,0x52,0x58,0x00,0x7A,0x78,0x37,0x00]+\
-							list(original_len.to_bytes(3, 'little'))
-						with open(f"{fin}.zx7","rb") as f:
-							fin_data.extend(list(f.read()))
-						if len(fin_data) > 65535:
-							print(f"Compressed file is too large to write to filesystem: {fin}\nAborting.")
-							exit(1)
-					else:
-						with open(fin, "rb") as f:
-							fin_data = list(f.read())
-						if len(fin_data) > 65535:
-							print(f"File is too large to write to filesystem: {fin}\nAborting.")
-							exit(1)
-					else:
-						add_file_to_rom(rom, fout, 0x00, fin_data)
-						build_cluster_map(rom)
-				except FileNotFoundError:
-					print(f"Could not open file: {fin}\nAborting.")
-					exit(1)
-			compress_file = False
+					with open(fin, "rb") as f:
+						f.seek(0, 2)
+						original_len = f.tell()
+					if original_len >= 0xD30000 - 0xD1A881:
+						print(f"File to be compressed would overflow usermem if executed: {fin}\nAborting.")
+						exit(1)
+					os.system(f"convbin -i {fin} -o {fin}.zx7 -j bin -k bin -c zx7")
+					fin_data = [0x18,0x0C,0x43,0x52,0x58,0x00,0x7A,0x78,0x37,0x00]+\
+						list(original_len.to_bytes(3, 'little'))
+					with open(f"{fin}.zx7","rb") as f:
+						fin_data.extend(list(f.read()))
+					if len(fin_data) > 65535:
+						print(f"Compressed file is too large to write to filesystem: {fin}\nAborting.")
+						exit(1)
+				else:
+					with open(fin, "rb") as f:
+						fin_data = list(f.read())
+					if len(fin_data) > 65535:
+						print(f"File is too large to write to filesystem: {fin}\nAborting.")
+						exit(1)
+				add_file_to_rom(rom, fout, 0x00, fin_data)
+				build_cluster_map(rom)
+			except FileNotFoundError:
+				print(f"Could not open file: {fin}\nAborting.")
+				exit(1)
 
 		with open(rom_out, 'wb') as f:
 			f.write(bytes(rom))

@@ -13,10 +13,21 @@ fs_GetFilePtr:
 	inc hl
 	push af
 	ld de,(hl)
-	push hl,de
+	push hl
+	bit fsbit_subfile, a
+	jq z,.get_file_sector
+	ex.s hl,de
+	ld e,0
+	res 0,d
+	add hl,de
+	jq .located_file
+.get_file_sector:
+	push de
 	call fs_GetSectorAddress
 	ex hl,de
-	pop hl,hl
+	pop hl
+.located_file:
+	pop hl
 	inc hl
 	inc hl
 	ld c,(hl)

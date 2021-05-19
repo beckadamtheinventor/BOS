@@ -5,8 +5,8 @@ include 'include/ti84pceg.inc'
 include 'include/bos.inc'
 
 org $D1A881
-	jq usbrecv_main
-	db "REX",0
+	; jq usbrecv_main
+	; db "REX",0
 usbrecv_main:
 	pop bc
 	pop hl

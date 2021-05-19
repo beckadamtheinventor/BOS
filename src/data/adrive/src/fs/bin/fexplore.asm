@@ -4,8 +4,8 @@ include 'include/ti84pceg.inc'
 include 'include/bos.inc'
 
 org $D1A881
-	jq fexplore_main
-	db "REX",0
+	; jq fexplore_main
+	; db "REX",0
 fexplore_main:
 	ld (_ErrSP),sp
 	call libload_load

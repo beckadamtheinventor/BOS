@@ -21,6 +21,7 @@ class Build:
 			"-c src/fs/bin/explorer.asm obj/explorer.bin",
 			"-c src/fs/bin/fexplore.asm obj/fexplore.bin",
 			"-c src/fs/bin/memedit.asm obj/memedit.bin",
+#			"-c src/fs/bin/edit.asm obj/edit.bin",
 			"-c src/fs/bin/usbrun.asm obj/usbrun.bin",
 			"-c src/fs/bin/usbsend.asm obj/usbsend.bin",
 			"-c src/fs/bin/usbrecv.asm obj/usbrecv.bin",
@@ -86,11 +87,11 @@ cp -rf src/include src/data/adrive/src/fs/bin/""")
 			os.system("mkdir noti-ez80\\bin")
 		else:
 			os.system("mkdir noti-ez80/bin")
-		os.system("fasmg noti-ez80/src/BareOS/usbrun.asm noti-ez80/src/BareOS/usbrun.bin")
-		os.system("fasmg noti-ez80/src/lib/fatdrvce/fatdrvce.asm noti-ez80/src/lib/fatdrvce/fatdrvce.bin")
-		os.system("fasmg noti-ez80/src/lib/srldrvce/srldrvce.asm noti-ez80/src/lib/srldrvce/srldrvce.bin")
-		os.system("fasmg noti-ez80/src/lib/usbdrvce/usbdrvce.asm noti-ez80/src/lib/usbdrvce/usbdrvce.bin")
-		os.system("fasmg noti-ez80/src/lib/libload/libload.asm noti-ez80/src/lib/libload/libload.bin")
+		# os.system("fasmg noti-ez80/src/BareOS/usbrun.asm noti-ez80/src/BareOS/usbrun.bin")
+		# os.system("fasmg noti-ez80/src/lib/fatdrvce/fatdrvce.asm noti-ez80/src/lib/fatdrvce/fatdrvce.bin")
+		# os.system("fasmg noti-ez80/src/lib/srldrvce/srldrvce.asm noti-ez80/src/lib/srldrvce/srldrvce.bin")
+		# os.system("fasmg noti-ez80/src/lib/usbdrvce/usbdrvce.asm noti-ez80/src/lib/usbdrvce/usbdrvce.bin")
+		# os.system("fasmg noti-ez80/src/lib/libload/libload.asm noti-ez80/src/lib/libload/libload.bin")
 		os.system("fasmg noti-ez80/src/main.asm noti-ez80/bin/NOTI.rom")
 
 	def build_filesystem(self):

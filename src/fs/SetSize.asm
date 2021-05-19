@@ -4,17 +4,21 @@
 ;@OUTPUT true if resizing succeeded
 ;@NOTE Will allocate enough sectors to contain len bytes.
 fs_SetSize:
-	ld hl,-19
+	ld hl,-20
 	call ti._frameset
 	ld iy,(ix+9)
-	ld hl,(iy+$C)
+	ld a,(iy + fsentry_fileattr)
+	ld (ix-20),a
+	ld hl,(iy + fsentry_filesector)
 	ld (ix-19),hl
-	ld de,(iy+$E)
+	ld de,(iy + fsentry_filelen)
 	ex.s hl,de
 	call fs_CeilDivBySector
 	ld a,l
 	or a,h
 	jq nz,.allocate_from_nonempty_file
+
+	res fsbit_subfile, (ix-20)
 
 	ld hl,(ix+6)
 	push hl
@@ -35,11 +39,14 @@ fs_SetSize:
 	add hl,de
 	jq nc,.update_file_entry ;file resize does not require any more clusters
 
+	bit fsbit_subfile, (ix-20)
+	res fsbit_subfile, (ix-20)
+
 	push iy
-	call fs_Free ;free the old file clusters
+	call z, fs_Free ;free the old file clusters if not a subfile
 	pop iy
 
-	ld hl,(iy+$E)
+	ld hl,(iy+fsentry_filelen)
 	ex.s hl,de
 	push de
 	ld hl,(ix+6)
@@ -51,13 +58,23 @@ fs_SetSize:
 	push hl
 	call fs_GetSectorAddress
 	ex (sp),hl
-	ld hl,(iy+$C)
+	ld hl,(iy + fsentry_filesector)
+	bit fsbit_subfile, (iy + fsentry_fileattr)
+	jq z,.rewrite_non_subfile
+	ex.s hl,de
+	lea hl,iy
+	ld l,0
+	res 0,h
+	add hl,de
+	jq .rewrite_file
+.rewrite_non_subfile:
 	push hl
 	call fs_GetSectorAddress
 	pop bc
+.rewrite_file:
 	ex (sp),hl
 	push hl
-	call sys_WriteFlashFullRam
+	call sys_WriteFlashFullRam ;rewrite file contents at new location
 	pop bc,bc,bc
 
 .update_file_entry:
@@ -68,6 +85,8 @@ fs_SetSize:
 	push bc
 	ld c,12
 	ldir
+	ld a,(ix-20) ;load new file attribute byte
+	ld (ix + fsentry_fileattr - 16),a
 	ld bc,(ix-19)
 	ld (ix-4),bc
 	ld bc,(ix+6)

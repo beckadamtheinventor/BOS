@@ -149,7 +149,7 @@
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 </table></div><div id="sys_ExecuteFile"><h1>sys_ExecuteFile</h1>	<h3>syscall Adress 020124</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>execute a file</td><td>int sys_ExecuteFile(const char *path, char *args);</td><td>-1 if file does not exist or is not a valid executable format<br>
+<tr><td>execute a file given a relative or absolute path</td><td>int sys_ExecuteFile(const char *path, char *args);</td><td>-1 if file does not exist or is not a valid executable format<br>
 ExecutingFileFd set to point to file descriptor. -1 if file not found</td><td>All, OP6.</td><td>
 </td></tr>
 </table></div><div id="os_GetOSInfo"><h1>os_GetOSInfo</h1>	<h3>syscall Adress 020128</h3>
