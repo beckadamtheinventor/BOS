@@ -136,4 +136,6 @@
 	jp gfx_Sprite
 	jp gfx_Sprite2x
 	jp gfx_VertLine
+	jp sys_Malloc32Align32
+	jp sys_Malloc64Align256
 
