@@ -20,7 +20,7 @@ fs_CreateDir:
 	ld (ix-3),hl ; save parent directory sector
 	call sys_Free ;free memory malloc'd by fs_ParentDir
 	pop bc
-	ld hl,48 ;minimum directory size
+	ld hl,32 ;size of new directory
 	ld de,(ix+9)
 	ld bc,(ix+6)
 	push hl,de,bc

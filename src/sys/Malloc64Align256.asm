@@ -3,7 +3,7 @@
 ;@OUTPUT hl = malloc'd bytes. hl = 0 if failed to malloc
 ;@OUTPUT Cf set if failed to malloc
 ;@DESTROYS All
-sys_Malloc:
+sys_Malloc64Align256:
 	ld hl,malloc_cache
 	ld bc,4096
 .loop:

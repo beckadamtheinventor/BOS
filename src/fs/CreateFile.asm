@@ -70,7 +70,7 @@ fs_CreateFile:
 
 	ld de,(iy+fsentry_filelen)
 	ex.s hl,de
-	ld bc,-32 ;write 32 bytes behind the new end of file, to overwrite the end of directory marker
+	ld bc,-16 ;write 16 bytes behind the new end of file, to append the directory
 	add hl,bc
 	push hl,iy
 	ld bc,1
@@ -78,20 +78,6 @@ fs_CreateFile:
 	ld c,16
 	push bc
 	pea ix-19
-	call fs_Write ;write new file descriptor to parent directory
-	pop bc,bc,bc,iy,bc
-
-	ld de,(iy+fsentry_filelen)
-	ex.s hl,de
-	ld bc,-16 ;write 16 bytes behind the new end of file to write new end of directory marker
-	add hl,bc
-	push hl,iy
-	ld bc,1
-	push bc
-	ld c,16
-	push bc
-	ld bc,$03FFF0
-	push bc
 	call fs_Write ;write new file descriptor to parent directory
 	pop bc,bc,bc,iy,bc
 
