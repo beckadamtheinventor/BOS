@@ -102,6 +102,7 @@ explorer_dirlist_buffer:=$-3
 	push hl
 	call nz,bos.fs_DirList
 	pop bc,bc,bc,bc
+	ld (explorer_max_selection),hl
 explorer_main:
 	call draw_background
 
@@ -198,6 +199,12 @@ assert display_items_num_x = 4
 	ld a,(explorer_cursor_x)
 	add a,l ;add x
 	ld l,a
+	ld bc,0
+explorer_max_selection:=$-3
+	or a,a
+	sbc hl,bc
+	jq nc,explorer_main
+	add hl,bc
 	add a,a ;multiply result by 3
 	add a,l
 	ld l,a

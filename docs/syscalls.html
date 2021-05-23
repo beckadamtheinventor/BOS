@@ -135,6 +135,8 @@
 <tr><td><a href="#gfx_Sprite">bos.gfx_Sprite</a></td><td><a href="#gfx_Sprite">020320</a></td></tr>
 <tr><td><a href="#gfx_Sprite2x">bos.gfx_Sprite2x</a></td><td><a href="#gfx_Sprite2x">020324</a></td></tr>
 <tr><td><a href="#gfx_VertLine">bos.gfx_VertLine</a></td><td><a href="#gfx_VertLine">020328</a></td></tr>
+<tr><td><a href="#sys_Malloc32Align32">bos.sys_Malloc32Align32</a></td><td><a href="#sys_Malloc32Align32">02032C</a></td></tr>
+<tr><td><a href="#sys_Malloc64Align256">bos.sys_Malloc64Align256</a></td><td><a href="#sys_Malloc64Align256">020330</a></td></tr>
 </table><div id="boot_os"><h1>boot_os</h1>	<h3>syscall Adress 020108</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
@@ -454,8 +456,8 @@ Cf set if failed</td><td></td><td>
 </td></tr>
 </table></div><div id="fs_DirList"><h1>fs_DirList</h1>	<h3>syscall Adress 020248</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>list items in a directory</td><td>void **fs_DirList(void **buffer, const char *path, int num, int skip);</td><td>pointer to array of dir entry pointers. Returns -1 and Cf on fail</td><td></td><td>
-</td></tr>
+<tr><td>list items in a directory</td><td>int fs_DirList(void **buffer, const char *path, unsigned int num, unsigned int skip);</td><td>Returns number of items read. Returns -1 and Cf on fail.</td><td></td><td>
+integer arguments "num" and "skip" must be less than 65536.</td></tr>
 </table></div><div id="sys_Free"><h1>sys_Free</h1>	<h3>syscall Adress 02024C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Free as block of memory malloc'd by sys_Malloc</td><td>void sys_Free(void *ptr);</td><td></td><td>All</td><td>
@@ -686,5 +688,15 @@ BC X<<8 + Y</td><td></td><td>HL,DE,BC,AF,fsOP6</td><td>
 </table></div><div id="gfx_VertLine"><h1>gfx_VertLine</h1>	<h3>syscall Adress 020328</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="sys_Malloc32Align32"><h1>sys_Malloc32Align32</h1>	<h3>syscall Adress 02032C</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Allocate 32 bytes of memory, 32-byte aligned.</td><td>void *sys_Malloc32Align32(void);</td><td>hl = malloc'd bytes. hl = 0 if failed to malloc<br>
+Cf set if failed to malloc</td><td>All</td><td>
+BOS's memory allocation is already 32-byte aligned</td></tr>
+</table></div><div id="sys_Malloc64Align256"><h1>sys_Malloc64Align256</h1>	<h3>syscall Adress 020330</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Allocate 64 bytes of memory, 256-byte aligned.</td><td>void *sys_Malloc64Align256(void);</td><td>hl = malloc'd bytes. hl = 0 if failed to malloc<br>
+Cf set if failed to malloc</td><td>All</td><td>
 </td></tr>
 </table></div></body></html>

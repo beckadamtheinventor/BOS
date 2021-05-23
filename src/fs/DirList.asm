@@ -1,6 +1,7 @@
 ;@DOES list items in a directory
-;@INPUT void **fs_DirList(void **buffer, const char *path, int num, int skip);
-;@OUTPUT pointer to array of dir entry pointers. Returns -1 and Cf on fail
+;@INPUT int fs_DirList(void **buffer, const char *path, unsigned int num, unsigned int skip);
+;@OUTPUT Returns number of items read. Returns -1 and Cf on fail.
+;@NOTE integer arguments "num" and "skip" must be less than 65536.
 fs_DirList:
 	call ti._frameset0
 	push iy
@@ -36,6 +37,7 @@ fs_DirList:
 	jq z,.skip_loop_bypass_deleted
 	jq .skip_loop
 .list_loop_entry:
+	ld de,0
 	ld hl,(ix+6)
 	ld bc,(ix+12)
 .list_loop:
@@ -56,18 +58,16 @@ fs_DirList:
 	inc hl
 	inc hl
 	inc hl
+	inc de
 .list_loop_next:
 	lea iy,iy+16
 	jq .list_loop
 .endofdir:
+	ld c,0
+	ld b,c
+	ld (hl),bc
 	ex hl,de
-	or a,a
-	sbc hl,hl
-	ex hl,de
-	ld (hl),de
-.done:
-	ld hl,(ix+6)
-	db $01
+	db $01 ;ld bc,...
 .fail:
 	scf
 	sbc hl,hl

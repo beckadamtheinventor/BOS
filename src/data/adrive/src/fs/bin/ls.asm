@@ -39,7 +39,7 @@ ls_main:
 	ld de,(ix-9)
 	push bc,de,hl
 	call bos.fs_DirList
-	pop bc,bc,bc,bc
+	pop hl,bc,bc,bc
 	jq c,.exit
 
 	ld b,32
