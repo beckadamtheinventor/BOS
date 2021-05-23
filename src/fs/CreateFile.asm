@@ -70,7 +70,7 @@ fs_CreateFile:
 
 	ld de,(iy+fsentry_filelen)
 	ex.s hl,de
-	ld bc,-16 ;write 16 bytes behind the new end of file, to append the directory
+	ld bc,-16 ;write 16 bytes behind the new end of parent directory file, appending the new entry
 	add hl,bc
 	push hl,iy
 	ld bc,1

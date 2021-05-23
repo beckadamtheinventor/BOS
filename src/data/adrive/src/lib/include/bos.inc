@@ -139,6 +139,8 @@
 ?gfx_Sprite                      := $20320
 ?gfx_Sprite2x                    := $20324
 ?gfx_VertLine                    := $20328
+?sys_Malloc32Align32             := $2032C
+?sys_Malloc64Align256            := $20330
 ;
 ?LCD_PAL?    := 0E30200h
 ?LCD_CTRL?   := 0E30018h
