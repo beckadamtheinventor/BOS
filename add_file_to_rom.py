@@ -42,10 +42,10 @@ def copy_file_name(entry):
 	elif chr(entry[0]) == '.':
 		return "."
 	if chr(entry[8]) == ' ':
-		name = "".join(chr(c) for c in entry[:8])
+		name = "".join(chr(c) for c in entry[:9])
 		return name[:name.find(" ")]
 	else:
-		name = "".join(chr(c) for c in entry[:8])
+		name = "".join(chr(c) for c in entry[:9])
 		name = name[:name.find(" ")]
 		return name + "." + "".join(chr(c) for c in entry[8:11]).rstrip(" ")
 
@@ -68,7 +68,7 @@ def alloc_space_for_file(rom, length):
 			while rom[cmap_data+i] != 0xFE and i<cmap_len and l<length:
 				i+=1
 				l+=0x200
-	print(f"allocated sectors {j} to {i}")
+	# print(f"allocated sectors {j} to {i}")
 	for k in range(j,i+1):
 		rom[cmap_data+k] = 0xFE
 		if 0x040000 + k*0x200 >= len(rom):
@@ -111,32 +111,37 @@ def build_cluster_map(rom):
 
 	cmap_data = 0x040000+(rom[cmap+0xC]+rom[cmap+0xD]*0x100)*0x200
 	rom[cmap_data] = 0xFE
+	rom[cmap_data+1] = 0xFE
 	build_cluster_map_dir(rom, cmap_data, 0x040000)
 
 
-def build_cluster_map_dir(rom, cmap, entry):
+def build_cluster_map_dir(rom, cmap, entry, dirprefix="/"):
 	i = 0x040000+(rom[entry+0xC]+rom[entry+0xD]*0x100)*0x200
-	maxi = i+(rom[entry+0xE]+rom[entry+0xF]*0x100)-16
-	while True:
-		if i>=maxi:
-			return False
-		if rom[i] == 0x00 or rom[i] == 0xFF:
+	# maxi = i+(rom[entry+0xE]+rom[entry+0xF]*0x100)-16
+	while i<len(rom):
+		if rom[i] in [0x00, 0xFF]:
 			return True
-		if rom[i+0xB] & 0x08:
+		if rom[i+0xB] & 8:
 			l = rom[i+0xE]+rom[i+0xF]*0x100
-			ptr = i&0xFFFE00 + rom[i+0xC] + rom[i+0xD]*0x100
+			ptr = (i&0xFFFE00) + rom[i+0xC] + rom[i+0xD]*0x100
 			k = (ptr-0x040000)//0x200
-			i = 0
-			while i<l:
+			m = 0
+			# print(f"processing subfile {copy_file_name(rom[i:i+16])} at {hex(ptr)}")
+			# print(f"starting at cluster map address {hex(cmap+k)}")
+			# print(f"sectors {k} to ",end="")
+			while m<l:
 				rom[cmap + k] = 0xFE
 				k+=1
-				i+=0x200
+				m+=0x200
+			# print(k)
 		else:
-			for j in range(rom[i+0xF]//2 if not rom[i+0xE]|rom[i+0xF]&1 else rom[i+0xF]//2+1):
-				rom[cmap + rom[i+0xC]+rom[i+0xD]*256 + j] = 0xFE
-			if (rom[i+0xB]&0x10) and rom[i]!=ord('.'): #check if a directory and not '.' or '..'
-				build_cluster_map_dir(rom, cmap, 0x040000+(rom[i+0xC]+rom[i+0xD]*0x100)*0x200)
+			for j in range(rom[i+0xF]//2 if not rom[i+0xE]|(rom[i+0xF]&1) else rom[i+0xF]//2+1):
+				rom[cmap + rom[i+0xC]+rom[i+0xD]*0x100 + j] = 0xFE
+			if rom[i+0xB]&0x10 and rom[i]!=0x2E: #check if a directory and not '.' or '..'
+				# print(f"pathing into {dirprefix}{copy_file_name(rom[i:i+16])}")
+				build_cluster_map_dir(rom, cmap, 0x040000+(rom[i+0xC]+rom[i+0xD]*0x100)*0x200, dirprefix+copy_file_name(rom[i:i+16])+"/")
 		i+=16
+	return False
 
 def add_file_to_rom(rom, fout, flags, fin_data):
 	dptr = search_for_entry(rom, os.path.dirname(fout))
@@ -251,5 +256,5 @@ if __name__=='__main__':
 				print(f"Could not open file: {fin}\nAborting.")
 				exit(1)
 
-		with open(rom_out, 'wb') as f:
-			f.write(bytes(rom))
+	with open(rom_out, 'wb') as f:
+		f.write(bytes(rom))
