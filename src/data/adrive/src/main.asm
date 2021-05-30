@@ -43,6 +43,7 @@ fs_dir bin_dir
 	fs_sfentry cp_exe, "cp", "", f_readonly+f_system+f_subfile
 	fs_sfentry initdev_exe, "device", "", f_readonly+f_system+f_subfile
 	fs_sfentry df_exe, "df", "", f_readonly+f_system+f_subfile
+	fs_entry edit_exe, "edit", "", f_readonly+f_system
 	fs_entry explorer_exe, "explorer", "", f_readonly+f_system
 	fs_entry fexplore_exe, "fexplore", "", f_readonly+f_system
 	fs_sfentry info_exe, "info", "", f_readonly+f_system+f_subfile
@@ -302,6 +303,10 @@ end fs_file
 
 fs_file bpm_exe
 	file '../obj/bpm.bin'
+end fs_file
+
+fs_file edit_exe
+	file '../obj/edit.bin'
 end fs_file
 
 fs_file missing_icon

@@ -3,6 +3,9 @@ include 'include/ez80.inc'
 include 'include/ti84pceg.inc'
 include 'include/bos.inc'
 
+line_height := 9
+margin_bottom := 231
+
 org ti.userMem
 	; jr main_init
 	; db "REX",0
@@ -28,7 +31,11 @@ main_edit_open:
 .load:
 	ld de,bos.safeRAM
 .copy:
+	push hl,bc
 	ldir
+	pop bc,hl
+	add hl,bc
+	ld (end_of_file),hl
 	call main_edit_loop
 	xor a,a
 	sbc hl,hl
@@ -46,10 +53,10 @@ edit_page_offset:=$-3
 	jq z,cursor_right
 	cp a,2
 	jq z,cursor_left
-	cp a,1
-	jq z,cursor_down
-	cp a,4
-	jq z,cursor_up
+	; cp a,1
+	; jq z,cursor_down
+	; cp a,4
+	; jq z,cursor_up
 	push af
 .wait_key_loop:
 	call bos.sys_AnyKey
@@ -87,7 +94,8 @@ cursor_left:
 	ld hl,(edit_pointer)
 	ld de,(edit_page_offset)
 	add hl,de
-	ld de,(cursor_x)
+	ld de,0
+cursor_x:=$-3
 	dec de
 	add hl,de
 	ld a,(hl)
@@ -97,7 +105,8 @@ cursor_left:
 	jq cursor_x_loadde
 
 cursor_up:
-	ld hl,(cursor_y)
+	ld hl,0
+cursor_y:=$-3
 	add hl,bc
 	or a,a
 	sbc hl,bc
@@ -132,38 +141,46 @@ main_draw:
 	ld hl,0
 header_string:=$-3
 	push hl
-	call gfx_PrintStringXY
+	call bos.gfx_PrintStringXY
 	pop bc,bc,bc
 	pop hl
 .loop:
-	ld de,(end_of_file)
+	ld de,0
+end_of_file:=$-3
 	or a,a
 	sbc hl,de
-	jq nc,gfx_BlitBuffer
+	jq nc,bos.gfx_BlitBuffer
 	add hl,de
 	ld a,(hl)
 	cp a,$A
 	jq z,.next_line
 	ld c,a
 	push hl,bc
-	call gfx_GetTextX
+	call bos.gfx_GetTextX
 	ld bc,310
 	or a,a
 	sbc hl,bc
-	call c,gfx_PrintChar
+	call c,bos.gfx_PrintChar
 	pop bc,hl
 	jq .loop
 .next_line:
 	push hl
-	call gfx_GetTextY
+	call bos.gfx_GetTextY
 	ld bc,line_height
 	add hl,bc
+	ld bc,margin_bottom
+	or a,a
+	sbc hl,bc
+	jq nc,.done_drawing
+	add hl,bc
 	push bc,hl
-	call gfx_SetTextXY
+	call bos.gfx_SetTextXY
 	pop bc,bc
-	ld hl,margin_bottom
 	pop hl
 	jq .loop
+.done_drawing:
+	pop bc
+	jq bos.gfx_BlitBuffer
 
 
 failed_to_open:

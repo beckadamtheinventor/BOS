@@ -13,14 +13,14 @@ end macro
 f_readonly   := 1
 f_hidden     := 2
 f_system     := 4
-f_subfile     := 8
+f_subfile    := 8
 f_subdir     := $10
 f_device     := $40
 
 fb_readonly   := 0
 fb_hidden     := 1
 fb_system     := 2
-fb_subfile     := 3
+fb_subfile    := 3
 fb_subdir     := 4
 fb_device     := 6
 

@@ -138,4 +138,7 @@
 	jp gfx_VertLine
 	jp sys_Malloc32Align32
 	jp sys_Malloc64Align256
+	jp gfx_PrintStringXY
+	jp gfx_GetTextX
+	jp gfx_GetTextY
 

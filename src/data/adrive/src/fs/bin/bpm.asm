@@ -15,6 +15,13 @@ bpm_outer_main:
 bpm_main:
 	call libload_load
 	ret c
+
+	ld hl,str_ConfigPath
+	ld c,$10
+	push bc,hl
+	call bos.fs_CreateDir
+	pop bc,bc
+	
 	ld ix,3
 	add ix,sp
 	ld hl,(ix+6)
@@ -64,14 +71,38 @@ bpm_main:
 	db 0
 
 bpm_install:
+	ld bc,str_Install.len
+	add hl,bc
+	ld a,(hl)
+	cp a,'-'
+	jq nz,.network_package_install
+	inc hl
+	ld a,(hl)
+	cp a,'f'
+	jq nz,.network_package_install
+	inc hl
+	inc hl
+	push hl
+	call bos.fs_GetFilePtr
+	pop de
+	jq bpm_process_data
+.network_package_install:
 	
 	ret
+
 bpm_remove:
-	
+	ld bc,str_Remove.len
+	add hl,bc
 	ret
+
 bpm_purge:
-	
+	ld bc,str_Purge.len
+	add hl,bc
 	ret
+
+bpm_process_data:
+	ret
+
 
 libload_load:
 	ld hl,.name

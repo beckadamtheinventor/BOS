@@ -137,6 +137,9 @@
 <tr><td><a href="#gfx_VertLine">bos.gfx_VertLine</a></td><td><a href="#gfx_VertLine">020328</a></td></tr>
 <tr><td><a href="#sys_Malloc32Align32">bos.sys_Malloc32Align32</a></td><td><a href="#sys_Malloc32Align32">02032C</a></td></tr>
 <tr><td><a href="#sys_Malloc64Align256">bos.sys_Malloc64Align256</a></td><td><a href="#sys_Malloc64Align256">020330</a></td></tr>
+<tr><td><a href="#gfx_PrintStringXY">bos.gfx_PrintStringXY</a></td><td><a href="#gfx_PrintStringXY">020334</a></td></tr>
+<tr><td><a href="#gfx_GetTextX">bos.gfx_GetTextX</a></td><td><a href="#gfx_GetTextX">020338</a></td></tr>
+<tr><td><a href="#gfx_GetTextY">bos.gfx_GetTextY</a></td><td><a href="#gfx_GetTextY">02033C</a></td></tr>
 </table><div id="boot_os"><h1>boot_os</h1>	<h3>syscall Adress 020108</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
@@ -698,5 +701,17 @@ BOS's memory allocation is already 32-byte aligned</td></tr>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Allocate 64 bytes of memory, 256-byte aligned.</td><td>void *sys_Malloc64Align256(void);</td><td>hl = malloc'd bytes. hl = 0 if failed to malloc<br>
 Cf set if failed to malloc</td><td>All</td><td>
+</td></tr>
+</table></div><div id="gfx_PrintStringXY"><h1>gfx_PrintStringXY</h1>	<h3>syscall Adress 020334</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td></td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="gfx_GetTextX"><h1>gfx_GetTextX</h1>	<h3>syscall Adress 020338</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td></td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="gfx_GetTextY"><h1>gfx_GetTextY</h1>	<h3>syscall Adress 02033C</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td></td><td></td><td></td><td>
 </td></tr>
 </table></div></body></html>

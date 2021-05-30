@@ -141,6 +141,9 @@
 ?gfx_VertLine                    := $20328
 ?sys_Malloc32Align32             := $2032C
 ?sys_Malloc64Align256            := $20330
+?gfx_PrintStringXY               := $20334
+?gfx_GetTextX                    := $20338
+?gfx_GetTextY                    := $2033C
 ;
 ?LCD_PAL?    := 0E30200h
 ?LCD_CTRL?   := 0E30018h

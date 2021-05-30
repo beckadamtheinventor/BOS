@@ -851,7 +851,7 @@ explorer_display_diritems:
 	inc hl
 	cp a,7 ;denotes external icon
 	jq z,.external_icon
-	cp a,1
+	dec a
 	ret nz ;don't display an icon if there isn't one
 .display_icon:
 	ld bc,0
@@ -882,7 +882,7 @@ explorer_sprite_temp:=$-3
 	ret z
 	ld bc,(hl)
 	ex hl,de
-	db $21,"ICO"
+	db $21,"SPT"
 	xor a,a
 	sbc hl,de
 	ret nz
