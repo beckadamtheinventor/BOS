@@ -17,13 +17,14 @@ In order to install BOS on a calculator:
 Download "BOSOS.8xp" from the releases page, transfer it to your calculator using TI-Connect CE or TiLP, then run it from the homescreen. You should see a formatting screen pop up.
 
 # Building
-BOS requires the CE C toolchain version 9+ in order to build.
+BOS requires the CE C toolchain version 9+, and python 3.7 or higher in order to build.
 
 Link to CE C toolchain:
 https://github.com/CE-Programming/toolchain
 
-Once the toolchain is installed, run `build.py` with python 3.7 or higher.
-If you would prefer to use the build script via the command line, type `python3 build.py -h` for a list of options.
+Once the toolchain is installed, run `python build.py` from the command line while in the repo's root directory.
+Optionally, you can use make to build BOS.
+For advanced users, type `python3 build.py -h` for a list of build options.
 
 
 # Updating BOS
@@ -36,6 +37,8 @@ It is essentially the same program that initially installs BOS. However this pro
 # BOS Recovery Options
 From BOS's homescreen, press the "Y=" key. (also known as "F1") If this doesn't go to the recovery menu, press "clear" to go back, then "F1" again.
 From there, you can reboot, attempt filesystem recovery, reset the filesystem, and uninstall BOS.
+If you still cannot access the recovery menu, press the reset button found on the back of the calculator while pressing the recovery menu key.
+If that still doesn't work, hold on+2nd+del and press reset then reinstall TIOS using TI-Connect CE or TiLP.
 
 
 # Documentation
