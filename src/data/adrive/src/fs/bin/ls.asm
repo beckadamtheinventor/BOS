@@ -48,15 +48,14 @@ ls_main:
 	ld a,(de)
 	or a,a
 	jq z,.exit
-	ex hl,de
-	add hl,de
-	sbc hl,de
-	jq z,.exit
-	ex hl,de
 	inc a
 	jq z,.exit
+	ld a,e
+	or a,d
 	inc hl
 	inc hl
+	or a,(hl)
+	jq z,.exit
 	inc hl
 	push hl,bc
 	push de
@@ -92,13 +91,16 @@ ls_main:
 	ld a,c
 	ld (bos.lcd_text_bg),a
 .draw_file_name:
-	ld hl,bos.fsOP6+1
-	push iy,hl
+	ld hl,bos.curcol
+	inc (hl)
+	inc (hl)
+	push iy
 	call bos.fs_CopyFileName
-	pop hl,iy
-	dec hl
-	ld (hl),$9
+	pop bc
+	push hl
 	call bos.gui_Print
+	call bos.sys_Free ;free the buffer allocated by fs_CopyFileName
+	pop bc
 	ld a,(ix-10)
 	ld (bos.lcd_text_bg),a
 	call bos.gui_NewLine
@@ -122,5 +124,6 @@ ls_main:
 	pop ix
 	ret
 .tab_str:
-	db $9,$9,0
-
+	db $9
+str_TabString:
+	db $9,0

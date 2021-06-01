@@ -15,15 +15,16 @@ f_hidden     := 2
 f_system     := 4
 f_subfile    := 8
 f_subdir     := $10
-f_device     := $40
+f_device     := $20
+f_elevated   := $80
 
 fb_readonly   := 0
 fb_hidden     := 1
 fb_system     := 2
 fb_subfile    := 3
 fb_subdir     := 4
-fb_device     := 6
-
+fb_device     := 5
+fb_elevated   := 7
 
 macro fs_fs?
 	local fs

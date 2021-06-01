@@ -7,8 +7,11 @@ fs_WriteFile:
 	ld hl,-19
 	call ti._frameset
 	push iy
-	ld iy,(ix+12)
-	bit fsbit_readonly,(iy+fsentry_fileattr)
+	ld bc,(ix+12)
+	push bc
+	call fs_CheckWritableFD
+	dec a
+	pop iy
 	jq nz,.fail
 	ld hl,(ix+9)
 	ld bc,65535
@@ -43,8 +46,8 @@ fs_WriteFile:
 	ld de,(ix+6)
 	push bc,de,hl
 	call sys_WriteFlashFullRam
-	jq c,.fail
 	pop bc,bc,bc
+	jq c,.fail
 
 .success:
 	ld hl,(ix+9)

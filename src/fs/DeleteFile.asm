@@ -9,9 +9,12 @@ fs_DeleteFile:
 ; open the file to be deleted and check if it's writable
 	ld hl,(ix+6)
 	push hl
+	call fs_CheckWritable
+	dec a
+	jq nz,.fail
 	call fs_OpenFile
 	pop bc
-	jq c,.fail
+;	jq c,.fail
 	ld (ix-3),hl
 	ld bc,fsentry_fileattr
 	add hl,bc

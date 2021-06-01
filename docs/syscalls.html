@@ -140,6 +140,9 @@
 <tr><td><a href="#gfx_PrintStringXY">bos.gfx_PrintStringXY</a></td><td><a href="#gfx_PrintStringXY">020334</a></td></tr>
 <tr><td><a href="#gfx_GetTextX">bos.gfx_GetTextX</a></td><td><a href="#gfx_GetTextX">020338</a></td></tr>
 <tr><td><a href="#gfx_GetTextY">bos.gfx_GetTextY</a></td><td><a href="#gfx_GetTextY">02033C</a></td></tr>
+<tr><td><a href="#fs_CheckWritable">bos.fs_CheckWritable</a></td><td><a href="#fs_CheckWritable">020340</a></td></tr>
+<tr><td><a href="#fs_CheckWritableFD">bos.fs_CheckWritableFD</a></td><td><a href="#fs_CheckWritableFD">020344</a></td></tr>
+<tr><td><a href="#sys_OpenFileInPath">bos.sys_OpenFileInPath</a></td><td><a href="#sys_OpenFileInPath">020348</a></td></tr>
 </table><div id="boot_os"><h1>boot_os</h1>	<h3>syscall Adress 020108</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
@@ -172,15 +175,15 @@ This only searches for short 8.3 file names.</td></tr>
 </table></div><div id="fs_CheckDirExists"><h1>fs_CheckDirExists</h1>	<h3>syscall Adress 020134</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>check if a directory exists.</td><td>bool fs_CheckDirExists(char *path);</td><td>true if path exists, else false</td><td></td><td>
-uses InputBuffer and fsOP6</td></tr>
+</td></tr>
 </table></div><div id="fs_GetPathLastName"><h1>fs_GetPathLastName</h1>	<h3>syscall Adress 020138</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>get last file name from a path. Equivalent to python path.split("/")[-1]</td><td>char *fs_GetPathLastName(char *path);</td><td>pointer to file name</td><td></td><td>
 this will return the last entry in the path, regardless of whether the path exists or if it points to a program entrypoint.</td></tr>
 </table></div><div id="fs_CopyFileName"><h1>fs_CopyFileName</h1>	<h3>syscall Adress 02013C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>copies file name from file descriptor</td><td>char *fs_CopyFileName(char *dest, void *fd);</td><td>first byte of dest will be null if failed.</td><td></td><td>
-dest must be allocated at least 14 bytes</td></tr>
+<tr><td>copies file name from file descriptor</td><td>char *fs_CopyFileName(void *fd);</td><td>returns -1 on fail</td><td></td><td>
+Allocates space for copied file name</td></tr>
 </table></div><div id="fs_Read"><h1>fs_Read</h1>	<h3>syscall Adress 020140</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>read data from a file into RAM</td><td>int fs_Read(void *dest, int len, uint8_t count, void *fd, int offset);</td><td>number of bytes read</td><td>All</td><td>
@@ -713,5 +716,17 @@ Cf set if failed to malloc</td><td>All</td><td>
 </table></div><div id="gfx_GetTextY"><h1>gfx_GetTextY</h1>	<h3>syscall Adress 02033C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="fs_CheckWritable"><h1>fs_CheckWritable</h1>	<h3>syscall Adress 020340</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Check if a file can be written to.</td><td>uint8_t fs_CheckWritable(const char *path);</td><td>0 if file cannot be written to, -1 and Cf set if file doesn't exist, 1 if the file can be written to.</td><td></td><td>
+takes into consideration whether the OS is in "elevated" mode</td></tr>
+</table></div><div id="fs_CheckWritableFD"><h1>fs_CheckWritableFD</h1>	<h3>syscall Adress 020344</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Check if a file descriptor is writable.</td><td>uint8_t fs_CheckWritableFD(void *fd);</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="sys_OpenFileInPath"><h1>sys_OpenFileInPath</h1>	<h3>syscall Adress 020348</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>open a file, looking in directories from $PATH variable if file not found</td><td>void *sys_OpenFileInPath(const char *path);</td><td>pointer to file descriptor</td><td></td><td>
 </td></tr>
 </table></div></body></html>

@@ -11,7 +11,7 @@
 	db 0,0,0,0,0,0,0,0
 	db 5,5,5,5,5,5,5,5
 cmd_exe_main:
-	ld hl,-22
+	ld hl,-25
 	call ti._frameset
 	xor a,a
 	sbc hl,hl
@@ -66,59 +66,53 @@ cmd_execute_next_line:
 	ld a,b
 	or a,c
 	jq z,cmd_exit_retzero
-	ld hl,(ix-16)
 	ld de,(ix-22)
 	push de
 	call bos.sys_Free
 	pop bc
 	ld hl,(ix-16)
+	ld (ix-25),hl
 	ld bc,(ix-19)
+	ld a,(hl)
+	push af
 	call .linelen
+	pop af
+	ld (ix-13),de
+	ld (ix-16),hl
+	ld (ix-19),bc
+	cp a,'#'
+	jq z,.nextline ;only copy line and execute if line not commented
 	ld a,e
 	or a,d
-	jq z,.dontexit
-	ld a,b
-	or a,c
-	jq z,.dontdec0bc
-	dec bc
-.dontdec0bc:
-	ld (ix-19),bc
-	ld (ix-13),de
+	jq z,.nextline
 	push de
 	call bos.sys_Malloc
 	pop bc
 	jq c,cmd_exit_retneg2 ;return if failed to malloc
 	ld (ix-22),hl
 	ex hl,de
-	ld hl,(ix-16)
-	push hl
-	add hl,bc
-	inc hl
-	ld (ix-16),hl
-	pop hl
+	ld hl,(ix-25)
+	ld bc,(ix-13)
 	push de
-	ldir
+	ldir ;copy the line from the file into a null-terminated buffer
 	xor a,a
 	ld (de),a
 	pop hl
-	ld a,(hl)
-	cp a,'#'
-	jq z,.dontexit ;only execute if line not commented
 	call execute_program_string
 	ld a,(ix-10)
 	or a,a
-	jq nz,.dontexit
+	jq nz,.nextline
 	ld hl,(ix-9)
 	add hl,bc
 	or a,a
 	sbc hl,bc
 	jq nz,cmd_exit
-.dontexit:
-	ld hl,(ix-13)
+.nextline:
+	ld hl,(ix-19)
 	add hl,bc
 	or a,a
 	sbc hl,bc
-	jq nz,.loop ;execute next line if newline is present
+	jq nz,.loop ;execute next line if there are more characters in the file to be read
 	ld a,(ix-10)
 	cp a,'i'
 	jq nz,.returnerrorcode
@@ -134,11 +128,11 @@ cmd_execute_next_line:
 	ld a,(hl)
 	or a,a
 	ret z
+	inc hl
+	dec bc
 	cp a,$A
 	ret z
 	inc de
-	inc hl
-	dec bc
 	ld a,b
 	or a,c
 	jq nz,.linelenloop
@@ -221,10 +215,16 @@ execute_program_string:
 .noargs:
 	ex (sp),hl ;store args, restore path
 	push hl ;push path
-	call bos.fs_OpenFile
-	jq c,.system_exe
-.execute:
 	call bos.sys_ExecuteFile
+	push hl
+	ld hl,(bos.ExecutingFileFd) ;check if the currently executing file descriptor is -1
+	inc hl
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	pop hl
+	jq z,.file_not_found ;if it's -1, the file could not be located
+.return_from_exec:
 	ld (ix-9),hl
 	pop bc,bc
 	ld hl,(ix-6)
@@ -251,29 +251,7 @@ execute_program_string:
 	call bos.gui_PrintInt
 	call bos.gui_NewLine
 	jp bos.gfx_BlitBuffer
-.system_exe:
-	call ti._strlen
-	ex (sp),hl
-	pop bc
-	push bc,hl
-	ld hl,str_system_path.len+1
-	add hl,bc
-	push hl
-	call bos.sys_Malloc
-	ex hl,de
-	pop bc,hl,bc
-	jq c,cmd_exit
-	push de,bc,hl
-	ld hl,str_system_path
-	ld bc,str_system_path.len
-	ldir
-	pop hl,bc
-	ldir
-	xor a,a
-	ld (de),a
-	call bos.fs_OpenFile
-	jq nc,.execute
-
+.file_not_found:
 	pop bc,bc
 	ld a,(ix-10)
 	cp a,'i'

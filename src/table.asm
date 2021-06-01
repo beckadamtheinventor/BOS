@@ -141,4 +141,7 @@
 	jp gfx_PrintStringXY
 	jp gfx_GetTextX
 	jp gfx_GetTextY
+	jp fs_CheckWritable
+	jp fs_CheckWritableFD
+	jp sys_OpenFileInPath
 

@@ -14,17 +14,17 @@ fs_WriteNewFile:
 	sbc hl,bc
 	jq z,.fail
 	pop bc,bc,bc
-	ld bc,0
-	push bc,hl
-	ld c,1
-	push bc
+	ld bc,$C
+	add hl,bc
+	ld hl,(hl)
+	push hl
+	call fs_GetSectorAddress
+	pop bc
 	ld bc,(ix+15)
-	push bc
-	ld bc,(ix+12)
-	push bc
-	call fs_Write
-	pop bc,bc,bc,hl,bc
-	jq c,.fail
+	ld de,(ix+12)
+	push bc,de,hl
+	call sys_WriteFlashFullRam
+	pop bc,bc,bc
 	db $01 ;ld bc,...
 .fail:
 	scf

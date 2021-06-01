@@ -7,15 +7,12 @@ fs_RenameFile:
 	push iy
 	ld hl,(ix+6)
 	push hl
-	call fs_OpenFile
-	jq c,.fail
-	pop bc
-	ld bc,fsentry_fileattr
-	push hl
-	add hl,bc
-	bit fsbit_readonly,(hl)
+	call fs_CheckWritable
+	dec a
 	jq nz,.fail
-	pop hl
+	call fs_OpenFile
+	; jq c,.fail ;no need to check if the file exists twice
+	pop bc
 	ld bc,(ix+9)
 	push hl,bc
 	call fs_OpenFileInDir

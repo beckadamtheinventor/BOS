@@ -23,8 +23,6 @@ taskbar_item_width    := 64
 
 assert taskbar_height < 231
 
-explorer_dirname_buffer := bos.safeRAM
-
 org ti.userMem
 	; jq explorer_init
 	; db "REX",0
@@ -212,10 +210,14 @@ explorer_max_selection:=$-3
 	add hl,bc ;index directory list buffer
 	push iy
 	ld iy,(hl)
-	ld bc,explorer_dirname_buffer
-	push iy,bc
+	push iy
+	ld hl,(explorer_dirname_buffer)
+	push hl
+	call bos.sys_Free
+	pop bc
 	call bos.fs_CopyFileName
-	pop bc,iy
+	ld (explorer_dirname_buffer),hl
+	pop iy
 	bit bos.fd_subdir,(iy+bos.fsentry_fileattr)
 	push iy
 	jq z,.open_file
@@ -255,7 +257,8 @@ explorer_max_selection:=$-3
 	jq z,.exec_file
 .edit_file:
 	ld hl,str_memeditexe
-	ld de,explorer_dirname_buffer
+	ld de,$FF0000
+explorer_dirname_buffer:=$-3
 	jq explorer_call_file
 .skip3:
 	inc hl
@@ -279,7 +282,7 @@ explorer_max_selection:=$-3
 	sbc hl,de
 	jq nz,.edit_file ;if it's neither a Flash Executable nor a Ram Executable, open it in memedit
 .exec_file:
-	ld hl,explorer_dirname_buffer
+	ld hl,(explorer_dirname_buffer)
 	jq explorer_call_file_noargs
 .filemenu:
 	jq explorer_main
@@ -328,10 +331,14 @@ explorer_max_selection:=$-3
 	cp a,(hl)
 	jq z,.path_into_return ;return if pathing into '.' entry
 .path_into_dir:
-	ld hl,explorer_dirname_buffer
 	ld bc,(ix+6)
-	push bc,hl
+	push bc
+	ld hl,(explorer_dirname_buffer)
+	push hl
+	call bos.sys_Free
+	pop bc
 	call bos.fs_CopyFileName
+	ld (explorer_dirname_buffer),hl
 	call ti._strlen ;get length of directory we're pathing into
 	ld (ix-3),hl
 	ex (sp),hl
@@ -363,7 +370,7 @@ explorer_max_selection:=$-3
 	ld (de),a
 	inc de
 .path_into_dontaddpathsep:
-	ld hl,explorer_dirname_buffer
+	ld hl,(explorer_dirname_buffer)
 	ld bc,(ix-3)
 	ldir ;copy directory we're pathing into
 	ld a,'/'
@@ -392,7 +399,7 @@ explorer_max_selection:=$-3
 	ret
 
 explorer_join_file_name:
-	ld hl,explorer_dirname_buffer
+	ld hl,(explorer_dirname_buffer)
 	push hl
 	call ti._strlen
 	ld (.tmplen),hl
@@ -415,7 +422,7 @@ explorer_join_file_name:
 	ld bc,0
 .tmplen2:=$-3
 	ldir
-	ld hl,explorer_dirname_buffer
+	ld hl,(explorer_dirname_buffer)
 	ld bc,(.tmplen)
 	ldir
 	xor a,a
@@ -749,9 +756,13 @@ explorer_display_diritems:
 	ret
 .main:
 	push bc
-	ld bc,explorer_dirname_buffer
-	push bc
+	ld hl,(explorer_dirname_buffer)
+	push hl
+	call bos.sys_Free
+	pop bc
 	call bos.fs_CopyFileName
+	ld (explorer_dirname_buffer),hl
+	push hl
 	call ti._strlen
 	ld a,l
 	cp a,9

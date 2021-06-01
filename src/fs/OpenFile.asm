@@ -120,6 +120,10 @@ fs_OpenFile:
 
 ;searches for a file name in a directory listing
 .search_next:
+	ld hl,(ix-6)
+	push hl
+	call sys_Free
+	pop bc
 	lea iy,iy+16
 .search_loop:
 	ld a,(iy)
@@ -131,11 +135,12 @@ fs_OpenFile:
 	jq z,.search_next
 	cp a,fsentry_longfilename+1
 	jq z,.search_next
-	lea bc,ix-17
-	push iy,bc
+	push iy
 	call fs_CopyFileName ;get file name string from file entry
+	ld (ix-6),hl
+	push hl
 	call ti._strlen ;get length of file name string from file entry
-	ld bc,(ix-23)
+	ld bc,(ix-23) ;compare lengths
 	or a,a
 	sbc hl,bc
 	add hl,bc
@@ -150,6 +155,10 @@ fs_OpenFile:
 	or a,a
 	sbc hl,bc
 	jq nz,.search_next ;check next file entry
+	ld hl,(ix-6)
+	push hl
+	call sys_Free
+	pop bc
 	xor a,a
 	inc a
 	ret

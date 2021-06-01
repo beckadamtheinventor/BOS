@@ -26,7 +26,7 @@ fs_DirList:
 	or a,b
 	jq z,.list_loop_entry
 	dec bc
-.skip_loop_bypass_deleted:
+.skip_loop_bypass:
 	ld a,(iy)
 	or a,a
 	jq z,.fail
@@ -34,7 +34,9 @@ fs_DirList:
 	jq z,.fail
 	lea iy,iy+16
 	cp a,fsentry_deleted+1
-	jq z,.skip_loop_bypass_deleted
+	jq z,.skip_loop_bypass
+	cp a,fsentry_unlisted+1
+	jq z,.skip_loop_bypass
 	jq .skip_loop
 .list_loop_entry:
 	ld de,0
@@ -51,6 +53,8 @@ fs_DirList:
 	inc a
 	jq z,.endofdir
 	cp a,fsentry_deleted+1
+	jq z,.list_loop_next
+	cp a,fsentry_unlisted+1
 	jq z,.list_loop_next
 	bit fd_hidden,(iy+fsentry_fileattr)
 	jq nz,.list_loop_next

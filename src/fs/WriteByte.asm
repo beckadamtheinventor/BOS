@@ -4,10 +4,13 @@
 fs_WriteByte:
 	call ti._frameset0
 	ld hl,(ix+9)
+	push hl
+	call fs_CheckWritableFD
+	dec a
+	jq nz,.fail
+	pop hl
 	ld bc,fsentry_fileattr
 	add hl,bc
-	bit fsbit_readonly,(hl)
-	jq nz,.fail
 	bit fsbit_subfile,(hl)
 	inc hl
 	ld de,(hl)

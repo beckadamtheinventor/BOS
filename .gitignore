@@ -1,4 +1,6 @@
 /bin
+/src/os
+/src/os.inc
 /.idea
 /__pycache__
 /obj

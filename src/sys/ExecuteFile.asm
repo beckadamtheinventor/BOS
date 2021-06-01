@@ -19,11 +19,18 @@ sys_ExecuteFile:
 	or a,a
 	jq z,.fail
 	ld (fsOP6),de
-	push hl
+	push hl,hl
 	call fs_AbsPath
+	ld (fsOP6+3),hl
 	ex (sp),hl
-	call fs_OpenFile
+	call fs_OpenFile ;check if file is found in current working directory
 	pop bc
+	call c,sys_OpenFileInPath ;call if fs_OpenFile failed
+	pop bc ;hl will be result of fs_OpenFile if it didn't fail, otherwise result of sys_OpenFileInPath
+	ld bc,(fsOP6+3)
+	push hl,af,bc
+	call sys_Free ;free the pointer returned by fs_AbsPath
+	pop bc,af,hl
 	jq c,.fail
 .open_fd:
 	ld (ExecutingFileFd),hl

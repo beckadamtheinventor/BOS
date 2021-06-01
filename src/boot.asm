@@ -9,14 +9,27 @@ boot_os:
 	; ldir
 
 ;boot_os_thread:
+	di             ;inline flash unlock for security reasons
+	in0 a,($06)
+	set 2,a
+	out0 ($06),a
+	ld a,$04
+	di
+	jr $+2
+	di
+	rsmix
+	im 1
+	out0 ($28),a
+	in0 a,($28)
+	bit 2,a
 
-	call flash_unlock
-	ld a,$05 ;set privleged code end address to $050000 (up until and including first filesystem sector)
+	ld a,$04 ;set privleged code end address to $040000 (up until the first filesystem sector)
 	out0 ($1F),a
 	xor a,a
 	out0 ($1D),a
 	out0 ($1E),a
 	call flash_lock
+
 	ld a,4           ;set wait states to 4
 	ld ($E00005),a
 
@@ -62,12 +75,23 @@ boot_os:
 	call gfx_SetDraw
 
 	call fs_SanityCheck
+
 	ld hl,current_working_dir
 	ld (hl),'/'
 	inc hl
 	ld (hl),0
 
+	call fs_GetElevationFile
+	jq nc,.dont_create_elevation_file
+	ld hl,512
+	ld c,f_readonly+f_system
+	push hl,bc,de
+	call fs_CreateFile
+	pop bc,bc,bc
+.dont_create_elevation_file:
+
 os_return:
+	ld sp,$D1A87E ;base stack pointer
 	call sys_GetKey
 	cp a,53
 	jq z,os_recovery_menu

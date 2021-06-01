@@ -107,15 +107,16 @@ fd_hidden     := 1
 fd_system     := 2
 fd_subfile    := 3
 fd_subdir     := 4
-;fd_archive    := 5
-fd_device     := 6
+fd_device     := 5
+fd_elevated   := 7
 
 ; file entry first byte
-fsentry_endofdir     := $00
-fsentry_dot          := $2E
-fsentry_deleted      := $F0
-fsentry_longfilename := $F1
-fsentry_endofdir2    := $FF
+fsentry_endofdir        := $00
+fsentry_dot             := $2E
+fsentry_deleted         := $F0
+fsentry_longfilename    := $F1
+fsentry_unlisted        := $F2
+fsentry_endofdir2       := $FF
 
 ; file entry offsets
 fsentry_filename            := $00

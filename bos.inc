@@ -144,6 +144,9 @@
 ?gfx_PrintStringXY               := $20334
 ?gfx_GetTextX                    := $20338
 ?gfx_GetTextY                    := $2033C
+?fs_CheckWritable                := $20340
+?fs_CheckWritableFD              := $20344
+?sys_OpenFileInPath              := $20348
 ;
 ?LCD_PAL?    := 0E30200h
 ?LCD_CTRL?   := 0E30018h
@@ -231,12 +234,14 @@
 ?fd_system     := 2
 ?fd_subfile    := 3
 ?fd_subdir     := 4
-?fd_device     := 6
-?fsentry_endofdir     := $00
-?fsentry_dot          := $2E
-?fsentry_deleted      := $F0
-?fsentry_longfilename := $F1
-?fsentry_endofdir2    := $FF
+?fd_device     := 5
+?fd_elevated   := 7
+?fsentry_endofdir        := $00
+?fsentry_dot             := $2E
+?fsentry_deleted         := $F0
+?fsentry_longfilename    := $F1
+?fsentry_unlisted        := $F2
+?fsentry_endofdir2       := $FF
 ?fsentry_filename            := $00
 ?fsentry_filename.len        := 8
 ?fsentry_fileext             := $08

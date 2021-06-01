@@ -4,9 +4,15 @@
 ;@OUTPUT true if resizing succeeded
 ;@NOTE Will allocate enough sectors to contain len bytes.
 fs_SetSize:
-	ld hl,-20
+	ld hl,-23
 	call ti._frameset
-	ld iy,(ix+9)
+	ld (ix-23),iy
+	ld bc,(ix+9)
+	push bc
+	call fs_CheckWritableFD
+	dec a
+	jq nz,.fail
+	pop iy
 	ld a,(iy + fsentry_fileattr)
 	ld (ix-20),a
 	ld hl,(iy + fsentry_filesector)
@@ -102,12 +108,10 @@ fs_SetSize:
 .fail:
 	xor a,a
 	or a,a
+	ld iy,(ix-23)
 	ld sp,ix
 	pop ix
 	ret
-
-.cluster_file:
-	db "/dev/cmap.dat",0
 
 
 

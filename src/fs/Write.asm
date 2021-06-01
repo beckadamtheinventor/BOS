@@ -4,12 +4,15 @@
 ;@DESTROYS All. Assume OP5, OP6
 ;@NOTE file must be at least offset + len * count bytes in size.
 fs_Write:
-	ld hl,-3
+	ld hl,-6
 	call ti._frameset
-	push iy
-	ld iy,(ix+15) ;void *fd
-	bit fsbit_readonly,(iy+fsentry_fileattr)
+	ld (ix-6),iy
+	ld bc,(ix+15) ;void *fd
+	push bc
+	call fs_CheckWritableFD
+	dec a
 	jq nz,.fail
+	pop iy
 	ld de,(ix+9) ;int len
 	ld b,(ix+12) ;uint8_t count
 	or a,a
@@ -64,7 +67,7 @@ fs_Write:
 	scf
 	sbc hl,hl
 
-	pop iy
+	ld iy,(ix-6)
 	ld sp,ix
 	pop ix
 	ret

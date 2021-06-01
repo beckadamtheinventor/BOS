@@ -42,4 +42,14 @@ string_os_recovery_menu:
 	db $9,"Press del to uninstall BOS",$A,0
 string_press_enter_confirm:
 	db "Press enter to confirm.",$A,0
+string_program_requested_flash:
+	db "Error: Unauthorized flash unlock!",$A
+	db "Program requested flash unlock without elevation.",$A
+	db "Aborting program execution.",$A
+	db "Press any key to continue.",$A,0
+
+string_os_elevation_file:
+	db "/",$F2,"OS/ELEVATED",0
+string_path_variable:
+	db "/var/PATH",0
 
