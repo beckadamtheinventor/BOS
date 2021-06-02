@@ -20,7 +20,7 @@ updater_start:
 	ld hl,installing_string
 	call bos._PutS
 
-	os_create $03 ;erase only OS sectors as to not clobber the filesystem.
+	os_create $3B ;erase OS and filesystem sectors due to filesystem changes
 
 installing_string:
 	db "Updating BOS...",0
