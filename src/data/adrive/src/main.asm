@@ -40,29 +40,30 @@ end fs_dir
 ;"/bin/" directory
 fs_dir bin_dir
 	fs_entry root_dir, "..", "", f_subdir
-	fs_sfentry boot_exe, "boot", "", f_readonly+f_system+f_subfile+f_elevated
-	fs_entry bpkload_exe, "bpk", "", f_readonly+f_system+f_elevated
-	fs_entry bpm_exe, "bpm", "", f_readonly+f_system+f_elevated
+	fs_sfentry writeinto_exe, ">", "", f_readonly+f_system+f_subfile
+	fs_sfentry boot_exe, "boot", "", f_readonly+f_system+f_subfile
+	fs_entry bpkload_exe, "bpk", "", f_readonly+f_system
+	fs_entry bpm_exe, "bpm", "", f_readonly+f_system
 	fs_sfentry cat_exe, "cat", "", f_readonly+f_system+f_subfile
 	fs_sfentry cd_exe, "cd", "", f_readonly+f_system+f_subfile
 	fs_sfentry cmd_exe, "cmd", "", f_readonly+f_system+f_subfile
 	fs_sfentry cls_exe, "cls", "", f_readonly+f_system+f_subfile
-	fs_sfentry cp_exe, "cp", "", f_readonly+f_system+f_subfile+f_elevated
-	fs_sfentry initdev_exe, "device", "", f_readonly+f_system+f_subfile+f_elevated
+	fs_sfentry cp_exe, "cp", "", f_readonly+f_system+f_subfile
+	fs_sfentry initdev_exe, "device", "", f_readonly+f_system+f_subfile
 	fs_sfentry df_exe, "df", "", f_readonly+f_system+f_subfile
-	fs_entry edit_exe, "edit", "", f_readonly+f_system+f_elevated
-	fs_entry explorer_exe, "explorer", "", f_readonly+f_system+f_elevated
-	fs_entry fexplore_exe, "fexplore", "", f_readonly+f_system+f_elevated
+	fs_entry edit_exe, "edit", "", f_readonly+f_system
+	fs_entry explorer_exe, "explorer", "", f_readonly+f_system
+	fs_entry fexplore_exe, "fexplore", "", f_readonly+f_system
 	fs_sfentry info_exe, "info", "", f_readonly+f_system+f_subfile
 	fs_sfentry ls_exe, "ls", "", f_readonly+f_system+f_subfile
-	fs_entry memedit_exe, "memedit", "", f_readonly+f_system+f_elevated
-	fs_sfentry mkdir_exe, "mkdir", "", f_readonly+f_system+f_subfile+f_elevated
-	fs_sfentry mkfile_exe, "mkfile", "", f_readonly+f_system+f_subfile+f_elevated
-	fs_sfentry off_exe, "off", "", f_readonly+f_system+f_subfile+f_elevated
-	fs_sfentry rm_exe, "rm", "", f_readonly+f_system+f_subfile+f_elevated
-	fs_entry usbrecv_exe, "usbrecv", "", f_readonly+f_system+f_elevated
-	fs_entry usbrun_exe, "usbrun", "", f_readonly+f_system+f_elevated
-	fs_entry usbsend_exe, "usbsend", "", f_readonly+f_system+f_elevated
+	fs_entry memedit_exe, "memedit", "", f_readonly+f_system
+	fs_sfentry mkdir_exe, "mkdir", "", f_readonly+f_system+f_subfile
+	fs_sfentry mkfile_exe, "mkfile", "", f_readonly+f_system+f_subfile
+	fs_sfentry off_exe, "off", "", f_readonly+f_system+f_subfile
+	fs_sfentry rm_exe, "rm", "", f_readonly+f_system+f_subfile
+	fs_entry usbrecv_exe, "usbrecv", "", f_readonly+f_system
+	fs_entry usbrun_exe, "usbrun", "", f_readonly+f_system
+	fs_entry usbsend_exe, "usbsend", "", f_readonly+f_system
 end fs_dir
 
 fs_dir _os_dir
@@ -76,6 +77,10 @@ end fs_dir
 
 fs_subfile boot_exe, bin_dir
 	include 'fs/bin/boot.asm'
+end fs_subfile
+
+fs_subfile writeinto_exe, bin_dir
+	include 'fs/bin/writeinto.asm'
 end fs_subfile
 
 fs_subfile cat_exe, bin_dir
@@ -334,7 +339,7 @@ fs_file explorer_cfg
 end fs_file
 
 fs_file path_var
-	db "/bin:/usr/bin:/bin/if"
+	db "/bin:/usr/bin:/bin/if:/sbin"
 end fs_file
 
 end fs_fs

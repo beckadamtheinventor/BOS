@@ -9,24 +9,20 @@ cat_main:
 	ld a,(hl)
 	or a,a
 	jq z,.help
+	cp a,'-'
+	jq nz,.print_file
+	inc hl
+	ld a,(hl)
+	cp a,'c'
+	jq z,.copy_file
+.print_file:
 	push hl
-	call bos.fs_OpenFile
-	pop bc
-	jq c,.fail
-	ld bc,$B
-	add hl,bc
-	bit bos.fd_subdir,(hl)
-	jq nz,.fail_dir
-	inc hl
-	ld de,(hl)
-	inc hl
-	inc hl
-	ld hl,(hl)
-	ex.s hl,de
-	push de,hl
 	call bos.gui_NewLine
-	call bos.fs_GetSectorAddress
-	pop bc,bc
+	call bos.fs_GetFilePtr
+	pop de
+	jq c,.fail
+	bit bos.fd_subdir,a
+	jq nz,.fail_dir
 	ld a,c
 	or a,b
 	jq z,.done ;nothing to print
@@ -45,6 +41,36 @@ cat_main:
 	jq nz,.print_loop
 	call bos.gui_NewLine
 	jq .done
+.copy_file:
+	inc hl
+	inc hl
+	push hl
+	call bos.fs_GetFilePtr
+	pop de
+	jq c,.fail
+	bit bos.fd_subdir,a
+	jq nz,.fail_dir
+	ld a,c
+	or a,b
+	jq nz,.read_file_into_buffer
+	ld hl,$FF0000
+	jq .return
+.read_file_into_buffer:
+	inc bc
+	inc bc
+	push bc,hl
+	call bos.sys_Malloc
+	pop de,bc
+	jq c,.fail
+	push hl
+	ld (hl),c
+	inc hl
+	ld (hl),b
+	inc hl
+	ex hl,de
+	ldir
+	pop hl
+	jq .return
 .fail_dir:
 	ld hl,str_FailSubdir
 	jq .print
@@ -54,16 +80,18 @@ cat_main:
 	call bos.gui_Print
 .done:
 	xor a,a
-	sbc hl,hl
-	db $01
+	db $3E
 .fail:
 	scf
-	sbc hl,hl ;Cf is already unset
+	sbc hl,hl ;cf is unset if jumped to .done, else it's set from .fail
+.return: ;return value in HL
 	ld sp,ix
 	pop ix
 	ret
 str_CatHelp:
-	db $9,"Usage: CAT [file]",$A,0
+	db "Usage:",$A
+	db $9,"cat file     print file contents",$A
+	db $9,"cat -c file  copy file into malloc'd buffer",$A,0
 str_FailSubdir:
 	db $9,"Cannot display directory as text.",$A,0
 

@@ -201,6 +201,9 @@ def add_file_to_rom(rom, fout, flags, fin_data):
 
 
 if __name__=='__main__':
+	fdir = os.path.dirname(__file__)
+	if not fdir.endswith("/"):
+		fdir+="/"
 	fnamein = []
 	fnameout = []
 	rom_out = "bin/BOSOS_appended.rom"
@@ -209,9 +212,14 @@ if __name__=='__main__':
 	try:
 		with open(rom_in, 'rb') as f:
 			rom = list(f.read())
+		fdir = ""
 	except FileNotFoundError:
-		print(f'Could not locate rom image "{rom_in}". Did you build BOS yet?\nAborting.')
-		exit(1)
+		try:
+			with open(fdir+rom_in,'rb') as f:
+				rom = list(f.read())
+		except FileNotFoundError:
+			print(f'Could not locate rom image "{rom_in}". Did you build BOS yet?\nAborting.')
+			exit(1)
 	build_cluster_map(rom)
 
 	_argv = sys.argv[1:]
@@ -256,5 +264,5 @@ if __name__=='__main__':
 				print(f"Could not open file: {fin}\nAborting.")
 				exit(1)
 
-	with open(rom_out, 'wb') as f:
+	with open(fdir+rom_out, 'wb') as f:
 		f.write(bytes(rom))

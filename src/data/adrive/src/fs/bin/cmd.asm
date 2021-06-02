@@ -216,6 +216,7 @@ execute_program_string:
 	ex (sp),hl ;store args, restore path
 	push hl ;push path
 	call bos.sys_ExecuteFile
+	ld (bos.LastCommandResult),hl
 	push hl
 	ld hl,(bos.ExecutingFileFd) ;check if the currently executing file descriptor is -1
 	inc hl
@@ -223,10 +224,23 @@ execute_program_string:
 	or a,a
 	sbc hl,bc
 	pop hl
-	jq z,.file_not_found ;if it's -1, the file could not be located
+	jq z,.file_not_found ;if the executing file descriptor is -1, the file could not be located
 .return_from_exec:
 	ld (ix-9),hl
-	pop bc,bc
+	pop bc
+	call ti._strlen ;get length of arguments passed to executable
+	ex (sp),hl
+	pop bc
+	ld a,b
+	or a,c
+	jq z,.at_eol
+	ld a,':' ;find secondary eol character
+	cpir
+	jq nz,.at_eol
+	ld a,(hl)
+	or a,a
+	jq nz,execute_program_string ;continue executing if ':' is found and is not the last character in the string
+.at_eol:
 	ld hl,(ix-6)
 	push hl
 	call bos.sys_Free

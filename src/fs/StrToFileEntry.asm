@@ -20,6 +20,8 @@ fs_StrToFileEntry:
 	or a,a
 	ld c,a
 	jq z,.pad_file_name
+	cp a,' '
+	jq z,.pad_file_name_loop
 	inc hl
 	cp a,'.'
 	jq z,.pad_file_name
@@ -40,6 +42,8 @@ fs_StrToFileEntry:
 	ld a,c
 	or a,a
 	jq z,.pad_file_ext
+	cp a,' '
+	jq z,.pad_file_ext_loop
 .copy_file_name_ext_loop:
 	ld a,(hl)
 	or a,a

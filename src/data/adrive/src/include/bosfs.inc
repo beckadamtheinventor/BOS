@@ -57,6 +57,7 @@ macro fs_fs?
 		fs_file flabel
 		fs_entry flabel, ".", "", f_subdir
 		macro end?.fs_dir?
+			db 16 dup $FF
 			end fs_file
 			purge end?.fs_dir
 		end macro

@@ -55,6 +55,7 @@ ScrapByte              := $D0027C
 ScrapWord              := $D0027D
 ScrapMem               := $D0027D
 ExecutingFileFd        := $D00280 ; 3 bytes. Pointer to currently executing file descriptor. -1 if file not found. 0 if file descriptor is not applicable
+LastCommandResult      := $D00283 ; 3 bytes. Points to result of previously executed command
 open_files_table       := $D00300
 InputBuffer            := $D00400
 gfx_string_temp        := $D00500

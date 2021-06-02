@@ -564,7 +564,7 @@ If you need a routine callable from C, this is not the one you'll want to use.</
 </table></div><div id="sys_WriteFlashFullRam"><h1>sys_WriteFlashFullRam</h1>	<h3>syscall Adress 0202A4</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>store data to flash, surpassing flash AND logic using the first half of VRAM for swap if needed.</td><td></td><td>uint8_t sys_WriteFlashFullRam(void *dest, void *src, int len);</td><td></td><td>
-</td></tr>
+Assume maximum write length is 65536.</td></tr>
 </table></div><div id="sys_WriteFlashByteFullRam"><h1>sys_WriteFlashByteFullRam</h1>	<h3>syscall Adress 0202A8</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Write a byte to flash, surpassing flash AND logic using the first half of VRAM for swap if needed.</td><td>bool sys_WriteFlashByteFullRam(void *dest, uint8_t byte);</td><td>true if success, false if failed</td><td></td><td>

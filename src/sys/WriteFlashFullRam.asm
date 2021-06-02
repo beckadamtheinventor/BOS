@@ -1,6 +1,7 @@
 
 ;@DOES store data to flash, surpassing flash AND logic using the first half of VRAM for swap if needed.
 ;@OUTPUT uint8_t sys_WriteFlashFullRam(void *dest, void *src, int len);
+;@NOTE Assume maximum write length is 65536.
 sys_WriteFlashFullRam:
 	call ti._frameset0
 	ld a,(ix+8) ;high byte of destination
@@ -8,10 +9,13 @@ sys_WriteFlashFullRam:
 	jq c,.fail
 	cp a,$40
 	jq nc,.fail
+	ld bc,(ix+12)
+	ld a,c
+	or a,b
+	jq z,.success ;if there's no data to write, there's nothing to change
 
 	ld de,(ix+6)
 	ld hl,(ix+9)
-	ld bc,(ix+12)
 .check_write_needs_swap_loop:
 	ld a,(de)
 	inc de
@@ -69,7 +73,7 @@ sys_WriteFlashFullRam:
 	ld a,(ix+8) ;high byte of destination
 	cp a,4
 	jq c,.fail
-	cp a,$3F
+	cp a,$40
 	jq nc,.fail
 
 	call sys_FlashUnlock
@@ -103,8 +107,8 @@ sys_WriteFlashFullRam:
 	ld hl,LCD_VRAM+$010000
 	or a,a
 	sbc hl,de
-	push hl
-	pop bc
+	ld c,l
+	ld b,h
 	pop hl
 	ld a,b
 	or a,c

@@ -44,8 +44,11 @@ endif
 
 all: bos
 
+rebuild:
+	python build.py -r
+
 bos:
-	python build.py
+	python build.py -b -i -d
 
 version:
 	python build.py -v

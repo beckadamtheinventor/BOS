@@ -20,7 +20,7 @@ fs_CreateDir:
 	ld (ix-3),hl ; save parent directory sector
 	call sys_Free ;free memory malloc'd by fs_ParentDir
 	pop bc
-	ld hl,32 ;size of new directory
+	ld hl,48 ;size of new directory
 	ld de,(ix+9)
 	ld bc,(ix+6)
 	push hl,de,bc
@@ -73,10 +73,17 @@ fs_CreateDir:
 	push bc,hl,de
 	call sys_WriteFlashFullRam
 	pop bc
-;maybe verify end of directory marker here
-	call sys_FlashLock
 	call sys_Free ; free previously malloc'd memory
 	pop bc,bc
+	ld hl,(ix-9)
+	ld bc,32
+	add hl,bc
+	ld c,16
+	ld de,$03FFF0
+	push bc,de,hl
+	call sys_WriteFlashFullRam
+	pop bc,bc,bc
+	call sys_FlashLock
 	ld hl,(ix-6)
 	xor a,a
 	db $01

@@ -37,6 +37,8 @@ fs_OpenFile:
 	ld a,(hl)
 	or a,a
 	jq z,.return
+	cp a,' '
+	jq z,.return
 	push hl
 	call ti._strlen
 	ld (ix-23),hl
@@ -55,9 +57,9 @@ fs_OpenFile:
 	dec hl
 .no_more_slash:
 	ld (ix-3),hl ;advance path entry
-	ld a,(hl)
-	cp a,'$'
-	jq z,.return_file_entry_point
+	; ld a,(hl)
+	; cp a,'$'
+	; jq z,.return_file_entry_point
 	ld hl,(ix-23)
 	or a,a
 	sbc hl,bc ;how long was the string?
@@ -67,7 +69,9 @@ fs_OpenFile:
 	ld hl,(ix-3)
 	ld a,(hl)
 	or a,a
-	jq z,._return
+	jq z,._return ;return if at end of string
+	cp a,' '
+	jq z,._return ;return if at end of path
 .into_dir:
 	bit fsbit_subdirectory,(iy + fsentry_fileattr) ;check if we're entering a directory
 	jq z,.fail ;trying to path into a file?
