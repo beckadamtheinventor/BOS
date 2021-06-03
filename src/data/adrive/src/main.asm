@@ -51,6 +51,7 @@ fs_dir bin_dir
 	fs_sfentry cp_exe, "cp", "", f_readonly+f_system+f_subfile
 	fs_sfentry initdev_exe, "device", "", f_readonly+f_system+f_subfile
 	fs_sfentry df_exe, "df", "", f_readonly+f_system+f_subfile
+	fs_entry echo_exe, "echo", "", f_readonly+f_system
 	fs_entry edit_exe, "edit", "", f_readonly+f_system
 	fs_entry explorer_exe, "explorer", "", f_readonly+f_system
 	fs_entry fexplore_exe, "fexplore", "", f_readonly+f_system
@@ -253,11 +254,6 @@ fs_file explorer_exe
 	file '../obj/explorer.bin'
 end fs_file
 
-
-fs_file fexplore_exe
-	file '../obj/fexplore.bin'
-end fs_file
-
 fs_file fatdrvce_lll
 	file '../obj/fatdrvce.bin'
 end fs_file
@@ -296,6 +292,14 @@ end fs_file
 
 fs_file updater_exe
 	include 'fs/bin/updater.asm'
+end fs_file
+
+fs_file echo_exe
+	include 'fs/bin/echo.asm'
+end fs_file
+
+fs_file fexplore_exe
+	file '../obj/fexplore.bin'
 end fs_file
 
 fs_file memedit_exe

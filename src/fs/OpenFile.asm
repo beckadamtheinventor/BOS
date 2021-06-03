@@ -3,7 +3,6 @@
 ;@INPUT void *fs_OpenFile(char *path);
 ;@OUTPUT hl = file descriptor. hl is -1 and Cf set if file does not exist.
 ;@DESTROYS All
-;@NOTE This only searches for short 8.3 file names.
 fs_OpenFile:
 	pop bc,hl
 	push hl,bc
@@ -40,7 +39,7 @@ fs_OpenFile:
 	cp a,' '
 	jq z,.return
 	push hl
-	call ti._strlen
+	call .strlen
 	ld (ix-23),hl
 	ex (sp),hl
 	pop bc
@@ -167,3 +166,19 @@ fs_OpenFile:
 	inc a
 	ret
 
+.strlen:
+	pop bc,de
+	push de,bc
+	or a,a
+	sbc hl,hl
+.strlenloop:
+	ld a,(de)
+	or a,a
+	ret z
+	cp a,' '
+	ret z
+	cp a,':'
+	ret z
+	inc de
+	inc hl
+	jq .strlenloop

@@ -147,6 +147,7 @@
 ?fs_CheckWritable                := $20340
 ?fs_CheckWritableFD              := $20344
 ?sys_OpenFileInPath              := $20348
+?sys_VarString                   := $2034C
 ;
 ?LCD_PAL?    := 0E30200h
 ?LCD_CTRL?   := 0E30018h

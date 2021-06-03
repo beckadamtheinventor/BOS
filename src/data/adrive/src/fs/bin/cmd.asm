@@ -299,10 +299,11 @@ cmd_terminate_arguments:
 	ld (ix-29),hl
 	ret
 
-cmd_get_arguments:
-	db $3E
-.loop:
+cmd_get_arguments.inc_twice:
 	inc hl
+cmd_get_arguments.loop:
+	inc hl
+cmd_get_arguments:
 	ld a,(hl)
 	or a,a
 	ret z
@@ -310,6 +311,8 @@ cmd_get_arguments:
 	ret z
 	cp a,$A
 	ret z
+	cp a,$5C ;backslash
+	jq z,.inc_twice
 	cp a,' '
 	jq nz,.loop
 	ld (hl),0

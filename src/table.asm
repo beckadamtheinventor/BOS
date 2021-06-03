@@ -144,4 +144,5 @@
 	jp fs_CheckWritable
 	jp fs_CheckWritableFD
 	jp sys_OpenFileInPath
+	jp sys_VarString
 

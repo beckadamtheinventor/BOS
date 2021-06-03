@@ -9,6 +9,7 @@ gui_Input:
 	xor a,a
 	sbc hl,hl
 	ld (ix-3),hl
+	ld (ix-11),hl
 	ld hl,(ix+6)
 	ld (hl),a
 	inc a
@@ -19,12 +20,12 @@ gui_Input:
 	ld bc,(ix+9)
 	ldir
 .enter_no_clear_buffer:
-	ld a,(console_line)
+	ld a,(currow)
 	ld (ix-5),a
 	jr .entry
 .draw:
 	ld a,(ix-5)
-	ld (console_line),a
+	ld (currow),a
 .entry:
 	call .clear_line
 	xor a,a
@@ -76,38 +77,43 @@ gui_Input:
 	add hl,bc
 	ld a,(hl)
 .inserta:
+	or a,a
+	jq z,.keys ;don't insert a character if the character is null
 	ld hl,(ix-3)
 	ld bc,(ix+9)
-	or a,a
 	inc hl
+	or a,a
 	sbc hl,bc
-	jq nc,.keys
-	add hl,bc
-	ld (ix-3),hl
-	dec hl
-	ld bc,(ix+6)
+	jq nc,.keys ;don't insert a character if there's no room left in the buffer
+	ld hl,(ix+6)
+	ld bc,(ix-11)
 	add hl,bc
 	ld (hl),a
-	inc hl
-	ld (hl),0
+	inc bc
+	ld (ix-11),bc
+	ld bc,(ix-3)
+	inc bc
+	ld (ix-3),bc
 	jq .draw
 .delete:
-	ld hl,(ix+6)
-	ld bc,(ix-3)
-	ld a,(ix-1)
+	ld bc,(ix-11)
+	ld a,(ix-3)
 	or a,b
 	or a,c
 	jq z,.draw
+	ld hl,(ix+6)
+	ld bc,(ix-3)
 	dec bc
 	add hl,bc
 	ld (hl),0
 	ld (ix-3),bc
+	ld (ix-11),bc
 	jq .draw
 .arrow_key:
 	cp a,3
-	jq z,.keys
+	jq z,.cursor_right
 	cp a,2
-	jq z,.keys
+	jq z,.cursor_left
 	add a,8
 	jq .return
 .enter:
@@ -131,8 +137,27 @@ gui_Input:
 	call gui_NewLine
 	pop af
 	ret
+.cursor_left:
+	ld hl,(ix-11)
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	jq z,.keys ;do nothing if we're already at the start of the string
+	dec hl
+	ld (ix-11),hl
+	jq .draw
+.cursor_right:
+	ld hl,(ix-11)
+	ld bc,(ix-3)
+	or a,a
+	sbc hl,bc
+	jq nc,.keys ;do nothing if we're already at the eol
+	add hl,bc
+	inc hl
+	ld (ix-11),hl
+	jq .draw
 .clear_line:
-	ld a,(console_line)
+	ld a,(currow)
 	ld hl,LCD_BUFFER
 	ld c,a
 	add a,a
@@ -169,19 +194,32 @@ gui_Input:
 	jr c,.setmap
 	xor a,a
 	jr .setmap
+
 .draw_underline:
-	ld a,(curcol)
-	or a,a
-	sbc hl,hl
-	ld l,a
+	ld hl,(ix-11)
+	ld bc,40
+	call ti._idvrmu
+	push hl
 	ld a,(currow)
+	add a,e
 	inc a
-	ld c,a
-	add a,a
-	add a,a
-	add a,a
-	add a,c
 	ld e,a
+	add a,a
+	add a,a
+	add a,a
+	add a,e
+	ld e,a
+	sbc hl,hl
+	push de
+	call gfx_Compute
+	push hl
+	pop de
+	inc de
+	ld a,(lcd_text_bg)
+	ld (hl),a
+	ld bc,319
+	ldir
+	pop de,hl
 	add hl,hl
 	add hl,hl
 	add hl,hl
@@ -227,7 +265,6 @@ gui_Input:
 	pop hl
 	jq ._printlines
 
-
 .keymaps:
 	dl .keymap_A,.keymap_a,.keymap_1,.keymap_x
 .keymap_A:
@@ -237,6 +274,6 @@ gui_Input:
 .keymap_1:
 	db "+-*/^",0,0,";369)$@",0,".258(&~",0,"0147,][",0,0,"'<=>}{"
 .keymap_x:
-	db "'][",0,0,0,0,";369}$@ =258{&~ ",$7F,"147,][  '<=>}{"
+	db "'][",$5C,$7F,0,0,";369}$@ =258{&~ _147,][  '<=>}{"
 .overtypes:
 	db "Aa1x"

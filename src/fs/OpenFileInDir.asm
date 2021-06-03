@@ -3,7 +3,6 @@
 ;@INPUT void *fs_OpenFileInDir(char *path, void *dir);
 ;@OUTPUT hl = file descriptor. hl is -1 if file does not exist.
 ;@DESTROYS All
-;@NOTE This only searches for short 8.3 file names.
 fs_OpenFileInDir:
 	pop bc,hl,de
 	push de,hl,bc
@@ -16,23 +15,38 @@ fs_OpenFileInDir:
 	ex hl,de
 	ret ;return directory
 .pathnonzero:
-	ld hl,-19
+	ld hl,-26
 	call ti._frameset
-	ld (ix-19),iy
+	ld (ix-20),iy
 	ld hl,(ix+6)
 	ld (ix-3),hl
 	ld iy,(ix+9)
+	ld de,(iy+fsentry_filesector)
+	bit fsbit_subfile,(iy+fsentry_fileattr)
+	jq z,.open_regular_file
+	ex.s hl,de
+	lea de,iy
+	ld e,0
+	res 0,d
+	add hl,de
+	push hl
+	jq .open_from_stack
+.open_regular_file:
+	push de
+	call fs_GetSectorAddress
+	ex (sp),hl
+.open_from_stack:
+	pop iy
 	call fs_OpenFile.entry
 	jq c,.fail
-.return:
 	xor a,a
 	lea hl,iy
-	db $01 ;ld bc,...
+	db $01
 .fail:
 	scf
 	sbc hl,hl
 ._return:
-	ld iy,(ix-19) ;restore iy
+	ld iy,(ix-20) ;restore iy
 	ld sp,ix
 	pop ix
 	ret
