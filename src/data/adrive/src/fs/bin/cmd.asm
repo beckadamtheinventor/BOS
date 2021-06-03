@@ -11,7 +11,7 @@
 	db 0,0,0,0,0,0,0,0
 	db 5,5,5,5,5,5,5,5
 cmd_exe_main:
-	ld hl,-25
+	ld hl,-29
 	call ti._frameset
 	xor a,a
 	sbc hl,hl
@@ -201,45 +201,27 @@ enter_input:
 
 execute_program_string:
 	push hl
-	call ti._strlen ;get length of program+arg string
-	ex (sp),hl
-	pop bc
-
+	call cmd_get_arguments
 	push hl
-	ld a,' ' ;locate first ' ' in string to separate program from args
-	cpir
-	jq nz,.noargs
-	dec hl
-	ld (hl),0 ;replace the space with null to null-terminate the file name
-	inc hl ;bypass the space that is now null
+	call cmd_terminate_arguments ;check arguments string for eol characters so we can process multi-line commands
+	pop hl
 .noargs:
 	ex (sp),hl ;store args, restore path
 	push hl ;push path
 	call bos.sys_ExecuteFile
 	ld (bos.LastCommandResult),hl
-	push hl
+	ld (ix-9),hl
 	ld hl,(bos.ExecutingFileFd) ;check if the currently executing file descriptor is -1
 	inc hl
 	add hl,bc
 	or a,a
 	sbc hl,bc
-	pop hl
 	jq z,.file_not_found ;if the executing file descriptor is -1, the file could not be located
-.return_from_exec:
-	ld (ix-9),hl
-	pop bc
-	call ti._strlen ;get length of arguments passed to executable
-	ex (sp),hl
-	pop bc
-	ld a,b
-	or a,c
-	jq z,.at_eol
-	ld a,':' ;find secondary eol character
-	cpir
-	jq nz,.at_eol
-	ld a,(hl)
+	pop bc,bc
+	ld a,(ix-26)
+	ld hl,(ix-29)
 	or a,a
-	jq nz,execute_program_string ;continue executing if ':' is found and is not the last character in the string
+	jq nz,execute_program_string ;continue executing if an eol character was found before the null terminator
 .at_eol:
 	ld hl,(ix-6)
 	push hl
@@ -294,6 +276,44 @@ cmd_exit:
 	pop hl,af
 	ld sp,ix
 	pop ix
+	ret
+
+cmd_terminate_arguments:
+	xor a,a
+	ld (ix-26),a
+	ld c,a
+.loop:
+	ld a,(hl)
+	or a,a
+	ret z
+	cp a,':'
+	jq z,.eol
+	cp a,$A
+	jq z,.eol
+	inc hl
+	jq .loop
+.eol:
+	ld (ix-26),a
+	ld (hl),c
+	inc hl
+	ld (ix-29),hl
+	ret
+
+cmd_get_arguments:
+	db $3E
+.loop:
+	inc hl
+	ld a,(hl)
+	or a,a
+	ret z
+	cp a,':'
+	ret z
+	cp a,$A
+	ret z
+	cp a,' '
+	jq nz,.loop
+	ld (hl),0
+	inc hl
 	ret
 
 cmd_help_info:

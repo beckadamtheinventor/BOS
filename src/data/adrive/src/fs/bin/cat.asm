@@ -1,7 +1,7 @@
 	jq cat_main
 	db "FEX",0
 cat_main:
-	ld hl,-2
+	ld hl,-3
 	call ti._frameset
 	xor a,a
 	ld (ix-1),a
@@ -58,10 +58,18 @@ cat_main:
 .read_file_into_buffer:
 	inc bc
 	inc bc
-	push bc,hl
+	ld a,(bos.running_process_id)
+	ld (ix-3),a
+	push hl,bc
+	ld a,1
+	ld (bos.running_process_id),a
 	call bos.sys_Malloc
-	pop de,bc
+	pop bc,de
 	jq c,.fail
+	ld a,(ix-3)
+	ld (bos.running_process_id),a
+	dec bc
+	dec bc
 	push hl
 	ld (hl),c
 	inc hl

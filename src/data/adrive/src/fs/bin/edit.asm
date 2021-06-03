@@ -48,6 +48,7 @@ edit_pointer:=$-3
 edit_page_offset:=$-3
 	add hl,de
 	call main_draw
+.loop:
 	call bos.sys_WaitKey
 	cp a,3
 	jq z,cursor_right
@@ -65,7 +66,7 @@ edit_page_offset:=$-3
 	pop af
 	cp a,15
 	ret z
-	jq main_edit_loop
+	jq .loop
 	
 	
 	ret
@@ -194,8 +195,7 @@ print_and_fail:
 str_FailedToOpen:
 	db "Failed to open file.",$A,0
 
-
-__keymaps:
+.keymaps:
 	dl .keymap_A,.keymap_a,.keymap_1,.keymap_x
 .keymap_A:
 	db '"',"WRMH",0,0,"?!VQLG",0,0,":ZUPKFC",0," YTOJEB",0,0,"XSNIDA"

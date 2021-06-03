@@ -339,6 +339,7 @@ explorer_dirname_buffer:=$-3
 	pop bc
 	call bos.fs_CopyFileName
 	ld (explorer_dirname_buffer),hl
+	ex (sp),hl
 	call ti._strlen ;get length of directory we're pathing into
 	ld (ix-3),hl
 	ex (sp),hl

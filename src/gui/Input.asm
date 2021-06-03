@@ -4,7 +4,7 @@
 ;@OUTPUT 0 if user exit, 1 if user enter, 9/12 if user presses down/up arrow key
 ;@DESTROYS All
 gui_Input:
-	ld hl,-8
+	ld hl,-11
 	call ti._frameset
 	xor a,a
 	sbc hl,hl
@@ -30,7 +30,7 @@ gui_Input:
 	xor a,a
 	ld (curcol),a
 	ld hl,(ix+6)
-	call gui_Print
+	call ._printlines
 	call gfx_SwapTextColors
 	ld bc,0
 	ld hl,.overtypes
@@ -40,6 +40,12 @@ gui_Input:
 	ld (ix-8),bc
 	ld a,(hl)
 	call gfx_PrintChar
+	ld hl,(ix-11)
+	ld bc,(ix-3)
+	or a,a
+	sbc hl,bc
+	add hl,bc
+	call c,.draw_underline
 	call gfx_SwapTextColors
 	call gfx_BlitBuffer
 .keys:
@@ -143,7 +149,7 @@ gui_Input:
 	inc de
 	ld a,(lcd_text_bg)
 	ld (hl),a
-	ld bc,320*9
+	ld bc,320*9 - 1
 	ldir
 	ret
 .prevmap:
@@ -163,6 +169,64 @@ gui_Input:
 	jr c,.setmap
 	xor a,a
 	jr .setmap
+.draw_underline:
+	ld a,(curcol)
+	or a,a
+	sbc hl,hl
+	ld l,a
+	ld a,(currow)
+	inc a
+	ld c,a
+	add a,a
+	add a,a
+	add a,a
+	add a,c
+	ld e,a
+	add hl,hl
+	add hl,hl
+	add hl,hl
+	call gfx_Compute
+	ld a,(lcd_text_fg)
+	ld b,8
+.horiz_loop:
+	ld (hl),a
+	inc hl
+	djnz .horiz_loop
+	ret
+
+._printlines_scroll:
+	push hl
+	call gui_Scroll
+	pop hl
+._printlines:
+	call gui_PrintString
+	ret nc
+.controlcode:
+	or a,a
+	jr z,.nextline
+	cp a,$0A ;LF
+	jq z,.nextline
+	cp a,$09 ;TAB
+	jq nz,._printlines
+.tab:
+	ld a,(curcol)
+	add a,3
+	ld (curcol),a
+	jq ._printlines
+.nextline:
+	xor a,a
+	ld (curcol),a
+	ld a,(currow)
+	cp a,25
+	jq nc,._printlines_scroll
+	inc a
+	ld (currow),a
+	push hl
+	call gfx_BlitBuffer
+	call .clear_line
+	pop hl
+	jq ._printlines
+
 
 .keymaps:
 	dl .keymap_A,.keymap_a,.keymap_1,.keymap_x

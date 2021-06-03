@@ -1,15 +1,12 @@
 
-gui_Print:
-.print:
-	call gui_PrintString
-	jq c,.controlcode
-	ret
-
-.scroll:
+gui_Print.scroll:
 	push hl
 	call gui_Scroll
 	pop hl
-	jq .
+gui_Print:
+.print:
+	call gui_PrintString
+	ret nc
 
 .controlcode:
 	or a,a
