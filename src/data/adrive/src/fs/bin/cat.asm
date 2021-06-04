@@ -65,9 +65,9 @@ cat_main:
 	ld (bos.running_process_id),a
 	call bos.sys_Malloc
 	pop bc,de
-	jq c,.fail
 	ld a,(ix-3)
 	ld (bos.running_process_id),a
+	jq c,.fail
 	dec bc
 	dec bc
 	push hl

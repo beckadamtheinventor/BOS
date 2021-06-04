@@ -127,7 +127,17 @@ fs_OpenFile:
 	push hl
 	call sys_Free
 	pop bc
+	ld a,(iy)
 	lea iy,iy+16
+	cp a,fsentry_longfilename
+	jq nz,.search_loop
+	or a,a
+	sbc hl,hl
+	ld l,(iy-15)
+	lea bc,iy
+	add hl,bc
+	push hl
+	pop iy
 .search_loop:
 	ld a,(iy)
 	or a,a

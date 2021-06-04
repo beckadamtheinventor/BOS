@@ -25,11 +25,13 @@ _writeinto:
 	inc hl
 	push bc,hl
 	ld c,0
-	push bc,de,hl
-	call bos.sys_Free
-	pop bc
+	push bc,de
 	call bos.fs_WriteNewFile
-	pop bc,bc,bc,bc
+	pop bc,bc,bc
+	push af,bc
+	call bos.sys_Free
+	pop bc,af,bc
+	sbc hl,hl
 	ret ;previous routine returns what we want to return
 .overwritefile:
 	ex hl,de
@@ -42,12 +44,14 @@ _writeinto:
 	call bos.fs_SetSize
 	pop bc,de,hl
 	push de,bc,hl
-	call bos.sys_Free
 	call bos.fs_WriteFile
 	add hl,bc
 	or a,a
 	sbc hl,bc
-	pop hl,bc,de
+	pop hl
+	push af,hl
+	call bos.sys_Free
+	pop hl,af,bc,de
 	jq z,.fail
 	xor a,a
 	db $3E ;dummify following scf

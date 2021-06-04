@@ -41,13 +41,24 @@ macro fs_fs?
 	end macro
 
 	macro fs_entry? fdata, name, ext, prop
+		assert ((fdata - fs.base) shr 9) < 65536
+		assert fdata.len < 65536
 		pad_db name, ' ', 8
 		pad_db ext, ' ', 3
 		db prop
-		assert ((fdata - fs.base) shr 9) < 65536
 		dw (fdata - fs.base) shr 9
-		assert fdata.len < 65536
 		dw fdata.len
+	end macro
+
+	macro fs_longentry? fdata, name, prop
+		assert ((fdata - fs.base) shr 9) < 65536
+		assert fdata.len < 65536
+		db $F1,lengthof name,9 dup 0,prop
+		dw (fdata-fs.base) shr 9
+		dw fdata.len
+		fdata.namestart:
+		db name,0
+		db $10 - (($ - fdata.namestart) and $F) dup 0
 	end macro
 
 	macro fs_dir? flabel

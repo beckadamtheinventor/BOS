@@ -37,6 +37,14 @@ fs_DirList:
 	jq z,.skip_loop_bypass
 	cp a,fsentry_unlisted+1
 	jq z,.skip_loop_bypass
+	cp a,fsentry_longfilename+1
+	jq nz,.skip_loop
+	sbc hl,hl
+	ld l,(iy-15)
+	lea bc,iy
+	add hl,bc
+	push hl
+	pop iy
 	jq .skip_loop
 .list_loop_entry:
 	ld de,0
@@ -64,7 +72,17 @@ fs_DirList:
 	inc hl
 	inc de
 .list_loop_next:
+	ld a,(iy)
 	lea iy,iy+16
+	cp a,fsentry_longfilename
+	jq nz,.list_loop
+	push bc,hl
+	sbc hl,hl
+	ld l,(iy-15)
+	lea bc,iy
+	add hl,bc
+	ex (sp),hl
+	pop iy,bc
 	jq .list_loop
 .endofdir:
 	ld c,0

@@ -35,12 +35,14 @@ fs_dir root_dir
 	fs_entry tmp_dir, "tmp", "", f_subdir
 	fs_entry usr_dir, "usr", "", f_subdir
 	fs_entry var_dir, "var", "", f_subdir
+;	fs_longentry test_name_file, "testing.testing.123.hello", 0 ;coming soon :D
 end fs_dir
 
 ;"/bin/" directory
 fs_dir bin_dir
 	fs_entry root_dir, "..", "", f_subdir
 	fs_sfentry writeinto_exe, ">", "", f_readonly+f_system+f_subfile
+	fs_sfentry appendinto_exe, ">>", "", f_readonly+f_system+f_subfile
 	fs_sfentry boot_exe, "boot", "", f_readonly+f_system+f_subfile
 	fs_entry bpkload_exe, "bpk", "", f_readonly+f_system
 	fs_entry bpm_exe, "bpm", "", f_readonly+f_system
@@ -82,6 +84,10 @@ end fs_subfile
 
 fs_subfile writeinto_exe, bin_dir
 	include 'fs/bin/writeinto.asm'
+end fs_subfile
+
+fs_subfile appendinto_exe, bin_dir
+	include 'fs/bin/appendinto.asm'
 end fs_subfile
 
 fs_subfile cat_exe, bin_dir
