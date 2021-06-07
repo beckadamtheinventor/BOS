@@ -279,11 +279,10 @@ char *fs_StrToFileEntry(char *dest, const char *name);
  * @param path Path of directory to list.
  * @param num Number of entries to list.
  * @param skip Number of entries to skip.
- * @return Pointer to buffer. -1 if failed to list directory or if skip is greater than \
-the number of items in the directory.
+ * @return Number of entries read into buffer
  * @note buffer should be allocated at least 3*num bytes.
  */
-void **fs_DirList(void **buffer, const char *path, unsigned int num, unsigned int skip);
+unsigned int fs_DirList(void **buffer, const char *path, unsigned int num, unsigned int skip);
 
 /**
  * Free memory allocated by sys_Malloc.

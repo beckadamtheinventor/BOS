@@ -15,12 +15,8 @@ _OP1ToPath:
 	ldir
 	ld bc,8
 	ld hl,fsOP1+1
-	push de
 	ldir
-	pop hl
-	xor a,a
-	cpir
-	dec hl
+	ex hl,de
 	ld (hl),'.'
 	inc hl
 	ld (hl),'v'
@@ -33,12 +29,11 @@ _OP1ToPath:
 	rrca
 	and a,$F
 	ld hl,str_HexChars
-	ld bc,0
 	ld c,a
 	add hl,bc
 	ldi
 	ld a,(fsOP1)
-	ld bc,0
+	ld c,0
 	and a,$F
 	ld c,a
 	ld hl,str_HexChars

@@ -144,6 +144,7 @@
 <tr><td><a href="#fs_CheckWritableFD">bos.fs_CheckWritableFD</a></td><td><a href="#fs_CheckWritableFD">020344</a></td></tr>
 <tr><td><a href="#sys_OpenFileInPath">bos.sys_OpenFileInPath</a></td><td><a href="#sys_OpenFileInPath">020348</a></td></tr>
 <tr><td><a href="#sys_VarString">bos.sys_VarString</a></td><td><a href="#sys_VarString">02034C</a></td></tr>
+<tr><td><a href="#fs_GetFreeSpace">bos.fs_GetFreeSpace</a></td><td><a href="#fs_GetFreeSpace">020350</a></td></tr>
 </table><div id="boot_os"><h1>boot_os</h1>	<h3>syscall Adress 020108</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
@@ -734,4 +735,8 @@ takes into consideration whether the OS is in "elevated" mode</td></tr>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Similar to sprintf but uses system vars and malloc's the output buffer.</td><td>char *sys_VarString(const char *str);</td><td>hl string where $VAR's are replaced with their respective values. Returns -1 and Cf set if failed.</td><td></td><td>
 $VAR must be terminated with a space " " which is not included in the output.</td></tr>
+</table></div><div id="fs_GetFreeSpace"><h1>fs_GetFreeSpace</h1>	<h3>syscall Adress 020350</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Return remaining free space in the filesystem</td><td>int fs_GetFreeSpace(void);</td><td>filesystem remaining space in bytes</td><td></td><td>
+will sanity check the filesystem if cluster map file is not found or has zero length.</td></tr>
 </table></div></body></html>

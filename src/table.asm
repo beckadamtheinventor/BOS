@@ -145,4 +145,5 @@
 	jp fs_CheckWritableFD
 	jp sys_OpenFileInPath
 	jp sys_VarString
+	jp fs_GetFreeSpace
 

@@ -51,6 +51,10 @@ macro os_private
 		call.is	.unlock and $ffff
 
 ; setup our OS
+if defined INSTALLER8XP
+		ld a,($20104 + 3) ;high byte of ti.OSSize jump location
+		push af ;push last sector of TIOS
+end if
 		ld	a,$02
 .erase:
 		push	af
@@ -65,6 +69,11 @@ macro os_private
 		ld	bc,os.full_binary_len
 		call	$2e0
 
+if defined INSTALLER8XP
+		pop af ;pop TI-OS user archive sector
+		ld de,$0401FF ;tell BOS what sector TIOS ends at
+		call $2E8 ;WriteFlashA
+end if
 		call.is	.lock and $ffff
 		ld	a,$d0
 		ld	mb,a

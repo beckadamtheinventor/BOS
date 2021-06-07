@@ -3024,6 +3024,7 @@ namespace ti?
 ;semiSafeRAM Locations
 ;---------------------------------------------
 ?usbArea			:= 0D13FD8h ; 14306 bytes used for usb, probably need to disable timer3/usb interrupts to use
+?usbHandleKeys		:= 0D14091h ; zero this byte while using usbArea to keep GetCSC from affecting other parts of usbArea
 ?usbInited		:= 0D177B7h ; zero this byte while using usbArea and to reset the usb stack when interrupts are re-enabled
 ?heapBot			:= 0D1887Ch ; 1024 bytes used for flash ram routines, rest used rarely
 ?ramCodeTop		:= 0D18C7Ch
@@ -3432,6 +3433,12 @@ namespace ti?
 ?bmFifo3Empty		:= 1 shl bFifo3Empty
 ?bFifoEmpty		:= 8
 ?bmFifoEmpty		:= 0Fh shl bFifoEmpty
+
+?usbCxFifoBytes		:= 0123h
+?pUsbCxFifoBytes		:= pUsbRange + usbCxFifoBytes
+?mpUsbCxFifoBytes	:= mpUsbRange + usbCxFifoBytes
+?bUsbCxFifoBytes		:= 0
+?bmUsbCxFifoBytes	:= 07Fh
 
 ?usbIdle			:= 0124h
 ?pUsbIdle		:= pUsbRange + usbIdle
@@ -6633,15 +6640,13 @@ namespace ti?
 ?SLower			:= StdXP2 + FPLEN
 ?SUpper			:= SLower + FPLEN
 ?SStat			:= SUpper + FPLEN
-;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-; Bloody hell
-;?F_DF			:= anovaf_vars
-;?F_SS			:= F_DF + FPLEN
-;?F_MS			:= F_SS + FPLEN
-;?E_DF			:= F_MS + FPLEN
-;?E_SS			:= E_DF + FPLEN
-;?E_MS			:= E_SS + FPLEN
-;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+?anovaf_vars		:= SStat + FPLEN
+?F_DF			:= anovaf_vars
+?F_SS			:= F_DF + FPLEN
+?F_MS			:= F_SS + FPLEN
+?E_DF			:= F_MS + FPLEN
+?E_SS			:= E_DF + FPLEN
+?E_MS			:= E_SS + FPLEN
 
 ;System Flags
 ;----------------------------------------------------------------------

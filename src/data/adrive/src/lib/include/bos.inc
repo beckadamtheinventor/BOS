@@ -148,6 +148,7 @@
 ?fs_CheckWritableFD              := $20344
 ?sys_OpenFileInPath              := $20348
 ?sys_VarString                   := $2034C
+?fs_GetFreeSpace                 := $20350
 ;
 ?LCD_PAL?    := 0E30200h
 ?LCD_CTRL?   := 0E30018h
@@ -211,19 +212,20 @@
 ?top_of_UserMem         := $D01089 ;3 bytes
 ?SaveSP                 := $D01092 ;3 bytes, saves SP when running programs.
 ?current_sectors_per_cluster := $D01095 ;1 byte. Number of sectors per cluster in last drive where fs_DataSection or fs_RootDir has been called on it.
-?usb_sector_buffer      := $D02000 ;512 bytes
-?malloc_cache           := $D03000 ;4096 bytes
-?usbRAM                 := $D05080 ;256 bytes, should not be tampered with while /dev/mnt or /dev/usb are active
-?safeRAM                := $D05200 ; 65536 bytes scrap RAM
-?safeRAM_len            := 65536
-?reservedRAM            := $D15200 ; 2048 bytes reserved RAM
+?malloc_cache           := $D02000 ;4096 bytes
+?usb_sector_buffer      := $D03000 ;512 bytes
+?usbRAM                 := $D03200 ;256 bytes, should not be tampered with while /dev/mnt or /dev/usb are active
+?safeRAM                := $D03300 ; 85248 bytes scrap RAM
+?safeRAM_len            := 85248
+?reservedRAM            := $D18000 ; 2048 bytes reserved RAM
 ?reservedRAM_len        := 2048
 ?bos_Stackbot           := $D1A87C
 ?bos_UserMem            := $D1A881
-?driverExecRAM          := $D2F000 ; 4096 bytes RAM reserved for driver code
-?driverExecRAM_len      := 4096
 ?bottom_of_malloc_RAM   := $D30000
 ?top_of_RAM             := $D40000
+?usbArea                := $D13FD8 ; 14306 bytes used for usb, probably need to disable timer3/usb interrupts to use
+?usbHandleKeys          := $D14091 ; zero this byte while using usbArea to keep GetCSC from affecting other parts of usbArea
+?usbInited              := $D177B7 ; zero this byte while using usbArea and to reset the usb stack when interrupts are re-enabled
 ?thread_map             := $D02800 ; thread map. 256 threads. Active threads have bit 7 set.
 ?thread_temp_save       := $D03000 ; temporary save location for registers when a thread switch interrupt is triggered. 32 bytes per thread, 256 threads = 8192 bytes.
 ?current_thread         := $D05000 ; currently running thread ID

@@ -56,7 +56,7 @@ fs_dir bin_dir
 	fs_entry echo_exe, "echo", "", f_readonly+f_system
 	fs_entry edit_exe, "edit", "", f_readonly+f_system
 	fs_entry explorer_exe, "explorer", "", f_readonly+f_system
-	fs_entry fexplore_exe, "fexplore", "", f_readonly+f_system
+	; fs_entry fexplore_exe, "fexplore", "", f_readonly+f_system
 	fs_sfentry info_exe, "info", "", f_readonly+f_system+f_subfile
 	fs_sfentry ls_exe, "ls", "", f_readonly+f_system+f_subfile
 	fs_entry memedit_exe, "memedit", "", f_readonly+f_system
@@ -64,9 +64,10 @@ fs_dir bin_dir
 	fs_sfentry mkfile_exe, "mkfile", "", f_readonly+f_system+f_subfile
 	fs_sfentry off_exe, "off", "", f_readonly+f_system+f_subfile
 	fs_sfentry rm_exe, "rm", "", f_readonly+f_system+f_subfile
-	fs_entry usbrecv_exe, "usbrecv", "", f_readonly+f_system
-	fs_entry usbrun_exe, "usbrun", "", f_readonly+f_system
-	fs_entry usbsend_exe, "usbsend", "", f_readonly+f_system
+	; fs_entry transfer_exe, "transfer", "", f_readonly+f_system
+	; fs_entry usbrecv_exe, "usbrecv", "", f_readonly+f_system
+	; fs_entry usbrun_exe, "usbrun", "", f_readonly+f_system
+	; fs_entry usbsend_exe, "usbsend", "", f_readonly+f_system
 end fs_dir
 
 fs_dir _os_dir
@@ -167,12 +168,25 @@ end fs_subfile
 fs_dir etc_dir
 	fs_entry root_dir, "..", "", f_subdir
 	fs_entry etc_config_dir, "config", "", f_subdir
+	fs_entry etc_data_dir, "data", "", f_subdir
 end fs_dir
 
 ;"/etc/config/" directory
 fs_dir etc_config_dir
 	fs_entry etc_dir, "..", "", f_subdir
 	fs_entry etc_config_explorer_dir, "explorer", "", f_subdir
+end fs_dir
+
+;"/etc/data/" directory
+fs_dir etc_data_dir
+	fs_entry etc_dir, "..", "", f_subdir
+	fs_entry transfer_dir, "TRANSFER", "", f_subdir
+end fs_dir
+
+;"/etc/data/TRANSFER/" directory
+fs_dir transfer_dir
+	fs_entry etc_data_dir, "..", "", f_subdir
+	; fs_entry font_data_file, "font", "bin", 0
 end fs_dir
 
 ;"/etc/config/explorer/" directory
@@ -304,25 +318,25 @@ fs_file echo_exe
 	include 'fs/bin/echo.asm'
 end fs_file
 
-fs_file fexplore_exe
-	file '../obj/fexplore.bin'
-end fs_file
+; fs_file fexplore_exe
+	; file '../obj/fexplore.bin'
+; end fs_file
 
 fs_file memedit_exe
 	file '../obj/memedit.bin'
 end fs_file
 
-fs_file usbrun_exe
-	file "../obj/usbrun.bin"
-end fs_file
+; fs_file usbrun_exe
+	; file "../obj/usbrun.bin"
+; end fs_file
 
-fs_file usbsend_exe
-	file "../obj/usbsend.bin"
-end fs_file
+; fs_file usbsend_exe
+	; file "../obj/usbsend.bin"
+; end fs_file
 
-fs_file usbrecv_exe
-	file '../obj/usbrecv.bin'
-end fs_file
+; fs_file usbrecv_exe
+	; file '../obj/usbrecv.bin'
+; end fs_file
 
 fs_file bpkload_exe
 	file '../obj/bpkload.bin'
@@ -339,6 +353,14 @@ end fs_file
 fs_file edit_exe
 	file '../obj/edit.bin'
 end fs_file
+
+; fs_file font_data_file
+	; file 'fs/etc/data/font.bin'
+; end fs_file
+
+; fs_file transfer_exe
+	; file 'fs/bin/TRANSFER.bin'
+; end fs_file
 
 fs_file missing_icon
 	include 'fs/etc/config/explorer/missing.asm'
