@@ -180,14 +180,22 @@ end fs_dir
 ;"/etc/data/" directory
 fs_dir etc_data_dir
 	fs_entry etc_dir, "..", "", f_subdir
-	fs_entry transfer_dir, "TRANSFER", "", f_subdir
+	; fs_entry transfer_dir, "TRANSFER", "", f_subdir
+	fs_entry etc_data_explorer_dir, "explorer", "", f_subdir
+end fs_dir
+
+
+;"/etc/data/explorer/" directory
+fs_dir etc_data_explorer_dir
+	fs_entry etc_data_dir, "..", "", f_subdir
+	; fs_entry explorer_font_file, "font", "bin", 0
 end fs_dir
 
 ;"/etc/data/TRANSFER/" directory
-fs_dir transfer_dir
-	fs_entry etc_data_dir, "..", "", f_subdir
+; fs_dir transfer_dir
+	; fs_entry etc_data_dir, "..", "", f_subdir
 	; fs_entry font_data_file, "font", "bin", 0
-end fs_dir
+; end fs_dir
 
 ;"/etc/config/explorer/" directory
 fs_dir etc_config_explorer_dir
@@ -354,8 +362,12 @@ fs_file edit_exe
 	file '../obj/edit.bin'
 end fs_file
 
+; fs_file explorer_font_file
+	; file 'fs/etc/data/explorer/font.bin'
+; end fs_file
+
 ; fs_file font_data_file
-	; file 'fs/etc/data/font.bin'
+	; file 'fs/etc/data/TRANSFER/font.bin'
 ; end fs_file
 
 ; fs_file transfer_exe

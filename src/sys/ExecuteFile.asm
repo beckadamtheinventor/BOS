@@ -25,7 +25,7 @@ sys_ExecuteFile:
 	ex (sp),hl
 	call fs_OpenFile ;check if file is found in current working directory
 	pop bc
-	call c,sys_OpenFileInPath ;call if fs_OpenFile failed
+	call c,sys_OpenFileInPath ;call if fs_OpenFile failed to find the file in dirs listed in $PATH
 	pop bc ;hl will be result of fs_OpenFile if it didn't fail, otherwise result of sys_OpenFileInPath
 	ld bc,(fsOP6+3)
 	push hl,af,bc

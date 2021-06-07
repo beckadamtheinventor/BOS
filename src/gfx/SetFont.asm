@@ -8,8 +8,12 @@ gfx_SetFont:
 	pop bc,hl
 	push hl,bc
 	ld bc,0
-	ld c,(hl)
-	inc bc
+	ld a,(hl)
+	or a,a
+	ld c,a
+	jq nz,.under256
+	inc b
+.under256:
 	inc hl
 	ld (font_spacing),hl
 	add hl,bc

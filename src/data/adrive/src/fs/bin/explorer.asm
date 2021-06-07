@@ -522,7 +522,6 @@ explorer_load_config:
 .readstringloop:
 	cpir ;find end of string
 	dec hl
-	dec hl
 	ld a,(hl)
 	cp a,$5C
 	jq nz,.foundendofstring
@@ -569,7 +568,7 @@ explorer_load_config:
 	or a,a
 	sbc hl,bc
 	jq nz,.next
-	push hl
+	push de
 	call bos.gfx_SetFont
 	ld hl,(bos.font_spacing)
 	ex (sp),hl

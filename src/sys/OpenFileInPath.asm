@@ -5,6 +5,14 @@
 sys_OpenFileInPath:
 	ld hl,-15
 	call ti._frameset
+	ld hl,string_path_variable
+	push hl
+	call fs_GetFilePtr
+	jq c,.fail ;fail if /var/PATH not found
+	pop de
+.entry_hlbc:
+	ld (ix-6),hl
+	ld (ix-9),bc
 	ld hl,(ix+6)
 	ld a,(hl)
 	or a,a
@@ -12,26 +20,17 @@ sys_OpenFileInPath:
 	push hl
 	call fs_OpenFile
 	pop bc
-	jq nc,.success
+	jq nc,.success ;succeed if file found
 	ld a,(bc)
 	cp a,'/'
-	jq z,.fail ;fail if absolute path to file not found
+	jq z,.fail ;fail if absolute path not found
 	push bc
 	call ti._strlen
 	ld (ix-3),hl
 	pop bc
-	ld hl,string_path_variable
-	push hl
-	call fs_GetFilePtr
-	jq c,.fail ;fail if /var/PATH not found
-	pop de
-	ld (ix-6),hl
-	ld (ix-9),bc
-	jq .loopentry
 .loop:
 	ld hl,(ix-6)
 	ld bc,(ix-9)
-.loopentry:
 	ld a,c
 	or a,b
 	jq z,.fail
