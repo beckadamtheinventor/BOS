@@ -145,6 +145,8 @@
 <tr><td><a href="#sys_OpenFileInPath">bos.sys_OpenFileInPath</a></td><td><a href="#sys_OpenFileInPath">020348</a></td></tr>
 <tr><td><a href="#sys_VarString">bos.sys_VarString</a></td><td><a href="#sys_VarString">02034C</a></td></tr>
 <tr><td><a href="#fs_GetFreeSpace">bos.fs_GetFreeSpace</a></td><td><a href="#fs_GetFreeSpace">020350</a></td></tr>
+<tr><td><a href="#fs_GetFDPtr">bos.fs_GetFDPtr</a></td><td><a href="#fs_GetFDPtr">020354</a></td></tr>
+<tr><td><a href="#fs_GetFDLen">bos.fs_GetFDLen</a></td><td><a href="#fs_GetFDLen">020358</a></td></tr>
 </table><div id="boot_os"><h1>boot_os</h1>	<h3>syscall Adress 020108</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
@@ -739,4 +741,12 @@ $VAR must be terminated with a space " " which is not included in the output.</t
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Return remaining free space in the filesystem</td><td>int fs_GetFreeSpace(void);</td><td>filesystem remaining space in bytes</td><td></td><td>
 will sanity check the filesystem if cluster map file is not found or has zero length.</td></tr>
+</table></div><div id="fs_GetFDPtr"><h1>fs_GetFDPtr</h1>	<h3>syscall Adress 020354</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Return pointer to file data given a file descriptor</td><td>void *fs_GetFDPtr(void *fd);</td><td>pointer to file data</td><td></td><td>
+</td></tr>
+</table></div><div id="fs_GetFDLen"><h1>fs_GetFDLen</h1>	<h3>syscall Adress 020358</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Return length of file data given a file descriptor</td><td>int fs_GetFDLen(void *fd);</td><td>length of file data</td><td>HL,DE</td><td>
+</td></tr>
 </table></div></body></html>

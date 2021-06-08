@@ -27,6 +27,7 @@ main_edit_open:
 	push hl
 	pop de
 	inc de
+	ld bc,65536
 	jq .copy
 .load:
 	ld de,bos.safeRAM

@@ -28,8 +28,9 @@ def build_bos_inc():
 
 	with open("bos.inc","w") as f:
 		f.write("""
-	define bos? bos
-	namespace bos
+define bos? bos
+namespace bos
+; jump table
 	""")
 		for line in data:
 			if "jp " in line:
@@ -43,9 +44,14 @@ def build_bos_inc():
 				counter+=4
 			else:
 				f.write(";"+line+"\n")
+		f.write("""; defines
+""")
 		for line in defines:
 			if len(line):
 				o=ord(line[0])
 				if o in range(0x41,0x5B) or o in range(0x61,0x7B):
 					f.write("?"+line+"\n")
 		f.write("\nend namespace")
+
+if __name__=='__main__':
+	build_bos_inc()

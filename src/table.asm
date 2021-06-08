@@ -146,4 +146,7 @@
 	jp sys_OpenFileInPath
 	jp sys_VarString
 	jp fs_GetFreeSpace
+	jp fs_GetFDPtr
+	jp fs_GetFDLen
+
 

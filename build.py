@@ -21,7 +21,7 @@ class Build:
 			"-c src/fs/bin/explorer.asm obj/explorer.bin",
 			# "-c src/fs/bin/fexplore.asm obj/fexplore.bin",
 			"-c src/fs/bin/memedit.asm obj/memedit.bin",
-			"-c src/fs/bin/edit.asm obj/edit.bin",
+			# "-c src/fs/bin/edit.asm obj/edit.bin",
 			# "-c src/fs/bin/usbrun.asm obj/usbrun.bin",
 			# "-c src/fs/bin/usbsend.asm obj/usbsend.bin",
 			# "-c src/fs/bin/usbrecv.asm obj/usbrecv.bin",

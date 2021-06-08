@@ -54,7 +54,7 @@ fs_dir bin_dir
 	fs_sfentry initdev_exe, "device", "", f_readonly+f_system+f_subfile
 	fs_sfentry df_exe, "df", "", f_readonly+f_system+f_subfile
 	fs_entry echo_exe, "echo", "", f_readonly+f_system
-	fs_entry edit_exe, "edit", "", f_readonly+f_system
+	; fs_entry edit_exe, "edit", "", f_readonly+f_system
 	fs_entry explorer_exe, "explorer", "", f_readonly+f_system
 	; fs_entry fexplore_exe, "fexplore", "", f_readonly+f_system
 	fs_sfentry info_exe, "info", "", f_readonly+f_system+f_subfile
@@ -358,9 +358,9 @@ fs_file bpm_exe
 	file '../obj/bpm.bin'
 end fs_file
 
-fs_file edit_exe
-	file '../obj/edit.bin'
-end fs_file
+; fs_file edit_exe
+	; file '../obj/edit.bin'
+; end fs_file
 
 ; fs_file explorer_font_file
 	; file 'fs/etc/data/explorer/font.bin'

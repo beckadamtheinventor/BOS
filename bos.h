@@ -22,7 +22,21 @@ const char *os_GetOSInfo(void);
  * @param path Path to file.
  * @return Pointer to file descriptor.
  */
-void *fs_OpenFile(const char *path)
+void *fs_OpenFile(const char *path);
+
+/**
+ * Get pointer to file data given a file descriptor
+ * @param fd File descriptor.
+ * @return Pointer to file data.
+ */
+void *fs_GetFDPtr(const void *fd);
+
+/**
+ * Get length of file data given a file descriptor
+ * @param fd File descriptor.
+ * @return Length of file data.
+ */
+int fs_GetFDLen(const void *fd);
 
 /**
  * Get the memory address of a given filesystem sector.

@@ -1,6 +1,7 @@
 
-	define bos? bos
-	namespace bos
+define bos? bos
+namespace bos
+; jump table
 	;
 ?boot_os                         := $20108
 ?handle_interrupt                := $2010C
@@ -149,7 +150,11 @@
 ?sys_OpenFileInPath              := $20348
 ?sys_VarString                   := $2034C
 ?fs_GetFreeSpace                 := $20350
+?fs_GetFDPtr                     := $20354
+?fs_GetFDLen                     := $20358
 ;
+;
+; defines
 ?LCD_PAL?    := 0E30200h
 ?LCD_CTRL?   := 0E30018h
 ?LCD_VRAM?   := 0D40000h
