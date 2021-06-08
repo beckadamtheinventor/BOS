@@ -1,1 +1,1 @@
-BOS 1.08.0002 alpha
+BOS 1.08.0003 alpha

@@ -109,17 +109,16 @@ mem_edit_main:
 	ld a,(ix-12)
 	or a,a
 	jq z,.main_draw
+	ld a,1
+	ld (edited_file),a
 	ld bc,(ix-3)
-	or a,a
 	sbc hl,hl
 	ld l,(ix-7)
 	add hl,bc
 	ld bc,bos.safeRAM
-	or a,a
 	sbc hl,bc
 	jq c,.main_draw
 	ld bc,(ix-11)
-	or a,a
 	sbc hl,bc
 	jq c,.main_draw
 	add hl,bc
@@ -140,7 +139,6 @@ mem_edit_main:
 	or a,a
 	jq z,.draw_address
 	ld bc,bos.safeRAM
-	or a,a
 	sbc hl,bc
 .draw_address:
 	call _print24h
@@ -293,6 +291,10 @@ mem_edit_main:
 	ld (hl),a
 	jq .main_set_file_max
 .exit:
+	ld a,0
+edited_file:=$-1
+	or a,a
+	call nz,.write_file
 	call gfx_ZeroScreen
 	call gfx_BlitBuffer
 	ld sp,ix
