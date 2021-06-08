@@ -255,7 +255,7 @@ mem_edit_main:
 	cp a,9
 	jq z,.input_string
 	cp a,42 ;"->" / "x" key
-	jq z,.write_file
+	jq z,._write_file
 	cp a,15 ;clear key
 	jq z,.exit
 	cp a,53 ;yequ key
@@ -418,11 +418,14 @@ edited_file:=$-1
 	ld de,$D52C02
 	add hl,de ;&vRamBuffer[col*27 + row*9*320 + 2]
 	ret
+._write_file:
+	call .write_file
+	jq .main_loop
 .write_file:
 	ld hl,(ix+6) ;args
 	ld a,(hl)
 	cp a,'$'
-	jq z,.main_loop
+	ret z
 	call gfx_ZeroScreen
 	ld bc,1
 	push bc,bc
@@ -433,7 +436,7 @@ edited_file:=$-1
 	call gfx_BlitBuffer
 	call bos.sys_WaitKeyCycle
 	cp a,9
-	jq nz,.main_loop
+	ret nz
 	ld hl,(ix+6) ;args
 	push hl
 	call bos.fs_OpenFile
@@ -443,7 +446,7 @@ edited_file:=$-1
 	push bc
 	call bos.fs_SetSize
 	pop bc,hl
-	jq z,.main_loop
+	ret z
 	jq .write_file_data
 .write_new_file:
 	ld bc,(ix-11)
@@ -463,7 +466,7 @@ edited_file:=$-1
 	push bc
 	call nc,bos.fs_Write
 	pop bc,bc,bc,bc,bc
-	jq .main_loop
+	ret
 .exitaddrloop:
 	pop bc
 	call gfx_BlitBuffer
