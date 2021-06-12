@@ -230,7 +230,7 @@ fontlib_SetWindowFullScreen:
 ;  Nothing
 	ld	hl,_TextDefaultWindow
 	ld	de,_TextXMin
-	jp	_Mov8b
+	jp	bos._Mov8b
 
 
 ;-------------------------------------------------------------------------------
@@ -1805,26 +1805,27 @@ util.GetFontPackData:
 ;  Carry set if appvar not found, or not a font pack; NC on success
 	dec	hl
 	ld	iy,flags
-	call	_Mov9ToOP1
+	call	bos._Mov9ToOP1
 	ld	a,AppVarObj
-	ld	(OP1),a
-	call	_ChkFindSym
+	ld	(bos.fsOP1),a
+	call	bos._ChkFindSym
 	jr	c,.error
 	ex	de,hl
-	ld	a,b
-	cp	a,$D0
-	jr	nc,.headerCheck
+	; ld	a,b
+	; cp	a,$D0
+	; jr	nc,.headerCheck
 ; Sadly, TI doesn't kindly provide us with a direct pointer; we have to account
 ; for the archive header ourselves.
-	ld	de,9
-	add	hl,de
-	ld	e,(hl)
-	inc	hl
-	add	hl,de
+; but since this isn't TIOS, we get an actual data pointer
+	; ld	de,9
+	; add	hl,de
+	; ld	e,(hl)
+	; inc	hl
+	; add	hl,de
 .headerCheck:
 ; Check header
-	inc	hl
-	inc	hl
+	; inc	hl
+	; inc	hl
 	push	hl
 	call	util.VerifyHeader
 	pop	de

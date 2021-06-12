@@ -39,7 +39,8 @@ string_os_recovery_menu:
 	db $9,"Press 2nd to turn off calculator",$A
 	db $9,"Press enter to attempt recovery",$A
 	db $9,"Press mode to reset filesystem",$A
-	db $9,"Press del to uninstall BOS",$A,0
+	db $9,"Press del to uninstall BOS",$A
+	db $9,"Press apps to reinstall TIOS",$A,0
 string_press_enter_confirm:
 	db "Press enter to confirm.",$A,0
 string_program_requested_flash:
@@ -47,6 +48,8 @@ string_program_requested_flash:
 	db "Program requested flash unlock without elevation.",$A
 	db "Aborting program execution.",$A
 	db "Press any key to continue.",$A,0
+string_failed_to_reinstall:
+	db "Failed to reinstall TIOS, backup files are missing!",$A,0
 
 string_os_elevation_file:
 	db "/",$F2,"OS/ELEVATED",0

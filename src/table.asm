@@ -148,5 +148,6 @@
 	jp fs_GetFreeSpace
 	jp fs_GetFDPtr
 	jp fs_GetFDLen
+	jp _OP1ToPath
 
 

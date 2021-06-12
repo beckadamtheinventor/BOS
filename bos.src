@@ -145,6 +145,7 @@
 	public fs_GetFreeSpace
 	public fs_GetFDPtr
 	public fs_GetFDLen
+	public _OP1ToPath
 boot_os                         := $20108
 handle_interrupt                := $2010C
 handle_safeop                   := $20118
@@ -290,3 +291,4 @@ sys_VarString                   := $2034C
 fs_GetFreeSpace                 := $20350
 fs_GetFDPtr                     := $20354
 fs_GetFDLen                     := $20358
+_OP1ToPath                      := $2035C

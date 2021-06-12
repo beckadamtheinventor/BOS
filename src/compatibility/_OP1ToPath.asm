@@ -13,9 +13,18 @@ _OP1ToPath:
 	ld hl,str_tivars_dir
 	ld bc,str_tivars_dir.len
 	ldir
-	ld bc,8
+	ld b,8
 	ld hl,fsOP1+1
-	ldir
+.copy_name_loop:
+	ld a,(hl)
+	or a,a
+	jq z,.done_copying_name
+	inc hl
+	ld (de),a
+	inc de
+	djnz .copy_name_loop
+.done_copying_name:
+	ld b,c
 	ex hl,de
 	ld (hl),'.'
 	inc hl

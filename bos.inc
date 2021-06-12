@@ -152,6 +152,7 @@ namespace bos
 ?fs_GetFreeSpace                 := $20350
 ?fs_GetFDPtr                     := $20354
 ?fs_GetFDLen                     := $20358
+?_OP1ToPath                      := $2035C
 ;
 ;
 ; defines

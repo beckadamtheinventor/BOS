@@ -9,6 +9,9 @@ _ChkFindSym:
 	push hl
 	call fs_OpenFile
 	pop bc
+	push af,hl,bc
+	call sys_Free
+	pop bc,hl,af
 	ret c
 
 	ld bc,fsentry_filesector ;file pointer

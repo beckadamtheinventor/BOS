@@ -124,6 +124,8 @@ os_recovery_menu:
 	jq z,.uninstall
 	cp a,15
 	jq z,boot_os
+	cp a,39
+	jq z,.reinstalltios
 	
 	jq .keywait
 
@@ -165,6 +167,27 @@ os_recovery_menu:
 	call sys_FlashUnlock
 	ld a,2
 	jq sys_EraseFlashSector ;erase first OS sector, bootcode will handle the rest
+
+.reinstalltios:
+	ld hl,string_press_enter_confirm
+	call gui_Print
+	call sys_WaitKeyCycle
+	cp a,9
+	jq nz,os_recovery_menu
+	ld hl,.reinstall_fail_handler
+	ld de,bos_UserMem
+	push hl,de
+	ld hl,data_reinstall_tios_program
+	ld bc,data_reinstall_tios_program.len
+	ldir
+	ret
+
+.reinstall_fail_handler:
+	ld hl,string_failed_to_reinstall
+	call gui_DrawConsoleWindow
+	call sys_WaitKeyCycle
+	jq os_recovery_menu
+	
 
 handle_interrupt:
 	ld bc,$5015
@@ -335,9 +358,33 @@ handle_offsetcall:
 	ex (sp),hl ;push jump location, restore HL
 	ret
 
-
 os_GetOSInfo:
 	ld hl,string_os_info
 os_DoNothing:
 	ret
+
+virtual at ti.userMem
+	ld hl,_backup_file
+	push hl
+	call fs_OpenFile
+	pop bc
+	ret c
+	
+	
+	
+	
+	
+	ret
+_backup_file:
+	db "/usr/tivars/TIOSbkp"
+_backup_number:
+	db "A.v15",0
+
+
+	load data_reinstall_tios_program.data:$-$$ from $$
+end virtual
+
+data_reinstall_tios_program:
+	db data_reinstall_tios_program.data
+.len:=$-.
 
