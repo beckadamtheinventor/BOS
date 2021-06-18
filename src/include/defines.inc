@@ -56,6 +56,7 @@ ScrapWord              := $D0027D
 ScrapMem               := $D0027D
 ExecutingFileFd        := $D00280 ; 3 bytes. Pointer to currently executing file descriptor. -1 if file not found. 0 if file descriptor is not applicable
 LastCommandResult      := $D00283 ; 3 bytes. Points to result of previously executed command
+last_keypress          := $D00286 ; 1 byte. Last keypress returned by an os getkey routine
 open_files_table       := $D00300
 InputBuffer            := $D00400
 gfx_string_temp        := $D00500
@@ -75,7 +76,8 @@ argument_stack_current := $D01083 ;3 bytes
 asm_prgm_size          := $D01086 ;3 bytes
 top_of_UserMem         := $D01089 ;3 bytes
 SaveSP                 := $D01092 ;3 bytes, saves SP when running programs.
-current_sectors_per_cluster := $D01095 ;1 byte. Number of sectors per cluster in last drive where fs_DataSection or fs_RootDir has been called on it.
+current_sectors_per_cluster := $D01095 ;1 byte. Number of sectors per cluster in last drive where fs_DataSection or fs_RootDir has been called on it. Currently unused.
+asset_reservations_table    := $D01600 ;1024 bytes. Caches asset memory reservations
 malloc_cache           := $D02000 ;4096 bytes
 usb_sector_buffer      := $D03000 ;512 bytes
 usbRAM                 := $D03200 ;256 bytes, should not be tampered with while /dev/mnt or /dev/usb are active
@@ -97,15 +99,17 @@ usbInited              := $D177B7 ; zero this byte while using usbArea and to re
 
 ; threading defines
 thread_map             := $D02800 ; thread map. 256 threads. Active threads have bit 7 set.
-thread_temp_save       := $D03000 ; temporary save location for registers when a thread switch interrupt is triggered. 32 bytes per thread, 256 threads = 8192 bytes.
-current_thread         := $D05000 ; currently running thread ID
-thread_control         := $D05001 ; zero if threading is disabled
-thread_memory_end      := $D05002 ; end of thread memory
+thread_temp_save       := $D03000 ; temporary save location for registers when a thread switch is triggered. 16 bytes per thread, 256 threads = 4096 bytes.
+current_thread         := $D04000 ; currently running thread ID
+thread_control         := $D04001 ; zero if threading is disabled
+thread_memory_end      := $D04002 ; end of thread memory
 
 ; Flash locations
 start_of_user_archive  := $040000 ;sector $04
 end_of_user_archive    := $3B0000 ;sector $3B, start of certificate
 
+
+asset_locations_start      := $3C0000
 
 ; file entry flags
 fd_readonly   := 0

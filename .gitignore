@@ -4,10 +4,6 @@
 /.idea
 /__pycache__
 /obj
-/src/threading/
-/src/threading.inc
-/src/include/threading.inc
-/src/data/adrive/src/fs/bin/include/threading.inc
 /src/data/adrive/data.bin
 /*.rom
 /*.bin

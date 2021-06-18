@@ -56,6 +56,7 @@ ScrapWord              := $D0027D
 ScrapMem               := $D0027D
 ExecutingFileFd        := $D00280 ; 3 bytes. Pointer to currently executing file descriptor. -1 if file not found. 0 if file descriptor is not applicable
 LastCommandResult      := $D00283 ; 3 bytes. Points to result of previously executed command
+last_keypress          := $D00286 ; 1 byte. Last keypress returned by an os getkey routine
 open_files_table       := $D00300
 InputBuffer            := $D00400
 gfx_string_temp        := $D00500
@@ -97,10 +98,10 @@ usbInited              := $D177B7 ; zero this byte while using usbArea and to re
 
 ; threading defines
 thread_map             := $D02800 ; thread map. 256 threads. Active threads have bit 7 set.
-thread_temp_save       := $D03000 ; temporary save location for registers when a thread switch interrupt is triggered. 32 bytes per thread, 256 threads = 8192 bytes.
-current_thread         := $D05000 ; currently running thread ID
-thread_control         := $D05001 ; zero if threading is disabled
-thread_memory_end      := $D05002 ; end of thread memory
+thread_temp_save       := $D03000 ; temporary save location for registers when a thread switch is triggered. 16 bytes per thread, 256 threads = 4096 bytes.
+current_thread         := $D04000 ; currently running thread ID
+thread_control         := $D04001 ; zero if threading is disabled
+thread_memory_end      := $D04002 ; end of thread memory
 
 ; Flash locations
 start_of_user_archive  := $040000 ;sector $04

@@ -1,14 +1,6 @@
 
 boot_os:
 	call ti.boot.Set48MHzMode
-
-	; ld hl,thread_map
-	; ld de,thread_map+1
-	; ld (hl),l
-	; ld bc,thread_memory_end-thread_map
-	; ldir
-
-;boot_os_thread:
 	di             ;inline flash unlock for security reasons
 	in0 a,($06)
 	set 2,a
@@ -30,9 +22,18 @@ boot_os:
 	out0 ($1E),a
 	call flash_lock
 
-	ld a,4           ;set wait states to 4
-	ld ($E00005),a
+	ld hl,thread_map
+	ld de,thread_map+1
+	xor a,a
+	ld (current_thread),a
+	ld (hl),a
+	ld bc,thread_memory_end-thread_map
+	ldir
+	ld a,$80
+	ld (thread_map),a
 
+	ld a,3           ;set wait states to 3, same as the CE C toolchain
+	ld ($E00005),a
 	call gfx_SetDefaultFont
 	call gfx_Set8bpp
 
@@ -89,18 +90,16 @@ boot_os:
 	call fs_CreateFile
 	pop bc,bc,bc
 .dont_create_elevation_file:
+; os_trap_loop:
+	; SpawnThread os_return, ti.stackBot
+	; HandleNextThread
+; if we get back here, check if recovery key pressed
+	; ld a,(last_keypress)
+	; cp a,53
+	; jq nz,os_trap_loop
+	ld sp,ti.stackBot
+	jq os_return
 
-os_return:
-	ld sp,$D1A87E ;base stack pointer
-	call sys_GetKey
-	cp a,53
-	jq z,os_recovery_menu
-	call gfx_Set8bpp
-	ld bc,$FF0000
-	ld hl,str_StartupProgram
-	push bc,hl
-	call sys_ExecuteFile
-	pop bc,bc ;we should only get back here in a severe error case or if the user opens this menu
 os_recovery_menu:
 	xor a,a
 	ld (lcd_bg_color),a
@@ -363,16 +362,25 @@ os_GetOSInfo:
 os_DoNothing:
 	ret
 
+os_return:
+	call sys_GetKey
+	cp a,53
+	jq z,os_recovery_menu
+	call gfx_Set8bpp
+	ld bc,$FF0000
+	ld hl,str_StartupProgram
+	push bc,hl
+	call sys_ExecuteFile
+	pop bc,bc
+	EndThread
+
+;tios reinstaller
 virtual at ti.userMem
 	ld hl,_backup_file
 	push hl
 	call fs_OpenFile
 	pop bc
 	ret c
-	
-	
-	
-	
 	
 	ret
 _backup_file:

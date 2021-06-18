@@ -5,9 +5,9 @@ namespace bos
 	;
 ?boot_os                         := $20108
 ?handle_interrupt                := $2010C
-;DONOTHING                       := $20110
+?HandleInstruction               := $20110
 ;DONOTHING                       := $20114
-?handle_safeop                   := $20118
+;DONOTHING                       := $20118
 ?handle_offsetcall               := $2011C
 ;DONOTHING                       := $20120
 ?sys_ExecuteFile                 := $20124
@@ -198,6 +198,7 @@ namespace bos
 ?ScrapMem               := $D0027D
 ?ExecutingFileFd        := $D00280 ; 3 bytes. Pointer to currently executing file descriptor. -1 if file not found. 0 if file descriptor is not applicable
 ?LastCommandResult      := $D00283 ; 3 bytes. Points to result of previously executed command
+?last_keypress          := $D00286 ; 1 byte. Last keypress returned by an os getkey routine
 ?open_files_table       := $D00300
 ?InputBuffer            := $D00400
 ?gfx_string_temp        := $D00500
@@ -233,10 +234,10 @@ namespace bos
 ?usbHandleKeys          := $D14091 ; zero this byte while using usbArea to keep GetCSC from affecting other parts of usbArea
 ?usbInited              := $D177B7 ; zero this byte while using usbArea and to reset the usb stack when interrupts are re-enabled
 ?thread_map             := $D02800 ; thread map. 256 threads. Active threads have bit 7 set.
-?thread_temp_save       := $D03000 ; temporary save location for registers when a thread switch interrupt is triggered. 32 bytes per thread, 256 threads = 8192 bytes.
-?current_thread         := $D05000 ; currently running thread ID
-?thread_control         := $D05001 ; zero if threading is disabled
-?thread_memory_end      := $D05002 ; end of thread memory
+?thread_temp_save       := $D03000 ; temporary save location for registers when a thread switch is triggered. 16 bytes per thread, 256 threads = 4096 bytes.
+?current_thread         := $D04000 ; currently running thread ID
+?thread_control         := $D04001 ; zero if threading is disabled
+?thread_memory_end      := $D04002 ; end of thread memory
 ?start_of_user_archive  := $040000 ;sector $04
 ?end_of_user_archive    := $3B0000 ;sector $3B, start of certificate
 ?fd_readonly   := 0

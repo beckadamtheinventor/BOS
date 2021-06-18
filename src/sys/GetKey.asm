@@ -1,7 +1,7 @@
 ;@DOES Return current keypress
 ;@OUTPUT A keypress
 ;@OUTPUT z if no key pressed
-;@DESTROYS HL,DE,BC,AF
+;@DESTROYS HL,BC,AF
 sys_GetKey:
 	call kb_Scan
 	ld hl,$F50012
@@ -18,7 +18,7 @@ sys_GetKey:
 	ld c,a
 	djnz .scanloop
 	xor a,a
-	ret
+	jq .done
 .keyispressed:
 	ld b,8
 .keybitloop:
@@ -28,5 +28,6 @@ sys_GetKey:
 	djnz .keybitloop
 .this:
 	ld a,c
+.done:
+	ld (last_keypress),a
 	ret
-

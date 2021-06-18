@@ -1,8 +1,8 @@
 <html><head><title>bos.inc docs</title>	<link rel="stylesheet" type="text/css" href="style.css"></head>	<body>	<h1>"bos.inc" documentation</h1>	<h3>syscalls marked in <a class="no_op">red</a> are no-ops and do nothing.</h3>	<table><th>syscall name</th><th>syscall adress</th>	<tr><td><a href="#boot_os">bos.boot_os</a></td><td><a href="#boot_os">020108</a></td></tr>
 <tr><td><a href="#handle_interrupt">bos.handle_interrupt</a></td><td><a href="#handle_interrupt">02010C</a></td></tr>
-<tr class="no_op"><td><a href="#DONOTHING ">bos.DONOTHING </a></td><td><a href="#DONOTHING ">020110</a></td></tr>
-<tr class="no_op"><td><a href="#DONOTHING ">bos.DONOTHING </a></td><td><a href="#DONOTHING ">020114</a></td></tr>
-<tr><td><a href="#handle_safeop ">bos.handle_safeop </a></td><td><a href="#handle_safeop ">020118</a></td></tr>
+<tr><td><a href="#HandleInstruction ">bos.HandleInstruction </a></td><td><a href="#HandleInstruction ">020110</a></td></tr>
+<tr class="no_op"><td><a href="#DONOTHING">bos.DONOTHING</a></td><td><a href="#DONOTHING">020114</a></td></tr>
+<tr class="no_op"><td><a href="#DONOTHING">bos.DONOTHING</a></td><td><a href="#DONOTHING">020118</a></td></tr>
 <tr><td><a href="#handle_offsetcall ">bos.handle_offsetcall </a></td><td><a href="#handle_offsetcall ">02011C</a></td></tr>
 <tr class="no_op"><td><a href="#DONOTHING ">bos.DONOTHING </a></td><td><a href="#DONOTHING ">020120</a></td></tr>
 <tr><td><a href="#sys_ExecuteFile">bos.sys_ExecuteFile</a></td><td><a href="#sys_ExecuteFile">020124</a></td></tr>
@@ -156,7 +156,7 @@
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
 </td></tr>
-</table></div><div id="handle_safeop "><h1>handle_safeop </h1>	<h3>syscall Adress 020118</h3>
+</table></div><div id="HandleInstruction "><h1>HandleInstruction </h1>	<h3>syscall Adress 020110</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 </table></div><div id="handle_offsetcall "><h1>handle_offsetcall </h1>	<h3>syscall Adress 02011C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -213,7 +213,7 @@ A increment</td><td>HL number+increment</td><td>AF</td><td>
 </table></div><div id="sys_GetKey"><h1>sys_GetKey</h1>	<h3>syscall Adress 020154</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Return current keypress</td><td></td><td>A keypress<br>
-z if no key pressed</td><td>HL,DE,BC,AF</td><td>
+z if no key pressed</td><td>HL,BC,AF</td><td>
 </td></tr>
 </table></div><div id="sys_KbScan"><h1>sys_KbScan</h1>	<h3>syscall Adress 020158</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>

@@ -949,9 +949,6 @@ ti_Detect:
 	; djnz	.loop
 	; xor	a, a
 	; ld	(de), a
-	scf
-	sbc hl,hl
-	ret
 
 ;.fdetectall:
 ;	dl	0
@@ -1002,7 +999,7 @@ ti_GetTokenString:
 ; .smc_length := $-1
 ; .skipstore:
 	; ld	hl, OP3
-	scf
+	or a,a
 	sbc hl,hl
 	ret
 
@@ -1134,7 +1131,7 @@ ti_Rename:
 	call	bos._ChkFindSym		; find old name
 	jr	c, .return_2 ;fail if old name doesn't exist
 	ld a,e   ;zero the latter nibble to get the file descriptor
-	and a,$F
+	and a,$F0
 	ld e,a
 	ld hl,bos.fsOP2+1 ;old name
 	ld bc,.tivars_dir
@@ -1275,7 +1272,6 @@ ti_ArchiveHasRoom:
 	; ld	a,1
 	; ret	nz
 	; dec	a
-	ret
 
 ;-------------------------------------------------------------------------------
 ti_SetGCBehavior:
@@ -1303,7 +1299,6 @@ ti_SetGCBehavior:
 	; ld	hl,util_pre_gc_default_handler
 ; .notdefault2:
 	; ld	(util_pre_gc_handler),hl
-	ret
 ;util_post_gc_default_handler := util_no_op
 ;util_pre_gc_default_handler := util_no_op
 
