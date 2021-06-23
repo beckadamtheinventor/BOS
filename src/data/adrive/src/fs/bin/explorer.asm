@@ -131,10 +131,6 @@ explorer_main:
 	; call gfx_FillRectangle
 	; pop bc,bc,bc
 
-	ld a,(explorer_dirlist_buffer)
-	or a,a
-	call nz,explorer_display_diritems
-
 	ld hl,(explorer_foreground2_color)
 	push hl
 	call gfx_SetColor
@@ -163,30 +159,32 @@ explorer_cursor_x:=$-3
 	call bos.sys_WaitKeyCycle
 	or a,a
 	jq z,.key_loop
-	cp a,1
+	dec a
 	jq z,explorer_cursor_down
-	cp a,2
+	dec a
 	jq z,explorer_cursor_left
-	cp a,3
+	dec a
 	jq z,explorer_cursor_right
-	cp a,4
+	dec a
 	jq z,explorer_cursor_up
-	cp a,53
-	jq z,_exit_return_1337
-	cp a,15
+	cp a,ti.skClear
 	jq z,explorer_main
-	cp a,52
-	jq z,.optionsmenu
-	cp a,51
+	cp a,ti.skYequ - 4
+	jq z,_exit_return_1337
+	cp a,ti.skWindow - 4
+	jq z,.controlkey
+	cp a,ti.skZoom - 4
 	jq z,.quickmenu
-	cp a,49
+	cp a,ti.skTrace - 4
+	jq z,.optionsmenu
+	cp a,ti.skGraph - 4
 	jq z,open_terminal
-	cp a,48
+	cp a,ti.skAlpha - 4
 	jq z,.filemenu
-	cp a,9
+	cp a,ti.skEnter - 4
 	jq z,.click
-	cp a,54
-	jq z,.key_loop
+	cp a,ti.sk2nd - 4
+	jq nz,.key_loop
 .click:
 	ld a,(explorer_cursor_y)
 assert display_items_num_x = 4
@@ -284,6 +282,9 @@ explorer_dirname_buffer:=$-3
 .exec_file:
 	ld hl,(explorer_dirname_buffer)
 	jq explorer_call_file_noargs
+.controlkey:
+	; - TODO -
+	jq explorer_main
 .filemenu:
 	jq explorer_main
 .quickmenu:
@@ -294,6 +295,7 @@ explorer_dirname_buffer:=$-3
 	call draw_taskbar
 	call bos.sys_WaitKeyCycle
 	; - TODO - actually make quickmenu functionality
+	
 	jq explorer_main
 .optionsmenu:
 ;draw background
@@ -713,6 +715,49 @@ explorer_page_up:
 	jq explorer_dirlist
 
 
+draw_background:
+	ld c,0
+	push bc
+	call gfx_SetTransparentColor
+	ld l,1
+	ex (sp),hl
+	call gfx_SetDraw
+;draw background
+	ld l,$08
+explorer_background_color:=$-1
+	ex (sp),hl
+	call gfx_FillScreen
+	call gfx_SetTextTransparentColor
+	call gfx_SetTextBGColor
+	ld l,$FF
+explorer_foreground_color:=$-1
+	ex (sp),hl
+	call gfx_SetTextFGColor
+
+;draw status bar
+	ld l,$11
+explorer_statusbar_color:=$-1
+	ex (sp),hl
+	call gfx_SetColor
+	ld hl,statusbar_height
+	ex (sp),hl
+	ld bc,320
+	push bc
+	or a,a
+	sbc hl,hl
+if statusbar_y = 0
+	push hl,hl
+else
+	ld bc,statusbar_y
+	push bc,hl
+end if
+	call gfx_FillRectangle
+	pop bc,bc,bc,bc
+	ld a,(explorer_dirlist_buffer)
+	or a,a
+	ret z
+;	jq explorer_display_diritems
+
 explorer_display_diritems:
 	push ix
 	ld hl,display_margin_top+2
@@ -943,46 +988,6 @@ explorer_sprite_temp:=$-3
 	db "dev ",0
 .subdir_str:
 	db "dir ",0
-
-draw_background:
-	ld c,0
-	push bc
-	call gfx_SetTransparentColor
-	ld l,1
-	ex (sp),hl
-	call gfx_SetDraw
-;draw background
-	ld l,$08
-explorer_background_color:=$-1
-	ex (sp),hl
-	call gfx_FillScreen
-	call gfx_SetTextTransparentColor
-	call gfx_SetTextBGColor
-	ld l,$FF
-explorer_foreground_color:=$-1
-	ex (sp),hl
-	call gfx_SetTextFGColor
-
-;draw status bar
-	ld l,$11
-explorer_statusbar_color:=$-1
-	ex (sp),hl
-	call gfx_SetColor
-	ld hl,statusbar_height
-	ex (sp),hl
-	ld bc,320
-	push bc
-	or a,a
-	sbc hl,hl
-if statusbar_y = 0
-	push hl,hl
-else
-	ld bc,statusbar_y
-	push bc,hl
-end if
-	call gfx_FillRectangle
-	pop bc,bc,bc,bc
-	ret
 
 draw_taskbar:
 	push hl

@@ -48,9 +48,10 @@ th_HandleNextThread:
 	add hl,hl
 	ld bc,thread_temp_save
 	add hl,bc
+
+.load_from_hl:
 	push hl
 	pop ix
-
 	ld hl,(ix+3) ;restore sp
 	ld sp,hl
 	ld hl,(ix) ;location to jump to
@@ -68,7 +69,9 @@ th_FindFreeThread:
 	ld a,(current_thread)
 	ld hl,thread_map
 	ld l,a
-	ld b,0
+	xor a,a
+	sub a,l
+	ld b,a
 .search_loop:
 	inc l
 	bit 7,(hl)
@@ -82,14 +85,15 @@ th_FindFreeThread:
 th_FindNextThread:
 	ld a,(current_thread)
 	ld hl,thread_map
+	ld b,l
 	ld l,a
-	ld b,0
 .search_loop:
 	inc l
 	bit 7,(hl)
 	jq nz,.found_thread
 	djnz .search_loop
-	ld l,b
+	jq os_return
 .found_thread:
 	ld a,l
 	ret
+

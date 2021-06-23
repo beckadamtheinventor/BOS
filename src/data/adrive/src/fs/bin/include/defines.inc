@@ -76,7 +76,8 @@ argument_stack_current := $D01083 ;3 bytes
 asm_prgm_size          := $D01086 ;3 bytes
 top_of_UserMem         := $D01089 ;3 bytes
 SaveSP                 := $D01092 ;3 bytes, saves SP when running programs.
-current_sectors_per_cluster := $D01095 ;1 byte. Number of sectors per cluster in last drive where fs_DataSection or fs_RootDir has been called on it.
+current_sectors_per_cluster := $D01095 ;1 byte. Number of sectors per cluster in last drive where fs_DataSection or fs_RootDir has been called on it. Currently unused.
+asset_reservations_table    := $D01600 ;1024 bytes. Caches asset memory reservations
 malloc_cache           := $D02000 ;4096 bytes
 usb_sector_buffer      := $D03000 ;512 bytes
 usbRAM                 := $D03200 ;256 bytes, should not be tampered with while /dev/mnt or /dev/usb are active
@@ -107,6 +108,8 @@ thread_memory_end      := $D04002 ; end of thread memory
 start_of_user_archive  := $040000 ;sector $04
 end_of_user_archive    := $3B0000 ;sector $3B, start of certificate
 
+
+asset_locations_start      := $3C0000
 
 ; file entry flags
 fd_readonly   := 0

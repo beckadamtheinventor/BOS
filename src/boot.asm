@@ -1,39 +1,39 @@
 
 boot_os:
-	call ti.boot.Set48MHzMode
-	di             ;inline flash unlock for security reasons
-	in0 a,($06)
-	set 2,a
-	out0 ($06),a
-	ld a,$04
-	di
-	jr $+2
-	di
-	rsmix
-	im 1
-	out0 ($28),a
-	in0 a,($28)
-	bit 2,a
-
+	call sys_FlashUnlock
 	ld a,$04 ;set privleged code end address to $040000 (up until the first filesystem sector)
 	out0 ($1F),a
 	xor a,a
 	out0 ($1D),a
 	out0 ($1E),a
-	call flash_lock
+	call sys_FlashLock
+	call ti.boot.Set48MHzMode
+	ld a,3           ;set flash wait states to 3, same as the CE C toolchain
+	ld ($E00005),a
 
 	ld hl,thread_map
-	ld de,thread_map+1
-	xor a,a
+	push hl,hl
+	pop de
+	inc de
+assert ~thread_map and $FF
+	ld a,e
 	ld (current_thread),a
-	ld (hl),a
+	ld (hl),l
 	ld bc,thread_memory_end-thread_map
 	ldir
-	ld a,$80
-	ld (thread_map),a
+	pop hl
+	rrca ;a should be 1, so rolling the lsb into the msb should set a to $80
+	ld (hl),a
+assert ~thread_temp_save and $FF
+	ld hl,thread_temp_save
+	ld de,os_trap_loop
+	ld (hl),de
+	ld de,ti.stackBot
+	ld l,3
+	ld (hl),de
+	ld l,9
+	ld (hl),iy ;assume iy was set by the bootcode and preserved until now
 
-	ld a,3           ;set wait states to 3, same as the CE C toolchain
-	ld ($E00005),a
 	call gfx_SetDefaultFont
 	call gfx_Set8bpp
 
@@ -90,15 +90,14 @@ boot_os:
 	call fs_CreateFile
 	pop bc,bc,bc
 .dont_create_elevation_file:
-; os_trap_loop:
-	; SpawnThread os_return, ti.stackBot
-	; HandleNextThread
-; if we get back here, check if recovery key pressed
-	; ld a,(last_keypress)
-	; cp a,53
-	; jq nz,os_trap_loop
+os_trap_loop:
+	SpawnThread os_return, ti.stackBot ;spawn thread ID 1
+	HandleNextThread
+; check if recovery key was pressed
+	ld a,(last_keypress)
+	cp a,53
+	jq nz,os_trap_loop
 	ld sp,ti.stackBot
-	jq os_return
 
 os_recovery_menu:
 	xor a,a

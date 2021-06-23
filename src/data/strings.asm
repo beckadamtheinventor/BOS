@@ -51,6 +51,10 @@ string_program_requested_flash:
 string_failed_to_reinstall:
 	db "Failed to reinstall TIOS, backup files are missing!",$A,0
 
+bosfs_filesystem_header:
+	db "bosfs512fs "
+.len:=$-.
+
 string_os_elevation_file:
 	db "/",$F2,"OS/ELEVATED",0
 string_path_variable:

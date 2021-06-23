@@ -6,9 +6,8 @@ include 'include/tiformat.inc'
 include 'include/os.inc'
 include 'include/defines.inc'
 
-
+ROM_BUILD:
 file '../noti-ez80/bin/NOTI.rom'
-
 ;-------------------------------------------------------------------------------
 	os_rom
 ;-------------------------------------------------------------------------------
