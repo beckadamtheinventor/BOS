@@ -33,9 +33,3 @@ macro HandleNextThread?
 	rst $10
 	db $C1
 end macro
-
-macro SetExitThread? start_pc
-	rst $10
-	db $FF
-	dl start_pc
-end macro
