@@ -1,9 +1,10 @@
 
 ;@DOES execute a file given a relative or absolute path
 ;@INPUT int sys_ExecuteFile(const char *path, char *args);
-;@OUTPUT -1 if file does not exist or is not a valid executable format
+;@OUTPUT -1 and Cf set if file does not exist or is not a valid executable format, or if malloc failed somewhere.
 ;@OUTPUT ExecutingFileFd set to point to file descriptor. -1 if file not found
 ;@DESTROYS All, OP6.
+;@NOTE If you're running a threaded executable, the thread is spawned but won't actually start until it's thread is handled.
 sys_ExecuteFile:
 	scf
 	sbc hl,hl
@@ -31,29 +32,18 @@ sys_ExecuteFile:
 	push hl,af,bc
 	call sys_Free ;free the pointer returned by fs_AbsPath
 	pop bc,af,hl
-	jq c,.fail
+	jq c,.fail ;fail if both fs_OpenFile and sys_OpenFileInPath failed to locate the file
 .open_fd:
 	ld (ExecutingFileFd),hl
 	ld bc,fsentry_fileattr
 	add hl,bc
 	bit fd_subdir,(hl)
 	jq nz,.fail ;can't execute a directory
-	bit fsbit_subfile,(hl)
-	inc hl
-	ld de,(hl)
-	jq z,.get_file_ptr
+	or a,a
+	sbc hl,bc
 	push hl
-	ex.s hl,de
-	pop de
-	ld e,0
-	res 0,d
-	add hl,de
-	jq .got_file_ptr
-.get_file_ptr:
-	push de
-	call fs_GetSectorAddress
+	call fs_GetFDPtr
 	pop bc
-.got_file_ptr:
 	ld (running_program_ptr),hl
 .exec_check_loop:
 	ld a,(hl)
@@ -63,11 +53,12 @@ sys_ExecuteFile:
 	cp a,$C3 ;jp
 	jq z,.skip3
 	cp a,$EF
-	jq nz,.fail
+	jq nz,.fail ;fail if unrecognized header
 	ld a,(hl)
 	inc hl
 	cp a,$7B
-	jq z,.exec_rex_entryhl
+	jq z,.exec_rex_entryhl ;jump if $EF,$7B header
+; fail if unrecognized header
 .fail:
 	scf
 	sbc hl,hl
@@ -78,18 +69,25 @@ sys_ExecuteFile:
 .skip1:
 	inc hl
 	ld de,(hl)
-	db $21 ;ld hl,...
-	db 'CRX' ;Compressed Ram eXecutable
+; threaded RAM executables coming once I figure out an implementation allowing "multiple programs to run at once" considering programs
+; aren't going to be running from the same location if more than one is likely to be running at the same time.
+	; db $21, 'TRX' ;ld hl, 'TRX' ;Threaded Ram eXecutable
+	; or a,a
+	; sbc hl,de
+	; jq z,.exec_threaded_rex
+	db $21, 'TFX' ;ld hl, 'TFX' ;Threaded Flash eXecutable
+	or a,a
+	sbc hl,de
+	jq z,.exec_threaded_fex
+	db $21, 'CRX' ;ld hl, 'CRX' ;Compressed Ram eXecutable
 	or a,a
 	sbc hl,de
 	jq z,.exec_compressed_rex
-	db $21 ;ld hl,...
-	db 'FEX' ;Flash EXecutable
+	db $21, 'FEX' ;ld hl, 'FEX' ;Flash EXecutable
 	or a,a
 	sbc hl,de
 	jq z,.exec_fex
-	db $21 ;ld hl,...
-	db 'REX' ;Ram EXecutable
+	db $21, 'REX' ;ld hl, 'REX' ;Ram EXecutable
 	or a,a
 	sbc hl,de
 	jq nz,.fail ;if it's neither a Flash Executable nor a Ram Executable, return -1
@@ -123,7 +121,7 @@ sys_ExecuteFile:
 	ld hl,(fsOP6) ;push arguments
 	push hl
 	call sys_NextProcessId
-	call sys_FreeRunningProcessId ;free memory allocated by the new process ID, though there shouldn't be any in the first place
+	call sys_FreeRunningProcessId ;free memory allocated by the new process ID
 	call .normalize_lcd
 	call .jptoprogram
 	pop bc
@@ -181,3 +179,52 @@ sys_ExecuteFile:
 	xor a,a
 	ld (curcol),a
 	ret
+.exec_threaded_fex:
+	ld hl,(running_program_ptr)
+	ld a,(hl)
+	cp a,$18 ;jr
+	jq z,.threaded_skipjr
+	inc hl
+	inc hl
+.threaded_skipjr:
+	ld de,6 ;length of short jump + length of magic number
+	add hl,de
+	ld l,(hl) ;the byte following the magic number should indicate how many 32-byte chunks of stack frame the program requires, minus 1.
+	ld h,32
+	ld e,h
+	mlt hl
+	add hl,de ;chunks * 32 + 32
+	push de
+	call sys_NextProcessId
+	call sys_Malloc
+	pop bc
+	ret c ;return if failed to malloc
+
+	add hl,bc ;malloc'd pointer + length because the stack grows downwards
+	push hl
+	ld hl,.threaded_run_data
+	ld bc,.threaded_run_data_len
+	ld de,fsOP6+3
+	push de
+	ldir
+	pop de,hl
+	dec hl
+	dec hl
+	dec hl
+	ld bc,.threaded_return_handler ;set program return location so its memory can be easily freed
+	ld (hl),bc
+	ld (fsOP6+5),hl ;stack pointer allocated for the thread
+	ex hl,de
+	ld bc,(running_program_ptr)
+	ld (fsOP6+8),bc
+	jp (hl)
+
+.threaded_return_handler:
+	call sys_FreeRunningProcessId
+	call sys_PrevProcessId
+	EndThread ;assume we're still in the program's main thread
+
+.threaded_run_data:
+	SpawnThread 0, 0
+	ret
+.threaded_run_data_len := $ - .threaded_run_data

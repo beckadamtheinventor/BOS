@@ -2,6 +2,7 @@
 include 'include/ez80.inc'
 include 'include/ti84pceg.inc'
 include 'include/bos.inc'
+include 'include/threading.inc'
 
 display_items_num_x   := 4
 display_items_num_y   := 5
@@ -156,9 +157,24 @@ explorer_cursor_x:=$-3
 	pop bc,bc,bc,bc
 	call gfx_BlitBuffer
 .key_loop:
-	call bos.sys_WaitKeyCycle
+	HandleNextThread
+	call bos.sys_GetKey
 	or a,a
 	jq z,.key_loop
+	cp a,ti.skYequ
+	jq z,_exit
+	push af
+	cp a,5
+	jq c,.wait_timed_key
+.key_wait_off_loop:
+	call bos.sys_AnyKey
+	jq nz,.key_wait_off_loop
+	jq .process_key
+.wait_timed_key:
+	ld a,10
+	call ti.DelayTenTimesAms
+.process_key:
+	pop af
 	dec a
 	jq z,explorer_cursor_down
 	dec a
@@ -169,8 +185,6 @@ explorer_cursor_x:=$-3
 	jq z,explorer_cursor_up
 	cp a,ti.skClear
 	jq z,explorer_main
-	cp a,ti.skYequ - 4
-	jq z,_exit_return_1337
 	cp a,ti.skWindow - 4
 	jq z,.controlkey
 	cp a,ti.skZoom - 4
@@ -433,11 +447,6 @@ explorer_join_file_name:
 	pop hl
 	ret
 
-
-_exit_return_1337:
-	call bos._HomeUp
-	ld hl,1337
-	jq _exit.loadix
 _exit:
 	call bos._HomeUp
 	xor a,a

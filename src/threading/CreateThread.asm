@@ -21,5 +21,9 @@ th_CreateThread:
 	inc hl
 	inc hl
 	ld (hl),bc
+	ld bc,9
+	add hl,bc
+	ld a,(running_process_id)
+	ld (hl),a
 	jp (iy)
 

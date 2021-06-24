@@ -15,7 +15,6 @@ fs_GetFDPtr:
 	pop bc
 	ret
 .subfile:
-	inc hl
 	ld c,(hl)
 	inc hl
 	ld b,(hl)

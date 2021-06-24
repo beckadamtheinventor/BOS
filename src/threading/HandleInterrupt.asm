@@ -59,6 +59,8 @@ th_HandleNextThread:
 	; in a,(bc)
 	; or a,1 shl 2
 	; out (bc),a
+	ld a,(ix+12) ;restore running_process_id
+	ld (running_process_id),a
 	ld iy,(ix+9) ;restore ix
 	ld ix,(ix+6) ;restore iy
 	jp (hl)
@@ -87,12 +89,15 @@ th_FindNextThread:
 	ld hl,thread_map
 	ld b,l
 	ld l,a
+	xor a,a
 .search_loop:
 	inc l
 	bit 7,(hl)
 	jq nz,.found_thread
 	djnz .search_loop
-	jq os_return
+	bit 7,(hl) ;check if currently running thread is actually running, if it isn't then run thread ID 0
+	ret z
+; continue the currently running thread I suppose
 .found_thread:
 	ld a,l
 	ret

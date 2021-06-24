@@ -11,29 +11,6 @@ boot_os:
 	ld a,3           ;set flash wait states to 3, same as the CE C toolchain
 	ld ($E00005),a
 
-	ld hl,thread_map
-	push hl,hl
-	pop de
-	inc de
-assert ~thread_map and $FF
-	ld a,e
-	ld (current_thread),a
-	ld (hl),l
-	ld bc,thread_memory_end-thread_map
-	ldir
-	pop hl
-	rrca ;a should be 1, so rolling the lsb into the msb should set a to $80
-	ld (hl),a
-assert ~thread_temp_save and $FF
-	ld hl,thread_temp_save
-	ld de,os_trap_loop
-	ld (hl),de
-	ld de,ti.stackBot
-	ld l,3
-	ld (hl),de
-	ld l,9
-	ld (hl),iy ;assume iy was set by the bootcode and preserved until now
-
 	call gfx_SetDefaultFont
 	call gfx_Set8bpp
 
@@ -90,102 +67,28 @@ assert ~thread_temp_save and $FF
 	call fs_CreateFile
 	pop bc,bc,bc
 .dont_create_elevation_file:
-os_trap_loop:
-	SpawnThread os_return, ti.stackBot ;spawn thread ID 1
-	HandleNextThread
-; check if recovery key was pressed
-	ld a,(last_keypress)
-	cp a,53
-	jq nz,os_trap_loop
-	ld sp,ti.stackBot
-
-os_recovery_menu:
+	ld hl,thread_map
+	push hl,hl
+	pop de
+	inc de
+assert ~thread_map and $FF
 	xor a,a
-	ld (lcd_bg_color),a
-	ld (lcd_text_bg),a
-	ld (lcd_text_bg2),a
-	dec a
-	ld (lcd_text_fg),a
-	ld a,7
-	ld (lcd_text_fg2),a
-	ld hl,string_os_recovery_menu
-	call gui_DrawConsoleWindow
-.keywait:
-	call sys_WaitKeyCycle
-	cp a,55
-	jq z,.reset_fs
-	cp a,54
-	jq z,.turn_off
-	cp a,9
-	jq z,.attempt_recovery
-	cp a,56
-	jq z,.uninstall
-	cp a,15
-	jq z,boot_os
-	cp a,39
-	jq z,.reinstalltios
-	
-	jq .keywait
-
-.reset_fs:
-	ld hl,string_press_enter_confirm
-	call gui_Print
-	call sys_WaitKeyCycle
-	cp a,9
-	jq nz,os_recovery_menu
-	call fs_Format
-	jq boot_os
-
-.turn_off:
-	call sys_TurnOff
-	jq boot_os
-
-.attempt_recovery:
-	call fs_SanityCheck
-	jq os_recovery_menu
-
-.uninstall:
-	ld hl,string_press_enter_confirm
-	call gui_Print
-	call sys_WaitKeyCycle
-	cp a,9
-	jq nz,os_recovery_menu
-	ld hl,bos_UserMem
-	push hl ;return to usermem which immediately tells the calc to invalidate the OS and reboot
-	ld (hl),$CD
-	inc hl
-	ld de,ti.MarkOSInvalid
-	ld (hl),de
-	inc hl
-	inc hl
-	inc hl
-	ld (hl),$CF ;rst $08
-	ld hl,flashStatusByte
-	set bKeepFlashUnlocked,(hl)
-	call sys_FlashUnlock
-	ld a,2
-	jq sys_EraseFlashSector ;erase first OS sector, bootcode will handle the rest
-
-.reinstalltios:
-	ld hl,string_press_enter_confirm
-	call gui_Print
-	call sys_WaitKeyCycle
-	cp a,9
-	jq nz,os_recovery_menu
-	ld hl,.reinstall_fail_handler
-	ld de,bos_UserMem
-	push hl,de
-	ld hl,data_reinstall_tios_program
-	ld bc,data_reinstall_tios_program.len
+	ld (current_thread),a
+	ld (hl),l
+	ld bc,thread_memory_end-thread_map
 	ldir
-	ret
-
-.reinstall_fail_handler:
-	ld hl,string_failed_to_reinstall
-	call gui_DrawConsoleWindow
-	call sys_WaitKeyCycle
-	jq os_recovery_menu
-	
+	pop hl
+	ld (hl),$80
+assert ~thread_temp_save and $FF
+	ld hl,thread_temp_save
+	ld de,os_return
+	ld (hl),de
+	ld de,ti.stackBot
+	ld l,3
+	ld (hl),de
+	ld l,12
+	ld (hl),1
+	jq th_HandleNextThread.nosave
 
 handle_interrupt:
 	ld bc,$5015
@@ -371,7 +274,99 @@ os_return:
 	push bc,hl
 	call sys_ExecuteFile
 	pop bc,bc
-	EndThread
+
+; check if recovery key was pressed
+	ld a,(last_keypress)
+	cp a,53
+	jq nz,os_return
+
+	ld sp,ti.stackBot
+os_recovery_menu:
+	xor a,a
+	ld (lcd_bg_color),a
+	ld (lcd_text_bg),a
+	ld (lcd_text_bg2),a
+	dec a
+	ld (lcd_text_fg),a
+	ld a,7
+	ld (lcd_text_fg2),a
+	ld hl,string_os_recovery_menu
+	call gui_DrawConsoleWindow
+.keywait:
+	call sys_WaitKeyCycle
+	cp a,55
+	jq z,.reset_fs
+	cp a,54
+	jq z,.turn_off
+	cp a,9
+	jq z,.attempt_recovery
+	cp a,56
+	jq z,.uninstall
+	cp a,15
+	jq z,boot_os
+	cp a,39
+	jq z,.reinstalltios
+	
+	jq .keywait
+
+.reset_fs:
+	ld hl,string_press_enter_confirm
+	call gui_Print
+	call sys_WaitKeyCycle
+	cp a,9
+	jq nz,os_recovery_menu
+	call fs_Format
+	jq boot_os
+
+.turn_off:
+	call sys_TurnOff
+	jq boot_os
+
+.attempt_recovery:
+	call fs_SanityCheck
+	jq os_recovery_menu
+
+.uninstall:
+	ld hl,string_press_enter_confirm
+	call gui_Print
+	call sys_WaitKeyCycle
+	cp a,9
+	jq nz,os_recovery_menu
+	ld hl,bos_UserMem
+	push hl ;return to usermem which immediately tells the calc to invalidate the OS and reboot
+	ld (hl),$CD
+	inc hl
+	ld de,ti.MarkOSInvalid
+	ld (hl),de
+	inc hl
+	inc hl
+	inc hl
+	ld (hl),$CF ;rst $08
+	ld hl,flashStatusByte
+	set bKeepFlashUnlocked,(hl)
+	call sys_FlashUnlock
+	ld a,2
+	jq sys_EraseFlashSector ;erase first OS sector, bootcode will handle the rest
+
+.reinstalltios:
+	ld hl,string_press_enter_confirm
+	call gui_Print
+	call sys_WaitKeyCycle
+	cp a,9
+	jq nz,os_recovery_menu
+	ld hl,.reinstall_fail_handler
+	ld de,bos_UserMem
+	push hl,de
+	ld hl,data_reinstall_tios_program
+	ld bc,data_reinstall_tios_program.len
+	ldir
+	ret
+
+.reinstall_fail_handler:
+	ld hl,string_failed_to_reinstall
+	call gui_DrawConsoleWindow
+	call sys_WaitKeyCycle
+	jq os_recovery_menu
 
 ;tios reinstaller
 virtual at ti.userMem
