@@ -74,7 +74,7 @@ boot_os:
 assert ~thread_map and $FF
 	xor a,a
 	ld (current_thread),a
-	ld (hl),l
+	ld (hl),a
 	ld bc,thread_memory_end-thread_map
 	ldir
 	pop hl

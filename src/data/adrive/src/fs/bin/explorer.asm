@@ -974,29 +974,54 @@ explorer_sprite_temp:=$-3
 	ret c
 	jq .display_icon
 .subdir:
-	ld hl,.subdir_str
-	jq .printflagstr
+	ld hl,.subdir_icon
+	jq .printflagicon
 .system:
-	ld hl,.system_str
-	jq .printflagstr
+	ld hl,.system_icon
+	jq .printflagicon
 .device:
-	ld hl,.device_str
-	jq .printflagstr
+	ld hl,.device_icon
+	jq .printflagicon
 .readonly:
-	ld hl,.readonly_str
-.printflagstr:
-	push af,hl
-	call gfx_PrintString
-	pop bc,af
+	ld hl,.readonly_icon
+.printflagicon:
+	ld c,$80
+	push af,hl,bc
+	call gfx_SetCharData
+	ld l,$80
+	ex (sp),hl
+	call gfx_PrintChar
+	pop bc,bc,af
 	ret
-.readonly_str:
-	db "R/O ",0
-.system_str:
-	db "sys ",0
-.device_str:
-	db "dev ",0
-.subdir_str:
-	db "dir ",0
+; ****|    |
+; ** *| *  |
+; *** |* * |
+; ** *|* * |
+; ** *| *  |
+.readonly_icon:
+	db $00,$00,$F0,$D4,$EA,$DA,$D4
+; *** |*** |
+; *   |*   |
+;  *  | *  |
+;   * |  * |
+; *** |*** |
+.system_icon:
+	db $00,$00,$EE,$88,$44,$22,$EE
+; **  |* * |
+; * * |* * |
+; * * |* * |
+; * * |* * |
+; **  | *  |
+.device_icon:
+	db $00,$00,$CA,$AA,$AA,$AA,$C4
+; *** |    |
+; *  *|    |
+; ****|*** |
+; *   |  * |
+; *   |  * |
+; ****|**  |
+.subdir_icon:
+	db $00,$E0,$90,$FE,$82,$82,$FC,$00
 
 draw_taskbar:
 	push hl
@@ -1101,6 +1126,8 @@ gfx_SetTransparentColor:
 	jp 225
 gfx_ScaleSprite:
 	jp 246
+gfx_SetCharData:
+	jp 276
 
 	xor   a,a      ; return z (loaded)
 	pop   hl      ; pop error return
