@@ -45,13 +45,13 @@ endif
 all: bos
 
 rebuild:
-	python build.py -r
+	python3 build.py -r
 
 bos:
-	python build.py -b -i -d
+	python3 build.py -b -i -d
 
 version:
-	python build.py -v
+	python3 build.py -v
 
 #make clean
 clean:
