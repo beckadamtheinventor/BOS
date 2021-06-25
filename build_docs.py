@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 import os
-import zipfile
 def error(e):
 	print("Something went wrong building!\nError:",e)
 	quit()
+
 def myhex(n):
 	h="0123456789ABCDEF"
 	l=[]
