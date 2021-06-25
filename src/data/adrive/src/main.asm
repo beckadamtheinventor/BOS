@@ -152,16 +152,16 @@ fs_dir dev_dir
 	fs_sfentry dev_mnt, "mnt", "", f_readonly+f_system+f_device+f_subfile
 end fs_dir
 
-fs_subfile dev_mnt, dev_dir
-	include 'fs/dev/mnt.asm'
-end fs_subfile
-
 fs_subfile dev_null, dev_dir
 	include 'fs/dev/null.asm'
 end fs_subfile
 
 fs_subfile dev_lcd, dev_dir
 	include 'fs/dev/lcd.asm'
+end fs_subfile
+
+fs_subfile dev_mnt, dev_dir
+	include 'fs/dev/mnt.asm'
 end fs_subfile
 
 ;"/etc/" directory

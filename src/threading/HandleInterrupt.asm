@@ -70,6 +70,7 @@ th_HandleNextThread:
 th_FindFreeThread:
 	ld a,(current_thread)
 	ld hl,thread_map
+	ld (hl),$80 ;thread 0 is always active
 	ld l,a
 	xor a,a
 	sub a,l
@@ -87,6 +88,7 @@ th_FindFreeThread:
 th_FindNextThread:
 	ld a,(current_thread)
 	ld hl,thread_map
+	ld (hl),$80 ;thread 0 is always active
 	ld b,l
 	ld l,a
 	xor a,a

@@ -135,9 +135,9 @@ explorer_main:
 	ld hl,(explorer_foreground2_color)
 	push hl
 	call gfx_SetColor
-	ld hl,display_item_height+2
+	ld hl,display_item_height+1
 	ex (sp),hl
-	ld bc,display_item_width+2
+	ld bc,display_item_width+1
 	push bc
 	ld hl,0
 explorer_cursor_y:=$-3
@@ -157,24 +157,7 @@ explorer_cursor_x:=$-3
 	pop bc,bc,bc,bc
 	call gfx_BlitBuffer
 .key_loop:
-	HandleNextThread
-	call bos.sys_GetKey
-	or a,a
-	jq z,.key_loop
-	cp a,ti.skYequ
-	jq z,_exit
-	push af
-	cp a,5
-	jq c,.wait_timed_key
-.key_wait_off_loop:
-	call bos.sys_AnyKey
-	jq nz,.key_wait_off_loop
-	jq .process_key
-.wait_timed_key:
-	ld a,10
-	call ti.DelayTenTimesAms
-.process_key:
-	pop af
+	call explorer_wait_key_wrapper
 	dec a
 	jq z,explorer_cursor_down
 	dec a
@@ -183,7 +166,9 @@ explorer_cursor_x:=$-3
 	jq z,explorer_cursor_right
 	dec a
 	jq z,explorer_cursor_up
-	cp a,ti.skClear
+	cp a,ti.skYequ - 4
+	jq z,_exit
+	cp a,ti.skClear - 4
 	jq z,explorer_main
 	cp a,ti.skWindow - 4
 	jq z,.controlkey
@@ -307,7 +292,7 @@ explorer_dirname_buffer:=$-3
 ;draw quick menu taskbar strings
 	ld hl,quickmenu_item_strings
 	call draw_taskbar
-	call bos.sys_WaitKeyCycle
+	call explorer_wait_key_wrapper
 	; - TODO - actually make quickmenu functionality
 	
 	jq explorer_main
@@ -318,7 +303,7 @@ explorer_dirname_buffer:=$-3
 	ld hl,options_item_strings
 	call draw_taskbar
 	call gfx_BlitBuffer
-	call bos.sys_WaitKeyCycle
+	call explorer_wait_key_wrapper
 	cp a,53
 	jq z,run_power_app
 	jq explorer_main
@@ -925,11 +910,11 @@ explorer_sprite_temp:=$-3
 	call gfx_ScaleSprite
 	pop bc,bc
 	ld hl,(.y_pos)
-	ld bc,display_item_height-17
+	ld bc,display_item_height-19
 	add hl,bc
 	push hl
 	ld hl,(.x_pos)
-	ld bc,display_item_width-17
+	ld bc,display_item_width-19
 	add hl,bc
 	ld de,(explorer_sprite_temp)
 	push hl,de
@@ -1067,6 +1052,29 @@ draw_taskbar:
 	djnz .draw_taskbar_loop
 	pop ix
 	ret
+
+explorer_wait_key_wrapper:
+	ld bc,explorer_handle_key
+	push bc
+	call bos.th_WaitKeyCycle
+	pop bc
+	jp c,bos.sys_WaitKeyCycle
+	xor a,a
+	ld (explorer_key_pressed),a
+.key_wait_loop:
+	HandleNextThread
+	ld a,0
+explorer_key_pressed := $-1
+	or a,a
+	jq z,.key_wait_loop
+	ret
+
+explorer_handle_key:
+	pop hl,bc
+	push bc
+	ld a,c
+	ld (explorer_key_pressed),a
+	jp (hl)
 
 load_libload:
 	ld hl,libload_name

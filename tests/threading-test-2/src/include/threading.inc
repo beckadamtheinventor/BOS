@@ -12,6 +12,11 @@
 ;	db $F7
 ; end macro
 
+macro StopAllThreads?
+	rst $10
+	db $76
+end macro
+
 macro EndThread?
 	rst $10
 	db $C9

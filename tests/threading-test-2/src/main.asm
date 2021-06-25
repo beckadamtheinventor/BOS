@@ -19,7 +19,7 @@ init:
 	ld (ix),hl
 .loop:
 	ld hl,(ti.mpLcdUpbase)
-	ld de,296
+	ld de,270
 	add hl,de
 	ld de,(ix)
 	add hl,de

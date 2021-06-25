@@ -45,7 +45,7 @@ endif
 all: demo
 
 demo: src/*.asm
-	fasmg src/main.asm bin/thread1.bin
+	fasmg src/main.asm bin/thread2.bin
 
 #make clean
 clean:

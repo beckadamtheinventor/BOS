@@ -179,8 +179,72 @@ sys_ExecuteFile:
 	xor a,a
 	ld (curcol),a
 	ret
-.exec_threaded_fex:
+.exec_threaded_rex:
 	ld hl,(running_program_ptr)
+	ld a,(hl)
+	cp a,$18
+	jq z,.threaded_rex_skipjr
+	inc hl
+	inc hl
+.threaded_rex_skipjr:
+	ld de,7 ; length of short jump + length of magic number + length of stack frame chunks indicator
+	add hl,de
+	ld e,(hl) ; get size of space needed for program
+	inc hl
+	ld d,(hl)
+	inc hl
+	push hl,de
+	call sys_NextProcessId
+	call sys_Malloc
+	pop bc
+	ex (sp),hl
+	push bc
+	ld c,(hl) ; get number of entries in relocations table
+	inc hl
+	ld b,(hl)
+	inc hl
+	ld (fsOP6+3),hl
+	ld (fsOP6+6),bc
+	add hl,bc
+	add hl,bc ;each entry is 2 bytes
+	ld (fsOP6+12),hl ; should point to code needing relocation
+	pop bc,de
+	ld (fsOP6+9),de
+	ldir
+	ld bc,(fsOP6+6)
+	ld a,b
+	or a,c
+	jq z,.no_relocations
+	push iy
+	ld iy,(fsOP6+3)
+.relocations_loop:
+	push bc
+	ld c,(iy)
+	ld b,(iy+1)
+	lea iy,iy+2
+	ld hl,(fsOP6+12)
+	add hl,bc
+	ld bc,(hl)
+	ex hl,de
+	ld hl,(fsOP6+9)
+	add hl,bc
+	ex hl,de
+	ld (hl),de
+	pop bc
+	dec bc
+	ld a,c
+	or a,b
+	jq nz,.relocations_loop
+	pop iy
+.no_relocations:
+	ld hl,(running_program_ptr)
+	ld de,(fsOP6+9)
+	ld (running_program_ptr),de
+	jq .exec_threaded_hl
+.exec_threaded_fex:
+	call sys_NextProcessId
+	ld hl,(running_program_ptr)
+.exec_threaded_hl:
 	ld a,(hl)
 	cp a,$18 ;jr
 	jq z,.threaded_skipjr
@@ -194,8 +258,7 @@ sys_ExecuteFile:
 	ld e,h
 	mlt hl
 	add hl,de ;chunks * 32 + 32
-	push de
-	call sys_NextProcessId
+	push hl
 	call sys_Malloc
 	pop bc
 	ret c ;return if failed to malloc

@@ -6,8 +6,6 @@ HandleInstruction:
 	push hl
 	; or a,a
 	; jq z,_DisableThreading
-	cp a,$76
-	jq z,_StopAllThreads
 	; cp a,$F7
 	; jq z,_EnableThreading
 	cp a,$C5

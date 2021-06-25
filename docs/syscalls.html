@@ -148,6 +148,7 @@
 <tr><td><a href="#fs_GetFDPtr">bos.fs_GetFDPtr</a></td><td><a href="#fs_GetFDPtr">020354</a></td></tr>
 <tr><td><a href="#fs_GetFDLen">bos.fs_GetFDLen</a></td><td><a href="#fs_GetFDLen">020358</a></td></tr>
 <tr><td><a href="#_OP1ToPath">bos._OP1ToPath</a></td><td><a href="#_OP1ToPath">02035C</a></td></tr>
+<tr><td><a href="#th_WaitKeyCycle">bos.th_WaitKeyCycle</a></td><td><a href="#th_WaitKeyCycle">020360</a></td></tr>
 </table><div id="boot_os"><h1>boot_os</h1>	<h3>syscall Adress 020108</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
@@ -755,4 +756,8 @@ will sanity check the filesystem if cluster map file is not found or has zero le
 <tr><td>Convert a variable name from OP1 into a BOS filesystem path.</td><td>OP1 variable type byte, 8 byte name</td><td>hl = path<br>
 Cf set if failed</td><td></td><td>
 </td></tr>
+</table></div><div id="th_WaitKeyCycle"><h1>th_WaitKeyCycle</h1>	<h3>syscall Adress 020360</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Starts a thread that does nothing until a key is pressed and unpressed, passes the keypress to the caller via a callback function, then stops.</td><td>int th_WaitKeyCycle(void (*callback)(uint8_t key));</td><td>returns 0 and Cf unset on success, -1 and Cf set on fail.</td><td></td><td>
+Starts a thread, which won't do anything until handled.</td></tr>
 </table></div></body></html>
