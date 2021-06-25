@@ -7,12 +7,14 @@ include "include/threading.inc"
 	db "TFX",0
 	db 0
 init:
-	ld bc,3
+	ld bc,6
 	push bc
 	call bos.sys_Malloc
 	ex (sp),hl
 	pop ix
 	ret c
+	pop hl
+	ld (ix+3),hl
 	xor a,a
 	ld (bos.last_keypress),a
 	sbc hl,hl
@@ -45,5 +47,6 @@ init:
 	ld a,(bos.last_keypress)
 	cp a,ti.skClear
 	jr nz,.loop
-	ret
+	ld hl,(ix+3)
+	jp (hl)
 

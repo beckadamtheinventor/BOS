@@ -84,7 +84,6 @@ generate_boot_configs:
 	db $A
 	db "#dont remove lines here unless you know what you're doing",$A
 	db "explorer",$A
-	db "if.key 53 return",$A
 .onbootconfig_len:=$-.onbootconfig
 
 

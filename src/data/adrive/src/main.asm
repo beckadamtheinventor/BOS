@@ -3,6 +3,7 @@ include 'include/ez80.inc'
 include 'include/ti84pceg.inc'
 include 'include/bosfs.inc'
 include 'include/bos.inc'
+include 'include/threading.inc'
 
 org $040000
 fs_fs
@@ -45,7 +46,7 @@ fs_dir bin_dir
 	fs_sfentry appendinto_exe, ">>", "", f_readonly+f_system+f_subfile
 	fs_sfentry boot_exe, "boot", "", f_readonly+f_system+f_subfile
 	fs_entry bpkload_exe, "bpk", "", f_readonly+f_system
-	fs_entry bpm_exe, "bpm", "", f_readonly+f_system
+	; fs_entry bpm_exe, "bpm", "", f_readonly+f_system
 	fs_sfentry cat_exe, "cat", "", f_readonly+f_system+f_subfile
 	fs_sfentry cd_exe, "cd", "", f_readonly+f_system+f_subfile
 	fs_sfentry cmd_exe, "cmd", "", f_readonly+f_system+f_subfile
@@ -65,8 +66,8 @@ fs_dir bin_dir
 	fs_sfentry off_exe, "off", "", f_readonly+f_system+f_subfile
 	fs_sfentry rm_exe, "rm", "", f_readonly+f_system+f_subfile
 	; fs_entry transfer_exe, "transfer", "", f_readonly+f_system
-	; fs_entry usbrecv_exe, "usbrecv", "", f_readonly+f_system
-	; fs_entry usbrun_exe, "usbrun", "", f_readonly+f_system
+	fs_entry usbrecv_exe, "usbrecv", "", f_readonly+f_system
+	fs_entry usbrun_exe, "usbrun", "", f_readonly+f_system
 	; fs_entry usbsend_exe, "usbsend", "", f_readonly+f_system
 end fs_dir
 
@@ -204,7 +205,6 @@ fs_dir etc_config_explorer_dir
 	fs_entry missing_icon, "missing", "ico", 0
 end fs_dir
 
-
 ;"/lib/" directory
 fs_dir lib_dir
 	fs_entry root_dir, "..", "", f_subdir
@@ -221,6 +221,7 @@ end fs_dir
 ;"/opt/" directory
 fs_dir opt_dir
 	fs_entry root_dir, "..", "", f_subdir
+	fs_entry opt_explorer_dir, "explorer", "", f_subdir
 end fs_dir
 
 ;"/sbin/" directory
@@ -268,6 +269,18 @@ end fs_dir
 ;"/home/user/" directory
 fs_dir user_dir
 	fs_entry home_dir, "..", "", f_subdir
+end fs_dir
+
+;"/opt/explorer/" directory
+fs_dir opt_explorer_dir
+	fs_entry opt_dir, "..", "", f_subdir
+	fs_entry explorer_blconfig_dir, "BLconfig", "", f_subdir
+end fs_dir
+
+;"/opt/explorer/BLconfig/" directory
+fs_dir explorer_blconfig_dir
+	fs_entry opt_explorer_dir, "..", "", f_subdir
+	fs_entry explorer_blconfig_exe, "blconfig", "", 0
 end fs_dir
 
 ;-------------------------------------------------------------
@@ -334,17 +347,17 @@ fs_file memedit_exe
 	file '../obj/memedit.bin'
 end fs_file
 
-; fs_file usbrun_exe
-	; file "../obj/usbrun.bin"
-; end fs_file
+fs_file usbrun_exe
+	file "../obj/usbrun.bin"
+end fs_file
 
 ; fs_file usbsend_exe
 	; file "../obj/usbsend.bin"
 ; end fs_file
 
-; fs_file usbrecv_exe
-	; file '../obj/usbrecv.bin'
-; end fs_file
+fs_file usbrecv_exe
+	file '../obj/usbrecv.bin'
+end fs_file
 
 fs_file bpkload_exe
 	file '../obj/bpkload.bin'
@@ -354,9 +367,9 @@ fs_file fsutil_exe
 	include 'fs/bin/fsutil.asm'
 end fs_file
 
-fs_file bpm_exe
-	file '../obj/bpm.bin'
-end fs_file
+; fs_file bpm_exe
+	; file '../obj/bpm.bin'
+; end fs_file
 
 ; fs_file edit_exe
 	; file '../obj/edit.bin'
@@ -383,7 +396,11 @@ fs_file explorer_cfg
 end fs_file
 
 fs_file path_var
-	db "/bin:/usr/bin:/bin/if:/sbin"
+	db "/bin:/usr/bin:/sbin"
+end fs_file
+
+fs_file explorer_blconfig_exe
+	include 'fs/opt/explorer/BLconfig/blconfig.asm'
 end fs_file
 
 
