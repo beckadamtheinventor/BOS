@@ -71,14 +71,15 @@ th_FindFreeThread:
 	ld a,(current_thread)
 	ld hl,thread_map
 	ld (hl),$80 ;thread 0 is always active
+	inc a
 	ld l,a
 	xor a,a
 	sub a,l
 	ld b,a
 .search_loop:
-	inc l
 	bit 7,(hl)
 	jq z,.found_thread
+	inc l
 	djnz .search_loop
 	ld l,b
 .found_thread:
@@ -102,5 +103,20 @@ th_FindNextThread:
 ; continue the currently running thread I suppose
 .found_thread:
 	ld a,l
+	ret
+
+th_ResetThreadMemory:
+	ld hl,thread_map
+	push hl,hl
+	pop de
+	inc de
+assert ~thread_map and $FF
+	xor a,a
+	ld (current_thread),a
+	ld (hl),a
+	ld bc,thread_memory_end-thread_map
+	ldir
+	pop hl
+	ld (hl),$80
 	ret
 

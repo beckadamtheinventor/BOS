@@ -7,7 +7,7 @@ fs_Free:
 	push bc
 	call fs_GetFilePtr
 	pop bc
-	jq c,fs_SanityCheck
+	call c,fs_SanityCheck
 	pop bc,de
 	push de,bc
 	push hl

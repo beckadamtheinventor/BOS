@@ -4,10 +4,7 @@ _blconfig_exe:
 	db "TFX",0
 	db 0
 .init:
-	or a,a
-	sbc hl,hl
-	add hl,sp
-	ld ix,(hl)
+	pop ix
 .clear_key:
 	xor a,a
 	ld (bos.last_keypress),a

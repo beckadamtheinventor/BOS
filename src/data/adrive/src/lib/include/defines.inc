@@ -81,8 +81,8 @@ asset_reservations_table    := $D01600 ;1024 bytes. Caches asset memory reservat
 malloc_cache           := $D02000 ;4096 bytes
 usb_sector_buffer      := $D03000 ;512 bytes
 usbRAM                 := $D03200 ;256 bytes, should not be tampered with while /dev/mnt or /dev/usb are active
-safeRAM                := $D03300 ; 85248 bytes scrap RAM
-safeRAM_len            := 85248
+safeRAM                := $D04500 ; 80640 bytes scrap RAM
+safeRAM_len            := 80640
 reservedRAM            := $D18000 ; 2048 bytes reserved RAM
 reservedRAM_len        := 2048
 bos_Stackbot           := $D1A87C
@@ -98,11 +98,11 @@ usbInited              := $D177B7 ; zero this byte while using usbArea and to re
 
 
 ; threading defines
-thread_map             := $D02800 ; thread map. 256 threads. Active threads have bit 7 set.
-thread_temp_save       := $D03000 ; temporary save location for registers when a thread switch is triggered. 16 bytes per thread, 256 threads = 4096 bytes.
-current_thread         := $D04000 ; currently running thread ID
-thread_control         := $D04001 ; zero if threading is disabled
-thread_memory_end      := $D04002 ; end of thread memory
+thread_map             := $D03300 ; thread map. 256 threads. Active threads have bit 7 set.
+thread_temp_save       := $D03400 ; temporary save location for registers when a thread switch is triggered. 16 bytes per thread, 256 threads = 4096 bytes.
+current_thread         := $D04400 ; currently running thread ID
+thread_control         := $D04401 ; zero if threading is disabled
+thread_memory_end      := $D04402 ; end of thread memory
 
 ; Flash locations
 start_of_user_archive  := $040000 ;sector $04
@@ -147,3 +147,5 @@ bKeepFlashUnlocked   := 1
 
 mIsFlashUnlocked     := 1
 mKeepFlashUnlocked   := 2
+
+fs_cmap_length := 7040

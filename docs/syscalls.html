@@ -439,7 +439,7 @@ Cf set if failed</td><td></td><td>
 </table></div><div id="fs_InitClusterMap"><h1>fs_InitClusterMap</h1>	<h3>syscall Adress 02022C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>initialize cluster map given data within the file system.</td><td>void fs_InitClusterMap(void);</td><td></td><td></td><td>
-</td></tr>
+uses bos.safeRAM as scrap.</td></tr>
 </table></div><div id="sys_WriteFlash"><h1>sys_WriteFlash</h1>	<h3>syscall Adress 020230</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>write BC bytes to flash from HL to DE.</td><td>HL, DE, BC</td><td></td><td></td><td>

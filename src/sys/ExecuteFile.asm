@@ -179,6 +179,7 @@ sys_ExecuteFile:
 	xor a,a
 	ld (curcol),a
 	ret
+
 .exec_threaded_rex:
 	ld hl,(running_program_ptr)
 	ld a,(hl)
@@ -194,7 +195,10 @@ sys_ExecuteFile:
 	ld d,(hl)
 	inc hl
 	push hl,de
-	call sys_NextProcessId
+	ld a,(running_process_id)
+	ld (fsOP6+13),a
+	ld a,1
+	ld (running_process_id),a
 	call sys_Malloc
 	pop bc
 	ex (sp),hl
@@ -242,7 +246,10 @@ sys_ExecuteFile:
 	ld (running_program_ptr),de
 	jq .exec_threaded_hl
 .exec_threaded_fex:
-	call sys_NextProcessId
+	ld a,(running_process_id)
+	ld (fsOP6+13),a
+	ld a,1
+	ld (running_process_id),a
 	ld hl,(running_program_ptr)
 .exec_threaded_hl:
 	ld a,(hl)
@@ -264,30 +271,29 @@ sys_ExecuteFile:
 	ret c ;return if failed to malloc
 
 	add hl,bc ;malloc'd pointer + length because the stack grows downwards
-	push hl
-	ld hl,.threaded_run_data
-	ld bc,.threaded_run_data_len
-	ld de,fsOP6+3
-	push de
-	ldir
-	pop de,hl
+	dec hl
+	dec hl
+	dec hl
+	ld de,(running_program_ptr)
+	ld (hl),de
 	dec hl
 	dec hl
 	dec hl
 	ld bc,.threaded_return_handler ;set program return location so its memory can be easily freed
 	ld (hl),bc
-	ld (fsOP6+5),hl ;stack pointer allocated for the thread
-	ex hl,de
-	ld bc,(running_program_ptr)
-	ld (fsOP6+8),bc
-	jp (hl)
+	push hl,de
+	ld a,(fsOP6+13)
+	inc a
+	ld (running_process_id),a
+	call th_CreateThread
+	ld a,(fsOP6+13)
+	ld (running_process_id),a
+	pop hl,de
+	ret
 
 .threaded_return_handler:
 	call sys_FreeRunningProcessId
 	call sys_PrevProcessId
+	call sys_Free ;free the memory the program is allocated in if it's a TRX.
+	pop bc
 	EndThread ;assume we're still in the program's main thread
-
-.threaded_run_data:
-	SpawnThread 0, 0
-	ret
-.threaded_run_data_len := $ - .threaded_run_data

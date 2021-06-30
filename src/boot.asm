@@ -67,18 +67,7 @@ boot_os:
 	call fs_CreateFile
 	pop bc,bc,bc
 .dont_create_elevation_file:
-	ld hl,thread_map
-	push hl,hl
-	pop de
-	inc de
-assert ~thread_map and $FF
-	xor a,a
-	ld (current_thread),a
-	ld (hl),a
-	ld bc,thread_memory_end-thread_map
-	ldir
-	pop hl
-	ld (hl),$80
+	call th_ResetThreadMemory
 assert ~thread_temp_save and $FF
 	ld hl,thread_temp_save
 	ld de,os_return
@@ -354,35 +343,49 @@ os_recovery_menu:
 	call sys_WaitKeyCycle
 	cp a,9
 	jq nz,os_recovery_menu
-	ld hl,.reinstall_fail_handler
-	ld de,bos_UserMem
-	push hl,de
-	ld hl,data_reinstall_tios_program
-	ld bc,data_reinstall_tios_program.len
-	ldir
-	ret
-
-.reinstall_fail_handler:
+	ld a,($0401FF)
+	inc a
+	jq nz,.reinstalltios_start
 	ld hl,string_failed_to_reinstall
 	call gui_DrawConsoleWindow
 	call sys_WaitKeyCycle
 	jq os_recovery_menu
+.reinstalltios_start:
+	ld de,bos_UserMem
+	push de
+	ld hl,data_reinstall_tios_program
+	ld bc,data_reinstall_tios_program.len
+	ldir
+	jp sys_FlashUnlock
+
 
 ;tios reinstaller
 virtual at ti.userMem
-	ld hl,_backup_file
-	push hl
-	call fs_OpenFile
-	pop bc
-	ret c
-	
-	ret
-_backup_file:
-	db "/usr/tivars/TIOSbkp"
-_backup_number:
-	db "A.v15",0
-
-
+	ld a,$02
+data_reinstall_tios_program.loop:
+	push af
+	call data_reinstall_tios_program.sectorerase
+	pop af
+	inc a
+	cp a,$12
+	jq nz,data_reinstall_tios_program.loop
+	ld hl,$2B0000
+	ld de,$020000
+	ld bc,$120000
+	call sys_WriteFlash
+	ld a,$12
+data_reinstall_tios_program.loop2:
+	push af
+	call data_reinstall_tios_program.sectorerase
+	pop af
+	inc a
+	cp a,$3B
+	jq nz,data_reinstall_tios_program.loop2
+	rst 0
+data_reinstall_tios_program.sectorerase:
+	ld bc,$F8
+	push bc
+	jp $2DC
 	load data_reinstall_tios_program.data:$-$$ from $$
 end virtual
 

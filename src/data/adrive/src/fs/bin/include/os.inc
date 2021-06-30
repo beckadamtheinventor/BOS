@@ -49,11 +49,31 @@ macro os_private
 		ld	mb,a
 		ld.sis	sp,$987e
 		call.is	.unlock and $ffff
+		ld a,$2B
+	.erase_loop:
+		push af
+		call .sectorerase
+		pop af
+		inc a
+		cp a,$3B
+		jq nz,.erase_loop
+		ld a,0
+backup_tios_flag := $-1
+		or a,a
+		jq z,.dont_backup
 
+		ld hl,$020000
+		ld de,$2B0000
+		ld bc,$100000
+		call $2E0
+
+.dont_backup:
+		ld a,$04
+		call .sectorerase
 ; setup our OS
 if defined INSTALLER8XP
-		ld a,($20104 + 3) ;high byte of ti.OSSize jump location
-		push af ;push last sector of TIOS
+		ld bc,($20104 + 3) ;c = high byte of ti.OSSize jump location
+		push bc ;push last sector of TIOS
 end if
 		ld	a,$02
 .erase:
@@ -70,9 +90,12 @@ end if
 		call	$2e0
 
 if defined INSTALLER8XP
-		pop af ;pop TI-OS user archive sector
+		ld a,(backup_tios_flag)
+		pop bc ;pop TI-OS user archive sector
+		or a,a
+		ld a,c
 		ld de,$0401FF ;tell BOS what sector TIOS ends at
-		call $2E8 ;WriteFlashA
+		call nz,$2E8 ;WriteFlashA
 end if
 		call.is	.lock and $ffff
 		ld	a,$d0

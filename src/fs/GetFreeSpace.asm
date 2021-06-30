@@ -7,20 +7,19 @@ fs_GetFreeSpace:
 	push bc
 	call fs_GetFilePtr
 	pop de
-	jq c,fs_SanityCheck
+	jq c,.SanityCheck
 	ld a,b
 	or a,c
-	jq z,fs_SanityCheck
+	jq z,.SanityCheck
+.reentry:
 	ex hl,de
+	or a,a
 	sbc hl,hl
 .loop:
 	ld a,(de)
 	inc de
-	or a,a
-	jq z,.increment
 	inc a
 	jq nz,.next
-.increment:
 	inc hl
 .next:
 	dec bc
@@ -32,3 +31,9 @@ fs_GetFreeSpace:
 	add hl,hl
 	djnz .multloop
 	ret
+.SanityCheck:
+	push de
+	call fs_SanityCheck
+	call fs_GetFilePtr
+	pop de
+	jq .reentry

@@ -10,7 +10,12 @@ sys_HLToString:
 	xor	a,a
 	ld	(de),a
 	pop	de
-	ret
+.skip0loop:
+	ld a,(de)
+	cp a,'0'
+	ret nz
+	inc de
+	jq .skip0loop
 .entry:
 	ld	bc,-10000000
 	call	.aqu

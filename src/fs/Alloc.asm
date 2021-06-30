@@ -18,7 +18,7 @@ fs_Alloc:
 	push hl
 	call fs_OpenFile
 	pop bc
-	jq c,.fail
+	call c,fs_SanityCheck
 
 	ld bc,$C
 	add hl,bc

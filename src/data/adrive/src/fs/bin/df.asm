@@ -10,15 +10,15 @@ df_main:
 	ld hl,.str_bytes_free
 	call bos.gui_Print
 	pop de
-	ld hl,3604480
+	ld hl,$3B0000 - $040000
 	or a,a
 	sbc hl,de
 	call bos.gui_PrintUInt
 	ld hl,.str_bytes_used
 	call bos.gui_Print
 	pop hl
-	ld c,10
-	call ti._ishru
+	ld bc,1024
+	call ti._idivu
 	call bos.gui_PrintUInt
 	ld hl,.str_kb_free
 	call bos.gui_Print

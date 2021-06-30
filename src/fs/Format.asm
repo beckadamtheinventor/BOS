@@ -9,17 +9,16 @@ fs_Format:
 	set bKeepFlashUnlocked, (hl)
 	call sys_FlashUnlock
 
-	; ld a,($0401FF) ;stores last sector of TIOS, will be 0xFF otherwise
-	; inc a
-	; ld ($D3FFFF),a
-	; ld a,$04
-	; jq z,.erase_all_loop
-; .erase_some_loop:
-	; call .erase_one
-	; ld hl,$D3FFFF
-	; cp a,(hl)
-	; jq nz,.erase_some_loop
-	; jq .extract_fs
+	ld a,($0401FF) ;stores last sector of TIOS, will be 0xFF otherwise
+	ld ($D2FFFF),a
+	inc a
+	ld a,$04
+	jq z,.erase_all_loop
+.erase_some_loop:
+	call .erase_one
+	cp a,$2B ;this is the sector where TIOS gets backed up from the installer
+	jq nz,.erase_some_loop
+	jq .extract_fs
 .erase_all_loop: ;erase all filesystem flash sectors
 	call .erase_one
 	cp a,end_of_user_archive shr 16
@@ -40,12 +39,30 @@ fs_Format:
 
 	call fs_InitClusterMap
 
-	call gui_NewLine
+	ld a,($D2FFFF)
+	inc a
+	jq z,.dont_reserve_memory
+	dec a
+	ld de,$0401FF
+	call sys_WriteFlashA
 
+	ld hl,fs_cluster_map_file
+	push hl
+	call fs_GetFilePtr
+	pop de
+	ld de,($2B0000 - $040000) shr 9
+	add hl,de
+	ex hl,de
+	ld hl,$FF0000
+	ld bc,$100000 shr 9
+	call sys_WriteFlash
+
+.dont_reserve_memory:
 	ld hl,flashStatusByte
 	res bKeepFlashUnlocked, (hl)
 	call sys_FlashLock
 
+	call gui_NewLine
 	ld hl,str_PressAnyKey
 	call gui_Print
 	jp sys_WaitKeyCycle

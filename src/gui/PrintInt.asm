@@ -12,11 +12,9 @@ gui_PrintInt:
 	sbc hl,hl
 	sbc hl,de
 	call	sys_HLToString
-	ld hl,gfx_string_temp+9
-	ld de,gfx_string_temp+10
-	ld bc,9
-	lddr
-	ld (hl),'-'
+	ex hl,de
+	ld a,'-'
+	call gui_PrintChar
 	jq .print
 .positive:
 	ex hl,de
@@ -24,7 +22,7 @@ gui_PrintInt:
 ;@INPUT hl = integer
 gui_PrintUInt:
 	call	sys_HLToString
-	ld hl,gfx_string_temp
+	ex hl,de
 gui_PrintInt.print:
 	jp	gui_PrintString
 

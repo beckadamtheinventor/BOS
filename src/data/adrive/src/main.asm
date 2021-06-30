@@ -288,7 +288,7 @@ end fs_dir
 ;-------------------------------------------------------------
 
 fs_file cluster_map_file
-	db 7040 dup $FF
+	db bos.fs_cmap_length dup $FF
 end fs_file
 
 fs_file explorer_exe

@@ -33,6 +33,7 @@ explorer_init:
 	;push hl
 	;push bc
 	;ld (explorer_args),hl
+
 	di
 	ld (_SaveIX),ix
 	ld (_SaveSP),sp
@@ -84,6 +85,27 @@ explorer_foreground2_color:=$-1
 	ld (explorer_cursor_y),a
 	; call ti.GetBatteryStatus
 	; ld (battery_status),a
+explorer_load_extensions:
+	ld hl,2
+	push hl
+	ld bc,display_items_num_x * display_items_num_y
+	push bc
+	ld bc,explorer_extensions_dir
+	push bc
+	ld hl,(explorer_dirlist_buffer)
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	push hl
+	call nz,bos.fs_DirList
+	pop bc,bc,bc,bc
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	jq z,explorer_dirlist
+	
+	
+	
 explorer_dirlist:
 	ld hl,1
 explorer_files_skip:=$-3
@@ -1336,3 +1358,5 @@ str_memeditexe:
 	db "/bin/memedit",0
 str_MissingIconFile:
 	db "/etc/config/explorer/missing.ico",0
+explorer_extensions_dir:
+	db "/opt/explorer/",0

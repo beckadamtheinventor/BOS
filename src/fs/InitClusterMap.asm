@@ -1,37 +1,67 @@
 ;@DOES initialize cluster map given data within the file system.
 ;@INPUT void fs_InitClusterMap(void);
+;@NOTE uses bos.safeRAM as scrap.
 fs_InitClusterMap:
 	ld hl,-3
 	call ti._frameset
-	call sys_FlashUnlock
-	ld bc,7040
-	push bc
-	ld c,0
-	push bc
-	ld bc,.cluster_file
-	push bc
-	call fs_OpenFile
-	call c,fs_CreateFile
-	pop bc,bc,bc
-	ld bc,0
-	push bc,hl
-	ld c,1
-	push bc
-	ld bc,7040
-	push bc
-	ld bc,$03E000
-	push bc
-	call fs_Write
-	pop bc,bc,bc,hl,bc
 
-	ld bc,fsentry_filesector
-	add hl,bc
-	ld hl,(hl)
+	ld de,fs_cluster_map_file
+	push de
+	call fs_OpenFile
+	pop de
+	jq c,.create_cmap
+	; ld bc,0
+	; push bc,hl
+	; ld c,1
+	; push bc
+	; ld bc,7040
+	; push bc
+	; ld bc,$03E000
+	; push bc
+	; call fs_Write
+	; pop bc,bc,bc,hl,bc
+	ld hl,fs_cluster_map_file
 	push hl
-	call fs_GetSectorAddress
-	pop bc
+	call fs_GetFilePtr
 	ld (ix-3),hl
+	pop de
 	ex hl,de
+	ld bc,fs_cmap_length
+	ld hl,safeRAM
+.sectorcheckloop:
+	ld a,(de)
+	or a,a
+	jq z,.next
+	ld a,$FF
+.next:
+	ld (hl),a
+	inc hl
+	inc de
+	dec bc
+	ld a,c
+	or a,b
+	jq nz,.sectorcheckloop
+	ld hl,safeRAM
+	ld de,(ix-3)
+	ld bc,fs_cmap_length
+	push bc,hl,de
+	call sys_FlashUnlock
+	call sys_WriteFlashFullRam
+	call sys_FlashLock
+	pop bc,bc,bc
+	jq .start_traversing
+
+.create_cmap:
+	ld bc,fs_cmap_length
+	push bc
+	ld c,fd_system+fd_readonly
+	push bc,de
+	call fs_CreateFile
+	pop bc,bc,bc
+
+.start_traversing:
+	call sys_FlashUnlock
+	ld de,(ix-3)
 	ld a,$FE
 	call sys_WriteFlashA
 	ld iy,$040000
@@ -105,8 +135,4 @@ fs_InitClusterMap:
 	call .traverse
 	pop iy
 	ret
-
-
-.cluster_file:
-	db "/dev/cmap.dat",0
 
