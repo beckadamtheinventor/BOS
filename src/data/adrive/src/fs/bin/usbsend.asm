@@ -37,15 +37,9 @@ usbsend_main:
 libload_load:
 	ld hl,libload_name
 	push hl
-	call bos.fs_OpenFile
+	call bos.fs_GetFilePtr
 	pop bc
 	jq c,.notfound
-	ld bc,$0C
-	add hl,bc
-	ld hl,(hl)
-	push hl
-	call bos.fs_GetSectorAddress
-	pop bc
 	ld   de,libload_relocations
 	ld   bc,.notfound
 	push   bc

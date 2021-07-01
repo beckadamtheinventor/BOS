@@ -107,16 +107,11 @@ th_FindNextThread:
 
 th_ResetThreadMemory:
 	ld hl,thread_map
-	push hl,hl
-	pop de
-	inc de
-assert ~thread_map and $FF
 	xor a,a
-	ld (current_thread),a
+	ld b,a
+.loop:
 	ld (hl),a
-	ld bc,thread_memory_end-thread_map
-	ldir
-	pop hl
-	ld (hl),$80
+	inc hl
+	djnz .loop
 	ret
 
