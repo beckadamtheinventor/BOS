@@ -17,7 +17,7 @@ usbrun_main:
 	call libload_load
 	jq z,usbrun_main.main
 	ld hl,str_FailedToLoadLibload
-	call bos.gui_Print
+	call bos.gui_PrintLine
 	scf
 	sbc hl,hl
 	ret
@@ -57,7 +57,7 @@ usbrun_main.main:
 	jq nz,no_drive_found
 main_init_start:
 	ld hl,str_WaitingForDevice
-	call bos.gui_Print
+	call bos.gui_PrintLine
 	ld hl,main_exit_cleanup
 	call bos.sys_SetupOnInterruptHandler
 .loop:
@@ -75,11 +75,11 @@ main_init_start:
 	jq z,.init_success
 .init_fail:
 	ld hl,str_FailedToInitMsd
-	call bos.gui_Print
+	call bos.gui_PrintLine
 	jq main_exit
 .init_success:
 	ld hl,str_MsdInited
-	call bos.gui_Print
+	call bos.gui_PrintLine
 init_explore_drive:
 	call init_fat_partition
 	jq z,open_file
@@ -90,7 +90,7 @@ main_fail_memory:
 	ld hl,str_MemoryError
 
 main_print_and_exit:
-	call bos.gui_Print
+	call bos.gui_PrintLine
 	call bos.sys_WaitKeyCycle
 ;Cleanup USB
 main_exit:
@@ -142,7 +142,7 @@ init_fat_partition:
 	ld bc,msd_device
 	push bc
 	ld hl,str_LookingForPartitions
-	call bos.gui_Print
+	call bos.gui_PrintLine
 	call fat_Find
 	pop bc,bc,bc,bc
 	add hl,bc
@@ -159,7 +159,7 @@ init_fat_partition:
 	ld bc,fat_device
 	push bc
 	ld hl,str_InitializingPartition
-	call bos.gui_Print
+	call bos.gui_PrintLine
 	call fat_Init
 	pop bc,bc
 	add hl,bc
@@ -167,7 +167,7 @@ init_fat_partition:
 	sbc hl,bc
 	ret nz
 	ld hl,str_FatInited
-	call bos.gui_Print
+	call bos.gui_PrintLine
 	ld a,$C9
 	ld (.),a ;smc so we don't run this code again
 	or a,a
@@ -175,7 +175,7 @@ init_fat_partition:
 	ret
 .no_partitions:
 	ld hl,str_NoParitions
-	call bos.gui_Print
+	call bos.gui_PrintLine
 	ld a,1
 	or a,a
 	ret
@@ -195,7 +195,7 @@ main_event_handler:
 	jq z,.device_enabled
 	jq .success
 .print_then_success:
-	call bos.gui_Print
+	call bos.gui_PrintLine
 .success:
 	pop ix
 	xor a,a
@@ -254,7 +254,7 @@ fat_dir_entries:
 
 no_drive_found:
 	ld hl,.string
-	call bos.gui_Print
+	call bos.gui_PrintLine
 	ld hl,-2
 	jq _exit
 .string:
@@ -271,41 +271,41 @@ libload_name:
 	db   "/lib/LibLoad.dll",0
 .len := $ - .
 str_NoParitions:
-	db "No Partitions found.",$A,0
+	db "No Partitions found.",0
 str_LookingForPartitions:
-	db "Looking for partitions...",$A,0
+	db "Looking for partitions...",0
 str_InitializingPartition:
-	db "Initializing partition...",$A,0
+	db "Initializing partition...",0
 found_partitions:
 	dl 0
 str_UsbRun:
-	db "USB Program Executor",$A,0
+	db "USB Program Executor",0
 str_WaitingForDevice:
 	db $9,"Waiting for device...",$A
-	db "Please insert USB flash drive.",$A,0
+	db "Please insert USB flash drive.",0
 str_FailedToInitFat:
 	db $9,"Failed to initialize drive.",$A
-	db "Are you sure it is FAT32 formatted?",$A,0
+	db "Are you sure it is FAT32 formatted?",0
 str_FailedToInitMsd:
-	db $9,"Failed to init device.",$A,0
+	db $9,"Failed to init device.",0
 str_FailedToLoadLibload:
-	db "Failed to load libload.",$A,0
+	db "Failed to load libload.",0
 str_DeviceConnected:
-	db "Device connected.",$A,0
+	db "Device connected.",0
 str_DeviceDisconnected:
-	db "Device disconnected",$A,0
+	db "Device disconnected",0
 str_FatInited:
-	db "FAT Filesystem initialized.",$A,"Read/Write can now occur",$A,0
+	db "FAT Filesystem initialized.",$A,"Read/Write can now occur",0
 str_MsdInited:
-	db "Device initialized.",$A,0
+	db "Device initialized.",0
 str_DeviceEnabled:
-	db "Device Enabled.",$A,0
+	db "Device Enabled.",0
 str_FileNotFound:
-	db $9,"File not found.",$A,0
+	db $9,"File not found.",0
 str_MemoryError:
-	db $9,"Not Enough Memory.",$A,0
+	db $9,"Not Enough Memory.",0
 str_InavlidExecutable:
-	db "Invalid Executable Format. Aborting.",$A,0
+	db "Invalid Executable Format. Aborting.",0
 
 
 libload_relocations:
@@ -426,7 +426,7 @@ _Args:=$-3
 	ret
 .invalid_executable:
 	ld hl,str_InavlidExecutable
-	call bos.gui_Print
+	call bos.gui_PrintLine
 	jp bos.sys_WaitKeyCycle
 
 
