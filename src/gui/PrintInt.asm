@@ -15,6 +15,9 @@ gui_PrintInt:
 	ex hl,de
 	ld a,'-'
 	call gui_PrintChar
+	ex hl,de
+	ld hl,curcol
+	dec (hl)
 	jq .print
 .positive:
 	ex hl,de
@@ -22,7 +25,7 @@ gui_PrintInt:
 ;@INPUT hl = integer
 gui_PrintUInt:
 	call	sys_HLToString
-	ex hl,de
 gui_PrintInt.print:
+	ex hl,de
 	jp	gui_PrintString
 

@@ -8,12 +8,26 @@ HandleInstruction:
 	; jq z,_DisableThreading
 	; cp a,$F7
 	; jq z,_EnableThreading
-	cp a,$C5
-	jq z,_HandleThreadSpawn
-	cp a,$C9
-	jq z,th_EndThread
 	cp a,$C1
 	jq z,th_HandleNextThread
+	cp a,$C9
+	jq z,th_EndThread
+	cp a,$C5
+	ret nz
+
+_HandleThreadSpawn:
+	pop hl
+	ld de,(hl)
+	inc hl
+	inc hl
+	inc hl
+	ld bc,(hl)
+	inc hl
+	inc hl
+	inc hl
+	push hl,de,bc
+	call th_CreateThread
+	pop bc,bc
 	ret
 
 ; _EnableThreading:
@@ -52,30 +66,14 @@ HandleInstruction:
 	; out (bc),a
 	; ret
 
-_StopAllThreads:
-	ld hl,thread_map+1
-	xor a,a
-	ld b,$FF
-.loop:
-	res 7,(hl)
-	inc hl
-	djnz .loop
-	pop hl
-	dec hl
-	jp (hl)
-
-_HandleThreadSpawn:
-	pop hl
-	ld de,(hl)
-	inc hl
-	inc hl
-	inc hl
-	ld bc,(hl)
-	inc hl
-	inc hl
-	inc hl
-	push hl,de,bc
-	call th_CreateThread
-	pop bc,bc
-	ret
-
+; _StopAllThreads:
+	; ld hl,thread_map+1
+	; xor a,a
+	; ld b,$FF
+; .loop:
+	; res 7,(hl)
+	; inc hl
+	; djnz .loop
+	; pop hl
+	; dec hl
+	; jp (hl)

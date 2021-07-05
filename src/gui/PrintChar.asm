@@ -4,22 +4,23 @@
 ;@DESTROYS Assume all except HL
 gui_PrintChar:
 	push hl,af
+	ld hl,(curcol)
+	ld h,8
+	mlt hl
+	ld (lcd_x),hl
 	ld a,(console_line)
 	ld c,a
 	add a,a
 	add a,a
 	add a,a
 	add a,c
-	ld c,a
-	ld hl,(lcd_x)
-	push bc,hl
-	call gfx_SetTextXY
-	pop bc,bc
+	ld (lcd_y),a
 	pop af
 	call gfx_PrintChar
 	jq c,.controlcode
 .advance:
 	ld a,(curcol)
+.advance_entry:
 	cp a,40
 	jq nc,.advance_new_line
 	inc a
@@ -42,12 +43,6 @@ gui_PrintChar:
 	pop hl
 	ret
 
-.scroll:
-	push hl
-	call gui_Scroll
-	pop hl
-	jq .done
-
 .controlcode:
 	or a,a
 	jr z,.nextline
@@ -56,14 +51,10 @@ gui_PrintChar:
 	cp a,$09 ;TAB
 	jq nz,.advance
 .tab:
-	ld hl,(lcd_x)
-	ld a,l
-	and a,$F0
-	ld l,a
-	ld bc,$10
-	add hl,bc
-	ld (lcd_x),hl
-	jq .advance
+	ld a,(curcol)
+	inc a
+	inc a
+	jq .advance_entry
 .nextline:
 	ld a,(console_line)
 	cp a,25
@@ -73,3 +64,8 @@ gui_PrintChar:
 	call gfx_BlitBuffer
 	jq .advance
 
+.scroll:
+	push hl
+	call gui_Scroll
+	pop hl
+	jq .done

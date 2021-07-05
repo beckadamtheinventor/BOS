@@ -264,6 +264,7 @@ os_return:
 	call sys_ExecuteFile
 	pop bc,bc
 
+	call th_EndAllThreads
 ; check if recovery key was pressed
 	ld a,(last_keypress)
 	cp a,53

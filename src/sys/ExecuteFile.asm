@@ -69,12 +69,10 @@ sys_ExecuteFile:
 .skip1:
 	inc hl
 	ld de,(hl)
-; threaded RAM executables coming once I figure out an implementation allowing "multiple programs to run at once" considering programs
-; aren't going to be running from the same location if more than one is likely to be running at the same time.
-	; db $21, 'TRX' ;ld hl, 'TRX' ;Threaded Ram eXecutable
-	; or a,a
-	; sbc hl,de
-	; jq z,.exec_threaded_rex
+	db $21, 'TRX' ;ld hl, 'TRX' ;Threaded Ram eXecutable
+	or a,a
+	sbc hl,de
+	jq z,.exec_threaded_rex
 	db $21, 'TFX' ;ld hl, 'TFX' ;Threaded Flash eXecutable
 	or a,a
 	sbc hl,de
@@ -197,8 +195,7 @@ sys_ExecuteFile:
 	push hl,de
 	ld a,(running_process_id)
 	ld (fsOP6+13),a
-	ld a,1
-	ld (running_process_id),a
+	call sys_NextProcessId
 	call sys_Malloc
 	pop bc
 	ex (sp),hl
@@ -210,8 +207,7 @@ sys_ExecuteFile:
 	ld (fsOP6+3),hl
 	ld (fsOP6+6),bc
 	add hl,bc
-	add hl,bc ;each entry is 2 bytes
-	ld (fsOP6+12),hl ; should point to code needing relocation
+	add hl,bc ;each entry is 2 bytes. hl should now point to code needing relocation
 	pop bc,de
 	ld (fsOP6+9),de
 	ldir
@@ -226,7 +222,7 @@ sys_ExecuteFile:
 	ld c,(iy)
 	ld b,(iy+1)
 	lea iy,iy+2
-	ld hl,(fsOP6+12)
+	ld hl,(fsOP6+9)
 	add hl,bc
 	ld bc,(hl)
 	ex hl,de
@@ -282,9 +278,6 @@ sys_ExecuteFile:
 	ld bc,.threaded_return_handler ;set program return location so its memory can be easily freed
 	ld (hl),bc
 	push hl,de
-	ld a,(fsOP6+13)
-	inc a
-	ld (running_process_id),a
 	call th_CreateThread
 	ld a,(fsOP6+13)
 	ld (running_process_id),a
@@ -293,7 +286,6 @@ sys_ExecuteFile:
 
 .threaded_return_handler:
 	call sys_FreeRunningProcessId
-	call sys_PrevProcessId
 	call sys_Free ;free the memory the program is allocated in if it's a TRX.
 	pop bc
 	EndThread ;assume we're still in the program's main thread

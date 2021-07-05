@@ -4,6 +4,7 @@ include 'include/ti84pceg.inc'
 include 'include/bosfs.inc'
 include 'include/bos.inc'
 include 'include/threading.inc'
+include 'include/bos_trx.inc'
 
 org $040000
 fs_fs
@@ -170,6 +171,7 @@ fs_dir etc_dir
 	fs_entry root_dir, "..", "", f_subdir
 	fs_entry etc_config_dir, "config", "", f_subdir
 	fs_entry etc_data_dir, "data", "", f_subdir
+	fs_entry etc_plugins_dir, "plugins", "", f_subdir
 end fs_dir
 
 ;"/etc/config/" directory
@@ -221,7 +223,6 @@ end fs_dir
 ;"/opt/" directory
 fs_dir opt_dir
 	fs_entry root_dir, "..", "", f_subdir
-	fs_entry opt_explorer_dir, "explorer", "", f_subdir
 end fs_dir
 
 ;"/sbin/" directory
@@ -271,16 +272,31 @@ fs_dir user_dir
 	fs_entry home_dir, "..", "", f_subdir
 end fs_dir
 
-;"/opt/explorer/" directory
-fs_dir opt_explorer_dir
-	fs_entry opt_dir, "..", "", f_subdir
-	fs_entry explorer_blconfig_dir, "BLconfig", "", f_subdir
+;"/etc/plugins/" directory
+fs_dir etc_plugins_dir
+	fs_entry etc_dir, "..", "", f_subdir
+	fs_entry etc_plugins_explorer_dir, "explorer", "", f_subdir
 end fs_dir
 
-;"/opt/explorer/BLconfig/" directory
+;"/etc/plugins/explorer/" directory
+fs_dir etc_plugins_explorer_dir
+	fs_entry etc_plugins_dir, "..", "", f_subdir
+	fs_entry explorer_blconfig_dir, "blconfig", "", f_subdir
+	fs_entry explorer_serial_dir, "serial", "", f_subdir
+end fs_dir
+
+;"/etc/plugins/explorer/blconfig/" directory
 fs_dir explorer_blconfig_dir
-	fs_entry opt_explorer_dir, "..", "", f_subdir
+	fs_entry etc_plugins_explorer_dir, "..", "", f_subdir
 	fs_entry explorer_blconfig_exe, "blconfig", "", 0
+	fs_entry explorer_blconfig_cmd, "index", "cmd", 0
+end fs_dir
+
+;"/etc/plugins/explorer/serial/" directory
+fs_dir explorer_serial_dir
+	fs_entry etc_plugins_explorer_dir, "..", "", f_subdir
+	fs_entry explorer_serial_cmd, "index", "cmd", 0
+	fs_entry explorer_serial_exe, "serial", "", 0
 end fs_dir
 
 ;-------------------------------------------------------------
@@ -400,9 +416,20 @@ fs_file path_var
 end fs_file
 
 fs_file explorer_blconfig_exe
-	include 'fs/opt/explorer/BLconfig/blconfig.asm'
+	include 'fs/etc/plugins/explorer/blconfig/blconfig.asm'
 end fs_file
 
+fs_file explorer_blconfig_cmd
+	db "blconfig",$A,0
+end fs_file
+
+fs_file explorer_serial_exe
+	include 'fs/etc/plugins/explorer/serial/serial.asm'
+end fs_file
+
+fs_file explorer_serial_cmd
+	db "serial",$A,0
+end fs_file
 
 end fs_fs
 
