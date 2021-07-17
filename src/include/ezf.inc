@@ -119,6 +119,7 @@ virtual at 0
 	?EXPORT?    rb 1   ;publicize a section for external use
 	?ENTRY?     rb 1   ;program entry point
 	?EXTERN?    rb 1   ;external section reference
+	?IMPORT?    rb 1   ;library import reference
 	?ROEXEC?    rb 1   ;readonly executable section
 	?RODAT?     rb 1   ;readonly data section
 	?RONULL?    rb 1   ;readonly null data section

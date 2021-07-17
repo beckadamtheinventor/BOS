@@ -31,10 +31,24 @@ sys_ExecuteEZF:
 	cp a,13
 	jq c,.fail ;less than minimum size
 .atleastminsize:
+	push hl
+	ex (sp),iy
+	push iy
+	lea iy,iy+4
+.extractloop:
+	ld a,(iy)
+	inc a
+	jq z,.extractloopend
+	dec a
+	jq z,.next
+	jq .extractloop
+.extractloopend:
+	pop iy
 	
 	
 	
-	ret
+	
+	pop iy
 .fail:
 	scf
 	sbc hl,hl
