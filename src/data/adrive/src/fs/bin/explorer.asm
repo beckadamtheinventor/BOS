@@ -54,13 +54,6 @@ explorer_init_2:
 	ld (hl),bc
 	ld hl,bos.current_working_dir
 	ld (current_working_dir),hl
-	ld bc,display_items_num_x * display_items_num_y * 3
-	push bc
-	call bos.sys_Malloc
-	pop bc
-	jq c,.nodirlistbuffer
-	ld (explorer_dirlist_buffer),hl
-.nodirlistbuffer:
 	ld de,explorer_config_file
 	push de
 	call bos.fs_GetFilePtr
@@ -85,27 +78,24 @@ explorer_foreground2_color:=$-1
 	ld (explorer_cursor_y),a
 	; call ti.GetBatteryStatus
 	; ld (battery_status),a
-explorer_load_extensions:
-	ld hl,2
-	push hl
-	ld bc,display_items_num_x * display_items_num_y
-	push bc
-	ld bc,explorer_extensions_dir
-	push bc
-	ld hl,(explorer_dirlist_buffer)
-	add hl,bc
-	or a,a
-	sbc hl,bc
-	push hl
-	call nz,bos.fs_DirList
-	pop bc,bc,bc,bc
-	add hl,bc
-	or a,a
-	sbc hl,bc
-	jq z,explorer_dirlist
-	
-	
-	
+; explorer_load_extensions:
+	; ld hl,2
+	; push hl
+	; ld bc,display_items_num_x * display_items_num_y
+	; push bc
+	; ld bc,explorer_extensions_dir
+	; push bc
+	; ld hl,explorer_dirlist_buffer
+	; add hl,bc
+	; or a,a
+	; sbc hl,bc
+	; push hl
+	; call nz,bos.fs_DirList
+	; pop bc,bc,bc,bc
+	; add hl,bc
+	; or a,a
+	; sbc hl,bc
+	; jq z,explorer_dirlist
 explorer_dirlist:
 	ld hl,1
 explorer_files_skip:=$-3
@@ -115,8 +105,7 @@ explorer_files_skip:=$-3
 	ld bc,0
 current_working_dir:=$-3
 	push bc
-	ld hl,0
-explorer_dirlist_buffer:=$-3
+	ld hl,explorer_dirlist_buffer
 	add hl,bc
 	or a,a
 	sbc hl,bc
@@ -207,6 +196,9 @@ explorer_cursor_x:=$-3
 	cp a,ti.sk2nd - 4
 	jq nz,.key_loop
 .click:
+	xor a,a
+	ld (.force_editing_file),a
+.open_file_entry:
 	ld a,(explorer_cursor_y)
 assert display_items_num_x = 4
 	add a,a ;multiply y by 4
@@ -225,7 +217,7 @@ explorer_max_selection:=$-3
 	add a,a ;multiply result by 3
 	add a,l
 	ld l,a
-	ld bc,(explorer_dirlist_buffer)
+	ld bc,explorer_dirlist_buffer
 	add hl,bc ;index directory list buffer
 	push iy
 	ld iy,(hl)
@@ -236,29 +228,27 @@ explorer_max_selection:=$-3
 	pop bc
 	call bos.fs_CopyFileName
 	ld (explorer_dirname_buffer),hl
+	ld a,(.force_editing_file)
+	or a,a
+	jq nz,.open_file
 	pop iy
 	bit bos.fd_subdir,(iy+bos.fsentry_fileattr)
 	push iy
 	jq z,.open_file
 	call .path_into
-	pop bc,iy
+	pop bc,bc
 	jq explorer_dirlist
 .open_file:
-	ld hl,(iy+bos.fsentry_filesector)
-	bit bos.fd_subfile,(iy + bos.fsentry_fileattr)
-	jq z,.open_file_by_sector
-	ex.s hl,de
-	lea hl,iy
-	ld l,0
-	res 0,h
-	add hl,de
-	jq .check_file_magic
-.open_file_by_sector:
-	ex (sp),hl
-	call bos.fs_GetSectorAddress
-.check_file_magic:
-	pop bc
-	pop iy
+	call bos.fs_GetFDLen
+	ld (.open_file_len),hl
+	call bos.fs_GetFDPtr
+	pop bc,bc
+	ld a,0
+.force_editing_file:=$-1
+	or a,a
+	jq nz,.edit_file
+	ld bc,0
+.open_file_len:=$-3
 	ld a,c
 	or a,b
 	jq z,.edit_file
@@ -314,10 +304,20 @@ explorer_dirname_buffer:=$-3
 ;draw quick menu taskbar strings
 	ld hl,quickmenu_item_strings
 	call draw_taskbar
+	call gfx_BlitBuffer
 	call explorer_wait_key_wrapper
-	; - TODO - actually make quickmenu functionality
-	
-	jq explorer_main
+	cp a,ti.skYequ
+	jq z,explorer_create_new_file
+	cp a,ti.skWindow
+	jq z,explorer_copy_file
+	cp a,ti.skZoom
+	jq z,explorer_cut_file
+	cp a,ti.skTrace
+	jq z,explorer_paste_file
+	cp a,ti.skGraph
+	jq nz,explorer_main
+	ld (.force_editing_file),a
+	jq .open_file_entry
 .optionsmenu:
 ;draw background
 	call draw_background
@@ -473,7 +473,6 @@ explorer_call_file:
 	ld sp,(_SaveSP)
 	ld ix,(_SaveIX)
 	push de,hl
-	call bos.sys_FreeRunningProcessId
 	call bos.gfx_SetDefaultFont
 	pop hl,de
 	ld bc,str_ExplorerExecutable
@@ -769,16 +768,23 @@ else
 end if
 	call gfx_FillRectangle
 	pop bc,bc,bc,bc
-	ld a,(explorer_dirlist_buffer)
-	or a,a
-	ret z
+
+	ld bc,1
+	push bc,bc
+	call gfx_SetTextXY
+	pop bc,bc
+
+	ld hl,(current_working_dir)
+	ld bc,20
+	call explorer_display_bc_chars
+
 ;	jq explorer_display_diritems
 
 explorer_display_diritems:
 	push ix
 	ld hl,display_margin_top+2
 	ld (.y_pos),hl
-	ld ix,(explorer_dirlist_buffer)
+	ld ix,explorer_dirlist_buffer
 	ld c,display_items_num_y
 .outer_loop:
 	ld b,display_items_num_x
@@ -981,17 +987,17 @@ explorer_sprite_temp:=$-3
 	ret c
 	jq .display_icon
 .subdir:
-	ld hl,.subdir_icon
-	jq .printflagicon
+	ld hl,_subdir_icon
+	jq explorer_print_icon
 .system:
-	ld hl,.system_icon
-	jq .printflagicon
+	ld hl,_system_icon
+	jq explorer_print_icon
 .device:
-	ld hl,.device_icon
-	jq .printflagicon
+	ld hl,_device_icon
+	jq explorer_print_icon
 .readonly:
-	ld hl,.readonly_icon
-.printflagicon:
+	ld hl,_readonly_icon
+explorer_print_icon:
 	ld c,$80
 	push af,hl,bc
 	call gfx_SetCharData
@@ -1005,21 +1011,21 @@ explorer_sprite_temp:=$-3
 ; *** |* * |
 ; ** *|* * |
 ; ** *| *  |
-.readonly_icon:
+_readonly_icon:
 	db $00,$00,$F0,$D4,$EA,$DA,$D4
 ; *** |*** |
 ; *   |*   |
 ;  *  | *  |
 ;   * |  * |
 ; *** |*** |
-.system_icon:
+_system_icon:
 	db $00,$00,$EE,$88,$44,$22,$EE
 ; **  |* * |
 ; * * |* * |
 ; * * |* * |
 ; * * |* * |
 ; **  | *  |
-.device_icon:
+_device_icon:
 	db $00,$00,$CA,$AA,$AA,$AA,$C4
 ; *** |    |
 ; *  *|    |
@@ -1027,8 +1033,17 @@ explorer_sprite_temp:=$-3
 ; *   |  * |
 ; *   |  * |
 ; ****|**  |
-.subdir_icon:
+_subdir_icon:
 	db $00,$E0,$90,$FE,$82,$82,$FC,$00
+;     |    |
+;     |    |
+;     |    |
+;     |    |
+; *  *| *  |
+; *  *| *  |
+_dotdot_icon:
+	db $00,$00,$00,$00,$00,$00,$54,$54
+
 
 draw_taskbar:
 	push hl
@@ -1097,6 +1112,60 @@ explorer_handle_key:
 	ld a,c
 	ld (explorer_key_pressed),a
 	jp (hl)
+
+explorer_display_bc_chars:
+	ld a,(hl)
+	or a,a
+	ret z
+	push bc,hl
+	call ti._strlen
+	pop bc,de
+	or a,a
+	sbc hl,de
+	add hl,de
+	jq nc,.loop_entry
+	push bc
+	pop hl
+	jq .loop
+.loop_entry:
+	add hl,bc
+	or a,a
+	sbc hl,de
+	push hl
+	ld hl,_dotdot_icon
+	call explorer_print_icon
+	pop hl
+.loop:
+	ld a,(hl)
+	inc hl
+	or a,a
+	ret z
+	ld c,a
+	push hl,bc
+	call gfx_PrintChar
+	pop bc,hl
+	jq .loop
+
+explorer_create_new_file:
+	
+	jq explorer_main
+
+explorer_copy_file:
+	
+	jq explorer_main
+
+explorer_cut_file:
+	
+	jq explorer_main
+
+explorer_paste_file:
+	
+	jq explorer_main
+
+
+
+
+
 
 load_libload:
 	ld hl,libload_name
@@ -1360,3 +1429,5 @@ str_MissingIconFile:
 	db "/etc/config/explorer/missing.ico",0
 explorer_extensions_dir:
 	db "/opt/explorer/",0
+explorer_dirlist_buffer:
+	dl display_items_num_x * display_items_num_y dup 0

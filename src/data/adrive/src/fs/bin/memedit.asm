@@ -18,9 +18,9 @@ mem_edit_main:
 	push bc
 	call gfx_SetDraw
 	pop bc
-	call mem_edit_readme
-	cp a,15
-	jq z,.exit
+	; call mem_edit_readme
+	; cp a,15
+	; jq z,.exit
 	ld hl,(ix+6)
 	ld a,(hl)
 	or a,a
@@ -193,8 +193,8 @@ mem_edit_main:
 	call .lcd_ptr_from_cursor
 	ld bc,320*9
 	add hl,bc
-	ld bc,17
-	ld (hl),$FF
+	ld bc,14
+	ld (hl),$37
 	push hl
 	pop de
 	inc de
@@ -213,20 +213,53 @@ mem_edit_main:
 	ld a,l
 	sbc hl,de
 	jq nc,.done_drawing ;end of file after end of page
+	push af
 	call .lcd_ptr_from_cursor
-	ld de,-331
+	ld de,-6
 	add hl,de
-	ld de,312
-	ld c,11
-.draw_eof_loop_outer:
+	ld de,320
 	ld b,8
 .draw_eof_loop:
 	ld (hl),$E0
-	inc hl
-	djnz .draw_eof_loop
 	add hl,de
-	dec c
-	jq nz,.draw_eof_loop_outer
+	djnz .draw_eof_loop
+	pop af
+	ld c,a
+	rra
+	rra
+	rra
+	and a,$F
+	add a,3
+	ld l,a
+	ld h,9*20
+	mlt hl    ;row*9*20
+	add hl,hl ;row*9*40
+	add hl,hl ;row*9*80
+	add hl,hl ;row*9*160
+	add hl,hl ;row*9*320
+	ld de,$D52C00
+	add hl,de
+	ld a,c
+	and a,7 ;column
+	ld b,a
+	ld c,27
+	mlt bc ;column*27
+	ld a,c
+	or a,b
+	jq nz,.draw_eof_lower
+	ld bc,27*8 + 14
+	jq .draw_eof_upper
+.draw_eof_lower:
+	push bc
+	ld bc,320*8
+	add hl,bc
+	pop bc
+.draw_eof_upper:
+	ld (hl),$E0
+	push hl
+	pop de
+	inc de
+	ldir
 .done_drawing:
 	call gfx_BlitBuffer
 .keys:
@@ -399,9 +432,7 @@ edited_file:=$-1
 	rra
 	rra
 	and a,$F
-	inc a
-	inc a
-	inc a
+	add a,3
 	ld l,a
 	ld h,9*20
 	mlt hl    ;row*9*20
@@ -415,7 +446,7 @@ edited_file:=$-1
 	ld e,27
 	mlt de    ;col*27
 	add hl,de ;col*27 + row*9*320
-	ld de,$D52C02
+	ld de,$D52C00
 	add hl,de ;&vRamBuffer[col*27 + row*9*320 + 2]
 	ret
 ._write_file:
@@ -628,48 +659,48 @@ curcol:=$-3
 	inc (hl)
 	ret
 
-mem_edit_readme:
-	call _setdefaultcolors
-	call gfx_ZeroScreen
-	ld hl,readme_strings
-.loop:
-	push hl
-	ld hl,(hl)
-	ld a,(hl)
-	or a,a
-	jq z,.exit
-	call _print
-	xor a,a
-	ld (curcol),a
-	ld hl,currow
-	inc (hl)
-	pop hl
-	inc hl
-	inc hl
-	inc hl
-	jq .loop
-.exit:
-	pop bc
-	call gfx_BlitBuffer
-	jq bos.sys_WaitKeyCycle
+; mem_edit_readme:
+	; call _setdefaultcolors
+	; call gfx_ZeroScreen
+	; ld hl,readme_strings
+; .loop:
+	; push hl
+	; ld hl,(hl)
+	; ld a,(hl)
+	; or a,a
+	; jq z,.exit
+	; call _print
+	; xor a,a
+	; ld (curcol),a
+	; ld hl,currow
+	; inc (hl)
+	; pop hl
+	; inc hl
+	; inc hl
+	; inc hl
+	; jq .loop
+; .exit:
+	; pop bc
+	; call gfx_BlitBuffer
+	; jq bos.sys_WaitKeyCycle
 
 str_WriteFileAreYouSure:
 	db "Write buffer to file? Press enter to confirm.",0
-readme_strings:
-	dl ._1, ._2, ._3, ._4, ._5, ._6, ._7, ._8, ._9, ._10, ._11, ._12, ._13, $FF0000
-._1: db "--MEMEDIT v1.2 by BeckATI--",0
-._2: db "Arrow keys navigate the cursor.",0
-._3: db "Clear quits. +/- scroll up/down.",0
-._4: db "0-9,A-F write hex nibbles.",0
-._5: db "  (two of these must be pressed",0
-._6: db "in order to write a byte)",0
-._7: db "This program will only edit RAM.",0
-._8: db "Because editing flash directly is",0
-._9: db "usually a bad idea.",0
-._10: db "Pressing x will write to the opened file.",0
-._11: db "usage: memedit $xxxxxx : start at address",0
-._12: db "memedit [file path] : open a file",0
-._13: db "Press any key to continue.",0
+; readme_strings:
+	; dl ._1, ._2, ._3, ._4, ._5, ._6, ._7, ._8, ._9, ._10, ._11, ._12, ._13, $FF0000
+; ._1: db "--MEMEDIT v1.2 by BeckATI--",0
+; ._2: db "Arrow keys navigate the cursor.",0
+; ._3: db "Clear quits. +/- scroll up/down.",0
+; ._4: db "0-9,A-F write hex nibbles.",0
+; ._5: db "  (two of these must be pressed",0
+; ._6: db "in order to write a byte)",0
+; ._7: db "This program will only edit RAM.",0
+; ._8: db "Because editing flash directly is",0
+; ._9: db "usually a bad idea.",0
+; ._10: db "Pressing x will write to the opened file.",0
+; ._11: db "usage: memedit $xxxxxx : start at address",0
+; ._12: db "memedit [file path] : open a file",0
+; ._13: db "Press any key to continue.",0
 
 libload_load:
 	ld hl,.libload_name

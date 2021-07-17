@@ -1,6 +1,7 @@
 
 ; BOS filesystem functions
 
+include 'fs/JoinPath.asm'
 include 'fs/AbsPath.asm'
 include 'fs/Alloc.asm'
 include 'fs/CeilDivBySector.asm'

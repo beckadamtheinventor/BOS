@@ -59,5 +59,13 @@ string_os_elevation_file:
 	db "/",$F2,"OS/ELEVATED",0
 string_path_variable:
 	db "/var/PATH",0
+string_lib_var:
+	db "/var/LIB",0
 string_var_dir:
 	db "/var/",0
+
+string_EZF_header:
+	db $7F, "EZF"
+.len:=$-.
+
+

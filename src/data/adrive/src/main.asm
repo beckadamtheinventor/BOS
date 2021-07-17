@@ -66,6 +66,7 @@ fs_dir bin_dir
 	fs_sfentry mkfile_exe, "mkfile", "", f_readonly+f_system+f_subfile
 	fs_sfentry off_exe, "off", "", f_readonly+f_system+f_subfile
 	fs_sfentry rm_exe, "rm", "", f_readonly+f_system+f_subfile
+	fs_entry serial_exe, "serial", "", f_readonly+f_system
 	; fs_entry transfer_exe, "transfer", "", f_readonly+f_system
 	fs_entry usbrecv_exe, "usbrecv", "", f_readonly+f_system
 	fs_entry usbrun_exe, "usbrun", "", f_readonly+f_system
@@ -282,7 +283,7 @@ end fs_dir
 fs_dir etc_plugins_explorer_dir
 	fs_entry etc_plugins_dir, "..", "", f_subdir
 	fs_entry explorer_blconfig_dir, "blconfig", "", f_subdir
-	fs_entry explorer_serial_dir, "serial", "", f_subdir
+	; fs_entry explorer_serial_dir, "serial", "", f_subdir
 end fs_dir
 
 ;"/etc/plugins/explorer/blconfig/" directory
@@ -293,11 +294,11 @@ fs_dir explorer_blconfig_dir
 end fs_dir
 
 ;"/etc/plugins/explorer/serial/" directory
-fs_dir explorer_serial_dir
-	fs_entry etc_plugins_explorer_dir, "..", "", f_subdir
-	fs_entry explorer_serial_cmd, "index", "cmd", 0
-	fs_entry explorer_serial_exe, "serial", "", 0
-end fs_dir
+; fs_dir explorer_serial_dir
+	; fs_entry etc_plugins_explorer_dir, "..", "", f_subdir
+	; fs_entry explorer_serial_cmd, "index", "cmd", 0
+	; fs_entry explorer_serial_exe, "serial", "", 0
+; end fs_dir
 
 ;-------------------------------------------------------------
 ;file data section
@@ -423,12 +424,16 @@ fs_file explorer_blconfig_cmd
 	db "blconfig",$A,0
 end fs_file
 
-fs_file explorer_serial_exe
-	include 'fs/etc/plugins/explorer/serial/serial.asm'
-end fs_file
+; fs_file explorer_serial_exe
+	; include 'fs/etc/plugins/explorer/serial/serial.asm'
+; end fs_file
 
-fs_file explorer_serial_cmd
-	db "serial",$A,0
+; fs_file explorer_serial_cmd
+	; db "serial",$A,0
+; end fs_file
+
+fs_file serial_exe
+	file 'fs/bin/serial/bosbin/serial.bin'
 end fs_file
 
 end fs_fs

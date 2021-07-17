@@ -82,7 +82,7 @@ generate_boot_configs:
 .onbootconfig:
 	db "#insert programs to run on boot before the UI starts",$A
 	db $A
-	db "#dont remove lines here unless you know what you're doing",$A
+	db "#run the ui",$A
 	db "explorer",$A
 .onbootconfig_len:=$-.onbootconfig
 

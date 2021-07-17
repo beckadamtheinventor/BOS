@@ -154,6 +154,7 @@ namespace bos
 ?fs_GetFDLen                     := $20358
 ?_OP1ToPath                      := $2035C
 ?th_WaitKeyCycle                 := $20360
+?fs_JoinPath                     := $20364
 ;
 ;
 ; defines
@@ -231,7 +232,7 @@ namespace bos
 ?usbHandleKeys          := $D14091 ; zero this byte while using usbArea to keep GetCSC from affecting other parts of usbArea
 ?usbInited              := $D177B7 ; zero this byte while using usbArea and to reset the usb stack when interrupts are re-enabled
 ?reservedRAM            := $D177BA
-?bos_Stackbot           := $D1A87C
+?bos_Stackbot           := $D1987E
 ?bos_UserMem            := $D1A881
 ?bottom_of_malloc_RAM   := $D30000
 ?top_of_RAM             := $D40000

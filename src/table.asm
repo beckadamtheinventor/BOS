@@ -150,5 +150,6 @@
 	jp fs_GetFDLen
 	jp _OP1ToPath
 	jp th_WaitKeyCycle
+	jp fs_JoinPath
 
 

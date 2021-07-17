@@ -26,17 +26,37 @@ extern "C" {
 #endif
 
 typedef enum usb_init_flags {
-  USB_USE_C_HEAP         = 1 << 0, /**< Use part of the default C heap.
+  USB_USE_C_HEAP        = 1 <<  0, /**< Use part of the default C heap.
                                         @warning Do not use this unless you
                                         changed your program's bss/heap to end
                                         at 0xD10000! */
-  USB_USE_PERIODIC_LIST  = 1 << 1, /**< Use space normally used for periodic.
-                                        @warning This disables support for
-                                        interrupt transfers, isochronous
-                                        transfers, and hubs! */
-  USB_USE_USB_AREA       = 1 << 2, /**< Use the memory that TIOS uses for usb. */
-  USB_USE_OS_HEAP        = 1 << 3, /**< Use the application heap area. */
-  USB_DEFAULT_INIT_FLAGS = USB_USE_USB_AREA | USB_USE_OS_HEAP,
+  USB_USE_OS_HEAP       = 1 <<  1, /**< Use the application heap area. */
+#define USB_INIT_FLSZ(x) (((x) & 3) <<  2)
+  USB_INIT_FLSZ_1024 = USB_INIT_FLSZ(0), /**< Init Frame List Size to 1024. */
+  USB_INIT_FLSZ_512  = USB_INIT_FLSZ(1), /**< Init Frame List Size to  512. */
+  USB_INIT_FLSZ_256  = USB_INIT_FLSZ(2), /**< Init Frame List Size to  256. */
+  USB_INIT_FLSZ_0    = USB_INIT_FLSZ(3), /**< Disable Frame List.
+                                              @warning This also disables
+                                              support for periodic transfers
+                                              and hubs! */
+#define USB_INIT_ASST(x) (((x) & 3) <<  8)
+  USB_INIT_ASST_0 = USB_INIT_ASST(0), /**< Init Async Sched Sleep Timer to 0. */
+  USB_INIT_ASST_1 = USB_INIT_ASST(1), /**< Init Async Sched Sleep Timer to 1. */
+  USB_INIT_ASST_2 = USB_INIT_ASST(2), /**< Init Async Sched Sleep Timer to 2. */
+  USB_INIT_ASST_3 = USB_INIT_ASST(3), /**< Init Async Sched Sleep Timer to 3. */
+#define USB_INIT_EOF1(x) (((x) & 3) << 10)
+  USB_INIT_EOF1_0 = USB_INIT_EOF1(0), /**< Init EOF 1 Timing to 0. */
+  USB_INIT_EOF1_1 = USB_INIT_EOF1(1), /**< Init EOF 1 Timing to 1. */
+  USB_INIT_EOF1_2 = USB_INIT_EOF1(2), /**< Init EOF 1 Timing to 2. */
+  USB_INIT_EOF1_3 = USB_INIT_EOF1(3), /**< Init EOF 1 Timing to 3. */
+#define USB_INIT_EOF2(x) (((x) & 3) << 12)
+  USB_INIT_EOF2_0 = USB_INIT_EOF2(0), /**< Init EOF 2 Timing to 0. */
+  USB_INIT_EOF2_1 = USB_INIT_EOF2(1), /**< Init EOF 2 Timing to 1. */
+  USB_INIT_EOF2_2 = USB_INIT_EOF2(2), /**< Init EOF 2 Timing to 2. */
+  USB_INIT_EOF2_3 = USB_INIT_EOF2(3), /**< Init EOF 2 Timing to 3. */
+  USB_INIT_UNKNOWN = 1 << 15,
+  USB_DEFAULT_INIT_FLAGS = USB_USE_OS_HEAP | USB_INIT_FLSZ_256 | USB_INIT_ASST_1
+                         | USB_INIT_EOF1_3 | USB_INIT_EOF2_0 | USB_INIT_UNKNOWN,
 } usb_init_flags_t;
 
 typedef enum usb_event {
@@ -61,7 +81,8 @@ typedef enum usb_event {
   /// \p event_data The usb_control_setup_t * that was sent by the host.
   USB_DEFAULT_SETUP_EVENT,
   /// This event triggers when the calculator is configured by a host.
-  /// \p event_data The usb_device_t of the host that configured us.
+  /// \p event_data The const usb_configuration_descriptor_t * that was selected
+  /// by the host.
   USB_HOST_CONFIGURE_EVENT,
   // Temp debug events:
   USB_DEVICE_INTERRUPT,
@@ -105,6 +126,7 @@ typedef enum usb_error {
   USB_ERROR_NO_DEVICE,
   USB_ERROR_NO_MEMORY,
   USB_ERROR_NOT_SUPPORTED,
+  USB_ERROR_OVERFLOW,
   USB_ERROR_TIMEOUT,
   USB_ERROR_FAILED,
   USB_USER_ERROR = 100,
@@ -241,24 +263,33 @@ typedef enum usb_recipient {
 } usb_recipient_t;
 
 typedef enum usb_request {
-  USB_GET_STATUS,
-  USB_CLEAR_FEATURE,
-  USB_SET_FEATURE = 3,
-  USB_SET_ADDRESS = 5,
-  USB_GET_DESCRIPTOR,
-  USB_SET_DESCRIPTOR,
-  USB_GET_CONFIGURATION,
-  USB_SET_CONFIGURATION,
-  USB_GET_INTERFACE,
-  USB_SET_INTERFACE,
-  USB_SYNC_FRAME,
+  USB_GET_STATUS_REQUEST,
+  USB_CLEAR_FEATURE_REQUEST,
+  USB_SET_FEATURE_REQUEST = 3,
+  USB_SET_ADDRESS_REQUEST = 5,
+  USB_GET_DESCRIPTOR_REQUEST,
+  USB_SET_DESCRIPTOR_REQUEST,
+  USB_GET_CONFIGURATION_REQUEST,
+  USB_SET_CONFIGURATION_REQUEST,
+  USB_GET_INTERFACE_REQUEST,
+  USB_SET_INTERFACE_REQUEST,
+  USB_SYNC_FRAME_REQUEST,
 } usb_request_t;
 
 typedef enum usb_feature {
-  USB_ENDPOINT_HALT,
-  USB_DEVICE_REMOTE_WAKEUP,
-  USB_TEST_MODE,
+  USB_ENDPOINT_HALT_FEATURE,
+  USB_DEVICE_REMOTE_WAKEUP_FEATURE,
+  USB_DEVICE_TEST_MODE_FEATURE,
 } usb_feature_t;
+
+typedef enum usb_device_status {
+  USB_DEVICE_SELF_POWERED_STATUS  = 1 << 0,
+  USB_DEVICE_REMOTE_WAKEUP_STATUS = 1 << 1,
+} usb_device_status_t;
+
+typedef enum usb_endpoint_status {
+  USB_ENDPOINT_HALT_STATUS = 1 << 0,
+} usb_endpoint_status_t;
 
 typedef enum usb_descriptor_type {
   USB_DEVICE_DESCRIPTOR = 1,
@@ -333,7 +364,7 @@ typedef struct usb_control_setup {
 typedef struct usb_descriptor {
   uint8_t  bLength;             /**< The length of this descriptor.           */
   uint8_t  bDescriptorType;     /**< A usb_descriptor_type_t.                 */
-  uint8_t  data[1];             /**< The rest of the descriptor               */
+  uint8_t  data[];              /**< The rest of the descriptor               */
 } usb_descriptor_t;
 
 typedef struct usb_device_descriptor {
@@ -403,7 +434,7 @@ typedef struct usb_endpoint_descriptor {
 typedef struct usb_string_descriptor {
   uint8_t  bLength;             /**< byte length, not character length        */
   uint8_t  bDescriptorType;     /**< USB_STRING_DESCRIPTOR                    */
-  wchar_t  bString[1];          /**< UTF-16 string, no null termination       */
+  wchar_t  bString[];           /**< UTF-16 string, no null termination       */
 } usb_string_descriptor_t;
 
 typedef struct usb_standard_descriptors {
@@ -427,9 +458,10 @@ typedef struct usb_standard_descriptors {
 typedef struct usb_device   *usb_device_t;   /**< opaque  device  handle */
 typedef struct usb_endpoint *usb_endpoint_t; /**< opaque endpoint handle */
 
-#define USB_RETRY_FOREVER 0xFFFFFFu
+enum { USB_RETRY_FOREVER = 0xFFFFFFu };
 
-#define usb_RootHub() ((usb_device_t)0xD13FC0u) /**< Root hub device */
+#define /*usb_device_t */usb_RootHub(/*void*/)/*;*/ \
+    ((usb_device_t)0xD13FE0u) /**< Root hub device */
 
 /**
  * A pointer to \c usb_callback_data_t is passed to the \c usb_event_callback_t.
@@ -533,9 +565,9 @@ typedef struct usb_timer usb_timer_t;
 typedef usb_error_t (*usb_timer_callback_t)(usb_timer_t *timer);
 
 struct usb_timer {
-  usb_timer_callback_t handler;
   uint32_t tick;     /**< private */
   usb_timer_t *next; /**< private */
+  usb_timer_callback_t handler;
 };
 
 /**
@@ -555,7 +587,8 @@ usb_error_t usb_Init(usb_event_callback_t handler, usb_callback_data_t *data,
 
 /**
  * Uninitializes the usb driver.
- * @note This must be called before the program exits, or TIOS gets angry.
+ * @note This must be called after calling usb_Init() and before the program
+ * exits, even if usb_Init returns an error, or else TIOS gets angry.
  */
 void usb_Cleanup(void);
 
@@ -697,20 +730,20 @@ usb_device_t usb_FindDevice(usb_device_t root, usb_device_t from,
                             usb_find_device_flags_t flags);
 
 /**
- * Performs a usb reset on a device. This triggers a device enabled event when
- * the reset finishes.
+ * Performs an asynchronous usb reset on a device. This triggers a device
+ * enabled event when the reset is complete.
  * @param device The device to reset.
  * @return USB_SUCCESS if the transfer succeeded or an error.
  */
 usb_error_t usb_ResetDevice(usb_device_t device);
 
 /**
- * Forces a device to disconnect. This triggers a device disabled event when the
- * disconnect finishes.
- * @param device The device to disconnect.
+ * Forces a device to become disabled. This triggers a device disabled event
+ * when it finishes.
+ * @param device The device to disable.
  * @return USB_SUCCESS if the transfer succeeded or an error.
  */
-usb_error_t usb_DisconnectDevice(usb_device_t device);
+usb_error_t usb_DisableDevice(usb_device_t device);
 
 /**
  * Gets the usb address of a \p device, or 0 if disabled.
@@ -753,6 +786,18 @@ size_t usb_GetConfigurationDescriptorTotalLength(usb_device_t device,
 usb_error_t usb_GetDescriptor(usb_device_t device, usb_descriptor_type_t type,
                               uint8_t index, void *descriptor, size_t length,
                               size_t *transferred);
+#define /*usb_error_t */                                                       \
+usb_GetDeviceDescriptor(/*usb_device_t */device,                               \
+                        /*usb_device_descriptor_t **/descriptor,               \
+                        /*size_t */length, /*size_t **/transferred)            \
+    usb_GetDescriptor(device, USB_DEVICE_DESCRIPTOR, 0, descriptor, length,    \
+                      transferred)
+#define /*usb_error_t */                                                       \
+usb_GetConfigurationDescriptor(/*usb_device_t */device, /*uint8_t */index,     \
+                               /*usb_configuration_descriptor_t **/descriptor, \
+                               /*size_t */length, /*size_t **/transferred)     \
+    usb_GetDescriptor(device, USB_CONFIGURATION_DESCRIPTOR, index, descriptor, \
+                      length, transferred)
 
 /**
  * Changes the descriptor at \p index.
@@ -769,6 +814,17 @@ usb_error_t usb_GetDescriptor(usb_device_t device, usb_descriptor_type_t type,
 usb_error_t usb_SetDescriptor(usb_device_t device, usb_descriptor_type_t type,
                               uint8_t index, const void *descriptor,
                               size_t length);
+#define /*usb_error_t */                                                       \
+usb_SetDeviceDescriptor(/*usb_device_t */device,                               \
+                        /*usb_device_descriptor_t **/descriptor,               \
+                        /*size_t */length)                                     \
+    usb_SetDescriptor(device, USB_DEVICE_DESCRIPTOR, 0, descriptor, length)
+#define /*usb_error_t */                                                       \
+usb_SetConfigurationDescriptor(/*usb_device_t */device, /*uint8_t */index,     \
+                               /*usb_configuration_descriptor_t **/descriptor, \
+                               /*size_t */length)                              \
+    usb_SetDescriptor(device, USB_CONFIGURATION_DESCRIPTOR, index, descriptor, \
+                      length)
 
 /**
  * Gets the string descriptor at \p index and \p langid.
@@ -855,11 +911,22 @@ usb_error_t usb_SetInterface(usb_device_t device,
                              size_t length);
 
 /**
- * Clears halt condition on \p endpoint.  This may only be called if there are
- * no pending transfers.  If any non-control transfer stalls, this function is
- * called automatically, so you only need to call this if you need to clear an
- * endpoint halt for a reason other than a stalled transfer.  This function
- * blocks until the halt condition is cleared.
+ * Sets halt condition on \p endpoint.  This is only supported by bulk and
+ * interrupt endpoints.  If acting as usb host, this may only be called if there
+ * are no pending transfers.  This also has the sife effect of asynchronously
+ * cancelling all pending transfers to \p endpoint.
+ * @param endpoint The endpoint to set the halt condition of.
+ * @return USB_SUCCESS if the transfer succeeded or an error.
+ */
+usb_error_t usb_SetEndpointHalt(usb_endpoint_t endpoint);
+
+/**
+ * Clears halt condition on \p endpoint.  This is only supported by bulk and
+ * interrupt endpoints.  If acting as usb host, this may only be called if there
+ * are no pending transfers.  If any non-control transfer stalls, this is called
+ * automatically, so you only need to call this if you need to clear an endpoint
+ * halt for a reason other than a stalled transfer. This function blocks until
+ * the halt condition is cleared.
  * @param endpoint The endpoint to clear the halt condition of.
  * @return USB_SUCCESS if the transfer succeeded or an error.
  */
@@ -913,7 +980,16 @@ int8_t usb_GetEndpointTransferType(usb_endpoint_t endpoint);
  * @param endpoint The endpoint to get the maximum packet size of.
  * @return The \c wMaxPacketSize of an \p endpoint.
  */
-unsigned usb_GetEndpointMaxPacketSize(usb_endpoint_t endpoint);
+size_t usb_GetEndpointMaxPacketSize(usb_endpoint_t endpoint);
+
+/**
+ * Gets the interval of an endpoint.
+ * @param endpoint The endpoint to get the endpoint of.
+ * @return The actual \c bInterval of an \p endpoint, which is rounded down to
+ * the nearest power of two from the descriptor, or 0 for asynchronous
+ * endpoints.
+ */
+uint8_t usb_GetEndpointInterval(usb_endpoint_t endpoint);
 
 /**
  * Sets the flags for an endpoint.
@@ -987,12 +1063,13 @@ usb_ControlTransfer(usb_endpoint_t endpoint, const usb_control_setup_t *setup,
  * NULL means don't return anything.
  * @return USB_SUCCESS if the transfer succeeded or an error.
  */
-#define usb_DefaultControlTransfer(/*usb_device_t */device,                    \
-                                   /*const usb_control_setup_t **/setup,       \
-                                   /*void **/buffer, /*unsigned */retries,     \
-                                   /*size_t **/transferred)/*;*/               \
-  usb_ControlTransfer(usb_GetDeviceEndpoint(device, 0), setup, buffer,         \
-                      retries, transferred)
+#define /*usb_error_t */                                                 \
+usb_DefaultControlTransfer(/*usb_device_t */device,                      \
+                           /*const usb_control_setup_t **/setup,         \
+                           /*void **/buffer, /*unsigned */retries,       \
+                           /*size_t **/transferred)/*;*/                 \
+    usb_ControlTransfer(usb_GetDeviceEndpoint(device, 0), setup, buffer, \
+                        retries, transferred)
 
 /**
  * Schedules a transfer to the pipe connected to \p endpoint, using \p length as
@@ -1099,36 +1176,54 @@ usb_ScheduleTransfer(usb_endpoint_t endpoint, void *buffer, size_t length,
 /* Timer Functions */
 
 /**
+ * Converts milliseconds to cpu cycles.
+ * @return ms * 48000
+ */
+uint32_t usb_MsToCycles(uint16_t ms);
+#define /*uint32_t */usb_MsToCycles(/*uint16_t */ms)                    \
+    (__builtin_constant_p(ms) ? (ms) * UINT32_C(48000) : usb_MsToCycles(ms))
+
+/**
+ * Stops a timer.
+ * @note May be called from within \c timer->handler itself.
+ */
+void usb_StopTimer(usb_timer_t *timer);
+
+/**
  * Starts a timer that expires \p timeout_ms after calling this function.
  * @note May be called from within \c timer->handler itself.
- * @param timer An allocated struct with \c timer->handler already initialized.
+ * @param timer A user allocated struct with \c timer->handler already initialized.
  * @param timeout_ms Timeout in milliseconds.
  */
-void usb_StartTimer(usb_timer_t *timer, uint16_t timeout_ms);
+#define /*void */usb_StartTimerMs(/*usb_timer_t **/timer,        \
+                                  /*uint16_t */timeout_ms)/*;*/  \
+    usb_StartTimerCycles(timer, usb_MsToCycles(timeout_ms))
 
 /**
  * Starts a timer that expires \p interval_ms after it last expired.
  * @note May be called from within \c timer->handler itself.
- * @param timer An allocated struct with \c timer->handler already initialized.
+ * @param timer A user allocated struct with \c timer->handler already initialized.
  * @param interval_ms Repeat interval in milliseconds.
  */
-void usb_RepeatTimer(usb_timer_t *timer, uint16_t interval_ms);
+#define /*void */usb_RepeatTimerMs(/*usb_timer_t **/timer,       \
+                                   /*uint16_t */timeout_ms)/*;*/ \
+    usb_RepeatTimerCycles(timer, usb_MsToCycles(timeout_ms))
 
 /**
  * Starts a timer that expires \p timeout_cycles after calling this function.
  * @note May be called from within \c timer->handler itself.
- * @param timer An allocated struct with \c timer->handler already initialized.
+ * @param timer A user allocated struct with \c timer->handler already initialized.
  * @param timeout_cycles Timeout in cpu cycles.
  */
-void usb_StartCycleTimer(usb_timer_t *timer, uint32_t timeout_cycles);
+void usb_StartTimerCycles(usb_timer_t *timer, uint32_t timeout_cycles);
 
 /**
  * Starts a timer that expires \p interval_cycles after it last expired.
  * @note May be called from within \c timer->handler itself.
- * @param timer An allocated struct with \c timer->handler already initialized.
+ * @param timer A user allocated struct with \c timer->handler already initialized.
  * @param interval_cycles Repeat interval in cpu cycles.
  */
-void usb_RepeatCycleTimer(usb_timer_t *timer, uint32_t interval_cycles);
+void usb_RepeatTimerCycles(usb_timer_t *timer, uint32_t interval_cycles);
 
 /**
  * Returns a counter that increments once every cpu cycle, or 48000 times every

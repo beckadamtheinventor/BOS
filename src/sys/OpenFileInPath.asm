@@ -6,6 +6,7 @@ sys_OpenFileInPath:
 	ld hl,-15
 	call ti._frameset
 	ld hl,string_path_variable
+.entryhl:
 	push hl
 	call fs_GetFilePtr
 	jq c,.fail ;fail if /var/PATH not found

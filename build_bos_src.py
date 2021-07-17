@@ -16,9 +16,11 @@ def build_bos_src():
 	with open(os.path.join(d, "bos.src"),"w") as f:
 		f.write("\n; BOS jump table functions\n")
 		for line in publics:
-			f.write(f"\tpublic {line}\n")
+			line = line.replace("gfx_", "bosgfx_")
+			f.write(f"\tpublic _{line}\n")
 		for line in defines:
-			f.write(f"{line}\n")
+			line = line.replace("gfx_", "bosgfx_")
+			f.write(f"_{line}\n")
 
 if __name__=='__main__':
 	build_bos_src()
