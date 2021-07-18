@@ -135,7 +135,9 @@ end namespace
 
 macro ezf?
 	local _ezf
-	_ezf.num_externs = 0
+
+	load _ezf.sectionlabels:
+
 	virtual
 		db $7F,"EZF"
 		load _ezf.header: $-$$ from $$
@@ -152,7 +154,11 @@ macro ezf?
 	virtual at _ezf.externs_table.end
 		_ezf.program_table::
 	end virtual
+
 	virtual at _ezf.sections_data.end
+		_ezf.relocation_offsets::
+	end virtual
+	virtual at _ezf.relocation_offsets.end
 		_ezf.function_names::
 	end virtual
 	virtual at _ezf.program_table.end 
@@ -168,12 +174,21 @@ macro ezf?
 	end macro
 
 	macro public? sectionlabel
+		sectionlabel = $FFFFFF
 		virtual _ezf.publics_table
 			db ezsec.public
 			dl 0
 			dw sectionlabel.header
-			dw 8
-			sectionlabel._headerend:
+			dw sectionlabel._pub_relocation_table
+		end virtual
+		virtual _ezf.relocation_offsets
+			sectionlabel._pub_relocation_table:
+			irpv each, sectionlabel
+				if each < $10000
+					dw each
+				end if
+			end irpv
+			dw 0
 		end virtual
 	end macro
 
@@ -183,39 +198,45 @@ macro ezf?
 			sectionlabel.nameloc:
 			db sectionname, 0
 		end virtual
+		virtual _ezf.relocation_offsets
+			sectionlabel._exp_relocation_table:
+			irpv each, sectionlabel
+				if each < $10000
+					dw each
+				end if
+			end irpv
+			dw 0
+		end virtual
 		virtual _ezf.exports_table
 			sectionlabel.headerloc:
 			db ezsec.export
 			dl sectionlabel.nameloc
 			dw sectionlabel.header
-			dw 8
+			dw sectionlabel._exp_relocation_table
 			sectionlabel._headerend:
 		end virtual
 	end macro
 
 	macro extern? sectionlabel, sectionname
-		local tmpcount
+		sectionlabel = $FFFFFF
 		virtual _ezf.function_names
 			dw lengthof sectionname
 			sectionlabel.externnameloc:
 			db sectionname, 0
 		end virtual
+		virtual _ezf.relocation_offsets
+			sectionlabel._ext_relocation_table:
+			irpv each, sectionlabel
+				dw each
+			end irpv
+			dw 0
+		end virtual
 		virtual _ezf.externs_table
 			db ezsec.extern
-			dl sectionlabel.nameloc
-			dw sectonlabel.header
-			dw 8
+			dl sectionlabel.externnameloc
+			dw 0
+			dw sectionlabel._ext_relocation_table
 			sectionlabel._headerend:
-			sectionlabel = $FFFFFF
-			tmpcount = 3
-			irpv each, sectionlabel
-				if tmpcount = 3
-					db ezsec.none, 0
-					tmpcount = 0
-				end if
-				dw each
-				tmpcount = tmpcount + 1
-			end irpv
 		end virtual
 	end macro
 
@@ -228,22 +249,6 @@ macro ezf?
 			dw sectionlabel.sectionsize
 			sectionlabel.headerend:
 		end virtual
-		virtual
-			sectionlabel.relocations::
-		end virtual
-		macro @ez80.word @value*
-			local value, address
-			value = @value
-			address = $
-			if value >= sectionaddress & value < sectionaddress + sectionlabel.sectionsize
-				virtual sectionlabel.relocations
-					dw address - sectionlabel.sectionsource
-				end virtual
-				@ez80.word value - sectionaddress
-			else
-				@ez80.word value
-			end if
-		end macro
 		sectionlabel.sectionsource:
 		virtual at sectionaddress
 		macro end?.section?
@@ -251,12 +256,7 @@ macro ezf?
 			load sectionlabel.sectiondata: $-$$ from $$
 			end virtual
 			sectionlabel.end:
-			virtual sectionlabel.relocations
-				load sectionlabel.relocations.data: $-$$ from $$
-			end virtual
 			sectionlabel.sectionsource_offset = $
-			db sectionlabel.relocations.data
-			dw 0
 			db sectionlabel.sectiondata
 			purge end?.section?
 		end macro
@@ -267,6 +267,7 @@ macro ezf?
 			_ezf.sections_data.end:
 			load _ezf.sections_data: $-$$ from $$
 		end virtual
+
 		virtual _ezf.exports_table
 			_ezf.exports_table.end:
 			load _ezf.exports_table.data: $-$$ from $$
@@ -288,11 +289,17 @@ macro ezf?
 			_ezf.function_names.end:
 			load _ezf.function_names.data: $-$$ from $$
 		end virtual
+		virtual _ezf.relocation_offsets
+			_ezf.relocation_offsets.end:
+			load _ezf.relocation_offsets.data: $-$$ from $$
+		end virtual
 		db _ezf.header
 		db _ezf.exports_table.data
 		db _ezf.publics_table.data
+		db _ezf.externs_table.data
 		db _ezf.program_table.data
 		db _ezf.sections_data
+		db _ezf.relocation_offsets.data
 		db _ezf.function_names.data
 		purge end?.ezf?
 	end macro
