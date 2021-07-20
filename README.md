@@ -9,7 +9,7 @@ An Operating system (WIP) for the TI-84+CE family (eZ80) graphing calculators, w
 
 # A note on ".rom" Files
 BOS ".rom" files are for use on CEmu [https://ce-programming.github.io/CEmu/] *only* and should not be installed on physical hardware. If you want BOS on physical hardware, use the ".8xp" file. (See installation for details)
-Assuming only noti-ez80 bootcode and BOS are on the image, (which is the case if downloaded from this repository) it may be freely distributed between individuals. However I do not permit rehosting of the image, without prior permission from myself. (Adam "beckadamtheinventor" Beckingham)
+Assuming only noti-ez80 bootcode and BOS are on the image, (which is the case if downloaded from this repository) it may be freely distributed between individuals. However, I do not permit rehosting of the image, without prior permission from myself. (Adam "beckadamtheinventor" Beckingham)
 If you are getting the rom image from another author, read the author's provided LICENSE file (usually a plain text file without an extension) for further guidance on distribution of the ROM image.
 
 # Installing BOS to Hardware
@@ -37,7 +37,7 @@ For advanced users, type `python3 build.py -h` for a list of build options.
 When building BOS there is a file that can be used to reinstall/update BOS from a FAT32-formatted USB flash drive.
 Send `bin/BOSUPDTR.BIN` to the root directory of a FAT32 formatted flash drive, and plug it into the calculator.
 Then from the console, type: `updater`. The calc will read from `BOSUPDTR.BIN` and execute it from UserMem.
-It is essentially the same program that initially installs BOS. However this program will not modify BOS's filesystem, but when there is an update to any of the OS binaries, the filesystem will need to be reset. See "recovery options" for details
+It is essentially the same program that initially installs BOS. However, this program will not modify BOS's filesystem, but when there is an update to any of the OS binaries, the filesystem will need to be reset. See "recovery options" for details
 
 
 # BOS Recovery Options
