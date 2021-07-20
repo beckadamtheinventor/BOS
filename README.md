@@ -2,9 +2,9 @@
 An Operating system (WIP) for the TI-84+CE family (eZ80) graphing calculators, with the aim of being freely distributable.
 
 # Eye Candy
-![cap/cap1.gif]
+![https://raw.githubusercontent.com/beckadamtheinventor/BOS/master/cap/cap.gif]
 
-![cap/cap2.gif]
+![https://raw.githubusercontent.com/beckadamtheinventor/BOS/master/cap/cap1.gif]
 
 
 # A note on ".rom" Files
