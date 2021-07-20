@@ -1,6 +1,12 @@
 # BOS
 An Operating system (WIP) for the TI-84+CE family (eZ80) graphing calculators, with the aim of being freely distributable.
 
+# Eye Candy
+![cap/cap1.gif]
+
+![cap/cap2.gif]
+
+
 # A note on ".rom" Files
 BOS ".rom" files are for use on CEmu [https://ce-programming.github.io/CEmu/] *only* and should not be installed on physical hardware. If you want BOS on physical hardware, use the ".8xp" file. (See installation for details)
 Assuming only noti-ez80 bootcode and BOS are on the image, (which is the case if downloaded from this repository) it may be freely distributed between individuals. However I do not permit rehosting of the image, without prior permission from myself. (Adam "beckadamtheinventor" Beckingham)
