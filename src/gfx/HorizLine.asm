@@ -6,5 +6,12 @@
 gfx_HorizLine:
 	call	gfx_Compute			; hl -> drawing location
 .computed:
-	jp	sys_MemSet
+sys_MemSet:
+	push de,hl
+	pop de
+	inc de
+	ld (hl),a
+	ldir
+	pop de
+	ret
 

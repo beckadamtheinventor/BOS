@@ -20,9 +20,9 @@
 <tr><td><a href="#sys_GetKey">bos.sys_GetKey</a></td><td><a href="#sys_GetKey">020154</a></td></tr>
 <tr><td><a href="#sys_KbScan">bos.sys_KbScan</a></td><td><a href="#sys_KbScan">020158</a></td></tr>
 <tr><td><a href="#sys_Malloc">bos.sys_Malloc</a></td><td><a href="#sys_Malloc">02015C</a></td></tr>
-<tr><td><a href="#sys_MemCmp">bos.sys_MemCmp</a></td><td><a href="#sys_MemCmp">020160</a></td></tr>
+<tr class="no_op"><td><a href="#DONOTHING">bos.DONOTHING</a></td><td><a href="#DONOTHING">020160</a></td></tr>
 <tr><td><a href="#sys_MemSet">bos.sys_MemSet</a></td><td><a href="#sys_MemSet">020164</a></td></tr>
-<tr><td><a href="#sys_Mult24x8">bos.sys_Mult24x8</a></td><td><a href="#sys_Mult24x8">020168</a></td></tr>
+<tr class="no_op"><td><a href="#DONOTHING">bos.DONOTHING</a></td><td><a href="#DONOTHING">020168</a></td></tr>
 <tr><td><a href="#sys_WaitKey">bos.sys_WaitKey</a></td><td><a href="#sys_WaitKey">02016C</a></td></tr>
 <tr><td><a href="#sys_WaitKeyCycle">bos.sys_WaitKeyCycle</a></td><td><a href="#sys_WaitKeyCycle">020170</a></td></tr>
 <tr><td><a href="#gui_DrawConsoleWindow">bos.gui_DrawConsoleWindow</a></td><td><a href="#gui_DrawConsoleWindow">020174</a></td></tr>
@@ -226,21 +226,11 @@ z if no key pressed</td><td>HL,BC,AF</td><td>
 <tr><td>Allocate memory</td><td>void *sys_Malloc(size_t amt);</td><td>hl = malloc'd bytes. hl = 0 if failed to malloc<br>
 Cf set if failed to malloc</td><td>All</td><td>
 </td></tr>
-</table></div><div id="sys_MemCmp"><h1>sys_MemCmp</h1>	<h3>syscall Adress 020160</h3>
-<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>compare two memory pointers</td><td>HL,DE pointers to compare<br>
-BC number of bytes to compare</td><td>Z flag set if success</td><td></td><td>
-</td></tr>
 </table></div><div id="sys_MemSet"><h1>sys_MemSet</h1>	<h3>syscall Adress 020164</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>set BC bytes of HL to the value A</td><td>HL pointer to set<br>
-BC amount to set<br>
-A byte to set memory to</td><td>HL HL+BC<br>
-DE HL+BC+1</td><td>AF</td><td>
-</td></tr>
-</table></div><div id="sys_Mult24x8"><h1>sys_Mult24x8</h1>	<h3>syscall Adress 020168</h3>
-<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Multiply HL (24 bit) by A (8 bit)</td><td>HL,A</td><td>HL</td><td>AF</td><td>
+<tr><td>draws a horizontal line to the current buffer</td><td>HL line X coordinate<br>
+E line Y coordinate<br>
+BC line length</td><td></td><td>HL,DE,BC,F(P/V)</td><td>
 </td></tr>
 </table></div><div id="sys_WaitKey"><h1>sys_WaitKey</h1>	<h3>syscall Adress 02016C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>

@@ -21,9 +21,9 @@
 	jp sys_GetKey
 	jp sys_KbScan
 	jp sys_Malloc
-	jp sys_MemCmp
+	jp DONOTHING
 	jp sys_MemSet
-	jp sys_Mult24x8
+	jp DONOTHING
 	jp sys_WaitKey
 	jp sys_WaitKeyCycle
 	jp gui_DrawConsoleWindow

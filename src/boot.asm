@@ -59,14 +59,6 @@ boot_os:
 	inc hl
 	ld (hl),0
 
-	call fs_GetElevationFile
-	jq nc,.dont_create_elevation_file
-	ld hl,512
-	ld c,f_readonly+f_system
-	push hl,bc,de
-	call fs_CreateFile
-	pop bc,bc,bc
-.dont_create_elevation_file:
 	call th_ResetThreadMemory
 assert ~thread_temp_save and $FF
 	ld hl,thread_temp_save

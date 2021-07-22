@@ -20,13 +20,7 @@ fs_fs
 	db 496 dup $FF
 ;end fs_dir
 
-virtual
-	db $F2,"OS"
-	load _os_dir_name: $-$$ from $$
-end virtual
-
 fs_dir root_dir
-	fs_entry _os_dir, _os_dir_name, "", f_system+f_subdir
 	fs_entry bin_dir, "bin", "", f_system+f_subdir
 	fs_entry dev_dir, "dev", "", f_system+f_subdir
 	fs_entry etc_dir, "etc", "", f_subdir
@@ -71,10 +65,6 @@ fs_dir bin_dir
 	fs_entry usbrecv_exe, "usbrecv", "", f_readonly+f_system
 	fs_entry usbrun_exe, "usbrun", "", f_readonly+f_system
 	; fs_entry usbsend_exe, "usbsend", "", f_readonly+f_system
-end fs_dir
-
-fs_dir _os_dir
-	fs_entry root_dir, "..", "", f_subdir
 end fs_dir
 
 fs_dir var_dir

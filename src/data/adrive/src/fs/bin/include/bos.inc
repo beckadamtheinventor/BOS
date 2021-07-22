@@ -25,9 +25,9 @@ namespace bos
 ?sys_GetKey                      := $20154
 ?sys_KbScan                      := $20158
 ?sys_Malloc                      := $2015C
-?sys_MemCmp                      := $20160
+;DONOTHING                       := $20160
 ?sys_MemSet                      := $20164
-?sys_Mult24x8                    := $20168
+;DONOTHING                       := $20168
 ?sys_WaitKey                     := $2016C
 ?sys_WaitKeyCycle                := $20170
 ?gui_DrawConsoleWindow           := $20174
