@@ -7,16 +7,28 @@ rm_main:
 	call bos.fs_OpenFile
 	ex (sp),hl
 	pop iy
-	bit fb_readonly, (iy+$B)
+	bit fb_readonly, (iy + $B)
 	jq nz,.fail_readonly
-	bit fb_subdir, (iy+$B)
-	jq nz,.fail_subdir
-	push hl
+	bit fb_subdir, (iy + $B)
+	jq nz,.maybe_fail_subdir
+.delete:
+	pop bc,hl
+	push hl,bc,hl
 	call bos.fs_DeleteFile
 	pop bc
 	xor a,a
 	sbc hl,hl
 	ret
+.maybe_fail_subdir:
+	ld de, (iy + $E)
+	ld a,d
+	or a,a
+	jq nz,.fail_subdir
+	ld h,a
+	ld l,49
+	ex.s hl,de
+	sbc hl,de
+	jq c,.delete
 .fail_subdir:
 	ld hl,.string_subdir
 	jq .error_print
