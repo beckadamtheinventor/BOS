@@ -451,7 +451,7 @@ _init_usb:
 	xor	a, a
 	ld	(_network_up), a
 	call	_srl_GetCDCStandardDescriptors
-	ld	de, 12
+	ld	de, 36106
 	push	de
 	push	hl
 	ld	hl, 0

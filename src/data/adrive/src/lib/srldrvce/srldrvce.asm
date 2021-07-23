@@ -1,5 +1,5 @@
 ;-------------------------------------------------------------------------------
-include '../include/library.inc'
+include '../include/library-ti84pceg.inc'
 include '../include/include_library.inc'
 ;-------------------------------------------------------------------------------
 
@@ -473,7 +473,7 @@ srl_Write:
 	ret
 
 ;usb_standard_descriptors_t *srl_GetCDCStandardDescriptors(void);
-srl_GetCDCStandardDescriptors: ; just assume TI-84+CE and no serial number for now
+srl_GetCDCStandardDescriptors:
 	; call	ti.os.GetSystemStats
 	; ld	de,4
 	; add	hl,de
@@ -485,44 +485,44 @@ srl_GetCDCStandardDescriptors: ; just assume TI-84+CE and no serial number for n
 	; ld	hl,.string83
 	; ld	(.model),hl
 ; .84pce:
-	; ld	iy,ti.flags	; get serial number
-	; call	ti.GetSerial
-	; jq	nz,.noserial
+	ld	iy,ti.flags	; get serial number
+	call	ti.GetSerial
+	jq	nz,.noserial
 
-	; ld	a,3
-	; ld	hl,.device+deviceDescriptor.iSerialNumber
-	; ld	(hl),a
+	ld	a,3
+	ld	hl,.device+deviceDescriptor.iSerialNumber
+	ld	(hl),a
 
-	; ld	de,.stringserialnum + 2
-	; ld	hl,ti.OP4
-	; ld	b,5
-; .loop_byte:
-	; ld	a,(hl)
-	; rra
-	; rra
-	; rra
-	; rra
-	; call	.conv_hex
-	; ld	a,(hl)
-	; call	.conv_hex
-	; inc	hl
-	; djnz	.loop_byte
-; .noserial:
+	ld	de,.stringserialnum + 2
+	ld	hl,ti.OP4
+	ld	b,5
+.loop_byte:
+	ld	a,(hl)
+	rra
+	rra
+	rra
+	rra
+	call	.conv_hex
+	ld	a,(hl)
+	call	.conv_hex
+	inc	hl
+	djnz	.loop_byte
+.noserial:
 	ld	hl,.descriptors
 	ret
-; .conv_hex:
-	; and	a,$f
-	; add	a,'0'
-	; cp	a,'9'+1
-	; jq	c,.store
-	; add	a,'A'-'9'-1
-; .store:
-	; ex	de,hl
-	; ld	(hl),a
-	; ex	de,hl
-	; inc	de
-	; inc	de
-	; ret
+.conv_hex:
+	and	a,$f
+	add	a,'0'
+	cp	a,'9'+1
+	jq	c,.store
+	add	a,'A'-'9'-1
+.store:
+	ex	de,hl
+	ld	(hl),a
+	ex	de,hl
+	inc	de
+	inc	de
+	ret
 
 .descriptors:
 	dl .device, .configurations, .langids
