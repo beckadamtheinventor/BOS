@@ -38,28 +38,107 @@ QUOTE_ARG  = '$(subst ','\'',$1)'#'
 APPEND     = @echo $(call QUOTE_ARG,$1) >>$@
 endif
 
+FSOBJ ?= $(call NATIVEPATH,src/data/adrive/obj)
+FSSRC ?= $(call NATIVEPATH,src/data/adrive/src)
+
 #build rules
 
+all: objdirs includes fs os bosbin bos8xp bosrom
+
+objdirs:
+	$(call MKDIR,bin)
+	$(call MKDIR,obj)
+	$(call MKDIR,$(call NATIVEPATH,noti-ez80/bin))
+	$(call MKDIR,$(call NATIVEPATH,src/data/adrive/obj))
+
+includes: $(call NATIVEPATH,src/include/*)
+
+$(call NATIVEPATH,src/include/*):
+	$(CPDIR) $(call NATIVEPATH,src/include) $(call NATIVEPATH,$(FSSRC)/fs/include)
+	$(CPDIR) $(call NATIVEPATH,src/include) $(call NATIVEPATH,$(FSSRC)/fs/lib/include)
 
 
-all: bos
+# LibLoad Library build rules
 
-rebuild:
-	python3 build.py -r
+$(call NATIVEPATH,$(FSOBJ)/libload.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/libload/bos_libload.asm) $(call NATIVEPATH,src/include/*)
+	fasmg $(call NATIVEPATH,$(FSSRC)/fs/lib/libload/bos_libload.asm) $(call NATIVEPATH,$(FSOBJ)/libload.bin)
 
-bos:
-	python3 build.py -b -i -d
+$(call NATIVEPATH,$(FSOBJ)/fatdrvce.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/fatdrvce/fatdrvce.asm) $(call NATIVEPATH,$(FSSRC)/fs/lib/fatdrvce/fat.asm) $(call NATIVEPATH,src/include/*)
+	fasmg $(call NATIVEPATH,$(FSSRC)/fs/lib/fatdrvce/fatdrvce.asm) $(call NATIVEPATH,$(FSOBJ)/fatdrvce.bin)
 
-version:
-	python3 build.py -v
+$(call NATIVEPATH,$(FSOBJ)/fileioc.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/fileioc/fileioc.asm) $(call NATIVEPATH,src/include/*)
+	fasmg $(call NATIVEPATH,$(FSSRC)/fs/lib/fileioc/fileioc.asm) $(call NATIVEPATH,$(FSOBJ)/fileioc.bin)
+
+$(call NATIVEPATH,$(FSOBJ)/fontlibc.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/fontlibc/fontlibc.asm) $(call NATIVEPATH,src/include/*)
+	fasmg $(call NATIVEPATH,$(FSSRC)/fs/lib/fontlibc/fontlibc.asm) $(call NATIVEPATH,$(FSOBJ)/fontlibc.bin)
+
+$(call NATIVEPATH,$(FSOBJ)/graphx.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/graphx/graphx.asm) $(call NATIVEPATH,src/include/*)
+	fasmg $(call NATIVEPATH,$(FSSRC)/fs/lib/graphx/graphx.asm) $(call NATIVEPATH,$(FSOBJ)/graphx.bin)
+
+$(call NATIVEPATH,$(FSOBJ)/keypadc.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/keypadc/keypadc.asm) $(call NATIVEPATH,src/include/*)
+	fasmg $(call NATIVEPATH,$(FSSRC)/fs/lib/keypadc/keypadc.asm) $(call NATIVEPATH,$(FSOBJ)/keypadc.bin)
+
+$(call NATIVEPATH,$(FSOBJ)/srldrvce.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/srldrvce/srldrvce.asm) $(call NATIVEPATH,src/include/*)
+	fasmg $(call NATIVEPATH,$(FSSRC)/fs/lib/srldrvce/srldrvce.asm) $(call NATIVEPATH,$(FSOBJ)/srldrvce.bin)
+
+$(call NATIVEPATH,$(FSOBJ)/usbdrvce.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/usbdrvce/usbdrvce.asm) $(call NATIVEPATH,src/include/*)
+	fasmg $(call NATIVEPATH,$(FSSRC)/fs/lib/usbdrvce/usbdrvce.asm) $(call NATIVEPATH,$(FSOBJ)/usbdrvce.bin)
+
+
+# OS Files build rules
+$(call NATIVEPATH,$(FSOBJ)/bpkload.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/bpkload.asm) $(call NATIVEPATH,src/include/*)
+	fasmg $(call NATIVEPATH,$(FSSRC)/fs/bin/bpkload.asm) $(call NATIVEPATH,$(FSOBJ)/bpkload.bin)
+
+$(call NATIVEPATH,$(FSOBJ)/explorer.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer.asm) $(call NATIVEPATH,src/include/*)
+	fasmg $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer.asm) $(call NATIVEPATH,$(FSOBJ)/explorer.bin)
+
+$(call NATIVEPATH,$(FSOBJ)/memedit.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/memedit.asm) $(call NATIVEPATH,src/include/*)
+	fasmg $(call NATIVEPATH,$(FSSRC)/fs/bin/memedit.asm) $(call NATIVEPATH,$(FSOBJ)/memedit.bin)
+
+$(call NATIVEPATH,$(FSOBJ)/usbrecv.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/usbrecv.asm) $(call NATIVEPATH,src/include/*)
+	fasmg $(call NATIVEPATH,$(FSSRC)/fs/bin/usbrecv.asm) $(call NATIVEPATH,$(FSOBJ)/usbrecv.bin)
+
+$(call NATIVEPATH,$(FSOBJ)/usbrun.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/usbrun.asm) $(call NATIVEPATH,src/include/*)
+	fasmg $(call NATIVEPATH,$(FSSRC)/fs/bin/usbrun.asm) $(call NATIVEPATH,$(FSOBJ)/usbrun.bin)
+
+$(call NATIVEPATH,$(FSOBJ)/usbsend.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/usbsend.asm) $(call NATIVEPATH,src/include/*)
+	fasmg $(call NATIVEPATH,$(FSSRC)/fs/bin/usbsend.asm) $(call NATIVEPATH,$(FSOBJ)/usbsend.bin)
+
+
+
+# Rule to build Filesytem and compress it
+$(call NATIVEPATH,src/data/adrive/data.bin): $(call NATIVEPATH,$(FSSRC)/main.asm) $(call NATIVEPATH,$(FSOBJ)/libload.bin) $(call NATIVEPATH,$(FSOBJ)/fatdrvce.bin) \
+	$(call NATIVEPATH,$(FSOBJ)/fileioc.bin) $(call NATIVEPATH,$(FSOBJ)/fontlibc.bin) $(call NATIVEPATH,$(FSOBJ)/graphx.bin) $(call NATIVEPATH,$(FSOBJ)/keypadc.bin) \
+	$(call NATIVEPATH,$(FSOBJ)/srldrvce.bin) $(call NATIVEPATH,$(FSOBJ)/usbdrvce.bin) $(call NATIVEPATH,$(FSOBJ)/bpkload.bin) $(call NATIVEPATH,$(FSOBJ)/memedit.bin) \
+	$(call NATIVEPATH,$(FSOBJ)/usbrecv.bin) $(call NATIVEPATH,$(FSOBJ)/usbrun.bin) $(call NATIVEPATH,$(FSOBJ)/usbsend.bin) $(call NATIVEPATH,$(FSOBJ)/explorer.bin)
+	fasmg $(call NATIVEPATH,$(FSSRC)/main.asm) $(call NATIVEPATH,src/data/adrive/main.bin)
+	convbin -i $(call NATIVEPATH,src/data/adrive/main.bin) -o $(call NATIVEPATH,src/data/adrive/data.bin) -j bin -k bin -c zx7
+
+# Rule to build OS data
+os: $(call NATIVEPATH,src/data/adrive/data.bin)
+	fasmg $(call NATIVEPATH,src/main.asm) $(call NATIVEPATH,obj/bosos.bin)
+
+# Rule to build Updater binary
+bosbin: $(call NATIVEPATH,obj/bosos.bin)
+	fasmg $(call NATIVEPATH,src/updater.asm) $(call NATIVEPATH,bin/BOSUPDTR.BIN)
+
+# Rule to build Installer 8xp
+bos8xp: $(call NATIVEPATH,obj/bosos.bin)
+	fasmg $(call NATIVEPATH,src/installer8xp.asm) $(call NATIVEPATH,bin/BOSOS.8xp)
+
+# Rule to build ROM image
+bosrom: $(call NATIVEPATH,obj/bosos.bin)
+	fasmg $(call NATIVEPATH,src/rom.asm) $(call NATIVEPATH,bin/BOSOS.rom)
 
 #make clean
 clean:
 	$(call RMDIR,bin)
 	$(call RMDIR,obj)
+	$(call RMDIR,$(call NATIVEPATH,noti-ez80/bin))
+	$(call RMDIR,$(call NATIVEPATH,src/data/adrive/obj))
 	$(Q)echo Removed objects and binaries.
 
-.PHONY: all bos bosbin bosfs
+.PHONY: all fs bosbin bos8xp bosrom
 
 .SECONDEXPANSION:
 $(DIRS): $$(call DIRNAME,$$@)

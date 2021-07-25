@@ -22,5 +22,5 @@ file '../noti-ez80/bin/NOTI.rom'
 
 	db $040000-$ dup $FF
 
-	file 'data/adrive/obj/main.bin'
+	file 'data/adrive/main.bin'
 

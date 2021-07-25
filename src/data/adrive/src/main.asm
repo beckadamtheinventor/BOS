@@ -60,7 +60,7 @@ fs_dir bin_dir
 	fs_sfentry mkfile_exe, "mkfile", "", f_readonly+f_system+f_subfile
 	fs_sfentry off_exe, "off", "", f_readonly+f_system+f_subfile
 	fs_sfentry rm_exe, "rm", "", f_readonly+f_system+f_subfile
-	fs_entry serial_exe, "serial", "", f_readonly+f_system
+	; fs_entry serial_exe, "serial", "", f_readonly+f_system
 	; fs_entry transfer_exe, "transfer", "", f_readonly+f_system
 	fs_entry usbrecv_exe, "usbrecv", "", f_readonly+f_system
 	fs_entry usbrun_exe, "usbrun", "", f_readonly+f_system
@@ -140,22 +140,22 @@ end fs_subfile
 fs_dir dev_dir
 	fs_entry root_dir, "..", "", f_subdir
 	fs_entry cluster_map_file, "cmap", "dat", f_readonly+f_system
-	fs_sfentry dev_lcd, "lcd", "", f_readonly+f_system+f_device+f_subfile
-	fs_sfentry dev_null, "null", "", f_readonly+f_system+f_device+f_subfile
-	fs_sfentry dev_mnt, "mnt", "", f_readonly+f_system+f_device+f_subfile
+	; fs_sfentry dev_lcd, "lcd", "", f_readonly+f_system+f_device+f_subfile
+	; fs_sfentry dev_null, "null", "", f_readonly+f_system+f_device+f_subfile
+	; fs_sfentry dev_mnt, "mnt", "", f_readonly+f_system+f_device+f_subfile
 end fs_dir
 
-fs_subfile dev_null, dev_dir
-	include 'fs/dev/null.asm'
-end fs_subfile
+; fs_subfile dev_null, dev_dir
+	; include 'fs/dev/null.asm'
+; end fs_subfile
 
-fs_subfile dev_lcd, dev_dir
-	include 'fs/dev/lcd.asm'
-end fs_subfile
+; fs_subfile dev_lcd, dev_dir
+	; include 'fs/dev/lcd.asm'
+; end fs_subfile
 
-fs_subfile dev_mnt, dev_dir
-	include 'fs/dev/mnt.asm'
-end fs_subfile
+; fs_subfile dev_mnt, dev_dir
+	; include 'fs/dev/mnt.asm'
+; end fs_subfile
 
 ;"/etc/" directory
 fs_dir etc_dir
@@ -331,15 +331,15 @@ fs_file usbdrvce_lll
 end fs_file
 
 fs_file libload_lll
-	file '../obj/bos_libload.bin'
+	file '../obj/libload.bin'
 end fs_file
 
 fs_file uninstaller_exe
-	include 'fs/bin/uninstlr.asm'
+	include 'fs/sbin/uninstlr.asm'
 end fs_file
 
 fs_file updater_exe
-	include 'fs/bin/updater.asm'
+	include 'fs/sbin/updater.asm'
 end fs_file
 
 fs_file echo_exe
@@ -371,7 +371,7 @@ fs_file bpkload_exe
 end fs_file
 
 fs_file fsutil_exe
-	include 'fs/bin/fsutil.asm'
+	include 'fs/sbin/fsutil.asm'
 end fs_file
 
 ; fs_file bpm_exe
@@ -422,9 +422,9 @@ end fs_file
 	; db "serial",$A,0
 ; end fs_file
 
-fs_file serial_exe
-	file 'fs/bin/serial/bosbin/serial.bin'
-end fs_file
+; fs_file serial_exe
+	; file 'fs/bin/serial/bosbin/serial.bin'
+; end fs_file
 
 end fs_fs
 
