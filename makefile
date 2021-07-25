@@ -43,7 +43,14 @@ FSSRC ?= $(call NATIVEPATH,src/data/adrive/src)
 
 #build rules
 
-all: objdirs includes bosbin bos8xp bosrom
+all: objdirs includes include_dirs bosbin bos8xp bosrom
+
+docs:
+	python build_docs.py
+
+includes:
+	python build_bos_inc.py
+	python build_bos_src.py
 
 objdirs:
 	$(call MKDIR,bin)
@@ -51,9 +58,10 @@ objdirs:
 	$(call MKDIR,$(call NATIVEPATH,noti-ez80/bin))
 	$(call MKDIR,$(call NATIVEPATH,src/data/adrive/obj))
 
-includes: $(call NATIVEPATH,src/include/*)
+include_dirs: $(call NATIVEPATH,src/include/*)
 
-$(call NATIVEPATH,src/include/*):
+$(call NATIVEPATH,src/include/*): includes
+	$(CP) bos.inc $(call NATIVEPATH,src/include/bos.inc)
 	$(CPDIR) $(call NATIVEPATH,src/include) $(call NATIVEPATH,$(FSSRC)/fs/include)
 	$(CPDIR) $(call NATIVEPATH,src/include) $(call NATIVEPATH,$(FSSRC)/fs/lib/include)
 

@@ -19,9 +19,7 @@
 	public _sys_GetKey
 	public _sys_KbScan
 	public _sys_Malloc
-	public _sys_MemCmp
 	public _sys_MemSet
-	public _sys_Mult24x8
 	public _sys_WaitKey
 	public _sys_WaitKeyCycle
 	public _gui_DrawConsoleWindow
@@ -167,9 +165,7 @@ _sys_FreeAll                     := $20150
 _sys_GetKey                      := $20154
 _sys_KbScan                      := $20158
 _sys_Malloc                      := $2015C
-_sys_MemCmp                      := $20160
 _sys_MemSet                      := $20164
-_sys_Mult24x8                    := $20168
 _sys_WaitKey                     := $2016C
 _sys_WaitKeyCycle                := $20170
 _gui_DrawConsoleWindow           := $20174
