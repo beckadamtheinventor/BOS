@@ -25,8 +25,8 @@ taskbar_item_width    := 64
 assert taskbar_height < 231
 
 org ti.userMem
-	; jq explorer_init
-	; db "REX",0
+	jq explorer_init
+	db "REX",0
 explorer_init:
 	;pop bc
 	;pop hl

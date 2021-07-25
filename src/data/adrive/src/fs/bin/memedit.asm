@@ -4,8 +4,8 @@ include 'include/ti84pceg.inc'
 include 'include/bos.inc'
 
 org ti.userMem
-	; jq mem_edit
-	; db "REX",0
+	jq mem_edit
+	db "REX",0
 mem_edit:
 	call libload_load
 	ret nz

@@ -5,8 +5,8 @@ include 'include/ti84pceg.inc'
 include 'include/bos.inc'
 
 org $D1A881
-	; jq usbrun_main
-	; db "REX",0
+	jq usbrun_main
+	db "REX",0
 usbrun_main:
 	pop bc
 	pop hl

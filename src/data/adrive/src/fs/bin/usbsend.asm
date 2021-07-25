@@ -5,8 +5,8 @@ include 'include/ti84pceg.inc'
 include 'include/bos.inc'
 
 org $D1A881
-	; jq usbsend_main
-	; db "REX",0
+	jq usbsend_main
+	db "REX",0
 usbsend_main:
 	pop bc
 	pop hl

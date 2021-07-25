@@ -68,48 +68,48 @@ $(call NATIVEPATH,src/include/*): includes
 
 # LibLoad Library build rules
 
-$(call NATIVEPATH,$(FSOBJ)/libload.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/libload/bos_libload.asm) $(call NATIVEPATH,src/include/*)
+$(call NATIVEPATH,$(FSOBJ)/libload.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/libload/bos_libload.asm)
 	fasmg $(call NATIVEPATH,$(FSSRC)/fs/lib/libload/bos_libload.asm) $(call NATIVEPATH,$(FSOBJ)/libload.bin)
 
-$(call NATIVEPATH,$(FSOBJ)/fatdrvce.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/fatdrvce/fatdrvce.asm) $(call NATIVEPATH,$(FSSRC)/fs/lib/fatdrvce/fat.asm) $(call NATIVEPATH,src/include/*)
+$(call NATIVEPATH,$(FSOBJ)/fatdrvce.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/fatdrvce/fatdrvce.asm) $(call NATIVEPATH,$(FSSRC)/fs/lib/fatdrvce/fat.asm)
 	fasmg $(call NATIVEPATH,$(FSSRC)/fs/lib/fatdrvce/fatdrvce.asm) $(call NATIVEPATH,$(FSOBJ)/fatdrvce.bin)
 
-$(call NATIVEPATH,$(FSOBJ)/fileioc.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/fileioc/fileioc.asm) $(call NATIVEPATH,src/include/*)
+$(call NATIVEPATH,$(FSOBJ)/fileioc.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/fileioc/fileioc.asm)
 	fasmg $(call NATIVEPATH,$(FSSRC)/fs/lib/fileioc/fileioc.asm) $(call NATIVEPATH,$(FSOBJ)/fileioc.bin)
 
-$(call NATIVEPATH,$(FSOBJ)/fontlibc.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/fontlibc/fontlibc.asm) $(call NATIVEPATH,src/include/*)
+$(call NATIVEPATH,$(FSOBJ)/fontlibc.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/fontlibc/fontlibc.asm)
 	fasmg $(call NATIVEPATH,$(FSSRC)/fs/lib/fontlibc/fontlibc.asm) $(call NATIVEPATH,$(FSOBJ)/fontlibc.bin)
 
-$(call NATIVEPATH,$(FSOBJ)/graphx.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/graphx/graphx.asm) $(call NATIVEPATH,src/include/*)
+$(call NATIVEPATH,$(FSOBJ)/graphx.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/graphx/graphx.asm)
 	fasmg $(call NATIVEPATH,$(FSSRC)/fs/lib/graphx/graphx.asm) $(call NATIVEPATH,$(FSOBJ)/graphx.bin)
 
-$(call NATIVEPATH,$(FSOBJ)/keypadc.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/keypadc/keypadc.asm) $(call NATIVEPATH,src/include/*)
+$(call NATIVEPATH,$(FSOBJ)/keypadc.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/keypadc/keypadc.asm)
 	fasmg $(call NATIVEPATH,$(FSSRC)/fs/lib/keypadc/keypadc.asm) $(call NATIVEPATH,$(FSOBJ)/keypadc.bin)
 
-$(call NATIVEPATH,$(FSOBJ)/srldrvce.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/srldrvce/srldrvce.asm) $(call NATIVEPATH,src/include/*)
+$(call NATIVEPATH,$(FSOBJ)/srldrvce.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/srldrvce/srldrvce.asm)
 	fasmg $(call NATIVEPATH,$(FSSRC)/fs/lib/srldrvce/srldrvce.asm) $(call NATIVEPATH,$(FSOBJ)/srldrvce.bin)
 
-$(call NATIVEPATH,$(FSOBJ)/usbdrvce.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/usbdrvce/usbdrvce.asm) $(call NATIVEPATH,src/include/*)
+$(call NATIVEPATH,$(FSOBJ)/usbdrvce.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/usbdrvce/usbdrvce.asm)
 	fasmg $(call NATIVEPATH,$(FSSRC)/fs/lib/usbdrvce/usbdrvce.asm) $(call NATIVEPATH,$(FSOBJ)/usbdrvce.bin)
 
 
 # OS Files build rules
-$(call NATIVEPATH,$(FSOBJ)/bpkload.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/bpkload.asm) $(call NATIVEPATH,src/include/*)
+$(call NATIVEPATH,$(FSOBJ)/bpkload.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/bpkload.asm)
 	fasmg $(call NATIVEPATH,$(FSSRC)/fs/bin/bpkload.asm) $(call NATIVEPATH,$(FSOBJ)/bpkload.bin)
 
-$(call NATIVEPATH,$(FSOBJ)/explorer.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer.asm) $(call NATIVEPATH,src/include/*)
+$(call NATIVEPATH,$(FSOBJ)/explorer.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer.asm)
 	fasmg $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer.asm) $(call NATIVEPATH,$(FSOBJ)/explorer.bin)
 
-$(call NATIVEPATH,$(FSOBJ)/memedit.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/memedit.asm) $(call NATIVEPATH,src/include/*)
+$(call NATIVEPATH,$(FSOBJ)/memedit.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/memedit.asm)
 	fasmg $(call NATIVEPATH,$(FSSRC)/fs/bin/memedit.asm) $(call NATIVEPATH,$(FSOBJ)/memedit.bin)
 
-$(call NATIVEPATH,$(FSOBJ)/usbrecv.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/usbrecv.asm) $(call NATIVEPATH,src/include/*)
+$(call NATIVEPATH,$(FSOBJ)/usbrecv.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/usbrecv.asm)
 	fasmg $(call NATIVEPATH,$(FSSRC)/fs/bin/usbrecv.asm) $(call NATIVEPATH,$(FSOBJ)/usbrecv.bin)
 
-$(call NATIVEPATH,$(FSOBJ)/usbrun.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/usbrun.asm) $(call NATIVEPATH,src/include/*)
+$(call NATIVEPATH,$(FSOBJ)/usbrun.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/usbrun.asm)
 	fasmg $(call NATIVEPATH,$(FSSRC)/fs/bin/usbrun.asm) $(call NATIVEPATH,$(FSOBJ)/usbrun.bin)
 
-$(call NATIVEPATH,$(FSOBJ)/usbsend.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/usbsend.asm) $(call NATIVEPATH,src/include/*)
+$(call NATIVEPATH,$(FSOBJ)/usbsend.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/usbsend.asm)
 	fasmg $(call NATIVEPATH,$(FSSRC)/fs/bin/usbsend.asm) $(call NATIVEPATH,$(FSOBJ)/usbsend.bin)
 
 
