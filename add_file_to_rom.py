@@ -167,6 +167,8 @@ def add_file_to_rom(rom, fout, flags, fin_data):
 	ptr = dptr_content = 0x040000 + 0x200 * (rom[dptr+0xC]+rom[dptr+0xD]*0x200)
 	dptr_len = rom[dptr+0xE]+rom[dptr+0xF]*0x200
 	# print("found parent directory. ptr:",hex(ptr),"len:",hex(dptr_len))
+	dptr_len += 16
+	rom[dptr+0xE],rom[dptr+0xF] = dptr_len&0xFF, dptr_len//0x100
 
 	while rom[ptr] != 0x00 and rom[ptr] != 0xFF: ptr+=16
 	if '/' in fout:

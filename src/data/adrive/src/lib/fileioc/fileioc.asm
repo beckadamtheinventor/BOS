@@ -562,22 +562,34 @@ ti_GetC:
 ; args:
 ;  sp + 3 : slot index
 ; return:
-;  a = character read if success
+;  hl = character read if success
 	pop hl
 	pop bc
 	push bc
 	push hl
 	call util_is_slot_open
-	jq nz,util_ret_null
+	jq nz,util_ret_neg_one
+	call util_get_slot_size
+	push bc
+	call util_get_offset
+	pop hl
+	or a,a
+	dec hl
+	sbc hl,bc
+	jq c,util_ret_neg_one
 	call util_get_data_ptr
 	ld de,(hl)
-	call util_get_offset
 	ex hl,de
 	add hl,bc
 	ld a,(hl)
 	inc bc
-	jq util_set_offset
-
+	push af
+	call util_set_offset
+	pop af
+	or a,a
+	sbc hl,hl
+	ld l,a
+	ret
 
 ;-------------------------------------------------------------------------------
 ti_PutC:
@@ -586,7 +598,7 @@ ti_PutC:
 ;  sp + 3 : Character to place
 ;  sp + 6 : Slot number
 ; return:
-;  Character written if no failure
+;  hl = Character written if no failure
 	pop hl
 	pop de
 	pop bc
@@ -596,7 +608,7 @@ ti_PutC:
 	ld a,e
 	ld (.buffer),a
 	call util_is_slot_open
-	jq nz,util_ret_null
+	jq nz,util_ret_neg_one
 	call util_get_vat_ptr
 	ld bc,-$E
 	add hl,bc
@@ -617,13 +629,13 @@ ti_PutC:
 	call nc,bos.fs_SetSize
 	pop hl,bc
 
-	ld c,0
-.buffer:=$-1
+	ld bc,0
+.buffer:=$-3
 	push bc
 	call bos.fs_WriteByte
 	pop bc,bc,bc
 	inc bc
-	ld a,(.buffer)
+	ld hl,(.buffer)
 	jq util_set_offset
 
 

@@ -22,16 +22,13 @@ _CreateVar:
 	ex (sp),hl
 	push hl
 	call sys_Free
-	pop bc,hl,de,bc
-	ld bc,fsentry_filesector
-	add hl,bc
-	ld de,(hl)
+	pop bc,de,bc,bc
+	ld hl,fsentry_filelen
+	add hl,de
 	push hl,de
-	call fs_GetSectorAddress
+	call fs_GetFDPtr
 	ex hl,de
 	pop bc,hl
-	inc hl
-	inc hl
 	or a,a
 	ret
 
