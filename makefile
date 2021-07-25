@@ -127,7 +127,7 @@ $(call NATIVEPATH,noti-ez80/bin/NOTI.rom):
 	fasmg $(call NATIVEPATH,noti-ez80/src/main.asm) $(call NATIVEPATH,noti-ez80/bin/NOTI.rom)
 
 # Rule to build OS data
-os: $(call NATIVEPATH,src/data/adrive/data.bin)
+$(call NATIVEPATH,obj/bosos.bin): $(call NATIVEPATH,src/data/adrive/data.bin)
 	fasmg $(call NATIVEPATH,src/main.asm) $(call NATIVEPATH,obj/bosos.bin)
 
 # Rule to build Updater binary
