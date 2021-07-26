@@ -47,7 +47,7 @@ fs_dir bin_dir
 	fs_sfentry cmd_exe, "cmd", "", f_readonly+f_system+f_subfile
 	fs_sfentry cls_exe, "cls", "", f_readonly+f_system+f_subfile
 	fs_sfentry cp_exe, "cp", "", f_readonly+f_system+f_subfile
-	fs_sfentry initdev_exe, "device", "", f_readonly+f_system+f_subfile
+	; fs_sfentry initdev_exe, "device", "", f_readonly+f_system+f_subfile
 	fs_sfentry df_exe, "df", "", f_readonly+f_system+f_subfile
 	fs_entry echo_exe, "echo", "", f_readonly+f_system
 	; fs_entry edit_exe, "edit", "", f_readonly+f_system
@@ -72,74 +72,110 @@ fs_dir var_dir
 	fs_entry path_var, "PATH", "", 0
 end fs_dir
 
-fs_subfile boot_exe, bin_dir
-	include 'fs/bin/boot.asm'
-end fs_subfile
+fs_file os_internal_subfiles
+	db "bin/",0,f_subdir+f_system
+	dw 0, 0
+	db ">",0,f_readonly+f_system+f_subfile
+	dw writeinto_exe-$, writeinto_exe.len
+	db ">>",0,f_readonly+f_system+f_subfile
+	dw appendinto_exe-$, appendinto_exe.len
+	db "boot",0,f_readonly+f_system+f_subfile
+	dw boot_exe-$, boot_exe.len
+	db "cat",0,f_readonly+f_system+f_subfile
+	dw cat_exe-$, cat_exe.len
+	db "cd",0,f_readonly+f_system+f_subfile
+	dw cd_exe-$, cd_exe.len
+	db "cmd",0,f_readonly+f_system+f_subfile
+	dw cmd_exe-$, cmd_exe.len
+	db "cls",0,f_readonly+f_system+f_subfile
+	dw cls_exe-$, cls_exe.len
+	db "cp",0,f_readonly+f_system+f_subfile
+	dw cp_exe-$, cp_exe.len
+	db "df",0,f_readonly+f_system+f_subfile
+	dw df_exe-$, df_exe.len
+	db "ls",0,f_readonly+f_system+f_subfile
+	dw ls_exe-$, ls_exe.len
+	db "info",0,f_readonly+f_system+f_subfile
+	dw info_exe-$, info_exe.len
+	db "rm",0,f_readonly+f_system+f_subfile
+	dw rm_exe-$, rm_exe.len
+	db "mkdir",0,f_readonly+f_system+f_subfile
+	dw mkdir_exe-$, mkdir_exe.len
+	db "mkfile",0,f_readonly+f_system+f_subfile
+	dw mkfile_exe-$, mkfile_exe.len
+	db "off",0,f_readonly+f_system+f_subfile
+	dw off_exe-$, off_exe.len
+	db $FF
+	fs_subfile writeinto_exe, bin_dir
+		include 'fs/bin/writeinto.asm'
+	end fs_subfile
 
-fs_subfile writeinto_exe, bin_dir
-	include 'fs/bin/writeinto.asm'
-end fs_subfile
+	fs_subfile appendinto_exe, bin_dir
+		include 'fs/bin/appendinto.asm'
+	end fs_subfile
 
-fs_subfile appendinto_exe, bin_dir
-	include 'fs/bin/appendinto.asm'
-end fs_subfile
+	fs_subfile boot_exe, bin_dir
+		include 'fs/bin/boot.asm'
+	end fs_subfile
 
-fs_subfile cat_exe, bin_dir
-	include 'fs/bin/cat.asm'
-end fs_subfile
+	fs_subfile cat_exe, bin_dir
+		include 'fs/bin/cat.asm'
+	end fs_subfile
 
-fs_subfile cd_exe, bin_dir
-	include 'fs/bin/cd.asm'
-end fs_subfile
+	fs_subfile cd_exe, bin_dir
+		include 'fs/bin/cd.asm'
+	end fs_subfile
 
-fs_subfile cls_exe, bin_dir
-	include 'fs/bin/cls.asm'
-end fs_subfile
+	fs_subfile cmd_exe, bin_dir
+		include 'fs/bin/cmd.asm'
+	end fs_subfile
 
-fs_subfile initdev_exe, bin_dir
-	include 'fs/bin/device.asm'
-end fs_subfile
+	fs_subfile cls_exe, bin_dir
+		include 'fs/bin/cls.asm'
+	end fs_subfile
 
-fs_subfile df_exe, bin_dir
-	include 'fs/bin/df.asm'
-end fs_subfile
+	fs_subfile cp_exe, bin_dir
+		include 'fs/bin/cp.asm'
+	end fs_subfile
 
-fs_subfile cmd_exe, bin_dir
-	include 'fs/bin/cmd.asm'
-end fs_subfile
+	; fs_subfile initdev_exe, bin_dir
+		; include 'fs/bin/device.asm'
+	; end fs_subfile
 
-fs_subfile ls_exe, bin_dir
-	include 'fs/bin/ls.asm'
-end fs_subfile
+	fs_subfile df_exe, bin_dir
+		include 'fs/bin/df.asm'
+	end fs_subfile
 
-fs_subfile cp_exe, bin_dir
-	include 'fs/bin/cp.asm'
-end fs_subfile
+	fs_subfile ls_exe, bin_dir
+		include 'fs/bin/ls.asm'
+	end fs_subfile
 
-fs_subfile info_exe, bin_dir
-	include 'fs/bin/info.asm'
-end fs_subfile
+	fs_subfile info_exe, bin_dir
+		include 'fs/bin/info.asm'
+	end fs_subfile
 
-fs_subfile rm_exe, bin_dir
-	include 'fs/bin/rm.asm'
-end fs_subfile
+	fs_subfile rm_exe, bin_dir
+		include 'fs/bin/rm.asm'
+	end fs_subfile
 
-fs_subfile mkdir_exe, bin_dir
-	include 'fs/bin/mkdir.asm'
-end fs_subfile
+	fs_subfile mkdir_exe, bin_dir
+		include 'fs/bin/mkdir.asm'
+	end fs_subfile
 
-fs_subfile mkfile_exe, bin_dir
-	include 'fs/bin/mkfile.asm'
-end fs_subfile
+	fs_subfile mkfile_exe, bin_dir
+		include 'fs/bin/mkfile.asm'
+	end fs_subfile
 
-fs_subfile off_exe, bin_dir
-	include 'fs/bin/off.asm'
-end fs_subfile
+	fs_subfile off_exe, bin_dir
+		include 'fs/bin/off.asm'
+	end fs_subfile
+end fs_file
 
 ;"/dev/" directory
 fs_dir dev_dir
 	fs_entry root_dir, "..", "", f_subdir
 	fs_entry cluster_map_file, "cmap", "dat", f_readonly+f_system
+	fs_entry os_internal_subfiles, "osfiles", "dat", f_readonly+f_system
 	; fs_sfentry dev_lcd, "lcd", "", f_readonly+f_system+f_device+f_subfile
 	; fs_sfentry dev_null, "null", "", f_readonly+f_system+f_device+f_subfile
 	; fs_sfentry dev_mnt, "mnt", "", f_readonly+f_system+f_device+f_subfile
