@@ -1,7 +1,6 @@
 
 include 'include/ti84pceg.inc'
 include 'include/ez80.inc'
-include 'include/tiformat.inc'
 include 'include/defines.inc'
 
 org $020108

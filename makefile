@@ -43,15 +43,22 @@ FSSRC ?= $(call NATIVEPATH,src/data/adrive/src)
 
 #build rules
 
-all: objdirs includes include_dirs bosbin bos8xp bosrom
+all: objdirs includes include_dirs bosos bosbin bos8xp bosrom
 
+# Rule to build OS data
+bosos:
+	fasmg $(call NATIVEPATH,src/main.asm) $(call NATIVEPATH,obj/bosos.bin)
+
+# Rule to build docs
 docs:
 	python build_docs.py
 
+# Rule to build include files
 includes:
 	python build_bos_inc.py
 	python build_bos_src.py
 
+# Rule to create object and binary directories
 objdirs:
 	$(call MKDIR,bin)
 	$(call MKDIR,obj)
@@ -126,20 +133,16 @@ $(call NATIVEPATH,src/data/adrive/data.bin): $(call NATIVEPATH,$(FSSRC)/main.asm
 $(call NATIVEPATH,noti-ez80/bin/NOTI.rom):
 	fasmg $(call NATIVEPATH,noti-ez80/src/main.asm) $(call NATIVEPATH,noti-ez80/bin/NOTI.rom)
 
-# Rule to build OS data
-$(call NATIVEPATH,obj/bosos.bin): $(call NATIVEPATH,src/data/adrive/data.bin)
-	fasmg $(call NATIVEPATH,src/main.asm) $(call NATIVEPATH,obj/bosos.bin)
-
 # Rule to build Updater binary
-bosbin: $(call NATIVEPATH,obj/bosos.bin)
+bosbin: $(call NATIVEPATH,src/data/adrive/data.bin)
 	fasmg $(call NATIVEPATH,src/updater.asm) $(call NATIVEPATH,bin/BOSUPDTR.BIN)
 
 # Rule to build Installer 8xp
-bos8xp: $(call NATIVEPATH,obj/bosos.bin)
+bos8xp: $(call NATIVEPATH,src/data/adrive/data.bin)
 	fasmg $(call NATIVEPATH,src/installer8xp.asm) $(call NATIVEPATH,bin/BOSOS.8xp)
 
 # Rule to build ROM image
-bosrom: $(call NATIVEPATH,obj/bosos.bin) $(call NATIVEPATH,noti-ez80/bin/NOTI.rom)
+bosrom: $(call NATIVEPATH,src/data/adrive/data.bin) $(call NATIVEPATH,noti-ez80/bin/NOTI.rom)
 	fasmg $(call NATIVEPATH,src/rom.asm) $(call NATIVEPATH,bin/BOSOS.rom)
 
 #make clean

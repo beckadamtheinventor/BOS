@@ -94,6 +94,7 @@ sys_ExecuteFile:
 	ld hl,(running_program_ptr)
 .exec_rex_entryhl:
 	push hl
+	ld iy,(ExecutingFileFd)
 	ld hl,(iy+fsentry_filelen)
 	ex.s hl,de
 	push de
