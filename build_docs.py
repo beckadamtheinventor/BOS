@@ -57,7 +57,7 @@ def build_docs():
 	with open("docs/style.css","w") as f:
 		f.write("""
 	html{
-		background-color: #100;
+		background-color: #000500;
 	}
 	body{
 		margin: 0 auto;
@@ -118,7 +118,7 @@ def build_docs():
 	<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\"></head>\
 	<body>\
 	<h1>\"bos.inc\" documentation</h1>\
-	<h3>syscalls marked in <a class=\"no_op\">red</a> are no-ops and do nothing.</h3>\
+	<b>\"bos.DONOTHING\" is a no-op and does nothing,</b><br>As the name implies.\
 	<table><th>syscall name</th><th>syscall adress</th>\
 	")
 		with open("docs/tmp.html","w") as f2:
@@ -130,7 +130,7 @@ def build_docs():
 					line=line[line.find("jp ")+3:]
 					if ";" in line:
 						line=line[:line.find(";")]
-					if line.strip(" \t").startswith("DONOTHING"):
+					if "DONOTHING" in line:
 						f.write("<tr class=\"no_op\">")
 					else:
 						f.write("<tr>")
@@ -187,3 +187,6 @@ def build_docs():
 #			zf.write(fname)
 #
 #	print("Done.")
+
+if __name__=='__main__':
+    build_docs()

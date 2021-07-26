@@ -49,8 +49,8 @@ all: objdirs includes include_dirs bosos bosbin bos8xp bosrom
 bosos:
 	fasmg $(call NATIVEPATH,src/main.asm) $(call NATIVEPATH,obj/bosos.bin)
 
-# Rule to build docs
-docs:
+# Rule to build documentation
+documentation:
 	python build_docs.py
 
 # Rule to build include files
