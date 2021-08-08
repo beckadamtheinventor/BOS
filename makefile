@@ -43,7 +43,7 @@ FSSRC ?= $(call NATIVEPATH,src/data/adrive/src)
 
 #build rules
 
-all: objdirs includes include_dirs bosos bosbin bos8xp bosrom
+all: objdirs includes include_dirs $(call NATIVEPATH,src/data/adrive/data.bin) bosos bosbin bos8xp bosrom
 
 # Rule to build OS data
 bosos:
