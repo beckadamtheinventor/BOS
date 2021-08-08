@@ -8,20 +8,29 @@ _ntwk_process:
 	ld	l, 1
 	xor	a, l
 	bit	0, a
-	jq	nz, BB0_3
-BB0_2:
-	ld	hl, 512
+	jq	nz, BB0_4
+	ld	hl, 3
+	push	hl
+	call	_usb_read_to_size
+	pop	hl
+	ld	l, 1
+	xor	a, l
+	bit	0, a
+	jq	nz, BB0_4
+	ld	hl, (_net_buf)
+	push	hl
+	call	_usb_read_to_size
+	pop	hl
+	ld	l, 1
+	xor	a, l
+	bit	0, a
 	push	hl
 	ld	hl, _net_buf
 	push	hl
-	call	_usb_read_to_size
-	pop	de
-	pop	de
-	add	hl, bc
-	or	a, a
-	sbc	hl, bc
-	jq	nz, BB0_2
-BB0_3:
+	call	z, _conn_HandleInput
+	pop	hl
+	pop	hl
+BB0_4:
 	ret
 	section	.text,"ax",@progbits
 
@@ -29,86 +38,43 @@ BB0_3:
 	public	_usb_read_to_size
 _usb_read_to_size:
 	call	__frameset0
-	ld	bc, (ix + 6)
-	ld	hl, (ix + 9)
+	ld	hl, (ix + 6)
 	ld	iy, _net_buf
-	add	hl, bc
-	ld	de, 514
+	ld	de, _srl
+	ld	bc, (_usb_read_to_size.bytes_read)
+	add	iy, bc
+	or	a, a
+	sbc	hl, bc
+	push	hl
+	push	iy
+	push	de
+	call	_srl_Read
+	push	hl
+	pop	de
+	pop	hl
+	pop	hl
+	pop	hl
+	ld	iy, (_usb_read_to_size.bytes_read)
+	add	iy, de
+	ld	de, (ix + 6)
+	lea	hl, iy + 0
 	or	a, a
 	sbc	hl, de
-	push	bc
-	push	iy
-	ld	hl, _srl
-	push	hl
-	ld	hl, 0
-	call	c, _srl_Read
-	pop	de
-	pop	de
-	pop	de
-	pop	ix
-	ret
-	section	.text,"ax",@progbits
-
-	section	.text,"ax",@progbits
-	public	_ntwk_send
-_ntwk_send:
-	ld	hl, -5
-	call	__frameset
-	ld	a, (ix + 6)
-	ld	l, 1
-	ld	(ix + -1), a
-	ld	a, (_network_up)
-	ld	e, a
-	xor	a, l
-	bit	0, a
-	jq	nz, BB2_2
-	ld	hl, (ix + 12)
-	ld	(ix + -5), e
-	ld	de, 4
-	ld	iy, 3
-	add	hl, de
-	ld	(ix + -4), hl
-	push	iy
-	pea	ix + -4
-	call	_usb_write
-	pop	hl
-	pop	hl
-	ld	hl, 1
-	push	hl
-	pea	ix + -1
-	call	_usb_write
-	pop	hl
-	pop	hl
-	ld	hl, (ix + 12)
-	push	hl
-	ld	hl, (ix + 9)
-	push	hl
-	call	_usb_write
-	ld	e, (ix + -5)
-	pop	hl
-	pop	hl
-	ld	l, 1
-BB2_2:
-	ld	a, e
-	xor	a, l
-	xor	a, l
-	ld	sp, ix
-	pop	ix
-	ret
-	section	.text,"ax",@progbits
-
-	section	.text,"ax",@progbits
-	public	_usb_write
-_usb_write:
-	call	__frameset0
-	ld	hl, (ix + 6)
-	ld	de, (ix + 9)
-	ld	bc, _srl
-	push	de
-	push	hl
-	push	bc
-	call	_srl_Write
-	ld	sp, ix
+	lea	hl, iy + 0
+	jq	c, BB1_2
+	or	a, a
+	sbc	hl, hl
+BB1_2:
+	ld	(_usb_read_to_size.bytes_read), hl
+	lea	hl, iy + 0
+	or	a, a
+	sbc	hl, de
+	jq	nc, BB1_3
+	ld	a, 0
+	jq	BB1_5
+BB1_3:
+	ld	a, 1
+BB1_5:
 	pop	ix
 	ret
 	section	.text,"ax",@progbits
@@ -124,41 +90,54 @@ _conn_HandleInput:
 	add	hl, bc
 	or	a, a
 	sbc	hl, bc
-	jq	nz, BB4_2
+	jq	nz, BB2_2
 	push	de
 	call	_sys_Malloc
 	ld	bc, 0
 	pop	de
 	ld	(_incoming_data), hl
-BB4_2:
+BB2_2:
 	ld	hl, (ix + 6)
 	ld	a, (hl)
 	cp	a, 4
-	jq	c, BB4_5
+	jq	c, BB2_4
 	ld	hl, L_.str.2
-BB4_4:
 	push	hl
 	call	_gui_PrintLine
-BB4_24:
 	pop	hl
-	jq	BB4_25
-BB4_5:
+	ld	hl, 33
+	push	hl
+	ld	hl, L_.str.2
+	push	hl
+	or	a, a
+	sbc	hl, hl
+	push	hl
+	call	_ntwk_send
+BB2_23:
+	pop	hl
+	pop	hl
+BB2_24:
+	pop	hl
+	jq	BB2_25
+BB2_4:
 	ld	iy, 1
 	inc	hl
 	ld	(ix + -3), hl
 	push	bc
 	pop	de
 	ld	e, a
-	ld	hl, LJTI4_0
+	ld	hl, LJTI2_0
 	add	hl, de
 	add	hl, de
 	add	hl, de
 	ld	hl, (hl)
 	jp	(hl)
-BB4_6:
+BB2_5:
 	ld	hl, (ix + -3)
-	jq	BB4_4
-BB4_7:
+	push	hl
+	call	_gui_PrintLine
+	jq	BB2_24
+BB2_6:
 	ld	bc, (_incoming_file+12)
 	push	bc
 	pop	hl
@@ -177,10 +156,10 @@ BB4_7:
 	or	a, a
 	sbc	hl, de
 	ld	de, 512
-	jq	c, BB4_9
+	jq	c, BB2_8
 	push	de
 	pop	bc
-BB4_9:
+BB2_8:
 	ld	(ix + -6), bc
 	ld	hl, (_incoming_file+9)
 	push	bc
@@ -199,7 +178,7 @@ BB4_9:
 	ld	de, (ix + -6)
 	add	hl, de
 	ld	(_incoming_file+12), hl
-BB4_10:
+BB2_9:
 	ld	hl, (_outgoing_file)
 	push	hl
 	call	_sys_Free
@@ -226,7 +205,7 @@ BB4_10:
 	add	hl, bc
 	or	a, a
 	sbc	hl, bc
-	jq	z, BB4_17
+	jq	z, BB2_16
 	ld	de, (ix + -6)
 	push	de
 	ld	de, (ix + -3)
@@ -244,7 +223,7 @@ BB4_10:
 	add	hl, bc
 	or	a, a
 	sbc	hl, bc
-	jq	nz, BB4_14
+	jq	nz, BB2_13
 	ld	hl, L_.str
 	push	hl
 	call	_gui_PrintLine
@@ -261,7 +240,7 @@ BB4_10:
 	pop	hl
 	pop	hl
 	ld	hl, (_outgoing_file+9)
-BB4_14:
+BB2_13:
 	push	hl
 	call	_fs_GetFDPtr
 	pop	de
@@ -284,7 +263,7 @@ BB4_14:
 	add	hl, bc
 	or	a, a
 	sbc	hl, bc
-	jq	z, BB4_17
+	jq	z, BB2_16
 	ld	de, (ix + -3)
 	push	de
 	push	hl
@@ -294,7 +273,7 @@ BB4_14:
 	pop	hl
 	pop	hl
 	pop	hl
-BB4_19:
+BB2_18:
 	ld	de, (_incoming_data)
 	ld	(ix + -3), de
 	ld	bc, (_outgoing_file+3)
@@ -340,18 +319,18 @@ BB4_19:
 	ld	de, (ix + -3)
 	or	a, a
 	sbc	hl, de
-	jq	c, BB4_21
+	jq	c, BB2_20
 	ld	iy, 512
-BB4_21:
+BB2_20:
 	ld	de, (ix + -6)
 	add	iy, de
 	ld	(_outgoing_file+12), iy
 	lea	hl, iy + 0
 	or	a, a
 	sbc	hl, bc
-	jq	c, BB4_19
-	jq	BB4_25
-BB4_16:
+	jq	c, BB2_18
+	jq	BB2_25
+BB2_15:
 	ld	hl, (_incoming_file)
 	push	hl
 	call	_sys_Free
@@ -378,14 +357,14 @@ BB4_16:
 	add	hl, bc
 	or	a, a
 	sbc	hl, bc
-	jq	nz, BB4_22
-BB4_17:
+	jq	nz, BB2_21
+BB2_16:
 	call	_malloc_error
-BB4_25:
+BB2_25:
 	ld	sp, ix
 	pop	ix
 	ret
-BB4_22:
+BB2_21:
 	ld	de, (ix + -6)
 	push	de
 	ld	de, (ix + -3)
@@ -403,7 +382,7 @@ BB4_22:
 	add	hl, bc
 	or	a, a
 	sbc	hl, bc
-	jq	nz, BB4_25
+	jq	nz, BB2_25
 	ld	hl, (_incoming_file)
 	ld	de, (_incoming_file+6)
 	push	de
@@ -411,18 +390,80 @@ BB4_22:
 	push	de
 	push	hl
 	call	_fs_CreateFile
-	pop	hl
-	pop	hl
-	jq	BB4_24
+	jq	BB2_23
 	section	.text,"ax",@progbits
 	section	.rodata,"a",@progbits
-lJTI4_0:
-	private	LJTI4_0
-LJTI4_0:
-	dl	BB4_6
-	dl	BB4_16
-	dl	BB4_7
-	dl	BB4_10
+lJTI2_0:
+	private	LJTI2_0
+LJTI2_0:
+	dl	BB2_5
+	dl	BB2_15
+	dl	BB2_6
+	dl	BB2_9
+
+	section	.text,"ax",@progbits
+	public	_ntwk_send
+_ntwk_send:
+	ld	hl, -5
+	call	__frameset
+	ld	a, (ix + 6)
+	ld	l, 1
+	ld	(ix + -1), a
+	ld	a, (_network_up)
+	ld	e, a
+	xor	a, l
+	bit	0, a
+	jq	nz, BB3_2
+	ld	hl, (ix + 12)
+	ld	(ix + -5), e
+	ld	de, 4
+	ld	iy, 3
+	add	hl, de
+	ld	(ix + -4), hl
+	push	iy
+	pea	ix + -4
+	call	_usb_write
+	pop	hl
+	pop	hl
+	ld	hl, 1
+	push	hl
+	pea	ix + -1
+	call	_usb_write
+	pop	hl
+	pop	hl
+	ld	hl, (ix + 12)
+	push	hl
+	ld	hl, (ix + 9)
+	push	hl
+	call	_usb_write
+	ld	e, (ix + -5)
+	pop	hl
+	pop	hl
+	ld	l, 1
+BB3_2:
+	ld	a, e
+	xor	a, l
+	xor	a, l
+	ld	sp, ix
+	pop	ix
+	ret
+	section	.text,"ax",@progbits
+
+	section	.text,"ax",@progbits
+	public	_usb_write
+_usb_write:
+	call	__frameset0
+	ld	hl, (ix + 6)
+	ld	de, (ix + 9)
+	ld	bc, _srl
+	push	de
+	push	hl
+	push	bc
+	call	_srl_Write
+	ld	sp, ix
+	pop	ix
+	ret
+	section	.text,"ax",@progbits
 
 	section	.text,"ax",@progbits
 	public	_malloc_error
@@ -478,67 +519,56 @@ BB6_1:
 	private	_handle_usb_event
 _handle_usb_event:
 	call	__frameset0
-	ld	de, (ix + 6)
-	ld	iy, _srl
+	ld	iy, (ix + 6)
+	xor	a, a
+	ld	de, 0
 	ld	bc, 1
-	push	de
-	pop	hl
+	lea	hl, iy + 0
 	or	a, a
 	sbc	hl, bc
-	jq	nz, BB7_2
-	push	iy
-	call	_srl_Close
-	pop	hl
-	xor	a, a
-	jq	BB7_7
-BB7_2:
+	jq	z, BB7_7
 	ld	bc, 2
-	push	de
-	pop	hl
+	lea	hl, iy + 0
 	or	a, a
 	sbc	hl, bc
 	jq	nz, BB7_4
 	call	_usb_GetRole
+	ld	de, 0
 	ld	a, l
 	bit	4, a
 	jq	z, BB7_5
 	jq	BB7_8
 BB7_4:
 	ld	bc, 8
-	ex	de, hl
+	lea	hl, iy + 0
 	or	a, a
 	sbc	hl, bc
 	jq	nz, BB7_8
 BB7_5:
 	ld	iy, (ix + 9)
-	ld	de, _srl_buf
-	ld	bc, 1024
-	ld	hl, 115200
-	push	hl
-	ld	hl, -1
+	ld	bc, _srl_buf
+	ld	hl, 1024
+	ld	de, -1
+	push	de
 	push	hl
 	push	bc
-	push	de
 	push	iy
 	ld	hl, _srl
 	push	hl
-	call	_srl_Open
-	pop	de
-	pop	de
-	pop	de
-	pop	de
-	pop	de
-	pop	de
-	add	hl, bc
+	call	_srl_Init
+	ld	de, 0
+	pop	hl
+	pop	hl
+	pop	hl
+	pop	hl
+	pop	hl
 	or	a, a
-	sbc	hl, bc
 	jq	nz, BB7_8
 	ld	a, 1
 BB7_7:
 	ld	(_network_up), a
 BB7_8:
-	or	a, a
-	sbc	hl, hl
+	ex	de, hl
 	pop	ix
 	ret
 	section	.text,"ax",@progbits
@@ -581,7 +611,7 @@ L_.str.1:
 	section	.rodata,"a",@progbits
 	private	L_.str.2
 L_.str.2:
-	db	"Warning: Unknown or invalid packet recieved.",000o
+	db	"Unknown/invalid packet recieved.",000o
 
 	section	.rodata,"a",@progbits
 	private	L_.str.3
@@ -589,9 +619,14 @@ L_.str.3:
 	db	"Error: Out of malloc memory. Aborting transfer.",000o
 
 	section	.bss,"aw",@nobits
+	private	_usb_read_to_size.bytes_read
+_usb_read_to_size.bytes_read:
+	rb	3
+
+	section	.bss,"aw",@nobits
 	public	_srl
 _srl:
-	rb	39
+	rb	40
 
 	section	.bss,"aw",@nobits
 	public	_srl_buf
@@ -599,25 +634,24 @@ _srl_buf:
 	rb	1024
 
 	ident	"clang version 12.0.0 (https://github.com/jacobly0/llvm-project 170be88120e3aa88c20eea5615ba76b8f1d6c647)"
-	extern	_srl_Open
 	extern	__Unwind_SjLj_Register
 	extern	__frameset
 	extern	_srl_Write
 	extern	_srl_GetCDCStandardDescriptors
 	extern	_fs_CreateFile
-	extern	_srl_Close
 	extern	_gui_PrintLine
 	extern	_fs_GetFDPtr
 	extern	_fs_GetFDLen
 	extern	_fs_OpenFile
-	extern	_memcpy
 	extern	_usb_HandleEvents
-	extern	_sys_Malloc
+	extern	_memcpy
 	extern	_strlen
+	extern	_sys_Malloc
 	extern	_usb_GetRole
 	extern	_fs_Write
 	extern	__Unwind_SjLj_Unregister
 	extern	_sys_Free
+	extern	_srl_Init
 	extern	_srl_Read
 	extern	__frameset0
 	extern	_usb_Init

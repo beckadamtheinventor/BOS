@@ -40,10 +40,11 @@ fs_dir bin_dir
 	fs_sfentry writeinto_exe, ">", "", f_readonly+f_system+f_subfile
 	fs_sfentry appendinto_exe, ">>", "", f_readonly+f_system+f_subfile
 	fs_sfentry boot_exe, "boot", "", f_readonly+f_system+f_subfile
-	fs_entry bpkload_exe, "bpk", "", f_readonly+f_system
+	; fs_entry bpkload_exe, "bpk", "", f_readonly+f_system
 	; fs_entry bpm_exe, "bpm", "", f_readonly+f_system
 	fs_sfentry cat_exe, "cat", "", f_readonly+f_system+f_subfile
 	fs_sfentry cd_exe, "cd", "", f_readonly+f_system+f_subfile
+	fs_entry cedit_exe, "cedit", "", f_readonly+f_system
 	fs_sfentry cmd_exe, "cmd", "", f_readonly+f_system+f_subfile
 	fs_sfentry cls_exe, "cls", "", f_readonly+f_system+f_subfile
 	fs_sfentry cp_exe, "cp", "", f_readonly+f_system+f_subfile
@@ -60,10 +61,11 @@ fs_dir bin_dir
 	fs_sfentry mkfile_exe, "mkfile", "", f_readonly+f_system+f_subfile
 	fs_sfentry off_exe, "off", "", f_readonly+f_system+f_subfile
 	fs_sfentry rm_exe, "rm", "", f_readonly+f_system+f_subfile
-	; fs_entry serial_exe, "serial", "", f_readonly+f_system
+	fs_entry serial_exe, "serial", "", f_readonly+f_system
+	fs_sfentry sleep_exe, "sleep", "", f_readonly+f_system+f_subfile
 	; fs_entry transfer_exe, "transfer", "", f_readonly+f_system
-	fs_entry usbrecv_exe, "usbrecv", "", f_readonly+f_system
-	fs_entry usbrun_exe, "usbrun", "", f_readonly+f_system
+	; fs_entry usbrecv_exe, "usbrecv", "", f_readonly+f_system
+	; fs_entry usbrun_exe, "usbrun", "", f_readonly+f_system
 	; fs_entry usbsend_exe, "usbsend", "", f_readonly+f_system
 end fs_dir
 
@@ -105,6 +107,8 @@ fs_file os_internal_subfiles
 	dw mkfile_exe-$, mkfile_exe.len
 	db "off",0,f_readonly+f_system+f_subfile
 	dw off_exe-$, off_exe.len
+	db "sleep",0,f_readonly+f_system+f_subfile
+	dw sleep_exe-$, sleep_exe.len
 	db $FF
 	fs_subfile writeinto_exe, bin_dir
 		include 'fs/bin/writeinto.asm'
@@ -169,6 +173,10 @@ fs_file os_internal_subfiles
 	fs_subfile off_exe, bin_dir
 		include 'fs/bin/off.asm'
 	end fs_subfile
+
+	fs_subfile sleep_exe, bin_dir
+		include 'fs/bin/sleep.asm'
+	end fs_subfile
 end fs_file
 
 ;"/dev/" directory
@@ -198,6 +206,7 @@ fs_dir etc_dir
 	fs_entry root_dir, "..", "", f_subdir
 	fs_entry etc_config_dir, "config", "", f_subdir
 	fs_entry etc_data_dir, "data", "", f_subdir
+	fs_entry etc_fontlibc_dir, "fontlibc", "", f_subdir
 	fs_entry etc_plugins_dir, "plugins", "", f_subdir
 end fs_dir
 
@@ -326,6 +335,11 @@ end fs_dir
 	; fs_entry explorer_serial_exe, "serial", "", 0
 ; end fs_dir
 
+fs_dir etc_fontlibc_dir
+	fs_entry etc_dir, "..", "", f_subdir
+	fs_entry etc_fontlibc_drmono, "DrMono", "", f_system+f_readonly
+end fs_dir
+
 ;-------------------------------------------------------------
 ;file data section
 ;-------------------------------------------------------------
@@ -390,21 +404,21 @@ fs_file memedit_exe
 	file '../obj/memedit.bin'
 end fs_file
 
-fs_file usbrun_exe
-	file "../obj/usbrun.bin"
-end fs_file
+; fs_file usbrun_exe
+	; file "../obj/usbrun.bin"
+; end fs_file
 
 ; fs_file usbsend_exe
 	; file "../obj/usbsend.bin"
 ; end fs_file
 
-fs_file usbrecv_exe
-	file '../obj/usbrecv.bin'
-end fs_file
+; fs_file usbrecv_exe
+	; file '../obj/usbrecv.bin'
+; end fs_file
 
-fs_file bpkload_exe
-	file '../obj/bpkload.bin'
-end fs_file
+; fs_file bpkload_exe
+	; file '../obj/bpkload.bin'
+; end fs_file
 
 fs_file fsutil_exe
 	include 'fs/sbin/fsutil.asm'
@@ -458,9 +472,17 @@ end fs_file
 	; db "serial",$A,0
 ; end fs_file
 
-; fs_file serial_exe
-	; file 'fs/bin/serial/bosbin/serial.bin'
-; end fs_file
+fs_file serial_exe
+	file 'fs/bin/serial/bosbin/serial.bin'
+end fs_file
+
+fs_file cedit_exe
+	file 'fs/bin/cedit/bosbin/cedit.bin'
+end fs_file
+
+fs_file etc_fontlibc_drmono
+	file 'fs/etc/fontlibc/DrMono.bin'
+end fs_file
 
 end fs_fs
 

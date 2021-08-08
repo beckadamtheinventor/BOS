@@ -136,8 +136,6 @@ end namespace
 macro ezf?
 	local _ezf
 
-	load _ezf.sectionlabels:
-
 	virtual
 		db $7F,"EZF"
 		load _ezf.header: $-$$ from $$
@@ -174,22 +172,13 @@ macro ezf?
 	end macro
 
 	macro public? sectionlabel
-		sectionlabel = $FFFFFF
 		virtual _ezf.publics_table
 			db ezsec.public
 			dl 0
 			dw sectionlabel.header
 			dw sectionlabel._pub_relocation_table
 		end virtual
-		virtual _ezf.relocation_offsets
-			sectionlabel._pub_relocation_table:
-			irpv each, sectionlabel
-				if each < $10000
-					dw each
-				end if
-			end irpv
-			dw 0
-		end virtual
+		sectionlabel.ispublic = 1
 	end macro
 
 	macro export? sectionlabel, sectionname
@@ -198,15 +187,7 @@ macro ezf?
 			sectionlabel.nameloc:
 			db sectionname, 0
 		end virtual
-		virtual _ezf.relocation_offsets
-			sectionlabel._exp_relocation_table:
-			irpv each, sectionlabel
-				if each < $10000
-					dw each
-				end if
-			end irpv
-			dw 0
-		end virtual
+		sectionlabel.isexport = 1
 		virtual _ezf.exports_table
 			sectionlabel.headerloc:
 			db ezsec.export
@@ -218,19 +199,12 @@ macro ezf?
 	end macro
 
 	macro extern? sectionlabel, sectionname
-		sectionlabel = $FFFFFF
 		virtual _ezf.function_names
 			dw lengthof sectionname
 			sectionlabel.externnameloc:
 			db sectionname, 0
 		end virtual
-		virtual _ezf.relocation_offsets
-			sectionlabel._ext_relocation_table:
-			irpv each, sectionlabel
-				dw each
-			end irpv
-			dw 0
-		end virtual
+		sectionlabel.isextern = 1
 		virtual _ezf.externs_table
 			db ezsec.extern
 			dl sectionlabel.externnameloc
@@ -249,11 +223,26 @@ macro ezf?
 			dw sectionlabel.sectionsize
 			sectionlabel.headerend:
 		end virtual
+		macro @ez80.word? @value*
+			local value, address
+			value = @value
+			if value relativeto sectionaddress
+				virtual _ezf.relocation_offsets
+					dw $ - $$
+				end virtual
+				@ez80.word $FFFFFF
+			else
+				@ez80.word value
+			end if
+		end macro
 		sectionlabel.sectionsource:
 		virtual at sectionaddress
 		macro end?.section?
 			sectionlabel.sectionsize = $-$$
 			load sectionlabel.sectiondata: $-$$ from $$
+			end virtual
+			virtual _ezf.relocation_offsets
+				dw $FFFF
 			end virtual
 			sectionlabel.end:
 			sectionlabel.sectionsource_offset = $

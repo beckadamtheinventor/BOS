@@ -144,13 +144,13 @@ char *gui_Input(char *buffer, unsigned int len);
 /**
  * Blit the back buffer to the LCD.
  */
-void gfx_BlitBuffer(void);
+void bosgfx_BlitBuffer(void);
 
 /**
  * Print a string to the current text draw position.
  * @param str Pointer to string to print.
  */
-void gfx_PrintString(const char *str);
+void bosgfx_PrintString(const char *str);
 
 /**
  * Scan the keypad and return a scan code.
@@ -374,12 +374,12 @@ void *fs_CreateDir(const char *path, uint8_t flags);
 /**
  * Clear LCD buffer.
  */
-void gfx_BufClear(void);
+void bosgfx_BufClear(void);
 
 /**
  * Clear the LCD.
  */
-void gfx_LcdClear(void);
+void bosgfx_LcdClear(void);
 
 /**
  * Run a sanity check on the filesystem.
@@ -456,7 +456,7 @@ void fs_GarbageCollect(void);
 /**
  * Swap text 1 and 2 colors.
  */
-void gfx_SwapTextColors(void);
+void bosgfx_SwapTextColors(void);
 
 /**
  * Create a new file and write contents to it.
@@ -473,12 +473,12 @@ void *fs_WriteNewFile(const char *path, uint8_t properties, void *data, int len)
  * @return Pointer to old font data.
  * @note font data structure: uint8_t num_bitmaps, uint8_t spacing[], uint8_t data[]
  */
-void *gfx_SetFont(void *data);
+void *bosgfx_SetFont(void *data);
 
 /**
  * Set Font to default
  */
-void gfx_SetDefaultFont(void);
+void bosgfx_SetDefaultFont(void);
 
 /**
  * Decompress a block of zx7-compressed memory.

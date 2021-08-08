@@ -1,0 +1,9 @@
+library	"SRLDRVCE", 0
+	export	srl_Init ; 0
+	export	srl_SetRate ; 3
+	export	srl_Available ; 6
+	export	srl_Read ; 9
+	export	srl_Write ; 12
+	export	srl_Read_Blocking ; 15
+	export	srl_Write_Blocking ; 18
+	export	srl_GetCDCStandardDescriptors ; 21

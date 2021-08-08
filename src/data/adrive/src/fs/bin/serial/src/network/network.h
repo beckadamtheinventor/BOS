@@ -47,6 +47,6 @@ static usb_error_t handle_usb_event(usb_event_t event, void *event_data,
 
 
 void usb_write(void *buf, size_t size);
-unsigned int usb_read_to_size(size_t size, unsigned int offset);
+bool usb_read_to_size(size_t size);
 
 #endif

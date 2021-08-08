@@ -15,14 +15,16 @@ bool network_up = false;
 void ntwk_process(void) {
 	usb_process();
 
-	/* If the device was disconnected, exit */
+	/* Only read if the device is connected */
 	if(network_up) {
 		size_t len;
-		size_t packet_size = 0;
-		do {
-			len = usb_read_to_size(&net_buf, 512);
-			packet_size += len;
-		} while (len);
+		if (usb_read_to_size(3)){
+			len = *(unsigned int *)&net_buf;
+			len = usb_read_to_size(len);
+			if (len > 0){
+				conn_HandleInput(&net_buf, len);
+			}
+		}
 	}
 }
 
@@ -100,7 +102,8 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
 			}
 			break;
 		default:
-			gui_PrintLine("Warning: Unknown or invalid packet recieved.");
+			gui_PrintLine("Unknown/invalid packet recieved.");
+			ntwk_send(0, PS_STR("Unknown/invalid packet recieved."));
 			break;
 	}
 }
@@ -125,25 +128,25 @@ static usb_error_t handle_usb_event(usb_event_t event, void *event_data,
 	/* When a device is connected, or when connected to a computer */
 	if ((event == USB_DEVICE_CONNECTED_EVENT && !(usb_GetRole() & USB_ROLE_DEVICE)) || event == USB_HOST_CONFIGURE_EVENT) {
 		usb_device_t device = event_data;
-		if (!(srl_error = srl_Open(&srl, device, srl_buf, (sizeof(srl_buf)), SRL_INTERFACE_ANY, 115200))) {
+		if (!(srl_error = srl_Init(&srl, device, srl_buf, (sizeof(srl_buf)), SRL_INTERFACE_ANY))) {
+			// srl_SetRate(&srl, 115200);
 			network_up = true;
 		}
 	}
 
 	/* When a device is disconnected */
 	if(event == USB_DEVICE_DISCONNECTED_EVENT) {
-		srl_Close(&srl);
 		network_up = false;
 	}
 
 	return USB_SUCCESS;
 }
 
-unsigned int usb_read_to_size(size_t size, unsigned int offset) {
-	if (offset + size > (sizeof(net_buf))){
-		return 0;
-	}
-	return srl_Read(&srl, &net_buf, size);
+bool usb_read_to_size(size_t size) {
+	static bytes_read = 0;
+	bytes_read += srl_Read(&srl, &net_buf[bytes_read], size - bytes_read);
+	if(bytes_read >= size) {bytes_read = 0; return true;}
+	else return false;
 }
 
 void usb_write(void *buf, size_t size) {

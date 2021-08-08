@@ -33,7 +33,7 @@ boot_main:
 	call bos.fs_OpenFile
 	pop bc
 	call c,generate_boot_configs
-;	jq c,boot_fail ;there's really no need to critical error if we can't create config files
+	jq c,boot_default
 
 	call bos.sys_GetKey
 	cp a,53
@@ -55,6 +55,15 @@ boot_main:
 	; call bos.sys_ExecuteFile
 	; pop bc
 	; pop bc
+	ret
+
+boot_default:
+	ld bc,$FF0000
+	push bc
+	ld bc,str_ExplorerExecutable
+	push bc
+	call bos.sys_ExecuteFile
+	pop bc,bc
 	ret
 
 generate_boot_configs:
