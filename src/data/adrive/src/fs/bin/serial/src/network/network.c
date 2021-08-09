@@ -129,7 +129,7 @@ static usb_error_t handle_usb_event(usb_event_t event, void *event_data,
 	if ((event == USB_DEVICE_CONNECTED_EVENT && !(usb_GetRole() & USB_ROLE_DEVICE)) || event == USB_HOST_CONFIGURE_EVENT) {
 		usb_device_t device = event_data;
 		if (!(srl_error = srl_Init(&srl, device, srl_buf, (sizeof(srl_buf)), SRL_INTERFACE_ANY))) {
-			// srl_SetRate(&srl, 115200);
+			srl_SetRate(&srl, 115200);
 			network_up = true;
 		}
 	}

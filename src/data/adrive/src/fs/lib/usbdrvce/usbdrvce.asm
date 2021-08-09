@@ -297,8 +297,8 @@ end struct
 ;-------------------------------------------------------------------------------
 ; memory locations
 ;-------------------------------------------------------------------------------
-virtual at (bos.safeRAM+$FFFF) and not $FFFF
-	cHeap			dbx (bos.safeRAM+65535) and not $FF - $: ?
+virtual at $D10000
+	cHeap			dbx (bos.usbArea - $) and not $FF: ?
 end virtual
 virtual at usbArea
 				rb (-$) and 7

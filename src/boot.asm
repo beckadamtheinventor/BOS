@@ -64,7 +64,7 @@ assert ~thread_temp_save and $FF
 	ld hl,thread_temp_save
 	ld de,os_return
 	ld (hl),de
-	ld de,ti.stackBot
+	ld de,ti.stackTop
 	ld l,3
 	ld (hl),de
 	ld l,12
@@ -262,7 +262,7 @@ os_return:
 	cp a,53
 	jq nz,os_return
 
-	ld sp,ti.stackBot
+	ld sp,ti.stackTop
 os_recovery_menu:
 	xor a,a
 	ld (lcd_bg_color),a
