@@ -60,6 +60,9 @@ fs_dir bin_dir
 	fs_sfentry mkdir_exe, "mkdir", "", f_readonly+f_system+f_subfile
 	fs_sfentry mkfile_exe, "mkfile", "", f_readonly+f_system+f_subfile
 	fs_sfentry off_exe, "off", "", f_readonly+f_system+f_subfile
+	fs_sfentry osrt_so, "osrt", "so", f_readonly+f_system+f_subfile
+	fs_sfentry peek_exe, "peek", "", f_readonly+f_system+f_subfile
+	fs_sfentry poke_exe, "poke", "", f_readonly+f_system+f_subfile
 	fs_sfentry rm_exe, "rm", "", f_readonly+f_system+f_subfile
 	fs_entry serial_exe, "serial", "", f_readonly+f_system
 	fs_sfentry sleep_exe, "sleep", "", f_readonly+f_system+f_subfile
@@ -109,6 +112,12 @@ fs_file os_internal_subfiles
 	dw off_exe-$, off_exe.len
 	db "sleep",0,f_readonly+f_system+f_subfile
 	dw sleep_exe-$, sleep_exe.len
+	db "osrt.so",0,f_readonly+f_system+f_subfile
+	dw osrt_so-$, osrt_so.len
+	db "peek",0,f_readonly+f_system+f_subfile
+	dw peek_exe-$, peek_exe.len
+	db "poke",0,f_readonly+f_system+f_subfile
+	dw poke_exe-$, poke_exe.len
 	db $FF
 	fs_subfile writeinto_exe, bin_dir
 		include 'fs/bin/writeinto.asm'
@@ -177,6 +186,19 @@ fs_file os_internal_subfiles
 	fs_subfile sleep_exe, bin_dir
 		include 'fs/bin/sleep.asm'
 	end fs_subfile
+
+	fs_subfile osrt_so, bin_dir
+		include 'fs/bin/osrt.so.asm'
+	end fs_subfile
+
+	fs_subfile peek_exe, bin_dir
+		include 'fs/bin/peek.asm'
+	end fs_subfile
+
+	fs_subfile poke_exe, bin_dir
+		include 'fs/bin/poke.asm'
+	end fs_subfile
+
 end fs_file
 
 ;"/dev/" directory

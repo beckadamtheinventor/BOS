@@ -17,6 +17,23 @@ INSTALLER8XP := 1
 	call ti.RunIndicOff
 	call ti.ClrLCD
 	call ti.HomeUp
+	ld iy,ti.flags
+	ld hl,second_binary_appvar
+	call ti.Mov9ToOP1
+	call ti.ChkFindSym
+	jq c,fail_missing_secondary
+	call ti.ChkInRam
+	ex de,hl
+	jr z,secondary_in_ram
+	ld de,9
+	add	hl,de
+	ld e,(hl)
+	add	hl,de
+	inc	hl
+secondary_in_ram:
+	call ti.LoadDEInd_s
+	ld (os_second_binary),hl
+	ld (os_second_binary.len),de
 	ld hl,backup_tios_querry
 	call _printline
 waitkey:
@@ -78,24 +95,33 @@ do_installation:
 	call _printline
 	os_create $05 ;erase up until sector $05 to erase OS sectors and trigger BOS to format/convert the filesystem.
 
+fail_missing_secondary:
+	ld hl,missing_secondary_str
+	call _printline
+	jp ti.RunIndicOn
+
 _printline:
 	call ti.PutS
 	jp ti.NewLine
 
+second_binary_appvar:
+	db ti.AppVarObj,"BOSOSpt2"
 installing_string:
 	db "Installing BOS...",0
 backup_tios_querry:
 	db "Back up TIOS? Y/N",0
-backingup_os_string:
-	db "Backing up TIOS...",0
-installation_failed_string:
-	db "Need more ARC. Aborting.",0
-install_info_string:
-	db "Please run a Garbage",0
-	db "Collect then re-run the",0
-	db "installer.",0
+missing_secondary_str:
+	db "Missing AppVar BOSOSpt2",0
+; backingup_os_string:
+	; db "Backing up TIOS...",0
+; installation_failed_string:
+	; db "Need more ARC. Aborting.",0
+; install_info_string:
+	; db "Please run a Garbage",0
+	; db "Collect then re-run the",0
+	; db "installer.",0
 
-tios_backup_file:
-	db ti.AppVarObj,"TIOSbkpA",0
+; tios_backup_file:
+	; db ti.AppVarObj,"TIOSbkpA",0
 
 write_os_binary

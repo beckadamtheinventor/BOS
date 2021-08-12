@@ -243,6 +243,7 @@ handle_offsetcall:
 os_GetOSInfo:
 	ld hl,string_os_info
 os_DoNothing:
+DONOTHING:
 	ret
 
 os_return:

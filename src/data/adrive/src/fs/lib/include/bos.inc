@@ -199,8 +199,9 @@ namespace bos
 ?ScrapWord              := $D0027D
 ?ScrapMem               := $D0027D
 ?ExecutingFileFd        := $D00280 ; 3 bytes. Pointer to currently executing file descriptor. -1 if file not found. 0 if file descriptor is not applicable
-?LastCommandResult      := $D00283 ; 3 bytes. Points to result of previously executed command
-?last_keypress          := $D00286 ; 1 byte. Last keypress returned by an os getkey routine
+?LastCommandResult      := $D00283 ; 4 bytes. Stores result of previously executed command
+?last_keypress          := $D00287 ; 1 byte. Last keypress returned by an os getkey routine
+?return_code_flags      := $D00288 ; flag byte that determines how to interpret the return value of the last run program. Is to be set within the program for non-default return interpretation.
 ?open_files_table       := $D00300
 ?InputBuffer            := $D00400
 ?gfx_string_temp        := $D00500
@@ -265,6 +266,9 @@ namespace bos
 ?bKeepFlashUnlocked   := 1
 ?mIsFlashUnlocked     := 1
 ?mKeepFlashUnlocked   := 2
+?bReturnNotError      := 0
+?bReturnHex           := 1
+?bReturnLong          := 2
 ?fs_cmap_length := 7040
 
 end namespace

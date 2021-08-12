@@ -1,4 +1,6 @@
 #!/usr/bin/python3
+from os import path
+
 def error(e):
 	print("Something went wrong!")
 	print("Error:",e)
@@ -8,17 +10,17 @@ def myhex(n):
 	return hex(n).replace("0x","").upper()
 
 try:
-	with open("src/table.asm") as f:
+	with open(path.join(path.dirname(__file__), "src", "table.asm")) as f:
 		data=f.read().splitlines()
 except Exception as e:
 	error(e)
 try:
-	with open("src/include/defines.inc") as f:
+	with open(path.join(path.dirname(__file__), "src", "include", "defines.inc")) as f:
 		defines=f.read().splitlines()
 except Exception as e:
 	error(e)
 try:
-	with open("src/include/boot_calls.inc") as f:
+	with open(path.join(path.dirname(__file__), "src", "include", "boot_calls.inc")) as f:
 		bootcalls=f.read()
 except Exception as e:
 	error(e)
@@ -26,7 +28,7 @@ except Exception as e:
 def build_bos_inc():
 	counter=0x020108
 
-	with open("bos.inc","w") as f:
+	with open(path.join(path.dirname(__file__), "bos.inc"),"w") as f:
 		f.write("""
 define bos? bos
 namespace bos

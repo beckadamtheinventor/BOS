@@ -9,6 +9,8 @@ sys_ExecuteFile:
 	scf
 	sbc hl,hl
 	ld (ExecutingFileFd),hl
+	xor a,a
+	ld (return_code_flags),a
 	pop bc
 	pop hl
 	pop de

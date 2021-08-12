@@ -201,7 +201,8 @@ execute_program_string:
 	push hl ;push path
 	call bos.sys_ExecuteFile
 	ld (bos.LastCommandResult),hl
-	ld (ix-9),hl
+	ld a,e
+	ld (bos.LastCommandResult+3),a
 	ld hl,(bos.ExecutingFileFd) ;check if the currently executing file descriptor is -1
 	inc hl
 	add hl,bc
@@ -221,8 +222,13 @@ execute_program_string:
 	or a,a
 	sbc hl,hl
 	ld (ix-6),hl
-	ld hl,(ix-9)
-	ld a,(ix-7)
+	xor a,a
+	ld (bos.curcol),a
+	ld a,(bos.return_code_flags)
+	bit bos.bReturnNotError,a
+	jq nz,.program_returned_number
+	ld hl,(bos.LastCommandResult)
+	ld a,(bos.LastCommandResult+2)
 	or a,h
 	or a,l
 	ret z ;don't print anything if program returned 0
@@ -230,13 +236,31 @@ execute_program_string:
 	or a,a
 	ret nz ;don't print anything if we're ignoring exit codes
 	call bos.gfx_BlitBuffer
-	xor a,a
-	ld (bos.curcol),a
+	ld a,(bos.return_code_flags)
+	bit bos.bReturnHex,a
+	jq nz,.program_returned_hex
 	ld hl,str_ProgramFailedWithCode
 	call bos.gui_PrintString
-	ld hl,(ix-9)
+.program_returned_number:
+	bit bos.bReturnHex,a
+	jq nz,.program_returned_hex
+	ld hl,(bos.LastCommandResult)
 	call bos.gui_PrintInt
+.newline_and_return:
 	call bos.gui_NewLine
+	jp bos.gfx_BlitBuffer
+.program_returned_hex:
+	ld hl,bos.LastCommandResult
+	ld de,bos.gfx_string_temp
+	bit bos.bReturnLong,a
+	jq nz,.program_returned_long
+	call osrt.int_to_hexstr
+	jq .print_string_temp
+.program_returned_long:
+	call osrt.long_to_hexstr
+.print_string_temp:
+	ld hl,bos.gfx_string_temp
+	call bos.gui_PrintLine
 	jp bos.gfx_BlitBuffer
 .file_not_found:
 	pop bc,bc
@@ -247,7 +271,6 @@ execute_program_string:
 	ld (ix-9),hl
 	ld hl,str_CouldNotLocateExecutable
 	jp bos.gui_Print
-
 cmd_exit_retneg1:
 	scf
 	sbc hl,hl

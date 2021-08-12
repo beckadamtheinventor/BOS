@@ -68,6 +68,55 @@ osrt.hexstr_to_int.add_a:
 	ld l,a
 	jr osrt.hexstr_to_int.loop
 
+; input hl pointer to number
+; input de pointer to output buffer
+osrt.long_to_hexstr:
+	ld b,4
+	inc hl
+	inc hl
+	db $01 ;dummify next 3 bytes
+
+; input hl pointer to number
+; input de pointer to output buffer
+osrt.int_to_hexstr:
+	ld b,3
+	inc hl
+	inc hl ;osrt.long_to_hexstr will enter here
+osrt.int_to_hexstr.loop:
+	call osrt.byte_to_hexstr
+	djnz osrt.int_to_hexstr.loop
+	ret
+
+; input hl pointer to input
+; input de pointer to output
+osrt.byte_to_hexstr:
+	ld a,(hl)
+	rrca
+	rrca
+	rrca
+	rrca
+	call osrt.nibble
+	ld (de),a
+	inc de
+	ld a,(hl)
+	dec hl
+	call osrt.nibble
+	ld (de),a
+	inc de
+	ret
+
+; input a nibble (upper 4 bits are ignored)
+; output a hex character
+osrt.nibble:
+	and a,$F
+	cp a,10
+	jq nc,osrt.nibble.over9
+	add a,'0'
+	ret
+osrt.nibble.over9:
+	add a,'A'-10
+	ret
+
 ; input a number of bytes to read
 ; input hl address to read from
 osrt.read_a_from_addr:
@@ -159,6 +208,11 @@ osrt.set_long_at_addr:
 	dec hl
 	dec hl
 	ld (hl),bc
+	ret
+
+osrt.return_neg_one:
+	scf
+	sbc hl,hl
 	ret
 
 osrt.check_address_writable:

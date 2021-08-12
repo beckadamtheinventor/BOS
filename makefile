@@ -43,7 +43,7 @@ FSSRC ?= $(call NATIVEPATH,src/data/adrive/src)
 
 #build rules
 
-all: objdirs includes include_dirs $(call NATIVEPATH,src/data/adrive/data.bin) bosos bosbin bos8xp bosrom
+all: objdirs includes include_dirs filesystem bosos bosbin bos8xp bosrom
 
 # Rule to build OS data
 bosos:
@@ -65,10 +65,9 @@ objdirs:
 	$(call MKDIR,$(call NATIVEPATH,noti-ez80/bin))
 	$(call MKDIR,$(call NATIVEPATH,src/data/adrive/obj))
 
-include_dirs: $(call NATIVEPATH,src/include/*)
-
-$(call NATIVEPATH,src/include/*): includes
+include_dirs:
 	$(CP) bos.inc $(call NATIVEPATH,src/include/bos.inc)
+	$(CPDIR) $(call NATIVEPATH,src/include) $(call NATIVEPATH,$(FSSRC)/include)
 	$(CPDIR) $(call NATIVEPATH,src/include) $(call NATIVEPATH,$(FSSRC)/fs/include)
 	$(CPDIR) $(call NATIVEPATH,src/include) $(call NATIVEPATH,$(FSSRC)/fs/lib/include)
 
@@ -122,27 +121,28 @@ $(call NATIVEPATH,$(FSOBJ)/usbsend.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/usbse
 
 
 # Rule to build Filesytem and compress it
-$(call NATIVEPATH,src/data/adrive/data.bin): $(call NATIVEPATH,$(FSSRC)/main.asm) $(call NATIVEPATH,$(FSOBJ)/libload.bin) $(call NATIVEPATH,$(FSOBJ)/fatdrvce.bin) \
+filesystem: $(call NATIVEPATH,$(FSSRC)/main.asm) $(call NATIVEPATH,$(FSOBJ)/libload.bin) $(call NATIVEPATH,$(FSOBJ)/fatdrvce.bin) \
 	$(call NATIVEPATH,$(FSOBJ)/fileioc.bin) $(call NATIVEPATH,$(FSOBJ)/fontlibc.bin) $(call NATIVEPATH,$(FSOBJ)/graphx.bin) $(call NATIVEPATH,$(FSOBJ)/keypadc.bin) \
 	$(call NATIVEPATH,$(FSOBJ)/srldrvce.bin) $(call NATIVEPATH,$(FSOBJ)/usbdrvce.bin) $(call NATIVEPATH,$(FSOBJ)/bpkload.bin) $(call NATIVEPATH,$(FSOBJ)/memedit.bin) \
 	$(call NATIVEPATH,$(FSOBJ)/usbrecv.bin) $(call NATIVEPATH,$(FSOBJ)/usbrun.bin) $(call NATIVEPATH,$(FSOBJ)/usbsend.bin) $(call NATIVEPATH,$(FSOBJ)/explorer.bin)
 	fasmg $(call NATIVEPATH,$(FSSRC)/main.asm) $(call NATIVEPATH,src/data/adrive/main.bin)
 	convbin -i $(call NATIVEPATH,src/data/adrive/main.bin) -o $(call NATIVEPATH,src/data/adrive/data.bin) -j bin -k bin -c zx7
+	convbin -i $(call NATIVEPATH,src/data/adrive/data.bin) -o $(call NATIVEPATH,bin/BOSOSpt2.8xv) -j bin -k 8xv -n BOSOSpt2
 
 # Rule to build noti-ez80 submodule required for standalone ROM image
 $(call NATIVEPATH,noti-ez80/bin/NOTI.rom):
 	fasmg $(call NATIVEPATH,noti-ez80/src/main.asm) $(call NATIVEPATH,noti-ez80/bin/NOTI.rom)
 
 # Rule to build Updater binary
-bosbin: $(call NATIVEPATH,src/data/adrive/data.bin)
+bosbin:
 	fasmg $(call NATIVEPATH,src/updater.asm) $(call NATIVEPATH,bin/BOSUPDTR.BIN)
 
 # Rule to build Installer 8xp
-bos8xp: $(call NATIVEPATH,src/data/adrive/data.bin)
+bos8xp:
 	fasmg $(call NATIVEPATH,src/installer8xp.asm) $(call NATIVEPATH,bin/BOSOS.8xp)
 
 # Rule to build ROM image
-bosrom: $(call NATIVEPATH,src/data/adrive/data.bin) $(call NATIVEPATH,noti-ez80/bin/NOTI.rom)
+bosrom: $(call NATIVEPATH,noti-ez80/bin/NOTI.rom)
 	fasmg $(call NATIVEPATH,src/rom.asm) $(call NATIVEPATH,bin/BOSOS.rom)
 
 #make clean
@@ -151,4 +151,6 @@ clean:
 	$(call RMDIR,obj)
 	$(call RMDIR,$(call NATIVEPATH,noti-ez80/bin))
 	$(call RMDIR,$(call NATIVEPATH,src/data/adrive/obj))
+	$(RM) $(call NATIVEPATH,src/data/adrive/data.bin)
+	$(RM) $(call NATIVEPATH,src/data/adrive/main.bin)
 	$(Q)echo Removed objects and binaries.

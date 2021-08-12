@@ -14,12 +14,11 @@ include 'sys.inc'
 include 'util.inc'
 include 'fs.inc'
 include 'gui.inc'
-include 'data.inc'
 include 'compatibility.inc'
-
-DONOTHING:
-	ret
+include 'data.inc'
 
 macro exaf
 	db $08 ;why does the comma in ex af,af' have to screw with things? >_>
 end macro
+
+fs_drive_a_data_compressed_bin := $+4 ; this MUST be at the end of the OS data, so we can write the filesystem data directly following. The +4 is important.

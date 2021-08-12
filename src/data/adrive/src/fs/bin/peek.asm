@@ -1,10 +1,13 @@
 	jq peek_main
 	db "FEX",0
 peek_main:
+	ld hl,bos.return_code_flags
+	set bos.bReturnHex,(hl)
+	set bos.bReturnNotError,(hl)
 	pop bc
 	ex (sp),hl
 	push bc
-	ld a,(de)
+	ld a,(hl)
 	ld c,1
 	cp a,'b'
 	jq z,.preinchl
@@ -25,4 +28,5 @@ peek_main:
 	push hl
 	call osrt.hexstr_to_int
 	pop bc,bc
+	ld a,c
 	jq osrt.read_a_from_addr
