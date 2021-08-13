@@ -118,7 +118,7 @@
 	jp gfx_SetDefaultFont
 	jp sys_FreeRunningProcessId
 	jp util_Zx7Decompress
-	jp DONOTHING
+	jp sys_CheckMallocRAM
 	jp gfx_Compute
 	jp gfx_FillRectangle
 	jp gfx_FillScreen
@@ -151,5 +151,3 @@
 	jp _OP1ToPath
 	jp th_WaitKeyCycle
 	jp fs_JoinPath
-
-

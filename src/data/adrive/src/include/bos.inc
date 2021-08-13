@@ -122,7 +122,7 @@ namespace bos
 ?gfx_SetDefaultFont              := $202D8
 ?sys_FreeRunningProcessId        := $202DC
 ?util_Zx7Decompress              := $202E0
-;DONOTHING                       := $202E4
+?sys_CheckMallocRAM              := $202E4
 ?gfx_Compute                     := $202E8
 ?gfx_FillRectangle               := $202EC
 ?gfx_FillScreen                  := $202F0
@@ -155,8 +155,6 @@ namespace bos
 ?_OP1ToPath                      := $2035C
 ?th_WaitKeyCycle                 := $20360
 ?fs_JoinPath                     := $20364
-;
-;
 ; defines
 ?LCD_PAL?    := 0E30200h
 ?LCD_CTRL?   := 0E30018h

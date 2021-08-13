@@ -104,6 +104,12 @@ bool sys_AnyKey(void);
 void sys_FreeAll(void);
 
 /**
+ * Check how much RAM is available to Malloc.
+ * @return Amount of free Malloc RAM in bytes.
+ */
+int sys_CheckMallocRAM(void);
+
+/**
  * Scan the keypad and return a scan code.
  * @return Scan code of pressed key. 0 if no keys pressed.
  */
@@ -297,6 +303,12 @@ char *fs_StrToFileEntry(char *dest, const char *name);
  * @note buffer should be allocated at least 3*num bytes.
  */
 unsigned int fs_DirList(void **buffer, const char *path, unsigned int num, unsigned int skip);
+
+/**
+ * Check how much space is free in the filesystem.
+ * @return Number of bytes free.
+ */
+int fs_GetFreeSpace(void);
 
 /**
  * Free memory allocated by sys_Malloc.

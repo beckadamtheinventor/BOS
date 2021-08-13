@@ -114,6 +114,7 @@
 	public _bosgfx_SetDefaultFont
 	public _sys_FreeRunningProcessId
 	public _util_Zx7Decompress
+	public _sys_CheckMallocRAM
 	public _bosgfx_Compute
 	public _bosgfx_FillRectangle
 	public _bosgfx_FillScreen
@@ -260,6 +261,7 @@ _bosgfx_SetFont                     := $202D4
 _bosgfx_SetDefaultFont              := $202D8
 _sys_FreeRunningProcessId        := $202DC
 _util_Zx7Decompress              := $202E0
+_sys_CheckMallocRAM              := $202E4
 _bosgfx_Compute                     := $202E8
 _bosgfx_FillRectangle               := $202EC
 _bosgfx_FillScreen                  := $202F0
