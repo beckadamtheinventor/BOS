@@ -63,6 +63,10 @@ string_lib_var:
 	db "/var/LIB",0
 string_var_dir:
 	db "/var/",0
+str_var_index_name:
+	db "/var/cache"
+.num:
+	db "000.dat",0
 
 string_EZF_header:
 	db $7F, "EZF"

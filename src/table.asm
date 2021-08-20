@@ -151,3 +151,4 @@
 	jp _OP1ToPath
 	jp th_WaitKeyCycle
 	jp fs_JoinPath
+	jp sys_MallocPersistent

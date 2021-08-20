@@ -223,7 +223,7 @@ osrt.check_address_writable:
 	jr c,osrt.popbchl_return
 	ld bc,$D52C00 - $D00000
 	sbc hl,bc
-	ccf ;Cf set if address greater than $D52C00
+	ccf ;Cf set if address greater than or equal to $D52C00
 	jr c,osrt.popbchl_return
 	ld bc,ti.stackTop - $D52C00
 	sbc hl,bc

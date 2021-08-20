@@ -143,5 +143,6 @@ mKeepFlashUnlocked   := 2
 bReturnNotError      := 0
 bReturnHex           := 1
 bReturnLong          := 2
+bSilentReturn        := 3
 
 fs_cmap_length := 7040

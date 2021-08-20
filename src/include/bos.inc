@@ -155,6 +155,7 @@ namespace bos
 ?_OP1ToPath                      := $2035C
 ?th_WaitKeyCycle                 := $20360
 ?fs_JoinPath                     := $20364
+?sys_MallocPersistent            := $20368
 ; defines
 ?LCD_PAL?    := 0E30200h
 ?LCD_CTRL?   := 0E30018h
@@ -267,6 +268,7 @@ namespace bos
 ?bReturnNotError      := 0
 ?bReturnHex           := 1
 ?bReturnLong          := 2
+?bSilentReturn        := 3
 ?fs_cmap_length := 7040
 
 end namespace

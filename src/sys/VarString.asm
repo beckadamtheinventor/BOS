@@ -20,6 +20,10 @@ sys_VarString:
 	jq z,.begin_replacing
 	inc hl
 	inc bc
+	cp a,$5C
+	jq nz,.len_loop_not_backslash
+	inc hl
+.len_loop_not_backslash:
 	cp a,'$'
 	jq nz,.len_loop
 	push bc
@@ -62,8 +66,31 @@ sys_VarString:
 	or a,a
 	jq z,.success
 	inc hl
+	cp a,$5C
+	jq nz,.replace_loop_not_backslash
+	ld a,(hl)
+	inc hl
+	cp a,'N'
+	jq nz,.maybe_not_newline
+.insert_newline:
+	ld a,$A
+	jq .replace_loop_put_char
+.maybe_not_newline:
+	cp a,'n'
+	jq z,.insert_newline
+	cp a,'T'
+	jq nz,.maybe_not_tab
+.insert_tab:
+	ld a,$9
+	jq .replace_loop_put_char
+.maybe_not_tab:
+	cp a,'t'
+	jq z,.insert_tab
+	jq .replace_loop_put_char
+.replace_loop_not_backslash:
 	cp a,'$'
 	jq z,.replace_var
+.replace_loop_put_char:
 	ld (de),a
 	inc de
 	jq .replace_loop

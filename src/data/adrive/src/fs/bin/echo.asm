@@ -2,6 +2,8 @@
 	jr _echo_exe
 	db "FEX",0
 _echo_exe:
+	ld hl,bos.return_code_flags
+	set bos.bSilentReturn,(hl)
 	pop bc,hl
 	push hl,bc
 	ld a,(hl)

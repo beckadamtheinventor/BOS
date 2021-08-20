@@ -36,7 +36,7 @@ void *fs_GetFDPtr(const void *fd);
  * @param fd File descriptor.
  * @return Length of file data.
  */
-int fs_GetFDLen(const void *fd);
+unsigned int fs_GetFDLen(const void *fd);
 
 /**
  * Get the memory address of a given filesystem sector.
@@ -78,7 +78,7 @@ char *fs_CopyFileName(char *buffer, void *fd);
  * @param offset Offset of file to read data from.
  * @note reads len*count bytes.
  */
-int fs_Write(void *data, size_t len, uint8_t count, void *fd, unsigned int offset);
+unsigned int fs_Read(void *data, size_t len, uint8_t count, void *fd, unsigned int offset);
 
 /**
  * Write bytes to a file.
@@ -89,7 +89,7 @@ int fs_Write(void *data, size_t len, uint8_t count, void *fd, unsigned int offse
  * @param offset Offset of file to write data to.
  * @note writes len*count bytes.
  */
-int fs_Write(void *data, size_t len, uint8_t count, void *fd, unsigned int offset);
+unsigned int fs_Write(void *data, size_t len, uint8_t count, void *fd, unsigned int offset);
 
 /**
  * Scan the keypad, checking if a key was pressed.
@@ -125,7 +125,14 @@ void sys_KbScan(void);
  * @param bytes Number of bytes to allocate.
  * @return Pointer to allocated memory. 0 if failed to malloc.
  */
-void *sys_Malloc(int bytes);
+void *sys_Malloc(unsigned int bytes);
+
+/**
+ * Allocate persistent memory.
+ * @param bytes Number of bytes to allocate persistently.
+ * @return Pointer to persistent allocated memory. 0 if failed to malloc.
+ */
+void *MallocPersistent(unsigned int bytes);
 
 /**
  * Wait until a key is pressed and return a scan code.
@@ -232,6 +239,14 @@ void *fs_CreateFile(const char *path, uint8_t flags, unsigned int len);
 it is already an absolute path.
  */
 char *fs_AbsPath(const char *path);
+
+/**
+ * Join paths p1 and p2.
+ * @param p1 String representing a filesystem path.
+ * @param p2 String representing a filesystem path.
+ * @return Joined path.
+ */
+char *fs_JoinPath(const char *p1, const char *p2);
 
 /**
  * Open a file within a given directory.

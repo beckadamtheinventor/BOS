@@ -225,6 +225,8 @@ execute_program_string:
 	xor a,a
 	ld (bos.curcol),a
 	ld a,(bos.return_code_flags)
+	bit bos.bSilentReturn,a
+	ret nz ;don't print anything if program returned silently
 	bit bos.bReturnNotError,a
 	jq nz,.program_returned_number
 	ld hl,(bos.LastCommandResult)

@@ -1,6 +1,8 @@
 	jq cat_main
 	db "FEX",0
 cat_main:
+	ld hl,bos.return_code_flags
+	set bos.bSilentReturn,(hl)
 	ld hl,-3
 	call ti._frameset
 	xor a,a
