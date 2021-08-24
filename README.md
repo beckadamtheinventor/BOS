@@ -1,6 +1,7 @@
 # BOS
 An Operating system (WIP) for the TI-84+CE family (eZ80) graphing calculators, with the aim of being freely distributable.
 
+
 # Eye Candy
 ![](https://raw.githubusercontent.com/beckadamtheinventor/BOS/master/cap/cap.gif)
 
@@ -12,6 +13,7 @@ BOS ".rom" files are for use on CEmu [https://ce-programming.github.io/CEmu/] *o
 Assuming only noti-ez80 bootcode and BOS are on the image, (which is the case if downloaded from this repository) it may be freely distributed between individuals. However, I do not permit rehosting of the image, without prior permission from myself. (Adam "beckadamtheinventor" Beckingham)
 If you are getting the rom image from another author, read the author's provided LICENSE file (usually a plain text file without an extension) for further guidance on distribution of the ROM image.
 
+
 # Installing BOS to Hardware
 Before installing BOS, know that it is very much incomplete and lacks many features that TI-OS has.
 
@@ -22,13 +24,16 @@ Before installing BOS, note that it will erase all memory on your calculator! Bo
 In order to install BOS on a calculator:
 Download "BOSOS.8xp" from the releases page, transfer it to your calculator using TI-Connect CE or TiLP, then run it from the homescreen. You should see a formatting screen pop up.
 
+
 # Building
-BOS requires the CE C toolchain version 9+, and python 3.7 or higher in order to build includes.
+BOS requires the CE C toolchain version 9 or higher, the BOS toolchain, and python 3.7 or higher in order to build includes.
 
 Link to CE C toolchain:
 https://github.com/CE-Programming/toolchain
+Link to BOS toolchain:
+https://github.com/beckadamtheinventor/toolchain
 
-Once the toolchain is installed, run `make` from the command line while in the repo's root directory.
+Once both toolchains are installed, run `make` from your system's command line while in the repo's root directory.
 
 
 # Updating BOS
@@ -54,20 +59,24 @@ If there's a feature you want to see in BOS, you found a bug, or have any questi
 Additionally, if you make a program for BOS that you feel should be included in the OS binaries, open an issue or make a pull request.
 Made an enhancement? Optimized some code? Fixed a clerical error? Improved the UI? Make a pull request and I'll take a look.
 
+
 # Installing programs on BOS
 There are a few ways that BOS programs can be installed.
 
 Programs written for BOS can be transferred to BOS via a FAT32 formatted USB drive, or packaged with the ROM image for use with CEmu. [https://ce-programming.github.io/CEmu/]
 In any case, read the README file (chances are the author has provided one) and look for how to install on BOS.
 
+
 # Writing C programs for BOS
 I am currently working on a toolchain fork that targets BOS: [https://github.com/beckadamtheinventor/toolchain/]
 Many programs that compile on the standard CE C toolchain will compile in the BOS C toolchain, but steer clear from using most `os_` routines; many of them are not implemented in BOS and will cause crashes and other unexpected issues.
 As well, do not directly write directly to files in BOS! All files are stored in flash/archive, so attempting to write to them directly will almost certainly cause a crash.
 
+
 # Writing Assembly Programs for BOS
 NOTE: This guide will be heavily modified once I implement an ELF-derived executable and linkable format.
 The header of your program is different depending if it is meant to run from RAM/USB, or flash.
+
 
 ## If your program runs from RAM or USB
 header:
@@ -82,6 +91,7 @@ org ti.userMem ;the address this executable runs from
 main:
 	;your code here
 ```
+
 
 ## If Your Program Runs from Flash
 Note that this kind of program requires a method of referencing itself and cannot write directly to itself.
@@ -107,6 +117,7 @@ BOS comes pre-loaded with the standard libload libraries.
 + usbdrvce (stable, subject to change)
 
 There are three ways to use libload in BOS, depending on where your program runs from.
+
 
 ## Method A
 Program runs from RAM, default libload settings, optionally displaying libload messages.
@@ -145,6 +156,7 @@ main:
 	;your code here
 ```
 
+
 ## Method B
 Program runs from RAM, libload uses malloc'd memory, libload does not display messages.
 ```
@@ -181,6 +193,7 @@ load_libload:
 main:
 	;your code here
 ```
+
 
 ## Method C
 Program runs from flash, libload uses malloc'd memory, libload does not display messages.
