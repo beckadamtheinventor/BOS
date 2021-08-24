@@ -50,11 +50,9 @@ Call addresses within the 0x000000-0x00063C range (adresses below 0x020000) are 
 
 
 # Contributing
-Currently this OS is lacking in system executables. Said programs go into the `/src/data/adrive/src` directory.
-BOS is especially in need of a text editor.
-System executables must be referenced in `/src/data/adrive/src/main.asm` as well as built in both build.bat and build.sh.
-If you decide to make a program for BOS that you feel should be included in the OS binaries, feel free to make a pull request! I'll link them into the filesystem and provide credit.
-
+If there's a feature you want to see in BOS, you found a bug, or have any questions or concerns, feel free to make an [issue](https://github.com/beckadamtheinventor/BOS/issues).
+Additionally, if you make a program for BOS that you feel should be included in the OS binaries, open an issue or make a pull request.
+Made an enhancement? Optimized some code? Fixed a clerical error? Improved the UI? Make a pull request and I'll take a look.
 
 # Installing programs on BOS
 There are a few ways that BOS programs can be installed.
