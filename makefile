@@ -1,8 +1,5 @@
 
-
-#copied from CE toolchain /meta/makefile.mk
-
-# common/os specific things
+# common/os specific things copied from CE toolchain /meta/makefile.mk
 ifeq ($(OS),Windows_NT)
 SHELL      = cmd.exe
 NATIVEPATH = $(subst /,\,$1)
@@ -43,7 +40,7 @@ FSSRC ?= $(call NATIVEPATH,src/data/adrive/src)
 
 #build rules
 
-all: objdirs includes include_dirs filesystem bosos bosbin bos8xp bosrom
+all: objdirs filesystem bosos bosbin bos8xp bosrom
 
 # Rule to build OS data
 bosos:
@@ -65,7 +62,7 @@ objdirs:
 	$(call MKDIR,$(call NATIVEPATH,noti-ez80/bin))
 	$(call MKDIR,$(call NATIVEPATH,src/data/adrive/obj))
 
-include_dirs:
+include_dirs: includes
 	$(CP) bos.inc $(call NATIVEPATH,src/include/bos.inc)
 	$(CPDIR) $(call NATIVEPATH,src/include) $(call NATIVEPATH,$(FSSRC)/include)
 	$(CPDIR) $(call NATIVEPATH,src/include) $(call NATIVEPATH,$(FSSRC)/fs/include)

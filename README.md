@@ -26,12 +26,13 @@ Download "BOSOS.8xp" from the releases page, transfer it to your calculator usin
 
 
 # Building
-BOS requires the CE C toolchain version 9 or higher, the BOS toolchain, and python 3.7 or higher in order to build includes.
+BOS requires the CE C toolchain version 9 or higher and the BOS toolchain extension.
+Python 3.7 or higher is required to build includes and documentation.
 
 Link to CE C toolchain:
 https://github.com/CE-Programming/toolchain
-Link to BOS toolchain:
-https://github.com/beckadamtheinventor/toolchain
+Link to BOS toolchain files:
+https://github.com/beckadamtheinventor/toolchain-bos
 
 Once both toolchains are installed, run `make` from your system's command line while in the repo's root directory.
 
