@@ -23,34 +23,30 @@ In order to install BOS on a calculator:
 Download "BOSOS.8xp" from the releases page, transfer it to your calculator using TI-Connect CE or TiLP, then run it from the homescreen. You should see a formatting screen pop up.
 
 # Building
-BOS requires the CE C toolchain version 9+, and python 3.7 or higher in order to build.
+BOS requires the CE C toolchain version 9+, and python 3.7 or higher in order to build includes.
 
 Link to CE C toolchain:
 https://github.com/CE-Programming/toolchain
 
-Once the toolchain is installed, run `python build.py` from the command line while in the repo's root directory.
-Optionally, you can use make to build BOS.
-For advanced users, type `python3 build.py -h` for a list of build options.
+Once the toolchain is installed, run `make` from the command line while in the repo's root directory.
 
 
 # Updating BOS
-When building BOS there is a file that can be used to reinstall/update BOS from a FAT32-formatted USB flash drive.
-Send `bin/BOSUPDTR.BIN` to the root directory of a FAT32 formatted flash drive, and plug it into the calculator.
-Then from the console, type: `updater`. The calc will read from `BOSUPDTR.BIN` and execute it from UserMem.
-It is essentially the same program that initially installs BOS. However, this program will not modify BOS's filesystem, but when there is an update to any of the OS binaries, the filesystem will need to be reset. See "recovery options" for details
+Currently the only method of updating BOS involves reinstalling TIOS first.
+See Recovery options for details on uninstalling BOS and reinstalling TIOS.
 
 
 # BOS Recovery Options
 From BOS's homescreen, press the "Y=" key. (also known as "F1") If this doesn't go to the recovery menu, press "clear" to go back, then "F1" again.
 From there, you can reboot, attempt filesystem recovery, reset the filesystem, and uninstall BOS.
 If you still cannot access the recovery menu, press the reset button found on the back of the calculator while pressing the recovery menu key.
-If that still doesn't work, hold on+2nd+del and press reset then reinstall TIOS using TI-Connect CE or TiLP.
+If that still doesn't work, hold on+2nd+del and press reset, then reinstall TIOS using TI-Connect CE or TiLP.
 
 
-# Documentation
-`bos.inc` docs https://beckadamtheinventor.github.io/BOS/
-OS calls in `ti84pceg.inc` are mostly unimplemented and most of them will likely not be implemented.
-However, syscall addresses below 0x020000 are bootcode calls and can be used as normal.
+# BOS OS Call Documentation
+`bos.inc` documentation for OS calls can be found here: https://beckadamtheinventor.github.io/BOS/
+However, OS calls found in `ti84pceg.inc` within the 0x020124-0x0221F8 range are effectively unusable in BOS at this time.
+Call addresses within the 0x000000-0x00063C range (adresses below 0x020000) are bootcode calls and can be used as normal.
 
 
 # Contributing
