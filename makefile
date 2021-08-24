@@ -100,9 +100,6 @@ $(call NATIVEPATH,$(FSOBJ)/usbdrvce.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/usbd
 
 
 # OS Files build rules
-# $(call NATIVEPATH,$(FSOBJ)/bpkload.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/bpkload.asm)
-	# fasmg $(call NATIVEPATH,$(FSSRC)/fs/bin/bpkload.asm) $(call NATIVEPATH,$(FSOBJ)/bpkload.bin)
-
 $(call NATIVEPATH,$(FSOBJ)/explorer.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer.asm)
 	fasmg $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer.asm) $(call NATIVEPATH,$(FSOBJ)/explorer.bin)
 
@@ -110,19 +107,7 @@ $(call NATIVEPATH,$(FSOBJ)/memedit.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/memed
 	fasmg $(call NATIVEPATH,$(FSSRC)/fs/bin/memedit.asm) $(call NATIVEPATH,$(FSOBJ)/memedit.bin)
 
 $(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/bosbin/CEDIT.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/src/main.c)
-	$(CD) $(call NATIVEPATH,$(FSSRC)/fs/bin/cedit)
-	$(Q)make -f bos.makefile
-	# I need to remember to change this if I move the filesystem sources
-	$(CD) $(call NATIVEPATH,../../../../../../../)
-
-# $(call NATIVEPATH,$(FSOBJ)/usbrecv.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/usbrecv.asm)
-	# fasmg $(call NATIVEPATH,$(FSSRC)/fs/bin/usbrecv.asm) $(call NATIVEPATH,$(FSOBJ)/usbrecv.bin)
-
-# $(call NATIVEPATH,$(FSOBJ)/usbrun.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/usbrun.asm)
-	# fasmg $(call NATIVEPATH,$(FSSRC)/fs/bin/usbrun.asm) $(call NATIVEPATH,$(FSOBJ)/usbrun.bin)
-
-# $(call NATIVEPATH,$(FSOBJ)/usbsend.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/usbsend.asm)
-	# fasmg $(call NATIVEPATH,$(FSSRC)/fs/bin/usbsend.asm) $(call NATIVEPATH,$(FSOBJ)/usbsend.bin)
+	$(Q)make -f bos.makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/)
 
 
 # Rule to build Filesytem and compress it
