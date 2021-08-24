@@ -110,6 +110,10 @@ $(call NATIVEPATH,$(FSOBJ)/memedit.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/memed
 	fasmg $(call NATIVEPATH,$(FSSRC)/fs/bin/memedit.asm) $(call NATIVEPATH,$(FSOBJ)/memedit.bin)
 
 $(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/bosbin/CEDIT.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/src/main.c)
+	$(CD) $(call NATIVEPATH,$(FSSRC)/fs/bin/cedit)
+	$(Q)make -f bos.makefile
+	# I need to remember to change this if I move the filesystem sources
+	$(CD) $(call NATIVEPATH,../../../../../../../)
 
 # $(call NATIVEPATH,$(FSOBJ)/usbrecv.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/usbrecv.asm)
 	# fasmg $(call NATIVEPATH,$(FSSRC)/fs/bin/usbrecv.asm) $(call NATIVEPATH,$(FSOBJ)/usbrecv.bin)
@@ -125,7 +129,10 @@ $(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/bosbin/CEDIT.bin): $(call NATIVEPATH,$(F
 filesystem: $(call NATIVEPATH,$(FSSRC)/main.asm) $(call NATIVEPATH,$(FSSRC)/fs/lib/libload/bos_libload.asm) $(call NATIVEPATH,$(FSSRC)/fs/lib/fatdrvce/fatdrvce.asm) \
 	$(call NATIVEPATH,$(FSSRC)/fs/lib/fatdrvce/fat.asm) $(call NATIVEPATH,$(FSSRC)/fs/lib/fileioc/fileioc.asm) $(call NATIVEPATH,$(FSSRC)/fs/lib/fontlibc/fontlibc.asm) \
 	$(call NATIVEPATH,$(FSSRC)/fs/lib/graphx/graphx.asm) $(call NATIVEPATH,$(FSSRC)/fs/lib/keypadc/keypadc.asm) $(call NATIVEPATH,$(FSSRC)/fs/lib/srldrvce/srldrvce.asm) \
-	$(call NATIVEPATH,$(FSSRC)/fs/lib/usbdrvce/usbdrvce.asm) $(call NATIVEPATH,$(FSSRC)/fs/bin/memedit.asm) $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer.asm)
+	$(call NATIVEPATH,$(FSSRC)/fs/lib/usbdrvce/usbdrvce.asm) $(call NATIVEPATH,$(FSSRC)/fs/bin/memedit.asm) $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer.asm) \
+	$(call NATIVEPATH,$(FSOBJ)/libload.bin) $(call NATIVEPATH,$(FSOBJ)/fatdrvce.bin) $(call NATIVEPATH,$(FSOBJ)/fileioc.bin) $(call NATIVEPATH,$(FSOBJ)/fontlibc.bin) \
+	$(call NATIVEPATH,$(FSOBJ)/graphx.bin) $(call NATIVEPATH,$(FSOBJ)/keypadc.bin) $(call NATIVEPATH,$(FSOBJ)/srldrvce.bin) $(call NATIVEPATH,$(FSOBJ)/usbdrvce.bin) \
+	$(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/bosbin/CEDIT.bin) $(call NATIVEPATH,$(FSOBJ)/explorer.bin) $(call NATIVEPATH,$(FSOBJ)/memedit.bin)
 	fasmg $(call NATIVEPATH,$(FSSRC)/main.asm) $(call NATIVEPATH,src/data/adrive/main.bin)
 	convbin -i $(call NATIVEPATH,src/data/adrive/main.bin) -o $(call NATIVEPATH,src/data/adrive/data.bin) -j bin -k bin -c zx7
 	convbin -i $(call NATIVEPATH,src/data/adrive/data.bin) -o $(call NATIVEPATH,bin/BOSOSpt2.8xv) -j bin -k 8xv -n BOSOSpt2
