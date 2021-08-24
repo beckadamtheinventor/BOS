@@ -61,23 +61,18 @@ If you decide to make a program for BOS that you feel should be included in the 
 
 
 # Installing programs on BOS
-Threre are three ways that BOS programs can be installed, and it depends on how the author chooses to package.
+There are a few ways that BOS programs can be installed.
 
 Programs written for BOS can be transferred to BOS via a FAT32 formatted USB drive, or packaged with the ROM image for use with CEmu. [https://ce-programming.github.io/CEmu/]
 In any case, read the README file (chances are the author has provided one) and look for how to install on BOS.
 
-## If you do not see a ".bpk" file
-Place the ".bin" file onto the drive, open BOS's USB program receiver, enter the path to the file transferred to the USB drive, enter the file you want the program to be written to within BOS's filesystem, and wait for the transfer to complete.
-
-## If you see a ".bpk" file
-Place the ".bpk" file and the "bpk/" directory on the drive, and run the bpk loader with the path to the ".bpk" file on the drive. Once the transfer is complete, the program should show up in the "/usr/bin/" directory under the same name as the ".bpk" file. (likely wity the ".exe" extension)
-
 # Writing C programs for BOS
-I am currently working on a toolchain fork that targets BOS: [https://github.com/beckadamtheinventor/toolchain/] Under the llvm-bos branch: [https://github.com/beckadamtheinventor/toolchain/tree/llvm-bos]
-Many programs that compile on the standard CE C toolchain will compile in the BOS C toolchain, but steer clear from using OS routines; many of them are not implemented in BOS and will cause crashes and other unexpected issues.
-As well, do not directly write directly to variables in BOS! All files are currently stored in flash/archive, so attempting to write to them directly will almost certainly cause a crash.
+I am currently working on a toolchain fork that targets BOS: [https://github.com/beckadamtheinventor/toolchain/]
+Many programs that compile on the standard CE C toolchain will compile in the BOS C toolchain, but steer clear from using most `os_` routines; many of them are not implemented in BOS and will cause crashes and other unexpected issues.
+As well, do not directly write directly to files in BOS! All files are stored in flash/archive, so attempting to write to them directly will almost certainly cause a crash.
 
 # Writing Assembly Programs for BOS
+NOTE: This guide will be heavily modified once I implement an ELF-derived executable and linkable format.
 The header of your program is different depending if it is meant to run from RAM/USB, or flash.
 
 ## If your program runs from RAM or USB
@@ -111,7 +106,7 @@ main:
 BOS comes pre-loaded with the standard libload libraries.
 + fatdrvce (stable, subject to change)
 + fontlibc (stable)
-+ fileioc (semi-stable)
++ fileioc (mostly stable)
 + graphx (stable)
 + keypadc (stable)
 + srldrvce (stable, subject to change)

@@ -4,6 +4,7 @@ import os, sys
 default_dir_entry = [
 	ord("."),0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,  0x10,  0x00, 0x00, 0x00, 0x00,
 	ord("."),ord("."),0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,  0x10,  0x00, 0x00, 0x00, 0x00,
+	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
 ]
 
 def search_for_entry(rom, path):
@@ -64,15 +65,14 @@ def alloc_space_for_file(rom, length):
 			i+=1
 		j = i
 		l = 0x200
-		if l<length:
-			while rom[cmap_data+i] != 0xFE and i<cmap_len and l<length:
-				i+=1
-				l+=0x200
-	# print(f"allocated sectors {j} to {i}")
-	for k in range(j,i+1):
+		while rom[cmap_data+i] != 0xFE and i<cmap_len and l<length:
+			i+=1
+			l+=0x200
+	# print(f"allocated sectors {hex(j)} to {hex(i)} ({hex(0x040000+j*0x200)} to {hex(0x040000+i*0x200)})")
+	for k in range(j, i+1):
 		rom[cmap_data+k] = 0xFE
-		if 0x040000 + k*0x200 >= len(rom):
-			rom.extend([0xff]*(0x040000 + k*0x200 - len(rom)))
+		if 0x040000 + k * 0x200 >= len(rom):
+			rom.extend([0xff]*0x200)
 	return j
 
 def free_file_descriptor(rom, ptr):
@@ -164,13 +164,16 @@ def add_file_to_rom(rom, fout, flags, fin_data):
 	if f is not None:
 		free_file_descriptor(rom, f)
 
-	ptr = dptr_content = 0x040000 + 0x200 * (rom[dptr+0xC]+rom[dptr+0xD]*0x200)
+	ptr = dptr_content = 0x040000 + 0x200 * (rom[dptr+0xC]+rom[dptr+0xD]*0x100)
 	dptr_len = rom[dptr+0xE]+rom[dptr+0xF]*0x200
 	# print("found parent directory. ptr:",hex(ptr),"len:",hex(dptr_len))
 	dptr_len += 16
 	rom[dptr+0xE],rom[dptr+0xF] = dptr_len&0xFF, dptr_len//0x100
 
-	while rom[ptr] != 0x00 and rom[ptr] != 0xFF: ptr+=16
+	if ptr+16 < len(rom):
+		while rom[ptr] != 0x00 and rom[ptr] != 0xFF: ptr+=16
+	if ptr+16 >= len(rom):
+		rom.extend([0xFF]*512)
 	if '/' in fout:
 		fn = fout.rsplit("/",maxsplit=1)[1]
 	else:

@@ -156,6 +156,7 @@ namespace bos
 ?th_WaitKeyCycle                 := $20360
 ?fs_JoinPath                     := $20364
 ?sys_MallocPersistent            := $20368
+?sys_OpenFileInVar               := $2036C
 ; defines
 ?LCD_PAL?    := 0E30200h
 ?LCD_CTRL?   := 0E30018h

@@ -148,6 +148,7 @@
 	public _th_WaitKeyCycle
 	public _fs_JoinPath
 	public _sys_MallocPersistent
+	public _sys_OpenFileInVar
 _boot_os                         := $20108
 _handle_interrupt                := $2010C
 _HandleInstruction               := $20110
@@ -296,3 +297,4 @@ __OP1ToPath                      := $2035C
 _th_WaitKeyCycle                 := $20360
 _fs_JoinPath                     := $20364
 _sys_MallocPersistent            := $20368
+_sys_OpenFileInVar               := $2036C

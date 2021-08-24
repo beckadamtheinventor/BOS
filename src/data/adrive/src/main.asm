@@ -75,6 +75,7 @@ end fs_dir
 fs_dir var_dir
 	fs_entry root_dir, "..", "", f_subdir
 	fs_entry path_var, "PATH", "", 0
+	fs_entry include_var, "INCLUDE", "", 0
 end fs_dir
 
 fs_file os_internal_subfiles
@@ -476,6 +477,10 @@ end fs_file
 
 fs_file path_var
 	db "/bin:/usr/bin:/sbin"
+end fs_file
+
+fs_file include_var
+	db "/include:/usr/include:/lib/include"
 end fs_file
 
 fs_file explorer_blconfig_exe

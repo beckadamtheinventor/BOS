@@ -2,6 +2,9 @@
 #ifndef __BOS_H__
 #define __BOS_H__
 
+#include <stdint.h>
+#include <stdbool.h>
+
 /**
  * Execute a given file, not preserving current program state.
  * @param path Path to file to execute.
@@ -514,6 +517,15 @@ void bosgfx_SetDefaultFont(void);
  * @return pointer to byte following last byte written to dest.
  */
 void *util_Zx7Decompress(void *dest, void *src);
+
+
+/**
+ * Open a file, searching in directories listed within var file.
+ * @param path Path to search for.
+ * @param var Name of file in /var/ containing directories to search in.
+ * @return pointer to file descriptor.
+ */
+void *sys_OpenFileInVar(const char *path, const char *var);
 
 
 #endif

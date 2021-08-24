@@ -152,3 +152,4 @@
 	jp th_WaitKeyCycle
 	jp fs_JoinPath
 	jp sys_MallocPersistent
+	jp sys_OpenFileInVar
