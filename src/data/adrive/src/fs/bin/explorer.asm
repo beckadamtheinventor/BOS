@@ -78,6 +78,15 @@ explorer_foreground2_color:=$-1
 	ld (explorer_cursor_y),a
 	; call ti.GetBatteryStatus
 	; ld (battery_status),a
+	ld hl,explorer_preload_file
+	push hl
+	call bos.fs_OpenFile
+	ld hl,explorer_preload_cmd
+	ex (sp),hl
+	ld hl,str_CmdExecutable
+	push hl
+	call nc,bos.sys_ExecuteFile
+	pop bc,bc
 ; explorer_load_extensions:
 	; ld hl,2
 	; push hl
@@ -1421,13 +1430,18 @@ str_ExplorerExecutable:
 	db "/bin/explorer",0
 explorer_config_file:
 	db "/etc/config/explorer/explorer.cfg",0
+explorer_preload_cmd:
+	db "cmd -x "
+explorer_preload_file:
+	db "/etc/config/explorer/prerun.cfg",0
+
 explorer_default_directory:
 	db "/home/user",0
 str_memeditexe:
 	db "/bin/memedit",0
 str_MissingIconFile:
-	db "/etc/config/explorer/missing.ico",0
-explorer_extensions_dir:
-	db "/opt/explorer/",0
+	db "/etc/explorer/missing.ico",0
+; explorer_extensions_dir:
+	; db "/opt/explorer/",0
 explorer_dirlist_buffer:
 	dl display_items_num_x * display_items_num_y dup 0

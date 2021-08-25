@@ -5,10 +5,10 @@ include "../../src/include/ezf.inc"
 
 ezf
 
-extern _printsomething, "printsomething"
+extern _printsomething, "CustomSO.so printsomething"
 
 entrypoint _main
-section _main, ezsec.execany
+section _main, ezsec.roexec
 	ld hl,_str_HelloWorld
 	push hl
 	call _printsomething
@@ -18,7 +18,7 @@ section _main, ezsec.execany
 	ret
 end section
 
-public _str_HelloWorld
+private _str_HelloWorld
 section _str_HelloWorld, ezsec.rodat
 	db "Hello World!",0
 end section

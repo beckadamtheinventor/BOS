@@ -64,7 +64,7 @@ fs_dir bin_dir
 	fs_sfentry peek_exe, "peek", "", f_readonly+f_system+f_subfile
 	fs_sfentry poke_exe, "poke", "", f_readonly+f_system+f_subfile
 	fs_sfentry rm_exe, "rm", "", f_readonly+f_system+f_subfile
-	fs_entry serial_exe, "serial", "", f_readonly+f_system
+	; fs_entry serial_exe, "serial", "", f_readonly+f_system
 	fs_sfentry sleep_exe, "sleep", "", f_readonly+f_system+f_subfile
 	; fs_entry transfer_exe, "transfer", "", f_readonly+f_system
 	; fs_entry usbrecv_exe, "usbrecv", "", f_readonly+f_system
@@ -230,7 +230,7 @@ fs_dir etc_dir
 	fs_entry etc_config_dir, "config", "", f_subdir
 	fs_entry etc_data_dir, "data", "", f_subdir
 	fs_entry etc_fontlibc_dir, "fontlibc", "", f_subdir
-	fs_entry etc_plugins_dir, "plugins", "", f_subdir
+	fs_entry etc_explorer_dir, "explorer", "", f_subdir
 end fs_dir
 
 ;"/etc/config/" directory
@@ -263,7 +263,7 @@ end fs_dir
 fs_dir etc_config_explorer_dir
 	fs_entry etc_config_dir, "..", "", f_subdir
 	fs_entry explorer_cfg, "explorer", "cfg", 0
-	fs_entry missing_icon, "missing", "ico", 0
+	fs_entry explorer_prerun_cmd, "prerun", "cfg", 0
 end fs_dir
 
 ;"/lib/" directory
@@ -331,24 +331,11 @@ fs_dir user_dir
 	fs_entry home_dir, "..", "", f_subdir
 end fs_dir
 
-;"/etc/plugins/" directory
-fs_dir etc_plugins_dir
+;"/etc/explorer/" directory
+fs_dir etc_explorer_dir
 	fs_entry etc_dir, "..", "", f_subdir
-	fs_entry etc_plugins_explorer_dir, "explorer", "", f_subdir
-end fs_dir
-
-;"/etc/plugins/explorer/" directory
-fs_dir etc_plugins_explorer_dir
-	fs_entry etc_plugins_dir, "..", "", f_subdir
-	fs_entry explorer_blconfig_dir, "blconfig", "", f_subdir
-	; fs_entry explorer_serial_dir, "serial", "", f_subdir
-end fs_dir
-
-;"/etc/plugins/explorer/blconfig/" directory
-fs_dir explorer_blconfig_dir
-	fs_entry etc_plugins_explorer_dir, "..", "", f_subdir
 	fs_entry explorer_blconfig_exe, "blconfig", "", 0
-	fs_entry explorer_blconfig_cmd, "index", "cmd", 0
+	fs_entry missing_icon, "missing", "ico", 0
 end fs_dir
 
 ;"/etc/plugins/explorer/serial/" directory
@@ -468,7 +455,7 @@ end fs_file
 ; end fs_file
 
 fs_file missing_icon
-	include 'fs/etc/config/explorer/missing.asm'
+	include 'fs/etc/explorer/missing.asm'
 end fs_file
 
 fs_file explorer_cfg
@@ -484,11 +471,11 @@ fs_file include_var
 end fs_file
 
 fs_file explorer_blconfig_exe
-	include 'fs/etc/plugins/explorer/blconfig/blconfig.asm'
+	include 'fs/etc/explorer/blconfig.asm'
 end fs_file
 
-fs_file explorer_blconfig_cmd
-	db "blconfig",$A,0
+fs_file explorer_prerun_cmd
+	file 'fs/etc/config/explorer/prerun.cfg'
 end fs_file
 
 ; fs_file explorer_serial_exe
@@ -499,9 +486,9 @@ end fs_file
 	; db "serial",$A,0
 ; end fs_file
 
-fs_file serial_exe
-	file 'fs/bin/serial/bosbin/serial.bin'
-end fs_file
+; fs_file serial_exe
+	; file 'fs/bin/serial/bosbin/serial.bin'
+; end fs_file
 
 fs_file cedit_exe
 	file 'fs/bin/cedit/bosbin/cedit.bin'

@@ -5,13 +5,12 @@ include "../../src/include/ezf.inc"
 
 ezf
 
-export _printsomething, "printsomething"
+public _printsomething, "printsomething"
 section _printsomething, ezsec.execany
   pop bc
   ex (sp),hl
-  push bc,hl,hl
+  push bc,hl
   call bos.gui_Print
-  pop bc
   call ti._strlen
   pop bc
   ret

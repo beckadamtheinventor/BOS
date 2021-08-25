@@ -284,6 +284,8 @@ sys_ExecuteFile:
 	call th_CreateThread
 	ld a,(fsOP6+13)
 	ld (running_process_id),a
+	ld hl,return_code_flags
+	set bSilentReturn,(hl) ;return to caller silently
 	pop hl,de
 	ret
 

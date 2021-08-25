@@ -38,6 +38,8 @@ fs_OpenFile:
 	jq z,.return
 	cp a,' '
 	jq z,.return
+	cp a,':'
+	jq z,.return
 	push hl
 	call .strlen
 	ld (ix-23),hl
@@ -70,6 +72,8 @@ fs_OpenFile:
 	or a,a
 	jq z,._return ;return if at end of string
 	cp a,' '
+	jq z,._return ;return if at end of path
+	cp a,':'
 	jq z,._return ;return if at end of path
 .into_dir:
 	bit fsbit_subdirectory,(iy + fsentry_fileattr) ;check if we're entering a directory
