@@ -495,7 +495,7 @@ fs_file cedit_exe
 end fs_file
 
 fs_file etc_fontlibc_drmono
-	file 'fs/etc/fontlibc/DrMono.bin'
+	file 'fs/etc/fontlibc/DrMono.dat'
 end fs_file
 
 end fs_fs
