@@ -520,9 +520,9 @@ void *util_Zx7Decompress(void *dest, void *src);
 
 
 /**
- * Open a file, searching in directories listed within var file.
+ * Open a file, searching in directories listed within another file.
  * @param path Path to search for.
- * @param var Name of file in /var/ containing directories to search in.
+ * @param var Name of file containing directories to search in.
  * @return pointer to file descriptor.
  */
 void *sys_OpenFileInVar(const char *path, const char *var);
