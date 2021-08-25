@@ -63,9 +63,8 @@ Made an enhancement? Optimized some code? Fixed a clerical error? Improved the U
 
 # Installing programs on BOS
 There are a few ways that BOS programs can be installed.
-
-Programs written for BOS can be transferred to BOS via a FAT32 formatted USB drive, or packaged with the ROM image for use with CEmu. [https://ce-programming.github.io/CEmu/]
-In any case, read the README file (chances are the author has provided one) and look for how to install on BOS.
+Programs written for BOS can be packaged with the ROM image for use with CEmu, [https://ce-programming.github.io/CEmu/] or via BOS Package manager. (COMING SOON)
+In any case, read the README file that came with the program, (chances are the author has provided one) and look for install instructions.
 
 
 # Writing C programs for BOS
