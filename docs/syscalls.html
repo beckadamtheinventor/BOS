@@ -166,9 +166,11 @@
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 </table></div><div id="sys_ExecuteFile"><h1>sys_ExecuteFile</h1>	<h3>syscall Adress 020124</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>execute a file given a relative or absolute path</td><td>int sys_ExecuteFile(const char *path, char *args);</td><td>-1 and Cf set if file does not exist or is not a valid executable format, or if malloc failed somewhere.<br>
+<tr><td>Execute a file.</td><td>int sys_ExecuteFile(const char *path, char *args);</td><td>-1 and Cf set if file does not exist or is not a valid executable format, or if malloc failed somewhere.<br>
 ExecutingFileFd set to point to file descriptor. -1 if file not found</td><td>All, OP6.</td><td>
-If you're running a threaded executable, the thread is spawned but won't actually start until it's thread is handled.</td></tr>
+If you're running a threaded executable, the thread is spawned but won't actually start until it's thread is handled.<br>
+If OS threading is enabled, sleep current thread and execute a file in a new thread given a relative or absolute path. Returns to caller if starting a threaded executable.<br>
+If OS threading is disabled, execute a file in a new thread given a relative or absolute path. Returns to caller if starting a threaded executable.</td></tr>
 </table></div><div id="os_GetOSInfo"><h1>os_GetOSInfo</h1>	<h3>syscall Adress 020128</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
