@@ -4,17 +4,24 @@ _blconfig_exe:
 	db "TFX",0
 	db 0
 .init:
-	pop ix
 .loop:
 	HandleNextThread
 	ld a,(bos.last_keypress)
+	or a,a
+	jr z,.loop
 	cp a,ti.skMath
 	jr nz,.loop
+	xor a,a
+	ld (bos.last_keypress),a
 .loop2:
 	HandleNextThread
 	ld a,(bos.last_keypress)
+	or a,a
+	jr z,.loop2
 	cp a,ti.skMath
-	jr nz,.loop
+	jr nz,.loop2
+	xor a,a
+	ld (bos.last_keypress),a
 .bl_up:
 	ld hl,ti.mpBlLevel
 	ld a,(hl)
@@ -46,6 +53,9 @@ _blconfig_exe:
 	dec hl
 	djnz .draw_loop2
 	jr .loop2
+
+.explorer_file:
+	db "/bin/explorer",0
 
 ; Why the hell I put this here is to be discovered, but I doubt anyone will ever know what it means... hell I don't even remember what I did to make this.
 	db $D4, $29, $C1, $CD, $FD, $51, $29, $15, $ED, $D1, $CD, $39, $51, $29, $D9, $C9, $4D, $4D, $ED, $15, $51, $ED

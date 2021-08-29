@@ -122,7 +122,7 @@ namespace bos
 ?gfx_SetDefaultFont              := $202D8
 ?sys_FreeRunningProcessId        := $202DC
 ?util_Zx7Decompress              := $202E0
-;DONOTHING                       := $202E4
+?sys_CheckMallocRAM              := $202E4
 ?gfx_Compute                     := $202E8
 ?gfx_FillRectangle               := $202EC
 ?gfx_FillScreen                  := $202F0
@@ -155,8 +155,8 @@ namespace bos
 ?_OP1ToPath                      := $2035C
 ?th_WaitKeyCycle                 := $20360
 ?fs_JoinPath                     := $20364
-;
-;
+?sys_MallocPersistent            := $20368
+?sys_OpenFileInVar               := $2036C
 ; defines
 ?LCD_PAL?    := 0E30200h
 ?LCD_CTRL?   := 0E30018h
@@ -199,28 +199,26 @@ namespace bos
 ?ScrapWord              := $D0027D
 ?ScrapMem               := $D0027D
 ?ExecutingFileFd        := $D00280 ; 3 bytes. Pointer to currently executing file descriptor. -1 if file not found. 0 if file descriptor is not applicable
-?LastCommandResult      := $D00283 ; 3 bytes. Points to result of previously executed command
-?last_keypress          := $D00286 ; 1 byte. Last keypress returned by an os getkey routine
-?open_files_table       := $D00300
+?LastCommandResult      := $D00283 ; 4 bytes. Stores result of previously executed command
+?last_keypress          := $D00287 ; 1 byte. Last keypress returned by an os getkey routine
+?return_code_flags      := $D00288 ; flag byte that determines how to interpret the return value of the last run program. Is to be set within the program for non-default return interpretation.
+?asm_prgm_size          := $D00289 ;3 bytes
+?top_of_UserMem         := $D0028C ;3 bytes
+?SaveSP                 := $D0028F ;3 bytes, saves SP when running programs.
+?current_thread         := $D00292 ;1 byte, currently running thread ID
+?threading_enabled      := $D00293 ;1 byte, determines if software threading is enabled and whether it should be used in OS routines
+?thread_parents         := $D00300 ;256 bytes, one per thread. Saves ID of thread that spawned a given thread. A thread will only be run if it's parent thread is awake
 ?InputBuffer            := $D00400
 ?gfx_string_temp        := $D00500
 ?current_working_dir    := $D00510
-?argument_stack_top     := $D00670 ;96 bytes downward
-?op_stack_top           := $D00870 ;512 bytes downward
-?gui_cursor_x           := $D00870
-?gui_cursor_y           := $D00873
+?op_stack_bot           := $D00600
+?op_stack_top           := $D00800 ;512 bytes downward
 ?fsOP1                  := $D01000
 ?fsOP2                  := $D01010
 ?fsOP3                  := $D01020
 ?fsOP4                  := $D01030
 ?fsOP5                  := $D01040
 ?fsOP6                  := $D01050
-?current_cluster_map    := $D01080 ;3 bytes
-?argument_stack_current := $D01083 ;3 bytes
-?asm_prgm_size          := $D01086 ;3 bytes
-?top_of_UserMem         := $D01089 ;3 bytes
-?SaveSP                 := $D01092 ;3 bytes, saves SP when running programs.
-?current_thread         := $D01095 ; currently running thread ID
 ?usb_sector_buffer      := $D01100 ;512 bytes
 ?usbRAM                 := $D01300 ;256 bytes, should not be tampered with while /dev/mnt or /dev/usb are active
 ?thread_map             := $D01400 ; thread map. 256 threads. Active threads have bit 7 set.
@@ -232,7 +230,6 @@ namespace bos
 ?usbHandleKeys          := $D14091 ; zero this byte while using usbArea to keep GetCSC from affecting other parts of usbArea
 ?usbInited              := $D177B7 ; zero this byte while using usbArea and to reset the usb stack when interrupts are re-enabled
 ?reservedRAM            := $D177BA
-?bos_Stackbot           := $D1987E
 ?bos_UserMem            := $D1A881
 ?bottom_of_malloc_RAM   := $D30000
 ?top_of_RAM             := $D40000
@@ -262,10 +259,20 @@ namespace bos
 ?fsentry_filesector.len      := 2
 ?fsentry_filelen             := $0E
 ?fsentry_filelen.len         := 2
+?threadsDisabled             := 0
+?threadsEnabled              := 1
+?threadOSRoutines            := 2
+?bThreadAlive                := 7
+?bThreadPersistent           := 6
+?bThreadSleeping             := 5
 ?bIsFlashUnlocked     := 0
 ?bKeepFlashUnlocked   := 1
 ?mIsFlashUnlocked     := 1
 ?mKeepFlashUnlocked   := 2
+?bReturnNotError      := 0
+?bReturnHex           := 1
+?bReturnLong          := 2
+?bSilentReturn        := 3
 ?fs_cmap_length := 7040
 
 end namespace

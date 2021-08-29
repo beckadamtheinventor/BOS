@@ -114,7 +114,7 @@ virtual at 0
 	?NONE?      rb 1   ;unused section.
 	?BSS?       rb 1   ;unitialized data section. Allocates RAM.
 	?EXECANY?   rb 1   ;standalone executable section that is run without relocation.
-	?PRIVATE?   rb 1   ;mark a section as private for internal use. Anything you want relocated has to be marked public, private, or extern.
+	?PRIVATE?   rb 1   ;mark a section as private for internal use. Anything relative to the code has to be marked public, private, or extern.
 	?PUBLIC?    rb 1   ;mark a section as public for internal and external use.
 	?EXTERN?    rb 1   ;locate and load an external section by reference.
 	?ENTRY?     rb 1   ;mark a section as the program entry point, aka main function.

@@ -6,21 +6,27 @@ include '../include/include_library.inc'
 library 'SRLDRVCE', 0
 
 ;-------------------------------------------------------------------------------
-; Dependencies
+; dependencies
 ;-------------------------------------------------------------------------------
 include_library '../usbdrvce/usbdrvce.asm'
 
 ;-------------------------------------------------------------------------------
 ; v0 functions (not final, subject to change!)
 ;-------------------------------------------------------------------------------
-	export srl_Init
-	export srl_SetRate
-	export srl_Available
-	export srl_Read
-	export srl_Write
-	export srl_Read_Blocking
-	export srl_Write_Blocking
-	export srl_GetCDCStandardDescriptors
+	export	srl_Open
+	export	srl_Close
+	export	srl_Read
+	export	srl_Write
+	export	srl_GetCDCStandardDescriptors
+; temp
+	export	get_device_type_
+	export	get_endpoint_addresses_
+	export	ring_buf_contig_avail_
+	export	ring_buf_has_consecutive_region_
+	export	ring_buf_push_
+	export	ring_buf_pop_
+	export	ring_buf_update_read_
+	export	ring_buf_update_write_
 ;-------------------------------------------------------------------------------
 macro compare_hl_zero?
 	add	hl,de
@@ -57,74 +63,79 @@ macro struct? name*, parameters&
   namespace .
 end macro
 
-struct tmp_data
+struct ring_buf_ctrl
 	local size
-	label .: size
-	length		rl 1
-	descriptor	rb 18
+	label  .: size
+	buf_start			rl 1
+	buf_end				rl 1
+	data_start			rl 1
+	data_break			rl 1
+	data_end			rl 1
+	dma_active			rb 1
 	size := $-.
 end struct
 
-struct srl_Device
+struct srl_device
 	local size
-	label .: size
-	dev		rl 1		; USB device
-	?in		rl 1		; USB bulk in endpoint
-	?out		rl 1		; USB bulk out endpoint
-	type		rb 1		; Device type
-	subType		rb 1		; Device sub-type
-	readBuf		rl 1		; Pointer to the read buffer
-	readBufSize	rl 1		; Size of the read buffer
-	readBufStart	rl 1		; First byte with data in the read buffer
-	readBufEnd	rl 1		; Last byte with data in the read buffer
-	readBufBreak	rl 1		; Last byte before the buffer "loops"
-	readBufActive	rb 1		; Whether data is being read into the read buffer
-	stopRead	rb 1		; Set when waiting for the read to stop
-	writeBuf	rl 1		; Pointer to the write buffer
-	writeBufSize	rl 1		; Size of the write buffer
-	writeBufStart	rl 1		; First byte with data in the write buffer
-	writeBufEnd	rl 1		; Last byte with data in the write buffer
+	label  .: size
+	dev				rl 1
+	rx_addr				rb 1
+	tx_addr				rb 1
+	type				rb 1
+	subtype				rb 1
+	rx_buf				ring_buf_ctrl
+	tx_buf				ring_buf_ctrl
 	size := $-.
 end struct
 
-; enum srl_DeviceType
 virtual at 0
-	SRL_UNKNOWN	rb 1		; Incompatible or non-serial device
-	SRL_HOST	rb 1		; Calc is acting as a device
-	SRL_CDC		rb 1		; CDC device
-	SRL_FTDI	rb 1		; FTDI device
-	SRL_PL2303	rb 1		; PL2303 device
-end virtual
-
-; enum srl_SubType_FTDI
-virtual at 0
-	FTDI_UNKNOWN	rb 1
-	SIO		rb 1
-	FT8U232AM	rb 1
-	FT232BM		rb 1
-	FT2232C		rb 1
-	FT232RL		rb 1
-	FTX		rb 1
-	FT2232H		rb 1
-	FT4232H		rb 1
-	FT232H		rb 1
+	SRL_TYPE_UNKNOWN		rb 1	; Incompatible or non-serial device
+	SRL_TYPE_HOST			rb 1	; Calc is acting as a device
+	SRL_TYPE_CDC			rb 1	; CDC device
+	SRL_TYPE_FTDI			rb 1	; FTDI device
+	SRL_TYPE_PL2303			rb 1	; PL2303 device
 end virtual
 
 virtual at 0
-	PL2303_01	rb 1
-	PL2303_HX	rb 1
+	SRL_SUBTYPE_FTDI_UNKNOWN	rb 1
+	SRL_SUBTYPE_SIO			rb 1
+	SRL_SUBTYPE_FT8U232AM		rb 1
+	SRL_SUBTYPE_FT232BM		rb 1
+	SRL_SUBTYPE_FT2232C		rb 1
+	SRL_SUBTYPE_FT232RL		rb 1
+	SRL_SUBTYPE_FTX			rb 1
+	SRL_SUBTYPE_FT2232H		rb 1
+	SRL_SUBTYPE_FT4232H		rb 1
+	SRL_SUBTYPE_FT232H		rb 1
 end virtual
 
-SRL_INTERFACE_ANY := $FF
+virtual at 0
+	SRL_SUBTYPE_PL2303_01		rb 1
+	SRL_SUBTYPE_PL2303_HX		rb 1
+end virtual
 
-struct setuppkt, requestType: ?, request: ?, value: ?, index: ?, length: ?
-	label .: 8
-	bmRequestType		db requestType
-	bRequest		db request
-	wValue			dw value
-	wIndex			dw index
-	wLength			dw length
-end struct
+SRL_INTERFACE_ANY	:= $FF
+
+virtual at 0
+	SRL_SUCCESS			rb 1
+	SRL_ERROR_INVALID_PARAM		rb 1
+	SRL_ERROR_USB_FAILED		rb 1
+	SRL_ERROR_NOT_SUPPORTED		rb 1
+	SRL_ERROR_INVALID_DEVICE	rb 1
+	SRL_ERROR_INVALID_INTERFACE	rb 1
+	SRL_ERROR_NO_MEMORY		rb 1
+end virtual
+
+; enum usb_transfer_status
+?USB_TRANSFER_COMPLETED		:= 0
+?USB_TRANSFER_STALLED		:= 1 shl 0
+?USB_TRANSFER_NO_DEVICE		:= 1 shl 1
+?USB_TRANSFER_HOST_ERROR	:= 1 shl 2
+?USB_TRANSFER_ERROR		:= 1 shl 3
+?USB_TRANSFER_OVERFLOW		:= 1 shl 4
+?USB_TRANSFER_BUS_ERROR		:= 1 shl 5
+?USB_TRANSFER_FAILED		:= 1 shl 6
+?USB_TRANSFER_CANCELLED		:= 1 shl 7
 
 struct descriptor
 	label .: 2
@@ -177,1419 +188,291 @@ struct endpointDescriptor
 	bInterval		rb 1
 end struct
 
-; enum usb_transfer_direction
-virtual at 0
-	?HOST_TO_DEVICE			rb 1 shl 7
-	?DEVICE_TO_HOST			rb 1 shl 7
-end virtual
-
-virtual at 0
-	USB_SUCCESS			rb 1
-	USB_IGNORE			rb 1
-	USB_ERROR_SYSTEM		rb 1
-	USB_ERROR_INVALID_PARAM		rb 1
-	USB_ERROR_SCHEDULE_FULL		rb 1
-	USB_ERROR_NO_DEVICE		rb 1
-	USB_ERROR_NO_MEMORY		rb 1
-	USB_ERROR_NOT_SUPPORTED		rb 1
-	USB_ERROR_TIMEOUT		rb 1
-	USB_ERROR_FAILED		rb 1
-end virtual
-
-; enum usb_transfer_status
-?USB_TRANSFER_COMPLETED			:= 0
-?USB_TRANSFER_STALLED			:= 1 shl 0
-?USB_TRANSFER_NO_DEVICE			:= 1 shl 1
-?USB_TRANSFER_HOST_ERROR		:= 1 shl 2
-?USB_TRANSFER_ERROR			:= 1 shl 3
-?USB_TRANSFER_OVERFLOW			:= 1 shl 4
-?USB_TRANSFER_BUS_ERROR			:= 1 shl 5
-?USB_TRANSFER_FAILED			:= 1 shl 6
-?USB_TRANSFER_CANCELLED			:= 1 shl 7
-
-virtual at 0
-	SRL_SUCCESS			rb 1
-	SRL_IGNORE			rb 1
-	SRL_ERROR_SYSTEM		rb 1
-	SRL_ERROR_INVALID_PARAM		rb 1
-	SRL_ERROR_SCHEDULE_FULL		rb 1
-	SRL_ERROR_NO_DEVICE		rb 1
-	SRL_ERROR_NO_MEMORY		rb 1
-	SRL_ERROR_NOT_SUPPORTED		rb 1
-	SRL_ERROR_TIMEOUT		rb 1
-	SRL_ERROR_FAILED		rb 1
-	SRL_ERROR_INVALID_INTERFACE	rb 1
-end virtual
+; enum usb_find_flag
+?IS_NONE		:= 0
+?IS_DISABLED		:= 1 shl 0
+?IS_ENABLED		:= 1 shl 1
+?IS_DEVICE		:= 1 shl 2
+?IS_HUB			:= 1 shl 3
+?IS_ATTACHED		:= 1 shl 4
 
 ; enum usb_descriptor_type
 virtual at 1
-	?DEVICE_DESCRIPTOR		rb 1
-	?CONFIGURATION_DESCRIPTOR	rb 1
-	?STRING_DESCRIPTOR		rb 1
-	?INTERFACE_DESCRIPTOR		rb 1
-	?ENDPOINT_DESCRIPTOR		rb 1
+	?DEVICE_DESCRIPTOR			rb 1
+	?CONFIGURATION_DESCRIPTOR		rb 1
+	?STRING_DESCRIPTOR			rb 1
+	?INTERFACE_DESCRIPTOR			rb 1
+	?ENDPOINT_DESCRIPTOR			rb 1
 end virtual
 
-; enum usb_transfer_type
-virtual at 0
-	?CONTROL_TRANSFER		rb 1
-	?ISOCHRONOUS_TRANSFER		rb 1
-	?BULK_TRANSFER			rb 1
-	?INTERRUPT_TRANSFER		rb 1
-end virtual
-
-virtual at 0
-  USB_IS_DISABLED			rb 1
-  USB_IS_ENABLED			rb 1
-  USB_IS_DEVICES			rb 1
-  USB_IS_HUBS				rb 1
-end virtual
-
-;-------------------------------------------------------------------------------
-;srl_error_t srl_Init(srl_device_t *srl, usb_device_t dev, void *buf, size_t size, uint8_t interface);
-srl_Init:
+;srl_error_t srl_Open(srl_device_t *srl,
+;                     usb_device_t dev,
+;                     void *buffer,
+;                     size_t size,
+;                     uint8_t interface,
+;                     uint24_t rate);
+srl_Open:
 	ld	iy,0
 	add	iy,sp
 	push	ix
-	ld	ix,(iy + 3)
+	ld	ix,(iy+3)				; ix = srl
 
-	ld	hl,(iy + 12)			; check if buffer is large enough
-	ld	de,128
+	ld	hl,(iy+6)				; hl = dev
+	compare_hl_zero					; check if device is null
+	ld	a,SRL_ERROR_INVALID_DEVICE
+	jq	z,.exit
+	ld	(xsrl_device.dev),hl
+
+	ld	hl,(iy+12)				; hl = size
+	ld	de,128					; check if buffer is large enough
 	compare_hl_de
 	ld	a,SRL_ERROR_NO_MEMORY
 	jq	c,.exit
 
-	ld	hl,(iy + 6)			; usb device
-	compare_hl_zero
-	jq	z,.err_nd
-	ex	hl,de
-	ld	hl,(iy + 3)
-	ld	(hl),de
+	ld	(xsrl_device.rx_buf.buf_end),hl		; divide size by 2
+	srl	(xsrl_device.rx_buf.buf_end+2)
+	rr	(xsrl_device.rx_buf.buf_end+1)
+	rr	(xsrl_device.rx_buf.buf_end)
+	ld	de,(xsrl_device.rx_buf.buf_end)		; de = size / 2
 
-	call	usb_GetRole			; check if calc is acting as device
-	or	a,a
-	jq	z,.host
+	ld	hl,(iy+9)				; hl = buffer
+	ld	(xsrl_device.rx_buf.buf_start),hl
+	ld	(xsrl_device.rx_buf.data_start),hl
+	ld	(xsrl_device.rx_buf.data_end),hl
 
-	ld	a,SRL_HOST			; calc is acting as device
-	ld	(xsrl_Device.type),a
-	ld	a,$83				; set endpoints
-	ld	(.epIn),a
-	ld	a,$04
-	ld	(.epOut),a
-	jq	.getEndpoints
+	add	hl,de					; hl = buffer + size/2
+	ld	(xsrl_device.rx_buf.buf_end),hl
+	ld	(xsrl_device.tx_buf.buf_start),hl
+	ld	(xsrl_device.tx_buf.data_start),hl
+	ld	(xsrl_device.tx_buf.data_end),hl
 
-.host:
+	add	hl,de					; hl = buffer + size
+	ld	(xsrl_device.tx_buf.buf_end),hl
+
+	xor	a,a					; set break positions to null
+	sbc	hl,hl
+	ld	(xsrl_device.rx_buf.data_break),hl
+	ld	(xsrl_device.tx_buf.data_break),hl
+	ld	(xsrl_device.rx_buf.dma_active),a	; reset dma_active
+	ld	(xsrl_device.tx_buf.dma_active),a
+
 	push	iy
-	ld	bc,(xsrl_Device.dev)
-	push	bc
-	call	usb_GetDeviceFlags		; check if device is enabled
-	pop	bc
-	bit	USB_IS_ENABLED,l
-	jq	nz,.enabled
+	call	usb_GetRole
+	pop	iy
+	bit	4,l
+	jq	z,.role_host
 
-	ld	a,SRL_ERROR_NO_DEVICE
-	pop	hl
-	jq	.exit
+	; calc is acting as device
+	ld	a,SRL_TYPE_HOST
+	ld	(xsrl_device.type),a
+	ld	a,$83
+	ld	(xsrl_device.tx_addr),a
+	ld	a,$04
+	ld	(xsrl_device.rx_addr),a
+	jq	.shared
 
-.enabled:					; get descriptor
-	ld	bc,tmp.length			; storage for size of descriptor
+.role_host:
+	; check if device is enabled
+	push	iy
+	ld	bc,(xsrl_device.dev)
 	push	bc
-	ld	bc,18				; size of device descriptor
+	call	usb_GetDeviceFlags
+	pop	bc,iy
+
+	ld	a,SRL_ERROR_INVALID_DEVICE
+	bit	IS_ENABLED,l
+	jq	z,.exit
+
+	; get descriptors
+	push	iy
+	ld	bc,.transferred
 	push	bc
-	ld	bc,tmp.descriptor		; storage for descriptor
+	ld	bc,18					; length
 	push	bc
-	ld	bc,0
+	ld	bc,(iy+9)				; descriptor = buffer
 	push	bc
-	inc	bc				; USB_DEVICE_DESCRIPTOR = 1
+	ld	bc,0					; index = 0
 	push	bc
-	ld	bc,(xsrl_Device.dev)
+	ld	bc,DEVICE_DESCRIPTOR
+	push	bc
+	ld	bc,(xsrl_device.dev)
 	push	bc
 	call	usb_GetDescriptor
 	pop	bc,bc,bc,bc,bc,bc,iy
+
+	ld	a,SRL_ERROR_USB_FAILED
 	compare_hl_zero
-	ld	a,l
-	jq	nz,.exit			; return if error
-	ld	de,18
-	ld	hl,(tmp.length)
-	compare_hl_de				; ensure enough bytes were fetched
-	jq	nz,.err_nd
+	jq	nz,.exit
 
-	xor	a,a
-	ld	(.prevConfig),a
-
-;	this appears to be broken?
-;	push	iy
-;	ld	bc,.prevConfig			; get current configuration number
-;	push	bc
-;	ld	bc,(xsrl_Device.dev)
-;	push	bc
-;	call	usb_GetConfiguration
-;	pop	bc,bc,iy
-
-	ld	a,(.prevConfig)
+	ld	hl,0					; check transferred == length
+.transferred = $-3
+	ld	bc,18
 	or	a,a
-	jr	nz,.configSet
-	inc	a				; set config 1
-.configSet:
-	ld	(.configNum),a
+	sbc	hl,bc
+	jq	nz,.exit				; a = USB_FAILED
 
 	push	iy
-	ld	bc,0				; get config length
-	.configNum = $-3
-	dec	bc
+	ld	bc,.current_config			; get current config
+	push	bc	
+	ld	bc,(xsrl_device.dev)
 	push	bc
-	ld	bc,(xsrl_Device.dev)
+	call	usb_GetConfiguration
+	pop	bc,bc,iy
+
+	ld	a,SRL_ERROR_USB_FAILED
+	compare_hl_zero
+	jq	nz,.exit
+
+	ld	de,1
+.current_config = $-3
+
+	ld	a,e					; chech if config is 0
+	or	a,a
+	ld	a,SRL_ERROR_INVALID_DEVICE
+	jq	z,.exit
+
+	push	iy
+	dec	de
+	push	de
+	ld	bc,(xsrl_device.dev)
 	push	bc
 	call	usb_GetConfigurationDescriptorTotalLength
-	pop	bc
-	pop	bc
-	ld	(.configSize),hl
+	pop	bc,bc,iy
 
-	pop	iy
+	ld	a,SRL_ERROR_USB_FAILED
+	compare_hl_zero
+	jq	z,.exit
 
-	ld	de,(iy + 12)			; error if not enough space
-	ex	hl,de
-	compare_hl_de
+	ex	de,hl					; de = desc. length
+
+	ld	hl,18					; get length of both descriptors
+	add	hl,de
+	ld	bc,(iy + 12)				; check if buffer is large enough
+	or	a,a
+	sbc	hl,bc
 	ld	a,SRL_ERROR_NO_MEMORY
-	jq	c,.exit
-
-	push	iy				; get config into buffer
-	ld	bc,tmp.length
-	push	bc
-	push	hl				; descriptor length
-	ld	bc,(iy + 9)
-	push	bc
-	ld	bc,(.configNum)
-	dec	bc
-	push	bc
-	ld	bc,CONFIGURATION_DESCRIPTOR
-	push	bc
-	ld	bc,(xsrl_Device.dev)
-	push	bc
-	call	usb_GetDescriptor
-	ld	a,l
-	pop	de,hl,hl,bc,hl,hl,iy
-
-	or	a,a
-	jq	nz,.exit
-
-	ld	hl,tmp.descriptor + deviceDescriptor.idVendor		; check if device is an FTDI
-	ld	a,(hl)
-	cp	a,$03				; check if idVendor is $0403
-	jq	nz,.nonFTDI
-	inc	hl
-	ld	a,(hl)
-	cp	a,$04
-	jq	nz,.nonFTDI
-
-	ld	a,SRL_FTDI			; set device type
-	ld	(xsrl_Device.type),a
-
-	ld	a,(iy + 15)			; if interface == -1, interface = 0
-	inc	a
-	jq	nz,.specificInterface
-	ld	(iy + 15),a
-.specificInterface:
-
-	ld	hl,configurationDescriptor.bNumInterfaces		; check if device has multiple interfaces
-	ld	de,(iy + 9)
-	add	hl,de
-	ld	a,(hl)
-	dec	a
-	ld	hl,(tmp.descriptor + deviceDescriptor.bcdDevice)	; get device version in de
-	ex.s	hl,de
-	jq	z,.singleInterface
-
-	ld	b,(iy + 15)			; error if interface >= nNumInterfaces
-	cp	a,b
-	ld	a,SRL_ERROR_INVALID_INTERFACE
-	jq	c,.exit
-
-	sla	b				; multiply interface by 2
-	ld	a,$81				; add $81 to get in endpoint
-	add	a,b
-	ld	(.epIn),a
-	xor	a,a				; add $02 to get out endpoint
-	inc	a
-	inc	a
-	add	a,b
-	ld	(.epOut),a
-
-	xor	a,a
-	ld	hl,$0800			; check each version number for multi-interface devices
-	sbc	hl,de
-	ld	a,FT4232H
-	jq	z,.ftdiSubtypeSet
-	ld	hl,$0700
-	sbc	hl,de
-	ld	a,FT2232H
-	jq	z,.ftdiSubtypeSet
-	ld	a,FT2232C			; default to FT2232C
-	jq	.ftdiSubtypeSet
-
-.singleInterface:
-	ld	a,(iy + 15)			; if interface is non-zero, error
-	or	a,a
-	ld	a,SRL_ERROR_INVALID_INTERFACE
-	jq	nz,.exit
-
-	ld	a,$81
-	ld	(.epOut),a
-	ld	a,$02
-	ld	(.epIn),a
-
-	scf
-	ld	hl,$0200
-	sbc	hl,de
-	ld	a,SIO
-	jq	nc,.ftdiSubtypeSet
-	ld	hl,$0400
-	sbc	hl,de
-	ld	a,FT8U232AM
-	jq	nc,.ftdiSubtypeSet
-	ld	hl,$0600
-	sbc	hl,de
-	ld	a,FT232BM
-	jq	nc,.ftdiSubtypeSet
-	ld	hl,$0900
-	sbc	hl,de
-	ld	a,FT232RL
-	jq	nc,.ftdiSubtypeSet
-	ld	hl,$1000
-	sbc	hl,de
-	ld	a,FT232H
-	jq	nc,.ftdiSubtypeSet
-	ld	a,FTX
-	jq	.ftdiSubtypeSet
-
-.ftdiSubtypeSet:
-	ld	(xsrl_Device.subType),a
-	jq	.shared
-
-.nonFTDI:
-	ld	hl,tmp.descriptor + deviceDescriptor.idVendor
-	ld	a,(hl)				; check if device is a PL2303
-	cp	a,$57
-	jq	z,.possiblyATEN
-	cp	a,$7b
-	jq	nz,.nonPL2303
-	inc	hl
-	ld	a,(hl)
-	cp	a,$06
-	jq	nz,.nonPL2303
-	inc	hl
-	ld	hl,(hl)
-	ex.s	hl,de
-	xor	a,a
-iterate pid, $2303, $2304, $04bb, $1234, $aaa0, $aaa2, $aaa8, $0611, $0612, $0609, $331a, $0307, $e1f1
-	ld	hl,#pid
-	sbc	hl,de
-	jq	z,.pl2303
-end iterate
-	jq	.nonPL2303
-
-.possiblyATEN:
-	inc	hl
-	ld	hl,(hl)
-	ld	de,$200805
-	or	a,a
-	sbc	hl,de
-	jq	nz,.nonPL2303
-
-.pl2303:
-	ld	a,SRL_PL2303
-	ld	(xsrl_Device.type),a
-
-	ld	a,(tmp.descriptor + deviceDescriptor.bDeviceClass)
-	cp	a,2				; get subtype
-	ld	a,PL2303_01
-	jq	z,.plTypeFound
-	ld	a,(tmp.descriptor + deviceDescriptor.bMaxPacketSize0)
-	cp	a,$40
-	ld	a,PL2303_HX
-	jq	z,.plTypeFound
-	ld	a,PL2303_01
-
-.plTypeFound:
-	ld	(xsrl_Device.subType),a
-
-	ld	a,$02				; set endpoints
-	ld	(.epIn),a
-	ld	a,$83
-	ld	(.epOut),a
-
-	ld	hl,$8484			; neither the datasheet nor any driver I've found has explained what this does
-	call	pl2303VendorRead
-	ld	hl,$0404
-	ld	de,0
-	call	pl2303VendorWrite
-	ld	hl,$8484
-	call	pl2303VendorRead
-	ld	hl,$8383
-	call	pl2303VendorRead
-	ld	hl,$8484
-	call	pl2303VendorRead
-	ld	hl,$0404
-	ld	de,1
-	call	pl2303VendorWrite
-	ld	hl,$8484
-	call	pl2303VendorRead
-	ld	hl,$8383
-	call	pl2303VendorRead
-	ld	hl,0
-	ld	de,1
-	call	pl2303VendorWrite
-	ld	hl,1
-	ld	de,0
-	call	pl2303VendorWrite
-
-	ld	hl,2				; magic values are slightly different for older versions
-	ld	de,$24
-	ld	a,(xsrl_Device.subType)
-	or	a,a
-	jq	z,.plVersionLegacy
-	ld	e,$44				; device is a HX
-	call	pl2303VendorWrite
-	ld	hl,8
-	ld	de,0
-	call	pl2303VendorWrite
-	ld	hl,9
-	ld	de,0
-	call	pl2303VendorWrite
-
-	jq	.shared
-
-.plVersionLegacy:
-	call	pl2303VendorWrite
-
-	jq	.shared
-
-.nonPL2303:
-	ld	de,(iy + 9)			; address of configuration descriptor
-	ld	hl,(.configSize)
-
-	add	hl,de
-	ex	hl,de				; hl = start, de = end
-
-	xor	a,a				; reset endpoints to zero
-	ld	(.epIn),a
-	ld	(.epOut),a
-
-	ld	a,(iy + 15)			; check for CDC interface
-	cp	a,SRL_INTERFACE_ANY
-	jq	z,.findAnyInterface
-
-	call	findSpecificInterface
-	ld	a,SRL_ERROR_INVALID_INTERFACE
 	jq	nc,.exit
 
-	ld	bc,5				; check that this is a CDC data interface
+	push	iy,de					; de = desc. length
+	ld	bc,.config_transferred
+	push	bc
+	push	de					; length
+	ld	hl,(iy+9)				; descriptor = buffer + sizeof deviceDescriptor
+	ld	bc,18
 	add	hl,bc
-	ld	a,(hl)
-	sbc	hl,bc
-	cp	a,10
-	ld	a,SRL_ERROR_INVALID_INTERFACE
+	push	hl
+	ld	bc,(.current_config)			; index = current config - 1
+	dec	bc
+	push	bc
+	ld	c,CONFIGURATION_DESCRIPTOR
+	push	bc
+	ld	bc,(xsrl_device.dev)
+	push	bc
+	call	usb_GetDescriptor
+	pop	bc, bc, bc, bc, bc, bc
+	pop	de,iy					; de = desc. length
+
+	ld	a,SRL_ERROR_USB_FAILED
+	compare_hl_zero
 	jq	nz,.exit
-	call	findEndpoints
-	jq	.cdcCheckDone
 
-.findAnyInterface:
-	call	findAnyInterface
-	jq	nc,.err_nd
-	call	findEndpoints
-
-.cdcCheckDone:
-	ld	a,(.epIn)			; check if any endpoints were found
+	ld	hl,0
+.config_transferred = $-3
 	or	a,a
-	jq	nz,.cdcFound
-	ld	a,(.epOut)
-	or	a,a
-	jq	z,.err_nd
-	jq	.cdcFound
+	sbc	hl,de
+	jq	nz,.exit
 
-.cdcFound:
-	ld	a,SRL_CDC
-	ld	(xsrl_Device.type),a
+	call	get_device_type
+	ld	a,(xsrl_device.type)			; check if type is unknown
+	cp	a,SRL_TYPE_UNKNOWN
+	ld	a,SRL_ERROR_INVALID_DEVICE
+	jq	z,.exit
+
+	ld	a,(iy+15)				; a = interface number
+	call	get_endpoint_addresses
+	ld	a,l					; check for error
+	or	a,a
+	jq	nz,.exit_hl
+
+	call	init_device
+	ld	a,l					; check for error
+	or	a,a
+	jq	nz,.exit_hl
+
+	ld	hl,(iy+18)				; hl = baud rate
+	ld	c,(iy+15)				; a = interface number
+	call	set_rate
+	ld	a,l					; check for error
+	or	a,a
+	jq	nz,.exit_hl
 
 .shared:
-	ld	a,0				; check if configuration is already set
-	.prevConfig = $-1
-	or	a,a
-	jq	nz,.getEndpoints
+	ld	hl,(xsrl_device.dev)
+	push	iy,hl
+	call	usb_RefDevice
+	pop	hl,iy
+	
+	lea	ix,xsrl_device.rx_buf
+	call	start_read
 
-	push	iy
-
-	ld	hl,0
-	.configSize = $-3
-	push	hl
-	ld	bc,(iy + 9)
-	push	bc
-	ld	bc,(xsrl_Device.dev)
-	push	bc
-	call	usb_SetConfiguration
-	pop	de,bc,bc
-
-	pop	iy				; needed to keep stack balanced
-
-	ld	a,l				; return error if config set fails
-	or	a,a
-	jq	nz,.exit
-
-.getEndpoints:
-	push	iy
-	ld	bc,$83				; get endpoint
-	.epOut = $-3
-	push	bc
-	ld	de,(xsrl_Device.dev)
-	push	de
-	call	usb_GetDeviceEndpoint
-	pop	de
-	pop	bc
-	jq	z,.no_ep
-	ld	(xsrl_Device.in),hl
-
-	ld	bc,$04				; get endpoint
-	.epIn = $-3
-	push	bc
-	ld	de,(xsrl_Device.dev)
-	push	de
-	call	usb_GetDeviceEndpoint
-	pop	bc
-	pop	bc
-	ld	(xsrl_Device.out),hl
-.no_ep:
-	pop	iy
-	ld	a,SRL_ERROR_NO_DEVICE
-	jq	z,.exit
-
-.deviceConfigured:
-	ld	hl,(iy + 9)			; set read buffer pointer, start, and end
-	ld	(xsrl_Device.readBuf),hl
-	ld	(xsrl_Device.readBufStart),hl
-	ld	(xsrl_Device.readBufEnd),hl
-	ld	de,(iy + 12)			; set buffer sizes to size/2
-	ld	(xsrl_Device.readBufSize),de
-	srl	(xsrl_Device.readBufSize)
-	rr	(xsrl_Device.readBufSize+1)
-	rr	(xsrl_Device.readBufSize+2)
-	ld	de,(xsrl_Device.readBufSize)
-	ld	(xsrl_Device.writeBufSize),de
-	xor	a,a				; set write buffer pointer, start, and end
-	adc	hl,de
-	ld	(xsrl_Device.writeBuf),hl
-	ld	(xsrl_Device.writeBufStart),hl
-	ld	(xsrl_Device.writeBufEnd),hl
-	ld	hl,0				; set read buffer break to 0
-	ld	(xsrl_Device.readBufBreak),hl
-	xor	a,a				; unstop read
-	ld	(xsrl_Device.stopRead),a
-	ld	(xsrl_Device.readBufActive),a	; mark read buffer as inactive
-	ld	a,SRL_SUCCESS
+	xor	a,a					; a = USB_SUCCESS
 .exit:
-	pop	ix
-	ret
-.err_nd:
-	ld	a,SRL_ERROR_NO_DEVICE
-	jq	.exit
-
-; hl = pointer to current descriptor
-; de = end of config descriptor
-; returns with hl = pointer to next descriptor
-; returns nc if end of config descriptor reached
-nextDescriptor:
-	ld	bc,0
-	ld	c,(hl)
-	add	hl,bc
-	compare_hl_de
-	ret
-
-; hl = config descriptor
-; de = end of config descriptor
-; iy + 15 = interface number
-; returns with hl = pointer to interface descriptor
-; returns nc if end of config descriptor reached
-findSpecificInterface:
-	inc	hl
-	ld	a,(hl)
-	dec	hl
-	cp	a,INTERFACE_DESCRIPTOR		; check if interface descriptor
-	jq	nz,.next
-	inc	hl
-	inc	hl
-	ld	a,(hl)
-	cp	a,(iy + 15)
-	dec	hl
-	dec	hl
-	scf
-	ret	z
-.next:
-	call	nextDescriptor
-	ret	nc
-	jq	findSpecificInterface
-
-; hl = config descriptor
-; de = end of config descriptor
-; returns with hl = pointer to interface descriptor
-; returns nc if end of config descriptor reached
-findAnyInterface:
-	inc	hl
-	ld	a,(hl)
-	dec	hl
-	cp	a,INTERFACE_DESCRIPTOR		; check if interface descriptor
-	jq	nz,.next
-	ld	bc,5
-	add	hl,bc
-	ld	a,(hl)
-	sbc	hl,bc
-	cp	a,10
-	scf
-	ret	z
-.next:
-	call	nextDescriptor
-	ret	nc
-	jq	findAnyInterface
-
-; hl = config descriptor
-; de = end of config descriptor
-; sets epIn/epOut to the endpoint number
-findEndpoints:
-	call	nextDescriptor
-.loop:
-	inc	hl
-	ld	a,(hl)
-	cp	a,INTERFACE_DESCRIPTOR
-	ret	z
-	cp	a,ENDPOINT_DESCRIPTOR
-	jq	nz,.findEpNext
-	inc	hl
-	ld	a,(hl)
-	dec	hl
-	dec	hl
-	bit	7,a				; check endpoint direction
-	jq	z,.foundEpIn
-	ld	(srl_Init.epOut),a
-	jq	.findEpNext
-.foundEpIn:
-	ld	(srl_Init.epIn),a
-	jq	.findEpNext
-.findEpNext:
-	call	nextDescriptor
-	jq	.loop
-
-
-;-------------------------------------------------------------------------------
-;srl_error_t srl_SetRate(srl_device_t *srl, uint24_t rate);
-srl_SetRate:
-	ld	iy,0
-	add	iy,sp
-	push	ix
-	ld	ix,(iy + 3)
-	ld	a,SRL_UNKNOWN			; check device type
-	cp	a,(xsrl_Device.type)
-	jq	z,.exit
-	inc	a				; SRL_HOST
-	cp	a,(xsrl_Device.type)
-	jq	z,.exit
-	inc	a
-	cp	a,(xsrl_Device.type)
-	jq	z,.cdc
-	inc	a
-	cp	a,(xsrl_Device.type)
-	jq	z,.ftdi
-	inc	a
-	cp	a,(xsrl_Device.type)
-	jq	z,.cdc
-	jq	.exit
-.cdc:						; if a CDC device:
-	ld	hl,(iy + 6)			; change the rate of the default line coding
-	ld	(defaultlinecoding),hl
-	ld	de,defaultlinecoding
-	ld	hl,setup.setlinecoding
-	jq	.sendctrl
-.ftdi:						; if a FTDI device:
-	ld	a,(xsrl_Device.readBufActive)	; check if read needs to be stopped
-	or	a,a
-	jq	z,.noStop
-	ld	(xsrl_Device.stopRead),a	; stop read
-.loop:
-	call	usb_WaitForEvents		; wait for read to stop
-	ld	a,(xsrl_Device.readBufActive)
-	jq	nz,.loop
-.noStop:
-	ld	a,(xsrl_Device.subType)		; check device type
-	cp	a,SIO
-	jq	nz,.nonSIO
-
-	ld	de,(iy + 6)			; get SIO data
-	ld	c,0
-repeat 10
-if %=1
-	ld	hl,300
-else if %=9
-	ld	hl,57600
-else
-	add	hl,hl
-end if
-	compare_hl_de
-	jq	z,.sioPrepTransfer
-	inc	bc
-end repeat
-	
-	ld	l,SRL_ERROR_NOT_SUPPORTED	; invalid SIO baud rate
-	jq	.exit
-
-.sioPrepTransfer:
-	ld	a,c
-	ld	(setup.ftdisetrate + setuppkt.wValue),a
-	xor	a,a
-	ld	(setup.ftdisetrate + setuppkt.wValue + 1),a
-	jq	.sendFTDICtrl
-
-.nonSIO:
-	xor	a,a
-	ld	(.highSpeed),a
-	ld	bc,1200				; high speed is set for FT*232H if baud > 1200
-	ld	hl,(iy + 6)			; hl = baud rate
-	sbc	hl,bc
-	add	hl,bc
-	jq	c,.lowSpeed
-	ld	a,(xsrl_Device.subType)
-	cp	a,FT2232H
-	jq	c,.lowSpeed
-
-	ld	a,1				; high-speed specific stuff
-	ld	(.highSpeed),a
-	xor	a,a
-	add	hl,hl				; multiply baud by 8
-	rl	a
-	add	hl,hl
-	rl	a
-	push	hl
-	pop	bc				; half of baud rate
-	ld	d,a
-	add	hl,hl
-	rl	a
-	push	hl,af
-
-	ld	e,1200000000 shr 24		; base = 120000000
-	ld	hl,1200000000 and $FFFFFF
-
-	jq	.speedIndep
-
-.lowSpeed:
-	xor	a,a
-	push	hl
-	pop	bc				; half of divisor
-	ld	d,a
-	add	hl,hl				; double baud rate
-	rl	a
-	push	hl,af
-
-	ld	e,48000000 shr 24		; base = 48000000
-	ld	hl,48000000 and $FFFFFF
-
-	; divide base by baud * 2, round to nearest integer
-.speedIndep:
-	add	hl,bc				; add half of divisor so that result is rounded
-	ld	a,e
-	adc	a,d
-	ld	e,a
-
-	pop	af,bc
-
-	call	ti._ldivu			; euhl / aubc -> euhl
-
-	ld	bc,.bmNums
-
-	ld	a,(xsrl_Device.subType)
-	cp	a,FT8U232AM
-	jq	nz,.nonAM
-	
-
-	ld	bc,.amNums			; device is an AM
-	ld	a,l
-	and	a,$07
-	cp	a,$07
-	jq	nz,.nonAM			; if FT232AM and last 3 bits are set, increment result
-	xor	a,a
-	inc	hl
-	adc	a,e
-	ld	e,a
-
-.nonAM:
-	ld	a,e
-	ld	(setup.ftdisetrate + setuppkt.wIndex + 1),a
-	ld	(setup.ftdisetrate + setuppkt.wValue),hl
-	ld	a,l
-	and	a,$07				; div3 & 7
-
-	ld	e,3
-.shiftLoop:
-	ld	hl,setup.ftdisetrate + setuppkt.wIndex + 1
-	rr	(hl)
-	dec	hl
-	rr	(hl)
-	dec	hl
-	rr	(hl)
-	dec	hl
-	rr	(hl)
-	dec	e
-	jq	nz,.shiftLoop			; div = div3 >> 3
-
 	ld	hl,0
 	ld	l,a
-	add	hl,bc
-	ld	a,(hl)				; divnums[div3 & 7]
-	sla	a
-
-	ld	hl,setup.ftdisetrate + setuppkt.wValue + 1
-	jq	nc,.noExtraBit
-
-	inc	hl				; set 17th bit, in index field
-	set	0,(hl)
-	dec	hl
-
-.noExtraBit:
-	or	a,(hl)
-	ld	(hl),a				; div |= divnums[div3 & 7] << 14
-	
-	dec	hl
-	ld	a,(hl)
-	dec	a
-	jq	nz,.noSpecialCase
-	inc	hl
-	ld	hl,(hl)				; check if $00000001
-	compare_hl_zero
-	jq	nz,.divNonZero
-	xor	a,a
-	ld	(setup.ftdisetrate + setuppkt.wIndex),a
-	jq	.noSpecialCase
-.divNonZero:
-	ld	de,$40				; check if $00004001
-	compare_hl_de
-	jq	nz,.noSpecialCase
-	ld	a,(xsrl_Device.subType)		; if AM ignore this
-	cp	a,FT8U232AM
-	jq	z,.noSpecialCase
-	ld	a,1
-	ld	(setup.ftdisetrate + setuppkt.wIndex + 1),a
-.noSpecialCase:
-	ld	a,0				; check if high speed device
-	.highSpeed = $-1
-	or	a,a
-	jq	z,.sendFTDICtrl
-
-	ld	hl,setup.ftdisetrate + setuppkt.wIndex
-	set	1,(hl)				; for high speed div |= 0x00020000;
-
-.sendFTDICtrl:
-	ld	hl,setup.ftdisetrate
-	jq	.sendctrl
-
-.sendctrl:	;de: data, hl: request
-	ld	bc,0				; don't need transfer length
-	push	bc
-	ld	bc,50				; number of retries
-	push	bc
-	push	de
-	push	hl
-	ld	bc,0				; get endpoint
-	push	bc
-	ld	hl,(iy + 3)			; get usb_device_t
-	ld	bc,(hl)
-	push	bc
-	call	usb_GetDeviceEndpoint
-	pop	bc
-	pop	bc
-	push	hl
-	call	usb_ControlTransfer		; send control request
-	pop	bc,bc,bc,bc,bc
-	ld	a,(xsrl_Device.readBufActive)	; check if read needs to be started
-	or	a,a
-	call	z,srl_StartAsyncRead
-	jq	.exit				; return error, if any
-.exit:
-	ld	a,l
+.exit_hl:
 	pop	ix
 	ret
 
-.amNums:
-	db	0 shl 5, 3 shl 5, 0 shl 5, 0 shl 5, 1 shl 5, 1 shl 5, 1 shl 5
-.bmNums:
-	db	0 shl 5, 3 shl 5, 2 shl 5, 4 shl 5, 1 shl 5, 5 shl 5, 6 shl 5, 7 shl 5
+;void srl_Close(srl_device_t *srl);
+srl_Close:
+	; todo: cancel transfers somehow?
+	jq	usb_UnrefDevice
 
-;-------------------------------------------------------------------------------
-;size_t srl_Available(srl_device_t *srl);
-srl_Available:
-	ld	iy,0
-	add	iy,sp
-	push	ix
-	ld	ix,(iy + 3)
-	ld	hl,(xsrl_Device.readBufBreak)	; if readBufBreak == 0
-	compare_hl_zero
-	jq	nz,.break
-	jq	.nobreak
-.nobreak:
-	ld	hl,(xsrl_Device.readBufEnd)	; readBufEnd - readBufStart
-	ld	de,(xsrl_Device.readBufStart)
-	sbc	hl,de
-	jq	.exit
-.break:
-	ld	hl,(xsrl_Device.readBufBreak)	; (readBufBreak - readBufStart) + (readBufEnd - readBuf)
-	ld	de,(xsrl_Device.readBufEnd)
-	add	hl,de
-	ld	de,(xsrl_Device.readBuf)
-	sbc	hl,de
-	ld	de,(xsrl_Device.readBufStart)
-	sbc	hl,de
-	jq	.exit
-.exit:
-	pop	ix
-	ret
-
-;-------------------------------------------------------------------------------
-;size_t srl_Read(srl_device_t *srl, void *buffer, size_t length);
+;size_t srl_Read(srl_device_t *srl,
+;                void *data,
+;                size_t length);
 srl_Read:
 	ld	iy,0
 	add	iy,sp
 	push	ix
-	ld	ix,(iy + 3)
-	ld	de,(iy + 9)			; set remaining to length
-	ld	hl,0
-	xor	a,a
-	sbc	hl,de
-	jq	z,.exit
-.rec:
-	ld	hl,(xsrl_Device.readBufStart)	; check if buffer has *any* data
-	ld	bc,(xsrl_Device.readBufEnd)
-	xor	a,a
-	sbc	hl,bc				
-	jq	z,.sched
-	ld	hl,(xsrl_Device.readBufBreak)	; if readBufBreak
-	compare_hl_zero
-	jq	z,.nobreak
-	jq	.break
-.break:
-	ld	hl,(xsrl_Device.readBufStart)	; if readBufStart + remaining < readBufBreak:
-	add	hl,de
-	ld	bc,(xsrl_Device.readBufBreak)
-	sbc	hl,bc
-	jq	c,.space
-
-	ld	bc,(xsrl_Device.readBufStart)
-	ld	hl,(xsrl_Device.readBufBreak)
-	sbc	hl,bc
-	push	hl
-	pop	bc
-	ld	hl,(xsrl_Device.readBufStart)
-	push	bc
-	push	de
-	ld	de,(iy + 6)			; copy readBufBreak - readBufStart bytes to buffer
-	ldir
-	ld	hl,0				; set readBufBreak to 0
-	ld	(xsrl_Device.readBufBreak),hl
-	ld	hl,(xsrl_Device.readBuf)	; set readBufStart to readBuf
-	ld	(xsrl_Device.readBufStart),hl
-	pop	hl				; remaining -= readBufBreak - readBufStart
-	pop	bc
-	sbc	hl,bc
-	ex	hl,de
-	jq	.rec				; read remaining data
-.nobreak:
-	ld	hl,(xsrl_Device.readBufStart)	; if readBufStart + remaining < readBufEnd:
-	add	hl,de
-	ld	bc,(xsrl_Device.readBufEnd)
-	sbc	hl,bc
-	jq	nc,.nospace
-	jq	.space
-.space:
-	push	de				; copy remaining bytes to buffer + length - remaining
-	ld	hl,(iy + 6)
-	ld	bc,(iy + 9)
-	add	hl,bc
-	sbc	hl,de
-	ex	hl,de
-	ld	hl,(xsrl_Device.readBufStart)
-	pop	bc
-	push	bc
-	ldir
-	pop	de
-	ld	hl,(xsrl_Device.readBufStart)	; readBufStart += remaining
-	add	hl,de
-	ld	(xsrl_Device.readBufStart),hl
-	ld	de,0				; remaining = 0
-	jq	.sched
-.nospace:
-	push	de				; copy readBufEnd - readBufStart bytes to buffer + length - remaining
-	ld	hl,(iy + 6)
-	ld	bc,(iy + 9)
-	add	hl,bc
-	sbc	hl,de
-	ex	hl,de
-	ld	hl,(xsrl_Device.readBufEnd)
-	ld	bc,(xsrl_Device.readBufStart)
-	sbc	hl,bc
-	push	hl
-	pop	bc
-	ld	hl,(xsrl_Device.readBufStart)
-	ldir
-	pop	hl
-	ld	bc,(xsrl_Device.readBufStart)	; remaining -= readBufEnd - readBufStart
-	add	hl,bc
-	ld	bc,(xsrl_Device.readBufEnd)
-	sbc	hl,bc
-	ex	hl,de
-	ld	(xsrl_Device.readBufStart),bc	; set readBufStart to readBufEnd
-	jq	.sched
-.sched:
-	ld	a,(xsrl_Device.readBufActive)	; if read is inactive
+	ld	ix,(iy+3)
+	ld	hl,(iy+6)
+	ld	bc,(iy+9)
+	lea	ix,xsrl_device.rx_buf
+	call	ring_buf_pop
+	ld	a,(xring_buf_ctrl.dma_active)		; check if dma active
 	or	a,a
-	push	de,iy
-	call	z,srl_StartAsyncRead		; attempt to schedule async transfer
-	pop	iy,de
-	xor	a,a				; get number of bytes transferred
-	ld	hl,(iy + 9)
-	sbc	hl,de
+	jq	nz,.exit
+	push	hl
+	call	start_read
+	pop	hl
 .exit:
 	pop	ix
 	ret
 
-;-------------------------------------------------------------------------------
-;size_t srl_Write(srl_device_t *srl, const void *buffer, size_t length);
+;size_t srl_Write(srl_device_t *srl,
+;                 const void *data,
+;                 size_t length);
 srl_Write:
 	ld	iy,0
 	add	iy,sp
 	push	ix
-	ld	ix,(iy + 3)
-	ld	de,0				; transferred = 0
-	xor	a,a
-	ld	bc,(xsrl_Device.writeBufStart)	; writeBufStart == writeBufEnd
-	ld	hl,(xsrl_Device.writeBufEnd)
-	sbc	hl,bc
-	push	af
-	jq	c,.wrap				; if writeBufStart > writeBufEnd
-	jq	.nowrap
-.nowrap:
-	xor	a,a
-	ld	hl,(xsrl_Device.writeBufEnd)	; if writeBufEnd + length < writeBuf + writeBufSize
-	ld	bc,(iy + 9)
-	add	hl,bc
-	ld	bc,(xsrl_Device.writeBuf)
-	sbc	hl,bc
-	ld	bc,(xsrl_Device.writeBufSize)
-	sbc	hl,bc
-	jq	c,.space
-
-	ld	hl,(xsrl_Device.writeBuf)	; transferred = writeBuf + writeBufSize - writeBufEnd
-	ld	bc,(xsrl_Device.writeBufSize)
-	add	hl,bc
-	ld	bc,(xsrl_Device.writeBufEnd)
-	sbc	hl,bc
-	ex	hl,de
-
-	ld	hl,(xsrl_Device.writeBufStart)
-	ld	bc,(xsrl_Device.writeBuf)
+	ld	ix,(iy+3)
+	ld	hl,(iy+6)
+	ld	bc,(iy+9)
+	lea	ix,xsrl_device.tx_buf
+	call	ring_buf_push
+	ld	a,(xring_buf_ctrl.dma_active)		; check if dma active
 	or	a,a
-	sbc	hl,bc
-	jq	nz,.notstart1
-
-	dec	de
-
-.notstart1:
-	push	de,de
-	pop	bc
-
-	ld	hl,(iy + 6)			; copy transferred bytes from buffer to writeBufEnd
-	ld	de,(xsrl_Device.writeBufEnd)
-	ldir
-	ld	hl,(xsrl_Device.writeBuf)	; writeBufEnd = writeBuf
-	jq	nz,.notstart2
-
-	dec	hl
-	ld	(xsrl_Device.writeBufEnd),hl
-	pop	de
-	jq	.exit
-
-.notstart2:
-	ld	(xsrl_Device.writeBufEnd),hl
-	pop	de				; transferred = writeBuf + writeBufSize - writeBufEnd
-	jq	.wrap
-.wrap:
-	ld	hl,(xsrl_Device.writeBufEnd)	; if writeBufEnd + length - transferred < writeBufStart:
-	ld	bc,(iy + 9)
-	add	hl,bc
-	sbc	hl,de
-	ld	bc,(xsrl_Device.writeBufStart)
-	sbc	hl,bc
-	jq	c,.space
-
-	scf					; copy writeBufStart - writeBufEnd - 1 bytes from buffer + transferred to writeBufEnd
-	ld	hl,(xsrl_Device.writeBufStart)
-	ld	bc,(xsrl_Device.writeBufEnd)
-	sbc	hl,bc
-	jq	z,.exit				; if the buffer is full, just return
+	jq	nz,.exit
 	push	hl
-	push	hl
-	pop	bc
-	push	de
-	ld	hl,(iy + 6)
-	add	hl,de
-	ld	de,(xsrl_Device.writeBufEnd)
-	ldir
-	pop	de
-	pop	hl				; transferred += writeBufStart - writeBufEnd - 1
-	add	hl,de
-	ex	de,hl
-
-	ld	hl,(xsrl_Device.writeBufStart)
-	dec	hl
-	ld	(xsrl_Device.writeBufEnd),hl	; writeBufEnd = writeBufStart - 1
-	jq	.exit
-.space:
-	xor	a,a
-	ld	hl,(iy + 9)			; copy length - transferred bytes from buffer + transferred to writeBufEnd
-	sbc	hl,de
-	push	hl
-	pop	bc				; length - transferred
-	jq	z,.zero
-	push	bc
-	ld	hl,(iy + 6)
-	add	hl,de
-	ld	de,(xsrl_Device.writeBufEnd)
-	ldir
-	pop	bc
-.zero:
-	ld	hl,(xsrl_Device.writeBufEnd)	; writeBufEnd += length - transferred
-	add	hl,bc
-	ld	(xsrl_Device.writeBufEnd),hl
-	ld	de,(iy + 9)			; transferred = length
-.exit:
-	ex	hl,de
-	pop	af
-	push	hl
-	call	z,srl_StartAsyncWrite		; attempt to schedule async transfer if buffer was empty
+	call	start_write
 	pop	hl
-	pop	ix
-	ret
-
-;-------------------------------------------------------------------------------
-;size_t srl_Read_Blocking(srl_device_t *srl, void *buffer, size_t length, uint24_t timeout);
-srl_Read_Blocking:
-	ld	iy,0
-	add	iy,sp
-	push	ix
-	ld	ix,(iy + 3)
-	call	usb_GetFrameNumber
-	ex	hl,de
-	ld	bc,0				; total
-.loop:
-	ld	a,(iy + 12)
-	or	a,a
-	jq	z,.noTimeout
-	push	de
-	call	usb_GetFrameNumber
-	pop	de
-	xor	a,a
-	sbc	hl,de				; frame_new - frame_init - timeout
-	push	bc
-	ld	bc,(iy + 12)
-	sbc	hl,bc
-	pop	bc
-	jq	nc,.exit
-.noTimeout:
-	push	de
-	push	iy
-	push	bc
-	xor	a,a
-	ld	hl,(iy + 9)			; length - total
-	sbc	hl,bc
-	push	hl
-	ld	hl,(iy + 6)			; buffer + total
-	add	hl,bc
-	push	hl
-	push	ix
-	call	srl_Read			; srl_Read(srl, buffer + total, length - total)
-	pop	bc,bc,bc,bc
-	add	hl,bc				; total += len
-	push	hl
-	call	usb_HandleEvents
-	pop	bc,iy,de
-	xor	a,a
-	ld	hl,(iy + 9)
-	sbc	hl,bc
-	jq	nz,.loop
-.exit:
-	push	bc
-	pop	hl
-	pop	ix
-	ret
-
-;-------------------------------------------------------------------------------
-;size_t srl_Write_Blocking(srl_device_t *srl, const void *buffer, size_t length, uint24_t timeout);
-srl_Write_Blocking:
-	ld	iy,0
-	add	iy,sp
-	push	ix
-	ld	ix,(iy + 3)
-	ld	bc,0				; total
-.loop:
-;todo: check timeout
-	xor	a,a
-	push	iy
-	push	bc
-	ld	hl,(iy + 9)
-	sbc	hl,bc
-	push	hl
-	ld	hl,(iy + 6)
-	add	hl,bc
-	push	hl
-	push	ix
-	call	srl_Write			; srl_Write(srl, buffer + total, length - total)
-	pop	de,de,de,bc
-	add	hl,bc				; total += len
-	push	hl
-	call	usb_HandleEvents
-	pop	bc
-	pop	iy
-	xor	a,a
-	ld	hl,(iy + 9)
-	sbc	hl,bc
-	jq	c,.loop
-	pop	ix
-	ret
-
-;-------------------------------------------------------------------------------
-;usb_error_t (usb_endpoint_t endpoint, usb_transfer_status_t status, size_t transferred, srl_device_t *data);
-srl_ReadCallback:
-	ld	iy,0
-	add	iy,sp
-	
-	ld	a,(iy + 6)			; do nothing if device was disconnected
-	and	a,USB_TRANSFER_NO_DEVICE
-	jr	z,.not_disconnected
-	xor	a,a
-	ld	(xsrl_Device.readBufActive),a
-	ret
-
-.not_disconnected:
-	push	ix
-	ld	ix,(iy + 12)
-	ld	hl,(iy + 9)			; return if nothing was transferred
-	compare_hl_zero
-	jq	z,.restart
-
-	ld	a,SRL_FTDI
-	cp	a,(xsrl_Device.type)
-	jq	nz,.nonftdi
-	dec	hl				; transferred -= 2
-	dec	hl
-	compare_hl_zero
-	jq	z,.restart			; nothing was transferred
-
-	push	hl
-	pop	bc
-	push	bc
-	ld	hl,(xsrl_Device.readBufEnd)	; copy data from readBufEnd + 2 to readBufEnd
-	ld	de,(xsrl_Device.readBufEnd)
-	inc	hl
-	inc	hl
-	ldir
-	pop	hl
-	jq	.nonftdi
-.nonftdi:
-	ld	bc,(xsrl_Device.readBufEnd)	;readBufEnd += transferred
-	add	hl,bc
-	ld	(xsrl_Device.readBufEnd),hl
-.restart:
-	call	srl_StartAsyncRead
 .exit:
 	pop	ix
-	ld	hl,USB_SUCCESS
 	ret
 
-;-------------------------------------------------------------------------------
-;usb_error_t (usb_endpoint_t endpoint, usb_transfer_status_t status, size_t transferred, srl_device_t *data);
-srl_WriteCallback:
-	ld	iy,0
-	add	iy,sp
-
-	ld	a,(iy + 6)			; do nothing if device was disconnected
-	and	a,USB_TRANSFER_NO_DEVICE
-	ld	a,0
-	ret	nz
-
-	push	ix
-	ld	ix,(iy + 12)
-	ld	bc,(iy + 9)			; writeBufStart += transferred
-	ld	hl,(xsrl_Device.writeBufStart)
-	add	hl,bc
-	ld	(xsrl_Device.writeBufStart),hl
-	xor	a,a				; if writeBufStart == writeBuf + writeBufSize:
-	ld	bc,(xsrl_Device.writeBufSize)
-	sbc	hl,bc
-	ld	bc,(xsrl_Device.writeBuf)
-	sbc	hl,bc
-	jq	nz,.norestart
-	ld	(xsrl_Device.writeBufStart),bc	; writeBufStart = writeBuf
-.norestart:
-	xor	a,a				; if writeBufStart == writeBufEnd:
-	ld	bc,(xsrl_Device.writeBufStart)
-	ld	hl,(xsrl_Device.writeBufEnd)
-	sbc	hl,bc
-	jq	z,.exit				; don't reschedule
-	call	srl_StartAsyncWrite
-.exit:
-	pop	ix
-	ld	hl,USB_SUCCESS
-	ret
-
-;-------------------------------------------------------------------------------
-; ix: srl_device_t
-srl_StartAsyncRead:
-	ld	a,(xsrl_Device.stopRead)	; check if we are trying to stop
-	or	a,a
-	jq	z,.noStop			; default to no continuing transfer
-	xor	a,a
-	ld	(xsrl_Device.stopRead),a	; acknowledge that we have stopped
-	jq	.exit
-.noStop:
-	ld	hl,(xsrl_Device.readBufBreak)	; check if there is room in the buffer
-	compare_hl_zero
-	jq	nz,.break
-	jq	.nobreak
-.nobreak:
-	ld	hl,64				; if readBufEnd + 64 >= readBuf + readBufSize loop buffer
-	ld	de,(xsrl_Device.readBufEnd)
-	add	hl,de
-	ld	bc,(xsrl_Device.readBufSize)
-	sbc	hl,bc
-	ld	bc,(xsrl_Device.readBuf)
-	sbc	hl,bc
-	jq	c,.schedule
-	ld	hl,(xsrl_Device.readBufStart)
-	sbc	hl,bc
-	jq	z,.exit				; reset readBufActive - no room
-	ld	(xsrl_Device.readBufBreak),de	; set readBufBreak
-	ld	(xsrl_Device.readBufEnd),bc	; set readBufEnd to readBuf
-	jq	.break
-.break:
-	ld	hl,64				; if readBufEnd + 64 >= readBufStart cancel
-	ld	de,(xsrl_Device.readBufEnd)
-	add	hl,de
-	ld	bc,(xsrl_Device.readBufStart)
-	sbc	hl,bc
-	jq	nc,.exit			; reset readBufActive - no room
-	jq	.schedule
-.schedule:
-	push	ix				; schedule a transfer with 64 bytes
-	ld	bc,srl_ReadCallback
-	push	bc
-	ld	hl,64
-	push	hl
-	push	de				; readBufEnd
-	ld	bc,(xsrl_Device.in)
-	push	bc
-	call	usb_ScheduleTransfer
-	pop	bc,bc,bc,bc,bc
-	ld	a,1				; set readBufActive
-.exit:
-	ld	(xsrl_Device.readBufActive),a
-	ret
-
-;-------------------------------------------------------------------------------
-; ix: srl_device_t
-srl_StartAsyncWrite:
-	xor	a,a
-	ld	hl,(xsrl_Device.writeBufEnd)
-	ld	bc,(xsrl_Device.writeBufStart)
-	sbc	hl,bc				; size = writeBufEnd - writeBufStart
-	ret	z				; do nothing if buffer is empty
-	jq	nc,.schedule
-	jq	.wrap
-.wrap:
-	ld	hl,(xsrl_Device.writeBuf)	; size = writeBuf + writeBufSize - writeBufStart
-	ld	bc,(xsrl_Device.writeBufSize)
-	add	hl,bc
-	ld	bc,(xsrl_Device.writeBufStart)
-	sbc	hl,bc
-	jq	.schedule
-.schedule:
-	push	ix				; schedule a transfer
-	ld	bc,srl_WriteCallback
-	push	bc
-	push	hl
-	ld	bc,(xsrl_Device.writeBufStart)
-	push	bc
-	ld	bc,(xsrl_Device.out)
-	push	bc
-	call	usb_ScheduleTransfer
-	pop	bc,bc,bc,bc,bc
-	ret
-
-; hl: value
-pl2303VendorRead:
-	push	iy
-
-	ex.s	de,hl
-	ld	(.setup + setuppkt.wValue),de
-
-	ld	bc,0
-	push	bc
-	ld	bc,50
-	push	bc
-	ld	bc,.byte
-	push	bc
-	ld	bc,.setup
-	push	bc
-
-	ld	bc,0				; get the default control endpoint
-	push	bc
-	ld	bc,(xsrl_Device.dev)
-	push	bc
-	call	usb_GetDeviceEndpoint
-	pop	bc,bc
-
-	push	hl
-	call	usb_ControlTransfer
-	pop	bc,bc,bc,bc,bc
-	pop	iy
-	ld	a,0
-.byte=$-1
-	ret
-.setup	setuppkt	$c0,$01,$0000,$0000,1
-
-; hl: value
-; de: index
-pl2303VendorWrite:
-	push	iy
-
-	ld	(.setup + setuppkt.wValue),hl
-	ex.s	de,hl
-	ld	(.setup + setuppkt.wIndex),hl
-
-	ld	bc,0
-	push	bc
-	ld	bc,50
-	push	bc
-	ld	bc,0
-	push	bc
-	ld	bc,.setup
-	push	bc
-
-	ld	bc,0				; get the default control endpoint
-	push	bc
-	ld	bc,(xsrl_Device.dev)
-	push	bc
-	call	usb_GetDeviceEndpoint
-	pop	bc,bc
-
-	push	hl
-	call	usb_ControlTransfer
-	pop	bc,bc,bc,bc,bc
-	pop	iy
-	ret
-.setup	setuppkt	$40,$01,$0000,$0000,0
-
+;usb_standard_descriptors_t *srl_GetCDCStandardDescriptors(void);
 srl_GetCDCStandardDescriptors:
 	; call	ti.os.GetSystemStats
 	; ld	de,4
@@ -1657,44 +540,549 @@ srl_GetCDCStandardDescriptors:
 .string84 dw $031C, 'T','I','-','8','4',' ','P','l','u','s',' ','C','E'
 .stringserialnum dw $0316, '0','0','0','0','0','0','0','0','0','0'
 
-;temp
-openDebug:
-	push	hl
-	scf					; open debugger
+
+; Gets the device type and subtype based on the descriptors
+; Inputs:
+;  ix: Serial device struct
+;  xsrl_device.buffer: Device descriptor, followed by config descriptor
+; Returns:
+;  xsrl_device.type: Device type
+;  xsrl_device.subtype: Device subtype
+get_device_type:
+	xor	a,a
+	ld	(xsrl_device.type),a
+	ld	(xsrl_device.subtype),a
+	ret
+
+; Gets the endpoint addresses based on the descriptors and device type
+; Inputs:
+;  ix: Serial device struct
+;  a: Interface number
+;  xsrl_device.buffer: Device descriptor, followed by config descriptor
+;  xsrl_device.type: Device type
+;  xsrl_device.subtype: Device subtype
+; Returns:
+;  xsrl_device.rx_addr: Receive endpoint address
+;  xsrl_device.tx_addr: Transmit endpoint address
+;  hl: Error or SRL_SUCCESS
+get_endpoint_addresses:
+	xor	a,a
+	ld	(xsrl_device.rx_addr),a
+	ld	(xsrl_device.tx_addr),a
+	ld	hl,0
+	ret
+
+; Initializes a serial device whose type has been determined
+; Inputs:
+;  ix: Serial device struct
+; Returns:
+;  hl: Error or SRL_SUCCESS
+init_device:
+	ld	hl,0
+	ret
+
+; Sets the baud rate of a serial device
+; Inputs:
+;  ix: Serial device struct
+;  hl: Baud rate
+;  c: Interface number
+; Returns:
+;  hl: Error or SRL_SUCCESS
+set_rate:
+	ld	a,(xsrl_device.type)
+	or	a,a
+	jq	z,.invalid_device
+	dec	a					; type == HOST
+	jq	z,.success
+	dec	a					; type == CDC
+	jq	z,set_rate_cdc
+	dec	a					; type == FTDI
+	jq	z,set_rate_ftdi
+	dec	a					; type == PL2303
+	jq	z,set_rate_cdc
+.invalid_device:
+	ld	hl,SRL_ERROR_INVALID_DEVICE
+	ret
+.success:
+	or	a,a
 	sbc	hl,hl
-	ld	(hl),2
-	pop	hl
 	ret
 
-;temp: device in ix, byte in a
-dbg_WriteByte:
-	push	hl,bc,de,ix,iy
-	ld	(.byte),a
+; Sets the baud rate of a USB CDC device
+; Inputs:
+;  ix: Serial device struct
+;  hl: Baud rate
+;  c: Interface number
+; Returns:
+;  hl: Error or SRL_SUCCESS
+set_rate_cdc:
+	ret
+
+; Sets the baud rate of a FTDI device
+; Inputs:
+;  ix: Serial device struct
+;  hl: Baud rate
+;  c: Interface number
+; Returns:
+;  hl: Error or SRL_SUCCESS
+set_rate_ftdi:
+	ret
+
+; Sets the baud rate of a PL2303 device
+; Inputs:
+;  ix: Serial device struct
+;  hl: Baud rate
+;  c: Interface number
+; Returns:
+;  hl: Error or SRL_SUCCESS
+set_rate_pl2303:
+	ret
+
+; Checks how many contiguous bytes are available in a ring buffer
+; Inputs:
+;  ix: ring_buf_ctrl struct
+; Returns:
+;  hl: Number of available bytes
+ring_buf_contig_avail:
+	ld	hl,(xring_buf_ctrl.data_break)
+	compare_hl_zero
+	jq	z,.no_break
+	ld	bc,(xring_buf_ctrl.data_start)
+	or	a,a
+	sbc	hl,bc
+	ret
+.no_break:
+	ld	hl,(xring_buf_ctrl.data_end)
+	ld	bc,(xring_buf_ctrl.data_start)
+	or	a,a
+	sbc	hl,bc
+	ret
+
+; Checks if there is a consecutive region of the given size
+; following the last available byte
+; Inputs:
+;  ix: ring_buf_ctrl struct
+;  a: Size
+; Returns:
+;  c if the region does not exist
+ring_buf_has_consecutive_region:
+	ld	hl,(xring_buf_ctrl.data_break)
+	compare_hl_zero
+	jq	nz,.break
+	ld	hl,(xring_buf_ctrl.buf_end)
+	ld	bc,(xring_buf_ctrl.data_end)
+.compare:
+	or	a,a
+	sbc	hl,bc
 	ld	bc,0
-	push	bc		; transferred
-	dec	bc
-	push	bc		; retries
-	inc	bc
-	inc	bc
-	push	bc		; length
-	ld	bc,.byte	; data
-	push	bc
-	ld	bc,(xsrl_Device.out)
-	push	bc
-	call	usb_Transfer
-	pop	bc,bc,bc,bc,bc,iy,ix,de,bc,hl
+	ld	c,a
+	sbc	hl,bc
 	ret
-.byte:
-	rb	1
+.break:
+	ld	hl,(xring_buf_ctrl.data_start)
+	ld	bc,(xring_buf_ctrl.data_end)
+	jq	.compare
 
-;-------------------------------------------------------------------------------
-; library data
-;-------------------------------------------------------------------------------
+; Pushes bytes to a ring buffer
+; Assumes that this buffer does not have any consecutive byte requirements
+; Inputs:
+;  ix: ring_buf_ctrl struct
+;  hl: Data to push
+;  bc: Number of bytes to push
+; Returns:
+;  hl: Number of bytes pushed
+ring_buf_push:
+	ex	de,hl					; de = data to push
+	ld	hl,(xring_buf_ctrl.data_break)
+	compare_hl_zero
+	jq	nz,.break
+	ld	hl,(xring_buf_ctrl.buf_end)
+	or	a,a
+	sbc	hl,bc
+	push	bc
+	ld	bc,(xring_buf_ctrl.data_end)
+	or	a,a
+	sbc	hl,bc
+	jq	nc,.pop_copy
 
-setup.setlinecoding	setuppkt	$21,$20,$0000,$0000,7
-setup.ftdisetrate	setuppkt	$40,$03,$0000,$0000,0
+	ld	hl,(xring_buf_ctrl.buf_end)
+	ld	(xring_buf_ctrl.data_break),hl
+	ld	bc,(xring_buf_ctrl.data_end)
+	or	a,a
+	sbc	hl,bc					; hl = len
+	push	hl
+	pop	bc					; bc = len
+	ex	de,hl					; hl = data
+	push	hl
+	call	.copy					; hl = len
+	ld	bc,(xring_buf_ctrl.buf_start)
+	ld	(xring_buf_ctrl.data_end),bc
+	ex	de,hl					; de = len
+	pop	iy					; iy = data
+	add	iy,de					; iy = data + len
+	pop	hl					; hl = size
+	sbc	hl,de
+	push	hl
+	pop	bc					; bc = size - len
+	lea	hl,iy
+	push	de
+	call	.break
+	pop	de
+	add	hl,de
+	ret
+.break:
+	push	bc
+	ld	hl,(xring_buf_ctrl.data_start)
+	ld	bc,(xring_buf_ctrl.data_end)
+	or	a,a
+	sbc	hl,bc					; hl = len
+	pop	bc					; bc = size
+	or	a,a
+	sbc	hl,bc
+	add	hl,bc
+	jq	nc,.copy				; bc = len = size
+	push	hl
+.pop_copy:
+	pop	bc					; bc = len
+.copy:
+	sbc	hl,hl					; check if bc is 0
+	adc	hl,bc
+	ret	z
+	ex	de,hl					; hl = data
+	ld	de,(xring_buf_ctrl.data_end)
+	push	bc
+	ldir						; de = data_end + len
+	ld	(xring_buf_ctrl.data_end),de
+	pop	hl					; hl = len
+	ret
 
-defaultlinecoding:
-db	$80,$25,0,0,0,0,8
+; Takes bytes from a ring buffer
+; Inputs:
+;  ix: ring_buf_ctrl struct
+;  hl: Location to copy data to
+;  bc: Number of bytes to take
+; Returns:
+;  hl: Number of bytes taken
+ring_buf_pop:
+	ex	de,hl					; de = data
+	ld	hl,(xring_buf_ctrl.data_break)
+	compare_hl_zero
+	jq	nz,.break
+.no_break:
+	push	bc
+	ld	hl,(xring_buf_ctrl.data_end)
+	ld	bc,(xring_buf_ctrl.data_start)
+	or	a,a
+	sbc	hl,bc					; hl = len
+	pop	bc					; bc = size
+	or	a,a
+	sbc	hl,bc
+	add	hl,bc
+	jq	nc,.copy				; bc = len = size
+	push	hl
+.pop_copy:
+	pop	bc					; bc = len
+.copy:
+	sbc	hl,hl					; check if bc is 0
+	adc	hl,bc
+	ret	z
+	ld	hl,(xring_buf_ctrl.data_start)
+	push	bc
+	ldir						; hl = data_start + len
+	ld	(xring_buf_ctrl.data_start),hl
+	pop	hl					; hl = len
+	ret
+.break:
+	ld	hl,(xring_buf_ctrl.data_break)
+	or	a,a
+	sbc	hl,bc
+	push	bc
+	ld	bc,(xring_buf_ctrl.data_start)
+	or	a,a
+	sbc	hl,bc
+	jq	nc,.pop_copy
 
-tmp tmp_data
+	ld	hl,(xring_buf_ctrl.data_break)
+	ld	bc,(xring_buf_ctrl.data_start)
+	or	a,a
+	sbc	hl,bc					; hl = len
+	push	hl
+	pop	bc					; bc = len
+	push	de					; de = data
+	call	.copy					; hl = len
+	ld	bc,(xring_buf_ctrl.buf_start)
+	ld	(xring_buf_ctrl.data_start),bc
+	ld	bc,0
+	ld	(xring_buf_ctrl.data_break),bc
+	ex	de,hl					; de = len
+	pop	iy					; iy = data
+	add	iy,de					; iy = data + len
+	pop	hl					; hl = size
+	sbc	hl,de
+	push	hl
+	pop	bc					; bc = size - len
+	push	de
+	lea	de,iy
+	call	.no_break
+	pop	de
+	add	hl,de
+	ret
+
+; Update a ring buffer after it's been DMA'd into
+; Inputs:
+;  ix: ring_buf_ctrl struct
+;  bc: Number of bytes written
+;  a: Size of minimum consecutive region
+ring_buf_update_read:
+	ld	hl,(xring_buf_ctrl.data_end)
+	add	hl,bc
+	ld	(xring_buf_ctrl.data_end),hl
+	ex	de,hl					; de = data_end
+	ld	hl,(xring_buf_ctrl.data_break)
+	compare_hl_zero
+	ret	nz
+	ld	hl,(xring_buf_ctrl.buf_end)
+	or	a,a
+	sbc	hl,de
+	ld	bc,0
+	ld	c,a
+	or	a,a
+	sbc	hl,bc
+	ret	nc					; ret if >= region
+	ld	(xring_buf_ctrl.data_break),de		; data_break = data_end
+	ld	de,(xring_buf_ctrl.buf_start)
+	ld	(xring_buf_ctrl.data_end),de
+	ret
+
+; Update a ring buffer after it's been DMA'd from
+; Inputs:
+;  ix: ring_buf_ctrl struct
+;  bc: Number of bytes written
+ring_buf_update_write:
+	ld	hl,(xring_buf_ctrl.data_start)
+	add	hl,bc
+	ld	(xring_buf_ctrl.data_start),hl
+	ld	bc,(xring_buf_ctrl.data_break)
+	or	a,a
+	sbc	hl,bc
+	ret	nz
+	ld	(xring_buf_ctrl.data_break),hl		; hl = 0
+	ld	hl,(xring_buf_ctrl.buf_start)
+	ld	(xring_buf_ctrl.data_start),hl
+	ret
+
+;usb_error_t (usb_endpoint_t endpoint, usb_transfer_status_t status, size_t transferred, srl_device_t *data);
+read_callback:
+	ld	iy,0
+	add	iy,sp
+	push	ix
+	ld	ix,(iy+12)
+
+	ld	a,(iy+6)				; a = status
+	and	a,USB_TRANSFER_NO_DEVICE
+	jq	nz,.no_device
+
+	ld	bc,(iy+9)
+	ld	a,64
+	lea	ix,xsrl_device.rx_buf
+	call	ring_buf_update_read
+	call	start_read
+	pop	ix
+	xor	a,a
+	ret
+
+.no_device:
+	xor	a,a
+	ld	(xsrl_device.rx_buf.dma_active),a
+	pop	ix
+	ret
+
+;usb_error_t (usb_endpoint_t endpoint, usb_transfer_status_t status, size_t transferred, srl_device_t *data);
+write_callback:
+	ld	iy,0
+	add	iy,sp
+	push	ix
+	ld	ix,(iy+12)
+
+	ld	a,(iy+6)				; a = status
+	and	a,USB_TRANSFER_NO_DEVICE
+	jq	nz,.no_device
+
+	ld	bc,(iy+9)
+	ld	a,64
+	lea	ix,xsrl_device.tx_buf
+	call	ring_buf_update_write
+	call	start_write
+	pop	ix
+	xor	a,a
+	ret
+
+.no_device:
+	xor	a,a
+	ld	(xsrl_device.tx_buf.dma_active),a
+	pop	ix
+	ret
+
+; Starts the receive transfer, if possible
+; Inputs:
+;  ix: rx_buf of a serial device struct
+; Returns:
+;  ix.dma_active: 1 if transfer was started, 0 otherwise
+start_read:
+	ld	a,64
+	call	ring_buf_has_consecutive_region
+	lea	ix,ix - srl_device.rx_buf
+	jq	c,.error
+
+	ld	c,(xsrl_device.rx_addr)			; ix = srl device
+	push	bc
+	ld	bc,(xsrl_device.dev)
+	push	bc
+	call	usb_GetDeviceEndpoint
+	pop	bc,bc
+
+	ld	a,l					; check if null
+	or	a,a
+	jq	z,.error
+
+	push	ix					; srl device
+	ld	bc,read_callback
+	push	bc					; handler
+	ld	bc,64
+	push	bc					; length
+	ld	bc,(xsrl_device.rx_buf.data_end)
+	push	bc					; buffer
+	push	hl					; endpoint
+	call	usb_ScheduleTransfer
+	pop	bc,bc,bc,bc,bc
+
+	ld	a,l
+	or	a,a
+	jq	nz,.error
+
+	inc	a					; a = 1
+	ld	(xsrl_device.rx_buf.dma_active),a
+	ret
+.error:
+	xor	a,a
+	ld	(xsrl_device.rx_buf.dma_active),a
+	ret
+
+; Starts the transmit transfer, if possible
+; Inputs:
+;  ix: tx_buf of a serial device struct
+; Returns:
+;  ix.dma_active: 1 if transfer was started, 0 otherwise
+start_write:
+	call	ring_buf_contig_avail
+	lea	ix,ix - srl_device.tx_buf
+	compare_hl_zero
+	jq	z,.error
+	push	hl
+
+	ld	c,(xsrl_device.tx_addr)			; ix = srl device
+	push	bc
+	ld	bc,(xsrl_device.dev)
+	push	bc
+	call	usb_GetDeviceEndpoint
+	pop	bc,bc
+	pop	de					; de = length
+
+	ld	a,l					; check if null
+	or	a,a
+	jq	z,.error
+
+	push	ix					; srl device
+	ld	bc,write_callback
+	push	bc					; handler
+	push	de					; length
+	ld	bc,(xsrl_device.tx_buf.data_start)
+	push	bc					; buffer
+	push	hl					; endpoint
+	call	usb_ScheduleTransfer
+	pop	bc,bc,bc,bc,bc
+
+	ld	a,l
+	or	a,a
+	jq	nz,.error
+
+	inc	a					; a = 1
+	ld	(xsrl_device.tx_buf.dma_active),a
+	ret
+.error:
+	xor	a,a
+	ld	(xsrl_device.tx_buf.dma_active),a
+	ret
+
+;temp
+get_device_type_:
+	push	ix
+	pop	bc,de,ix
+	push	ix,de,bc
+	call	get_device_type
+	pop	ix
+	ret
+get_endpoint_addresses_:
+	push	ix
+	pop	bc,de,ix
+	push	ix,de,bc
+	call	get_endpoint_addresses
+	pop	ix
+	ret
+ring_buf_contig_avail_:
+	push	ix
+	pop	bc,de,ix
+	push	ix,de,bc
+	call	ring_buf_contig_avail
+	pop	ix
+	ret
+ring_buf_has_consecutive_region_:
+	push	ix
+	ld	ix,3
+	add	ix,sp
+	ld	a,(ix+6)
+	ld	ix,(ix+3)
+	call	ring_buf_has_consecutive_region
+	ld	a,1
+	sbc	a,0
+	pop	ix
+	ret
+ring_buf_push_:
+	push	ix
+	ld	ix,3
+	add	ix,sp
+	ld	hl,(ix+6)
+	ld	bc,(ix+9)
+	ld	ix,(ix+3)
+	call	ring_buf_push
+	pop	ix
+	ret
+ring_buf_pop_:
+	push	ix
+	ld	ix,3
+	add	ix,sp
+	ld	hl,(ix+6)
+	ld	bc,(ix+9)
+	ld	ix,(ix+3)
+	call	ring_buf_pop
+	pop	ix
+	ret
+ring_buf_update_read_:
+	push	ix
+	ld	ix,3
+	add	ix,sp
+	ld	bc,(ix+6)
+	ld	a,(ix+9)
+	ld	ix,(ix+3)
+	call	ring_buf_update_read
+	pop	ix
+	ret
+ring_buf_update_write_:
+	push	ix
+	ld	ix,3
+	add	ix,sp
+	ld	bc,(ix+6)
+	ld	ix,(ix+3)
+	call	ring_buf_update_write
+	pop	ix
+	ret

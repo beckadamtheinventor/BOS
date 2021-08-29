@@ -1,10 +1,12 @@
 
-;@DOES execute a file given a relative or absolute path
+;@DOES Execute a file.
 ;@INPUT int sys_ExecuteFile(const char *path, char *args);
 ;@OUTPUT -1 and Cf set if file does not exist or is not a valid executable format, or if malloc failed somewhere.
 ;@OUTPUT ExecutingFileFd set to point to file descriptor. -1 if file not found
 ;@DESTROYS All, OP6.
 ;@NOTE If you're running a threaded executable, the thread is spawned but won't actually start until it's thread is handled.
+;@NOTE If OS threading is enabled, sleep current thread and execute a file in a new thread given a relative or absolute path. Returns to caller if starting a threaded executable.
+;@NOTE If OS threading is disabled, execute a file in a new thread given a relative or absolute path. Returns to caller if starting a threaded executable.
 sys_ExecuteFile:
 	scf
 	sbc hl,hl
@@ -70,6 +72,18 @@ sys_ExecuteFile:
 	inc hl
 .skip1:
 	inc hl
+	; ld a,$7F
+	; cp a,(hl)
+	; jq nz,.notezf
+	; inc hl
+	; ld de,(hl)
+	; db $21, 'EZF'
+	; or a,a
+	; sbc hl,de
+	; jq nz,.fail
+	; ld hl,(ExecutingFileFD)
+	; jq sys_ExecuteEZF.loadfromfd
+.notezf:
 	ld de,(hl)
 	db $21, 'TRX' ;ld hl, 'TRX' ;Threaded Ram eXecutable
 	or a,a
@@ -119,12 +133,27 @@ sys_ExecuteFile:
 	add hl,bc
 	ld (top_of_UserMem),hl ;save top of usermem
 .exec_fex:
-	ld hl,(fsOP6) ;push arguments
-	push hl
+	ld de,(fsOP6) ;push arguments
+	push de
 	call sys_NextProcessId
-	call sys_FreeRunningProcessId ;free memory allocated by the new process ID
+	call sys_FreeRunningProcessId ;free memory allocated by the new process ID if there is any
 	call .normalize_lcd
+	ld a,(threading_enabled)
+	cp a,2
+	jr nz,.runnothreading
+	SleepThread
+	ld bc,(running_program_ptr)
+	or a,a
+	sbc hl,hl
+	add hl,sp
+	push hl,bc
+	call th_CreateThread.noparent
+	pop bc,bc
+	HandleNextThread ;handle the thread we just spawned
+	jr .ranthread
+.runnothreading:
 	call .jptoprogram
+.ranthread:
 	pop bc
 	push hl
 	call .normalize_lcd

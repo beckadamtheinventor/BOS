@@ -44,6 +44,7 @@ explorer_init:
 	sbc hl,hl
 	ret
 explorer_init_2:
+	EnableOSThreading
 	ld bc,258
 	push bc
 	call bos.sys_Malloc
@@ -78,6 +79,9 @@ explorer_foreground2_color:=$-1
 	ld (explorer_cursor_y),a
 	; call ti.GetBatteryStatus
 	; ld (battery_status),a
+	ld hl,bos.thread_map + 2
+	bit 7,(hl)
+	jq nz,explorer_dont_run_preload
 	ld hl,explorer_preload_file
 	push hl
 	call bos.fs_OpenFile
@@ -87,6 +91,7 @@ explorer_foreground2_color:=$-1
 	push hl
 	call nc,bos.sys_ExecuteFile
 	pop bc,bc
+explorer_dont_run_preload:
 ; explorer_load_extensions:
 	; ld hl,2
 	; push hl
@@ -177,7 +182,7 @@ explorer_cursor_x:=$-3
 	pop bc,bc,bc,bc
 	call gfx_BlitBuffer
 .key_loop:
-	call explorer_wait_key_wrapper
+	call bos.sys_WaitKeyCycle
 	dec a
 	jq z,explorer_cursor_down
 	dec a
@@ -314,7 +319,7 @@ explorer_dirname_buffer:=$-3
 	ld hl,quickmenu_item_strings
 	call draw_taskbar
 	call gfx_BlitBuffer
-	call explorer_wait_key_wrapper
+	call bos.sys_WaitKeyCycle
 	cp a,ti.skYequ
 	jq z,explorer_create_new_file
 	cp a,ti.skWindow
@@ -334,7 +339,7 @@ explorer_dirname_buffer:=$-3
 	ld hl,options_item_strings
 	call draw_taskbar
 	call gfx_BlitBuffer
-	call explorer_wait_key_wrapper
+	call bos.sys_WaitKeyCycle
 	cp a,53
 	jq z,run_power_app
 	jq explorer_main
@@ -1098,29 +1103,6 @@ draw_taskbar:
 	djnz .draw_taskbar_loop
 	pop ix
 	ret
-
-explorer_wait_key_wrapper:
-	ld bc,explorer_handle_key
-	push bc
-	call bos.th_WaitKeyCycle
-	pop bc
-	jp c,bos.sys_WaitKeyCycle
-	xor a,a
-	ld (explorer_key_pressed),a
-.key_wait_loop:
-	HandleNextThread
-	ld a,0
-explorer_key_pressed := $-1
-	or a,a
-	jq z,.key_wait_loop
-	ret
-
-explorer_handle_key:
-	pop hl,bc
-	push bc
-	ld a,c
-	ld (explorer_key_pressed),a
-	jp (hl)
 
 explorer_display_bc_chars:
 	ld a,(hl)

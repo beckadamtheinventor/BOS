@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+# !/usr/bin/python3
 import os, sys
 
 default_dir_entry = [
@@ -6,6 +6,13 @@ default_dir_entry = [
 	ord("."),ord("."),0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,  0x10,  0x00, 0x00, 0x00, 0x00,
 	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
 ]
+
+def get_file_data(rom, path):
+	ent = search_for_entry(rom, path)
+	if ent is not None:
+		ptr = 0x040000 + 0x200 * (rom[ent+0xC]+rom[ent+0xD]*0x100)
+		L = rom[ent+0xE]+rom[ent+0xF]*0x100
+		return rom[ptr:ptr+L]
 
 def search_for_entry(rom, path):
 	# print("searching for", path)
@@ -207,36 +214,55 @@ def add_file_to_rom(rom, fout, flags, fin_data):
 
 if __name__=='__main__':
 	fdir = os.path.dirname(__file__)
-	if not fdir.endswith("/"):
-		fdir+="/"
 	fnamein = []
 	fnameout = []
-	rom_out = "bin/BOSOS_appended.rom"
-	rom_in = "bin/BOSOS.rom"
-
-	try:
-		with open(rom_in, 'rb') as f:
-			rom = list(f.read())
-		fdir = ""
-	except FileNotFoundError:
-		try:
-			with open(fdir+rom_in,'rb') as f:
-				rom = list(f.read())
-		except FileNotFoundError:
-			print(f'Could not locate rom image "{rom_in}". Did you build BOS yet?\nAborting.')
-			exit(1)
-	build_cluster_map(rom)
+	rom_out = os.path.join(fdir, "bin", "BOSOS_appended.rom")
+	rom_in = os.path.join(fdir, "bin","BOSOS.rom")
+	rom = None
 
 	_argv = sys.argv[1:]
 	if len(_argv)>1:
-		compress_file = False
+		written_rom = False
 		while len(_argv):
+			appending = compress_file = False
 			fin = _argv.pop(0)
-			if fin.startswith("-c") or fin.startswith("--compressed-rex"):
+			if fin == "--rom":
+				rom_in = _argv.pop(0)
+				continue
+			elif fin == "--append":
+				fin = _argv.pop(0)
+				appending = True
+			elif fin == "--output":
+				fin = _argv.pop(0)
+				if not os.path.isabs(fin):
+					fin = os.path.join(fdir, fin)
+				with open(fin, "wb") as f2:
+					if rom is None:
+						try:
+							with open(rom_in, "rb") as f:
+								rom = list(f.read())
+						except FileNotFoundError:
+							print(f'Could not locate rom image "{rom_in}". Did you build BOS yet?\nAborting.')
+							exit(1)
+						build_cluster_map(rom)
+					f2.write(bytes(rom))
+				print(f"[Success] {fin}, {len(rom)} bytes")
+				written_rom = True
+				continue
+			elif fin.startswith("-c") or fin.startswith("--compressed-rex"):
 				compress_file = True
 				fin = _argv.pop(0)
-			else:
-				compress_file = False
+
+			if rom is None:
+				try:
+					with open(rom_in, "rb") as f:
+						rom = list(f.read())
+				except FileNotFoundError:
+						print(f'Could not locate rom image "{rom_in}".\nAborting.')
+						exit(1)
+
+			build_cluster_map(rom)
+
 			fout = _argv.pop(0)
 			print(f"writing file to rom image: {fin} --> {fout}")
 			if compress_file:
@@ -246,28 +272,48 @@ if __name__=='__main__':
 					with open(fin, "rb") as f:
 						f.seek(0, 2)
 						original_len = f.tell()
-					if original_len >= 0xD30000 - 0xD1A881:
-						print(f"File to be compressed would overflow usermem if executed: {fin}\nAborting.")
+					if appending:
+						existingdata = get_file_data(rom, fout)
+						if existingdata is None:
+							appending = False
+					if original_len >= 0xD2F800 - 0xD1A881:
+						print(f"File to be compressed would overflow usermem if executed: {fin} ({len(original_len)} bytes)\nAborting.")
 						exit(1)
 					os.system(f"convbin -i {fin} -o {fin}.zx7 -j bin -k bin -c zx7")
-					fin_data = [0x18,0x0C,0x43,0x52,0x58,0x00,0x7A,0x78,0x37,0x00]+\
-						list(original_len.to_bytes(3, 'little'))
+					if appending:
+						fin_data = list(existingdata)
+					else:
+						fin_data = []
+					fin_data.extend([0x18,0x0C,0x43,0x52,0x58,0x00,0x7A,0x78,0x37,0x00]+\
+						list(original_len.to_bytes(3, 'little')))
 					with open(f"{fin}.zx7","rb") as f:
 						fin_data.extend(list(f.read()))
 					if len(fin_data) > 65535:
-						print(f"Compressed file is too large to write to filesystem: {fin}\nAborting.")
+						print(f"Compressed file is too large to write to filesystem: {fin} ({len(fin_data)} bytes)\nAborting.")
 						exit(1)
 				else:
+					if appending:
+						existingdata = get_file_data(rom, fout)
+						if existingdata is None:
+							appending = False
 					with open(fin, "rb") as f:
 						fin_data = list(f.read())
+					if appending:
+						fin_data = existingdata + fin_data
 					if len(fin_data) > 65535:
-						print(f"File is too large to write to filesystem: {fin}\nAborting.")
+						print(f"File is too large to write to filesystem: {fin} ({len(fin_data)} bytes)\nAborting.")
 						exit(1)
 				add_file_to_rom(rom, fout, 0x00, fin_data)
 				build_cluster_map(rom)
 			except FileNotFoundError:
 				print(f"Could not open file: {fin}\nAborting.")
 				exit(1)
-
-	with open(fdir+rom_out, 'wb') as f:
-		f.write(bytes(rom))
+		if not written_rom:
+			with open(rom_out, "wb") as f:
+				f.write(bytes(rom))
+			print(f"[Success] {rom_out}, {len(rom)} bytes")
+	else:
+		print("""Usage:
+python add_file_to_rom.py file1source file1dest file2source +file2dest
+raw binary data from file1source is written to file1dest on rom image
+""")

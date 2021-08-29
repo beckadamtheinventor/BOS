@@ -2,16 +2,17 @@
 ;@DOES Recursive function used to load EZF executable dependencies.
 ;@INPUT int sys_LoadEZFDependency(const char *fname);
 ;@OUTPUT -1 and Cf set if failed.
-;@NOTE loads function from fname:func, searching in dirs listed within /var/LIBS if it could not be found directly.
+;@NOTE loads function from fname, (fname function pair seperated by a space) searching in dirs listed within /var/LIBS if it could not be found directly.
 ;@DESTROYS All, OP1
 sys_LoadEZFDependency:
 	pop bc,hl
 	push hl,bc
 .loadfromfile:
+	ld (fsOP1+3),hl
 	push hl
 	call fs_GetFilePtr
 	pop de
-	jq nc,.loadfromptr
+	jr nc,.loadfromptr
 	ld bc,str_LibsVarName
 	push bc,de
 	call sys_OpenFileInVar
@@ -20,37 +21,37 @@ sys_LoadEZFDependency:
 .loadfromptr:
 	ld a,c
 	or a,b
-	jq z,.fail
+	jr z,.fail
 	ld a,(hl)
 	cp a,$7F
 	jq nz,.fail
 	inc hl
 	ld de,(hl)
-	inc hl
-	inc hl
-	inc hl
 	push hl
 	db $21,"EZF"
 	xor a,a
 	sbc hl,de
 	pop hl
-	jq z,.fail
+	jr z,.fail
 	or a,b
-	jq nz,.atleastminsize
+	jr nz,.atleastminsize
 	ld a,c
 	cp a,13
-	jq nc,.atleastminsize
+	jr nc,.atleastminsize
 ;less than minimum size
 .fail:
 	scf
 	sbc hl,hl
 	ret
+.fail_popiy:
+	pop iy
+	jr .fail
 .atleastminsize:
+	dec hl
 	push hl
 	ex (sp),iy
-	push iy
-	ld (fsOP1),iy
 	lea iy,iy-4
+	ld (fsOP1),iy
 .dependencies_loop:
 	lea iy,iy+8
 	ld a,(iy)
@@ -69,17 +70,11 @@ sys_LoadEZFDependency:
 	ld (fsOP1),de
 	jq .dependencies_loop
 .done_dependency_loop:
-
-.extract_loop:
-
-.extractloopend:
+	ld iy,(fsOP1)
 	
 	
 	
-	
-	db $01
-.fail_popiy:
-	scf
-	sbc hl,hl
 	pop iy
+	or a,a
+	sbc hl,hl
 	ret

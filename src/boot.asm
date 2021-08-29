@@ -59,16 +59,20 @@ boot_os:
 	inc hl
 	ld (hl),0
 
+	DisableThreading
 	call th_ResetThreadMemory
 assert ~thread_temp_save and $FF
 	ld hl,thread_temp_save
 	ld de,os_return
 	ld (hl),de
+	ld l,12
+	ld (hl),de
 	ld de,ti.stackTop
 	ld l,3
 	ld (hl),de
-	ld l,12
+	ld l,15
 	ld (hl),1
+	EnableThreading
 	jq th_HandleNextThread.nosave
 
 handle_interrupt:

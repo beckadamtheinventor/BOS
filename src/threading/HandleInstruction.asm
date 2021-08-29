@@ -4,16 +4,57 @@ HandleInstruction:
 	ld a,(hl)
 	inc hl
 	push hl
-	; or a,a
-	; jq z,_DisableThreading
-	; cp a,$F7
-	; jq z,_EnableThreading
-	cp a,$C1
-	jq z,th_HandleNextThread
-	cp a,$C9
-	jq z,th_EndThread
 	cp a,$C5
+	jq z,_HandleThreadSpawn
+	ld hl,threading_enabled
+	or a,a
+	jq z,_DisableThreading
+	inc a
+	jq z,_EnableThreading
+	cp a,$76 + 1
+	jq z,_SleepThread
+	cp a,$E7 + 1
+	jq z,_WakeThread
+	cp a,$EF + 1
+	jq z,_EnableOSThreading
+	cp a,$C1 + 1
+	jq z,th_HandleNextThread
+	cp a,$C9 + 1
+	jq z,th_EndThread
+	cp a,$F7 + 1
 	ret nz
+	ld a,(threading_enabled)
+	cp a,threadOSRoutines
+	jq z,th_HandleNextThread ;handles next thread if OS threading is enabled
+	ret
+
+_EnableThreading:
+	ld (hl),1
+	ret
+
+_EnableOSThreading:
+	ld (hl),2
+	ret
+
+_DisableThreading:
+	ld (hl),a
+	ret
+
+_SleepThread:
+	ld a,(current_thread)
+assert ~thread_map and $FF
+	ld hl,thread_map
+	ld l,a
+	set bThreadSleeping,(hl)
+	ret
+
+_WakeThread:
+	ld a,(current_thread)
+assert ~thread_map and $FF
+	ld hl,thread_map
+	ld l,a
+	res bThreadSleeping,(hl)
+	ret
 
 _HandleThreadSpawn:
 	pop hl

@@ -12,6 +12,9 @@ assert ~thread_map and $FF
 	; exx
 	; exaf
 th_HandleNextThread:
+	ld a,(threading_enabled)
+	or a,a
+	ret z
 	; ld a,(thread_control)
 	; or a,a
 	; ret z
@@ -59,7 +62,7 @@ th_HandleNextThread:
 	; in a,(bc)
 	; or a,1 shl 2
 	; out (bc),a
-	ld a,(ix+12) ;restore running_process_id
+	ld a,(ix+15) ;restore running_process_id
 	ld (running_process_id),a
 	ld iy,(ix+9) ;restore ix
 	ld ix,(ix+6) ;restore iy
@@ -70,14 +73,14 @@ th_HandleNextThread:
 th_FindFreeThread:
 	ld a,(current_thread)
 	ld hl,thread_map
-	ld (hl),$80 ;thread 0 is always active
+	set bThreadAlive,(hl) ;thread 0 is always active
 	inc a
 	ld l,a
 	xor a,a
 	sub a,l
 	ld b,a
 .search_loop:
-	bit 7,(hl)
+	bit bThreadAlive,(hl)
 	jq z,.found_thread
 	inc l
 	djnz .search_loop
@@ -88,19 +91,32 @@ th_FindFreeThread:
 
 th_FindNextThread:
 	ld a,(current_thread)
+assert ~thread_map and $FF
 	ld hl,thread_map
-	ld (hl),$80 ;thread 0 is always active
+	set bThreadAlive,(hl) ;thread 0 is always alive
 	ld b,l
 	ld l,a
-	xor a,a
+	ld d,h
 .search_loop:
 	inc l
-	bit 7,(hl)
+	bit bThreadSleeping,(hl) ;check if thread is sleeping
+	jq nz,.search_next
+assert thread_parents shr 16 = thread_map shr 16
+	ld h,$FF and (thread_parents shr 8)
+	ld l,(hl) ;get parent thread ID
+	ld h,d
+	bit bThreadSleeping,(hl) ;check if parent thread is sleeping
+	jq nz,.search_next
+	bit bThreadAlive,(hl)
 	jq nz,.found_thread
+.search_next:
 	djnz .search_loop
-	bit 7,(hl) ;check if currently running thread is actually running, if it isn't then run thread ID 0
-	ret z
+	bit bThreadAlive,(hl) ;check if currently running thread is actually running, if it isn't then run thread ID 0
 ; continue the currently running thread I suppose
+	ld a,l
+	ret nz
+	xor a,a
+	ret
 .found_thread:
 	ld a,l
 	ret
@@ -111,7 +127,12 @@ th_ResetThreadMemory:
 	ld b,a
 .loop:
 	ld (hl),a
-	inc hl
+	inc l
 	djnz .loop
+	ld h,$FF and (thread_parents shr 8)
+.loop2:
+	ld (hl),a
+	inc l
+	djnz .loop2
 	ret
 

@@ -43,7 +43,7 @@ macro os_private
 	macro os_create? final_sector
 		di
 		call	.create
-		jp 0
+		rst 0
 .create:
 		ld	a,$d1
 		ld	mb,a
@@ -62,9 +62,16 @@ backup_tios_flag := $-1
 		or a,a
 		jq z,.dont_backup
 
-		ld hl,$020000
+		ld hl,(ti.OSSize+1)
+		ld de,$020000
+		ld bc,$000400
+		xor a,a
+		sbc hl,de
+		add hl,bc
+		push hl
+		pop bc
+		ex hl,de
 		ld de,$2B0000
-		ld bc,$100000
 		call $2E0
 
 .dont_backup:
@@ -85,9 +92,17 @@ end if
 		jr	nz,.erase
 
 		ld	hl,os.source
-		ld	de,$20000
+		ld	de,$020000
 		ld	bc,os.full_binary_len
-		call	$2e0
+		call	$2E0 ;WriteFlash
+		ld	hl,0
+	os_second_binary:=$-3
+		ld	de,$020000 + os.full_binary_len
+		ld	bc,0
+	os_second_binary.len:=$-3
+		ld a,c
+		or a,b
+		call	nz, $2E0 ;WriteFlash
 
 if defined INSTALLER8XP
 		ld a,(backup_tios_flag)

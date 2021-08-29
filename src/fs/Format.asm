@@ -5,8 +5,6 @@ fs_Format:
 	ld hl,str_Formatting
 	call gui_DrawConsoleWindow
 
-	ld hl,flashStatusByte
-	set bKeepFlashUnlocked, (hl)
 	call sys_FlashUnlock
 
 	ld a,($0401FF) ;stores last sector of TIOS, will be 0xFF otherwise

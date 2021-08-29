@@ -20,6 +20,8 @@ file '../noti-ez80/bin/NOTI.rom'
 
 	write_os_binary
 
+	file 'src/data/adrive/data.bin'
+
 	db $040000-$ dup $FF
 
 	file 'data/adrive/main.bin'

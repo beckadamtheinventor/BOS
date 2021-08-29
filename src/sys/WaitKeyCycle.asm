@@ -7,6 +7,7 @@ sys_WaitKeyCycle:
 	jr z,sys_WaitKeyCycle
 	push af
 .loop:
+	HandleNextThread_IfOSThreading
 	call kb_AnyKey
 	jr nz,.loop
 	pop af
