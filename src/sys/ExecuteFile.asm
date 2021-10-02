@@ -138,20 +138,20 @@ sys_ExecuteFile:
 	call sys_NextProcessId
 	call sys_FreeRunningProcessId ;free memory allocated by the new process ID if there is any
 	call .normalize_lcd
-	ld a,(threading_enabled)
-	cp a,2
-	jr nz,.runnothreading
-	SleepThread
-	ld bc,(running_program_ptr)
-	or a,a
-	sbc hl,hl
-	add hl,sp
-	push hl,bc
-	call th_CreateThread.noparent
-	pop bc,bc
-	HandleNextThread ;handle the thread we just spawned
-	jr .ranthread
-.runnothreading:
+	; ld a,(threading_enabled)
+	; cp a,2
+	; jr nz,.runnothreading
+	; SleepThread
+	; ld bc,(running_program_ptr)
+	; or a,a
+	; sbc hl,hl
+	; add hl,sp
+	; push hl,bc
+	; call th_CreateThread.noparent
+	; pop bc,bc
+	; HandleNextThread ;handle the thread we just spawned
+	; jr .ranthread
+; .runnothreading:
 	call .jptoprogram
 .ranthread:
 	pop bc
