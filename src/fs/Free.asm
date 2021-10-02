@@ -27,9 +27,9 @@ fs_Free:
 	pop hl
 	call fs_CeilDivBySector
 	ex (sp),hl ;push number of file sectors, pop cluster map at file sector#
-	ld de,$03FF80
+	ld de,$FF0000
 	push de,hl ;push source and destination pointers
-	call sys_WriteFlashFullRam
+	call sys_WriteFlash
 	pop bc,bc,hl ;return number of sectors freed
 	or a,a
 	ret
