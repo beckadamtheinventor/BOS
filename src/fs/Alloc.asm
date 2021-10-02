@@ -9,9 +9,9 @@ fs_Alloc:
 
 	ld a,l
 	or a,a
-	jq nz,.size_gt_0
+	jq nz,.notonesector
 	inc a
-.size_gt_0:
+.notonesector:
 	ld (ix-4),a
 
 	ld hl,fs_cluster_map_file
@@ -20,7 +20,7 @@ fs_Alloc:
 	pop bc
 	call c,fs_SanityCheck
 
-	ld bc,fsentry_filesector
+	ld bc,$C
 	add hl,bc
 	ld hl,(hl)
 	push hl

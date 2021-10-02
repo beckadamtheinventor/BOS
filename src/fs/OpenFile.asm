@@ -145,7 +145,7 @@ fs_OpenFile:
 .search_loop:
 	ld a,(iy)
 	or a,a
-	jq z,.search_next ;deleted entry
+	ret z ;reached end of directory
 	inc a
 	ret z ;reached end of directory
 	cp a,fsentry_deleted+1
