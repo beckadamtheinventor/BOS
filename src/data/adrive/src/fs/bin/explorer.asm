@@ -279,7 +279,33 @@ explorer_max_selection:=$-3
 	cp a,$7B
 	jq z,.exec_file
 .edit_file:
+	ld hl,(explorer_dirname_buffer)
+	push hl
+	call bos.fs_GetFilePtr
+	pop de
+	ld de,$5F16
+	dec b
+	ld b,c
+	jq c,.edit_file_under_256
+	ld b,$FF
+.edit_file_under_256:
+	ld c,$09
+.checkfileloop: ; check whether the first 256 bytes in the file are text characters
+	ld a,(hl)
+	sub a,c
+	cp a,2
+	jq c,.checkfileloop_nextbyte
+	sub a,e
+	cp a,d
+	jq nc,.edit_file_run_memedit
+.checkfileloop_nextbyte:
+	djnz .checkfileloop
+.edit_file_run_cedit:
+	ld hl,str_ceditexe
+	jq .edit_file_run_hl
+.edit_file_run_memedit:
 	ld hl,str_memeditexe
+.edit_file_run_hl:
 	ld de,$FF0000
 explorer_dirname_buffer:=$-3
 	jq explorer_call_file
@@ -1384,26 +1410,24 @@ dl .l1, .l2, .l3, .l4, .l5
 .l5:
 	db "edit",0
 
-input_dir_string:
-	db "Input path on usb to explore.",$A,0
-input_source_string:
-	db "Input file on usb to recieve.",$A,0
-input_dest_string:
-	db "Input destination file in filesystem.",$A,0
-input_program_string:
-	db "Input path to binary on usb to execute.",$A,0
+; input_dir_string:
+	; db "Input path on usb to explore.",$A,0
+; input_source_string:
+	; db "Input file on usb to recieve.",$A,0
+; input_dest_string:
+	; db "Input destination file in filesystem.",$A,0
+; input_program_string:
+	; db "Input path to binary on usb to execute.",$A,0
 str_PressEnterConfirm:
 	db "Press enter to confirm.",0
-str_UsbRecvExecutable:
-	db "/bin/usbrecv",0
-str_FExploreExecutable:
-	db "/bin/fexplore",0
+; str_UsbRecvExecutable:
+	; db "/bin/usbrecv",0
 str_OffExecutable:
 	db "/bin/off",0
-str_UsbRunExecutable:
-	db "/bin/usbrun",0
-str_UpdaterExecutable:
-	db "/bin/updater",0
+; str_UsbRunExecutable:
+	; db "/bin/usbrun",0
+; str_UpdaterExecutable:
+	; db "/bin/updater",0
 str_CmdExecutable:
 	db "/bin/cmd",0
 str_FilesExecutable:
@@ -1420,7 +1444,9 @@ explorer_preload_file:
 explorer_default_directory:
 	db "/home/user",0
 str_memeditexe:
-	db "/bin/memedit",0
+	db "memedit",0
+str_ceditexe:
+	db "cedit",0
 str_MissingIconFile:
 	db "/etc/explorer/missing.ico",0
 ; explorer_extensions_dir:

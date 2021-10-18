@@ -3,7 +3,7 @@
 #----------------------------
 
 # set NAME to the name of the library
-NAME :=usbdrvce
+NAME :=fatdrvce
 
 # defult locations
 FASMG ?=fasmg
@@ -38,7 +38,7 @@ LIB_H      :=$(NAME).h
 
 all: $(LIB_8XV)
 
-$(LIB_8XV): $(SRC)
+$(LIB_8XV): $(SRC) fat.asm
 	$(FASMG) $< $@
 
 clean:

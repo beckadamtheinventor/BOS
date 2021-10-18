@@ -175,6 +175,17 @@ macro ?! isreg: metadata 1 element 1 eq @ez80
 		label done
 	end macro
 
+	macro calminstruction?.regsize? result*, reg*
+		unique word, done
+		check reg isreg.wreg
+		byes word
+		compute result, byte?
+		branch done
+		label word
+		compute result, @ez80.ws
+		label done
+	end macro
+
 	iterate <suffixsize,suffixname,suffixencoding,suffixadjustment, wordsize>, \
 	                  2,          ,              ,                ,=@ez80.=ws, \
 	                  3,        s?,          100o,              il,=@ez80.=ws, \
@@ -424,7 +435,7 @@ macro ?! isreg: metadata 1 element 1 eq @ez80
 			check rhs relativeto after
 			jno far
 			compute offset, rhs - after
-			check offset | definite rhs
+			check offset & offset <> -suffixsize | definite rhs
 			jno after
 			check -200o <= offset & offset < 200o
 			jno far
@@ -710,6 +721,50 @@ macro ?! isreg: metadata 1 element 1 eq @ez80
 		errarguments:
 			err 'invalid arguments'
 		end calminstruction
+
+		iterate <name,first,second>, ldp,lhs,rhs, ldrp,rhs,lhs
+			calminstruction calminstruction?.loadpair? lhs*, rhs*
+				execute =execute ===ld?.=suffixname first
+				execute =execute ===ld?.=suffixname second
+			end calminstruction
+
+			@ez80.calminstruction name.suffixname lhs*, mhs*, rhs*
+				proxy lhs, mhs, rhs, hs, ls
+				isindirect mhs
+				jyes errindirection
+				compute mhs, +mhs
+				isindirect lhs
+				compute lhs, +lhs
+				jyes store
+				isindirect rhs
+				compute rhs, +rhs
+				jyes load
+				regsize hs, lhs
+				regsize ls, mhs
+				execute =virtual?
+				execute 	=emit? @hs + @ls: @rhs
+				execute 	=load? @hs: @hs =from? =$$? + @ls
+				execute 	=load? @ls: @ls =from? =$$?
+				execute =end? =virtual?
+				loadpair <@mhs, @ls>, <@lhs, @hs>
+				exit
+			store:
+				isindirect rhs
+				jyes errindirection
+				compute rhs, +rhs
+				regsize ls, rhs
+				loadpair <(@lhs), @rhs>, <(@lhs + @ls), @mhs>
+				exit
+			load:
+				regsize ls, mhs
+				loadpair <@mhs, (@rhs)>, <@lhs, (@rhs + @ls)>
+				exit
+			errindirection:
+				err 'invalid indirection'
+			end calminstruction
+
+			purge calminstruction?.loadpair?
+		end iterate
 
 		@ez80.calminstruction add.suffixname lhs*, rhs
 			proxy opcode, rhs
@@ -1421,7 +1476,7 @@ macro ?! isreg: metadata 1 element 1 eq @ez80
 		purge calminstruction?.emitsuffix?
 	end iterate
 
-	iterate command, isindirect, indexprefix, indexoffset
+	iterate command, isindirect, indexprefix, indexoffset, regsize
 		purge calminstruction?.command?
 	end iterate
 

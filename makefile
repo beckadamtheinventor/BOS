@@ -74,7 +74,7 @@ include_dirs: includes
 $(call NATIVEPATH,$(FSOBJ)/libload.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/libload/bos_libload.asm)
 	fasmg $(call NATIVEPATH,$(FSSRC)/fs/lib/libload/bos_libload.asm) $(call NATIVEPATH,$(FSOBJ)/libload.bin)
 
-$(call NATIVEPATH,$(FSOBJ)/fatdrvce.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/fatdrvce/fatdrvce.asm) $(call NATIVEPATH,$(FSSRC)/fs/lib/fatdrvce/fat.asm)
+$(call NATIVEPATH,$(FSOBJ)/fatdrvce.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/fatdrvce/fatdrvce.asm)
 	fasmg $(call NATIVEPATH,$(FSSRC)/fs/lib/fatdrvce/fatdrvce.asm) $(call NATIVEPATH,$(FSOBJ)/fatdrvce.bin)
 
 $(call NATIVEPATH,$(FSOBJ)/fileioc.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/fileioc/fileioc.asm)
@@ -109,7 +109,7 @@ $(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/bosbin/CEDIT.bin): $(call NATIVEPATH,$(F
 
 # Rule to build Filesytem and compress it
 filesystem: $(call NATIVEPATH,$(FSSRC)/main.asm) $(call NATIVEPATH,$(FSSRC)/fs/lib/libload/bos_libload.asm) $(call NATIVEPATH,$(FSSRC)/fs/lib/fatdrvce/fatdrvce.asm) \
-$(call NATIVEPATH,$(FSSRC)/fs/lib/fatdrvce/fat.asm) $(call NATIVEPATH,$(FSSRC)/fs/lib/fileioc/fileioc.asm) $(call NATIVEPATH,$(FSSRC)/fs/lib/fontlibc/fontlibc.asm) \
+$(call NATIVEPATH,$(FSSRC)/fs/lib/fileioc/fileioc.asm) $(call NATIVEPATH,$(FSSRC)/fs/lib/fontlibc/fontlibc.asm) \
 $(call NATIVEPATH,$(FSSRC)/fs/lib/graphx/graphx.asm) $(call NATIVEPATH,$(FSSRC)/fs/lib/keypadc/keypadc.asm) $(call NATIVEPATH,$(FSSRC)/fs/lib/srldrvce/srldrvce.asm) \
 $(call NATIVEPATH,$(FSSRC)/fs/lib/usbdrvce/usbdrvce.asm) $(call NATIVEPATH,$(FSSRC)/fs/bin/memedit.asm) $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer.asm) \
 $(call NATIVEPATH,$(FSOBJ)/libload.bin) $(call NATIVEPATH,$(FSOBJ)/fatdrvce.bin) $(call NATIVEPATH,$(FSOBJ)/fileioc.bin) $(call NATIVEPATH,$(FSOBJ)/fontlibc.bin) \

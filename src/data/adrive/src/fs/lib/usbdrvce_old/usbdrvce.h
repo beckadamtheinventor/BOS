@@ -81,8 +81,8 @@ typedef enum usb_event {
   /// \p event_data The usb_control_setup_t * that was sent by the host.
   USB_DEFAULT_SETUP_EVENT,
   /// This event triggers when the calculator is configured by a host.
-  /// \p event_data The const usb_configuration_descriptor_t * that was selected
-  /// by the host.
+  /// \p event_data The usb_configuration_descriptor_t * that was selected by
+  /// the host.
   USB_HOST_CONFIGURE_EVENT,
   // Temp debug events:
   USB_DEVICE_INTERRUPT,
@@ -263,33 +263,24 @@ typedef enum usb_recipient {
 } usb_recipient_t;
 
 typedef enum usb_request {
-  USB_GET_STATUS_REQUEST,
-  USB_CLEAR_FEATURE_REQUEST,
-  USB_SET_FEATURE_REQUEST = 3,
-  USB_SET_ADDRESS_REQUEST = 5,
-  USB_GET_DESCRIPTOR_REQUEST,
-  USB_SET_DESCRIPTOR_REQUEST,
-  USB_GET_CONFIGURATION_REQUEST,
-  USB_SET_CONFIGURATION_REQUEST,
-  USB_GET_INTERFACE_REQUEST,
-  USB_SET_INTERFACE_REQUEST,
-  USB_SYNC_FRAME_REQUEST,
+  USB_GET_STATUS,
+  USB_CLEAR_FEATURE,
+  USB_SET_FEATURE = 3,
+  USB_SET_ADDRESS = 5,
+  USB_GET_DESCRIPTOR,
+  USB_SET_DESCRIPTOR,
+  USB_GET_CONFIGURATION,
+  USB_SET_CONFIGURATION,
+  USB_GET_INTERFACE,
+  USB_SET_INTERFACE,
+  USB_SYNC_FRAME,
 } usb_request_t;
 
 typedef enum usb_feature {
-  USB_ENDPOINT_HALT_FEATURE,
-  USB_DEVICE_REMOTE_WAKEUP_FEATURE,
-  USB_DEVICE_TEST_MODE_FEATURE,
+  USB_ENDPOINT_HALT,
+  USB_DEVICE_REMOTE_WAKEUP,
+  USB_TEST_MODE,
 } usb_feature_t;
-
-typedef enum usb_device_status {
-  USB_DEVICE_SELF_POWERED_STATUS  = 1 << 0,
-  USB_DEVICE_REMOTE_WAKEUP_STATUS = 1 << 1,
-} usb_device_status_t;
-
-typedef enum usb_endpoint_status {
-  USB_ENDPOINT_HALT_STATUS = 1 << 0,
-} usb_endpoint_status_t;
 
 typedef enum usb_descriptor_type {
   USB_DEVICE_DESCRIPTOR = 1,
@@ -814,17 +805,6 @@ usb_GetConfigurationDescriptor(/*usb_device_t */device, /*uint8_t */index,     \
 usb_error_t usb_SetDescriptor(usb_device_t device, usb_descriptor_type_t type,
                               uint8_t index, const void *descriptor,
                               size_t length);
-#define /*usb_error_t */                                                       \
-usb_SetDeviceDescriptor(/*usb_device_t */device,                               \
-                        /*usb_device_descriptor_t **/descriptor,               \
-                        /*size_t */length)                                     \
-    usb_SetDescriptor(device, USB_DEVICE_DESCRIPTOR, 0, descriptor, length)
-#define /*usb_error_t */                                                       \
-usb_SetConfigurationDescriptor(/*usb_device_t */device, /*uint8_t */index,     \
-                               /*usb_configuration_descriptor_t **/descriptor, \
-                               /*size_t */length)                              \
-    usb_SetDescriptor(device, USB_CONFIGURATION_DESCRIPTOR, index, descriptor, \
-                      length)
 
 /**
  * Gets the string descriptor at \p index and \p langid.
@@ -911,18 +891,17 @@ usb_error_t usb_SetInterface(usb_device_t device,
                              size_t length);
 
 /**
- * Sets halt condition on \p endpoint.  This is only supported by bulk and
- * interrupt endpoints.  If acting as usb host, this may only be called if there
- * are no pending transfers.  This also has the sife effect of asynchronously
- * cancelling all pending transfers to \p endpoint.
+ * Sets halt condition on \p endpoint.  This is not supported by the default
+ * control endpoint.  If acting as usb host, this may only be called if there
+ * are no pending transfers.
  * @param endpoint The endpoint to set the halt condition of.
  * @return USB_SUCCESS if the transfer succeeded or an error.
  */
 usb_error_t usb_SetEndpointHalt(usb_endpoint_t endpoint);
 
 /**
- * Clears halt condition on \p endpoint.  This is only supported by bulk and
- * interrupt endpoints.  If acting as usb host, this may only be called if there
+ * Clears halt condition on \p endpoint.  This is not supported by the default
+ * control endpoint.  If acting as usb host, this may only be called if there
  * are no pending transfers.  If any non-control transfer stalls, this is called
  * automatically, so you only need to call this if you need to clear an endpoint
  * halt for a reason other than a stalled transfer. This function blocks until
