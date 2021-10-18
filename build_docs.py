@@ -157,8 +157,6 @@ def build_docs():
 									elif t.startswith("@NOTE "):
 										e.append(t.replace("@NOTE ","").replace("\\n","<br>\n"))
 								ix+=1
-							if not len(d):
-								d.append("Assume all")
 							f2.write("<tr><td>"+("<br>\n".join(a))+"</td><td>"+("<br>\n".join(b))+"</td><td>"+("<br>\n".join(c))+\
 								"</td><td>"+("<br>\n".join(d))+"</td><td>\n"+("<br>\n".join(e))+"</td></tr>\n")
 						f2.write("</table></div>")
