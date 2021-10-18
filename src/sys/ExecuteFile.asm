@@ -5,7 +5,7 @@
 ;@OUTPUT ExecutingFileFd set to point to file descriptor. -1 if file not found
 ;@DESTROYS All, OP6.
 ;@NOTE If you're running a threaded executable, the thread is spawned but won't actually start until it's thread is handled.
-;@NOTE If OS threading is enabled, sleep current thread and execute a file in a new thread given a relative or absolute path. Returns to caller if starting a threaded executable.
+;;;@NOTE If OS threading is enabled, sleep current thread and execute a file in a new thread given a relative or absolute path. Returns to caller if starting a threaded executable.
 ;@NOTE If OS threading is disabled, execute a file in a new thread given a relative or absolute path. Returns to caller if starting a threaded executable.
 sys_ExecuteFile:
 	scf
