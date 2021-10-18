@@ -131,7 +131,7 @@ def build_docs():
 					if ";" in line:
 						line=line[:line.find(";")]
 					if "DONOTHING" in line:
-						f.write("<tr class=\"no_op\">")
+						f.write("<tr class=\"no_op\"></tr>")
 					else:
 						f.write("<tr>")
 						f2.write("<div id=\""+line+"\"><h1>"+line+"</h1>\
@@ -157,6 +157,8 @@ def build_docs():
 									elif t.startswith("@NOTE "):
 										e.append(t.replace("@NOTE ","").replace("\\n","<br>\n"))
 								ix+=1
+							if not len(d):
+								d.append("Assume all")
 							f2.write("<tr><td>"+("<br>\n".join(a))+"</td><td>"+("<br>\n".join(b))+"</td><td>"+("<br>\n".join(c))+\
 								"</td><td>"+("<br>\n".join(d))+"</td><td>\n"+("<br>\n".join(e))+"</td></tr>\n")
 						f2.write("</table></div>")

@@ -1,10 +1,10 @@
 <html><head><title>bos.inc docs</title>	<link rel="stylesheet" type="text/css" href="style.css"></head>	<body>	<h1>"bos.inc" documentation</h1>	<b>"bos.DONOTHING" is a no-op and does nothing,</b><br>As the name implies.	<table><th>syscall name</th><th>syscall adress</th>	<tr><td><a href="#boot_os">bos.boot_os</a></td><td><a href="#boot_os">020108</a></td></tr>
 <tr><td><a href="#handle_interrupt">bos.handle_interrupt</a></td><td><a href="#handle_interrupt">02010C</a></td></tr>
 <tr><td><a href="#HandleInstruction ">bos.HandleInstruction </a></td><td><a href="#HandleInstruction ">020110</a></td></tr>
-<tr class="no_op"><td><a href="#DONOTHING">bos.DONOTHING</a></td><td><a href="#DONOTHING">020114</a></td></tr>
-<tr class="no_op"><td><a href="#DONOTHING">bos.DONOTHING</a></td><td><a href="#DONOTHING">020118</a></td></tr>
+<tr class="no_op"></tr><td><a href="#DONOTHING">bos.DONOTHING</a></td><td><a href="#DONOTHING">020114</a></td></tr>
+<tr class="no_op"></tr><td><a href="#DONOTHING">bos.DONOTHING</a></td><td><a href="#DONOTHING">020118</a></td></tr>
 <tr><td><a href="#handle_offsetcall ">bos.handle_offsetcall </a></td><td><a href="#handle_offsetcall ">02011C</a></td></tr>
-<tr class="no_op"><td><a href="#DONOTHING ">bos.DONOTHING </a></td><td><a href="#DONOTHING ">020120</a></td></tr>
+<tr class="no_op"></tr><td><a href="#DONOTHING ">bos.DONOTHING </a></td><td><a href="#DONOTHING ">020120</a></td></tr>
 <tr><td><a href="#sys_ExecuteFile">bos.sys_ExecuteFile</a></td><td><a href="#sys_ExecuteFile">020124</a></td></tr>
 <tr><td><a href="#os_GetOSInfo">bos.os_GetOSInfo</a></td><td><a href="#os_GetOSInfo">020128</a></td></tr>
 <tr><td><a href="#fs_OpenFile">bos.fs_OpenFile</a></td><td><a href="#fs_OpenFile">02012C</a></td></tr>
@@ -20,9 +20,9 @@
 <tr><td><a href="#sys_GetKey">bos.sys_GetKey</a></td><td><a href="#sys_GetKey">020154</a></td></tr>
 <tr><td><a href="#sys_KbScan">bos.sys_KbScan</a></td><td><a href="#sys_KbScan">020158</a></td></tr>
 <tr><td><a href="#sys_Malloc">bos.sys_Malloc</a></td><td><a href="#sys_Malloc">02015C</a></td></tr>
-<tr class="no_op"><td><a href="#DONOTHING">bos.DONOTHING</a></td><td><a href="#DONOTHING">020160</a></td></tr>
+<tr class="no_op"></tr><td><a href="#DONOTHING">bos.DONOTHING</a></td><td><a href="#DONOTHING">020160</a></td></tr>
 <tr><td><a href="#sys_MemSet">bos.sys_MemSet</a></td><td><a href="#sys_MemSet">020164</a></td></tr>
-<tr class="no_op"><td><a href="#DONOTHING">bos.DONOTHING</a></td><td><a href="#DONOTHING">020168</a></td></tr>
+<tr class="no_op"></tr><td><a href="#DONOTHING">bos.DONOTHING</a></td><td><a href="#DONOTHING">020168</a></td></tr>
 <tr><td><a href="#sys_WaitKey">bos.sys_WaitKey</a></td><td><a href="#sys_WaitKey">02016C</a></td></tr>
 <tr><td><a href="#sys_WaitKeyCycle">bos.sys_WaitKeyCycle</a></td><td><a href="#sys_WaitKeyCycle">020170</a></td></tr>
 <tr><td><a href="#gui_DrawConsoleWindow">bos.gui_DrawConsoleWindow</a></td><td><a href="#gui_DrawConsoleWindow">020174</a></td></tr>
@@ -154,11 +154,11 @@
 <tr><td><a href="#sys_OpenFileInVar">bos.sys_OpenFileInVar</a></td><td><a href="#sys_OpenFileInVar">02036C</a></td></tr>
 </table><div id="boot_os"><h1>boot_os</h1>	<h3>syscall Adress 020108</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td></td><td></td><td></td><td></td><td>
+<tr><td></td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="handle_interrupt"><h1>handle_interrupt</h1>	<h3>syscall Adress 02010C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td></td><td></td><td></td><td></td><td>
+<tr><td></td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="HandleInstruction "><h1>HandleInstruction </h1>	<h3>syscall Adress 020110</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -173,7 +173,7 @@ If OS threading is enabled, sleep current thread and execute a file in a new thr
 If OS threading is disabled, execute a file in a new thread given a relative or absolute path. Returns to caller if starting a threaded executable.</td></tr>
 </table></div><div id="os_GetOSInfo"><h1>os_GetOSInfo</h1>	<h3>syscall Adress 020128</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td></td><td></td><td></td><td></td><td>
+<tr><td></td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="fs_OpenFile"><h1>fs_OpenFile</h1>	<h3>syscall Adress 02012C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -181,19 +181,19 @@ If OS threading is disabled, execute a file in a new thread given a relative or 
 </td></tr>
 </table></div><div id="fs_GetSectorAddress"><h1>fs_GetSectorAddress</h1>	<h3>syscall Adress 020130</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>get the physical address of a given sector.</td><td>void *fs_GetSectorAddress(uint16_t sector);</td><td></td><td></td><td>
+<tr><td>get the physical address of a given sector.</td><td>void *fs_GetSectorAddress(uint16_t sector);</td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="fs_CheckDirExists"><h1>fs_CheckDirExists</h1>	<h3>syscall Adress 020134</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>check if a directory exists.</td><td>bool fs_CheckDirExists(char *path);</td><td>true if path exists, else false</td><td></td><td>
+<tr><td>check if a directory exists.</td><td>bool fs_CheckDirExists(char *path);</td><td>true if path exists, else false</td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="fs_GetPathLastName"><h1>fs_GetPathLastName</h1>	<h3>syscall Adress 020138</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>get last file name from a path. Equivalent to python path.split("/")[-1]</td><td>char *fs_GetPathLastName(char *path);</td><td>pointer to file name</td><td></td><td>
+<tr><td>get last file name from a path. Equivalent to python path.split("/")[-1]</td><td>char *fs_GetPathLastName(char *path);</td><td>pointer to file name</td><td>Assume all</td><td>
 this will return the last entry in the path, regardless of whether the path exists or if it points to a program entrypoint.</td></tr>
 </table></div><div id="fs_CopyFileName"><h1>fs_CopyFileName</h1>	<h3>syscall Adress 02013C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>copies file name from file descriptor</td><td>char *fs_CopyFileName(void *fd);</td><td>returns -1 on fail</td><td></td><td>
+<tr><td>copies file name from file descriptor</td><td>char *fs_CopyFileName(void *fd);</td><td>returns -1 on fail</td><td>Assume all</td><td>
 Allocates space for copied file name</td></tr>
 </table></div><div id="fs_Read"><h1>fs_Read</h1>	<h3>syscall Adress 020140</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -246,7 +246,7 @@ BC line length</td><td></td><td>HL,DE,BC,F(P/V)</td><td>
 </td></tr>
 </table></div><div id="gui_DrawConsoleWindow"><h1>gui_DrawConsoleWindow</h1>	<h3>syscall Adress 020174</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>clear the screen and display a string</td><td>hl = string</td><td></td><td></td><td>
+<tr><td>clear the screen and display a string</td><td>hl = string</td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="gui_Input"><h1>gui_Input</h1>	<h3>syscall Adress 020178</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -254,51 +254,51 @@ BC line length</td><td></td><td>HL,DE,BC,F(P/V)</td><td>
 </td></tr>
 </table></div><div id="gui_NewLine"><h1>gui_NewLine</h1>	<h3>syscall Adress 02017C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td></td><td></td><td></td><td></td><td>
+<tr><td></td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="gui_Print"><h1>gui_Print</h1>	<h3>syscall Adress 020180</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td></td><td></td><td></td><td></td><td>
+<tr><td></td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="gui_PrintInt"><h1>gui_PrintInt</h1>	<h3>syscall Adress 020184</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Print an integer. Does not swap buffers.</td><td>hl = integer</td><td></td><td></td><td>
+<tr><td>Print an integer. Does not swap buffers.</td><td>hl = integer</td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="gui_Scroll"><h1>gui_Scroll</h1>	<h3>syscall Adress 020188</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td></td><td></td><td></td><td></td><td>
+<tr><td></td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="gfx_BlitBuffer"><h1>gfx_BlitBuffer</h1>	<h3>syscall Adress 02018C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td></td><td></td><td></td><td></td><td>
+<tr><td></td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="gfx_PrintString"><h1>gfx_PrintString</h1>	<h3>syscall Adress 020190</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td></td><td></td><td></td><td></td><td>
+<tr><td></td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="_MemClear"><h1>_MemClear</h1>	<h3>syscall Adress 020194</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Clear (Zero) BC bytes at HL</td><td></td><td></td><td></td><td>
+<tr><td>Clear (Zero) BC bytes at HL</td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="_PushOP1"><h1>_PushOP1</h1>	<h3>syscall Adress 020198</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Push OP1 to the OP stack</td><td></td><td></td><td></td><td>
+<tr><td>Push OP1 to the OP stack</td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="_PopOP1"><h1>_PopOP1</h1>	<h3>syscall Adress 02019C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Pop OP1 from the OP stack</td><td></td><td></td><td></td><td>
+<tr><td>Pop OP1 from the OP stack</td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="_Mov9ToOP1"><h1>_Mov9ToOP1</h1>	<h3>syscall Adress 0201A0</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>move 9 bytes from HL to OP1</td><td></td><td></td><td></td><td>
+<tr><td>move 9 bytes from HL to OP1</td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="_CpHLDE"><h1>_CpHLDE</h1>	<h3>syscall Adress 0201A4</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>compare HL to DE. Returns the resultant of "sbc hl,de" without modifying either.</td><td></td><td></td><td></td><td>
+<tr><td>compare HL to DE. Returns the resultant of "sbc hl,de" without modifying either.</td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="_Mov8b"><h1>_Mov8b</h1>	<h3>syscall Adress 0201A8</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>move 8 bytes from HL to DE</td><td></td><td></td><td></td><td>
+<tr><td>move 8 bytes from HL to DE</td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="_ChkFindSym"><h1>_ChkFindSym</h1>	<h3>syscall Adress 0201AC</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -308,23 +308,23 @@ Cf set if file not found or otherwise cannot be opened.</td><td>OP4,OP5</td><td>
 </td></tr>
 </table></div><div id="_LoadDEInd_s"><h1>_LoadDEInd_s</h1>	<h3>syscall Adress 0201B0</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>load DE with 16-bit value at HL, advancing DE+=2</td><td></td><td></td><td></td><td>
+<tr><td>load DE with 16-bit value at HL, advancing DE+=2</td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="_EnoughMem"><h1>_EnoughMem</h1>	<h3>syscall Adress 0201B4</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Check if there are HL bytes avalible in userMem</td><td></td><td></td><td></td><td>
+<tr><td>Check if there are HL bytes avalible in userMem</td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="_InsertMem"><h1>_InsertMem</h1>	<h3>syscall Adress 0201B8</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>insert HL bytes into userMem at address DE</td><td>hl = bytes to insert</td><td>hl = new top of UserMem</td><td></td><td>
+<tr><td>insert HL bytes into userMem at address DE</td><td>hl = bytes to insert</td><td>hl = new top of UserMem</td><td>Assume all</td><td>
 this currently ignores DE and just moves the top of usermem forward HL bytes</td></tr>
 </table></div><div id="_SetHLUTo0"><h1>_SetHLUTo0</h1>	<h3>syscall Adress 0201BC</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Sets the top byte of HL to zero.</td><td></td><td></td><td></td><td>
+<tr><td>Sets the top byte of HL to zero.</td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="_PutS"><h1>_PutS</h1>	<h3>syscall Adress 0201C0</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Print a string to the current cursor position and blit the buffer when finished.</td><td>HL = string</td><td></td><td></td><td>
+<tr><td>Print a string to the current cursor position and blit the buffer when finished.</td><td>HL = string</td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="_GetCSC"><h1>_GetCSC</h1>	<h3>syscall Adress 0201C4</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -332,31 +332,31 @@ this currently ignores DE and just moves the top of usermem forward HL bytes</td
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 </table></div><div id="_ClrScrn"><h1>_ClrScrn</h1>	<h3>syscall Adress 0201CC</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Clear the screen and back buffer</td><td></td><td></td><td></td><td>
+<tr><td>Clear the screen and back buffer</td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="_HomeUp"><h1>_HomeUp</h1>	<h3>syscall Adress 0201D0</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Set the cursor position to 0,0</td><td></td><td></td><td></td><td>
+<tr><td>Set the cursor position to 0,0</td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="_ErrMemory"><h1>_ErrMemory</h1>	<h3>syscall Adress 0201D4</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Quit the program and display a memory error message</td><td></td><td></td><td></td><td>
+<tr><td>Quit the program and display a memory error message</td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="_DrawStatusBar"><h1>_DrawStatusBar</h1>	<h3>syscall Adress 0201D8</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Nothing for now. Basically just a compatibility define</td><td></td><td></td><td></td><td>
+<tr><td>Nothing for now. Basically just a compatibility define</td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="_os_GetSystemInfo"><h1>_os_GetSystemInfo</h1>	<h3>syscall Adress 0201DC</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>return system info. Compatibility define. It actually returns 0xFF0000. lol</td><td></td><td></td><td></td><td>
+<tr><td>return system info. Compatibility define. It actually returns 0xFF0000. lol</td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="_UsbPowerVbus"><h1>_UsbPowerVbus</h1>	<h3>syscall Adress 0201E0</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>I honestly don't know. Included this routine for compatibility with USBDDRVCE.</td><td></td><td></td><td></td><td>
+<tr><td>I honestly don't know. Included this routine for compatibility with USBDDRVCE.</td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="_UsbUnpowerVbus"><h1>_UsbUnpowerVbus</h1>	<h3>syscall Adress 0201E4</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>I honestly don't know. Included for compatibility with USBDRVCE.</td><td></td><td></td><td></td><td>
+<tr><td>I honestly don't know. Included for compatibility with USBDRVCE.</td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="sys_EraseFlashSector"><h1>sys_EraseFlashSector</h1>	<h3>syscall Adress 0201E8</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -364,15 +364,15 @@ this currently ignores DE and just moves the top of usermem forward HL bytes</td
 calls boot routine $2DC</td></tr>
 </table></div><div id="sys_FlashUnlock"><h1>sys_FlashUnlock</h1>	<h3>syscall Adress 0201EC</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td></td><td></td><td></td><td></td><td>
+<tr><td></td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="sys_FlashLock"><h1>sys_FlashLock</h1>	<h3>syscall Adress 0201F0</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td></td><td></td><td></td><td></td><td>
+<tr><td></td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="fs_CreateFile"><h1>fs_CreateFile</h1>	<h3>syscall Adress 0201F4</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Create a file given a path and return a file descriptor.</td><td>void *fs_CreateFile(const char *path, uint8_t flags, int len);</td><td>file descriptor. Returns 0 if failed to create file.</td><td></td><td>
+<tr><td>Create a file given a path and return a file descriptor.</td><td>void *fs_CreateFile(const char *path, uint8_t flags, int len);</td><td>file descriptor. Returns 0 if failed to create file.</td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="strupper"><h1>strupper</h1>	<h3>syscall Adress 0201F8</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -385,7 +385,7 @@ calls boot routine $2DC</td></tr>
 </table></div><div id="fs_AbsPath"><h1>fs_AbsPath</h1>	<h3>syscall Adress 020200</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>get absolute path representation of hl</td><td>char *fs_AbsPath(const char *path);</td><td>hl = absolute path. Will be equal to the input if it is already an absolute path<br>
-Cf set if failed</td><td></td><td>
+Cf set if failed</td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="fs_MultByBytesPerSector"><h1>fs_MultByBytesPerSector</h1>	<h3>syscall Adress 020204</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -393,7 +393,7 @@ Cf set if failed</td><td></td><td>
 </td></tr>
 </table></div><div id="_LoadLibraryOP1"><h1>_LoadLibraryOP1</h1>	<h3>syscall Adress 020208</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>locate and return a pointer to a library from a ".LLL" file in the "/lib/" directory</td><td>OP1 name of library</td><td>hl points to file length, de points to file data. Cf set if failed</td><td></td><td>
+<tr><td>locate and return a pointer to a library from a ".LLL" file in the "/lib/" directory</td><td>OP1 name of library</td><td>hl points to file length, de points to file data. Cf set if failed</td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="fs_OpenFileInDir"><h1>fs_OpenFileInDir</h1>	<h3>syscall Adress 02020C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -401,31 +401,31 @@ Cf set if failed</td><td></td><td>
 </td></tr>
 </table></div><div id="fs_SetSize"><h1>fs_SetSize</h1>	<h3>syscall Adress 020210</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Resizes a file descriptor.</td><td>bool fs_SetSize(int len, void *fd);</td><td>true if resizing succeeded</td><td></td><td>
+<tr><td>Resizes a file descriptor.</td><td>bool fs_SetSize(int len, void *fd);</td><td>true if resizing succeeded</td><td>Assume all</td><td>
 Will allocate enough sectors to contain len bytes.</td></tr>
 </table></div><div id="fs_WriteFile"><h1>fs_WriteFile</h1>	<h3>syscall Adress 020214</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Overwrite all data stored in a file from a given data pointer.</td><td>int WriteFile(void *data, int len, void *fd);</td><td>number of bytes written. 0 if failed to write</td><td></td><td>
+<tr><td>Overwrite all data stored in a file from a given data pointer.</td><td>int WriteFile(void *data, int len, void *fd);</td><td>number of bytes written. 0 if failed to write</td><td>Assume all</td><td>
 Only the number of clusters aready allocated to the file will be written. Call fs_SetSize() to reallocate file clusters.</td></tr>
 </table></div><div id="sys_HLToString"><h1>sys_HLToString</h1>	<h3>syscall Adress 020218</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>convert a number to a string</td><td>HL = number to convert</td><td>DE = string<br>
-string stored at gfx_string_temp</td><td></td><td>
+string stored at gfx_string_temp</td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="fs_DeleteFile"><h1>fs_DeleteFile</h1>	<h3>syscall Adress 02021C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>delete a file given a file name</td><td>bool fs_DeleteFile(const char *name);</td><td>true if success, otherwise fail</td><td></td><td>
+<tr><td>delete a file given a file name</td><td>bool fs_DeleteFile(const char *name);</td><td>true if success, otherwise fail</td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="_DelVar"><h1>_DelVar</h1>	<h3>syscall Adress 020220</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>delete a file in the /usr/tivars/ directory</td><td>OP1 = type byte, 8 byte name of var to delete</td><td>Cf set if failed</td><td></td><td>
+<tr><td>delete a file in the /usr/tivars/ directory</td><td>OP1 = type byte, 8 byte name of var to delete</td><td>Cf set if failed</td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="_CreateVar"><h1>_CreateVar</h1>	<h3>syscall Adress 020224</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>create a file in the /usr/tivars/ directory</td><td>OP1+1 = 8 byte name of var to create<br>
 A = var type<br>
 hl = length to allocate for file</td><td>hl = pointer to 2 byte file length, de = pointer to file data section<br>
-Cf set if failed</td><td></td><td>
+Cf set if failed</td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="gui_InputNoClear"><h1>gui_InputNoClear</h1>	<h3>syscall Adress 020228</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -433,37 +433,37 @@ Cf set if failed</td><td></td><td>
 </td></tr>
 </table></div><div id="fs_InitClusterMap"><h1>fs_InitClusterMap</h1>	<h3>syscall Adress 02022C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>initialize cluster map given data within the file system.</td><td>void fs_InitClusterMap(void);</td><td></td><td></td><td>
+<tr><td>initialize cluster map given data within the file system.</td><td>void fs_InitClusterMap(void);</td><td></td><td>Assume all</td><td>
 uses bos.safeRAM as scrap.</td></tr>
 </table></div><div id="sys_WriteFlash"><h1>sys_WriteFlash</h1>	<h3>syscall Adress 020230</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>write BC bytes to flash from HL to DE.</td><td>HL, DE, BC</td><td></td><td></td><td>
+<tr><td>write BC bytes to flash from HL to DE.</td><td>HL, DE, BC</td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="sys_WriteFlashA"><h1>sys_WriteFlashA</h1>	<h3>syscall Adress 020234</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>write a byte from A to flash at address DE</td><td>A, DE</td><td></td><td></td><td>
+<tr><td>write a byte from A to flash at address DE</td><td>A, DE</td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="sys_WriteFlashFull"><h1>sys_WriteFlashFull</h1>	<h3>syscall Adress 020238</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>store data to flash, surpassing flash AND logic using the swap sector.</td><td></td><td>uint8_t sys_WriteFlashFull(void *dest, void *src, int len);</td><td></td><td>
+<tr><td>store data to flash, surpassing flash AND logic using the swap sector.</td><td></td><td>uint8_t sys_WriteFlashFull(void *dest, void *src, int len);</td><td>Assume all</td><td>
 erases swap sector, copies dest sector to swap sector excluding the data write area, writes data, erases dest sector, copies swap sector to dest sector.<br>
 source and destination cannot be within the same sector.</td></tr>
 </table></div><div id="sys_WriteFlashByteFull"><h1>sys_WriteFlashByteFull</h1>	<h3>syscall Adress 02023C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Write a byte to flash, surpassing flash AND logic using the swap sector if needed.</td><td>bool sys_WriteFlashByteFull(void *dest, uint8_t byte);</td><td>true if success, false if failed</td><td></td><td>
+<tr><td>Write a byte to flash, surpassing flash AND logic using the swap sector if needed.</td><td>bool sys_WriteFlashByteFull(void *dest, uint8_t byte);</td><td>true if success, false if failed</td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="fs_ParentDir"><h1>fs_ParentDir</h1>	<h3>syscall Adress 020240</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>return a string representing the parent directory of a given path.</td><td>char *fs_ParentDir(const char *path);</td><td>HL = string representing path to parent directory. Returns -1 and Cf on fail.</td><td></td><td>
+<tr><td>return a string representing the parent directory of a given path.</td><td>char *fs_ParentDir(const char *path);</td><td>HL = string representing path to parent directory. Returns -1 and Cf on fail.</td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="fs_StrToFileEntry"><h1>fs_StrToFileEntry</h1>	<h3>syscall Adress 020244</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>convert a file.ext string to a file entry</td><td>char *fs_StrToFileEntry(char *dest, const char *src);</td><td>pointer to file entry, 0 if failed<br>
-Cf set if failed</td><td></td><td>
+Cf set if failed</td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="fs_DirList"><h1>fs_DirList</h1>	<h3>syscall Adress 020248</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>list items in a directory</td><td>int fs_DirList(void **buffer, const char *path, unsigned int num, unsigned int skip);</td><td>Returns number of items read. Returns -1 and Cf on fail.</td><td></td><td>
+<tr><td>list items in a directory</td><td>int fs_DirList(void **buffer, const char *path, unsigned int num, unsigned int skip);</td><td>Returns number of items read. Returns -1 and Cf on fail.</td><td>Assume all</td><td>
 integer arguments "num" and "skip" must be less than 65536.</td></tr>
 </table></div><div id="sys_Free"><h1>sys_Free</h1>	<h3>syscall Adress 02024C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -473,56 +473,56 @@ integer arguments "num" and "skip" must be less than 65536.</td></tr>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Jump execution to an executable file and return to caller afterwards</td><td>hl = file to execute<br>
 de = arguments<br>
-bc = file to return to</td><td></td><td></td><td>
+bc = file to return to</td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="sys_JumpExecuteFile"><h1>sys_JumpExecuteFile</h1>	<h3>syscall Adress 020254</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Jump execution to an executable file</td><td>hl = file to execute<br>
-de = arguments</td><td></td><td></td><td>
+de = arguments</td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="sys_InitDevice"><h1>sys_InitDevice</h1>	<h3>syscall Adress 020258</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Initialize a device given a path to it</td><td>void *sys_InitDevice(const char *name);</td><td>pointer to device file descriptor<br>
-hl=-1 and Cf set if failed</td><td></td><td>
+hl=-1 and Cf set if failed</td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="sys_DeinitDevice"><h1>sys_DeinitDevice</h1>	<h3>syscall Adress 02025C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Deinitialize a device given a pointer to its file descriptor</td><td>int sys_DeinitDevice(void *fd);</td><td>hl = -1 and Cf set if failed. Otherwise assume 0.</td><td></td><td>
+<tr><td>Deinitialize a device given a pointer to its file descriptor</td><td>int sys_DeinitDevice(void *fd);</td><td>hl = -1 and Cf set if failed. Otherwise assume 0.</td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="sys_GetDeviceAddress"><h1>sys_GetDeviceAddress</h1>	<h3>syscall Adress 020260</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Get a pointer for raw access to a device given a file descriptor</td><td>void *sys_GetDeviceAddress(void *dest, void *src, size_t len, void *fd);</td><td>assume hl points to device address. Device return may vary. Some devices do not have a physical address.<br>
-hl = 0 and Cf set if failed</td><td></td><td>
+hl = 0 and Cf set if failed</td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="sys_ReadDevice"><h1>sys_ReadDevice</h1>	<h3>syscall Adress 020264</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Read from a device given a file descriptor</td><td>int sys_ReadDevice(void *dest, void *src, size_t len, void *fd);</td><td>assume hl = number of bytes read. Device return may vary.<br>
-hl = 0 and Cf set if failed</td><td></td><td>
+hl = 0 and Cf set if failed</td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="sys_WriteDevice"><h1>sys_WriteDevice</h1>	<h3>syscall Adress 020268</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Write to a device given a file descriptor</td><td>int sys_WriteDevice(void *dest, void *src, size_t len, void *fd);</td><td>assume hl = number of bytes written. Device return may vary.<br>
-hl = 0 and Cf set if failed</td><td></td><td>
+hl = 0 and Cf set if failed</td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="fs_GetSector"><h1>fs_GetSector</h1>	<h3>syscall Adress 02026C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>get the sector a given address lies within</td><td>int fs_GetSector(void *address);</td><td></td><td></td><td>
+<tr><td>get the sector a given address lies within</td><td>int fs_GetSector(void *address);</td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="fs_WriteByte"><h1>fs_WriteByte</h1>	<h3>syscall Adress 020270</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>write a byte into a file</td><td>int fs_WriteByte(uint8_t byte, void *fd, int offset);</td><td></td><td></td><td>
+<tr><td>write a byte into a file</td><td>int fs_WriteByte(uint8_t byte, void *fd, int offset);</td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="fs_RenameFile"><h1>fs_RenameFile</h1>	<h3>syscall Adress 020274</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>rename a file</td><td>void *fs_RenameFile(const char *directory, const char *old_name, const char *new_name);</td><td>file descriptor. returns zero if failed</td><td></td><td>
+<tr><td>rename a file</td><td>void *fs_RenameFile(const char *directory, const char *old_name, const char *new_name);</td><td>file descriptor. returns zero if failed</td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="_SetCursorPos"><h1>_SetCursorPos</h1>	<h3>syscall Adress 020278</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Set the text cursor position</td><td>void _SetCursorPos(uint8_t row, uint8_t col);</td><td></td><td></td><td>
+<tr><td>Set the text cursor position</td><td>void _SetCursorPos(uint8_t row, uint8_t col);</td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="fs_CreateDir"><h1>fs_CreateDir</h1>	<h3>syscall Adress 02027C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Create a directory given a path and return a file descriptor.</td><td>void *fs_CreateDir(const char *path, uint8_t flags);</td><td>file descriptor. Returns 0 if failed to create directory. </td><td></td><td>
+<tr><td>Create a directory given a path and return a file descriptor.</td><td>void *fs_CreateDir(const char *path, uint8_t flags);</td><td>file descriptor. Returns 0 if failed to create directory. </td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="gfx_BufClear"><h1>gfx_BufClear</h1>	<h3>syscall Adress 020280</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -538,7 +538,7 @@ hl = 0 and Cf set if failed</td><td></td><td>
 </td></tr>
 </table></div><div id="sys_SetupOnInterruptHandler"><h1>sys_SetupOnInterruptHandler</h1>	<h3>syscall Adress 02028C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Setup an error handler for an interrupt caused by the [On] key.</td><td>HL = user error handler</td><td></td><td></td><td>
+<tr><td>Setup an error handler for an interrupt caused by the [On] key.</td><td>HL = user error handler</td><td></td><td>Assume all</td><td>
 user error handler is called after the interrupt is handled.</td></tr>
 </table></div><div id="gui_PrintChar"><h1>gui_PrintChar</h1>	<h3>syscall Adress 020290</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -546,7 +546,7 @@ user error handler is called after the interrupt is handled.</td></tr>
 </td></tr>
 </table></div><div id="gfx_SetDraw"><h1>gfx_SetDraw</h1>	<h3>syscall Adress 020294</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td></td><td></td><td></td><td></td><td>
+<tr><td></td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="gui_PrintString"><h1>gui_PrintString</h1>	<h3>syscall Adress 020298</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -556,23 +556,23 @@ A = control code if a control code is encountered. (Cf will be set)</td><td>All<
 If you need a routine callable from C, this is not the one you'll want to use.</td></tr>
 </table></div><div id="gui_PrintLine"><h1>gui_PrintLine</h1>	<h3>syscall Adress 02029C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td></td><td></td><td></td><td></td><td>
+<tr><td></td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="gui_PrintUInt"><h1>gui_PrintUInt</h1>	<h3>syscall Adress 0202A0</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Print an unsigned integer. Dos not swap buffers.</td><td>hl = integer</td><td></td><td></td><td>
+<tr><td>Print an unsigned integer. Dos not swap buffers.</td><td>hl = integer</td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="sys_WriteFlashFullRam"><h1>sys_WriteFlashFullRam</h1>	<h3>syscall Adress 0202A4</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>store data to flash, surpassing flash AND logic using the first half of VRAM for swap if needed.</td><td></td><td>uint8_t sys_WriteFlashFullRam(void *dest, void *src, int len);</td><td></td><td>
+<tr><td>store data to flash, surpassing flash AND logic using the first half of VRAM for swap if needed.</td><td></td><td>uint8_t sys_WriteFlashFullRam(void *dest, void *src, int len);</td><td>Assume all</td><td>
 Assume maximum write length is 65536.</td></tr>
 </table></div><div id="sys_WriteFlashByteFullRam"><h1>sys_WriteFlashByteFullRam</h1>	<h3>syscall Adress 0202A8</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Write a byte to flash, surpassing flash AND logic using the first half of VRAM for swap if needed.</td><td>bool sys_WriteFlashByteFullRam(void *dest, uint8_t byte);</td><td>true if success, false if failed</td><td></td><td>
+<tr><td>Write a byte to flash, surpassing flash AND logic using the first half of VRAM for swap if needed.</td><td>bool sys_WriteFlashByteFullRam(void *dest, uint8_t byte);</td><td>true if success, false if failed</td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="fs_GetFilePtr"><h1>fs_GetFilePtr</h1>	<h3>syscall Adress 0202AC</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>get a pointer to a file's data section</td><td>void *fs_GetFilePtr(const char *path);</td><td>HL = file data pointer, BC = file data length, A = file flags, Cf set and HL = -1 if failed</td><td></td><td>
+<tr><td>get a pointer to a file's data section</td><td>void *fs_GetFilePtr(const char *path);</td><td>HL = file data pointer, BC = file data length, A = file flags, Cf set and HL = -1 if failed</td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="sys_ExecuteFileFromPtr"><h1>sys_ExecuteFileFromPtr</h1>	<h3>syscall Adress 0202B0</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -584,19 +584,19 @@ Assume maximum write length is 65536.</td></tr>
 </td></tr>
 </table></div><div id="sys_TurnOff"><h1>sys_TurnOff</h1>	<h3>syscall Adress 0202B8</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>turns off the calculator until the on key is pressed.</td><td></td><td></td><td></td><td>
+<tr><td>turns off the calculator until the on key is pressed.</td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="sys_NextProcessId"><h1>sys_NextProcessId</h1>	<h3>syscall Adress 0202BC</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Increment the process ID.</td><td>void sys_NextProcessId(void);</td><td></td><td></td><td>
+<tr><td>Increment the process ID.</td><td>void sys_NextProcessId(void);</td><td></td><td>Assume all</td><td>
 Used for categorizing malloc'd memory</td></tr>
 </table></div><div id="sys_PrevProcessId"><h1>sys_PrevProcessId</h1>	<h3>syscall Adress 0202C0</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Decrement the process ID.</td><td>void sys_PrevProcessId(void);</td><td></td><td></td><td>
+<tr><td>Decrement the process ID.</td><td>void sys_PrevProcessId(void);</td><td></td><td>Assume all</td><td>
 Used for categorizing malloc'd memory</td></tr>
 </table></div><div id="sys_FreeProcessId"><h1>sys_FreeProcessId</h1>	<h3>syscall Adress 0202C4</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Free all memory allocated by a given process ID</td><td>void sys_FreeProcessId(uint8_t id);</td><td></td><td></td><td>
+<tr><td>Free all memory allocated by a given process ID</td><td>void sys_FreeProcessId(uint8_t id);</td><td></td><td>Assume all</td><td>
 DO NOT free process ID 1 since it is used by the OS and should be preserved.</td></tr>
 </table></div><div id="fs_GarbageCollect"><h1>fs_GarbageCollect</h1>	<h3>syscall Adress 0202C8</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -604,15 +604,15 @@ DO NOT free process ID 1 since it is used by the OS and should be preserved.</td
 will sanity-check the filesystem if the cluster map is not found.</td></tr>
 </table></div><div id="gfx_SwapTextColors"><h1>gfx_SwapTextColors</h1>	<h3>syscall Adress 0202CC</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Swap lcd_text_fg and lcd_text_fg2</td><td></td><td></td><td></td><td>
+<tr><td>Swap lcd_text_fg and lcd_text_fg2</td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="fs_WriteNewFile"><h1>fs_WriteNewFile</h1>	<h3>syscall Adress 0202D0</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Create and write a new file</td><td>void *fs_WriteNewFile(const char *name, uint8_t properties, void *data, int len);</td><td>HL = file descriptor. HL = -1 and Cf set if failed.</td><td></td><td>
+<tr><td>Create and write a new file</td><td>void *fs_WriteNewFile(const char *name, uint8_t properties, void *data, int len);</td><td>HL = file descriptor. HL = -1 and Cf set if failed.</td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="gfx_SetFont"><h1>gfx_SetFont</h1>	<h3>syscall Adress 0202D4</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>set the current font</td><td>void *gfx_SetFont(void *data)</td><td>HL = old font data</td><td></td><td>
+<tr><td>set the current font</td><td>void *gfx_SetFont(void *data)</td><td>HL = old font data</td><td>Assume all</td><td>
 data structure: uint8_t num_bitmaps, uint8_t spacing[], uint8_t data[]</td></tr>
 </table></div><div id="gfx_SetDefaultFont"><h1>gfx_SetDefaultFont</h1>	<h3>syscall Adress 0202D8</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -620,11 +620,11 @@ data structure: uint8_t num_bitmaps, uint8_t spacing[], uint8_t data[]</td></tr>
 </td></tr>
 </table></div><div id="sys_FreeRunningProcessId"><h1>sys_FreeRunningProcessId</h1>	<h3>syscall Adress 0202DC</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Free all memory allocated by the current process ID</td><td>void sys_FreeProcessId(void);</td><td></td><td></td><td>
+<tr><td>Free all memory allocated by the current process ID</td><td>void sys_FreeProcessId(void);</td><td></td><td>Assume all</td><td>
 Automatically called after program runs</td></tr>
 </table></div><div id="util_Zx7Decompress"><h1>util_Zx7Decompress</h1>	<h3>syscall Adress 0202E0</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>decompress a block of zx7-compressed data into a user-provided RAM buffer</td><td>void util_Zx7Decompress(void *dest, void *src);</td><td></td><td></td><td>
+<tr><td>decompress a block of zx7-compressed data into a user-provided RAM buffer</td><td>void util_Zx7Decompress(void *dest, void *src);</td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="sys_CheckMallocRAM"><h1>sys_CheckMallocRAM</h1>	<h3>syscall Adress 0202E4</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -637,19 +637,19 @@ E Y coordinate</td><td>HL pointer to draw location</td><td>HL,DE</td><td>
 </td></tr>
 </table></div><div id="gfx_FillRectangle"><h1>gfx_FillRectangle</h1>	<h3>syscall Adress 0202EC</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td></td><td></td><td></td><td></td><td>
+<tr><td></td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="gfx_FillScreen"><h1>gfx_FillScreen</h1>	<h3>syscall Adress 0202F0</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td></td><td></td><td></td><td></td><td>
+<tr><td></td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="gfx_GetFontPtr"><h1>gfx_GetFontPtr</h1>	<h3>syscall Adress 0202F4</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>get pointer to font data</td><td></td><td>hl = current font data</td><td></td><td>
+<tr><td>get pointer to font data</td><td></td><td>hl = current font data</td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="gfx_HorizLine"><h1>gfx_HorizLine</h1>	<h3>syscall Adress 0202F8</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td></td><td></td><td></td><td></td><td>
+<tr><td></td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="gfx_InitStdPalette"><h1>gfx_InitStdPalette</h1>	<h3>syscall Adress 0202FC</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -661,19 +661,19 @@ E Y coordinate</td><td>HL pointer to draw location</td><td>HL,DE</td><td>
 </td></tr>
 </table></div><div id="gfx_PrintChar"><h1>gfx_PrintChar</h1>	<h3>syscall Adress 020304</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td></td><td></td><td></td><td></td><td>
+<tr><td></td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="gfx_PrintHexA"><h1>gfx_PrintHexA</h1>	<h3>syscall Adress 020308</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td></td><td></td><td></td><td></td><td>
+<tr><td></td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="gfx_PrintUInt"><h1>gfx_PrintUInt</h1>	<h3>syscall Adress 02030C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td></td><td></td><td></td><td></td><td>
+<tr><td></td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="gfx_Rectangle"><h1>gfx_Rectangle</h1>	<h3>syscall Adress 020310</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td></td><td></td><td></td><td></td><td>
+<tr><td></td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="gfx_Set8bpp"><h1>gfx_Set8bpp</h1>	<h3>syscall Adress 020314</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -685,11 +685,11 @@ E Y coordinate</td><td>HL pointer to draw location</td><td>HL,DE</td><td>
 </td></tr>
 </table></div><div id="gfx_SetTextXY"><h1>gfx_SetTextXY</h1>	<h3>syscall Adress 02031C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td></td><td></td><td></td><td></td><td>
+<tr><td></td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="gfx_Sprite"><h1>gfx_Sprite</h1>	<h3>syscall Adress 020320</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td></td><td></td><td></td><td></td><td>
+<tr><td></td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="gfx_Sprite2x"><h1>gfx_Sprite2x</h1>	<h3>syscall Adress 020324</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -698,7 +698,7 @@ BC X<<8 + Y</td><td></td><td>HL,DE,BC,AF,fsOP6</td><td>
 </td></tr>
 </table></div><div id="gfx_VertLine"><h1>gfx_VertLine</h1>	<h3>syscall Adress 020328</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td></td><td></td><td></td><td></td><td>
+<tr><td></td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="sys_Malloc32Align32"><h1>sys_Malloc32Align32</h1>	<h3>syscall Adress 02032C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -712,39 +712,39 @@ Cf set if failed to malloc</td><td>All</td><td>
 </td></tr>
 </table></div><div id="gfx_PrintStringXY"><h1>gfx_PrintStringXY</h1>	<h3>syscall Adress 020334</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td></td><td></td><td></td><td></td><td>
+<tr><td></td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="gfx_GetTextX"><h1>gfx_GetTextX</h1>	<h3>syscall Adress 020338</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td></td><td></td><td></td><td></td><td>
+<tr><td></td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="gfx_GetTextY"><h1>gfx_GetTextY</h1>	<h3>syscall Adress 02033C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td></td><td></td><td></td><td></td><td>
+<tr><td></td><td></td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="fs_CheckWritable"><h1>fs_CheckWritable</h1>	<h3>syscall Adress 020340</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Check if a file can be written to.</td><td>uint8_t fs_CheckWritable(const char *path);</td><td>0 if file cannot be written to, -1 and Cf set if file doesn't exist, 1 if the file can be written to.</td><td></td><td>
+<tr><td>Check if a file can be written to.</td><td>uint8_t fs_CheckWritable(const char *path);</td><td>0 if file cannot be written to, -1 and Cf set if file doesn't exist, 1 if the file can be written to.</td><td>Assume all</td><td>
 takes into consideration whether the OS is in "elevated" mode</td></tr>
 </table></div><div id="fs_CheckWritableFD"><h1>fs_CheckWritableFD</h1>	<h3>syscall Adress 020344</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Check if a file descriptor is writable.</td><td>uint8_t fs_CheckWritableFD(void *fd);</td><td></td><td></td><td>
+<tr><td>Check if a file descriptor is writable.</td><td>uint8_t fs_CheckWritableFD(void *fd);</td><td></td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="sys_OpenFileInPath"><h1>sys_OpenFileInPath</h1>	<h3>syscall Adress 020348</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>open a file, looking in directories from $PATH variable if file not found</td><td>void *sys_OpenFileInPath(const char *path);</td><td>pointer to file descriptor</td><td></td><td>
+<tr><td>open a file, looking in directories from $PATH variable if file not found</td><td>void *sys_OpenFileInPath(const char *path);</td><td>pointer to file descriptor</td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="sys_VarString"><h1>sys_VarString</h1>	<h3>syscall Adress 02034C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Similar to sprintf but uses system vars and malloc's the output buffer.</td><td>char *sys_VarString(const char *str);</td><td>hl string where $VAR's are replaced with their respective values. Returns -1 and Cf set if failed.</td><td></td><td>
+<tr><td>Similar to sprintf but uses system vars and malloc's the output buffer.</td><td>char *sys_VarString(const char *str);</td><td>hl string where $VAR's are replaced with their respective values. Returns -1 and Cf set if failed.</td><td>Assume all</td><td>
 $VAR must be terminated with a space " " which is not included in the output.</td></tr>
 </table></div><div id="fs_GetFreeSpace"><h1>fs_GetFreeSpace</h1>	<h3>syscall Adress 020350</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Return remaining free space in the filesystem</td><td>int fs_GetFreeSpace(void);</td><td>filesystem remaining space in bytes</td><td></td><td>
+<tr><td>Return remaining free space in the filesystem</td><td>int fs_GetFreeSpace(void);</td><td>filesystem remaining space in bytes</td><td>Assume all</td><td>
 will sanity check the filesystem if cluster map file is not found or has zero length.</td></tr>
 </table></div><div id="fs_GetFDPtr"><h1>fs_GetFDPtr</h1>	<h3>syscall Adress 020354</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Return pointer to file data given a file descriptor</td><td>void *fs_GetFDPtr(void *fd);</td><td>pointer to file data</td><td></td><td>
+<tr><td>Return pointer to file data given a file descriptor</td><td>void *fs_GetFDPtr(void *fd);</td><td>pointer to file data</td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="fs_GetFDLen"><h1>fs_GetFDLen</h1>	<h3>syscall Adress 020358</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -753,23 +753,23 @@ will sanity check the filesystem if cluster map file is not found or has zero le
 </table></div><div id="_OP1ToPath"><h1>_OP1ToPath</h1>	<h3>syscall Adress 02035C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Convert a variable name from OP1 into a BOS filesystem path.</td><td>OP1 variable type byte, 8 byte name</td><td>hl = path<br>
-Cf set if failed</td><td></td><td>
+Cf set if failed</td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="th_WaitKeyCycle"><h1>th_WaitKeyCycle</h1>	<h3>syscall Adress 020360</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Starts a thread that does nothing until a key is pressed and unpressed, passes the keypress to the caller via a callback function, then stops.</td><td>int th_WaitKeyCycle(void (*callback)(uint8_t key));</td><td>returns 0 and Cf unset on success, -1 and Cf set on fail.</td><td></td><td>
+<tr><td>Starts a thread that does nothing until a key is pressed and unpressed, passes the keypress to the caller via a callback function, then stops.</td><td>int th_WaitKeyCycle(void (*callback)(uint8_t key));</td><td>returns 0 and Cf unset on success, -1 and Cf set on fail.</td><td>Assume all</td><td>
 Starts a thread, which won't do anything until handled.</td></tr>
 </table></div><div id="fs_JoinPath"><h1>fs_JoinPath</h1>	<h3>syscall Adress 020364</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>join two filesystem paths</td><td>char *fs_JoinPath(const char *path1, const char *path2);</td><td>hl = resultant path.<br>
-Cf set, hl = -1 if failed</td><td></td><td>
+Cf set, hl = -1 if failed</td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="sys_MallocPersistent"><h1>sys_MallocPersistent</h1>	<h3>syscall Adress 020368</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Allocate memory to be treated as persistent</td><td>same as sys_Malloc</td><td>same as sys_Malloc</td><td></td><td>
+<tr><td>Allocate memory to be treated as persistent</td><td>same as sys_Malloc</td><td>same as sys_Malloc</td><td>Assume all</td><td>
 </td></tr>
 </table></div><div id="sys_OpenFileInVar"><h1>sys_OpenFileInVar</h1>	<h3>syscall Adress 02036C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>open a file, looking in directories from var variable if file not found</td><td>void *sys_OpenFileInVar(const char *path, const char *var);</td><td>pointer to file descriptor</td><td></td><td>
+<tr><td>open a file, looking in directories from var variable if file not found</td><td>void *sys_OpenFileInVar(const char *path, const char *var);</td><td>pointer to file descriptor</td><td>Assume all</td><td>
 </td></tr>
 </table></div></body></html>
