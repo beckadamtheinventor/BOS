@@ -67,8 +67,7 @@
 ; using shared object example
 ; some C code
 ; ```
-; int main(int args){
-;    char *argv = (char*)args; //BOS program arguments are pushed as a string, but this is probably gonna change at some point.
+; int main(int argc, char *argv[]){
 ;    printsomething(argv); //this will likely still need to be included as part of a header file
 ;    return 0;
 ; }
@@ -81,14 +80,15 @@
 ; extern _printsomething, "printsomething"
 ; entrypoint _main 
 ; section _main, ezsec.execany
-;   pop bc
-;   ex (sp),hl
-;   push bc,hl
+;	call ti._frameset0
+;	ld ix,(ix+6)
+;	pea ix+3
 ;   call _printsomething
 ;   pop bc
 ;   or a,a
 ;   sbc hl,hl
-;   ret
+;   pop ix
+;	ret
 ; end section
 ;
 ; end ezf
@@ -129,9 +129,7 @@ end namespace
 
 macro ezf?
 	local _ezf
-	_ezf.flash_jump_table := $FFF000
-	_ezf.flash_jump_table_max_index := $1000 ; room for up to 1023 jumps to extern functions
-	_ezf.flash_jump_table_index = 4 ; first jump is reserved for allocation purposes
+	_ezf.flash_jump_table := $FFFFFF
 
 	virtual at 0
 		db $7F,"EZF"
@@ -196,7 +194,7 @@ macro ezf?
 	end macro
 
 	macro extern? sectionlabel, sectionname
-		sectionlabel := _ezf.flash_jump_table + _ezf.flash_jump_table_index
+		sectionlabel := _ezf.flash_jump_table
 		virtual _ezf.function_names
 			sectionlabel.externnameloc:
 			db sectionname, 0
@@ -207,13 +205,9 @@ macro ezf?
 			dw sectionlabel.externnameloc
 			assert lengthof sectionname < $100
 			db lengthof sectionname
-			jp _ezf.flash_jump_table + _ezf.flash_jump_table_index
+			jp _ezf.flash_jump_table
 			sectionlabel._headerend:
 		end virtual
-		_ezf.flash_jump_table_index = _ezf.flash_jump_table_index + 4
-		if _ezf.flash_jump_table_index > _ezf.flash_jump_table_max_index
-			err "Program uses too many external functions... somehow."
-		end if
 	end macro
 
 	macro uninitialized?.section? sectionlabel, sectionsize
@@ -240,8 +234,8 @@ macro ezf?
 			local value, address, hassetvalue
 			value = @value
 			address = $ - $$
-			hassetvalue = 0
 			if value eqtype sectionlabel
+				hassetvalue = 0
 				irpv usablelabel, <public, private>
 					virtual usablelabel.relocation_offsets
 						dw address
@@ -262,6 +256,8 @@ macro ezf?
 					display "Label ",value, " not marked as public, private, or extern. This will almost certainly cause runtime errors.",$A
 				end if
 				@ez80.word -1
+			else
+				@ez80.word value
 			end if
 		end macro
 		sectionlabel.sectionsource:
@@ -273,6 +269,7 @@ macro ezf?
 			sectionlabel.end:
 			sectionlabel.sectionsource_offset = $
 			db sectionlabel.sectiondata
+			restore @ez80.word?
 			purge end?.section?
 		end macro
 	end macro

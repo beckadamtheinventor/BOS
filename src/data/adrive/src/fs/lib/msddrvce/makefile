@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020
+# Copyright (C) 2015-2021
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -16,10 +16,10 @@
 
 include $(CURDIR)/../common.mk
 
-LIB_SRC := srldrvce.asm
-LIB_LIB := srldrvce.lib
-LIB_8XV := srldrvce.8xv
-LIB_H := srldrvce.h
+LIB_SRC := msddrvce.asm
+LIB_LIB := msddrvce.lib
+LIB_8XV := msddrvce.8xv
+LIB_H := msddrvce.h
 
 all: $(LIB_8XV)
 
@@ -36,4 +36,3 @@ install: all
 	$(Q)$(call COPY,$(LIB_H),$(INSTALL_H))
 
 .PHONY: all clean install
-

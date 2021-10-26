@@ -26,7 +26,7 @@ macro ?! $              : $              , \
 	required equ required.0
 	offset = endscript
 
-	iterate name, locate, order, range, library, source, require, provide, map
+	iterate name, locate, order, range, library, source, require, provide, map, dbg
 		macro name? line&
 			if definite endscript
 				err 'linker script command in source'
@@ -149,6 +149,13 @@ macro ?! $              : $              , \
 		execute =end? =virtual?
 	end calminstruction
 
+	calminstruction script.dbg
+		proxy output
+		execute =virtual? =as? 'dbg'
+		execute @output.=dbg::
+		execute =end? =virtual?
+	end calminstruction
+
 	irpv line, script
 		script.line
 	end irpv
@@ -242,6 +249,14 @@ macro ?! $              : $              , \
 		match , symbols
 		jno loop
 	end calminstruction
+
+	if defined output.dbg
+		calminstruction file? args&
+		end calminstruction
+
+		calminstruction loc? args&
+		end calminstruction
+	end if
 
 	irpv source, sources
 		namespace ?%

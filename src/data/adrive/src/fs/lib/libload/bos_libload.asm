@@ -27,6 +27,14 @@ include '../include/library.inc'
 define VERSION_MAJOR       3
 define VERSION_MINOR       1
 
+cursorImage := ti.cursorImage
+AppVarObj := ti.AppVarObj
+userMem := ti.userMem
+OP1 := ti.OP1
+skEnter := ti.skEnter
+skClear := ti.skClear
+
+
 ; global equates
 arclibrarylocations        = cursorImage + 000 ; place to store locations of archived libraries
 dependencyqueuelocation    = cursorImage + 450 ; queue for keeping track of which libraries still need to be resolved

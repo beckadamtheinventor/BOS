@@ -291,7 +291,7 @@ ti_Open:
 ;  sp + 6 : open flags
 ; return:
 ;  a = slot index if no error
-	ld	a, appVarObj
+	ld	a, ti.AppVarObj
 .start:
 	ld	(.smc_type), a
 	ld	(bos.fsOP1), a
@@ -338,7 +338,7 @@ ti_Open:
 	ld	hl, (ix + 9)
 	ld	a, (hl)
 	cp	a, 'w'
-	ld	iy, flags
+	ld	iy, ti.flags
 	jr	nz, .no_overwite
 	call	bos._DelVar
 .no_overwite:
@@ -426,7 +426,7 @@ ti_SetArchiveStatus:
 	; xor	a, a
 	; ld	(de), a
 	; call	_PushOP1
-	; ld	iy, flags
+	; ld	iy, ti.flags
 	; call	_ChkFindSym
 	; call	_ChkInRam
 	; push	af
@@ -469,7 +469,7 @@ ti_Write:
 ;  sp + 12 : slot index
 ; return:
 ;  hl = number of chunks written if success
-	call __frameset0
+	call ti._frameset0
 	ld c,(ix+15)
 	call util_is_slot_open
 	jq nz,util_ret_null_pop_ix
@@ -485,7 +485,7 @@ ti_Write:
 	ld bc,0
 	ld c,(ix+12)
 	ld hl,(ix+9)
-	call __imulu
+	call ti._imulu
 	ld (.write_total_size),hl
 	pop bc
 	add hl,bc
@@ -524,7 +524,7 @@ ti_Read:
 ;  sp + 12 : slot index
 ; return:
 ;  hl = number of chunks read if success
-	call __frameset0
+	call ti._frameset0
 	ld c,(ix+15)
 	call util_is_slot_open
 	jq nz,util_ret_null_pop_ix
@@ -710,7 +710,7 @@ ti_Delete:
 ;  sp + 3 : pointer to appvar name
 ; return:
 ;  hl = 0 if failure
-	ld	a,appVarObj
+	ld	a,ti.AppVarObj
 ; .start:
 	pop	de
 	pop	hl
@@ -992,7 +992,7 @@ ti_GetTokenString:
 	; ld	(hl), de
 	; pop	hl
 	; push	iy
-	; ld	iy, flags
+	; ld	iy, ti.flags
 	; call	_Get_Tok_Strng
 	; pop	iy
 	; ld	hl, (iy + 9)
@@ -1106,7 +1106,7 @@ ti_RenameVar:
 	ld	iy, 0
 	add	iy, sp
 	ld	a, (iy + 9)
-;	ld	iy, flags		; probably not needed
+;	ld	iy, ti.flags		; probably not needed
 ;	jr	ti_Rename.start		; emulated by dummifying next instruction
 	db	$fe			; ld a,appVarObj -> cp a,$3E \ dec d
 
@@ -1121,7 +1121,7 @@ ti_Rename:
 ;  a = 1 if new file already exists
 ;  a = 2 if old file does not exist
 ;  a = 3 if other error
-	ld	a,appVarObj		; file type
+	ld	a,ti.AppVarObj		; file type
 .start:
 	pop	bc
 	pop	hl
@@ -1227,7 +1227,7 @@ ti_StoVar:
 	; ld	hl, (iy + 6)		; pointer to var string
 	; ld	a, (iy + 3)
 	; call	util_set_var_str
-	; ld	iy, flags
+	; ld	iy, ti.flags
 	; ld	hl, util_ret_neg_one_byte
 	; call	_PushErrorHandler
 	; call	_StoOther
@@ -1247,7 +1247,7 @@ ti_RclVar:
 	; add	iy, sp
 	; ld	hl, (iy + 6)		; pointer to data
 	; ld	a, (iy + 3)		; var type
-	; ld	iy, flags
+	; ld	iy, ti.flags
 	; call	util_set_var_str
 	; call	_FindSym
 	; jp	c, util_ret_neg_one_byte

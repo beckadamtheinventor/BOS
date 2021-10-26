@@ -1,5 +1,5 @@
 ;-------------------------------------------------------------------------------
-include '../include/library-ti84pceg.inc'
+include '../include/library.inc'
 ;-------------------------------------------------------------------------------
 
 library 'USBDRVCE', 0
@@ -333,7 +333,6 @@ end struct
 virtual at $D10000
 	cHeap			dbx $D13F00 - $: ?
 end virtual
-
 virtual at ti.usbArea
 				rb (-$) and 7
 	?setupPacket		setup
@@ -569,7 +568,7 @@ usb_Init:
 	set	5,(hl);ti.flags+$1B
 	ld	hl,ti.mpTmr2Load
 	ld	c,12
-	call	bos._MemClear
+	call	ti.MemClear
 	ld	l,ti.tmrCtrl+1
 	set	ti.bTmr2CountUp-8,(hl)
 	dec	l;ti.tmrCtrl
