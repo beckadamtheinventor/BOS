@@ -1,0 +1,113 @@
+Section     Base   Top    High   Length
+----------- ------ ------ ------ -------
+.icon       D1A882 D1A882             0h
+.launcher   D1A882 D1A8A7            25h
+.libs       D1A8A7 D1A918            71h
+.start      D1A918 D1A97E            66h
+.cleanup    D1A97E D1A98C             Eh
+.text       D1A98C D1B1F9           86Dh
+.data       D1B1F9 D1B1F9             0h
+.rodata     D1B1F9 D1B431           238h
+.init_array 000000 000000             0h
+.ctors      000000 000000             0h
+.dtors      000000 000000             0h
+.fini_array 000000 000000             0h
+.bss        D03500 D03D64 D13FD6    864h
+.header     D1A87F D1A882             3h
+
+Label                          Value
+----------------------------   ------
+___low_bss                   = D03500
+___len_bss                   = 000864
+___heaptop                   = D13FD6
+___heapbot                   = D03D64
+___libs                      = D1A8A7
+___init_array_count          = 000000
+___ctors_count               = 000000
+___dtors_count               = 000000
+___fini_array_count          = 000000
+__stack                      = D1A87E
+_fs_OpenFile                 = 02012C
+_fs_CopyFileName             = 02013C
+_fs_Write                    = 020144
+_sys_GetKey                  = 020154
+_sys_WaitKeyCycle            = 020170
+_gui_NewLine                 = 02017C
+_gui_Print                   = 020180
+_gui_PrintInt                = 020184
+__MemClear                   = 020194
+__ClrScrn                    = 0201CC
+__HomeUp                     = 0201D0
+__DrawStatusBar              = 0201D8
+_fs_CreateFile               = 0201F4
+_fs_ParentDir                = 020240
+__SetCursorPos               = 020278
+_gui_PrintString             = 020298
+_gui_PrintLine               = 02029C
+_fs_GetFilePtr               = 0202AC
+_fs_GetFDPtr                 = 020354
+_fs_GetFDLen                 = 020358
+_os_GetCSC                   = 020154
+__frameset                   = D1A98C
+__frameset0                  = D1A99A
+__imulu                      = 000158
+__ishru                      = 000184
+__ladd                       = 00019C
+__lcmpu                      = 0001AC
+__setflag                    = 000218
+_strlen                      = 0000D4
+.missingappvar               = D1B1F9
+.libloadname                 = D1B201
+.webaddress                  = D1B212
+start                        = D1A918
+skip._exit                   = D1A973
+skip.__Exit                  = D1A973
+skip._abort                  = D1A973
+___main_argc_argv            = D1A9A5
+_handleUsbEvent              = D1B160
+LJTI1_0                      = D1B225
+___main_argc_argv.partitions = D03500
+___main_argc_argv.global     = D03550
+___main_argc_argv.fat        = D03953
+L_.str                       = D1B231
+L_.str.1                     = D1B26D
+L_.str.2                     = D1B27D
+L_.str.3                     = D1B292
+L_.str.4                     = D1B2A4
+L_.str.5                     = D1B2B7
+L_.str.6                     = D1B2C2
+L_.str.7                     = D1B2D9
+L_.str.8                     = D1B2EC
+L_.str.9                     = D1B301
+L_.str.10                    = D1B31A
+L_.str.11                    = D1B32D
+L_.str.12                    = D1B33B
+L_.str.13                    = D1B340
+L_.str.14                    = D1B357
+L_.str.15                    = D1B372
+L_.str.16                    = D1B392
+L_.str.17                    = D1B3BA
+L_.str.18                    = D1B3DD
+L_.str.19                    = D1B3F5
+L_.str.20                    = D1B40A
+L_.str.21                    = D1B41D
+_#fat_Init                   = D1A8B2
+_#fat_Deinit                 = D1A8B6
+_#fat_Open                   = D1A8BA
+_#fat_Close                  = D1A8BE
+_#fat_SetSize                = D1A8C2
+_#fat_GetSize                = D1A8C6
+_#fat_Read                   = D1A8CA
+_#fat_Write                  = D1A8CE
+_#fat_Create                 = D1A8D2
+_#fat_Delete                 = D1A8D6
+_#msd_Open                   = D1A8E5
+_#msd_Close                  = D1A8E9
+_#msd_Info                   = D1A8ED
+_#msd_Read                   = D1A8F1
+_#msd_Write                  = D1A8F5
+_#msd_FindPartitions         = D1A8F9
+_#usb_Init                   = D1A908
+_#usb_Cleanup                = D1A90C
+_#usb_WaitForInterrupt       = D1A910
+_#usb_ResetDevice            = D1A914

@@ -89,6 +89,9 @@ $(call NATIVEPATH,$(FSOBJ)/graphx.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/graphx
 $(call NATIVEPATH,$(FSOBJ)/keypadc.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/keypadc/keypadc.asm)
 	fasmg $(call NATIVEPATH,$(FSSRC)/fs/lib/keypadc/keypadc.asm) $(call NATIVEPATH,$(FSOBJ)/keypadc.bin)
 
+$(call NATIVEPATH,$(FSOBJ)/msddrvce.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/msddrvce/msddrvce.asm)
+	fasmg $(call NATIVEPATH,$(FSSRC)/fs/lib/msddrvce/msddrvce.asm) $(call NATIVEPATH,$(FSOBJ)/msddrvce.bin)
+
 $(call NATIVEPATH,$(FSOBJ)/srldrvce.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/srldrvce/srldrvce.asm)
 	fasmg $(call NATIVEPATH,$(FSSRC)/fs/lib/srldrvce/srldrvce.asm) $(call NATIVEPATH,$(FSOBJ)/srldrvce.bin)
 
@@ -106,6 +109,9 @@ $(call NATIVEPATH,$(FSOBJ)/memedit.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/memed
 $(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/bosbin/CEDIT.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/src/main.c)
 	$(Q)make -f bos.makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/)
 
+$(call NATIVEPATH,$(FSSRC)/fs/bin/msd/bosbin/MSD.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/msd/src/main.c)
+	$(Q)make -f makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/msd/)
+
 
 # Rule to build Filesytem and compress it
 filesystem: $(call NATIVEPATH,$(FSSRC)/main.asm) $(call NATIVEPATH,$(FSSRC)/fs/lib/libload/bos_libload.asm) $(call NATIVEPATH,$(FSSRC)/fs/lib/fatdrvce/fatdrvce.asm) \
@@ -114,7 +120,8 @@ $(call NATIVEPATH,$(FSSRC)/fs/lib/graphx/graphx.asm) $(call NATIVEPATH,$(FSSRC)/
 $(call NATIVEPATH,$(FSSRC)/fs/lib/usbdrvce/usbdrvce.asm) $(call NATIVEPATH,$(FSSRC)/fs/bin/memedit.asm) $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer.asm) \
 $(call NATIVEPATH,$(FSOBJ)/libload.bin) $(call NATIVEPATH,$(FSOBJ)/fatdrvce.bin) $(call NATIVEPATH,$(FSOBJ)/fileioc.bin) $(call NATIVEPATH,$(FSOBJ)/fontlibc.bin) \
 $(call NATIVEPATH,$(FSOBJ)/graphx.bin) $(call NATIVEPATH,$(FSOBJ)/keypadc.bin) $(call NATIVEPATH,$(FSOBJ)/srldrvce.bin) $(call NATIVEPATH,$(FSOBJ)/usbdrvce.bin) \
-$(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/bosbin/CEDIT.bin) $(call NATIVEPATH,$(FSOBJ)/explorer.bin) $(call NATIVEPATH,$(FSOBJ)/memedit.bin)
+$(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/bosbin/CEDIT.bin) $(call NATIVEPATH,$(FSOBJ)/explorer.bin) $(call NATIVEPATH,$(FSOBJ)/memedit.bin) \
+$(call NATIVEPATH,$(FSOBJ)/msddrvce.bin)
 	fasmg $(call NATIVEPATH,$(FSSRC)/main.asm) $(call NATIVEPATH,src/data/adrive/main.bin)
 	convbin -i $(call NATIVEPATH,src/data/adrive/main.bin) -o $(call NATIVEPATH,src/data/adrive/data.bin) -j bin -k bin -c zx7
 	convbin -i $(call NATIVEPATH,src/data/adrive/data.bin) -o $(call NATIVEPATH,bin/BOSOSpt2.8xv) -j bin -k 8xv -n BOSOSpt2

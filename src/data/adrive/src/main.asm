@@ -59,6 +59,7 @@ fs_dir bin_dir
 	fs_entry memedit_exe, "memedit", "", f_readonly+f_system
 	fs_sfentry mkdir_exe, "mkdir", "", f_readonly+f_system+f_subfile
 	fs_sfentry mkfile_exe, "mkfile", "", f_readonly+f_system+f_subfile
+	fs_entry msd_exe, "msd", "", f_readonly+f_system
 	fs_sfentry off_exe, "off", "", f_readonly+f_system+f_subfile
 	fs_sfentry osrt_so, "osrt", "so", f_readonly+f_system+f_subfile
 	fs_sfentry peek_exe, "peek", "", f_readonly+f_system+f_subfile
@@ -79,47 +80,6 @@ fs_dir var_dir
 end fs_dir
 
 fs_file os_internal_subfiles
-	db "bin/",0,f_subdir+f_system
-	dw 0, 0
-	db ">",0,f_readonly+f_system+f_subfile
-	dw writeinto_exe-$, writeinto_exe.len
-	db ">>",0,f_readonly+f_system+f_subfile
-	dw appendinto_exe-$, appendinto_exe.len
-	db "boot",0,f_readonly+f_system+f_subfile
-	dw boot_exe-$, boot_exe.len
-	db "cat",0,f_readonly+f_system+f_subfile
-	dw cat_exe-$, cat_exe.len
-	db "cd",0,f_readonly+f_system+f_subfile
-	dw cd_exe-$, cd_exe.len
-	db "cmd",0,f_readonly+f_system+f_subfile
-	dw cmd_exe-$, cmd_exe.len
-	db "cls",0,f_readonly+f_system+f_subfile
-	dw cls_exe-$, cls_exe.len
-	db "cp",0,f_readonly+f_system+f_subfile
-	dw cp_exe-$, cp_exe.len
-	db "df",0,f_readonly+f_system+f_subfile
-	dw df_exe-$, df_exe.len
-	db "ls",0,f_readonly+f_system+f_subfile
-	dw ls_exe-$, ls_exe.len
-	db "info",0,f_readonly+f_system+f_subfile
-	dw info_exe-$, info_exe.len
-	db "rm",0,f_readonly+f_system+f_subfile
-	dw rm_exe-$, rm_exe.len
-	db "mkdir",0,f_readonly+f_system+f_subfile
-	dw mkdir_exe-$, mkdir_exe.len
-	db "mkfile",0,f_readonly+f_system+f_subfile
-	dw mkfile_exe-$, mkfile_exe.len
-	db "off",0,f_readonly+f_system+f_subfile
-	dw off_exe-$, off_exe.len
-	db "sleep",0,f_readonly+f_system+f_subfile
-	dw sleep_exe-$, sleep_exe.len
-	db "osrt.so",0,f_readonly+f_system+f_subfile
-	dw osrt_so-$, osrt_so.len
-	db "peek",0,f_readonly+f_system+f_subfile
-	dw peek_exe-$, peek_exe.len
-	db "poke",0,f_readonly+f_system+f_subfile
-	dw poke_exe-$, poke_exe.len
-	db $FF
 	fs_subfile writeinto_exe, bin_dir
 		include 'fs/bin/writeinto.asm'
 	end fs_subfile
@@ -274,6 +234,7 @@ fs_dir lib_dir
 	fs_entry fontlibc_lll, "FONTLIBC","dll", f_readonly+f_system
 	fs_entry graphx_lll, "GRAPHX","dll", f_readonly+f_system
 	fs_entry keypadc_lll, "KEYPADC", "dll", f_readonly+f_system
+	fs_entry msddrvce_lll, "MSDDRVCE", "dll", f_readonly+f_system
 	fs_entry srldrvce_lll, "SRLDRVCE","dll", f_readonly+f_system
 	fs_entry usbdrvce_lll, "USBDRVCE","dll", f_readonly+f_system
 	fs_entry libload_lll, "LibLoad", "dll", f_readonly+f_system
@@ -380,6 +341,10 @@ end fs_file
 
 fs_file keypadc_lll
 	file '../obj/keypadc.bin'
+end fs_file
+
+fs_file msddrvce_lll
+	file '../obj/msddrvce.bin'
 end fs_file
 
 fs_file srldrvce_lll
@@ -496,6 +461,10 @@ end fs_file
 
 fs_file etc_fontlibc_drmono
 	file 'fs/etc/fontlibc/DrMono.dat'
+end fs_file
+
+fs_file msd_exe
+	file 'fs/bin/msd/bosbin/MSD.bin'
 end fs_file
 
 end fs_fs

@@ -327,11 +327,8 @@ end struct
 ;-------------------------------------------------------------------------------
 ; memory locations
 ;-------------------------------------------------------------------------------
-; virtual at (ti.saveSScreen+$FFFF) and not $FFFF
-	; cHeap			dbx (ti.saveSScreen+21945) and not $FF - $: ?
-; end virtual
-virtual at $D10000
-	cHeap			dbx $D13F00 - $: ?
+virtual at (ti.saveSScreen+$FFFF) and not $FFFF
+	cHeap			dbx (ti.saveSScreen+21945) and not $FF - $: ?
 end virtual
 virtual at ti.usbArea
 				rb (-$) and 7
@@ -2204,7 +2201,8 @@ _PowerVbusForRole:
 	pop	de,hl
 	set	ti.bUsbABusDrop,(hl)
 	res	ti.bUsbABusReq,(hl)
-	jq	bos._UsbUnpowerVbus
+	jp	bos._UsbUnpowerVbus
+
 
 ;-------------------------------------------------------------------------------
 _DefaultHandler:
