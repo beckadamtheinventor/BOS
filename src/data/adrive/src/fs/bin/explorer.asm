@@ -558,6 +558,8 @@ explorer_load_config:
 	jq z,.nextline
 .check:
 	push hl,bc
+	ld bc,.next ; push this so we can conditionally "return" to .next instead of using many conditional jumps
+	push bc
 	ld bc,(hl)
 	ld (ix-3),bc
 	inc hl
@@ -566,13 +568,55 @@ explorer_load_config:
 	ld a,(hl)
 	inc hl
 	cp a,'='
-	jq nz,.next ;fail if invalid statement
+	ret nz ;fail if invalid statement
 	ld a,(hl)
 	inc hl
 	cp a,'x'
 	jq z,.hexbytearg
 	cp a,'"'
-	jq nz,.next
+	jq z,.stringargument
+	ld d,'0'
+	sub a,d
+	ret c
+	cp a,10
+	ret nc
+; decimal number argument
+	ld e,a
+; check next two digits are valid
+	ld a,(hl)
+	inc hl
+	sub a,d
+	cp a,10
+	ret nc
+	ld a,(hl)
+	sub a,d
+	cp a,10
+	ret nc
+	dec hl
+
+	ld a,e
+	sub a,d
+	add a,a ; x2
+	ld e,a
+	add a,a ; x4
+	add a,a ; x8
+	add a,e ; x8 + x2 = x10
+	add a,(hl) ; add next character offset from '0'
+	sub a,d
+	add a,a ; x2
+	ld e,a
+	add a,a ; x4
+	add a,a ; x8
+	add a,e ; x8 + x2 = x10
+	add a,(hl) ; add next character offset from '0'
+	sub a,d
+	add a,a ; x2
+	ld e,a
+	add a,a ; x4
+	add a,a ; x8
+	add a,e ; x8 + x2 = x10
+	jq .setnumvalue
+.stringargument:
 	pop bc
 	push bc
 	ld (ix-6),hl
@@ -595,7 +639,7 @@ explorer_load_config:
 	call bos.sys_Malloc
 	ex hl,de
 	pop bc,hl
-	jq c,.next ;go to next line if failed to malloc
+	ret c ;go to next line if failed to malloc
 	dec bc
 	ld (ix-6),de
 	ldir
@@ -606,16 +650,20 @@ explorer_load_config:
 	or a,a
 	sbc hl,bc
 	jq z,.setcurdir
+	db $21,"IMG"
+	or a,a
+	sbc hl,bc
+	jq z,.setbackgroundimage
 	db $21,"FNT"
 	or a,a
 	sbc hl,bc
-	jq nz,.next
+	ret nz
 .setfont:
 	ld hl,(ix-6)
 	push hl
 	call bos.fs_GetFilePtr
 	pop de
-	jq c,.next
+	ret c
 	ld bc,(hl)
 	inc hl
 	inc hl
@@ -624,7 +672,7 @@ explorer_load_config:
 	db $21,"FNT"
 	or a,a
 	sbc hl,bc
-	jq nz,.next
+	ret nz
 	push de
 	call bos.gfx_SetFont
 	ld hl,(bos.font_spacing)
@@ -634,31 +682,30 @@ explorer_load_config:
 	ex (sp),hl
 	call gfx_SetFontData
 	pop bc
-	jq .next
+	ret
 .setcurdir:
 	ld (current_working_dir),de
-	jq .next
+	ret
 .hexbytearg:
-	push bc
 	ld a,(hl)
 	inc hl
 	call .nibble
 	inc a
-	jq z,.next_extrapop ;if a=0xff then we encountered an invalid hex character, so we should probably skip this line
+	ret z ;if a=0xff then we encountered an invalid hex character, so we should probably skip this line
 	dec a
 	add a,a
 	add a,a
 	add a,a
 	add a,a
-	ld c,a
+	ld e,a
 	ld a,(hl)
 	inc hl
 	call .nibble
 	inc a
-	jq z,.next_extrapop ;if a=0xff then we encountered an invalid hex character, so we should probably skip this line
+	ret z ;if a=0xff then we encountered an invalid hex character, so we should probably skip this line
 	dec a
-	add a,c
-	pop bc
+	add a,e
+.setnumvalue:
 	db $21, "BGC"
 	or a,a
 	sbc hl,bc
@@ -674,10 +721,9 @@ explorer_load_config:
 	db $21, "FG2"
 	or a,a
 	sbc hl,bc
-	jq z,.setfg2color
-	db $3E
-.next_extrapop:
-	pop bc
+	ret nz
+	ld (explorer_foreground2_color),a
+	ret
 .next:
 	pop bc,hl
 .nextline:
@@ -691,19 +737,86 @@ explorer_load_config:
 
 .setbgcolor:
 	ld (explorer_background_color),a
-	jq .next
+	ret
 
 .setfgcolor:
 	ld (explorer_foreground_color),a
-	jq .next
+	ret
 
 .setstatusbarcolor:
 	ld (explorer_statusbar_color),a
-	jq .next
+	ret
 
-.setfg2color:
-	ld (explorer_foreground2_color),a
-	jq .next
+.setbackgroundimage:
+	ld hl,(ix-6)
+	push hl
+	call bos.fs_GetFilePtr
+	pop de
+	ret c
+	ld bc,(hl)
+	inc hl
+	inc hl
+	inc hl
+	ex hl,de
+	db $21,"IMG"
+	or a,a
+	sbc hl,bc
+	jq z,.setbackgroundimg
+	db $21,"SPT"
+	sbc hl,bc
+	ret nz ; return if unsupported image format
+	ex hl,de
+	ld a,(hl)
+	inc hl
+	or a,a
+	jq z,.setimagesprite ; non-compressed image
+; compressed image
+	cp a,'7'
+	ret nz ; return if unsupported image format
+; decompress into the back buffer so we can scale into safeRAM
+	ld de,ti.vRam + ti.lcdHeight*ti.lcdWidth
+	push de,hl,de
+	call bos.util_Zx7Decompress
+	pop bc,bc,hl
+	jq .setimagesprite
+.setbackgroundimagespt:
+	ex hl,de
+.setimagesprite:
+	ld b,(hl)
+	inc hl
+	ld a,(hl)
+	dec hl
+	ex hl,de
+	ld hl,bos.safeRAM
+	push hl,de
+	ld (explorer_background_image_sprite),hl
+	ld d,255
+	ld e,b
+	ld (hl),d
+	inc hl
+	ex hl,de
+	mlt hl
+	ld bc,0
+	ld c,a
+	call ti._idivu
+	ex hl,de
+	ld (hl),e
+	call gfx_ScaleSprite
+	pop bc,bc
+	ret
+.setbackgroundimg:
+	ld a,(de)
+	cp a,'7'
+	ret nz ; dont load if the image is not compressed
+	ex hl,de
+	ld de,bos.safeRAM
+	ld (explorer_background_image_full),de
+	ldi
+	push hl,de
+	call bos.util_Zx7Decompress
+	pop bc,bc
+	ret
+
 
 .nibble:
 	sub a,'0'
@@ -720,6 +833,7 @@ explorer_load_config:
 .invalid:
 	sbc a,a
 	ret
+
 
 explorer_cursor_rightoverflow:
 	xor a,a
@@ -781,18 +895,43 @@ draw_background:
 	ld l,$08
 explorer_background_color:=$-1
 	ex (sp),hl
-	call gfx_FillScreen
 	call gfx_SetTextTransparentColor
 	call gfx_SetTextBGColor
 	ld l,$FF
 explorer_foreground_color:=$-1
-	ex (sp),hl
+	push hl
 	call gfx_SetTextFGColor
-
+	pop hl,bc
+	ld hl,$FF0000
+explorer_background_image_full:=$-3
+	ld a,(hl)
+	or a,a
+	jq z,.dont_draw_background_image
+	inc hl
+	ld de,ti.vRam + ti.lcdWidth*ti.lcdHeight + ti.lcdWidth*20
+	ld bc,ti.lcdWidth*200
+	ldir
+	jq .dont_draw_background_image_sprite
+.dont_draw_background_image:
+	push bc
+	call gfx_FillScreen
+	pop bc
+	ld hl,$FF0000
+explorer_background_image_sprite:=$-3
+	ld a,(hl)
+	or a,a
+	jq z,.dont_draw_background_image_sprite
+	ld bc,20
+	push bc
+	ld c,32
+	push bc,hl
+	call gfx_TransparentSprite
+	pop bc,bc
+.dont_draw_background_image_sprite:
 ;draw status bar
 	ld l,$11
 explorer_statusbar_color:=$-1
-	ex (sp),hl
+	push hl
 	call gfx_SetColor
 	ld hl,statusbar_height
 	ex (sp),hl
@@ -1448,8 +1587,11 @@ str_memeditexe:
 str_ceditexe:
 	db "cedit",0
 str_MissingIconFile:
-	db "/etc/explorer/missing.ico",0
+	db "/etc/explorer/missing.ico"
+explorer_background_image_sprite_default:
+	db 0
 ; explorer_extensions_dir:
 	; db "/opt/explorer/",0
 explorer_dirlist_buffer:
 	dl display_items_num_x * display_items_num_y dup 0
+
