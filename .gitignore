@@ -20,5 +20,4 @@
 /src/data/fs_updates.asm
 /src/data/main.asm
 /src/data/updates.asm
-/tests/*/bin
-/tests/*/obj
+/tests
