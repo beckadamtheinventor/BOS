@@ -153,3 +153,5 @@
 	jp fs_JoinPath
 	jp sys_MallocPersistent
 	jp sys_OpenFileInVar
+	jp fs_BaseName
+	jp fs_MoveFile

@@ -63,21 +63,22 @@ top_of_UserMem         := $D0028C ;3 bytes
 SaveSP                 := $D0028F ;3 bytes, saves SP when running programs.
 current_thread         := $D00292 ;1 byte, currently running thread ID
 threading_enabled      := $D00293 ;1 byte, determines if software threading is enabled and whether it should be used in OS routines
-gfx_string_temp        := $D00294 ;12 bytes, temp location for integer printing
+copy_buffer            := $D00294 ;3 bytes, points to first copy buffer entry, or -1 if nothing is stored.
 
 ; OP registers for compatibility routines and misc. scrap space for OS functions
 fsOP1                  := $D002A0
 fsOP2                  := $D002B0
 fsOP3                  := $D002C0
+gfx_string_temp        := $D002D0 ;16 bytes, temp location for integer printing
 fsOP4                  := $D002D0
 fsOP5                  := $D002E0
 fsOP6                  := $D002F0
 thread_parents         := $D00300 ;256 bytes, one per thread. Saves ID of thread that spawned a given thread. A thread will only be run if it's parent thread is awake
 InputBuffer            := $D00400
-current_working_dir    := $D00500
-op_stack_bot           := $D00600
-op_stack_top           := $D00700 ;256 bytes downward
-thread_map             := $D00800 ; thread map. 256 threads. Active threads have bit 7 set.
+current_working_dir    := $D00600
+op_stack_bot           := $D00700
+op_stack_top           := $D00800 ;256 bytes downward
+thread_map             := $D00900 ; thread map. 256 threads. Active threads have bit 7 set.
 
 safeRAM                := $D00C00 ; 62464 bytes scrap RAM
 safeRAM_len            := 62464

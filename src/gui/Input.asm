@@ -18,6 +18,7 @@ gui_Input:
 	pop de
 	inc de
 	ld bc,(ix+9)
+	dec bc
 	ldir
 .enter_no_clear_buffer:
 	ld a,(currow)

@@ -132,7 +132,9 @@ explorer_main:
 
 ;draw taskbar
 	ld hl,taskbar_item_strings
+	push hl
 	call draw_taskbar
+	pop bc
 
 	; ld a,(battery_status)
 	; ld l,$07
@@ -197,14 +199,14 @@ explorer_cursor_x:=$-3
 	jq z,explorer_main
 	cp a,ti.skWindow - 4
 	jq z,.controlkey
+	cp a,ti.skAlpha - 4
+	jq z,.controlkey
 	cp a,ti.skZoom - 4
 	jq z,.quickmenu
 	cp a,ti.skTrace - 4
 	jq z,.optionsmenu
 	cp a,ti.skGraph - 4
 	jq z,open_terminal
-	cp a,ti.skAlpha - 4
-	jq z,.filemenu
 	cp a,ti.skEnter - 4
 	jq z,.click
 	cp a,ti.sk2nd - 4
@@ -253,20 +255,17 @@ explorer_max_selection:=$-3
 	pop bc,bc
 	jq explorer_dirlist
 .open_file:
-	ld de,(iy+bos.fsentry_filelen)
-	ex.s hl,de
-	ld (.open_file_len),hl
-	call bos.fs_GetFDPtr
-	pop bc,bc
+	ld hl,(explorer_dirname_buffer)
+	push hl
+	call bos.fs_GetFilePtr
+	pop de
 	ld a,0
 .force_editing_file:=$-1
 	or a,a
 	jq nz,.edit_file
-	ld bc,0
-.open_file_len:=$-3
 	ld a,c
 	or a,b
-	jq z,.edit_file
+	jq z,.edit_file_run_cedit
 	ld a,(hl)
 	inc hl
 	cp a,$18 ;jr
@@ -284,23 +283,19 @@ explorer_max_selection:=$-3
 	push hl
 	call bos.fs_GetFilePtr
 	pop de
-	ld de,$5F16
-	dec b
-	ld b,c
-	jq c,.edit_file_under_256
-	ld b,0
-.edit_file_under_256:
-	ld c,$09
-.checkfileloop: ; check whether the first 256 bytes in the file are text characters
+	jq .checkfileloop_entry
+.checkfileloop: ; check whether the file contains only text characters (range 0x01 to 0x7F)
 	ld a,(hl)
-	sub a,c
-	cp a,2
-	jq c,.checkfileloop_nextbyte
-	sub a,e
-	cp a,d
-	jq nc,.edit_file_run_memedit
+	or a,a
+	jq z,.edit_file_run_memedit
+	add a,a
+	jq c,.edit_file_run_memedit
 .checkfileloop_nextbyte:
-	djnz .checkfileloop
+	dec bc
+.checkfileloop_entry:
+	ld a,c
+	or a,b
+	jq nz,.checkfileloop
 .edit_file_run_cedit:
 	ld hl,str_ceditexe
 	jq .edit_file_run_hl
@@ -309,6 +304,14 @@ explorer_max_selection:=$-3
 .edit_file_run_hl:
 	ld de,$FF0000
 explorer_dirname_buffer:=$-3
+	ld a,(de)
+	or a,a
+	jq z,explorer_call_file
+	push hl,de
+	ld hl,bos.reservedRAM
+	push hl
+	call ti._strcpy
+	pop bc,de,hl
 	jq explorer_call_file
 .skip3:
 	inc hl
@@ -330,46 +333,48 @@ explorer_dirname_buffer:=$-3
 	db 'CRX' ;Compressed Ram Executable
 	or a,a
 	sbc hl,de
-	jq nz,.edit_file ;if it's neither a Flash Executable nor a Ram Executable, open it in memedit
+	jq z,.exec_file
+	db $21 ;ld hl,...
+	db 'TRX' ;Threaded Ram Executable
+	or a,a
+	sbc hl,de
+	jq z,.exec_file
+	db $21 ;ld hl,...
+	db 'TFX' ;Threaded Flash Executable
+	or a,a
+	sbc hl,de
+	jq nz,.edit_file ;if it's neither a Flash Executable nor a Ram Executable, edit it
 .exec_file:
 	ld hl,(explorer_dirname_buffer)
 	jq explorer_call_file_noargs
 .controlkey:
 	; - TODO -
 	jq explorer_main
-.filemenu:
-	jq explorer_main
 .quickmenu:
-;draw background
-	call draw_background
-;draw quick menu taskbar strings
 	ld hl,quickmenu_item_strings
-	call draw_taskbar
-	call gfx_BlitBuffer
-	call bos.sys_WaitKeyCycle
-	cp a,ti.skYequ
-	jq z,explorer_create_new_file
-	cp a,ti.skWindow
-	jq z,explorer_copy_file
-	cp a,ti.skZoom
-	jq z,explorer_cut_file
-	cp a,ti.skTrace
-	jq z,explorer_paste_file
-	cp a,ti.skGraph
-	jq nz,explorer_main
-	ld (.force_editing_file),a
-	jq .open_file_entry
+	jq .drawmenu
 .optionsmenu:
-;draw background
-	call draw_background
-;draw options menu taskbar strings
 	ld hl,options_item_strings
+.drawmenu:
+	push hl
+	call draw_background
 	call draw_taskbar
 	call gfx_BlitBuffer
 	call bos.sys_WaitKeyCycle
-	cp a,53
-	jq z,run_power_app
-	jq explorer_main
+	pop bc
+	sub a,ti.skYequ
+	cp a,5
+	jq nc,explorer_main
+	ld bc,explorer_dirlist
+	push bc
+	add a,a
+	add a,a
+	add a,3
+	ld bc,0
+	ld c,a
+	add hl,bc
+	jp (hl)
+
 .path_into:
 	ld hl,-9
 	call ti._frameset
@@ -514,6 +519,12 @@ explorer_call_file:
 	ld sp,(_SaveSP)
 	ld ix,(_SaveIX)
 	push de,hl
+	; ld hl,(current_working_dir)
+	; ld de,bos.current_working_dir
+	; ld bc,255
+	; ldir
+	; xor a,a
+	; ld (de),a
 	call bos.gfx_SetDefaultFont
 	pop hl,de
 	ld bc,str_ExplorerExecutable
@@ -1226,8 +1237,11 @@ _dotdot_icon:
 
 
 draw_taskbar:
-	push hl
-	ex (sp),ix
+	push ix
+	ld hl,6
+	add hl,sp
+	ld hl,(hl)
+	ld ix,(hl)
 	ld hl,taskbar_height
 	push hl
 	ld hl,320
@@ -1304,25 +1318,117 @@ explorer_display_bc_chars:
 	jq .loop
 
 explorer_create_new_file:
-	
-	jq explorer_main
-
-explorer_copy_file:
-	
-	jq explorer_main
+	ld hl,$FF0000
+	ld de,str_NewFileNamePrompt
+	call explorer_input_file_name
+	ld bc,0
+	push bc,bc,hl
+	call bos.fs_CreateFile
+	pop bc,bc,bc
+	ret
 
 explorer_cut_file:
-	
-	jq explorer_main
+	db $3E
+explorer_copy_file:
+	xor a,a
+	ld (explorer_cut_file_indicator),a
+	ld hl,(explorer_dirname_buffer)
+	push hl
+	call ti._strlen
+	inc hl
+	push hl
+	call bos.sys_Malloc
+	ex hl,de
+	pop bc,hl
+	ret c
+	ld (bos.copy_buffer),de
+	ldir
+	ret
 
 explorer_paste_file:
-	
-	jq explorer_main
+	ld hl,(bos.copy_buffer)
+	add hl,bc
+	xor a,a
+	sbc hl,bc
+	ret z
+	or a,(hl)
+	ret z
 
+	push hl
+	call bos.fs_BaseName
+	push hl
+	ld de,str_DestinationFilePrompt
+	call explorer_input_file_name
+	or a,a
+	jq z,.cancel
+	ex (sp),hl
+	ld hl,(explorer_dirname_buffer)
+	push hl
+	call bos.fs_ParentDir
+	ex (sp),hl
+	call bos.fs_JoinPath ; join(dirname(dest), basename(src))
+	ld (.destfile),hl
+	call bos.sys_Free ; free memory allocated by parentdir
+	pop bc
+	call bos.sys_Free ; free memory allocated by basename
+	pop bc,bc
 
+	ld hl,0
+.destfile:=$-3
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	ret z ; return if failed to get destination file name
+	ld a,0
+explorer_cut_file_indicator:=$-1
+	or a,a
+	jq z,.copy
+	push hl,bc
+	call bos.fs_MoveFile
+	scf
+	sbc hl,hl
+	ld (bos.copy_buffer),hl
+.cancel:
+	pop bc,bc
+	ret
+.copy:
+	push hl,bc
+	call bos.fs_GetFilePtr ; returns bc=len, hl=ptr, a=attr
+	pop de,de
+	push bc,hl
+	ld c,a
+	push bc,de
+	call bos.fs_WriteNewFile ; copy file in copy buffer to the current working directory
+	pop bc,bc,bc,bc
+	ret
 
+explorer_input_file_name:
+	xor a,a
+	ld b,a
+	mlt bc
+	ld (bos.curcol),a
+	ld a,23
+	ld (bos.currow),a
+	push de
+	ld de,explorer_temp_name_input_buffer
+	ld c,14
+	ldir
+	pop hl
+	call bos.gui_PrintString
+	ld hl,explorer_temp_name_input_buffer
+	ld bc,14
+	push bc,hl
+.paste_wait_input:
+	call bos.gui_InputNoClear
+	cp a,2
+	jq nc,.paste_wait_input
+	pop hl,bc
+	ret
 
+explorer_temp_name_input_buffer:
+	db 14 dup 0
 
+; --------------------------------------------------------------
 
 load_libload:
 	ld hl,libload_name
@@ -1470,7 +1576,7 @@ gfx_BlitBuffer:
 
 run_power_app:
 	ld hl,str_OffExecutable
-	jq explorer_call_file
+	jq explorer_call_file_noargs
 
 ; run_updater_program:
 	; ld bc,1
@@ -1512,6 +1618,8 @@ run_power_app:
 	; jq explorer_call_file
 
 taskbar_item_strings:
+	dl .strings
+.strings:
 	dl .l1, .l2, .l3, .l4, .l5
 .l1:
 	db "recovery",0
@@ -1525,20 +1633,28 @@ taskbar_item_strings:
 	db "cmd",0
 
 options_item_strings:
-dl .l1, .l2, .l3, .l4, .l5
+	dl .strings
+	jp run_power_app
+	db 16 dup $C9
+.strings:
+	dl .l1, .l2, .l3, .l4, .l5
 .l1:
-	db "power",0
+	db "power"
 .l2:
-	db 0
 .l3:
-	db 0
 .l4:
-	db 0
 .l5:
 	db 0
 
 quickmenu_item_strings:
-dl .l1, .l2, .l3, .l4, .l5
+	dl .strings
+	jp explorer_create_new_file
+	jp explorer_copy_file
+	jp explorer_cut_file
+	jp explorer_paste_file
+	jp explorer_main.edit_file
+.strings:
+	dl .l1, .l2, .l3, .l4, .l5
 .l1:
 	db "new",0
 .l2:
@@ -1560,20 +1676,22 @@ dl .l1, .l2, .l3, .l4, .l5
 	; db "Input path to binary on usb to execute.",$A,0
 str_PressEnterConfirm:
 	db "Press enter to confirm.",0
+str_DestinationFilePrompt:
+	db "New name? ",0
+str_NewFileNamePrompt:
+	db "File name? ",0
 ; str_UsbRecvExecutable:
 	; db "/bin/usbrecv",0
 str_OffExecutable:
-	db "/bin/off",0
+	db "off",0
 ; str_UsbRunExecutable:
 	; db "/bin/usbrun",0
 ; str_UpdaterExecutable:
 	; db "/bin/updater",0
 str_CmdExecutable:
-	db "/bin/cmd",0
-str_FilesExecutable:
-	db "/bin/files",0
+	db "cmd",0
 str_ExplorerExecutable:
-	db "/bin/explorer",0
+	db "explorer",0
 explorer_config_file:
 	db "/etc/config/explorer/explorer.cfg",0
 explorer_preload_cmd:
