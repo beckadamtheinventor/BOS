@@ -47,4 +47,4 @@ if __name__=='__main__':
 		if not os.path.exists("backgrounds"):
 			os.mkdir("backgrounds")
 		for arg in sys.argv[1:]:
-			convert(arg, os.path.join("backgrounds", os.path.basename(arg).rsplit(".",maxsplit=1)[1]+".bin")
+			convert(arg, os.path.join("backgrounds", os.path.basename(arg).rsplit(".",maxsplit=1)[0]+".bin"))
