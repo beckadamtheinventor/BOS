@@ -63,32 +63,32 @@ top_of_UserMem         := $D0028C ;3 bytes
 SaveSP                 := $D0028F ;3 bytes, saves SP when running programs.
 current_thread         := $D00292 ;1 byte, currently running thread ID
 threading_enabled      := $D00293 ;1 byte, determines if software threading is enabled and whether it should be used in OS routines
+gfx_string_temp        := $D00294 ;12 bytes, temp location for integer printing
+
+; OP registers for compatibility routines and misc. scrap space for OS functions
+fsOP1                  := $D002A0
+fsOP2                  := $D002B0
+fsOP3                  := $D002C0
+fsOP4                  := $D002D0
+fsOP5                  := $D002E0
+fsOP6                  := $D002F0
 thread_parents         := $D00300 ;256 bytes, one per thread. Saves ID of thread that spawned a given thread. A thread will only be run if it's parent thread is awake
-
 InputBuffer            := $D00400
-gfx_string_temp        := $D00500
-current_working_dir    := $D00510
+current_working_dir    := $D00500
 op_stack_bot           := $D00600
-op_stack_top           := $D00800 ;512 bytes downward
+op_stack_top           := $D00700 ;256 bytes downward
+thread_map             := $D00800 ; thread map. 256 threads. Active threads have bit 7 set.
 
-fsOP1                  := $D01000
-fsOP2                  := $D01010
-fsOP3                  := $D01020
-fsOP4                  := $D01030
-fsOP5                  := $D01040
-fsOP6                  := $D01050
-usb_sector_buffer      := $D01100 ;512 bytes
-usbRAM                 := $D01300 ;256 bytes, should not be tampered with while /dev/mnt or /dev/usb are active
-thread_map             := $D01400 ; thread map. 256 threads. Active threads have bit 7 set.
-malloc_cache           := $D01500 ;4096 bytes
-thread_temp_save       := $D02500 ; temporary save location for registers when a thread switch is triggered. 16 bytes per thread, 256 threads = 4096 bytes.
-safeRAM                := $D03500 ; 68312 bytes scrap RAM
-safeRAM_len            := 68312
+safeRAM                := $D00C00 ; 62464 bytes scrap RAM
+safeRAM_len            := 62464
 usbArea                := $D13FD8 ; 14306 bytes used for usb, probably need to disable timer3/usb interrupts to use
 usbHandleKeys          := $D14091 ; zero this byte while using usbArea to keep GetCSC from affecting other parts of usbArea
 usbInited              := $D177B7 ; zero this byte while using usbArea and to reset the usb stack when interrupts are re-enabled
 reservedRAM            := $D177BA
 bos_UserMem            := $D1A881
+libload_top_ptr        := $D2F000
+thread_temp_save       := $D2F000 ; temporary save location for registers when a thread switch is triggered. 16 bytes per thread, 256 threads = 4096 bytes.
+malloc_cache           := $D2F800 ;4096 bytes
 bottom_of_malloc_RAM   := $D30000
 top_of_RAM             := $D40000
 

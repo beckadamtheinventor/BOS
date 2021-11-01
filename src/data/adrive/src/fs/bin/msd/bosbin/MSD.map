@@ -12,15 +12,15 @@ Section     Base   Top    High   Length
 .ctors      000000 000000             0h
 .dtors      000000 000000             0h
 .fini_array 000000 000000             0h
-.bss        D03500 D03D64 D13FD6    864h
+.bss        D00C00 D01464 D10000    864h
 .header     D1A87F D1A882             3h
 
 Label                          Value
 ----------------------------   ------
-___low_bss                   = D03500
+___low_bss                   = D00C00
 ___len_bss                   = 000864
-___heaptop                   = D13FD6
-___heapbot                   = D03D64
+___heaptop                   = D10000
+___heapbot                   = D01464
 ___libs                      = D1A8A7
 ___init_array_count          = 000000
 ___ctors_count               = 000000
@@ -66,9 +66,9 @@ skip._abort                  = D1A973
 ___main_argc_argv            = D1A9A5
 _handleUsbEvent              = D1B160
 LJTI1_0                      = D1B225
-___main_argc_argv.partitions = D03500
-___main_argc_argv.global     = D03550
-___main_argc_argv.fat        = D03953
+___main_argc_argv.partitions = D00C00
+___main_argc_argv.global     = D00C50
+___main_argc_argv.fat        = D01053
 L_.str                       = D1B231
 L_.str.1                     = D1B26D
 L_.str.2                     = D1B27D

@@ -131,7 +131,7 @@ disable_relocations
 
 	jp	_libloadstart.destination ; jump to execution block
 
-relocate _libloadstart, $D30000 - _libloadstart.length
+relocate _libloadstart, bos.libload_top_ptr - _libloadstart.length
 	pop	hl			; hl->start of library jump table
 
 	ld	(eSP),sp		; save the stack pointer if we hit an error

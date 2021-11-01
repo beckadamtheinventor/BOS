@@ -234,8 +234,8 @@ explorer_max_selection:=$-3
 	ld bc,explorer_dirlist_buffer
 	add hl,bc ;index directory list buffer
 	push iy
-	ld iy,(hl)
-	push iy
+	ld hl,(hl)
+	push hl
 	ld hl,(explorer_dirname_buffer)
 	push hl
 	call bos.sys_Free
@@ -253,7 +253,8 @@ explorer_max_selection:=$-3
 	pop bc,bc
 	jq explorer_dirlist
 .open_file:
-	call bos.fs_GetFDLen
+	ld de,(iy+bos.fsentry_filelen)
+	ex.s hl,de
 	ld (.open_file_len),hl
 	call bos.fs_GetFDPtr
 	pop bc,bc
@@ -287,7 +288,7 @@ explorer_max_selection:=$-3
 	dec b
 	ld b,c
 	jq c,.edit_file_under_256
-	ld b,$FF
+	ld b,0
 .edit_file_under_256:
 	ld c,$09
 .checkfileloop: ; check whether the first 256 bytes in the file are text characters

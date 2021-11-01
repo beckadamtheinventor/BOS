@@ -58,7 +58,7 @@ BB0_1:
 	lea	iy, ix
 	add	iy, de
 	ld	(iy), hl
-	ld	iy, 36106
+	ld	iy, 36104
 	ld	bc, (ix - 3)
 BB0_2:
 	ld	(___main_argc_argv.global), bc
@@ -112,7 +112,7 @@ BB0_11:
 	or	a, a
 	sbc	hl, bc
 	ld	bc, 0
-	ld	iy, 36106
+	ld	iy, 36104
 	jq	z, BB0_2
 	ex	de, hl
 	add	hl, bc
@@ -358,7 +358,7 @@ BB0_26:
 	add	hl, bc
 	ld	hl, (hl)
 	ld	a, (hl)
-	cp	a, 58
+	cp	a, 42
 	jq	nz, BB0_30
 	inc	hl
 	push	hl
@@ -396,7 +396,7 @@ BB0_31:
 	add	hl, bc
 	ld	hl, (hl)
 	ld	a, (hl)
-	cp	a, 58
+	cp	a, 42
 	jq	nz, BB0_49
 	inc	hl
 	ld	bc, -669
@@ -484,7 +484,7 @@ BB0_31:
 	add	hl, bc
 	ld	hl, (hl)
 	ld	a, (hl)
-	cp	a, 58
+	cp	a, 42
 	jq	nz, BB0_47
 	ld	bc, -660
 	lea	hl, ix
@@ -625,7 +625,7 @@ BB0_49:
 	lea	hl, ix
 	add	hl, bc
 	ld	hl, (hl)
-	ld	(hl), 58
+	ld	(hl), 42
 	ld	bc, -660
 	lea	hl, ix
 	add	hl, bc
@@ -963,7 +963,7 @@ ___main_argc_argv.fat:
 	section	.rodata,"a",@progbits
 	private	L_.str
 L_.str:
-	db	"Usage: msd src dest", 10, ":/PATH is on usb, /path is in local fs.", 0
+	db	"Usage: msd src dest", 10, "*/PATH is on usb, /path is on local fs.", 0
 
 	section	.rodata,"a",@progbits
 	private	L_.str.1

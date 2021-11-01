@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
     {
         global.usb = NULL;
 
-        usberr = usb_Init(handleUsbEvent, &global, NULL, USB_DEFAULT_INIT_FLAGS);
+        usberr = usb_Init(handleUsbEvent, &global, NULL, USB_DEFAULT_INIT_FLAGS & ~(USB_USE_C_HEAP | USB_USE_OS_HEAP));
         if (usberr != USB_SUCCESS)
         {
             gui_PrintLine("usb init error.");
