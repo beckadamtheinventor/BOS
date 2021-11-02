@@ -24,18 +24,9 @@ sys_ExecuteFile:
 	or a,a
 	jq z,.fail
 	ld (fsOP6),de
-	push hl,hl
-	call fs_AbsPath
-	ld (fsOP6+3),hl
-	ex (sp),hl
-	call fs_OpenFile ;check if file is found in current working directory
+	push hl
+	call sys_OpenFileInPath ;look for the file within dirs listed in $PATH
 	pop bc
-	call c,sys_OpenFileInPath ;call if fs_OpenFile failed to find the file in dirs listed in $PATH
-	pop bc ;hl will be result of fs_OpenFile if it didn't fail, otherwise result of sys_OpenFileInPath
-	ld bc,(fsOP6+3)
-	push hl,af,bc
-	call sys_Free ;free the pointer returned by fs_AbsPath
-	pop bc,af,hl
 	jq c,.fail ;fail if both fs_OpenFile and sys_OpenFileInPath failed to locate the file
 .open_fd:
 	ld (ExecutingFileFd),hl

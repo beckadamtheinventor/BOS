@@ -223,7 +223,6 @@ end fs_dir
 fs_dir etc_config_explorer_dir
 	fs_entry etc_config_dir, "..", "", f_subdir
 	fs_entry explorer_cfg, "explorer", "cfg", 0
-	fs_entry explorer_prerun_cmd, "prerun", "cfg", 0
 end fs_dir
 
 ;"/lib/" directory
@@ -297,6 +296,7 @@ fs_dir etc_explorer_dir
 	fs_entry etc_dir, "..", "", f_subdir
 	fs_entry explorer_blconfig_exe, "blconfig", "", 0
 	fs_entry missing_icon, "missing", "ico", 0
+	fs_entry themes_dat, "themes", "dat", 0
 end fs_dir
 
 ;"/etc/plugins/explorer/serial/" directory
@@ -424,7 +424,7 @@ fs_file missing_icon
 end fs_file
 
 fs_file explorer_cfg
-	file 'fs/etc/config/explorer/explorer.cfg'
+	include 'fs/etc/config/explorer/explorer.cfg.asm'
 end fs_file
 
 fs_file path_var
@@ -437,10 +437,6 @@ end fs_file
 
 fs_file explorer_blconfig_exe
 	include 'fs/etc/explorer/blconfig.asm'
-end fs_file
-
-fs_file explorer_prerun_cmd
-	file 'fs/etc/config/explorer/prerun.cfg'
 end fs_file
 
 ; fs_file explorer_serial_exe
@@ -465,6 +461,10 @@ end fs_file
 
 fs_file msd_exe
 	file 'fs/bin/msd/bosbin/MSD.bin'
+end fs_file
+
+fs_file themes_dat
+	include 'fs/etc/explorer/themes.asm'
 end fs_file
 
 end fs_fs

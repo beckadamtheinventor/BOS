@@ -35,6 +35,7 @@ fs_AbsPath:
 	ld (ix-6),hl
 	add hl,bc
 	inc hl
+	inc hl
 	push hl
 	call sys_Malloc
 	jq c,.fail
@@ -43,6 +44,15 @@ fs_AbsPath:
 	ld hl,(ix-9)
 	ld bc,(ix-6)
 	ldir
+	dec de
+	ld a,(de)
+	inc de
+	cp a,'/'
+	jq z,.dont_put_slash
+	ld a,'/'
+	ld (de),a
+	inc de
+.dont_put_slash:
 	ld hl,(ix-12)
 	ld bc,(ix-3)
 	ldir

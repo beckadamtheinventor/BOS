@@ -128,6 +128,45 @@ current_working_dir:=$-3
 	pop bc,bc,bc,bc
 	ld (explorer_max_selection),hl
 explorer_main:
+
+; load the file descriptor and file name of the file selected by the cursor
+	ld a,(explorer_cursor_y)
+assert display_items_num_x = 4
+	add a,a ;multiply y by 4
+	add a,a
+	sbc hl,hl
+	ld l,a
+	ld a,(explorer_cursor_x)
+	add a,l ;add x
+	ld l,a
+	ld bc,0
+explorer_max_selection:=$-3
+	or a,a
+	sbc hl,bc
+	jq nc,.no_file_selected
+	add hl,bc
+	add a,a ;multiply result by 3
+	add a,l
+	ld l,a
+	ld bc,explorer_dirlist_buffer
+	add hl,bc ;index directory list buffer
+	ld hl,(hl)
+	ld (explorer_selected_file_desc),hl
+	push hl
+	ld hl,(explorer_dirname_buffer)
+	push hl
+	call bos.sys_Free
+	pop bc
+	call bos.fs_CopyFileName
+	ld (explorer_dirname_buffer),hl
+	pop bc
+	jq .draw_background
+.no_file_selected:
+	scf
+	sbc hl,hl
+	ld (explorer_dirname_buffer),hl
+	ld (explorer_selected_file_desc),hl
+.draw_background:
 	call draw_background
 
 ;draw taskbar
@@ -197,6 +236,8 @@ explorer_cursor_x:=$-3
 	jq z,_exit
 	cp a,ti.skClear - 4
 	jq z,explorer_main
+	cp a,ti.skDel - 4
+	jq z,explorer_delete_file
 	cp a,ti.skWindow - 4
 	jq z,.controlkey
 	cp a,ti.skAlpha - 4
@@ -215,44 +256,14 @@ explorer_cursor_x:=$-3
 	xor a,a
 	ld (.force_editing_file),a
 .open_file_entry:
-	ld a,(explorer_cursor_y)
-assert display_items_num_x = 4
-	add a,a ;multiply y by 4
-	add a,a
-	sbc hl,hl
-	ld l,a
-	ld a,(explorer_cursor_x)
-	add a,l ;add x
-	ld l,a
-	ld bc,0
-explorer_max_selection:=$-3
-	or a,a
-	sbc hl,bc
-	jq nc,explorer_main
-	add hl,bc
-	add a,a ;multiply result by 3
-	add a,l
-	ld l,a
-	ld bc,explorer_dirlist_buffer
-	add hl,bc ;index directory list buffer
-	push iy
-	ld hl,(hl)
-	push hl
-	ld hl,(explorer_dirname_buffer)
-	push hl
-	call bos.sys_Free
-	pop bc
-	call bos.fs_CopyFileName
-	ld (explorer_dirname_buffer),hl
 	ld a,(.force_editing_file)
 	or a,a
 	jq nz,.open_file
-	pop iy
+	ld iy,0
+explorer_selected_file_desc:=$-3
 	bit bos.fd_subdir,(iy+bos.fsentry_fileattr)
-	push iy
 	jq z,.open_file
 	call .path_into
-	pop bc,bc
 	jq explorer_dirlist
 .open_file:
 	ld hl,(explorer_dirname_buffer)
@@ -288,7 +299,7 @@ explorer_max_selection:=$-3
 	ld a,(hl)
 	or a,a
 	jq z,.edit_file_run_memedit
-	add a,a
+	adc a,a
 	jq c,.edit_file_run_memedit
 .checkfileloop_nextbyte:
 	dec bc
@@ -361,8 +372,8 @@ explorer_dirname_buffer:=$-3
 	call draw_taskbar
 	call gfx_BlitBuffer
 	call bos.sys_WaitKeyCycle
-	pop bc
-	sub a,ti.skYequ
+	pop hl
+	sub a,ti.skGraph
 	cp a,5
 	jq nc,explorer_main
 	ld bc,explorer_dirlist
@@ -376,129 +387,74 @@ explorer_dirname_buffer:=$-3
 	jp (hl)
 
 .path_into:
-	ld hl,-9
-	call ti._frameset
-	ld hl,(ix+6)
+	ld hl,(explorer_dirname_buffer)
 	ld a,(hl)
 	cp a,'.'
 	jq nz,.path_into_dir
 	inc hl
-	cp a,(hl)
-	ld a,' '
-	jq nz,.path_into_checkspace
+	ld a,(hl)
+	or a,a
+	ret z
+	dec hl
+	cp a,'.'
+	jq nz,.path_into_dir ; path into '.something' entry
 	inc hl
-	cp a,(hl)
-	jq nz,.path_into_dir ;'..something' entry, though idk why you'd do that anyways
+	inc hl
+	ld a,(hl)
+	or a,a
+	dec hl
+	dec hl
+	jq nz,.path_into_dir ;path into '..something' entry, though idk why you'd have an entry like that
 	ld hl,(current_working_dir) ;path into '..' entry
 	push hl
 	call bos.fs_ParentDir ;get parent directory of working directory
-	jq c,.path_into_return ;if failed to malloc within fs_ParentDir
-	ld (ix-9),hl
 	pop bc
+	ret c ;if failed to malloc within fs_ParentDir
 	jq .path_into_setcurdir
-.path_into_checkspace:
+.maybe_path_into_dir:
 	cp a,(hl)
-	jq z,.path_into_return ;return if pathing into '.' entry
+	ret z ;return if pathing into '.' entry
+	dec hl ; path into '.something' entry
 .path_into_dir:
-	ld bc,(ix+6)
-	push bc
 	ld hl,(explorer_dirname_buffer)
-	push hl
-	call bos.sys_Free
-	pop bc
-	call bos.fs_CopyFileName
-	ld (explorer_dirname_buffer),hl
-	ex (sp),hl
-	call ti._strlen ;get length of directory we're pathing into
-	ld (ix-3),hl
-	ex (sp),hl
-	ld hl,(current_working_dir)
-	push hl
-	call ti._strlen ;get length of current working directory
-	ld (ix-6),hl
-	pop bc,bc
-	add hl,bc
-	inc hl
-	inc hl
-	inc hl
-	push hl
-	call bos.sys_Malloc
-	ld (ix-9),hl
-	ex hl,de
-	pop bc
-	jr c,.path_into_return
-	ld hl,(current_working_dir)
-	ld bc,(ix-6)
-	ldir ;copy current working directory
-	dec de
-	ld a,(de)
-	inc de
-	ld c,'/'
-	cp a,c
-	jq z,.path_into_dontaddpathsep
-	ld a,c
-	ld (de),a
-	inc de
-.path_into_dontaddpathsep:
-	ld hl,(explorer_dirname_buffer)
-	ld bc,(ix-3)
-	ldir ;copy directory we're pathing into
-	ld a,'/'
-	ld (de),a
-	inc de
-	xor a,a
-	ld (de),a
-.path_into_setcurdir:
-	ld hl,(ix-9)
-	push hl
 	ld de,(current_working_dir)
-	push de,hl
-	call ti._strlen
+	push hl,de
+	call bos.fs_JoinPath ; join(cwd, fname)
 	ex (sp),hl
-	pop bc,de
-	inc bc
-	ldir ;copy new working directory
-	call bos.sys_Free ;free temp working directory
-	pop bc
+	push hl
+	call bos.sys_Free ; free old cwd
+	pop bc,hl,bc
+.path_into_setcurdir:
+	ld (current_working_dir),hl
 	xor a,a
 	ld (explorer_cursor_x),a
 	ld (explorer_cursor_y),a
-.path_into_return:
-	ld sp,ix
-	pop ix
+	ld de,bos.current_working_dir
+	ld bc,255
+	ldir
+	ld (de),a
 	ret
 
-explorer_join_file_name:
+explorer_delete_file:
+	ld hl,str_ConfirmDelete
+	ld bc,display_margin_bottom-9
+	ld de,display_margin_left+11
+	push bc,de,hl
+	call gfx_PrintStringXY
+	pop bc,bc,bc
+	call gfx_BlitBuffer
+	call bos.sys_WaitKeyCycle
+	cp a,ti.skEnter
+	jq nz,explorer_main
 	ld hl,(explorer_dirname_buffer)
-	push hl
-	call ti._strlen
-	ld (.tmplen),hl
-	ld hl,(current_working_dir)
+	ld de,(current_working_dir)
+	push hl,de
+	call bos.fs_JoinPath
 	ex (sp),hl
-	call ti._strlen
-	ld (.tmplen2),hl
-	pop bc
-	ld bc,0
-.tmplen:=$-3
-	add hl,bc
-	inc hl
-	push hl
-	call bos.sys_Malloc
-	pop bc
-	ret c
-	push hl
-	ex hl,de
-	ld hl,(current_working_dir)
-	ld bc,0
-.tmplen2:=$-3
-	ldir
-	ld hl,(explorer_dirname_buffer)
-	ld bc,(.tmplen)
-	ldir
-	xor a,a
-	ld (de),a
-	pop hl
-	ret
+	call bos.fs_DeleteFile
+	call bos.sys_Free ; free file path allocated by fs_JoinPath
+	pop bc,bc
+	jq explorer_dirlist
 
 _exit:
 	call bos._HomeUp
@@ -519,12 +475,6 @@ explorer_call_file:
 	ld sp,(_SaveSP)
 	ld ix,(_SaveIX)
 	push de,hl
-	; ld hl,(current_working_dir)
-	; ld de,bos.current_working_dir
-	; ld bc,255
-	; ldir
-	; xor a,a
-	; ld (de),a
 	call bos.gfx_SetDefaultFont
 	pop hl,de
 	ld bc,str_ExplorerExecutable
@@ -1013,25 +963,45 @@ explorer_display_diritems:
 	pop ix
 	ret
 .main:
+	ld bc,(.y_pos)
 	push bc
-	ld hl,(explorer_dirname_buffer)
+	ld bc,(.x_pos)
+	push bc
+	call gfx_SetTextXY
+	pop bc,bc
+	ld hl,(ix)
 	push hl
-	call bos.sys_Free
-	pop bc
 	call bos.fs_CopyFileName
-	ld (explorer_dirname_buffer),hl
-	push hl
-	call ti._strlen
-	ld a,l
-	cp a,9
-	jq c,.nameunder9chars ;if name is less than 9 characters there's no need to split the string
-	ex (sp),hl
 	pop bc
+	ld a,(hl)
+	cp a,'.'
+	jq nz,.main_draw_regular_file_name
 	push hl
-	ld a,'.'
-	cpir
-	dec hl
-	ld (hl),0
+	call gfx_PrintString
+	call bos.sys_Free
+	pop hl
+	jq .dont_draw_extension
+.main_draw_regular_file_name:
+	ld b,8
+.main_draw_file_name_loop:
+	ld a,(hl)
+	or a,a
+	jq z,.main_done_drawing_file_name
+	cp a,'.'
+	jq z,.main_done_drawing_file_name
+	ld c,a
+	inc hl
+	push hl,bc
+	call gfx_PrintChar
+	pop bc,hl
+	djnz .main_draw_file_name_loop
+.main_done_drawing_file_name:
+	push hl
+	call bos.sys_Free ; free the memory allocated by fs_CopyFileName
+	pop hl
+	ld a,(hl)
+	cp a,'.'
+	jq nz,.dont_draw_extension ; dont draw the file extension if there isn't one
 	inc hl
 	push hl
 	ld hl,(.y_pos)
@@ -1039,34 +1009,27 @@ explorer_display_diritems:
 	add hl,bc
 	push hl
 	ld hl,(.x_pos)
-	ld c,display_item_width-40
+	ld c,display_item_width-30
 	add hl,bc
 	push hl
-	call gfx_SetTextXY ;set text position a line down for extension
+	call gfx_SetTextXY
 	pop bc
-	ld l,a
+	ld l,'.'
 	ex (sp),hl
 	call gfx_PrintChar
 	pop bc
 	call gfx_PrintString
+	pop bc
+.dont_draw_extension:
 	ld hl,(.y_pos)
-	ex (sp),hl
-	ld bc,(.x_pos)
-	push bc
+	ld bc,26
+	add hl,bc
+	push hl
+	ld hl,(.x_pos)
+	push hl
 	call gfx_SetTextXY
 	pop bc,bc
-.nameunder9chars:
-	call gfx_PrintString
-	ld hl,(.y_pos)
-	ld bc,18
-	add hl,bc
-	ld bc,(.x_pos)
-	push hl,bc
-	call gfx_SetTextXY ;set text position two lines down for file flags
-	pop bc,bc
-
-	pop bc,hl
-
+	ld hl,(ix)
 	ld bc,bos.fsentry_fileattr
 	add hl,bc
 	ld a,(hl)
@@ -1573,10 +1536,222 @@ gfx_BlitBuffer:
 	; ld hl,str_FExploreExecutable
 	; jq explorer_call_file
 
-
 run_power_app:
 	ld hl,str_OffExecutable
 	jq explorer_call_file_noargs
+
+explorer_configure_theme:
+	call .main
+	ld c,1
+	push hl,bc
+	call gfx_SetDraw
+	pop bc,hl
+	ld bc,(.max_selection)
+	or a,a
+	sbc hl,bc
+	jq z,.custom
+	add hl,bc
+	
+	
+	
+	ret
+.custom:
+	call draw_background
+	call gfx_BlitBuffer
+	ld hl,.colors
+	ld a,(explorer_background_color)
+	ld (hl),a
+	ld a,(explorer_statusbar_color)
+	ld (.colors+1),a
+	ld a,(explorer_foreground_color)
+	ld (.colors+2),a
+	ld a,(explorer_foreground2_color)
+	ld (.colors+3),a
+.custom_menu:
+	push hl
+	call bos.sys_WaitKey
+	pop hl
+	cp a,ti.skUp
+	jq nz,.dontprevcolor
+	dec hl
+.dontprevcolor:
+	cp a,ti.skDown
+	jq nz,.dontnextcolor
+	inc hl
+.dontnextcolor:
+	ld c,a
+	ld a,l
+	cp a, (.colors-1) and $FF
+	jq nz,.notunder
+	ld l, (.colors+3) and $FF
+.notunder:
+	cp a, (.colors+4) and $FF
+	jq nz,.notover
+	ld l, .colors and $FF
+.notover:
+	ld a,c
+	cp a,ti.skLeft
+	jq nz,.dontdecrementcolor
+	dec (hl)
+.dontdecrementcolor:
+	cp a,ti.skRight
+	jq nz,.dontincrementcolor
+	inc (hl)
+.dontincrementcolor:
+	cp a,ti.skClear
+	jq z,.exit
+	
+	ret
+.colors:
+	db 4 dup 0
+.exit:
+	ld c,1
+	push bc
+	call gfx_SetDraw
+	pop bc
+	ret
+.main:
+	ld bc,display_items_num_x*display_items_num_y*3  ; clear out the dir listing so we don't draw it
+	ld hl,explorer_dirlist_buffer
+	ld (hl),b
+	push hl
+	pop de
+	inc de
+	ldir
+	inc bc
+	ld (.max_selection),bc
+	call draw_background
+	ld hl,explorer_themes_file
+	push hl
+	call bos.fs_GetFilePtr
+	pop de
+	ld (.smc_themes_ptr),hl
+	ld (.smc_themes_len),bc
+	ld a,c
+	or a,b
+	jq z,.done_displaying_themes
+	ld de,display_margin_top
+	ld (.smc_y),de
+.display_themes_loop:
+	push bc,hl
+	ex hl,de
+	ld hl,0
+.smc_y:=$-3
+	push hl
+	ld c,9
+	add hl,bc
+	ld (.smc_y),hl
+	ld hl,0
+.max_selection:=$-3
+	inc hl
+	ld (.max_selection),hl
+	ld bc,display_margin_left+11
+	push bc,de
+	call gfx_PrintStringXY
+	pop bc,bc,bc,hl,bc
+.nextline:
+	xor a,a
+	cpir
+	jp po,.done_displaying_themes
+	ld a,4
+.display_theme_loop_skip_4b_loop:
+	cpi
+	jp po,.done_displaying_themes
+	dec a
+	jq nz,.display_theme_loop_skip_4b_loop
+	jq .display_themes_loop
+.done_displaying_themes:
+	ld hl,(.smc_y)
+	ld de,display_margin_left+11
+	ld bc,str_CustomTheme
+	push hl,de,bc
+	call gfx_PrintStringXY
+	pop bc,bc,bc
+	or a,a
+	sbc hl,hl
+	ld (.smc_selection),hl
+	push hl
+	call gfx_SetDraw
+	pop hl
+.menu_loop:
+	call gfx_BlitBuffer
+	ld bc,(explorer_foreground2_color)
+	push bc
+	call gfx_SetColor
+	pop bc
+	ld bc,7
+	push bc,bc
+	ld hl,0
+.smc_selection:=$-3
+	push hl
+	pop de
+	add hl,hl
+	add hl,hl
+	add hl,hl
+	add hl,de
+	ld de,display_margin_top
+	add hl,de
+	push hl
+	ld e,display_margin_left
+	push de
+	call gfx_FillRectangle
+	pop bc,bc,bc,bc
+.input_loop:
+	call bos.sys_WaitKeyCycle
+	cp a,ti.skClear
+	ret z
+	cp a,ti.skEnter
+	jq z,.select
+	cp a,ti.skUp
+	jq z,.cursor_up
+	cp a,ti.skDown
+	jq z,.cursor_down
+	cp a,ti.sk2nd
+	jq nz,.input_loop
+.select:
+	ld de,0
+.smc_themes_ptr:=$-3
+	ld bc,0
+.smc_themes_len:=$-3
+	ld hl,(.smc_selection)
+.get_theme_loop:
+	ex hl,de
+	ld a,$A
+	cpir
+	ex hl,de
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	ret z
+	ld a,4
+.next_theme_loop_skip_4b_loop:
+	cpi
+	ret po
+	dec a
+	jq nz,.next_theme_loop_skip_4b_loop
+	ret
+.cursor_down:
+	ld hl,(.smc_selection)
+	inc hl
+	ld de,(.max_selection)
+	or a,a
+	sbc hl,de
+	add hl,de
+	jq nc,.menu_loop
+	jq .set_cursor
+.cursor_up:
+	ld hl,(.smc_selection)
+	add hl,de
+	or a,a
+	sbc hl,de
+	jq z,.menu_loop
+	dec hl
+.set_cursor:
+	ld (.smc_selection),hl
+	jq .menu_loop
+
+explorer_themes_file:
+	db "/etc/explorer/themes.dat",0
 
 ; run_updater_program:
 	; ld bc,1
@@ -1634,8 +1809,9 @@ taskbar_item_strings:
 
 options_item_strings:
 	dl .strings
+	jp explorer_configure_theme
+	db 12 dup $C9
 	jp run_power_app
-	db 16 dup $C9
 .strings:
 	dl .l1, .l2, .l3, .l4, .l5
 .l1:
@@ -1643,16 +1819,17 @@ options_item_strings:
 .l2:
 .l3:
 .l4:
-.l5:
 	db 0
+.l5:
+	db "theme",0
 
 quickmenu_item_strings:
 	dl .strings
-	jp explorer_create_new_file
-	jp explorer_copy_file
-	jp explorer_cut_file
-	jp explorer_paste_file
 	jp explorer_main.edit_file
+	jp explorer_paste_file
+	jp explorer_cut_file
+	jp explorer_copy_file
+	jp explorer_create_new_file
 .strings:
 	dl .l1, .l2, .l3, .l4, .l5
 .l1:
@@ -1674,12 +1851,16 @@ quickmenu_item_strings:
 	; db "Input destination file in filesystem.",$A,0
 ; input_program_string:
 	; db "Input path to binary on usb to execute.",$A,0
+str_ConfirmDelete:
+	db "Press enter to confirm deletion.",0
 str_PressEnterConfirm:
 	db "Press enter to confirm.",0
 str_DestinationFilePrompt:
 	db "New name? ",0
 str_NewFileNamePrompt:
 	db "File name? ",0
+str_CustomTheme:
+	db "Custom Theme",0
 ; str_UsbRecvExecutable:
 	; db "/bin/usbrecv",0
 str_OffExecutable:
