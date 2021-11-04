@@ -74,8 +74,8 @@
 <tr><td><a href="#fs_InitClusterMap">bos.fs_InitClusterMap</a></td><td><a href="#fs_InitClusterMap">02022C</a></td></tr>
 <tr><td><a href="#sys_WriteFlash">bos.sys_WriteFlash</a></td><td><a href="#sys_WriteFlash">020230</a></td></tr>
 <tr><td><a href="#sys_WriteFlashA">bos.sys_WriteFlashA</a></td><td><a href="#sys_WriteFlashA">020234</a></td></tr>
-<tr><td><a href="#sys_WriteFlashFull">bos.sys_WriteFlashFull</a></td><td><a href="#sys_WriteFlashFull">020238</a></td></tr>
-<tr><td><a href="#sys_WriteFlashByteFull">bos.sys_WriteFlashByteFull</a></td><td><a href="#sys_WriteFlashByteFull">02023C</a></td></tr>
+<tr class="no_op"></tr><td><a href="#DONOTHING">bos.DONOTHING</a></td><td><a href="#DONOTHING">020238</a></td></tr>
+<tr class="no_op"></tr><td><a href="#DONOTHING">bos.DONOTHING</a></td><td><a href="#DONOTHING">02023C</a></td></tr>
 <tr><td><a href="#fs_ParentDir">bos.fs_ParentDir</a></td><td><a href="#fs_ParentDir">020240</a></td></tr>
 <tr><td><a href="#fs_StrToFileEntry">bos.fs_StrToFileEntry</a></td><td><a href="#fs_StrToFileEntry">020244</a></td></tr>
 <tr><td><a href="#fs_DirList">bos.fs_DirList</a></td><td><a href="#fs_DirList">020248</a></td></tr>
@@ -152,6 +152,8 @@
 <tr><td><a href="#fs_JoinPath">bos.fs_JoinPath</a></td><td><a href="#fs_JoinPath">020364</a></td></tr>
 <tr><td><a href="#sys_MallocPersistent">bos.sys_MallocPersistent</a></td><td><a href="#sys_MallocPersistent">020368</a></td></tr>
 <tr><td><a href="#sys_OpenFileInVar">bos.sys_OpenFileInVar</a></td><td><a href="#sys_OpenFileInVar">02036C</a></td></tr>
+<tr><td><a href="#fs_BaseName">bos.fs_BaseName</a></td><td><a href="#fs_BaseName">020370</a></td></tr>
+<tr><td><a href="#fs_MoveFile">bos.fs_MoveFile</a></td><td><a href="#fs_MoveFile">020374</a></td></tr>
 </table><div id="boot_os"><h1>boot_os</h1>	<h3>syscall Adress 020108</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
@@ -372,7 +374,7 @@ calls boot routine $2DC</td></tr>
 </table></div><div id="fs_CreateFile"><h1>fs_CreateFile</h1>	<h3>syscall Adress 0201F4</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Create a file given a path and return a file descriptor.</td><td>void *fs_CreateFile(const char *path, uint8_t flags, int len);</td><td>file descriptor. Returns 0 if failed to create file.</td><td></td><td>
-</td></tr>
+if len is zero, the file data section will not be initialized.</td></tr>
 </table></div><div id="strupper"><h1>strupper</h1>	<h3>syscall Adress 0201F8</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>convert a string to uppercase</td><td>HL pointer to string</td><td>HL HL+strlen(HL)</td><td>AF</td><td>
@@ -413,7 +415,7 @@ string stored at gfx_string_temp</td><td></td><td>
 </td></tr>
 </table></div><div id="fs_DeleteFile"><h1>fs_DeleteFile</h1>	<h3>syscall Adress 02021C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>delete a file given a file name</td><td>bool fs_DeleteFile(const char *name);</td><td>true if success, otherwise fail</td><td></td><td>
+<tr><td>delete a file given a file name</td><td>bool fs_DeleteFile(const char *name);</td><td>true/nz if success, false/zf if fail</td><td></td><td>
 </td></tr>
 </table></div><div id="_DelVar"><h1>_DelVar</h1>	<h3>syscall Adress 020220</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -433,23 +435,14 @@ Cf set if failed</td><td></td><td>
 </table></div><div id="fs_InitClusterMap"><h1>fs_InitClusterMap</h1>	<h3>syscall Adress 02022C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>initialize cluster map given data within the file system.</td><td>void fs_InitClusterMap(void);</td><td></td><td></td><td>
-uses bos.safeRAM as scrap.</td></tr>
+uses the first half of vRam as scrap.</td></tr>
 </table></div><div id="sys_WriteFlash"><h1>sys_WriteFlash</h1>	<h3>syscall Adress 020230</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>write BC bytes to flash from HL to DE.</td><td>HL, DE, BC</td><td></td><td></td><td>
+<tr><td>write BC bytes to flash from HL to DE.</td><td>HL, DE, BC</td><td>DE points to byte following written data</td><td></td><td>
 </td></tr>
 </table></div><div id="sys_WriteFlashA"><h1>sys_WriteFlashA</h1>	<h3>syscall Adress 020234</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>write a byte from A to flash at address DE</td><td>A, DE</td><td></td><td></td><td>
-</td></tr>
-</table></div><div id="sys_WriteFlashFull"><h1>sys_WriteFlashFull</h1>	<h3>syscall Adress 020238</h3>
-<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>store data to flash, surpassing flash AND logic using the swap sector.</td><td></td><td>uint8_t sys_WriteFlashFull(void *dest, void *src, int len);</td><td></td><td>
-erases swap sector, copies dest sector to swap sector excluding the data write area, writes data, erases dest sector, copies swap sector to dest sector.<br>
-source and destination cannot be within the same sector.</td></tr>
-</table></div><div id="sys_WriteFlashByteFull"><h1>sys_WriteFlashByteFull</h1>	<h3>syscall Adress 02023C</h3>
-<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Write a byte to flash, surpassing flash AND logic using the swap sector if needed.</td><td>bool sys_WriteFlashByteFull(void *dest, uint8_t byte);</td><td>true if success, false if failed</td><td></td><td>
 </td></tr>
 </table></div><div id="fs_ParentDir"><h1>fs_ParentDir</h1>	<h3>syscall Adress 020240</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -599,7 +592,7 @@ Used for categorizing malloc'd memory</td></tr>
 DO NOT free process ID 1 since it is used by the OS and should be preserved.</td></tr>
 </table></div><div id="fs_GarbageCollect"><h1>fs_GarbageCollect</h1>	<h3>syscall Adress 0202C8</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Clean up and optimize the filesystem, and reset freed areas.</td><td>None</td><td>None</td><td>All</td><td>
+<tr><td>Clean up the filesystem, resetting freed areas.</td><td>None</td><td>None</td><td>All</td><td>
 will sanity-check the filesystem if the cluster map is not found.</td></tr>
 </table></div><div id="gfx_SwapTextColors"><h1>gfx_SwapTextColors</h1>	<h3>syscall Adress 0202CC</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -740,7 +733,7 @@ $VAR must be terminated with a space " " which is not included in the output.</t
 </table></div><div id="fs_GetFreeSpace"><h1>fs_GetFreeSpace</h1>	<h3>syscall Adress 020350</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Return remaining free space in the filesystem</td><td>int fs_GetFreeSpace(void);</td><td>filesystem remaining space in bytes</td><td></td><td>
-will sanity check the filesystem if cluster map file is not found or has zero length.</td></tr>
+</td></tr>
 </table></div><div id="fs_GetFDPtr"><h1>fs_GetFDPtr</h1>	<h3>syscall Adress 020354</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Return pointer to file data given a file descriptor</td><td>void *fs_GetFDPtr(void *fd);</td><td>pointer to file data</td><td></td><td>
@@ -770,5 +763,13 @@ Cf set, hl = -1 if failed</td><td></td><td>
 </table></div><div id="sys_OpenFileInVar"><h1>sys_OpenFileInVar</h1>	<h3>syscall Adress 02036C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>open a file, looking in directories from var variable if file not found</td><td>void *sys_OpenFileInVar(const char *path, const char *var);</td><td>pointer to file descriptor</td><td></td><td>
+</td></tr>
+</table></div><div id="fs_BaseName"><h1>fs_BaseName</h1>	<h3>syscall Adress 020370</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>return the last path word of a path</td><td>char *fs_BaseName(const char *path);</td><td>last path word, or same as input if it is the only path word.</td><td></td><td>
+</td></tr>
+</table></div><div id="fs_MoveFile"><h1>fs_MoveFile</h1>	<h3>syscall Adress 020374</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Move a file given paths and return a file descriptor.</td><td>void *fs_MoveFile(const char *src, const char *dest);</td><td>file descriptor of destination file. Returns 0 if failed.</td><td></td><td>
 </td></tr>
 </table></div></body></html>
