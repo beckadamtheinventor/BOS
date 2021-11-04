@@ -2,68 +2,57 @@
 ;@INPUT int fs_Alloc(int len);
 ;@OUTPUT hl = first sector allocated
 fs_Alloc:
-	ld hl,-10
+	ld hl,-4
 	call ti._frameset
-	ld hl,(ix+6)
-	call fs_CeilDivBySector
-
-	ld a,l
+	ld bc,(ix+6)
+	ld a,b
+	and a,1
+	or a,c
+	jq z,.exact
+	inc b
+	inc b
 	or a,a
-	jq nz,.notonesector
-	inc a
-.notonesector:
+.exact:
+	ld a,b
+	rra
 	ld (ix-4),a
 
-	ld hl,fs_cluster_map_file
-	push hl
-	call fs_OpenFile
-	pop bc
-	call c,fs_SanityCheck
-
-	ld bc,$C
-	add hl,bc
-	ld hl,(hl)
-	push hl
-	call fs_GetSectorAddress
-	pop bc
-	ld (ix-10),hl
-	ld (ix-3),hl
-	ld bc,8192
-	add hl,bc
-	ld (ix-7),hl
-	ld hl,(ix-3)
-	dec hl
-.search_loop_entry:
-	ld a,$FF
-	ld de,(ix-7)
+	ld hl,fs_cluster_map
 .search_loop:
-	or a,a
-	sbc hl,de
-	jq nc,.garbage_collect ;we've hit the end of the cluster map, and we need to do a garbage collect
-	adc hl,de
-	cp a,(hl)
+	ld a,(hl)
+	inc hl
+	inc a
+	jq z,.found
+	dec bc
+	ld a,c
+	or a,b
 	jq nz,.search_loop
-
+;we've hit the end of the cluster map, and we need to do a garbage collect
+.garbage_collect:
+	call fs_GarbageCollect
+	jq .fail ;still make it a fail case for now, until garbage collect actually moves things around
 ;found an empty cluster
+.found:
 	ld (ix-3),hl
-	ld b,(ix-4)
-	dec b
-	jq z,.success
-	ld a,$FF
+	ld e,(ix-4)
 .len_loop:
-	or a,a
-	sbc hl,de
-	jq nc,.garbage_collect ;we've hit the end of the cluster map, and we need to do a garbage collect
-	adc hl,de
-	cp a,(hl)
-	jq nz,.search_loop_entry ;area not long enough
-	djnz .len_loop
-
-;if we're here, we succeeded :D
+	dec e
+	jq z,.success
+	ld a,(hl)
+	inc hl
+	inc a
+	jq nz,.search_loop ; area not long enough
+	dec bc
+	ld a,c
+	or a,b
+	jq nz,.len_loop
+	jq .garbage_collect ;we've hit the end of the cluster map, and we need to do a garbage collect
+; if we're here, we found a large enough space
 .success:
 	call sys_FlashUnlock
 
 	ld de,(ix-3)
+	dec de
 	ld b,(ix-4)
 	ld c,$FE
 .reserve_loop:
@@ -77,9 +66,10 @@ fs_Alloc:
 	call sys_FlashLock
 
 	ld hl,(ix-3)
-	ld de,(ix-10)
+	ld de,fs_cluster_map
 	or a,a
 	sbc hl,de ;return first allocated cluster
+	dec hl
 
 	db $01 ;ld bc,...
 .fail:
@@ -88,8 +78,5 @@ fs_Alloc:
 	ld sp,ix
 	pop ix
 	ret
-.garbage_collect:
-	call fs_GarbageCollect
-	jq .fail ;still make it a fail case for now, until garbage collect actually moves things around
 
 

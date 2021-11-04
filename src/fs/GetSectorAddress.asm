@@ -1,13 +1,15 @@
 ;@DOES get the physical address of a given sector.
 ;@INPUT void *fs_GetSectorAddress(uint16_t sector);
 fs_GetSectorAddress:
-	pop hl,de
-	push de,hl
+	pop de,hl
+	push hl,de
+.entry:
+	ex hl,de
 	ex.s hl,de
+	ld b,9
 	bit 7,h
 	jq nz,.ram_sector
 	ld de,fs_filesystem_root_address
-	ld b,9
 .mult_loop:
 	add hl,hl
 	djnz .mult_loop
@@ -15,12 +17,12 @@ fs_GetSectorAddress:
 	ret
 .ram_sector:
 	res 7,h
-	ld b,5
 	bit 6,h
-	jq nz,.malloc_sector
+	jq nz,.mmio
+	ld b,4
 	ld de,$D00000
 	jq .mult_loop
-.malloc_sector:
+.mmio:
 	res 6,h
-	ld de,$D30000
+	ld de,$D40000
 	jq .mult_loop

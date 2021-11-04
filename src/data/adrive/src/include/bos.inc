@@ -79,8 +79,8 @@ namespace bos
 ?fs_InitClusterMap               := $2022C
 ?sys_WriteFlash                  := $20230
 ?sys_WriteFlashA                 := $20234
-?sys_WriteFlashFull              := $20238
-?sys_WriteFlashByteFull          := $2023C
+;DONOTHING                       := $20238
+;DONOTHING                       := $2023C
 ?fs_ParentDir                    := $20240
 ?fs_StrToFileEntry               := $20244
 ?fs_DirList                      := $20248
@@ -275,6 +275,8 @@ namespace bos
 ?bReturnHex           := 1
 ?bReturnLong          := 2
 ?bSilentReturn        := 3
-?fs_cmap_length := 7040
+?fs_cluster_map := $3BE000
+?fs_cluster_map.len := 7040
+?fs_cmap_length := fs_cluster_map.len
 
 end namespace

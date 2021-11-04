@@ -15,12 +15,6 @@ str_PressAnyKey:
 	db "Press any key to continue...",$A,0
 str_Prompt:
 	db ">",0
-str_CmdExecutable:
-	db "/bin/cmd",0
-str_StartupProgram:
-	db "/bin/boot",0
-fs_cluster_map_file:
-	db "/dev/cmap.dat",0
 string_FilesystemCorrupt:
 	db "Filesystem corrupted!",$A,"Filesystem will now be formatted.",$A,"Press enter to continue.",$A,0
 string_FilesystemReformatted:
@@ -51,9 +45,9 @@ string_program_requested_flash:
 string_failed_to_reinstall:
 	db "Failed to reinstall TIOS, backup files are missing!",$A,0
 
-bosfs_filesystem_header:
-	db "bosfs512fs "
-.len:=$-.
+; bosfs_filesystem_header:
+	; db "bosfs512fs "
+; .len:=$-.
 
 string_os_elevation_file:
 	db "/",$F2,"OS/ELEVATED",0
@@ -67,9 +61,38 @@ str_var_index_name:
 	db "/var/cache"
 .num:
 	db "000.dat",0
+str_Booting:
+	db "Starting up...",$A,0
+str_BootFailed:
+	db "Boot has encountered a critical error",$A
+	db "and cannot complete boot process.",$A
+	db "Missing system executable /bin/explorer",$A
+	db "Press any key to open recovery options.",$A,0
+str_CmdExecutable:
+	db "/bin/cmd",0
+str_ExplorerExecutable:
+	db "/bin/explorer",0
+; str_ClusterMapFile:
+	; db "/dev/cmap.dat",0
+str_EtcConfigDir:
+	db "/etc/config",0
+str_EtcConfigBootDir:
+	db "/etc/config/boot",0
+str_CmdArguments:
+	db "-x " ;flow into next string for efficiency
+str_BootConfigFile:
+	db "/etc/config/boot/onboot.cmd",0
+str_HomeDir:
+	db "/home",0
 
 string_EZF_header:
 	db $7F, "EZF"
 .len:=$-.
 
+str_onbootconfig:
+	db "#insert programs to run on boot before the UI starts",$A
+	db $A
+	db "#run the ui",$A
+	db "explorer",$A
+.len:=$-.
 

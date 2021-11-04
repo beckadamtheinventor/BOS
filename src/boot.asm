@@ -53,6 +53,7 @@ boot_os:
 	call gfx_SetDraw
 
 	call fs_SanityCheck
+	call fs_InitClusterMap
 
 	ld hl,current_working_dir
 	ld (hl),'/'
@@ -250,25 +251,89 @@ os_DoNothing:
 DONOTHING:
 	ret
 
+generate_boot_configs:
+	push bc
+	ld bc,str_EtcConfigDir
+	ld e,1 shl fd_subdir
+	push de,bc
+	call fs_CreateDir
+	ld hl,str_EtcConfigBootDir
+	ex (sp),hl
+	call fs_CreateDir
+	pop bc
+	ld hl,str_onbootconfig.len
+	ex (sp),hl
+	ld hl,str_onbootconfig
+	ld e,0
+	ld bc,str_BootConfigFile
+	push hl,de,bc
+	call fs_WriteNewFile
+	pop bc,bc,bc,bc
+	call sys_FreeAll
+	call fs_OpenFile
+	pop bc
+	ret
+
 os_return:
-	call sys_GetKey
-	cp a,53
-	jq z,os_recovery_menu
+	call os_check_recovery_key
 	call gfx_Set8bpp
+	call sys_FreeAll
+	ld a,1
+	call gfx_SetDraw
+	xor a,a
+	ld (lcd_text_bg),a
+	dec a
+	ld (lcd_text_fg),a
+	call os_GetOSInfo
+	call gui_DrawConsoleWindow
+	ld hl,str_Booting
+	call gui_PrintLine
+
+	call os_check_recovery_key
+	ld hl,str_HomeDir
+	ld e,1 shl fd_subdir
+	push de,hl
+	call fs_CreateDir
+	pop hl,bc
+
+	call os_check_recovery_key
+	ld bc,str_BootConfigFile
+	push bc
+	call fs_OpenFile
+	pop bc
+	call c,generate_boot_configs
+	jq nc,.run_boot_cmd
+; if we can't find the boot config files and can't initialize them try to run the main gui
 	ld bc,$FF0000
-	ld hl,str_StartupProgram
-	push bc,hl
+	push bc
+	ld hl,str_ExplorerExecutable
+	jq .exec_file_hl
+.run_boot_cmd:
+	call os_check_recovery_key
+	ld de,str_CmdArguments
+	push de
+	ld hl,str_CmdExecutable
+.exec_file_hl:
+	push hl
+	call fs_OpenFile
+	jq c,boot_failed_critical
 	call sys_ExecuteFile
 	pop bc,bc
+	jq os_recovery_menu
 
-	call th_EndAllThreads
-; check if recovery key was pressed
-	ld a,(last_keypress)
+boot_failed_critical:    ; if we can't locate/create the boot configs and we can't locate the main gui or the command interpreter
+	ld hl,str_BootFailed ; then notify the user and open the recovery menu. Eventually there will be an emergency command line.
+	call gui_DrawConsoleWindow
+	; todo: emergency command line
+	call sys_WaitKeyCycle
+	jq os_recovery_menu
+
+os_check_recovery_key:
+	call sys_GetKey
 	cp a,53
-	jq nz,os_return
-
-	ld sp,ti.stackTop
+	ret nz
 os_recovery_menu:
+	ld sp,ti.stackTop
 	xor a,a
 	ld (lcd_bg_color),a
 	ld (lcd_text_bg),a
@@ -277,6 +342,9 @@ os_recovery_menu:
 	ld (lcd_text_fg),a
 	ld a,7
 	ld (lcd_text_fg2),a
+
+	DisableThreading
+
 	ld hl,string_os_recovery_menu
 	call gui_DrawConsoleWindow
 .keywait:

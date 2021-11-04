@@ -71,8 +71,6 @@
 	public _fs_InitClusterMap
 	public _sys_WriteFlash
 	public _sys_WriteFlashA
-	public _sys_WriteFlashFull
-	public _sys_WriteFlashByteFull
 	public _fs_ParentDir
 	public _fs_StrToFileEntry
 	public _fs_DirList
@@ -222,8 +220,6 @@ _gui_InputNoClear                := $20228
 _fs_InitClusterMap               := $2022C
 _sys_WriteFlash                  := $20230
 _sys_WriteFlashA                 := $20234
-_sys_WriteFlashFull              := $20238
-_sys_WriteFlashByteFull          := $2023C
 _fs_ParentDir                    := $20240
 _fs_StrToFileEntry               := $20244
 _fs_DirList                      := $20248

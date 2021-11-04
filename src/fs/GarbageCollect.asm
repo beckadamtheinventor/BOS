@@ -1,4 +1,4 @@
-;@DOES Clean up and optimize the filesystem, and reset freed areas.
+;@DOES Clean up the filesystem, resetting freed areas.
 ;@INPUT None
 ;@OUTPUT None
 ;@DESTROYS All
@@ -6,14 +6,9 @@
 fs_GarbageCollect:
 	ld hl,-18
 	call ti._frameset
-	ld bc,fs_cluster_map_file
-	push bc
-	call fs_GetFilePtr
-	pop bc
-	jq c,fs_SanityCheck
+	ld hl,fs_cluster_map
 	ld (ix-3),hl
 	ld (ix-9),hl
-	ld bc,8192
 	add hl,bc
 	ld (ix-12),hl
 
@@ -51,10 +46,6 @@ fs_GarbageCollect:
 	call gui_PrintString
 	ld a,(ix-4)
 	call gfx_PrintHexA
-	ld hl,(ix-6)
-	call .check_sector
-	cp a,$FF
-	jq z,.cleanup_next
 	ld b,65536/512
 .cleanup_freed_loop:
 	ld hl,(ix-3)
@@ -147,17 +138,5 @@ fs_GarbageCollect:
 	pop ix
 	ret
 
-.check_sector:
-	ld a,$FF
-	ld bc,0
-.check_sector_loop:
-	and a,(hl)
-	cp a,$FF
-	ret nz
-	inc hl
-	djnz .check_sector_loop
-	dec c
-	jq nz,.check_sector_loop
-	ret
 .str_cleaning_up:
 	db "Cleaning up sector: $",0

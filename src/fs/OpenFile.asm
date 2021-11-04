@@ -28,7 +28,11 @@ fs_OpenFile:
 	ld a,(hl)
 	or a,a
 	jq z,.return
-	ld iy,fs_filesystem_address
+	ld hl,(fs_filesystem_address+fsentry_filesector)
+	push hl
+	call fs_GetSectorAddress
+	ex (sp),hl
+	pop iy
 .entry:
 .main_search_loop:
 	ld hl,(ix-3)
@@ -58,9 +62,6 @@ fs_OpenFile:
 	dec hl
 .no_more_slash:
 	ld (ix-3),hl ;advance path entry
-	; ld a,(hl)
-	; cp a,'$'
-	; jq z,.return_file_entry_point
 	ld hl,(ix-23)
 	or a,a
 	sbc hl,bc ;how long was the string?
@@ -111,21 +112,13 @@ fs_OpenFile:
 	pop ix
 	ret
 
-.return_file_entry_point:
-	ld bc,(ix-26)
-	inc bc
-	ld (ix-26),bc
-	ld hl,(iy+$C)
+
+.search_next_section:
+	ld hl,(iy+fsentry_filesector)
 	push hl
 	call fs_GetSectorAddress
 	ex (sp),hl
 	pop iy
-	call .search_loop
-	jq z,.fail
-	jq .return
-
-
-;searches for a file name in a directory listing
 .search_next:
 	ld hl,(ix-6)
 	push hl
@@ -142,15 +135,15 @@ fs_OpenFile:
 	add hl,bc
 	push hl
 	pop iy
+
+;searches for a file name in a directory listing
 .search_loop:
 	ld a,(iy)
-	or a,a
-	ret z ;reached end of directory
 	inc a
-	ret z ;reached end of directory
-	cp a,fsentry_deleted+1
-	jq z,.search_next
-	cp a,fsentry_longfilename+1
+	ret z ; reached end of directory
+	inc a
+	jq z,.search_next_section ; reached end of directory section
+	cp a,fsentry_longfilename+2
 	jq z,.search_next
 	push iy
 	call fs_CopyFileName ;get file name string from file entry

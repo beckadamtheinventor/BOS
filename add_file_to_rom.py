@@ -2,7 +2,6 @@
 import os, sys
 
 default_dir_entry = [
-	ord("."),0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,  0x10,  0x00, 0x00, 0x00, 0x00,
 	ord("."),ord("."),0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,  0x10,  0x00, 0x00, 0x00, 0x00,
 	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
 ]
@@ -31,9 +30,7 @@ def search_for_entry(rom, path):
 	while rom[ptr] != 0x00 and rom[ptr] != 0xFF:
 		fn = copy_file_name(rom[ptr:ptr+16])
 		# print("ptr:",hex(ptr),"entry:","".join([chr(c) if c in range(0x20,0x80) else "\\x"+hex(c) for c in rom[ptr:ptr+16]]),"file name",fn)
-		if not rom[ptr]:
-			return None
-		elif path[dnum] == fn:
+		if fn == path[dnum]:
 			if dnum >= L:
 				return ptr
 			elif rom[ptr+0xB] & 0x10:
@@ -43,6 +40,7 @@ def search_for_entry(rom, path):
 			ptr+=16
 
 def copy_file_name(entry):
+	# print("entry:","".join([chr(c) if c in range(0x20,0x80) else "\\x"+hex(c) for c in entry]))
 	if entry[0] == 0xF0 or entry[0] == 0xF1:
 		return None
 	elif chr(entry[0]) == '.' and chr(entry[1]) == '.':
@@ -58,21 +56,16 @@ def copy_file_name(entry):
 		return name + "." + "".join(chr(c) for c in entry[8:11]).rstrip(" ")
 
 def alloc_space_for_file(rom, length):
-	cmap = search_for_entry(rom, "/dev/cmap.dat")
-	if cmap is None:
-		print("/dev/cmap.dat not found on rom!\nAborting.")
-		exit(1)
-
-	cmap_data = 0x040000+(rom[cmap+0xC]+rom[cmap+0xD]*0x100)*0x200
-	cmap_len = rom[cmap+0xE]+rom[cmap+0xF]*0x100
-	i = j = 3
-	l = 0
+	cmap_data = 0x3BE000
+	cmap_len = 7040
+	i = j = l = 0
 	while l<length and i<cmap_len:
-		while rom[cmap_data+i] == 0xFE and i<cmap_len:
+		while rom[cmap_data+i] != 0xFF and i<cmap_len:
 			i+=1
 		j = i
-		l = 0x200
-		while rom[cmap_data+i] != 0xFE and i<cmap_len and l<length:
+		i += 1
+		l = 0
+		while rom[cmap_data+i] == 0xFF and i<cmap_len and l<length:
 			i+=1
 			l+=0x200
 	# print(f"allocated sectors {hex(j)} to {hex(i)} ({hex(0x040000+j*0x200)} to {hex(0x040000+i*0x200)})")
@@ -89,7 +82,7 @@ def free_file_descriptor(rom, ptr):
 		exit(1)
 
 	cmap_data = 0x040000+(rom[cmap+0xC]+rom[cmap+0xD]*0x100)*0x200
-	cmap_len = rom[cmap+0xE]+rom[cmap+0xF]*0x100
+	cmap_len = 7040
 	i = cmap_data+rom[ptr+0xC]+rom[ptr+0xD]*0x100
 	data = 0x040000+(rom[ptr+0xC]+rom[ptr+0xD]*0x100)*0x200
 	data_len = rom[ptr+0xE]+rom[ptr+0xF]*0x100
@@ -111,25 +104,34 @@ def free_file_descriptor(rom, ptr):
 
 
 def build_cluster_map(rom):
-	cmap = search_for_entry(rom, "/dev/cmap.dat")
-	if cmap is None:
-		print("/dev/cmap.dat not found in rom!\nAborting.")
-		exit(1)
-
-	cmap_data = 0x040000+(rom[cmap+0xC]+rom[cmap+0xD]*0x100)*0x200
+	if len(rom)<0x3C0000:
+		rom.extend([0xFF]*(0x3C0000-len(rom)))
+	cmap_data = 0x3BE000
 	rom[cmap_data] = 0xFE
 	rom[cmap_data+1] = 0xFE
 	build_cluster_map_dir(rom, cmap_data, 0x040000)
 
 
 def build_cluster_map_dir(rom, cmap, entry, dirprefix="/"):
-	i = 0x040000+(rom[entry+0xC]+rom[entry+0xD]*0x100)*0x200
+	k = rom[entry+0xC]+rom[entry+0xD]*0x100
+	l = rom[entry+0xE]+rom[entry+0xF]*0x100
+	i = 0x040000+k*0x200
+	m = 0
+	# print(dirprefix, copy_file_name(rom[entry:entry+16]), hex(l))
+	while m<l:
+		# print("allocated sector", hex(k))
+		rom[cmap + k] = 0xFE
+		k += 1
+		m += 0x200
+	
 	# maxi = i+(rom[entry+0xE]+rom[entry+0xF]*0x100)-16
 	while i<len(rom):
-		if rom[i] in [0x00, 0xFF]:
+		# print(hex(rom[i]),hex(rom[i+0xB]))
+		if rom[i] == 0xFF:
 			return True
 		if rom[i+0xB] & 8:
 			l = rom[i+0xE]+rom[i+0xF]*0x100
+			# print(copy_file_name(rom[i:i+16]), hex(l))
 			ptr = (i&0xFFFE00) + rom[i+0xC] + rom[i+0xD]*0x100
 			k = (ptr-0x040000)//0x200
 			m = 0
@@ -137,16 +139,24 @@ def build_cluster_map_dir(rom, cmap, entry, dirprefix="/"):
 			# print(f"starting at cluster map address {hex(cmap+k)}")
 			# print(f"sectors {k} to ",end="")
 			while m<l:
+				# print("allocated sector", hex(k))
 				rom[cmap + k] = 0xFE
-				k+=1
-				m+=0x200
+				k += 1
+				m += 0x200
 			# print(k)
-		else:
-			for j in range(rom[i+0xF]//2 if not rom[i+0xE]|(rom[i+0xF]&1) else rom[i+0xF]//2+1):
-				rom[cmap + rom[i+0xC]+rom[i+0xD]*0x100 + j] = 0xFE
-			if rom[i+0xB]&0x10 and rom[i]!=0x2E: #check if a directory and not '.' or '..'
+		elif rom[i+0xB] & 0x10:
+			# print(hex(i+0xB), bin(rom[i+0xB]))
+			if copy_file_name(rom[i:i+16]) not in [".", ".."]: #check if a directory and not '.' or '..'
 				# print(f"pathing into {dirprefix}{copy_file_name(rom[i:i+16])}")
-				build_cluster_map_dir(rom, cmap, 0x040000+(rom[i+0xC]+rom[i+0xD]*0x100)*0x200, dirprefix+copy_file_name(rom[i:i+16])+"/")
+				build_cluster_map_dir(rom, cmap, i, dirprefix+copy_file_name(rom[i:i+16])+"/")
+		else:
+			flen = rom[i+0xE]+rom[i+0xF]*0x100
+			if flen % 0x200:
+				flen += flen % 0x200
+			# print(copy_file_name(rom[i:i+16]), hex(flen))
+			for j in range(flen//0x200):
+				# print("allocated sector", hex(rom[i+0xC]+rom[i+0xD]*0x100+j))
+				rom[cmap + rom[i+0xC]+rom[i+0xD]*0x100 + j] = 0xFE
 		i+=16
 	return False
 
@@ -160,27 +170,30 @@ def add_file_to_rom(rom, fout, flags, fin_data):
 			print(f"Failed to add file to rom: {fout}")
 			exit(1)
 		dptr = search_for_entry(rom, os.path.dirname(fout))
-		dptr_ds = 0x040000 + (rom[dptr+0xC] + rom[dptr+0xD]*0x100)*0x200
-		dptr_parent = 0x040000 + (rom[dptr_parent+0xC] + rom[dptr_parent+0xD]*0x100)*0x200
-		rom[dptr_ds+0xC] = ((dptr_ds-0x040000)//0x200)&0xFF
-		rom[dptr_ds+0xD] = (dptr_ds-0x040000)//0x20000
-		rom[dptr_ds+0x1C] = ((dptr_parent-0x040000)//0x200)&0xFF
-		rom[dptr_ds+0x1D] = (dptr_parent-0x040000)//0x20000
 
 	f = search_for_entry(rom, fout)
 	if f is not None:
 		free_file_descriptor(rom, f)
 
-	ptr = dptr_content = 0x040000 + 0x200 * (rom[dptr+0xC]+rom[dptr+0xD]*0x100)
-	dptr_len = rom[dptr+0xE]+rom[dptr+0xF]*0x200
+	ptr = 0x040000 + 0x200 * (rom[dptr+0xC]+rom[dptr+0xD]*0x100)
 	# print("found parent directory. ptr:",hex(ptr),"len:",hex(dptr_len))
-	dptr_len += 16
-	rom[dptr+0xE],rom[dptr+0xF] = dptr_len&0xFF, dptr_len//0x100
+	while rom[ptr] != 0xFF:
+		if rom[ptr] == 0xFE:
+			if rom[ptr+0xC]+rom[ptr+0xD]*0x100 == 0xFFFF:
+				nextptr = alloc_space_for_file(rom, 512)
+				rom[ptr+0xB] = 0x10
+				rom[ptr+0xC] = (nextptr//0x200) % 0x100
+				rom[ptr+0xD] = nextptr//0x20000
+				rom[ptr+0xE] = 0
+				rom[ptr+0xF] = 2
+			ptr = 0x040000 + (rom[ptr+0xC]+rom[ptr+0xD]*0x100)*0x200
+		ptr += 16
+	
 
 	if ptr+16 < len(rom):
 		while rom[ptr] != 0x00 and rom[ptr] != 0xFF: ptr+=16
 	if ptr+16 >= len(rom):
-		rom.extend([0xFF]*512)
+		rom.extend([0xFF]*0x200)
 	if '/' in fout:
 		fn = fout.rsplit("/",maxsplit=1)[1]
 	else:

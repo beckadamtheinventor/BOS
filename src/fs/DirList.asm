@@ -26,19 +26,30 @@ fs_DirList:
 	or a,b
 	jq z,.list_loop_entry
 	dec bc
-.skip_loop_bypass:
+.skip_loop_entry:
 	ld a,(iy)
-	or a,a
-	jq z,.fail
-	inc a
-	jq z,.fail
 	lea iy,iy+16
-	cp a,fsentry_deleted+1
-	jq z,.skip_loop_bypass
-	cp a,fsentry_unlisted+1
-	jq z,.skip_loop_bypass
-	cp a,fsentry_longfilename+1
-	jq nz,.skip_loop
+	or a,a
+	jq z,.skip_loop_entry ; skip deleted entry
+	inc a
+	jq z,.fail ; fail if we're at the end of the directory and still skipping
+	inc a
+	jq nz,.skip_loop_next_16
+	ld hl,(iy+fsentry_filesector-16)
+	ld a,l
+	and a,h
+	inc a
+	jq z,.fail ; fail if we're at the end of the directory and still skipping
+	push hl
+	call fs_GetSectorAddress ; get pointer to next directory section
+	ex (sp),hl
+	pop iy
+	jq .skip_loop_entry
+.skip_loop_next_16:
+	cp a,fsentry_unlisted+2
+	jq z,.skip_loop_entry ; skip unlisted entry
+	cp a,fsentry_longfilename+2
+	jq nz,.skip_loop      ; entry is not a long file name
 	sbc hl,hl
 	ld l,(iy-15)
 	lea bc,iy
@@ -50,32 +61,39 @@ fs_DirList:
 	ld de,0
 	ld hl,(ix+6)
 	ld bc,(ix+12)
+	jq .list_loop_entry_inner
 .list_loop:
+	lea iy,iy+16
+.list_loop_entry_inner:
 	ld a,b
 	or a,c
 	jq z,.endofdir
-	dec bc
 	ld a,(iy)
 	or a,a
-	jq z,.endofdir
+	jq z,.list_loop ; skip deleted entry
 	inc a
 	jq z,.endofdir
-	cp a,fsentry_deleted+1
-	jq z,.list_loop_next
-	cp a,fsentry_unlisted+1
-	jq z,.list_loop_next
-	bit fd_hidden,(iy+fsentry_fileattr)
-	jq nz,.list_loop_next
+	inc a
+	jq nz,.list_loop_next_16
+	ld hl,(iy+fsentry_filesector-16)
+	ld a,l
+	and a,h
+	inc a
+	jq z,.endofdir
+	push hl
+	call fs_GetSectorAddress
+	ex (sp),hl
+	pop iy
+	jq .list_loop
+.list_loop_next_16:
+	cp a,fsentry_unlisted+2
+	jq z,.list_loop
 	ld (hl),iy
 	inc hl
 	inc hl
 	inc hl
 	inc de
-.list_loop_next:
-	ld a,(iy)
-	lea iy,iy+16
-	cp a,fsentry_longfilename
-	jq nz,.list_loop
+	jq .list_loop
 	push bc,hl
 	sbc hl,hl
 	ld l,(iy-15)

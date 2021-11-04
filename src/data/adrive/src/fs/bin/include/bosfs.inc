@@ -66,7 +66,6 @@ macro fs_fs?
 			db $200 - ($ and $1FF) dup $FF
 		end if
 		fs_file flabel
-		fs_entry flabel, ".", "", f_subdir
 		macro end?.fs_dir?
 			db 16 dup $FF
 			end fs_file

@@ -1,6 +1,6 @@
 
 fs_filesystem_root_address := $040000
-fs_filesystem_address := $040200
+fs_filesystem_address := fs_filesystem_root_address
 
 fsbit_readonly       := 0
 fsbit_hidden         := 1
@@ -28,10 +28,10 @@ fsbit_elevated       := 7
 ;fsentry_filelen.len         := 2
 
 
-f_readonly   := 1
-f_hidden     := 2
-f_system     := 4
-f_subfile    := 8
-f_subdir     := $10
-f_device     := $20
-f_elevated   := $80
+f_readonly      := 1
+f_hidden        := 2
+f_system        := 4
+f_subfile       := 8
+f_subdir        := $10
+f_device        := $20
+f_elevated      := $80

@@ -1,36 +1,46 @@
 ;@DOES Free space allocated to a file
 ;@INPUT int fs_Free(void *fd);
 ;@OUTPUT number of sectors freed.
-;@NOTE will sanity check the filesystem if cluster map file is not found.
 fs_Free:
-	ld bc,fs_cluster_map_file
-	push bc
-	call fs_GetFilePtr
 	pop bc
-	call c,fs_SanityCheck
-	pop bc,de
-	push de,bc
-	push hl
-	ex hl,de
-	ld bc,fsentry_filesector
+	ex (sp),hl
+	push bc
+	ld bc,fsentry_fileattr
 	add hl,bc
+	bit fd_subfile,(hl)
+	jq nz,.zero
+	inc hl
 	ld de,(hl)
+	bit 7,d
+	jq nz,.zero ; dont free it if its a ram or device file
 	inc hl
 	inc hl
 	ld c,(hl)
 	inc hl
 	ld b,(hl)
 	ex.s hl,de
-	pop de
-	add hl,de ;hl points to cluster map at file sector#
-	push hl,bc
-	pop hl
-	call fs_CeilDivBySector
-	ex (sp),hl ;push number of file sectors, pop cluster map at file sector#
-	ld de,$03FF80
-	push de,hl ;push source and destination pointers
-	call sys_WriteFlashFullRam
-	pop bc,bc,hl ;return number of sectors freed
+	ld de,fs_cluster_map
+	add hl,de
+	ex hl,de
+	ld a,b
+	and a,1
+	or a,c
+	jq z,.exact
+	inc b
+	inc b
+	or a,a
+.exact:
+	ld a,b
+	rra
+	ld c,a
+	ld hl,$FF0000
+	ld b,l ; bc = file_len/512 + (file_len%512 > 0)
+	push bc
+	call sys_WriteFlash
+	pop hl ;return number of sectors freed
 	or a,a
 	ret
-
+.zero:
+	or a,a
+	sbc hl,hl
+	ret

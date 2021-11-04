@@ -154,4 +154,6 @@ bReturnHex           := 1
 bReturnLong          := 2
 bSilentReturn        := 3
 
-fs_cmap_length := 7040
+fs_cluster_map := $3BE000
+fs_cluster_map.len := 7040
+fs_cmap_length := fs_cluster_map.len

@@ -12,7 +12,7 @@ fs_AbsPath:
 	ld (ix-12),hl
 	ld a,(hl)
 	cp a,'/'
-	jq z,.dup_str ;just clone the string if it's already an absolute path
+	jq z,.return ; just return the string if it's already an absolute path
 	ld hl,current_working_dir
 	ld a,(hl)
 	or a,a
@@ -67,16 +67,3 @@ fs_AbsPath:
 	ld sp,ix
 	pop ix
 	ret
-.dup_str: ;clone the string if it's already an absolute path
-	push hl
-	call ti._strlen
-	inc hl
-	push hl
-	call sys_Malloc
-	ex hl,de
-	pop bc,hl
-	jq c,.fail
-	push de
-	ldir
-	pop hl
-	jq .return

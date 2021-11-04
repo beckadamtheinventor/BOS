@@ -75,8 +75,8 @@
 	jp fs_InitClusterMap
 	jp sys_WriteFlash
 	jp sys_WriteFlashA
-	jp sys_WriteFlashFull
-	jp sys_WriteFlashByteFull
+	jp DONOTHING
+	jp DONOTHING
 	jp fs_ParentDir
 	jp fs_StrToFileEntry
 	jp fs_DirList

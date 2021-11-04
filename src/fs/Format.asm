@@ -37,24 +37,6 @@ fs_Format:
 
 	call fs_InitClusterMap
 
-	ld a,($D2FFFF)
-	inc a
-	jq z,.dont_reserve_memory
-	dec a
-	ld de,$0401FF
-	call sys_WriteFlashA
-
-	ld hl,fs_cluster_map_file
-	push hl
-	call fs_GetFilePtr
-	pop de
-	ld de,($2B0000 - $040000) shr 9
-	add hl,de
-	ex hl,de
-	ld hl,$FF0000
-	ld bc,$100000 shr 9
-	call sys_WriteFlash
-
 .dont_reserve_memory:
 	ld hl,flashStatusByte
 	res bKeepFlashUnlocked, (hl)

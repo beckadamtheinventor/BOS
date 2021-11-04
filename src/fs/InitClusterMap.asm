@@ -1,83 +1,155 @@
 ;@DOES initialize cluster map given data within the file system.
 ;@INPUT void fs_InitClusterMap(void);
-;@NOTE uses bos.safeRAM as scrap.
+;@NOTE uses the first half of vRam as scrap.
 fs_InitClusterMap:
-	ld hl,-3
+	ld a,(fs_cluster_map)
+	inc a
+	inc a
+	ret z ; dont build the cluster map if its already been built
+
+	ld hl,-4
 	call ti._frameset
 
-	ld de,fs_cluster_map_file
-	push de
-	call fs_OpenFile
-	pop de
-	jq c,.create_cmap
-	; ld bc,0
-	; push bc,hl
-	; ld c,1
-	; push bc
-	; ld bc,7040
-	; push bc
-	; ld bc,$03E000
-	; push bc
-	; call fs_Write
-	; pop bc,bc,bc,hl,bc
-	ld hl,fs_cluster_map_file
+	ld hl,(ti.mpLcdUpbase)
 	push hl
-	call fs_GetFilePtr
-	ld (ix-3),hl
-	pop de
-	ex hl,de
-	ld bc,fs_cmap_length
-	ld hl,safeRAM
-.sectorcheckloop:
-	ld a,(de)
+	ld de,ti.vRam
 	or a,a
-	jq z,.next
-	ld a,$FF
-.next:
+	sbc hl,de
+	jq nz,.no_needed_blit
+	add hl,de
+; blit lcd to buffer
+	ld bc,ti.lcdWidth*ti.lcdHeight
+	add hl,bc
+	ex hl,de
+	push de
+	ldir
+	pop de
+; render from buffer
+	ld (ti.mpLcdUpbase),de
+
+.no_needed_blit:
+	ld hl,fs_cluster_map
+	ld de,ti.vRam+$10000
+	ld bc,fs_cluster_map.len
+	push de,bc
+	ldir
+	pop bc
+	xor a,a
+	cpdr ; find the last freed sector that hasn't been cleaned up yet
+	inc bc
+	pop de
+	jp po,.dont_clean_up ; don't try to clean up if there's nothing to clean up
+
+	call sys_FlashUnlock
+
+; hl = cluster map stored in ti.vRam+$10000
+; de = current flash sector
+; (ix-4) = cluster map sector counter (128 per physical 64k sector)
+; bc = remaining cluster map sectors to be processed
+	ld de,fs_filesystem_address
+	ld a,65536/512
+	ld (ix-4),a
+	jq .copy_next_sector
+.writeback_sector: ; write the sector back from vRam into flash
+	push hl,bc
+	ld (ix-3),de ; save pointer to flash
+	ld a,(ix-1)
+	call sys_EraseFlashSector
+	ld de,(ix-3)
+	ld e,d
+	ld bc,$010000
+	call sys_WriteFlash
+	ld de,(ix-3)
+	pop bc,hl
+.copy_next_sector: ; copy sector into vRam
+	push hl,de,bc
+	ex hl,de
+	ld de,ti.vRam
+	ld bc,$010000
+	ldir
+	pop bc,de,hl
+	ld a,65536/512
+	ld (ix-4),a
+.cleanup_loop: ; check cluster map sectors and reset them in vRam
+	ld a,(hl)
+	or a,a
+	jq nz,.dont_clear
+	push bc,hl
+	dec a
 	ld (hl),a
-	inc hl
+assert ~ti.vRam and $FFFF
+	ld hl,ti.vRam
+	ld h,d
+	ld l,e
+	ld (hl),a
+	push hl
+	pop de
 	inc de
+	ldir
+	ld d,h
+	ld e,l
+	pop hl,bc
+.dont_clear:
+	inc hl ; check next cluster map sector
 	dec bc
-	ld a,c
-	or a,b
-	jq nz,.sectorcheckloop
-	ld hl,safeRAM
-	ld de,(ix-3)
-	ld bc,fs_cmap_length
-	push bc,hl,de
-	call sys_FlashUnlock
-	call sys_WriteFlashFullRam
-	call sys_FlashLock
-	pop bc,bc,bc
-	jq .start_traversing
+	ld a,b
+	or a,c
+	jq z,.done_cleaning_up
+	dec (ix-4)
+	jq nz,.writeback_sector
 
-.create_cmap:
-	ld bc,fs_cmap_length
-	push bc
-	ld c,fd_system+fd_readonly
-	push bc,de
-	call fs_CreateFile
-	pop bc,bc,bc
-
-.start_traversing:
-	call sys_FlashUnlock
-	ld de,(ix-3)
+.done_cleaning_up:
+.dont_clean_up:
 	ld a,$FE
-	call sys_WriteFlashA
+	ld (ti.vRam+$10000),a
 	ld iy,$040000
 	call .traverse
 
+	ld hl,fs_cluster_map and $FF0000
+	ld de,ti.vRam
+	ld bc,$010000
+	ldir
+	ex hl,de
+	ld de,ti.vRam+$E000
+	ld bc,fs_cluster_map.len
+	ldir
+
+	ld a,fs_cluster_map shr 16
+	call sys_EraseFlashSector
+
+	ld hl,ti.vRam
+	ld de,fs_cluster_map and $FF0000
+	ld bc,$E000+fs_cluster_map.len
+	call sys_WriteFlash
+
 	call sys_FlashLock
+
+	pop hl
+	ld de,ti.vRam
+	or a,a
+	sbc hl,de
+	jq nz,.dont_restore_vram ; if we weren't drawing from vRam originally, there's no need to blit again
+	add hl,de
+	ld bc,ti.lcdWidth*ti.lcdHeight
+	add hl,bc
+	push de
+	ldir
+	pop de
+	ld (ti.mpLcdUpbase),de
+
+.dont_restore_vram:
 	ld sp,ix
 	pop ix
 	ret
 .traverse:
 	ld a,(iy)
 	or a,a
-	ret z
+	jq z,.traverse_next
 	inc a
 	ret z
-	cp a,'.'+1
+	inc a
+	jq z,.traverse_into_jump
+	cp a,'.'+2
 	jq z,.traverse_next
 	bit fsbit_subfile, (iy+fsentry_fileattr)
 	jq z,.regular_file
@@ -90,7 +162,7 @@ fs_InitClusterMap:
 	ld de,-$040000
 	add hl,de
 	call fs_CeilDivBySector
-	ld de,(ix-3)
+	ld de,fs_cluster_map
 	add hl,de
 	push hl
 	ld de,(iy+fsentry_filelen)
@@ -106,17 +178,14 @@ fs_InitClusterMap:
 	ld b,l
 	ld de,(iy+fsentry_filesector)
 	ex.s hl,de
-	ld de,(ix-3)
+	ld de,ti.vRam+$10000
 	add hl,de
 	ex hl,de
 .mark_file_entry:
 	push iy
-	ld c,$FE
+	ld a,$FE
 .mark_file_loop:
-	push bc,de
-	ld a,c
-	call sys_WriteFlashA
-	pop de,bc
+	ld (de),a
 	inc de
 	djnz .mark_file_loop
 	pop iy
@@ -127,12 +196,14 @@ fs_InitClusterMap:
 	jq .traverse
 .traverse_into:
 	push iy
+	call .traverse_into_jump
+	pop iy
+	ret
+.traverse_into_jump:
 	ld hl,(iy+fsentry_filesector)
 	push hl
 	call fs_GetSectorAddress
 	ex (sp),hl
 	pop iy
-	call .traverse
-	pop iy
-	ret
+	jq .traverse
 

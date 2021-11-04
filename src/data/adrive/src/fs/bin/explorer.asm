@@ -111,7 +111,7 @@ explorer_dont_run_preload:
 	; sbc hl,bc
 	; jq z,explorer_dirlist
 explorer_dirlist:
-	ld hl,1
+	ld hl,0
 explorer_files_skip:=$-3
 	push hl
 	ld bc,display_items_num_x * display_items_num_y
@@ -239,9 +239,9 @@ explorer_cursor_x:=$-3
 	cp a,ti.skDel - 4
 	jq z,explorer_delete_file
 	cp a,ti.skWindow - 4
-	jq z,.controlkey
+	jq z,.callpathout
 	cp a,ti.skAlpha - 4
-	jq z,.controlkey
+	jq z,.callpathout
 	cp a,ti.skZoom - 4
 	jq z,.quickmenu
 	cp a,ti.skTrace - 4
@@ -264,6 +264,9 @@ explorer_selected_file_desc:=$-3
 	bit bos.fd_subdir,(iy+bos.fsentry_fileattr)
 	jq z,.open_file
 	call .path_into
+	jq explorer_dirlist
+.callpathout:
+	call .pathout
 	jq explorer_dirlist
 .open_file:
 	ld hl,(explorer_dirname_buffer)
@@ -358,9 +361,6 @@ explorer_dirname_buffer:=$-3
 .exec_file:
 	ld hl,(explorer_dirname_buffer)
 	jq explorer_call_file_noargs
-.controlkey:
-	; - TODO -
-	jq explorer_main
 .quickmenu:
 	ld hl,quickmenu_item_strings
 	jq .drawmenu
@@ -389,34 +389,17 @@ explorer_dirname_buffer:=$-3
 .path_into:
 	ld hl,(explorer_dirname_buffer)
 	ld a,(hl)
-	cp a,'.'
-	jq nz,.path_into_dir
-	inc hl
-	ld a,(hl)
-	or a,a
-	ret z
-	dec hl
-	cp a,'.'
-	jq nz,.path_into_dir ; path into '.something' entry
-	inc hl
-	inc hl
-	ld a,(hl)
-	or a,a
-	dec hl
-	dec hl
-	jq nz,.path_into_dir ;path into '..something' entry, though idk why you'd have an entry like that
-	ld hl,(current_working_dir) ;path into '..' entry
+	inc a
+	jq nz,.path_into_dir ; path into directory
+.pathout:
+	ld hl,(current_working_dir) ; path into '..' entry
 	push hl
-	call bos.fs_ParentDir ;get parent directory of working directory
+	call bos.fs_ParentDir ; get parent directory of working directory
 	pop bc
-	ret c ;if failed to malloc within fs_ParentDir
+	ret c ; if failed to malloc within fs_ParentDir
 	jq .path_into_setcurdir
-.maybe_path_into_dir:
-	cp a,(hl)
-	ret z ;return if pathing into '.' entry
-	dec hl ; path into '.something' entry
 .path_into_dir:
-	ld hl,(explorer_dirname_buffer)
+	; ld hl,(explorer_dirname_buffer)
 	ld de,(current_working_dir)
 	push hl,de
 	call bos.fs_JoinPath ; join(cwd, fname)
@@ -857,13 +840,14 @@ draw_background:
 	ld l,$08
 explorer_background_color:=$-1
 	ex (sp),hl
+	call gfx_FillScreen
 	call gfx_SetTextTransparentColor
 	call gfx_SetTextBGColor
 	ld l,$FF
 explorer_foreground_color:=$-1
-	push hl
+	ex (sp),hl
 	call gfx_SetTextFGColor
-	pop hl,bc
+	pop hl
 	ld hl,$FF0000
 explorer_background_image_full:=$-3
 	ld a,(hl)
@@ -875,9 +859,6 @@ explorer_background_image_full:=$-3
 	ldir
 	jq .dont_draw_background_image_sprite
 .dont_draw_background_image:
-	push bc
-	call gfx_FillScreen
-	pop bc
 	ld hl,$FF0000
 explorer_background_image_sprite:=$-3
 	ld a,(hl)

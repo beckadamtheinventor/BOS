@@ -36,10 +36,9 @@ end fs_dir
 
 ;"/bin/" directory
 fs_dir bin_dir
-	fs_entry root_dir, "..", "", f_subdir
+	; fs_entry root_dir, "..", "", f_subdir
 	fs_sfentry writeinto_exe, ">", "", f_readonly+f_system+f_subfile
 	fs_sfentry appendinto_exe, ">>", "", f_readonly+f_system+f_subfile
-	fs_sfentry boot_exe, "boot", "", f_readonly+f_system+f_subfile
 	; fs_entry bpkload_exe, "bpk", "", f_readonly+f_system
 	; fs_entry bpm_exe, "bpm", "", f_readonly+f_system
 	fs_sfentry cat_exe, "cat", "", f_readonly+f_system+f_subfile
@@ -55,13 +54,15 @@ fs_dir bin_dir
 	fs_entry explorer_exe, "explorer", "", f_readonly+f_system
 	; fs_entry fexplore_exe, "fexplore", "", f_readonly+f_system
 	fs_sfentry info_exe, "info", "", f_readonly+f_system+f_subfile
+	fs_sfentry json_exe, "json", "", f_readonly+f_system+f_subfile
 	fs_sfentry ls_exe, "ls", "", f_readonly+f_system+f_subfile
+	fs_sfentry mem_so, "mem", "so", f_readonly+f_system+f_subfile
 	fs_entry memedit_exe, "memedit", "", f_readonly+f_system
 	fs_sfentry mkdir_exe, "mkdir", "", f_readonly+f_system+f_subfile
 	fs_sfentry mkfile_exe, "mkfile", "", f_readonly+f_system+f_subfile
 	fs_entry msd_exe, "msd", "", f_readonly+f_system
+	fs_sfentry numstr_so, "numstr", "so", f_readonly+f_system+f_subfile
 	fs_sfentry off_exe, "off", "", f_readonly+f_system+f_subfile
-	fs_sfentry osrt_so, "osrt", "so", f_readonly+f_system+f_subfile
 	fs_sfentry peek_exe, "peek", "", f_readonly+f_system+f_subfile
 	fs_sfentry poke_exe, "poke", "", f_readonly+f_system+f_subfile
 	fs_sfentry rm_exe, "rm", "", f_readonly+f_system+f_subfile
@@ -74,7 +75,7 @@ fs_dir bin_dir
 end fs_dir
 
 fs_dir var_dir
-	fs_entry root_dir, "..", "", f_subdir
+	; fs_entry root_dir, "..", "", f_subdir
 	fs_entry path_var, "PATH", "", 0
 	fs_entry include_var, "INCLUDE", "", 0
 end fs_dir
@@ -86,10 +87,6 @@ fs_file os_internal_subfiles
 
 	fs_subfile appendinto_exe, bin_dir
 		include 'fs/bin/appendinto.asm'
-	end fs_subfile
-
-	fs_subfile boot_exe, bin_dir
-		include 'fs/bin/boot.asm'
 	end fs_subfile
 
 	fs_subfile cat_exe, bin_dir
@@ -148,8 +145,12 @@ fs_file os_internal_subfiles
 		include 'fs/bin/sleep.asm'
 	end fs_subfile
 
-	fs_subfile osrt_so, bin_dir
-		include 'fs/bin/osrt.so.asm'
+	fs_subfile numstr_so, bin_dir
+		include 'fs/bin/numstr.so.asm'
+	end fs_subfile
+
+	fs_subfile mem_so, bin_dir
+		include 'fs/bin/mem.so.asm'
 	end fs_subfile
 
 	fs_subfile peek_exe, bin_dir
@@ -160,12 +161,15 @@ fs_file os_internal_subfiles
 		include 'fs/bin/poke.asm'
 	end fs_subfile
 
+	fs_subfile json_exe, bin_dir
+		include 'fs/bin/json.asm'
+	end fs_subfile
+
 end fs_file
 
 ;"/dev/" directory
 fs_dir dev_dir
-	fs_entry root_dir, "..", "", f_subdir
-	fs_entry cluster_map_file, "cmap", "dat", f_readonly+f_system
+	; fs_entry root_dir, "..", "", f_subdir
 	fs_entry os_internal_subfiles, "osfiles", "dat", f_readonly+f_system
 	; fs_sfentry dev_lcd, "lcd", "", f_readonly+f_system+f_device+f_subfile
 	; fs_sfentry dev_null, "null", "", f_readonly+f_system+f_device+f_subfile
@@ -186,22 +190,15 @@ end fs_dir
 
 ;"/etc/" directory
 fs_dir etc_dir
-	fs_entry root_dir, "..", "", f_subdir
-	fs_entry etc_config_dir, "config", "", f_subdir
+	; fs_entry root_dir, "..", "", f_subdir
 	fs_entry etc_data_dir, "data", "", f_subdir
 	fs_entry etc_fontlibc_dir, "fontlibc", "", f_subdir
 	fs_entry etc_explorer_dir, "explorer", "", f_subdir
 end fs_dir
 
-;"/etc/config/" directory
-fs_dir etc_config_dir
-	fs_entry etc_dir, "..", "", f_subdir
-	fs_entry etc_config_explorer_dir, "explorer", "", f_subdir
-end fs_dir
-
 ;"/etc/data/" directory
 fs_dir etc_data_dir
-	fs_entry etc_dir, "..", "", f_subdir
+	; fs_entry etc_dir, "..", "", f_subdir
 	; fs_entry transfer_dir, "TRANSFER", "", f_subdir
 	fs_entry etc_data_explorer_dir, "explorer", "", f_subdir
 end fs_dir
@@ -209,7 +206,7 @@ end fs_dir
 
 ;"/etc/data/explorer/" directory
 fs_dir etc_data_explorer_dir
-	fs_entry etc_data_dir, "..", "", f_subdir
+	; fs_entry etc_data_dir, "..", "", f_subdir
 	; fs_entry explorer_font_file, "font", "bin", 0
 end fs_dir
 
@@ -219,15 +216,9 @@ end fs_dir
 	; fs_entry font_data_file, "font", "bin", 0
 ; end fs_dir
 
-;"/etc/config/explorer/" directory
-fs_dir etc_config_explorer_dir
-	fs_entry etc_config_dir, "..", "", f_subdir
-	fs_entry explorer_cfg, "explorer", "cfg", 0
-end fs_dir
-
 ;"/lib/" directory
 fs_dir lib_dir
-	fs_entry root_dir, "..", "", f_subdir
+	; fs_entry root_dir, "..", "", f_subdir
 	fs_entry fatdrvce_lll, "FATDRVCE","dll", f_readonly+f_system
 	fs_entry fileioc_lll, "FILEIOC","dll", f_readonly+f_system
 	fs_entry fontlibc_lll, "FONTLIBC","dll", f_readonly+f_system
@@ -241,12 +232,12 @@ end fs_dir
 
 ;"/opt/" directory
 fs_dir opt_dir
-	fs_entry root_dir, "..", "", f_subdir
+	; fs_entry root_dir, "..", "", f_subdir
 end fs_dir
 
 ;"/sbin/" directory
 fs_dir sbin_dir
-	fs_entry root_dir, "..", "", f_subdir
+	; fs_entry root_dir, "..", "", f_subdir
 	fs_entry fsutil_exe, "fsutil", "", f_readonly+f_system
 	fs_entry uninstaller_exe, "uninstlr", "", f_readonly+f_system
 	fs_entry updater_exe, "updater", "", f_readonly+f_system
@@ -254,12 +245,12 @@ end fs_dir
 
 ;"/tmp/" directory
 fs_dir tmp_dir
-	fs_entry root_dir, "..", "", f_subdir
+	; fs_entry root_dir, "..", "", f_subdir
 end fs_dir
 
 ;"/usr/" directory
 fs_dir usr_dir
-	fs_entry root_dir, "..", "", f_subdir
+	; fs_entry root_dir, "..", "", f_subdir
 	fs_entry usr_bin_dir, "bin", "", f_subdir
 	fs_entry usr_lib_dir, "lib", "", f_subdir
 	fs_entry tivars_dir, "tivars", "", f_subdir
@@ -267,33 +258,33 @@ end fs_dir
 
 ;"/usr/tivars/" directory
 fs_dir tivars_dir
-	fs_entry usr_dir, "..", "", f_subdir
+	; fs_entry usr_dir, "..", "", f_subdir
 end fs_dir
 
 ;"/usr/bin/" directory
 fs_dir usr_bin_dir
-	fs_entry usr_dir, "..", "", f_subdir
+	; fs_entry usr_dir, "..", "", f_subdir
 end fs_dir
 
 ;"/usr/lib/" directory
 fs_dir usr_lib_dir
-	fs_entry usr_dir, "..", "", f_subdir
+	; fs_entry usr_dir, "..", "", f_subdir
 end fs_dir
 
 ;"/home/" directory
 fs_dir home_dir
-	fs_entry root_dir, "..", "", f_subdir
+	; fs_entry root_dir, "..", "", f_subdir
 	fs_entry user_dir, "user", "", f_subdir
 end fs_dir
 
 ;"/home/user/" directory
 fs_dir user_dir
-	fs_entry home_dir, "..", "", f_subdir
+	; fs_entry home_dir, "..", "", f_subdir
 end fs_dir
 
 ;"/etc/explorer/" directory
 fs_dir etc_explorer_dir
-	fs_entry etc_dir, "..", "", f_subdir
+	; fs_entry etc_dir, "..", "", f_subdir
 	fs_entry explorer_blconfig_exe, "blconfig", "", 0
 	fs_entry missing_icon, "missing", "ico", 0
 	fs_entry themes_dat, "themes", "dat", 0
@@ -307,17 +298,13 @@ end fs_dir
 ; end fs_dir
 
 fs_dir etc_fontlibc_dir
-	fs_entry etc_dir, "..", "", f_subdir
+	; fs_entry etc_dir, "..", "", f_subdir
 	fs_entry etc_fontlibc_drmono, "DrMono", "", f_system+f_readonly
 end fs_dir
 
 ;-------------------------------------------------------------
 ;file data section
 ;-------------------------------------------------------------
-
-fs_file cluster_map_file
-	db bos.fs_cmap_length dup $FF
-end fs_file
 
 fs_file explorer_exe
 	file '../obj/explorer.bin'
@@ -421,10 +408,6 @@ end fs_file
 
 fs_file missing_icon
 	include 'fs/etc/explorer/missing.asm'
-end fs_file
-
-fs_file explorer_cfg
-	include 'fs/etc/config/explorer/explorer.cfg.asm'
 end fs_file
 
 fs_file path_var
