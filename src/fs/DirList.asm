@@ -88,19 +88,20 @@ fs_DirList:
 .list_loop_next_16:
 	cp a,fsentry_unlisted+2
 	jq z,.list_loop
+	cp a,fsentry_longfilename+2
+	jq nz,.list_loop_append
+	push bc
+	ld bc,0
+	ld c,(iy-15)
+	add iy,bc
+	pop bc
+.list_loop_append:
 	ld (hl),iy
 	inc hl
 	inc hl
 	inc hl
 	inc de
-	jq .list_loop
-	push bc,hl
-	sbc hl,hl
-	ld l,(iy-15)
-	lea bc,iy
-	add hl,bc
-	ex (sp),hl
-	pop iy,bc
+	dec bc
 	jq .list_loop
 .endofdir:
 	ld c,0

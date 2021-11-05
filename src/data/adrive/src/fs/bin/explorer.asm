@@ -55,6 +55,13 @@ explorer_init_2:
 	ld (hl),bc
 	ld hl,bos.current_working_dir
 	ld (current_working_dir),hl
+
+	ld hl,explorer_config_dir
+	ld c,1 shl bos.fd_subdir
+	push bc,hl
+	call bos.fs_CreateDir
+	pop bc,bc
+
 	ld de,explorer_config_file
 	push de
 	call bos.fs_GetFilePtr
@@ -120,11 +127,8 @@ explorer_files_skip:=$-3
 current_working_dir:=$-3
 	push bc
 	ld hl,explorer_dirlist_buffer
-	add hl,bc
-	or a,a
-	sbc hl,bc
 	push hl
-	call nz,bos.fs_DirList
+	call bos.fs_DirList
 	pop bc,bc,bc,bc
 	ld (explorer_max_selection),hl
 explorer_main:
@@ -386,11 +390,6 @@ explorer_dirname_buffer:=$-3
 	add hl,bc
 	jp (hl)
 
-.path_into:
-	ld hl,(explorer_dirname_buffer)
-	ld a,(hl)
-	inc a
-	jq nz,.path_into_dir ; path into directory
 .pathout:
 	ld hl,(current_working_dir) ; path into '..' entry
 	push hl
@@ -398,6 +397,15 @@ explorer_dirname_buffer:=$-3
 	pop bc
 	ret c ; if failed to malloc within fs_ParentDir
 	jq .path_into_setcurdir
+.path_into:
+	ld hl,(explorer_dirname_buffer)
+	add hl,de
+	or a,a
+	sbc hl,de
+	ret z
+	ld a,(hl)
+	or a,a
+	ret z
 .path_into_dir:
 	; ld hl,(explorer_dirname_buffer)
 	ld de,(current_working_dir)
@@ -592,14 +600,17 @@ explorer_load_config:
 	ld (de),a
 	ld bc,(ix-3)
 	db $21,"DIR"
+str_dir:=$-3
 	or a,a
 	sbc hl,bc
 	jq z,.setcurdir
 	db $21,"IMG"
+str_img:=$-3
 	or a,a
 	sbc hl,bc
 	jq z,.setbackgroundimage
 	db $21,"FNT"
+str_fnt:=$-3
 	or a,a
 	sbc hl,bc
 	ret nz
@@ -652,18 +663,22 @@ explorer_load_config:
 	add a,e
 .setnumvalue:
 	db $21, "BGC"
+str_bgc:=$-3
 	or a,a
 	sbc hl,bc
 	jq z,.setbgcolor
 	db $21, "FGC"
+str_fgc:=$-3
 	or a,a
 	sbc hl,bc
 	jq z,.setfgcolor
 	db $21, "SBC"
+str_sbc:=$-3
 	or a,a
 	sbc hl,bc
 	jq z,.setstatusbarcolor
 	db $21, "FG2"
+str_fg2:=$-3
 	or a,a
 	sbc hl,bc
 	ret nz
@@ -748,7 +763,7 @@ explorer_load_config:
 	ld (hl),e
 	call gfx_ScaleSprite
 	pop bc,bc
-	ret
+	jq .set_background_file
 .setbackgroundimg:
 	ld a,(de)
 	cp a,'7'
@@ -760,6 +775,9 @@ explorer_load_config:
 	push hl,de
 	call bos.util_Zx7Decompress
 	pop bc,bc
+.set_background_file:
+	ld hl,(ix-6)
+	ld (explorer_background_file),hl
 	ret
 
 
@@ -1524,18 +1542,23 @@ run_power_app:
 explorer_configure_theme:
 	call .main
 	ld c,1
-	push hl,bc
+	push af,de,bc
 	call gfx_SetDraw
-	pop bc,hl
-	ld bc,(.max_selection)
+	pop bc,de,af
 	or a,a
-	sbc hl,bc
 	jq z,.custom
-	add hl,bc
-	
-	
-	
-	ret
+	ld a,(de)
+	ld (explorer_background_color),a
+	inc de
+	ld a,(de)
+	ld (explorer_statusbar_color),a
+	inc de
+	ld a,(de)
+	ld (explorer_foreground_color),a
+	inc de
+	ld a,(de)
+	ld (explorer_foreground2_color),a
+	jq explorer_write_config
 .custom:
 	call draw_background
 	call gfx_BlitBuffer
@@ -1604,6 +1627,8 @@ explorer_configure_theme:
 	call draw_background
 	ld hl,explorer_themes_file
 	push hl
+	call bos.fs_OpenFile
+	call c,.create_theme_dat
 	call bos.fs_GetFilePtr
 	pop de
 	ld (.smc_themes_ptr),hl
@@ -1731,8 +1756,105 @@ explorer_configure_theme:
 	ld (.smc_selection),hl
 	jq .menu_loop
 
-explorer_themes_file:
-	db "/etc/explorer/themes.dat",0
+.create_theme_dat:
+	ld hl,explorer_themes_file
+	ld de,explorer_themes_default
+	ld bc,explorer_themes_default.len
+	push bc,de
+	ld c,0
+	push bc,hl
+	call bos.fs_WriteNewFile
+	pop bc,bc,bc,bc
+	ret
+
+explorer_write_config:
+	ld de,512
+	push de
+	call bos.sys_Malloc
+	pop bc
+	ret c
+	push hl,hl
+	ex (sp),iy
+	db $11,"BGC"
+	ld a,(explorer_background_color)
+	call .write_entry_byte
+	db $11,"SBC"
+	ld a,(explorer_statusbar_color)
+	call .write_entry_byte
+	db $11,"FGC"
+	ld a,(explorer_foreground_color)
+	call .write_entry_byte
+	db $11,"FG2"
+	ld a,(explorer_foreground2_color)
+	call .write_entry_byte
+	ld hl,0
+explorer_background_file:=$-3
+	add hl,de
+	or a,a
+	sbc hl,de
+	jq z,.no_background_loaded
+	db $11,"IMG"
+	ld (iy),de
+	ld a,'"'
+	ld (iy+3),a
+	push hl
+	pea iy+4
+	call ti._strcpy ; copy the path
+	ld a,$A
+	ld (de),a ; write the newline (which follows the end quote)
+	dec de
+	ld a,'"'  ; write the end quote
+	ld (de),a
+	pop bc,bc
+.no_background_loaded:
+	pop iy
+	ld hl,explorer_config_file
+	ld de,512 ; low byte is 0 so we can also use this as the flags argument
+	push de,de,hl
+	call bos.fs_OpenFile
+	call c,bos.fs_CreateFile
+	pop bc,bc,bc
+
+	ex hl,de
+	ld hl,512
+	ex (sp),hl
+	push hl,de
+	call bos.fs_WriteFile
+	pop bc,bc,bc
+	ret
+
+; input iy pointer to output
+; input de entry key string
+; input a byte to write
+.write_entry_byte:
+	ld c,a
+	ld (iy),de
+	ld a,'x'
+	ld (iy+3),a
+	ld a,c
+	rrca
+	rrca
+	rrca
+	rrca
+	and a,$F
+	add a,'0'
+	cp a,'9'+1
+	jq c,.under_10
+	add a,'A'-'9'+1
+.under_10:
+	ld (iy+4),a
+	ld a,c
+	and a,$F
+	add a,'0'
+	cp a,'9'+1
+	jq c,.under_10_2
+	add a,'A'-'9'+1
+.under_10_2:
+	ld (iy+5),a
+	ld a,$A
+	ld (iy+6),a
+	lea iy,iy+6
+	ret
 
 ; run_updater_program:
 	; ld bc,1
@@ -1780,7 +1902,7 @@ taskbar_item_strings:
 .l1:
 	db "recovery",0
 .l2:
-	db "ctrl",0
+	db "back",0
 .l3:
 	db "file",0
 .l4:
@@ -1824,6 +1946,12 @@ quickmenu_item_strings:
 .l5:
 	db "edit",0
 
+explorer_themes_default:
+	db "BOS Blue",0,$08,$11,$FF,$07
+	db "BOS Green",0,$0C,$03,$AF,$C7
+	db "BOS Red",0,$C0,$A0,$E6,$E2
+.len := $-.
+
 ; input_dir_string:
 	; db "Input path on usb to explore.",$A,0
 ; input_source_string:
@@ -1854,6 +1982,10 @@ str_CmdExecutable:
 	db "cmd",0
 str_ExplorerExecutable:
 	db "explorer",0
+explorer_config_dir:
+	db "/etc/config/explorer",0
+explorer_themes_file:
+	db "/etc/config/explorer/themes.lst",0
 explorer_config_file:
 	db "/etc/config/explorer/explorer.cfg",0
 explorer_preload_cmd:

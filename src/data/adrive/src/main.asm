@@ -17,7 +17,8 @@ fs_fs
 
 ;fs_dir root_of_roots_dir
 	fs_entry root_dir, "bosfs512", "fs", f_system+f_subdir
-	db 496 dup $FF
+	db $1F0 - ($ and $1FF) dup $FF
+	db $FE, 15 dup $FF
 ;end fs_dir
 
 fs_dir root_dir
@@ -63,6 +64,7 @@ fs_dir bin_dir
 	fs_entry msd_exe, "msd", "", f_readonly+f_system
 	fs_sfentry numstr_so, "numstr", "so", f_readonly+f_system+f_subfile
 	fs_sfentry off_exe, "off", "", f_readonly+f_system+f_subfile
+	fs_entry os_internal_subfiles, "osfiles", "dat", f_readonly+f_system
 	fs_sfentry peek_exe, "peek", "", f_readonly+f_system+f_subfile
 	fs_sfentry poke_exe, "poke", "", f_readonly+f_system+f_subfile
 	fs_sfentry rm_exe, "rm", "", f_readonly+f_system+f_subfile
@@ -72,12 +74,6 @@ fs_dir bin_dir
 	; fs_entry usbrecv_exe, "usbrecv", "", f_readonly+f_system
 	; fs_entry usbrun_exe, "usbrun", "", f_readonly+f_system
 	; fs_entry usbsend_exe, "usbsend", "", f_readonly+f_system
-end fs_dir
-
-fs_dir var_dir
-	; fs_entry root_dir, "..", "", f_subdir
-	fs_entry path_var, "PATH", "", 0
-	fs_entry include_var, "INCLUDE", "", 0
 end fs_dir
 
 fs_file os_internal_subfiles
@@ -167,10 +163,15 @@ fs_file os_internal_subfiles
 
 end fs_file
 
+fs_dir var_dir
+	; fs_entry root_dir, "..", "", f_subdir
+	fs_entry path_var, "PATH", "", 0
+	fs_entry include_var, "INCLUDE", "", 0
+end fs_dir
+
 ;"/dev/" directory
 fs_dir dev_dir
 	; fs_entry root_dir, "..", "", f_subdir
-	fs_entry os_internal_subfiles, "osfiles", "dat", f_readonly+f_system
 	; fs_sfentry dev_lcd, "lcd", "", f_readonly+f_system+f_device+f_subfile
 	; fs_sfentry dev_null, "null", "", f_readonly+f_system+f_device+f_subfile
 	; fs_sfentry dev_mnt, "mnt", "", f_readonly+f_system+f_device+f_subfile

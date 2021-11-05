@@ -62,12 +62,13 @@ macro fs_fs?
 	end macro
 
 	macro fs_dir? flabel
-		if $ and $1FF > 0
-			db $200 - ($ and $1FF) dup $FF
-		end if
 		fs_file flabel
 		macro end?.fs_dir?
-			db 16 dup $FF
+			if ($ and $1FF) >= $1F0
+				db $10 dup $FF
+			end if
+			db ($1F0 - ($ and $1FF)) dup $FF
+			db $FE, 15 dup $FF
 			end fs_file
 			purge end?.fs_dir
 		end macro
@@ -80,7 +81,9 @@ macro fs_fs?
 		flabel := $
 		macro end?.fs_file?
 			flabel.len := $ - flabel
-			db $200-(flabel.len and $1FF) dup $FF
+			if $ and $1FF > 0
+				db ($200-($ and $1FF)) dup $FF
+			end if
 			purge end?.fs_file?
 		end macro
 	end macro
