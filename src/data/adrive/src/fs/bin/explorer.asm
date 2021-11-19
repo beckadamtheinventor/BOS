@@ -268,6 +268,9 @@ explorer_selected_file_desc:=$-3
 	bit bos.fd_subdir,(iy+bos.fsentry_fileattr)
 	jq z,.open_file
 	call .path_into
+	or a,a
+	sbc hl,hl
+	ld (explorer_files_skip),hl
 	jq explorer_dirlist
 .callpathout:
 	call .pathout

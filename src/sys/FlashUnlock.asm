@@ -1,7 +1,8 @@
 ;@DOES Unlocks flash.
-;@NOTE TBD Will check permissions and re-lock flash if we're not elevated.
+;@NOTE (TBD) Will check permissions and re-lock flash if we're not elevated.
 sys_FlashUnlock:
 flash_unlock:
+	push af
 	di
 	in0 a,($06)
 	set 2,a
@@ -24,6 +25,7 @@ flash_unlock:
 	; out0	(6),a
 	; out0	($28),c
 
+	pop af
 	ret
 
 	; call os_CheckElevated ;check if we're elevated

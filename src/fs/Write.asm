@@ -1,10 +1,9 @@
 ;@DOES write data to a file
-;@INPUT int fs_Write(void *data, int len, uint8_t count, void *fd, int offset);
-;@OUTPUT Returns -1 and Cf set if failed to write
-;@DESTROYS All. Assume OP5, OP6
-;@NOTE file must be at least offset + len * count bytes in size.
+;@INPUT void *fs_Write(void *data, int len, uint8_t count, void *fd, int offset);
+;@OUTPUT New file descriptor or -1 and Cf set if failed.
+;@DESTROYS All
 fs_Write:
-	ld hl,-6
+	ld hl,-12
 	call ti._frameset
 	ld (ix-6),iy
 	ld bc,(ix+15) ;void *fd
@@ -23,50 +22,71 @@ fs_Write:
 	ld (ix-3),hl
 	ld de,(ix+18) ;int offset
 	add hl,de
-	push hl
-	ld hl,(iy+$E) ;file length
-	ex.s hl,de
-	pop hl
+	ld bc,65535
 	or a,a
-	inc de
-	sbc hl,de
-	jq nc,.fail ;check if write length + write offset > file length
-	add hl,de
-	ld de,65535
-	or a,a
-	sbc hl,de
+	sbc hl,bc
 	jq nc,.fail ;check if write length + write offset > 65535
-	add hl,de
-
-	bit fsbit_subfile,(iy + fsentry_fileattr)
-	ld de,(iy + fsentry_filesector) ;file first sector
-	jq z,.get_sector_ptr
-	ex.s hl,de
-	lea de,iy
-	ld e,0
-	res 0,d
-	add hl,de
-	jq .got_file_ptr
-.get_sector_ptr:
-	push de
-	call fs_GetSectorAddress
-	pop bc
-.got_file_ptr:
-	ld bc,(ix+18)
 	add hl,bc
+	ld (ix-12),hl
+	ld bc,(ix+15) ; void *fd
+	ld (ix-9),bc
+	push bc,hl
+	call fs_SetSize
+	jq c,.fail
+	ld (ix+15),hl
+	pop bc,bc
+
+	push hl
+	call sys_FlashUnlock
+	call fs_GetFDPtr ; get pointer to new file data section
+	push hl
+	ld hl,(ix-9)
+	push hl
+	call fs_GetFDPtr ; get pointer to old file data section
+	pop bc,de,bc
+	push de,hl
+	ld bc,(ix+18) ; int offset
+	call sys_WriteFlash
+	ld bc,(ix-3) ; len*count
+	ld hl,(ix+6) ; void *data
+	call sys_WriteFlash
+	ld hl,(ix+18)
 	ld bc,(ix-3)
-	ld de,(ix+6)
-	push bc,de,hl
-	call sys_WriteFlashFullRam
-	pop bc,bc,bc
-	
-	ld hl,(ix-3)
+	add hl,bc
+	ld bc,(ix-12) ; new file length
+	or a,a
+	sbc hl,bc
+	jq nc,.done ; we're done if write offset + write length >= end of file
+	add hl,bc
+; otherwise write the trailing bytes
+	pop de
+	add hl,de ; &old_data[offset + len*count]
+	ex hl,de ; exchange old data offset and offset+len*count
+	pop bc
+	push hl ; save offset+len*count
+	add hl,bc ; &new_data[offset + len*count]
+	pop bc ; restore offset+len*count
+	push hl ; save &new_data[offset + len*count]
+	ld hl,(ix-12) ; new file length
+	or a,a
+	sbc hl,bc ; eof - (offset+len*count)
+	ld c,l ; load low 16 bits of hl into bc, assume bcu is 0
+	ld b,h
+	pop hl
+	ex hl,de
+	; hl = old_data, de = new_data, bc = new_len - (offset + len*count)
+	call sys_WriteFlash
+
+	; no need to free the old data section because it was already freed in fs_SetSize
+.done:
+	ld hl,(ix+15)
 	or a,a
 	db $01 ;ld bc,...
 .fail:
 	scf
 	sbc hl,hl
 
+	call sys_FlashLock
 	ld iy,(ix-6)
 	ld sp,ix
 	pop ix

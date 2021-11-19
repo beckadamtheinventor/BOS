@@ -4,6 +4,7 @@
 include 'fs/JoinPath.asm'
 include 'fs/AbsPath.asm'
 include 'fs/Alloc.asm'
+include 'fs/AllocDescriptor.asm'
 include 'fs/BaseName.asm'
 include 'fs/CeilDivBySector.asm'
 include 'fs/CheckDirExists.asm'

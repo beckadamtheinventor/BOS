@@ -1,44 +1,39 @@
 
-;@DOES write a byte into a file
-;@INPUT int fs_WriteByte(uint8_t byte, void *fd, int offset);
+;@DOES write a byte into a file if the byte can be written
+;@INPUT bool fs_WriteByte(uint8_t byte, void *fd, int offset);
+;@NOTE Fails if the byte can't be written without swapping
 fs_WriteByte:
 	call ti._frameset0
-	ld hl,(ix+9)
+	ld hl,(ix + 9)
 	push hl
 	call fs_CheckWritableFD
 	dec a
 	jq nz,.fail
-	pop hl
-	ld bc,fsentry_fileattr
-	add hl,bc
-	bit fsbit_subfile,(hl)
-	inc hl
-	ld de,(hl)
-	jq z,.get_sector_address
-	push hl
+	pop iy
+	ld de, (iy + fsentry_filelen)
 	ex.s hl,de
-	pop de
-	ld e,0
-	res 0,d
-	add hl,de
-	jq .got_file_ptr
-.get_sector_address:
-	push de
-	call fs_GetSectorAddress
-	pop bc
-.got_file_ptr:
-	ld bc,(ix+12)
-	add hl,bc
-	ld c,(ix+6)
-	push bc,hl
-	call sys_WriteFlashByteFullRam
-	pop hl,bc
+	ld de, (ix + 12)
 	or a,a
-	sbc hl,hl
-	ld l,c
-	db $01
+	sbc hl,de
+	jq c,.fail
+	push de,iy
+	call fs_GetFDPtr
+	pop bc,de
+	add hl,de
+	ex hl,de
+	ld c, (ix + 6)
+	ld a,(de)
+	and a,c
+	cp a,c
+	jq nz,.fail
+.write_byte:
+	call sys_FlashUnlock
+	call sys_WriteFlashA
+.return:
+	db $3E
 .fail:
-	scf
-	sbc hl,hl
+	xor a,a
+	call sys_FlashLock
+	or a,a
 	pop ix
 	ret

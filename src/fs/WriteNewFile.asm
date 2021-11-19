@@ -13,22 +13,20 @@ fs_WriteNewFile:
 	or a,a
 	sbc hl,bc
 	jq z,.fail
-	pop bc,bc,bc
-	ld bc,$C
-	add hl,bc
-	ld hl,(hl)
-	push hl
-	call fs_GetSectorAddress
-	pop bc
+	pop bc,bc
+	ex (sp),hl
+	call fs_GetFDPtr
+	ex hl,de
 	ld bc,(ix+15)
-	ld de,(ix+12)
-	push bc,de,hl
-	call sys_WriteFlashFullRam
-	pop bc,bc,bc
+	ld hl,(ix+12)
+	call sys_FlashUnlock
+	call sys_WriteFlash
+	pop hl
 	db $01 ;ld bc,...
 .fail:
 	scf
 	sbc hl,hl
+	call sys_FlashLock
 	ld sp,ix
 	pop ix
 	ret

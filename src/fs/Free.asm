@@ -18,6 +18,7 @@ fs_Free:
 	ld c,(hl)
 	inc hl
 	ld b,(hl)
+.entrydebc:
 	ex.s hl,de
 	ld de,fs_cluster_map
 	add hl,de

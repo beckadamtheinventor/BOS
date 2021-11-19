@@ -2,8 +2,9 @@
 ;@INPUT void *fs_CreateFileEntry(const char *path, uint8_t flags);
 ;@OUTPUT file descriptor. Returns 0 if failed to create file.
 fs_CreateFileEntry:
-	ld hl,-19
+	ld hl,-22
 	call ti._frameset
+	ld (ix-22),iy
 	xor a,a
 	sbc hl,hl
 	ld (ix-3),hl
@@ -20,12 +21,14 @@ fs_CreateFileEntry:
 	ex (sp),hl
 	call fs_OpenFile
 	jq c,.fail   ; fail if parent dir doesn't exist
-	ex (sp),hl
-	pop iy
-	bit fsbit_subdirectory,(iy+fsentry_fileattr)
-	jq z,.fail ;fail if parent dir is not a dir
+	; ex (sp),hl
+	; pop iy
+	; bit fsbit_subdirectory,(iy+fsentry_fileattr)
+	; jq z,.fail ;fail if parent dir is not a dir
+	; ld hl,(ix+6)
+	; push hl
 	ld hl,(ix+6)
-	push hl
+	ex (sp),hl
 	call ti._strlen
 	ex (sp),hl
 	pop bc
@@ -51,58 +54,12 @@ fs_CreateFileEntry:
 	ld (ix + fsentry_fileattr - 19), a     ;setup new file descriptor contents
 
 	ld hl,(ix-3)
-.write_descriptor:
 	push hl
 	call fs_GetFilePtr
-	pop de
-.get_end_of_dir_loop_entry:
-	ld bc,16
-	db $3E ; dummify next instruction
-.get_end_of_dir_loop:
-	add hl,bc
-	ld a,(hl)
-	inc a
-	jq z,.found_end_of_dir
-	inc a
-	jq nz,.get_end_of_dir_loop
-.seek_next_dir_section:
-	ld c,fsentry_filesector+1
-	add hl,bc
-	ld a,(hl)
-	dec hl
-	cp a,(hl)
-	jq nz,.next_section_allocated
-	inc a
-	jq z,.allocate_dir_section
-.next_section_allocated:
-	ld hl,(hl)
-	call fs_GetSectorAddress.entry
-	jq .get_end_of_dir_loop_entry
-.allocate_dir_section:
-	ld c,b
-	ld b,2
-	push hl,bc
-	call fs_Alloc ; allocate another directory section
-	jq c,.fail
-	pop bc,de
-	push hl
-	ld a,l
-	call sys_WriteFlashA
-	pop hl
-	push hl
-	ld a,h
-	call sys_WriteFlashA
-	pop hl
-	push hl
-	inc h
-	xor a,a
-	ld l,a
-	ex hl,de
-	dec a
-	dec a
-	call sys_WriteFlashA
-	pop hl
-.found_end_of_dir:
+	pop bc
+.write_descriptor:
+	call fs_AllocDescriptor.entry
+	call sys_FlashUnlock
 	ex hl,de
 	lea hl,ix-19
 	ld bc,fsentry_filesector ; only write up until and including attribute byte
@@ -118,6 +75,8 @@ fs_CreateFileEntry:
 	push hl
 	call sys_Free
 	pop bc,af,hl
+	call sys_FlashLock
+	ld iy,(ix-22)
 	ld sp,ix
 	pop ix
 	ret

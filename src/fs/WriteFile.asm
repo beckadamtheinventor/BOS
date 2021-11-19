@@ -1,12 +1,11 @@
 
 ;@DOES Overwrite all data stored in a file from a given data pointer.
 ;@INPUT int WriteFile(void *data, int len, void *fd);
-;@OUTPUT number of bytes written. 0 if failed to write
-;@NOTE Only the number of clusters aready allocated to the file will be written. Call fs_SetSize() to reallocate file clusters.
+;@OUTPUT New file descriptor. -1 if failed to write
 fs_WriteFile:
-	ld hl,-19
+	ld hl,-9
 	call ti._frameset
-	push iy
+	ld (ix-3),iy
 	ld bc,(ix+12)
 	push bc
 	call fs_CheckWritableFD
@@ -18,44 +17,47 @@ fs_WriteFile:
 	or a,a
 	sbc hl,bc
 	jq nc,.fail
-	bit fsbit_subfile,(iy+fsentry_fileattr)
-	ld hl,(iy+fsentry_filesector)
-	push hl
-	jq z,.regular_file
-	ex.s hl,de
-	lea hl,iy
-	ld l,0
-	res 0,h
-	add hl,de
-	jq .got_file_ptr
-.regular_file:
-	call fs_GetSectorAddress
-.got_file_ptr:
-	ex (sp),hl
-	ld hl,(iy+fsentry_filelen)
-	ld de,(ix+9)
-	ex.s hl,de
-	or a,a
-	sbc hl,de ;check if write len (hl) <= file length (de)
-	jq nc,.length_ok
-	ex hl,de ;use file length as write length instead
-.length_ok:
-	push de
-	pop bc
-	pop hl
-	ld de,(ix+6)
-	push bc,de,hl
-	call sys_WriteFlashFullRam
-	pop bc,bc,bc
+	ld hl,(ix+12)
+	call fs_AllocDescriptor.entry ; allocate new file descriptor
+	ld (ix-9),hl
 	jq c,.fail
-
-.success:
+	ld bc,(ix+9)
+	push bc
+	call fs_Alloc
+	jq c,.fail
+	ld (ix-6),hl
+	pop bc
+	call sys_FlashUnlock
+	ld hl,(ix+12)
+	ld de,(ix-9)
+	ld bc,fsentry_filesector ; copy up until file sector pointer
+	call sys_WriteFlash
+	ld a,(ix-6) ; low byte of file sector
+	call sys_WriteFlashA
+	ld a,(ix-5) ; high byte of file sector
+	call sys_WriteFlashA
+	ld a,(ix+9) ; low byte of file size
+	call sys_WriteFlashA
+	ld a,(ix+10) ; high byte of file size
+	call sys_WriteFlashA
 	ld hl,(ix+9)
+	push hl
+	call fs_DeleteFile ; delete and free old file descriptor and data section
+	ld hl,(ix-6)
+	ex (sp),hl
+	call fs_GetFDPtr ; get pointer to new file data section
+	pop bc
+	ex hl,de
+	ld hl,(ix+6) ; void *data
+	ld bc,(ix+9) ; int len
+	call sys_WriteFlash
+	call sys_FlashLock
+	ld hl,(ix-9) ; return new file descriptor
 	db $01
 .fail:
-	xor a,a
+	scf
 	sbc hl,hl
-	pop iy
+	ld iy,(ix-3)
 	ld sp,ix
 	pop ix
 	ret
