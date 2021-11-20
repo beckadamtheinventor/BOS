@@ -19,8 +19,10 @@ fs_DeleteFile:
 	call fs_Free
 	pop de
 ; mark the file descriptor as deleted
+	call sys_FlashUnlock
 	xor a,a
 	call sys_WriteFlashA
+	call sys_FlashLock
 
 	db $3E ;ld a,...
 .fail:

@@ -40,8 +40,6 @@ fs_InitClusterMap:
 	pop de
 	jp po,.dont_clean_up ; don't try to clean up if there's nothing to clean up
 
-	call sys_FlashUnlock
-
 ; hl = cluster map stored in ti.vRam+$10000
 ; de = current flash sector
 ; (ix-4) = cluster map sector counter (128 per physical 64k sector)
@@ -51,6 +49,7 @@ fs_InitClusterMap:
 	ld (ix-4),a
 	jq .copy_next_sector
 .writeback_sector: ; write the sector back from vRam into flash
+	call sys_FlashUnlock
 	push hl,bc
 	ld (ix-3),de ; save pointer to flash
 	ld a,(ix-1)
@@ -114,6 +113,7 @@ assert ~ti.vRam and $FFFF
 	ld bc,fs_cluster_map.len
 	ldir
 
+	call sys_FlashUnlock
 	ld a,fs_cluster_map shr 16
 	call sys_EraseFlashSector
 

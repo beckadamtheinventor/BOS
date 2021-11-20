@@ -59,7 +59,7 @@ cp_main:
 	jq c,.failtowrite
 	jq .done
 .maybeoverwrite: ;destination file exists
-	ld bc,$B
+	ld bc,bos.fsentry_fileattr
 	add hl,bc
 	bit bos.fd_subdir,(hl)
 	jq nz,.failtooverwritedir

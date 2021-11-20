@@ -309,7 +309,7 @@ explorer_selected_file_desc:=$-3
 	ld a,(hl)
 	or a,a
 	jq z,.edit_file_run_memedit
-	adc a,a
+	add a,a
 	jq c,.edit_file_run_memedit
 .checkfileloop_nextbyte:
 	dec bc

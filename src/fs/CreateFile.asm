@@ -16,27 +16,43 @@ fs_CreateFile:
 	sbc hl,bc
 	jq z,.fail
 
+	ld (ix-7),hl ; save file descriptor
+
 	ld bc,(ix+12)
 	ld a,c
 	or a,b
-	jq z,.done
+	jq z,.zerolen
 
-	ld (ix-7),hl ; save file descriptor
+	ld a,b
+	inc a
+	jq nz,.under64k
+	ld c,b
+.under64k:
 	ld (ix-2),c
 	ld (ix-1),b
+.alloc:
 	push bc
 	call fs_Alloc ;allocate space for file
 	jq c,.fail
 	pop bc
 	ld (ix-4),l
 	ld (ix-3),h
+	jq .writedescriptor
+
+.zerolen:
+	sbc hl,hl
+	ld (ix-3),hl
+	ld (ix-4),a
+.writedescriptor:
 	ld hl,(ix-7) ; restore file descriptor
 	ld bc,fsentry_filesector
 	add hl,bc
 	ex hl,de
 	lea hl,ix-4
 	ld c,4
+	call sys_FlashUnlock
 	call sys_WriteFlash
+	call sys_FlashLock
 	ld hl,(ix-7)
 .done:
 	db $01

@@ -46,10 +46,14 @@ fs_Write:
 	pop bc,de,bc
 	push de,hl
 	ld bc,(ix+18) ; int offset
-	call sys_WriteFlash
+	ld a,b
+	or a,c
+	call nz,sys_WriteFlash
 	ld bc,(ix-3) ; len*count
 	ld hl,(ix+6) ; void *data
-	call sys_WriteFlash
+	ld a,b
+	or a,c
+	call nz,sys_WriteFlash
 	ld hl,(ix+18)
 	ld bc,(ix-3)
 	add hl,bc
@@ -75,7 +79,9 @@ fs_Write:
 	pop hl
 	ex hl,de
 	; hl = old_data, de = new_data, bc = new_len - (offset + len*count)
-	call sys_WriteFlash
+	ld a,c
+	or a,b
+	call nz,sys_WriteFlash
 
 	; no need to free the old data section because it was already freed in fs_SetSize
 .done:

@@ -137,35 +137,27 @@ cmd_execute_next_line:
 cmd_no_cmd_args:
 	ld hl,bos.current_working_dir
 	call bos.gui_DrawConsoleWindow
-	ld hl,256
-	push hl
-	call bos.sys_Malloc
-	pop bc
-	jq c,cmd_exit
-	ld (ix-3),hl
-	ld bc,256
-	call bos._MemClear
 enter_input_clear:
 	ld hl,bos.InputBuffer
 	ld bc,256
 	call bos._MemClear
 	jq enter_input
-recall_last:
-	ld hl,(ix-3)
-	add hl,bc
-	or a,a
-	sbc hl,bc
-	jq z,enter_input
-	push hl
-	call ti._strlen
-	add hl,bc
-	or a,a
-	sbc hl,bc
-	ex (sp),hl
-	pop bc
-	jq z,enter_input
-	ld de,bos.InputBuffer
-	ldir
+recall_last: ; TODO: re-implement this in a less hacky way
+	; ld hl,(ix-3)
+	; add hl,bc
+	; or a,a
+	; sbc hl,bc
+	; jq z,enter_input
+	; push hl
+	; call ti._strlen
+	; add hl,bc
+	; or a,a
+	; sbc hl,bc
+	; ex (sp),hl
+	; pop bc
+	; jq z,enter_input
+	; ld de,bos.InputBuffer
+	; ldir
 enter_input:
 	ld bc,255
 	push bc
@@ -182,12 +174,17 @@ enter_input:
 	ld a,(hl)
 	or a,a
 	jq z,enter_input ;don't execute if the input is null
-	ld de,(ix-3)
 	ld bc,256
-	push hl
+	push hl,bc
+	call bos.sys_Malloc
+	ex hl,de
+	pop bc,hl
+	push de,de
 	ldir
 	pop hl
 	call execute_program_string
+	call bos.sys_Free
+	pop bc
 	jq enter_input_clear
 
 execute_program_string:
@@ -284,12 +281,12 @@ cmd_exit_retzero:
 	or a,a
 	sbc hl,hl
 cmd_exit:
-	push af,hl
-	ld hl,(ix-3)
-	push hl
-	call bos.sys_Free
-	pop bc
-	pop hl,af
+	; push af,hl
+	; ld hl,(ix-3)
+	; push hl
+	; call bos.sys_Free
+	; pop bc
+	; pop hl,af
 	ld sp,ix
 	pop ix
 	ret

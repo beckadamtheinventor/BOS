@@ -2,9 +2,8 @@
 ;@INPUT int fs_Free(void *fd);
 ;@OUTPUT number of sectors freed.
 fs_Free:
-	pop bc
-	ex (sp),hl
-	push bc
+	pop bc,hl
+	push hl,bc
 	ld bc,fsentry_fileattr
 	add hl,bc
 	bit fd_subfile,(hl)
@@ -37,7 +36,7 @@ fs_Free:
 	ld hl,$FF0000
 	ld b,l ; bc = file_len/512 + (file_len%512 > 0)
 	push bc
-	call sys_WriteFlash
+	call nz,sys_WriteFlash
 	pop hl ;return number of sectors freed
 	or a,a
 	ret

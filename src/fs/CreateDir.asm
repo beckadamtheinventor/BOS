@@ -14,8 +14,12 @@ fs_CreateDir:
 	ld l,(hl)
 	push de,hl,bc
 	call fs_CreateFile
-	pop bc,bc
-	ex (sp),hl
+	pop bc,bc,bc
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	ret z
+	push hl
 	call sys_FlashUnlock
 	call fs_GetFDPtr
 	ld bc,512-16
