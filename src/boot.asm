@@ -286,8 +286,130 @@ os_return:
 	ld (lcd_text_fg),a
 	call os_GetOSInfo
 	call gui_DrawConsoleWindow
-	ld hl,str_Booting
-	call gui_PrintLine
+
+
+	call os_check_recovery_key
+	ld bc,str_BootConfigFile
+	push bc
+	call fs_OpenFile
+	pop bc
+	jq nc,.run_boot_cmd
+
+.run_first_init:
+	ld	de,BOS_B_compressed
+	ld	hl,BOS_B
+	push	de,hl
+	call	util_Zx7Decompress
+	pop	bc,bc
+
+	ld	de,BOS_O_compressed
+	push	de,hl
+	call	util_Zx7Decompress
+	pop	bc,bc
+
+	ld	de,BOS_S_compressed
+	push	de,hl
+	call	util_Zx7Decompress
+	pop	bc,bc
+
+;	ld	hl,BOS_B
+;	ld	bc, (97 shl 8) + 53
+;	call	gfx_Sprite
+
+	ld	hl,BOS_O
+	ld	bc, (139 shl 8) + 99
+	call	gfx_Sprite
+
+;	ld	hl,BOS_S
+;	ld	bc, (187 shl 8) + 145
+;	call	gfx_Sprite
+
+
+	ld	b,48			; distance to move
+.loop:
+	push	bc
+
+	call	ti.Delay10ms
+
+	pop	hl			; I hate this code
+	push	hl
+	ld	l,h			; because b not c
+	ld	h,0
+	ld	bc,(97 shl 8) + 52
+	add	hl,bc
+	push	hl
+	pop	bc
+	ld	hl,BOS_B
+	call	gfx_Sprite
+
+	pop	bc			; I still hate this code
+	push	bc
+	ld	c,b
+	ld	b,0
+	ld	hl,(187 shl 8) + 146
+	sbc	hl,bc
+	push	hl
+	pop	bc
+	ld	hl,BOS_S
+	call	gfx_Sprite
+
+	call	gfx_BlitBuffer
+
+	pop	bc			; delay if on first frame
+	ld	a,b
+	cp	a,48
+	jq	nz,.notfirst
+
+	push	bc
+	ld	b,30
+.Delay1:
+	call	ti.Delay10ms
+	djnz	.Delay1
+	pop	bc
+
+.notfirst:
+	djnz	.loop
+
+	ld	a,228
+	ld	(lcd_text_fg),a
+	xor	a,a
+	ld	(lcd_text_bg),a
+
+	ld	hl,140
+	ld	a,86
+	call	gfx_SetTextXY
+	ld	hl,str_ecks
+	call	gfx_PrintString
+
+	ld a,187
+	ld (lcd_x),a
+	ld a,134
+	ld (lcd_y),a
+	ld	hl,str_perate
+	call	gfx_PrintString
+	ld	a,220
+	ld (lcd_x),a
+	ld	a,181
+	ld (lcd_y),a
+	ld	hl,str_ystem
+	call	gfx_PrintString
+
+	call	gfx_BlitBuffer
+
+	ld	b,80
+.Delay2:
+	call	ti.Delay10ms
+	djnz	.Delay2
+
+	ld a,255
+	ld (lcd_text_fg),a
+	ld	hl,str_Loading
+	call	gui_PrintLine
+
+	ld	b,80
+.Delay3:
+	call	ti.Delay10ms
+	djnz	.Delay3
 
 	call os_check_recovery_key
 	ld hl,str_HomeDir
@@ -297,11 +419,7 @@ os_return:
 	pop hl,bc
 
 	call os_check_recovery_key
-	ld bc,str_BootConfigFile
-	push bc
-	call fs_OpenFile
-	pop bc
-	call c,generate_boot_configs
+	call generate_boot_configs
 	jq nc,.run_boot_cmd
 ; if we can't find the boot config files and can't initialize them try to run the main gui
 	ld bc,$FF0000

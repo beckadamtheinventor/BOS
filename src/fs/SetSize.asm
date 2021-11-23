@@ -31,7 +31,7 @@ fs_SetSize:
 	jq c,.fail
 	ld (ix + fsentry_filesector - 16), hl ; set new file descriptor data pointer
 	pop hl
-	ld (ix + fsentry_filelen+0 - 16),l
+	ld (ix + fsentry_filelen+0 - 16),l ; set new file descriptor data length
 	ld (ix + fsentry_filelen+1 - 16),h
 	call sys_FlashUnlock
 	pop de

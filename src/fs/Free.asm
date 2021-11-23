@@ -17,6 +17,9 @@ fs_Free:
 	ld c,(hl)
 	inc hl
 	ld b,(hl)
+	ld a,c
+	or a,b
+	jq z,.zero ; dont free it if it hasnt been allocated
 .entrydebc:
 	ex.s hl,de
 	ld de,fs_cluster_map
@@ -36,7 +39,9 @@ fs_Free:
 	ld hl,$FF0000
 	ld b,l ; bc = file_len/512 + (file_len%512 > 0)
 	push bc
-	call nz,sys_WriteFlash
+	call sys_FlashUnlock
+	call sys_WriteFlash
+	call sys_FlashLock
 	pop hl ;return number of sectors freed
 	or a,a
 	ret

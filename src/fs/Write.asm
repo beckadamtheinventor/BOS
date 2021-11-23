@@ -29,22 +29,22 @@ fs_Write:
 	add hl,bc
 	ld (ix-12),hl
 	ld bc,(ix+15) ; void *fd
-	ld (ix-9),bc
-	push bc,hl
+	push bc,hl,bc
+	call fs_GetFDPtr ; get pointer to old file data section prior to clobbering it
+	ld (ix-9),hl
+	pop bc
 	call fs_SetSize
 	jq c,.fail
 	ld (ix+15),hl
 	pop bc,bc
 
 	push hl
-	call sys_FlashUnlock
 	call fs_GetFDPtr ; get pointer to new file data section
-	push hl
-	ld hl,(ix-9)
-	push hl
-	call fs_GetFDPtr ; get pointer to old file data section
-	pop bc,de,bc
+	pop bc
+	ex hl,de
+	ld hl,(ix-9) ; get pointer to old file data section
 	push de,hl
+	call sys_FlashUnlock
 	ld bc,(ix+18) ; int offset
 	ld a,b
 	or a,c

@@ -57,12 +57,12 @@ fs_dir bin_dir
 	fs_sfentry info_exe, "info", "", f_readonly+f_system+f_subfile
 	fs_sfentry json_exe, "json", "", f_readonly+f_system+f_subfile
 	fs_sfentry ls_exe, "ls", "", f_readonly+f_system+f_subfile
-	fs_sfentry mem_so, "mem", "so", f_readonly+f_system+f_subfile
+	fs_entry mem_so, "mem", "so", f_readonly+f_system
 	fs_entry memedit_exe, "memedit", "", f_readonly+f_system
 	fs_sfentry mkdir_exe, "mkdir", "", f_readonly+f_system+f_subfile
 	fs_sfentry mkfile_exe, "mkfile", "", f_readonly+f_system+f_subfile
 	fs_entry msd_exe, "msd", "", f_readonly+f_system
-	fs_sfentry numstr_so, "numstr", "so", f_readonly+f_system+f_subfile
+	fs_entry numstr_so, "numstr", "so", f_readonly+f_system
 	fs_sfentry off_exe, "off", "", f_readonly+f_system+f_subfile
 	fs_entry os_internal_subfiles, "osfiles", "dat", f_readonly+f_system
 	fs_sfentry peek_exe, "peek", "", f_readonly+f_system+f_subfile
@@ -141,14 +141,6 @@ fs_file os_internal_subfiles
 		include 'fs/bin/sleep.asm'
 	end fs_subfile
 
-	fs_subfile numstr_so, bin_dir
-		include 'fs/bin/numstr.so.asm'
-	end fs_subfile
-
-	fs_subfile mem_so, bin_dir
-		include 'fs/bin/mem.so.asm'
-	end fs_subfile
-
 	fs_subfile peek_exe, bin_dir
 		include 'fs/bin/peek.asm'
 	end fs_subfile
@@ -160,7 +152,14 @@ fs_file os_internal_subfiles
 	fs_subfile json_exe, bin_dir
 		include 'fs/bin/json.asm'
 	end fs_subfile
+end fs_file
 
+fs_file numstr_so
+	include 'fs/bin/numstr.so.asm'
+end fs_file
+
+fs_file mem_so
+	include 'fs/bin/mem.so.asm'
 end fs_file
 
 fs_dir var_dir
