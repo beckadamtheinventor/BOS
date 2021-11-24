@@ -295,6 +295,7 @@ os_return:
 	pop bc
 	jq nc,.run_boot_cmd
 
+; splash screen credit to LogicalJoe: https://github.com/LogicalJoe
 .run_first_init:
 	ld	de,BOS_B_compressed
 	ld	hl,BOS_B
