@@ -5,9 +5,9 @@ Section     Base   Top    High   Length
 .libs       D1A8A7 D1A918            71h
 .start      D1A918 D1A97E            66h
 .cleanup    D1A97E D1A98C             Eh
-.text       D1A98C D1B1F9           86Dh
-.data       D1B1F9 D1B1F9             0h
-.rodata     D1B1F9 D1B431           238h
+.text       D1A98C D1B218           88Ch
+.data       D1B218 D1B218             0h
+.rodata     D1B218 D1B450           238h
 .init_array 000000 000000             0h
 .ctors      000000 000000             0h
 .dtors      000000 000000             0h
@@ -51,46 +51,47 @@ _os_GetCSC                   = 020154
 __frameset                   = D1A98C
 __frameset0                  = D1A99A
 __imulu                      = 000158
+__ior                        = 000168
 __ishru                      = 000184
 __ladd                       = 00019C
 __lcmpu                      = 0001AC
 __setflag                    = 000218
 _strlen                      = 0000D4
-.missingappvar               = D1B1F9
-.libloadname                 = D1B201
-.webaddress                  = D1B212
+.missingappvar               = D1B218
+.libloadname                 = D1B220
+.webaddress                  = D1B231
 start                        = D1A918
 skip._exit                   = D1A973
 skip.__Exit                  = D1A973
 skip._abort                  = D1A973
 ___main_argc_argv            = D1A9A5
-_handleUsbEvent              = D1B160
-LJTI1_0                      = D1B225
+_handleUsbEvent              = D1B17F
+LJTI1_0                      = D1B244
 ___main_argc_argv.partitions = D00C00
 ___main_argc_argv.global     = D00C50
 ___main_argc_argv.fat        = D01053
-L_.str                       = D1B231
-L_.str.1                     = D1B26D
-L_.str.2                     = D1B27D
-L_.str.3                     = D1B292
-L_.str.4                     = D1B2A4
-L_.str.5                     = D1B2B7
-L_.str.6                     = D1B2C2
-L_.str.7                     = D1B2D9
-L_.str.8                     = D1B2EC
-L_.str.9                     = D1B301
-L_.str.10                    = D1B31A
-L_.str.11                    = D1B32D
-L_.str.12                    = D1B33B
-L_.str.13                    = D1B340
-L_.str.14                    = D1B357
-L_.str.15                    = D1B372
-L_.str.16                    = D1B392
-L_.str.17                    = D1B3BA
-L_.str.18                    = D1B3DD
-L_.str.19                    = D1B3F5
-L_.str.20                    = D1B40A
-L_.str.21                    = D1B41D
+L_.str                       = D1B250
+L_.str.1                     = D1B28C
+L_.str.2                     = D1B29C
+L_.str.3                     = D1B2B1
+L_.str.4                     = D1B2C3
+L_.str.5                     = D1B2D6
+L_.str.6                     = D1B2E1
+L_.str.7                     = D1B2F8
+L_.str.8                     = D1B30B
+L_.str.9                     = D1B320
+L_.str.10                    = D1B339
+L_.str.11                    = D1B34C
+L_.str.12                    = D1B35A
+L_.str.13                    = D1B35F
+L_.str.14                    = D1B376
+L_.str.15                    = D1B391
+L_.str.16                    = D1B3B1
+L_.str.17                    = D1B3D9
+L_.str.18                    = D1B3FC
+L_.str.19                    = D1B414
+L_.str.20                    = D1B429
+L_.str.21                    = D1B43C
 _#fat_Init                   = D1A8B2
 _#fat_Deinit                 = D1A8B6
 _#fat_Open                   = D1A8BA

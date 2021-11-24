@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
     }
 
     // locate the first fat partition available
-    num_partitions = msd_FindPartitions(&global.msd, partitions, MAX_PARTITIONS);
+    num_partitions = msd_FindPartitions(&global.msd, &partitions, MAX_PARTITIONS);
     if (num_partitions < 1)
     {
         gui_PrintLine("no paritions found");
@@ -160,97 +160,104 @@ int main(int argc, char *argv[])
         }
     }
 
-	gui_PrintLine("Transferring Files");
-	for (int i = 1; i < argc;) {
-		char *src, *dest;
-		void *srcfd, *destfd;
-		src = argv[i++];
-		dest = argv[i++];
-		gui_PrintString("Transferring ");
-		gui_PrintString(src);
-		gui_PrintString(" to ");
-		gui_PrintString(dest);
-		gui_NewLine();
-		if (*src == '*') {
-			faterr = fat_Open(&srcfile, &fat, &src[1]);
-			if (faterr != FAT_SUCCESS) {
-				goto source_file_missing;
-			}
-		} else {
-			srcfd = fs_OpenFile(src);
-			if (srcfd == -1) {
-				source_file_missing:;
-				gui_PrintLine("source file not found!");
-				goto fat_error;
-			}
-		}
-		if (*dest == '*') {
-			char *d = &dest[1];
-			char *path = fs_ParentDir(d);
-			char *base = &d[strlen(path)+1];
-			fat_Delete(&fat, d);
-			faterr = fat_Create(&fat, path, base, FAT_FILE);
-			if (faterr != FAT_SUCCESS) {
-				goto destination_file_error;
-			}
-			faterr = fat_Open(&srcfile, &fat, d);
-			if (faterr != FAT_SUCCESS) {
-				goto destination_file_error;
-			}
-			if (*src == '*') {
-				uint32_t srclen;
-				faterr = fat_SetSize(&destfile, (srclen = fat_GetSize(&srcfile)));
-				if (faterr != FAT_SUCCESS) {
-					goto destination_file_error;
-				}
-				for (uint32_t i = 0; i < srclen; i += FAT_BLOCK_SIZE) {
-					if (fat_Read(&srcfile, 1, &sector_buffer) != 1) {
-						read_error:;
-						gui_PrintLine("Error reading source file!");
-						goto fat_error;
+	if (*argv[1] == '-') {
+		if (argv[1][1] == 't') {
+			gui_PrintLine("Transferring Files");
+			for (int i = 2; i < argc;) {
+				char *src, *dest;
+				void *srcfd, *destfd;
+				src = argv[i++];
+				dest = argv[i++];
+				gui_PrintString("Transferring ");
+				gui_PrintString(src);
+				gui_PrintString(" to ");
+				gui_PrintString(dest);
+				gui_NewLine();
+				if (*src == '*') {
+					faterr = fat_Open(&srcfile, &fat, &src[1]);
+					if (faterr != FAT_SUCCESS) {
+						goto source_file_missing;
 					}
-					if (fat_Write(&destfile, 1, &sector_buffer) != 1) {
-						write_error:;
-						gui_PrintLine("Error writing destination file!");
+				} else {
+					srcfd = fs_OpenFile(src);
+					if (srcfd == -1) {
+						source_file_missing:;
+						gui_PrintLine("source file not found!");
 						goto fat_error;
 					}
 				}
-				fat_Close(&srcfile);
-				fat_Close(&destfile);
-			} else {
-				uint24_t srclen = fs_GetFDLen(srcfd);
-				uint24_t sectors = srclen / FAT_BLOCK_SIZE;
-				uint8_t *srcptr = fs_GetFDPtr(srcfd);
-				if (fat_Write(&destfile, sectors, srcptr) != sectors) {
-					goto write_error;
-				}
-				fat_Close(&destfile);
-			}
-		} else {
-			if (*src = '*') {
-				uint32_t srclen = fat_GetSize(&srcfile);
-				if (srclen > 65535) {
-					gui_PrintLine("File too large for internal filesystem!");
-					goto fat_error;
-				}
-				destfd = fs_CreateFile(dest, 0, srclen);
-				if (destfd == -1) {
-					destination_file_error:;
-					gui_PrintLine("Failed to create destination file!");
-					goto fat_error;
-				}
-				for (uint32_t i = 0; i < srclen; i += FAT_BLOCK_SIZE) {
-					if (fat_Read(&srcfile, 1, &sector_buffer) != 1) {
-						goto read_error;
+				if (*dest == '*') {
+					char *d = &dest[1];
+					char *path = fs_ParentDir(d);
+					char *base = &d[strlen(path)+1];
+					fat_Delete(&fat, d);
+					faterr = fat_Create(&fat, path, base, FAT_FILE);
+					if (faterr != FAT_SUCCESS) {
+						goto destination_file_error;
 					}
-					fs_Write(&sector_buffer, 512, 1, destfd, i);
+					faterr = fat_Open(&srcfile, &fat, d);
+					if (faterr != FAT_SUCCESS) {
+						goto destination_file_error;
+					}
+					if (*src == '*') {
+						uint32_t srclen;
+						faterr = fat_SetSize(&destfile, (srclen = fat_GetSize(&srcfile)));
+						if (faterr != FAT_SUCCESS) {
+							goto destination_file_error;
+						}
+						for (uint32_t i = 0; i < srclen; i += FAT_BLOCK_SIZE) {
+							if (fat_Read(&srcfile, 1, &sector_buffer) != 1) {
+								read_error:;
+								gui_PrintLine("Error reading source file!");
+								goto fat_error;
+							}
+							if (fat_Write(&destfile, 1, &sector_buffer) != 1) {
+								write_error:;
+								gui_PrintLine("Error writing destination file!");
+								goto fat_error;
+							}
+						}
+						fat_Close(&srcfile);
+						fat_Close(&destfile);
+					} else {
+						uint24_t srclen = fs_GetFDLen(srcfd);
+						uint24_t sectors = srclen / FAT_BLOCK_SIZE;
+						uint8_t *srcptr = fs_GetFDPtr(srcfd);
+						if (fat_Write(&destfile, sectors, srcptr) != sectors) {
+							goto write_error;
+						}
+						fat_Close(&destfile);
+					}
+				} else {
+					if (*src = '*') {
+						uint32_t srclen = fat_GetSize(&srcfile);
+						if (srclen > 65535) {
+							gui_PrintLine("File too large for internal filesystem!");
+							goto fat_error;
+						}
+						destfd = fs_CreateFile(dest, 0, srclen);
+						if (destfd == -1) {
+							destination_file_error:;
+							gui_PrintLine("Failed to create destination file!");
+							goto fat_error;
+						}
+						for (uint32_t i = 0; i < srclen; i += FAT_BLOCK_SIZE) {
+							if (fat_Read(&srcfile, 1, &sector_buffer) != 1) {
+								goto read_error;
+							}
+							fs_Write(&sector_buffer, 512, 1, destfd, i);
+						}
+						fat_Close(&srcfile);
+					} else {
+						fs_WriteNewFile(dest, 0, fs_GetFDPtr(srcfd), fs_GetFDLen(srcfd));
+					}
 				}
-				fat_Close(&srcfile);
-			} else {
-				fs_WriteNewFile(dest, 0, fs_GetFDPtr(srcfd), fs_GetFDLen(srcfd));
 			}
+			goto fat_error; // exit once all transfers have been completed
 		}
 	}
+
+	// TODO: some sort of GUI
 
 fat_error:
     // close the filesystem
