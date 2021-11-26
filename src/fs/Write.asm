@@ -3,7 +3,7 @@
 ;@OUTPUT New file descriptor or -1 and Cf set if failed.
 ;@DESTROYS All
 fs_Write:
-	ld hl,-12
+	ld hl,-13
 	call ti._frameset
 	ld (ix-6),iy
 	ld bc,(ix+15) ;void *fd

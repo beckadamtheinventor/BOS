@@ -476,16 +476,17 @@ edited_file:=$-1
 	ld bc,(ix-11)
 	push bc
 	call bos.fs_SetSize
-	pop bc,hl
-	ret z
+	pop bc,bc
+	ret c
 	jq .write_file_data
 .write_new_file:
-	ld bc,(ix-11)
-	push bc
+	ld hl,(ix-11)
+	ex (sp),hl
 	ld c,0
-	push bc
+	push bc,hl
 	call bos.fs_CreateFile
 	pop bc,bc,bc
+	ret c
 .write_file_data:
 	ld bc,0
 	push bc,hl
