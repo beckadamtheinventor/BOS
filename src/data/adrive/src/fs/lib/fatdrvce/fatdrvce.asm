@@ -921,13 +921,13 @@ fat_Create:
 	ld	hl,(iy + 6)
 	compare_hl_zero
 	jq	z,.rootdirpath
-	call	util_StrCopy
+	call	_StrCopy
 .rootdirpath:
 	ld	a,'/'
 	ld	(de),a
 	inc	de
 	ld	hl,(iy + 9)
-	call	util_StrCopy
+	call	_StrCopy
 	pop	de
 	push	iy
 	ld	iy,(iy + 3)
@@ -2318,9 +2318,11 @@ util_compare_auhl_zero:
 	or	a,a
 	ret
 
-util_StrCopy:
-	push hl,de
-	call ti._strcpy
-	pop de,hl
+_StrCopy:
+	ld a,(hl)
+	ld (de),a
+	inc hl
+	inc de
+	or a,a
+	jq nz,_StrCopy
 	ret
-
