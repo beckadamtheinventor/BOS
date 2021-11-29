@@ -2321,8 +2321,8 @@ util_compare_auhl_zero:
 _StrCopy:
 	ld a,(hl)
 	ld (de),a
+	or a,a
+	ret z
 	inc hl
 	inc de
-	or a,a
-	jq nz,_StrCopy
-	ret
+	jq _StrCopy
