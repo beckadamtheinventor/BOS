@@ -34,17 +34,17 @@ secondary_in_ram:
 	call ti.LoadDEInd_s
 	ld (os_second_binary),hl
 	ld (os_second_binary.len),de
-	ld hl,backup_tios_querry
-	call _printline
-waitkey:
-	call ti.GetCSC
-	cp a,ti.sk1
-	jq z,backup_tios
-	cp a,ti.skLog
-	jq nz,waitkey
-	xor a,a
-backup_tios:
-	ld (backup_tios_flag),a
+	; ld hl,backup_tios_querry
+	; call _printline
+; waitkey:
+	; call ti.GetCSC
+	; cp a,ti.sk1
+	; jq z,backup_tios
+	; cp a,ti.skLog
+	; jq nz,waitkey
+	; xor a,a
+; backup_tios:
+	; ld (backup_tios_flag),a
 	; call ti.ArcChk ; get free archive space
 	; ld hl,(ti.OSSize+1)
 	; ld de,$010000 - $020000 ; get os size in bytes, add 64k to the total
@@ -108,8 +108,8 @@ second_binary_appvar:
 	db ti.AppVarObj,"BOSOSpt2"
 installing_string:
 	db "Installing BOS...",0
-backup_tios_querry:
-	db "Back up TIOS? Y/N",0
+; backup_tios_querry:
+	; db "Back up TIOS? Y/N",0
 missing_secondary_str:
 	db "Missing AppVar BOSOSpt2",0
 ; backingup_os_string:

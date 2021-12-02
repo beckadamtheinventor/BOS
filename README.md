@@ -18,15 +18,16 @@ If you are getting the rom image from another author, read the author's provided
 Before installing BOS, know that it is very much incomplete and lacks many features that TI-OS has.
 
 *IMPORTANT NOTE* BOS will not work on any python edition calculator! BOS will *only* work on the TI-84+CE and TI-83 premium CE calculators. Additionally, BOS will not work on any calculator revision M or higher. Check the last character of the serial number on the back of the calculator. If it's "M" or higher, BOS will not work.
-BOS will also fail to work on a non-patched bootcode 5.3.0 or higher due to boot-time OS verification. See BootSwap [https://github.com/commandblockguy/bootswap] for details on disabling OS verification. *DO NOT INSTALL ANY CUSTOM BOOTCODES!!! YOU COULD PERMABRICK YOUR CALCULATOR!* Only use the "disable OS verification" option!
+BOS will also fail to work on a non-patched bootcode 5.3.0 or higher due to boot-time OS verification. See BootSwap [https://github.com/commandblockguy/bootswap] for details on disabling OS verification. Warning: *DO NOT INSTALL ANY CUSTOM BOOTCODE UNLESS YOU ABSOLUTELY KNOW WHAT YOU ARE DOING!!! YOU COULD PERMANENTLY TURN YOUR CALCULATOR INTO A PAPERWEIGHT!* Only use the "disable OS verification" option!
 
 Before installing BOS, note that it will erase all memory on your calculator! Both RAM and Archive! Make sure to back up your calculator's files before installing BOS!
 In order to install BOS on a calculator:
-Download "BOSOS.8xp" from the releases page, transfer it to your calculator using TI-Connect CE or TiLP, then run it from the homescreen. You should see a formatting screen pop up.
+Download "BOSOS.8xp" and "BOSOSpt2.8xv" from the releases tab, transfer it to your calculator using TI-Connect CE or TiLP, then run it from the homescreen. You should see a formatting screen pop up.
+If you do not get a formatting screen, but get an "invalid OS" error or the like, then your calc's bootcode needs to be patched or is incompatible with custom OSs. See above.
 
 
 # Building
-BOS requires the CE C toolchain version 9 or higher and the BOS toolchain extension.
+BOS requires the CE C toolchain version 9.2 or higher and the BOS toolchain extension.
 Python 3.7 or higher is required to build includes and documentation.
 
 Link to CE C toolchain:
@@ -38,21 +39,16 @@ Once both toolchains are installed, run `make` from your system's command line w
 
 
 # Updating BOS
-Currently the only method of updating BOS involves reinstalling TIOS first.
-See Recovery options for details on uninstalling BOS and reinstalling TIOS.
+In order to update BOS at this time you will need to either reinstall TIOS, or install the update via a FAT32 formatted USB flash drive.
+Updating by USB is over 3x faster than doing a fresh install however, and should be preferred if possible.
+To uninstall, press the reset button found on the back of the calculator, open the recovery menu by pressing F1/y= and press del.
 
 
 # BOS Recovery Options
 From BOS's homescreen, press the "Y=" key. (also known as "F1") If this doesn't go to the recovery menu, press "clear" to go back, then "F1" again.
-From there, you can reboot, attempt filesystem recovery, reset the filesystem, and uninstall BOS.
+From there, you can reboot, attempt filesystem recovery / run filesystem cleanup, reset the filesystem, and uninstall BOS.
 If you still cannot access the recovery menu, press the reset button found on the back of the calculator while pressing the recovery menu key.
 If that still doesn't work, hold on+2nd+del and press reset, then reinstall TIOS using TI-Connect CE or TiLP.
-
-
-# BOS OS Call Documentation
-`bos.inc` documentation for OS calls can be found here: https://beckadamtheinventor.github.io/BOS/
-However, OS calls found in `ti84pceg.inc` within the 0x020124-0x0221F8 range are effectively unusable in BOS at this time.
-Call addresses within the 0x000000-0x00063C range (adresses below 0x020000) are bootcode calls and can be used as normal.
 
 
 # Contributing
@@ -63,14 +59,23 @@ Made an enhancement? Optimized some code? Fixed a clerical error? Improved the U
 
 # Installing programs on BOS
 There are a few ways that BOS programs can be installed.
-Programs written for BOS can be packaged with the ROM image for use with CEmu, [https://ce-programming.github.io/CEmu/] or via BOS Package manager. (COMING SOON)
+Programs written for BOS can be packaged with the ROM image for use with CEmu, [https://ce-programming.github.io/CEmu/], via BOS Package manager, (COMING SOON) or transferred from a FAT32 formatted USB drive.
 In any case, read the README file that came with the program, (chances are the author has provided one) and look for install instructions.
 
 
+# Documentation for developers
+
+## BOS OS Call Documentation
+`bos.inc` documentation for OS calls can be found here: https://beckadamtheinventor.github.io/BOS/
+However, OS calls found in `ti84pceg.inc` within the 0x020124-0x0221F8 range are effectively unusable in BOS at this time.
+Call addresses within the 0x000000-0x00063C range (adresses below 0x020000) are bootcode calls and can be used as normal.
+
 # Writing C programs for BOS
-I am currently working on a toolchain fork that targets BOS: [https://github.com/beckadamtheinventor/toolchain/]
+I am currently working on a toolchain fork that targets BOS: [https://github.com/beckadamtheinventor/toolchain-bos]
+This toolchain is installed alongside an existing CEdev toolchain. Simply dowload/clone the repo and copy the `bos` folder into your toolchain installation.
 Many programs that compile on the standard CE C toolchain will compile in the BOS C toolchain, but steer clear from using most `os_` routines; many of them are not implemented in BOS and will cause crashes and other unexpected issues.
 As well, do not directly write directly to files in BOS! All files are stored in flash/archive, so attempting to write to them directly will almost certainly cause a crash.
+
 
 
 # Writing Assembly Programs for BOS
@@ -107,12 +112,13 @@ main:
 
 
 # Using libload
-BOS comes pre-loaded with the standard libload libraries.
+BOS comes pre-loaded with the standard libload libraries, including the USB drivers.
 + fatdrvce (stable, subject to change)
 + fontlibc (stable)
-+ fileioc (mostly stable)
++ fileioc (unstable at the moment)
 + graphx (stable)
 + keypadc (stable)
++ msddrvce (stable, subject to change)
 + srldrvce (stable, subject to change)
 + usbdrvce (stable, subject to change)
 
