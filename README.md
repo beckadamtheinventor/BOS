@@ -3,9 +3,11 @@ An Operating system (WIP) for the TI-84+CE family (eZ80) graphing calculators, w
 
 
 # Eye Candy
-![](https://raw.githubusercontent.com/beckadamtheinventor/BOS/master/cap/cap.gif)
+![](https://raw.githubusercontent.com/beckadamtheinventor/BOS/master/cap/cap2.gif)
+![](https://raw.githubusercontent.com/beckadamtheinventor/BOS/master/cap/cap3.gif)
 
-![](https://raw.githubusercontent.com/beckadamtheinventor/BOS/master/cap/cap1.gif)
+![](https://raw.githubusercontent.com/beckadamtheinventor/BOS/master/cap/cap4.gif)
+![](https://raw.githubusercontent.com/beckadamtheinventor/BOS/master/cap/cap5.gif)
 
 
 # A note on ".rom" Files
