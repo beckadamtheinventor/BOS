@@ -70,20 +70,20 @@ In any case, read the README file that came with the program, (chances are the a
 However, OS calls found in `ti84pceg.inc` within the 0x020124-0x0221F8 range are effectively unusable in BOS at this time.
 Call addresses within the 0x000000-0x00063C range (adresses below 0x020000) are bootcode calls and can be used as normal.
 
-# Writing C programs for BOS
+
+## Writing C programs for BOS
 I am currently working on a toolchain fork that targets BOS: [https://github.com/beckadamtheinventor/toolchain-bos]
 This toolchain is installed alongside an existing CEdev toolchain. Simply dowload/clone the repo and copy the `bos` folder into your toolchain installation.
 Many programs that compile on the standard CE C toolchain will compile in the BOS C toolchain, but steer clear from using most `os_` routines; many of them are not implemented in BOS and will cause crashes and other unexpected issues.
 As well, do not directly write directly to files in BOS! All files are stored in flash/archive, so attempting to write to them directly will almost certainly cause a crash.
 
 
-
-# Writing Assembly Programs for BOS
+## Writing Assembly Programs for BOS
 NOTE: This guide will be heavily modified once I implement an ELF-derived executable and linkable format.
 The header of your program is different depending if it is meant to run from RAM/USB, or flash.
 
 
-## If your program runs from RAM or USB
+### If your program runs from RAM or USB
 header:
 ```
 include 'include/ez80.inc'
@@ -98,7 +98,7 @@ main:
 ```
 
 
-## If Your Program Runs from Flash
+### If Your Program Runs from Flash
 Note that this kind of program requires a method of referencing itself and cannot write directly to itself.
 The program will not know where it is being run from until runtime.
 When the program is run it is passed arguments in a string on the stack, and a pointer to itself in HL.
@@ -111,11 +111,11 @@ main:
 ```
 
 
-# Using libload
+## Using libload
 BOS comes pre-loaded with the standard libload libraries, including the USB drivers.
 + fatdrvce (stable, subject to change)
 + fontlibc (stable)
-+ fileioc (unstable at the moment)
++ fileioc (volatile, do not use at the moment)
 + graphx (stable)
 + keypadc (stable)
 + msddrvce (stable, subject to change)
@@ -125,7 +125,7 @@ BOS comes pre-loaded with the standard libload libraries, including the USB driv
 There are three ways to use libload in BOS, depending on where your program runs from.
 
 
-## Method A
+### Method A
 Program runs from RAM, default libload settings, optionally displaying libload messages.
 ```
 include 'include/ez80.inc'
@@ -163,7 +163,7 @@ main:
 ```
 
 
-## Method B
+### Method B
 Program runs from RAM, libload uses malloc'd memory, libload does not display messages.
 ```
 include 'include/ez80.inc'
@@ -201,7 +201,7 @@ main:
 ```
 
 
-## Method C
+### Method C
 Program runs from flash, libload uses malloc'd memory, libload does not display messages.
 This is an advanced method!
 This method is the most difficult to use due to it requiring either relocation or offsets of the program file.
@@ -216,9 +216,10 @@ Note that since BOS comes pre-loaded with some of the latest libload libraries, 
 Headers for libload libraries included in BOS:
 + fatdrvce: `db $C0,"FATDRVCE",0,1`
 + fontlibc: `db $C0, "FONTLIBC",0,2`
-+ fileioc: `db $C0,"FILEIOC",0,6`
++ fileioc: `db $C0,"FILEIOC",0,7`
 + graphx: `db $C0,"GRAPHX",0,11`
 + keypadc: `db $C0,"KEYPADC",0,2`
++ msddrvce: `db $C0,"MSDDRVCE",0,1`
 + srldrvce: `db $C0,"SRLDRVCE",0,0`
 + usbdrvce: `db $C0,"USBDRVCE",0,0`
 
