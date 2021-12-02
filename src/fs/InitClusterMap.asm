@@ -6,7 +6,7 @@ fs_InitClusterMap:
 	inc a
 	inc a
 	ret z ; dont build the cluster map if its already been built
-
+.reinit:
 	ld hl,-4
 	call ti._frameset
 

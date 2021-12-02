@@ -159,6 +159,7 @@ namespace bos
 ?sys_OpenFileInVar               := $2036C
 ?fs_BaseName                     := $20370
 ?fs_MoveFile                     := $20374
+?fs_WriteRaw                     := $20378
 ; defines
 ?LCD_PAL?    := 0E30200h
 ?LCD_CTRL?   := 0E30018h

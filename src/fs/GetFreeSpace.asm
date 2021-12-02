@@ -3,6 +3,7 @@
 ;@OUTPUT filesystem remaining space in bytes
 fs_GetFreeSpace:
 	ld de,fs_cluster_map
+	ld bc,fs_cluster_map.len
 .reentry:
 	or a,a
 	sbc hl,hl

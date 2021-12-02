@@ -22,14 +22,14 @@
 	public _sys_MemSet
 	public _sys_WaitKey
 	public _sys_WaitKeyCycle
-	public _gui_DrawConsoleWindow
+	public _asm_gui_DrawConsoleWindow
 	public _gui_Input
 	public _gui_NewLine
-	public _gui_Print
-	public _gui_PrintInt
+	public _asm_gui_Print
+	public _asm_gui_PrintInt
 	public _gui_Scroll
 	public _bosgfx_BlitBuffer
-	public _bosgfx_PrintString
+	public _asm_bosgfx_PrintString
 	public __MemClear
 	public __PushOP1
 	public __PopOP1
@@ -91,11 +91,11 @@
 	public _bosgfx_LcdClear
 	public _fs_SanityCheck
 	public _sys_SetupOnInterruptHandler
-	public _gui_PrintChar
+	public _asm_gui_PrintChar
 	public _bosgfx_SetDraw
-	public _gui_PrintString
-	public _gui_PrintLine
-	public _gui_PrintUInt
+	public _asm_gui_PrintString
+	public _asm_gui_PrintLine
+	public _asm_gui_PrintUInt
 	public _sys_WriteFlashFullRam
 	public _sys_WriteFlashByteFullRam
 	public _fs_GetFilePtr
@@ -132,7 +132,7 @@
 	public _bosgfx_VertLine
 	public _sys_Malloc32Align32
 	public _sys_Malloc64Align256
-	public _bosgfx_PrintStringXY
+	public _asm_bosgfx_PrintStringXY
 	public _bosgfx_GetTextX
 	public _bosgfx_GetTextY
 	public _fs_CheckWritable
@@ -149,6 +149,7 @@
 	public _sys_OpenFileInVar
 	public _fs_BaseName
 	public _fs_MoveFile
+	public _fs_WriteRaw
 _boot_os                         := $20108
 _handle_interrupt                := $2010C
 _HandleInstruction               := $20110
@@ -171,14 +172,14 @@ _sys_Malloc                      := $2015C
 _sys_MemSet                      := $20164
 _sys_WaitKey                     := $2016C
 _sys_WaitKeyCycle                := $20170
-_gui_DrawConsoleWindow           := $20174
+_asm_gui_DrawConsoleWindow           := $20174
 _gui_Input                       := $20178
 _gui_NewLine                     := $2017C
-_gui_Print                       := $20180
-_gui_PrintInt                    := $20184
+_asm_gui_Print                       := $20180
+_asm_gui_PrintInt                    := $20184
 _gui_Scroll                      := $20188
 _bosgfx_BlitBuffer                  := $2018C
-_bosgfx_PrintString                 := $20190
+_asm_bosgfx_PrintString                 := $20190
 __MemClear                       := $20194
 __PushOP1                        := $20198
 __PopOP1                         := $2019C
@@ -240,11 +241,11 @@ _bosgfx_BufClear                    := $20280
 _bosgfx_LcdClear                    := $20284
 _fs_SanityCheck                  := $20288
 _sys_SetupOnInterruptHandler     := $2028C
-_gui_PrintChar                   := $20290
+_asm_gui_PrintChar                   := $20290
 _bosgfx_SetDraw                     := $20294
-_gui_PrintString                 := $20298
-_gui_PrintLine                   := $2029C
-_gui_PrintUInt                   := $202A0
+_asm_gui_PrintString                 := $20298
+_asm_gui_PrintLine                   := $2029C
+_asm_gui_PrintUInt                   := $202A0
 _sys_WriteFlashFullRam           := $202A4
 _sys_WriteFlashByteFullRam       := $202A8
 _fs_GetFilePtr                   := $202AC
@@ -281,7 +282,7 @@ _bosgfx_Sprite2x                    := $20324
 _bosgfx_VertLine                    := $20328
 _sys_Malloc32Align32             := $2032C
 _sys_Malloc64Align256            := $20330
-_bosgfx_PrintStringXY               := $20334
+_asm_bosgfx_PrintStringXY               := $20334
 _bosgfx_GetTextX                    := $20338
 _bosgfx_GetTextY                    := $2033C
 _fs_CheckWritable                := $20340
@@ -298,3 +299,4 @@ _sys_MallocPersistent            := $20368
 _sys_OpenFileInVar               := $2036C
 _fs_BaseName                     := $20370
 _fs_MoveFile                     := $20374
+_fs_WriteRaw                     := $20378

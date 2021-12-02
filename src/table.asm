@@ -155,3 +155,4 @@
 	jp sys_OpenFileInVar
 	jp fs_BaseName
 	jp fs_MoveFile
+	jp fs_WriteRaw

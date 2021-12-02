@@ -65,12 +65,11 @@ bool fs_CheckDirExists(const char *path);
 char *fs_GetPathLastName(const char *path);
 
 /**
- * Copy an 8.3 file name from a file descriptor.
- * @param dest Destination to read into.
+ * Copy a file name from a file descriptor.
  * @param fd File descriptor to read file name from.
- * @return Pointer to dest.
+ * @return Pointer to file name.
  */
-char *fs_CopyFileName(char *buffer, void *fd);
+char *fs_CopyFileName(void *fd);
 
 /**
  * Read bytes from a file.
@@ -90,9 +89,23 @@ unsigned int fs_Read(void *data, size_t len, uint8_t count, void *fd, unsigned i
  * @param count Number of lengths to write.
  * @param fd File descriptor to write to.
  * @param offset Offset of file to write data to.
- * @note writes len*count bytes.
+ * @return New file descriptor, or -1 if failed.
+ * @note writes len*count bytes from data.
  */
-unsigned int fs_Write(void *data, size_t len, uint8_t count, void *fd, unsigned int offset);
+void *fs_Write(void *data, size_t len, uint8_t count, void *fd, unsigned int offset);
+
+/**
+ * Write bytes to a file without reallocating the file.
+ * @param data Pointer to data to write to file.
+ * @param len Length of data to write.
+ * @param count Number of lengths to write.
+ * @param fd File descriptor to write to.
+ * @param offset Offset of file to write data to.
+ * @return New file descriptor, or -1 if failed.
+ * @note Only the amount of bytes allocated to the file can be written, this routine fails otherwise.
+ *       This routine will also fail if the data can't be written correctly.
+ */
+void *fs_WriteRaw(void *data, size_t len, uint8_t count, void *fd, unsigned int offset);
 
 /**
  * Scan the keypad, checking if a key was pressed.
@@ -158,6 +171,35 @@ uint8_t sys_WaitKeyCycle(void);
 char *gui_Input(char *buffer, unsigned int len);
 
 /**
+ * Clear the screen and print a line.
+ */
+void gui_DrawConsoleWindow(const char *str);
+
+/**
+ * Print a string to the screen advancing the current draw collumn, but not advancing the current line.
+ * @param str Pointer to string to print.
+ */
+void gui_Print(const char *str);
+
+/**
+ * Print a character to the screen, advancing the current draw collumn.
+ * @param str Pointer to string to print.
+ */
+void gui_PrintChar(const char *str);
+
+/**
+ * Print a string to the screen and advance the current draw line.
+ * @param str Pointer to string to print.
+ */
+void gui_PrintLine(const char *str);
+
+/**
+ * Print an integer to the screen and advance the current draw collumn.
+ * @param num integer to print.
+ */
+void gui_PrintInt(int num);
+
+/**
  * Blit the back buffer to the LCD.
  */
 void bosgfx_BlitBuffer(void);
@@ -167,6 +209,13 @@ void bosgfx_BlitBuffer(void);
  * @param str Pointer to string to print.
  */
 void bosgfx_PrintString(const char *str);
+
+/**
+ * Set the text draw position to collumn, row
+ * @param collumn zero indexed collumn number.
+ * @param row zero indexed row number.
+ */
+void bosgfx_SetTextPos(uint8_t collumn, uint8_t row);
 
 /**
  * Scan the keypad and return a scan code.
@@ -231,6 +280,7 @@ void sys_FlashLock(void);
  * @param path Path to file to be created.
  * @param flags File attribute byte.
  * @param len Length to allocate for new file.
+ * @return New file descriptor, or -1 if failed.
  */
 void *fs_CreateFile(const char *path, uint8_t flags, unsigned int len);
 
@@ -262,8 +312,9 @@ void *fs_OpenFileInDir(char *path, void *dir);
  * Set the size of a given file.
  * @param len New size for file.
  * @param fd File descriptor of file to set size of.
+ * @return New file descriptor, or -1 if failed.
  */
-bool fs_SetSize(int len, void *fd);
+void *fs_SetSize(int len, void *fd);
 
 /**
  * Overwrite file contents.
@@ -272,14 +323,15 @@ bool fs_SetSize(int len, void *fd);
  * @param count Multiplied by len to get actual write length.
  * @param fd File descriptor to write to.
  * @param offset File offset to write to.
+ * @return New file descriptor, or -1 if failed.
  */
-int fs_WriteFile(void *data, unsigned int len, uint8_t count, void *fd, unsigned int offset);
+void *fs_WriteFile(void *data, unsigned int len, uint8_t count, void *fd, unsigned int offset);
 
 /**
  * Delete a file.
  * @param path Path to file to be deleted.
  */
-bool fs_DeleteFile(const char *path);
+void fs_DeleteFile(const char *path);
 
 /**
  * Get user input.
@@ -290,7 +342,7 @@ bool fs_DeleteFile(const char *path);
 char *gui_InputNoClear(char *buffer, unsigned int len);
 
 /**
- * [re]Initialize filesystem cluster map.
+ * [re]Initialize filesystem cluster map / clean filesystem
  * @note You probably won't need to call this.
  */
 void fs_InitClusterMap(void);
@@ -382,14 +434,16 @@ int fs_GetSector(void *address);
  * @param byte Byte to write to file.
  * @param fd Pointer to file descriptor.
  * @param offset File offset to write to.
+ * @return New file descriptor, or -1 if failed.
  */
-int fs_WriteByte(uint8_t byte, void *fd, int offset);
+void *fs_WriteByte(uint8_t byte, void *fd, int offset);
 
 /**
  * Rename a file.
  * @param directory Path to parent directory of file to be renamed.
  * @param old_name Old file name.
  * @param new_name New file name.
+ * @return New file descriptor, or -1 if failed.
  */
 void *fs_RenameFile(const char *directory, const char *old_name, const char *new_name);
 
@@ -397,9 +451,22 @@ void *fs_RenameFile(const char *directory, const char *old_name, const char *new
  * Create a directory.
  * @param path Path to file to create.
  * @param flags File properties byte.
+ * @return New file descriptor, or -1 if failed.
  * @note flags byte should have fsbit_subdir set.
  */
 void *fs_CreateDir(const char *path, uint8_t flags);
+
+/**
+ * Run a sanity check on the filesystem.
+ */
+void fs_SanityCheck(void);
+
+/**
+ * Get a pointer to a given file's data section.
+ * @param path Path to file.
+ * @return Pointer to file data section.
+ */
+void *fs_GetFilePtr(const char *path);
 
 /**
  * Clear LCD buffer.
@@ -412,9 +479,28 @@ void bosgfx_BufClear(void);
 void bosgfx_LcdClear(void);
 
 /**
- * Run a sanity check on the filesystem.
+ * Swap text 1 and 2 colors.
  */
-void fs_SanityCheck(void);
+void bosgfx_SwapTextColors(void);
+
+/**
+ * Set Font to a provided data pointer.
+ * @param data Pointer to new font data.
+ * @return Pointer to old font data.
+ * @note font data structure: uint8_t num_bitmaps, uint8_t spacing[], uint8_t data[]
+ */
+void *bosgfx_SetFont(void *data);
+
+/**
+ * Set Font to default
+ */
+void bosgfx_SetDefaultFont(void);
+
+/**
+ * Set the OS gfx/gui draw location.
+ * @param loc 0 draws from vRam, 1 draws from vRam buffer
+ */
+void bosgfx_SetDraw(uint8_t loc);
 
 /**
  * Write data to flash using vRam as swap space
@@ -422,7 +508,6 @@ void fs_SanityCheck(void);
  * @param src Data to write.
  * @param len Length of data to write.
  * @return True if success, false if failed.
- * @note Flash must be unlocked prior to usage.
  */
 bool sys_WriteFlashFullRam(void *dest, void *src, int len);
 
@@ -431,16 +516,13 @@ bool sys_WriteFlashFullRam(void *dest, void *src, int len);
  * @param dest Destination to write byte.
  * @param byte Byte to write.
  * @return True if success, false if failed.
- * @note Flash must be unlocked prior to usage.
  */
 bool sys_WriteFlashByteFullRam(void *dest, uint8_t byte);
 
 /**
- * Get a pointer to a given file's data section.
- * @param path Path to file.
- * @return Pointer to file data section.
+ * Turn off the calculator until the user presses the [ON] key
  */
-void *fs_GetFilePtr(const char *path);
+void sys_TurnOff(void);
 
 /**
  * Execute a file given a pointer to its data section.
@@ -449,11 +531,6 @@ void *fs_GetFilePtr(const char *path);
  * @return Program exit code.
  */
 int sys_ExecuteFileFromPtr(void *ptr, char *args);
-
-/**
- * Turn off the calculator until the user presses the [ON] key
- */
-void sys_TurnOff(void);
 
 /**
  * Increments current process/program ID.
@@ -484,31 +561,14 @@ void sys_FreeRunningProcessId(void);
 void fs_GarbageCollect(void);
 
 /**
- * Swap text 1 and 2 colors.
- */
-void bosgfx_SwapTextColors(void);
-
-/**
  * Create a new file and write contents to it.
  * @param path Pointer to file path.
  * @param properties File attribute byte.
  * @param data Pointer to data to be written to the file.
  * @param len Length of data to be written to the file.
+ * @return New file descriptor, or -1 if failed.
  */
 void *fs_WriteNewFile(const char *path, uint8_t properties, void *data, int len);
-
-/**
- * Set Font to a provided data pointer.
- * @param data Pointer to new font data.
- * @return Pointer to old font data.
- * @note font data structure: uint8_t num_bitmaps, uint8_t spacing[], uint8_t data[]
- */
-void *bosgfx_SetFont(void *data);
-
-/**
- * Set Font to default
- */
-void bosgfx_SetDefaultFont(void);
 
 /**
  * Decompress a block of zx7-compressed memory.

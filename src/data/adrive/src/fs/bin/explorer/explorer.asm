@@ -4,6 +4,7 @@ include '../include/ti84pceg.inc'
 include '../include/bos.inc'
 include '../include/threading.inc'
 
+
 display_items_num_x   := 4
 display_items_num_y   := 5
 display_item_width    := 310/display_items_num_x

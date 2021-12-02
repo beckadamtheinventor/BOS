@@ -1,11 +1,8 @@
 explorer_configure_theme:
 	call .main
-	ld c,1
-	push af,de,bc
-	call gfx_SetDraw
-	pop bc,de,af
-	or a,a
-	jq z,.custom
+	ld a,c
+	or a,b
+	ret z ; return if we're at the end of the themes file
 	ld a,(de)
 	ld (explorer_background_color),a
 	inc de
@@ -18,61 +15,6 @@ explorer_configure_theme:
 	ld a,(de)
 	ld (explorer_foreground2_color),a
 	jq explorer_write_config
-.custom:
-	call draw_background
-	call gfx_BlitBuffer
-	ld hl,.colors
-	ld a,(explorer_background_color)
-	ld (hl),a
-	ld a,(explorer_statusbar_color)
-	ld (.colors+1),a
-	ld a,(explorer_foreground_color)
-	ld (.colors+2),a
-	ld a,(explorer_foreground2_color)
-	ld (.colors+3),a
-.custom_menu:
-	push hl
-	call bos.sys_WaitKey
-	pop hl
-	cp a,ti.skUp
-	jq nz,.dontprevcolor
-	dec hl
-.dontprevcolor:
-	cp a,ti.skDown
-	jq nz,.dontnextcolor
-	inc hl
-.dontnextcolor:
-	ld c,a
-	ld a,l
-	cp a, (.colors-1) and $FF
-	jq nz,.notunder
-	ld l, (.colors+3) and $FF
-.notunder:
-	cp a, (.colors+4) and $FF
-	jq nz,.notover
-	ld l, .colors and $FF
-.notover:
-	ld a,c
-	cp a,ti.skLeft
-	jq nz,.dontdecrementcolor
-	dec (hl)
-.dontdecrementcolor:
-	cp a,ti.skRight
-	jq nz,.dontincrementcolor
-	inc (hl)
-.dontincrementcolor:
-	cp a,ti.skClear
-	jq z,.exit
-	
-	ret
-.colors:
-	db 4 dup 0
-.exit:
-	ld c,1
-	push bc
-	call gfx_SetDraw
-	pop bc
-	ret
 .main:
 	ld bc,display_items_num_x*display_items_num_y*3  ; clear out the dir listing so we don't draw it
 	ld hl,explorer_dirlist_buffer
@@ -174,19 +116,17 @@ explorer_configure_theme:
 	cp a,ti.sk2nd
 	jq nz,.input_loop
 .select:
-	ld de,0
+	ld hl,0
 .smc_themes_ptr:=$-3
 	ld bc,0
 .smc_themes_len:=$-3
-	ld hl,(.smc_selection)
+	ld de,(.smc_selection)
 .get_theme_loop:
-	ex hl,de
 	ld a,$A
 	cpir
-	ex hl,de
-	add hl,bc
-	or a,a
-	sbc hl,bc
+	dec de
+	ld a,d
+	or a,e
 	ret z
 	ld a,4
 .next_theme_loop_skip_4b_loop:
@@ -194,7 +134,7 @@ explorer_configure_theme:
 	ret po
 	dec a
 	jq nz,.next_theme_loop_skip_4b_loop
-	ret
+	jq .custom
 .cursor_down:
 	ld hl,(.smc_selection)
 	inc hl
@@ -224,6 +164,66 @@ explorer_configure_theme:
 	push bc,hl
 	call bos.fs_WriteNewFile
 	pop bc,bc,bc,bc
+	ret
+
+.custom:
+	ld c,1
+	push bc
+	call gfx_SetDraw
+	pop bc
+	call draw_background
+	call gfx_BlitBuffer
+	ld hl,.colors
+	ld a,(explorer_background_color)
+	ld (hl),a
+	ld a,(explorer_statusbar_color)
+	ld (.colors+1),a
+	ld a,(explorer_foreground_color)
+	ld (.colors+2),a
+	ld a,(explorer_foreground2_color)
+	ld (.colors+3),a
+.custom_menu:
+	push hl
+	call bos.sys_WaitKey
+	pop hl
+	cp a,ti.skUp
+	jq nz,.dontprevcolor
+	dec hl
+.dontprevcolor:
+	cp a,ti.skDown
+	jq nz,.dontnextcolor
+	inc hl
+.dontnextcolor:
+	ld c,a
+	ld a,l
+	cp a, (.colors-1) and $FF
+	jq nz,.notunder
+	ld l, (.colors+3) and $FF
+.notunder:
+	cp a, (.colors+4) and $FF
+	jq nz,.notover
+	ld l, .colors and $FF
+.notover:
+	ld a,c
+	cp a,ti.skLeft
+	jq nz,.dontdecrementcolor
+	dec (hl)
+.dontdecrementcolor:
+	cp a,ti.skRight
+	jq nz,.dontincrementcolor
+	inc (hl)
+.dontincrementcolor:
+	cp a,ti.skClear
+	jq z,.exit
+	
+	ret
+.colors:
+	db 4 dup 0
+.exit:
+	ld c,1
+	push bc
+	call gfx_SetDraw
+	pop bc
 	ret
 
 explorer_write_config:

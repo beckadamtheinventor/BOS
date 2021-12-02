@@ -4,7 +4,8 @@ _MemClear:
 	push hl
 	pop de
 	inc de
-	ld (hl),0
+	xor a,a
+	ld (hl),a
 	ldir
 	pop de
 	ret

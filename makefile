@@ -144,6 +144,14 @@ bos8xp:
 bosrom: $(call NATIVEPATH,noti-ez80/bin/NOTI.rom)
 	fasmg $(call NATIVEPATH,src/rom.asm) $(call NATIVEPATH,bin/BOSOS.rom)
 
+clean-cedit:
+	$(Q)make clean -f bos.makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/)
+	$(Q)echo Removed CEdit objects and binaries.
+
+clean-msd:
+	$(Q)make clean -f makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/msd/)
+	$(Q)echo Removed MSD objects and binaries.
+
 #make clean
 clean:
 	$(call RMDIR,bin)
@@ -153,4 +161,5 @@ clean:
 	$(RM) $(call NATIVEPATH,src/data/adrive/data.bin)
 	$(RM) $(call NATIVEPATH,src/data/adrive/main.bin)
 	$(Q)make clean -f bos.makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/)
+	$(Q)make clean -f makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/msd/)
 	$(Q)echo Removed objects and binaries.

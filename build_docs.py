@@ -152,8 +152,8 @@ def build_docs():
 										b.append(t.replace("@INPUT ","").replace("\\n","<br>\n"))
 									elif t.startswith("@OUTPUT "):
 										c.append(t.replace("@OUTPUT ","").replace("\\n","<br>\n"))
-									elif t.startswith("@DESTROYS "):
-										d.append(t.replace("@DESTROYS ","").replace("\\n","<br>\n"))
+									# elif t.startswith("@DESTROYS "):
+										# d.append(t.replace("@DESTROYS ","").replace("\\n","<br>\n"))
 									elif t.startswith("@NOTE "):
 										e.append(t.replace("@NOTE ","").replace("\\n","<br>\n"))
 								ix+=1

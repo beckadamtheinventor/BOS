@@ -369,6 +369,8 @@ os_return:
 	pop	bc
 
 .notfirst:
+	call sys_AnyKey ; doesn't modify BC
+	jq nz,.skip_splash
 	djnz	.loop
 
 	ld	a,228
@@ -397,20 +399,18 @@ os_return:
 
 	call	gfx_BlitBuffer
 
-	ld	b,80
+	ld	b,100
 .Delay2:
+	call sys_AnyKey ; doesn't modify BC
+	jq nz,.skip_splash
 	call	ti.Delay10ms
 	djnz	.Delay2
 
+.skip_splash:
 	ld a,255
 	ld (lcd_text_fg),a
 	ld	hl,str_Loading
 	call	gui_PrintLine
-
-	ld	b,80
-.Delay3:
-	call	ti.Delay10ms
-	djnz	.Delay3
 
 	call os_check_recovery_key
 	ld hl,str_HomeDir
@@ -480,7 +480,6 @@ os_recovery_menu:
 	jq z,boot_os
 	cp a,39
 	jq z,.reinstalltios
-	
 	jq .keywait
 
 .reset_fs:
@@ -498,6 +497,7 @@ os_recovery_menu:
 
 .attempt_recovery:
 	call fs_SanityCheck
+	call fs_InitClusterMap.reinit
 	jq os_recovery_menu
 
 .uninstall:
