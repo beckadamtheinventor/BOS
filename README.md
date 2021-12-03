@@ -9,6 +9,8 @@ An Operating system (WIP) for the TI-84+CE family (eZ80) graphing calculators, w
 ![](https://raw.githubusercontent.com/beckadamtheinventor/BOS/master/cap/cap4.gif)
 ![](https://raw.githubusercontent.com/beckadamtheinventor/BOS/master/cap/cap5.gif)
 
+![](https://raw.githubusercontent.com/beckadamtheinventor/BOS/master/cap/cap6.gif)
+
 
 # A note on ".rom" Files
 BOS ".rom" files are for use on CEmu [https://ce-programming.github.io/CEmu/] *only* and should not be installed on physical hardware. If you want BOS on physical hardware, use the ".8xp" file. (See installation for details)
