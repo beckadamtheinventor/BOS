@@ -6,9 +6,7 @@ fs_SanityCheck:
 	jq z,.run_first_init
 	ld a,(fs_root_dir_address)
 	inc a
-	ret nz
-	; jq z,.run_first_init
-
+	jq nz,.check_root_dirs
 .run_first_init:
 	ld a,24
 	ld (currow),a
@@ -128,6 +126,7 @@ fs_SanityCheck:
 
 	call fs_Format
 
+.check_root_dirs:
 	ld hl,current_working_dir
 	ld (hl),'/'
 	inc hl
@@ -135,7 +134,6 @@ fs_SanityCheck:
 	ld hl,str_bin_dir
 	ld de,fs_root_dir_data
 	call .check_file_fd
-	call nz,.create_missing_entry
 	ld hl,str_lib_dir
 	ld de,fs_root_dir_data+16
 	call .check_file_fd
