@@ -3,7 +3,7 @@
 
 fs_Format:
 	ld hl,str_Formatting
-	call gui_DrawConsoleWindow
+	call gui_PrintLine
 
 	call sys_FlashUnlock
 
@@ -16,36 +16,16 @@ fs_Format:
 	call .erase_one
 	cp a,$2B ;this is the sector where TIOS gets backed up from the installer
 	jq nz,.erase_some_loop
-	jq .extract_fs
+	jq .done
 .erase_all_loop: ;erase all filesystem flash sectors
 	call .erase_one
 	cp a,end_of_user_archive shr 16
 	jr nz,.erase_all_loop
-
+.done:
 	ld hl,str_ErasedUserMemory
 	call gui_PrintLine
-.extract_fs:
-	ld hl,str_WritingFilesystem
-	call gui_PrintLine
-	
-	ld bc,fs_drive_a_data_compressed_bin
-	push bc
-	ld bc,$040000
-	push bc
-	call util_Zx7DecompressToFlash
-	pop bc,bc
-
-	call fs_InitClusterMap
-
-.dont_reserve_memory:
-	ld hl,flashStatusByte
-	res bKeepFlashUnlocked, (hl)
-	call sys_FlashLock
-
-	call gui_NewLine
-	ld hl,str_PressAnyKey
-	call gui_Print
-	jp sys_WaitKeyCycle
+	call fs_ExtractRootDir
+	jq unpack_updates.extract
 
 ; ._next_header      := $D3FF00
 ; ._file_len_header  := $D3FF03

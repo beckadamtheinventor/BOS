@@ -52,9 +52,6 @@ boot_os:
 	inc a
 	call gfx_SetDraw
 
-	call fs_SanityCheck
-	call fs_InitClusterMap
-
 	ld hl,current_working_dir
 	ld (hl),'/'
 	inc hl
@@ -287,137 +284,11 @@ os_return:
 	call os_GetOSInfo
 	call gui_DrawConsoleWindow
 
+	call os_check_recovery_key
+	call fs_SanityCheck
 
 	call os_check_recovery_key
-	ld bc,str_BootConfigFile
-	push bc
-	call fs_OpenFile
-	pop bc
-	jq nc,.run_boot_cmd
-
-; splash screen credit to LogicalJoe: https://github.com/LogicalJoe
-.run_first_init:
-	ld	de,BOS_B_compressed
-	ld	hl,BOS_B
-	push	de,hl
-	call	util_Zx7Decompress
-	pop	bc,bc
-
-	ld	de,BOS_O_compressed
-	push	de,hl
-	call	util_Zx7Decompress
-	pop	bc,bc
-
-	ld	de,BOS_S_compressed
-	push	de,hl
-	call	util_Zx7Decompress
-	pop	bc,bc
-
-;	ld	hl,BOS_B
-;	ld	bc, (97 shl 8) + 53
-;	call	gfx_Sprite
-
-	ld	hl,BOS_O
-	ld	bc, (139 shl 8) + 99
-	call	gfx_Sprite
-
-;	ld	hl,BOS_S
-;	ld	bc, (187 shl 8) + 145
-;	call	gfx_Sprite
-
-
-	ld	b,48			; distance to move
-.loop:
-	push	bc
-
-	call	ti.Delay10ms
-
-	pop	hl			; I hate this code
-	push	hl
-	ld	l,h			; because b not c
-	ld	h,0
-	ld	bc,(97 shl 8) + 52
-	add	hl,bc
-	push	hl
-	pop	bc
-	ld	hl,BOS_B
-	call	gfx_Sprite
-
-	pop	bc			; I still hate this code
-	push	bc
-	ld	c,b
-	ld	b,0
-	ld	hl,(187 shl 8) + 146
-	sbc	hl,bc
-	push	hl
-	pop	bc
-	ld	hl,BOS_S
-	call	gfx_Sprite
-
-	call	gfx_BlitBuffer
-
-	pop	bc			; delay if on first frame
-	ld	a,b
-	cp	a,48
-	jq	nz,.notfirst
-
-	push	bc
-	ld	b,30
-.Delay1:
-	call	ti.Delay10ms
-	djnz	.Delay1
-	pop	bc
-
-.notfirst:
-	call sys_AnyKey ; doesn't modify BC
-	jq nz,.skip_splash
-	djnz	.loop
-
-	ld	a,228
-	ld	(lcd_text_fg),a
-	xor	a,a
-	ld	(lcd_text_bg),a
-
-	ld	hl,140
-	ld	a,86
-	call	gfx_SetTextXY
-	ld	hl,str_ecks
-	call	gfx_PrintString
-
-	ld a,187
-	ld (lcd_x),a
-	ld a,134
-	ld (lcd_y),a
-	ld	hl,str_perate
-	call	gfx_PrintString
-	ld	a,220
-	ld (lcd_x),a
-	ld	a,181
-	ld (lcd_y),a
-	ld	hl,str_ystem
-	call	gfx_PrintString
-
-	call	gfx_BlitBuffer
-
-	ld	b,100
-.Delay2:
-	call sys_AnyKey ; doesn't modify BC
-	jq nz,.skip_splash
-	call	ti.Delay10ms
-	djnz	.Delay2
-
-.skip_splash:
-	ld a,255
-	ld (lcd_text_fg),a
-	ld	hl,str_Loading
-	call	gui_PrintLine
-
-	call os_check_recovery_key
-	ld hl,str_HomeDir
-	ld e,1 shl fd_subdir
-	push de,hl
-	call fs_CreateDir
-	pop hl,bc
+	call unpack_updates
 
 	call os_check_recovery_key
 	call generate_boot_configs
@@ -431,7 +302,7 @@ os_return:
 	call os_check_recovery_key
 	ld de,str_CmdArguments
 	push de
-	ld hl,str_CmdExecutable
+	ld hl,str_CmdExecutable	
 .exec_file_hl:
 	push hl
 	call fs_OpenFile
@@ -468,44 +339,32 @@ os_recovery_menu:
 	call gui_DrawConsoleWindow
 .keywait:
 	call sys_WaitKeyCycle
-	cp a,55
+	cp a,ti.skMode
 	jq z,.reset_fs
-	cp a,54
-	jq z,.turn_off
-	cp a,9
+	cp a,ti.skEnter
 	jq z,.attempt_recovery
-	cp a,56
+	cp a,ti.skDel
 	jq z,.uninstall
-	cp a,15
+	cp a,ti.skClear
 	jq z,boot_os
-	cp a,39
+	cp a,ti.skMatrix
 	jq z,.reinstalltios
-	jq .keywait
-
-.reset_fs:
-	ld hl,string_press_enter_confirm
-	call gui_Print
-	call sys_WaitKeyCycle
-	cp a,9
-	jq nz,os_recovery_menu
-	call fs_Format
-	jq boot_os
+	; cp a,ti.sk6
+	; jq z,.validate
+	cp a,ti.sk2nd
+	jq nz,.keywait
 
 .turn_off:
 	call sys_TurnOff
 	jq boot_os
 
-.attempt_recovery:
-	call fs_SanityCheck
-	call fs_InitClusterMap.reinit
-	jq os_recovery_menu
+.reset_fs:
+	call .confirm
+	call fs_Format
+	jq boot_os
 
 .uninstall:
-	ld hl,string_press_enter_confirm
-	call gui_Print
-	call sys_WaitKeyCycle
-	cp a,9
-	jq nz,os_recovery_menu
+	call .confirm
 	ld hl,bos_UserMem
 	push hl ;return to usermem which immediately tells the calc to invalidate the OS and reboot
 	ld (hl),$CD
@@ -523,11 +382,7 @@ os_recovery_menu:
 	jq sys_EraseFlashSector ;erase first OS sector, bootcode will handle the rest
 
 .reinstalltios:
-	ld hl,string_press_enter_confirm
-	call gui_Print
-	call sys_WaitKeyCycle
-	cp a,9
-	jq nz,os_recovery_menu
+	call .confirm
 	ld a,($0401FF)
 	inc a
 	jq nz,.reinstalltios_start
@@ -542,6 +397,77 @@ os_recovery_menu:
 	ld bc,data_reinstall_tios_program.len
 	ldir
 	jp sys_FlashUnlock
+
+.attempt_recovery:
+	call .confirm
+	call fs_SanityCheck
+	jq os_recovery_menu
+
+; .validate:
+	; call .confirm
+	; ld hl,str_ValidatingOSFiles
+	; call gui_DrawConsoleWindow
+	; ld hl,safeRAM
+	; push hl
+; .validate_loop:
+	; ld ix,fs_system_files
+	; push ix
+	; call fs_OpenFile
+	; ex (sp),hl
+	; call fs_HashFile
+	; pop bc
+	; lea hl,ix+32
+	; ld de,safeRAM
+	; ld b,32
+; assert ~safeRAM and $FF
+	; ld c,e
+; .digest_loop:
+	; ld a,(de)
+	; cp a,(hl)
+	; jq z,.match
+	; inc c
+; .digest_match:
+	; djnz .digest_loop
+	; ld a,c
+	; or a,a
+	; call nz,.verification_fail
+
+	; lea ix,ix+64
+	; ld a,(ix)
+	; or a,a
+	; jq nz,.validate_loop
+	; pop bc
+	
+	; jq .keywait
+
+; .verification_fail:
+	; ld hl,str_VerificationFailed
+	; call gui_Print
+	; lea hl,ix
+	; call gui_PrintLine
+	; jq sys_WaitKeyCycle
+
+.confirm:
+	ld hl,string_press_enter_confirm
+	call gui_Print
+	call sys_WaitKeyCycle
+	cp a,9
+	jq nz,os_recovery_menu
+	ret
+
+
+unpack_updates:
+	db $3E ; smc'd into a nop once updates are unpacked
+	ret ; this will only be executed if updates are already unpacked
+.extract:
+	call fs_ExtractOSBinaries
+	call fs_ExtractOSOptBinaries
+
+	call sys_FlashUnlock
+	xor a,a
+	ld de,unpack_updates
+	call sys_WriteFlashA
+	jq sys_FlashLock
 
 
 ;tios reinstaller
@@ -577,4 +503,5 @@ end virtual
 data_reinstall_tios_program:
 	db data_reinstall_tios_program.data
 .len:=$-.
+
 

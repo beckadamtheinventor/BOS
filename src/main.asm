@@ -16,6 +16,7 @@ include 'util.inc'
 include 'fs.inc'
 include 'gui.inc'
 include 'compatibility.inc'
+include 'math.inc'
 include 'data.inc'
 
 macro exaf

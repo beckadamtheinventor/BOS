@@ -75,10 +75,10 @@ backup_tios_flag := $-1
 		call $2E0
 
 .dont_backup:
-		ld a,$04
-		call .sectorerase
 ; setup our OS
 if defined INSTALLER8XP
+		ld a,$04
+		call .sectorerase
 		ld bc,($20104 + 3) ;c = high byte of ti.OSSize jump location
 		push bc ;push last sector of TIOS
 end if

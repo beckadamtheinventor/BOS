@@ -13,7 +13,7 @@ fs_DeleteFile:
 	jq nz,.fail
 	call fs_OpenFile
 	ex (sp),hl
-;	jq c,.fail
+	; jq c,.fail
 
 ;free the file's data
 	call fs_Free
@@ -28,6 +28,7 @@ fs_DeleteFile:
 .fail:
 	xor a,a
 	or a,a
+	ld sp,ix
 	pop ix
 	ret
 

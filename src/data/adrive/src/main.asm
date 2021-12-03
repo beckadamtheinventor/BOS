@@ -6,54 +6,50 @@ include 'include/bos.inc'
 include 'include/threading.inc'
 include 'include/bos_trx.inc'
 
-org $040000
-fs_fs
+org $040200
+fs_fs $040000
 
 ;-------------------------------------------------------------
 ;directory listings section
 ;-------------------------------------------------------------
 
-;filesystem root directory entries
+; this is written starting at LBA=1
 
-;fs_dir root_of_roots_dir
-	fs_entry root_dir, "bosfs512", "fs", f_system+f_subdir
-	db $1F0 - ($ and $1FF) dup $FF
-	db $FE, 15 dup $FF
-;end fs_dir
+;"/sbin/" directory
+fs_dir sbin_dir
+	; fs_entry root_dir, "..", "", f_subdir
+	fs_entry fsutil_exe, "fsutil", "", f_readonly+f_system
+	fs_entry uninstaller_exe, "uninstlr", "", f_readonly+f_system
+	; fs_entry updater_exe, "updater", "", f_readonly+f_system
+end fs_dir
 
-fs_dir root_dir
-	fs_entry bin_dir, "bin", "", f_system+f_subdir
-	fs_entry dev_dir, "dev", "", f_system+f_subdir
-	fs_entry etc_dir, "etc", "", f_subdir
-	fs_entry home_dir, "home", "", f_subdir
-	fs_entry lib_dir, "lib", "", f_system+f_subdir
-	fs_entry opt_dir, "opt", "", f_subdir
-	fs_entry sbin_dir, "sbin", "", f_system+f_subdir
-	fs_entry tmp_dir, "tmp", "", f_subdir
-	fs_entry usr_dir, "usr", "", f_subdir
-	fs_entry var_dir, "var", "", f_subdir
-;	fs_longentry test_name_file, "testing.testing.123.hello", 0 ;coming soon :D
+;"/lib/" directory
+fs_dir lib_dir
+	; fs_entry root_dir, "..", "", f_subdir
+	fs_entry fatdrvce_lll, "FATDRVCE","dll", f_readonly+f_system
+	fs_entry fileioc_lll, "FILEIOC","dll", f_readonly+f_system
+	fs_entry fontlibc_lll, "FONTLIBC","dll", f_readonly+f_system
+	fs_entry graphx_lll, "GRAPHX","dll", f_readonly+f_system
+	fs_entry keypadc_lll, "KEYPADC", "dll", f_readonly+f_system
+	fs_entry msddrvce_lll, "MSDDRVCE", "dll", f_readonly+f_system
+	fs_entry srldrvce_lll, "SRLDRVCE","dll", f_readonly+f_system
+	fs_entry usbdrvce_lll, "USBDRVCE","dll", f_readonly+f_system
+	fs_entry libload_lll, "LibLoad", "dll", f_readonly+f_system
 end fs_dir
 
 ;"/bin/" directory
 fs_dir bin_dir
-	; fs_entry root_dir, "..", "", f_subdir
 	fs_sfentry writeinto_exe, ">", "", f_readonly+f_system+f_subfile
 	fs_sfentry appendinto_exe, ">>", "", f_readonly+f_system+f_subfile
-	; fs_entry bpkload_exe, "bpk", "", f_readonly+f_system
-	; fs_entry bpm_exe, "bpm", "", f_readonly+f_system
 	fs_sfentry cat_exe, "cat", "", f_readonly+f_system+f_subfile
 	fs_sfentry cd_exe, "cd", "", f_readonly+f_system+f_subfile
-	fs_entry cedit_exe, "cedit", "", f_readonly+f_system
 	fs_sfentry cmd_exe, "cmd", "", f_readonly+f_system+f_subfile
 	fs_sfentry cls_exe, "cls", "", f_readonly+f_system+f_subfile
 	fs_sfentry cp_exe, "cp", "", f_readonly+f_system+f_subfile
 	; fs_sfentry initdev_exe, "device", "", f_readonly+f_system+f_subfile
 	fs_sfentry df_exe, "df", "", f_readonly+f_system+f_subfile
 	fs_entry echo_exe, "echo", "", f_readonly+f_system
-	; fs_entry edit_exe, "edit", "", f_readonly+f_system
 	fs_entry explorer_exe, "explorer", "", f_readonly+f_system
-	; fs_entry fexplore_exe, "fexplore", "", f_readonly+f_system
 	fs_sfentry info_exe, "info", "", f_readonly+f_system+f_subfile
 	fs_sfentry json_exe, "json", "", f_readonly+f_system+f_subfile
 	fs_sfentry ls_exe, "ls", "", f_readonly+f_system+f_subfile
@@ -61,19 +57,13 @@ fs_dir bin_dir
 	fs_entry memedit_exe, "memedit", "", f_readonly+f_system
 	fs_sfentry mkdir_exe, "mkdir", "", f_readonly+f_system+f_subfile
 	fs_sfentry mkfile_exe, "mkfile", "", f_readonly+f_system+f_subfile
-	fs_entry msd_exe, "msd", "", f_readonly+f_system
 	fs_entry numstr_so, "numstr", "so", f_readonly+f_system
 	fs_sfentry off_exe, "off", "", f_readonly+f_system+f_subfile
 	fs_entry os_internal_subfiles, "osfiles", "dat", f_readonly+f_system
 	fs_sfentry peek_exe, "peek", "", f_readonly+f_system+f_subfile
 	fs_sfentry poke_exe, "poke", "", f_readonly+f_system+f_subfile
 	fs_sfentry rm_exe, "rm", "", f_readonly+f_system+f_subfile
-	; fs_entry serial_exe, "serial", "", f_readonly+f_system
 	fs_sfentry sleep_exe, "sleep", "", f_readonly+f_system+f_subfile
-	; fs_entry transfer_exe, "transfer", "", f_readonly+f_system
-	; fs_entry usbrecv_exe, "usbrecv", "", f_readonly+f_system
-	; fs_entry usbrun_exe, "usbrun", "", f_readonly+f_system
-	; fs_entry usbsend_exe, "usbsend", "", f_readonly+f_system
 end fs_dir
 
 fs_file os_internal_subfiles
@@ -162,146 +152,6 @@ fs_file mem_so
 	include 'fs/bin/mem.so.asm'
 end fs_file
 
-fs_dir var_dir
-	; fs_entry root_dir, "..", "", f_subdir
-	fs_entry path_var, "PATH", "", 0
-	fs_entry include_var, "INCLUDE", "", 0
-end fs_dir
-
-;"/dev/" directory
-fs_dir dev_dir
-	; fs_entry root_dir, "..", "", f_subdir
-	; fs_sfentry dev_lcd, "lcd", "", f_readonly+f_system+f_device+f_subfile
-	; fs_sfentry dev_null, "null", "", f_readonly+f_system+f_device+f_subfile
-	; fs_sfentry dev_mnt, "mnt", "", f_readonly+f_system+f_device+f_subfile
-end fs_dir
-
-; fs_subfile dev_null, dev_dir
-	; include 'fs/dev/null.asm'
-; end fs_subfile
-
-; fs_subfile dev_lcd, dev_dir
-	; include 'fs/dev/lcd.asm'
-; end fs_subfile
-
-; fs_subfile dev_mnt, dev_dir
-	; include 'fs/dev/mnt.asm'
-; end fs_subfile
-
-;"/etc/" directory
-fs_dir etc_dir
-	; fs_entry root_dir, "..", "", f_subdir
-	fs_entry etc_data_dir, "data", "", f_subdir
-	fs_entry etc_fontlibc_dir, "fontlibc", "", f_subdir
-	fs_entry etc_explorer_dir, "explorer", "", f_subdir
-end fs_dir
-
-;"/etc/data/" directory
-fs_dir etc_data_dir
-	; fs_entry etc_dir, "..", "", f_subdir
-	; fs_entry transfer_dir, "TRANSFER", "", f_subdir
-	fs_entry etc_data_explorer_dir, "explorer", "", f_subdir
-end fs_dir
-
-
-;"/etc/data/explorer/" directory
-fs_dir etc_data_explorer_dir
-	; fs_entry etc_data_dir, "..", "", f_subdir
-	; fs_entry explorer_font_file, "font", "bin", 0
-end fs_dir
-
-;"/etc/data/TRANSFER/" directory
-; fs_dir transfer_dir
-	; fs_entry etc_data_dir, "..", "", f_subdir
-	; fs_entry font_data_file, "font", "bin", 0
-; end fs_dir
-
-;"/lib/" directory
-fs_dir lib_dir
-	; fs_entry root_dir, "..", "", f_subdir
-	fs_entry fatdrvce_lll, "FATDRVCE","dll", f_readonly+f_system
-	fs_entry fileioc_lll, "FILEIOC","dll", f_readonly+f_system
-	fs_entry fontlibc_lll, "FONTLIBC","dll", f_readonly+f_system
-	fs_entry graphx_lll, "GRAPHX","dll", f_readonly+f_system
-	fs_entry keypadc_lll, "KEYPADC", "dll", f_readonly+f_system
-	fs_entry msddrvce_lll, "MSDDRVCE", "dll", f_readonly+f_system
-	fs_entry srldrvce_lll, "SRLDRVCE","dll", f_readonly+f_system
-	fs_entry usbdrvce_lll, "USBDRVCE","dll", f_readonly+f_system
-	fs_entry libload_lll, "LibLoad", "dll", f_readonly+f_system
-end fs_dir
-
-;"/opt/" directory
-fs_dir opt_dir
-	; fs_entry root_dir, "..", "", f_subdir
-end fs_dir
-
-;"/sbin/" directory
-fs_dir sbin_dir
-	; fs_entry root_dir, "..", "", f_subdir
-	fs_entry fsutil_exe, "fsutil", "", f_readonly+f_system
-	fs_entry uninstaller_exe, "uninstlr", "", f_readonly+f_system
-	fs_entry updater_exe, "updater", "", f_readonly+f_system
-end fs_dir
-
-;"/tmp/" directory
-fs_dir tmp_dir
-	; fs_entry root_dir, "..", "", f_subdir
-end fs_dir
-
-;"/usr/" directory
-fs_dir usr_dir
-	; fs_entry root_dir, "..", "", f_subdir
-	fs_entry usr_bin_dir, "bin", "", f_subdir
-	fs_entry usr_lib_dir, "lib", "", f_subdir
-	fs_entry tivars_dir, "tivars", "", f_subdir
-end fs_dir
-
-;"/usr/tivars/" directory
-fs_dir tivars_dir
-	; fs_entry usr_dir, "..", "", f_subdir
-end fs_dir
-
-;"/usr/bin/" directory
-fs_dir usr_bin_dir
-	; fs_entry usr_dir, "..", "", f_subdir
-end fs_dir
-
-;"/usr/lib/" directory
-fs_dir usr_lib_dir
-	; fs_entry usr_dir, "..", "", f_subdir
-end fs_dir
-
-;"/home/" directory
-fs_dir home_dir
-	; fs_entry root_dir, "..", "", f_subdir
-	fs_entry user_dir, "user", "", f_subdir
-end fs_dir
-
-;"/home/user/" directory
-fs_dir user_dir
-	; fs_entry home_dir, "..", "", f_subdir
-end fs_dir
-
-;"/etc/explorer/" directory
-fs_dir etc_explorer_dir
-	; fs_entry etc_dir, "..", "", f_subdir
-	fs_entry explorer_blconfig_exe, "blconfig", "", 0
-	fs_entry missing_icon, "missing", "ico", 0
-	fs_entry themes_dat, "themes", "dat", 0
-end fs_dir
-
-;"/etc/plugins/explorer/serial/" directory
-; fs_dir explorer_serial_dir
-	; fs_entry etc_plugins_explorer_dir, "..", "", f_subdir
-	; fs_entry explorer_serial_cmd, "index", "cmd", 0
-	; fs_entry explorer_serial_exe, "serial", "", 0
-; end fs_dir
-
-fs_dir etc_fontlibc_dir
-	; fs_entry etc_dir, "..", "", f_subdir
-	fs_entry etc_fontlibc_drmono, "DrMono", "", f_system+f_readonly
-end fs_dir
-
 ;-------------------------------------------------------------
 ;file data section
 ;-------------------------------------------------------------
@@ -358,96 +208,12 @@ fs_file echo_exe
 	include 'fs/bin/echo.asm'
 end fs_file
 
-; fs_file fexplore_exe
-	; file '../obj/fexplore.bin'
-; end fs_file
-
 fs_file memedit_exe
 	file '../obj/memedit.bin'
 end fs_file
 
-; fs_file usbrun_exe
-	; file "../obj/usbrun.bin"
-; end fs_file
-
-; fs_file usbsend_exe
-	; file "../obj/usbsend.bin"
-; end fs_file
-
-; fs_file usbrecv_exe
-	; file '../obj/usbrecv.bin'
-; end fs_file
-
-; fs_file bpkload_exe
-	; file '../obj/bpkload.bin'
-; end fs_file
-
 fs_file fsutil_exe
 	include 'fs/sbin/fsutil.asm'
-end fs_file
-
-; fs_file bpm_exe
-	; file '../obj/bpm.bin'
-; end fs_file
-
-; fs_file edit_exe
-	; file '../obj/edit.bin'
-; end fs_file
-
-; fs_file explorer_font_file
-	; file 'fs/etc/data/explorer/font.bin'
-; end fs_file
-
-; fs_file font_data_file
-	; file 'fs/etc/data/TRANSFER/font.bin'
-; end fs_file
-
-; fs_file transfer_exe
-	; file 'fs/bin/TRANSFER.bin'
-; end fs_file
-
-fs_file missing_icon
-	include 'fs/etc/explorer/missing.asm'
-end fs_file
-
-fs_file path_var
-	db "/bin:/usr/bin:/sbin"
-end fs_file
-
-fs_file include_var
-	db "/include:/usr/include:/lib/include"
-end fs_file
-
-fs_file explorer_blconfig_exe
-	include 'fs/etc/explorer/blconfig.asm'
-end fs_file
-
-; fs_file explorer_serial_exe
-	; include 'fs/etc/plugins/explorer/serial/serial.asm'
-; end fs_file
-
-; fs_file explorer_serial_cmd
-	; db "serial",$A,0
-; end fs_file
-
-; fs_file serial_exe
-	; file 'fs/bin/serial/bosbin/serial.bin'
-; end fs_file
-
-fs_file cedit_exe
-	file 'fs/bin/cedit/bosbin/cedit.bin'
-end fs_file
-
-fs_file etc_fontlibc_drmono
-	file 'fs/etc/fontlibc/DrMono.dat'
-end fs_file
-
-fs_file msd_exe
-	file 'fs/bin/msd/bosbin/MSD.bin'
-end fs_file
-
-fs_file themes_dat
-	include 'fs/etc/explorer/themes.asm'
 end fs_file
 
 end fs_fs

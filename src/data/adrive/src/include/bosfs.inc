@@ -26,9 +26,9 @@ fb_subdir     := 4
 fb_device     := 5
 fb_elevated   := 7
 
-macro fs_fs?
+macro fs_fs? fsbase
 	local fs
-	fs.base = $
+	fs.base = fsbase
 
 	macro fs_sfentry? fdata, name, ext, prop
 		pad_db name, ' ', 8

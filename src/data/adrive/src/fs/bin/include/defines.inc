@@ -157,3 +157,5 @@ bSilentReturn        := 3
 fs_cluster_map := $3BE000
 fs_cluster_map.len := 7040
 fs_cmap_length := fs_cluster_map.len
+fs_root_dir_lba := $010000 shr 9
+fs_root_dir_address := start_of_user_archive + $010000

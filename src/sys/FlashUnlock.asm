@@ -1,5 +1,5 @@
 ;@DOES Unlocks flash.
-;@NOTE (TBD) Will check permissions and re-lock flash if we're not elevated.
+;@NOTE Will check permissions and re-lock flash if the caller doesn't have sufficient permissions
 sys_FlashUnlock:
 flash_unlock:
 	push af
@@ -26,12 +26,7 @@ flash_unlock:
 	; out0	($28),c
 
 	pop af
-	ret
-
-	; call os_CheckElevated ;check if we're elevated
-	; ret nz
-	; call sys_FlashLock
-	; call os_ExitRunningProgram
-	; ld hl,string_program_requested_flash
-	; call gui_DrawConsoleWindow
-	; jq bos.sys_WaitKeyCycle
+	call sys_CheckElevated ;check if we're elevated
+	ret nz
+	call sys_FlashLock
+	jq os_return

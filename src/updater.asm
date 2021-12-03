@@ -1,29 +1,41 @@
 
 include 'include/ti84pceg.inc'
 include 'include/ez80.inc'
-include 'include/tiformat.inc'
 
 include 'include/os.inc'
 include 'include/defines.inc'
 include 'include/bos.inc'
 
-org ti.userMem-2
+org ti.userMem
 
 os_rom
 	file '../obj/bosos.bin'
 end os_rom
 
-	db $EF,$7B
+	jr updater_start
+	db "REX",0
 updater_start:
-	call bos._ClrScrn
-	call bos._HomeUp
 	ld hl,installing_string
-	call bos._PutS
-
-	os_create $3B ;erase OS and filesystem sectors due to filesystem changes
+	call bos.gui_DrawConsoleWindow
+	ld hl,os_second_binary_file
+	push hl
+	call bos.fs_GetFilePtr
+	ld (os_second_binary),hl
+	ld (os_second_binary.len),bc
+	pop bc
+	jr nc,.update
+	ld hl,missing_second_binary
+	call bos.gui_PrintLine
+	jp bos.sys_WaitKeyCycle
+.update:
+	os_create $04 ;just overwrite OS sectors, let the boot process do the rest
 
 installing_string:
 	db "Updating BOS...",0
+missing_second_binary:
+	db "Missing "
+os_second_binary_file:
+	db "BOSOSPT2.BIN",0
 
 write_os_binary
 

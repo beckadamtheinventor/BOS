@@ -2,16 +2,14 @@
 ;@INPUT OP1 name of library
 ;@OUTPUT hl points to file length, de points to file data. Cf set if failed
 _LoadLibraryOP1:
-	ld hl,8+.dir_len+.ext_len
+	ld hl,8+.ext_len
 	push hl
 	call sys_Malloc
 	ex hl,de
 	pop bc
 	ret c
-	push iy,de
-	ld hl,.dir_name
-	ld bc,.dir_len
-	ldir
+	ld bc,string_lib_var
+	push iy,bc,de
 	ld hl,fsOP1+1
 	xor a,a
 	ld c,8
@@ -24,8 +22,8 @@ _LoadLibraryOP1:
 	ld hl,.ext_name
 	ld bc,.ext_len
 	ldir
-	call fs_OpenFile
-	pop bc,iy
+	call sys_OpenFileInVar
+	pop bc,bc,iy
 	ret c
 	ld bc,fsentry_filesector
 	add hl,bc
@@ -35,9 +33,6 @@ _LoadLibraryOP1:
 	ex hl,de
 	pop bc,hl
 	ret
-.dir_name:
-	db "/lib/"
-.dir_len:=$-.dir_name
 .ext_name:
 	db ".dll",0
 .ext_len:=$-.ext_name

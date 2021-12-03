@@ -17,7 +17,8 @@ fs_Alloc:
 	rra
 	ld (ix-4),a
 
-	ld hl,fs_cluster_map
+	ld hl,fs_cluster_map + fs_root_dir_lba ; only check clusters following the filesystem root directory
+	ld bc,fs_cluster_map.len - fs_root_dir_lba
 .search_loop:
 	ld a,(hl)
 	inc hl

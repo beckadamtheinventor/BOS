@@ -1,24 +1,24 @@
 
-str_CheckingFilesystem:
-	db "Checking Filesystem for errors.",$A,0
-str_Filesystem_Corrupt:
-	db "Filesystem is corrupted!",$A,0
+; str_CheckingFilesystem:
+	; db "Checking Filesystem for errors.",0
+; str_Filesystem_Corrupt:
+	; db "Filesystem is corrupted!",0
 str_Formatting:
-	db "Formatting...",$A,0
+	db "Formatting...",0
 str_ErasingSector:
 	db "Erasing Sector: $",0
 str_ErasedUserMemory:
-	db "Erased user memory.",$A,0
+	db "Erased user memory.",0
 str_WritingFilesystem:
-	db "Writing filesystem...",$A,0
+	db "Writing filesystem...",0
 str_PressAnyKey:
-	db "Press any key to continue...",$A,0
+	db "Press any key to continue...",0
 str_Prompt:
 	db ">",0
-string_FilesystemCorrupt:
-	db "Filesystem corrupted!",$A,"Filesystem will now be formatted.",$A,"Press enter to continue.",$A,0
-string_FilesystemReformatted:
-	db "Format complete.",$A,"Press enter to continue to BOS.",$A,0
+; string_FilesystemCorrupt:
+	; db "Filesystem corrupted!",$A,"Filesystem will now be formatted.",$A,"Press enter to continue.",$A,0
+; string_FilesystemReformatted:
+	; db "Format complete.",$A,"Press enter to continue to BOS.",$A,0
 str_tivars_dir:
 	db "/usr/tivars/"
 .len:=$-.
@@ -32,25 +32,119 @@ string_os_recovery_menu:
 	db $9,"Press clear to reboot",$A
 	db $9,"Press 2nd to turn off calculator",$A
 	db $9,"Press enter to attempt recovery",$A
+	; db $9,"Press 6/V to verify system files",$A
 	db $9,"Press mode to reset filesystem",$A
 	db $9,"Press del to uninstall BOS",$A
 	db $9,"Press apps to reinstall TIOS",$A,0
 string_press_enter_confirm:
 	db "Press enter to confirm.",$A,0
-string_program_requested_flash:
-	db "Error: Unauthorized flash unlock!",$A
-	db "Program requested flash unlock without elevation.",$A
-	db "Aborting program execution.",$A
-	db "Press any key to continue.",$A,0
+; string_program_requested_flash:
+	; db "Error: Unauthorized flash unlock!",$A
+	; db "Program requested flash unlock without elevation.",$A
+	; db "Aborting program execution.",$A
+	; db "Press any key to continue.",$A,0
 string_failed_to_reinstall:
 	db "Failed to reinstall TIOS, backup files are missing!",$A,0
+
+
+str_bosfs512_partition_header:
+	db "bos512fsfs ", $14
+	dw fs_root_dir_lba ; LBA of the root directory
+	dw 512 ; directory section size
+.len:=$-.
+
+fs_root_dir_data:
+	db "bin        ", $14, $03,$00, $00,$20
+	db "lib        ", $14, $02,$00, $00,$20
+	db "sbin       ", $14, $01,$00, $00,$20
+.len:=$-.
+
+fs_root_file_initializers:
+	db $14, "dev",0
+	db $10, "etc",0
+	db $10, "etc/fontlibc",0
+	db $10, "home",0
+	db $10, "opt",0
+	db $10, "opt/"
+str_bin_dir:
+	db "bin",0
+	db $10, "opt/"
+str_lib_dir:
+	db "lib",0
+	db $10, "tmp",0
+	db $10, "usr",0
+	db $10, "usr/bin",0
+	db $10, "usr/lib",0
+	db $10, "usr/tivars",0
+	db $10, "var",0
+
+	db $00, "etc/fontlibc/DrMono",0
+	dw fs_file_data_drmono.len
+	dw fs_file_data_drmono.zlen
+virtual
+	file "adrive/src/fs/etc/fontlibc/DrMono.dat"
+	fs_file_data_drmono.len := $-$$
+end virtual
+fs_file_data_drmono:
+	file "adrive/obj/DrMono.zx7.dat"
+fs_file_data_drmono.zlen:=$-.
+
+	db $00, "opt/bin/cedit",0
+	dw fs_file_data_cedit.len
+	dw fs_file_data_cedit.zlen
+virtual
+	file "adrive/src/fs/bin/cedit/bosbin/CEDIT.bin"
+	fs_file_data_cedit.len := $-$$
+end virtual
+fs_file_data_cedit:
+	file "adrive/obj/CEDIT.zx7.bin"
+fs_file_data_cedit.zlen:=$-.
+
+	db $00, "opt/bin/msd",0
+	dw fs_file_data_msd.len
+	dw fs_file_data_msd.zlen
+virtual
+	file "adrive/src/fs/bin/msd/bosbin/MSD.bin"
+	fs_file_data_msd.len := $-$$
+end virtual
+fs_file_data_msd:
+	file "adrive/obj/MSD.zx7.bin"
+fs_file_data_msd.zlen:=$-.
+	db $00, "var/PATH",0
+	dw fs_file_data_path.len
+	dw fs_file_data_path.zlen
+virtual
+	file "adrive/obj/PATH.bin"
+	fs_file_data_path.len := $-$$
+end virtual
+fs_file_data_path:
+	file "adrive/obj/PATH.zx7.bin"
+fs_file_data_path.zlen:=$-.
+
+	db $00, "var/LIB",0
+	dw fs_file_data_lib.len
+	dw fs_file_data_lib.zlen
+virtual
+	file "adrive/obj/LIB.bin"
+	fs_file_data_lib.len := $-$$
+end virtual
+fs_file_data_lib:
+	file "adrive/obj/LIB.zx7.bin"
+fs_file_data_lib.zlen:=$-.
+	dw 0
 
 ; bosfs_filesystem_header:
 	; db "bosfs512fs "
 ; .len:=$-.
 
-string_os_elevation_file:
-	db "/",$F2,"OS/ELEVATED",0
+; str_ValidatingOSFiles:
+	; db "Validating OS files...",0
+; str_VerificationFailed:
+	; db "Verification failed for file: ",0
+; string_os_elevation_file:
+	; db "/",$F2,"OS/ELEVATED",0
+str_sbin_dir:
+	db "sbin",0
 string_path_variable:
 	db "/var/PATH",0
 string_lib_var:
@@ -61,8 +155,12 @@ str_var_index_name:
 	db "/var/cache"
 .num:
 	db "000.dat",0
-str_Booting:
-	db "Starting up...",$A,0
+str_ExtractingFiles:
+	db "Extracting files:",0
+str_ExtractingOSBinaries:
+	db "Extracting OS binaries...",0
+str_ExtractingUpdates:
+	db "Extracting Updates...",0
 str_BootFailed:
 	db "Boot has encountered a critical error",$A
 	db "and cannot complete boot process.",$A
@@ -95,6 +193,90 @@ str_onbootconfig:
 	db "#main ui",$A
 	db "explorer",$A
 .len:=$-.
+
+_sha256_state_init:
+	dl 648807
+	db 106
+	dl 6794885
+	db -69
+	dl 7271282
+	db 60
+	dl 5240122
+	db -91
+	dl 938623
+	db 81
+	dl 354444
+	db -101
+	dl -8136277
+	db 31
+	dl -2044647
+	db 91
+
+_sha256_k:
+	dd	1116352408
+	dd	1899447441
+	dd	3049323471
+	dd	3921009573
+	dd	961987163
+	dd	1508970993
+	dd	2453635748
+	dd	2870763221
+	dd	3624381080
+	dd	310598401
+	dd	607225278
+	dd	1426881987
+	dd	1925078388
+	dd	2162078206
+	dd	2614888103
+	dd	3248222580
+	dd	3835390401
+	dd	4022224774
+	dd	264347078
+	dd	604807628
+	dd	770255983
+	dd	1249150122
+	dd	1555081692
+	dd	1996064986
+	dd	2554220882
+	dd	2821834349
+	dd	2952996808
+	dd	3210313671
+	dd	3336571891
+	dd	3584528711
+	dd	113926993
+	dd	338241895
+	dd	666307205
+	dd	773529912
+	dd	1294757372
+	dd	1396182291
+	dd	1695183700
+	dd	1986661051
+	dd	2177026350
+	dd	2456956037
+	dd	2730485921
+	dd	2820302411
+	dd	3259730800
+	dd	3345764771
+	dd	3516065817
+	dd	3600352804
+	dd	4094571909
+	dd	275423344
+	dd	430227734
+	dd	506948616
+	dd	659060556
+	dd	883997877
+	dd	958139571
+	dd	1322822218
+	dd	1537002063
+	dd	1747873779
+	dd	1955562222
+	dd	2024104815
+	dd	2227730452
+	dd	2361852424
+	dd	2428436474
+	dd	2756734187
+	dd	3204031479
+	dd	3329325298
 
 BOS_B_width := 38
 BOS_B_height := 41
@@ -134,6 +316,3 @@ str_perate:
 	db	'perating',0
 str_ystem:
 	db	'ystem',0
-
-str_Loading:
-	db	'Loading...',0

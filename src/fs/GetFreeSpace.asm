@@ -2,8 +2,8 @@
 ;@INPUT int fs_GetFreeSpace(void);
 ;@OUTPUT filesystem remaining space in bytes
 fs_GetFreeSpace:
-	ld de,fs_cluster_map
-	ld bc,fs_cluster_map.len
+	ld de,fs_cluster_map + fs_root_dir_lba ; only check usage following the filesystem root directory
+	ld bc,fs_cluster_map.len -  fs_root_dir_lba
 .reentry:
 	or a,a
 	sbc hl,hl

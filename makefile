@@ -108,10 +108,20 @@ $(call NATIVEPATH,$(FSOBJ)/memedit.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/memed
 
 $(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/bosbin/CEDIT.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/src/main.c)
 	$(Q)make -f bos.makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/)
+	convbin -i $(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/bosbin/CEDIT.bin) -o $(call NATIVEPATH,$(FSOBJ)/CEDIT.zx7.bin) -j bin -k bin -c zx7
 
 $(call NATIVEPATH,$(FSSRC)/fs/bin/msd/bosbin/MSD.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/msd/src/main.c)
 	$(Q)make -f makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/msd/)
+	convbin -i $(call NATIVEPATH,$(FSSRC)/fs/bin/msd/bosbin/MSD.bin) -o $(call NATIVEPATH,$(FSOBJ)/MSD.zx7.bin) -j bin -k bin -c zx7
 
+# filesystem var build rules
+$(call NATIVEPATH,$(FSOBJ)/LIB.bin): $(call NATIVEPATH,$(FSSRC)/fs/var/LIB.asm)
+	fasmg $(call NATIVEPATH,$(FSSRC)/fs/var/LIB.asm) $(call NATIVEPATH,$(FSOBJ)/LIB.bin)
+	convbin -i $(call NATIVEPATH,$(FSOBJ)/LIB.bin) -o $(call NATIVEPATH,$(FSOBJ)/LIB.zx7.bin) -j bin -k bin -c zx7
+	
+$(call NATIVEPATH,$(FSOBJ)/PATH.bin): $(call NATIVEPATH,$(FSSRC)/fs/var/PATH.asm)
+	fasmg $(call NATIVEPATH,$(FSSRC)/fs/var/PATH.asm) $(call NATIVEPATH,$(FSOBJ)/PATH.bin)
+	convbin -i $(call NATIVEPATH,$(FSOBJ)/PATH.bin) -o $(call NATIVEPATH,$(FSOBJ)/PATH.zx7.bin) -j bin -k bin -c zx7
 
 # Rule to build Filesytem and compress it
 filesystem: $(call NATIVEPATH,$(FSSRC)/main.asm) $(call NATIVEPATH,$(FSSRC)/fs/lib/libload/bos_libload.asm) $(call NATIVEPATH,$(FSSRC)/fs/lib/fatdrvce/fatdrvce.asm) \
@@ -123,10 +133,13 @@ $(call NATIVEPATH,$(FSOBJ)/graphx.bin) $(call NATIVEPATH,$(FSOBJ)/keypadc.bin) $
 $(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/bosbin/CEDIT.bin) $(call NATIVEPATH,$(FSOBJ)/explorer.bin) $(call NATIVEPATH,$(FSOBJ)/memedit.bin) \
 $(call NATIVEPATH,$(FSOBJ)/msddrvce.bin) $(call NATIVEPATH,$(FSSRC)/fs/bin/msd/bosbin/MSD.bin) $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/config.asm) \
 $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/data.asm) $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/display.asm) $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/files.asm) \
-$(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/libloader.asm) $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/loadconfig.asm)
+$(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/libloader.asm) $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/loadconfig.asm) $(call NATIVEPATH,$(FSOBJ)/PATH.bin) \
+$(call NATIVEPATH,$(FSSRC)/fs/var/PATH.asm) $(call NATIVEPATH,$(FSOBJ)/LIB.bin) $(call NATIVEPATH,$(FSSRC)/fs/var/LIB.asm)
+	convbin -i $(call NATIVEPATH,$(FSSRC)/fs/etc/fontlibc/DrMono.dat) -o $(call NATIVEPATH,$(FSOBJ)/DrMono.zx7.dat) -j bin -k bin -c zx7
 	fasmg $(call NATIVEPATH,$(FSSRC)/main.asm) $(call NATIVEPATH,src/data/adrive/main.bin)
 	convbin -i $(call NATIVEPATH,src/data/adrive/main.bin) -o $(call NATIVEPATH,src/data/adrive/data.bin) -j bin -k bin -c zx7
 	convbin -i $(call NATIVEPATH,src/data/adrive/data.bin) -o $(call NATIVEPATH,bin/BOSOSpt2.8xv) -j bin -k 8xv -n BOSOSpt2
+	$(CP) $(call NATIVEPATH,src/data/adrive/data.bin) $(call NATIVEPATH,bin/BOSOSPT2.BIN)
 
 # Rule to build noti-ez80 submodule required for standalone ROM image
 $(call NATIVEPATH,noti-ez80/bin/NOTI.rom):
