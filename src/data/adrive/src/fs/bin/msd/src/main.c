@@ -14,6 +14,8 @@ typedef struct global global_t;
 #include <stdlib.h>
 #include <string.h>
 
+#define isDirectory(entry) (((uint8_t*)(entry))[0xB] & (1<<4))
+
 #define MAX_PARTITIONS 10
 
 struct global
@@ -52,7 +54,7 @@ static usb_error_t handleUsbEvent(usb_event_t event, void *event_data,
     return USB_SUCCESS;
 }
 
-bool transfer_file(fat_t *fat, const char *src, const char *dest) {
+bool transfer_file(fat_t *fat, const char *src, const char *dest, bool send) {
 	fat_file_t srcfile;
     fat_file_t destfile;
 	uint8_t sector_buffer[FAT_BLOCK_SIZE];
@@ -63,89 +65,71 @@ bool transfer_file(fat_t *fat, const char *src, const char *dest) {
 	gui_Print(" to ");
 	gui_Print(dest);
 	gui_NewLine();
-	if (*src == '*') {
-		faterr = fat_Open(&srcfile, fat, &src[1]);
-		if (faterr != FAT_SUCCESS) {
-			goto source_file_missing;
+	if (send) {
+		char *path = fs_ParentDir(dest);
+		char *base = &dest[strlen(path)+1];
+		uint24_t srclen = fs_GetFDLen(srcfd);
+		uint24_t sectors = srclen / FAT_BLOCK_SIZE;
+		uint8_t *srcptr = fs_GetFDPtr(srcfd);
+		if (srclen % FAT_BLOCK_SIZE) sectors++;
+		for (char *ptr = path; *ptr; ptr++) {
+			if ((unsigned)(*ptr - 'a') < 26) *ptr ^= 0x20;
 		}
-	} else {
 		srcfd = fs_OpenFile(src);
 		if (srcfd == -1) {
 			source_file_missing:;
 			gui_PrintLine("source file not found!");
 			return 0;
 		}
-	}
-	if (*dest == '*') {
-		char *path = fs_ParentDir(&dest[1]);
-		char *base = &dest[strlen(path)+2];
-		fat_Delete(fat, &dest[1]);
+		fat_Delete(fat, dest);
 		faterr = fat_Create(fat, path, base, FAT_FILE);
 		if (faterr != FAT_SUCCESS) {
 			goto destination_file_error;
 		}
-		faterr = fat_Open(&destfile, fat, &dest[1]);
+		faterr = fat_Open(&destfile, fat, dest);
 		if (faterr != FAT_SUCCESS) {
 			goto destination_file_error;
 		}
-		if (*src == '*') {
-			uint32_t srclen;
-			faterr = fat_Open(&srcfile, fat, &src[1]);
-			if (faterr != FAT_SUCCESS) {
-				goto source_file_missing;
-			}
-			faterr = fat_SetSize(&destfile, (srclen = fat_GetSize(&srcfile)));
-			if (faterr != FAT_SUCCESS) {
-				goto destination_file_error;
-			}
-			for (uint32_t i = 0; i < srclen; i += FAT_BLOCK_SIZE) {
-				if (fat_Read(&srcfile, 1, &sector_buffer) != 1) {
-					read_error:;
-					gui_PrintLine("Error reading source file!");
-					return 0;
-				}
-				if (fat_Write(&destfile, 1, &sector_buffer) != 1) {
-					write_error:;
-					gui_PrintLine("Error writing destination file!");
-					return 0;
-				}
-			}
-			fat_Close(&srcfile);
+		if (fat_Write(&destfile, sectors, srcptr) != sectors) {
 			fat_Close(&destfile);
-		} else {
-			uint24_t srclen = fs_GetFDLen(srcfd);
-			uint24_t sectors = srclen / FAT_BLOCK_SIZE;
-			uint8_t *srcptr = fs_GetFDPtr(srcfd);
-			if (fat_Write(&destfile, sectors, srcptr) != sectors) {
-				goto write_error;
-			}
-			fat_Close(&destfile);
+			goto write_error;
 		}
+		fat_Close(&destfile);
 	} else {
-		if (*src == '*') {
-			uint32_t srclen = fat_GetSize(&srcfile);
-			if (srclen > 65535) {
-				gui_PrintLine("File too large for internal filesystem!");
-				return 0;
-			}
-			destfd = fs_CreateFile(dest, 0, (int)srclen);
-			if (destfd == -1) {
-				destination_file_error:;
-				gui_PrintLine("Failed to create destination file!");
-				return 0;
-			}
-			for (int i = 0; i < (int)srclen; i += FAT_BLOCK_SIZE) {
-				if (fat_Read(&srcfile, 1, &sector_buffer) != 1) {
-					goto read_error;
-				}
-				if (fs_WriteRaw(&sector_buffer, (i+512<srclen?512:srclen-i), 1, destfd, i) == -1) {
-					goto write_error;
-				}
-			}
-			fat_Close(&srcfile);
-		} else {
-			fs_WriteNewFile(dest, 0, fs_GetFDPtr(srcfd), fs_GetFDLen(srcfd));
+		uint32_t srclen;
+		for (char *ptr = src; *ptr; ptr++) {
+			if ((unsigned)(*ptr - 'a') < 26) *ptr ^= 0x20;
 		}
+		faterr = fat_Open(&srcfile, fat, src);
+		if (faterr != FAT_SUCCESS) {
+			goto source_file_missing;
+		}
+		srclen = fat_GetSize(&srcfile);
+		if (srclen > 65535) {
+			fat_Close(&srcfile);
+			gui_PrintLine("File too large for internal filesystem!");
+			return 0;
+		}
+		destfd = fs_CreateFile(dest, 0, (int)srclen);
+		if (destfd == -1) {
+			destination_file_error:;
+			gui_PrintLine("Failed to create destination file!");
+			return 0;
+		}
+		for (int i = 0; i < (int)srclen; i += FAT_BLOCK_SIZE) {
+			if (fat_Read(&srcfile, 1, &sector_buffer) != 1) {
+				fat_Close(&srcfile);
+				gui_PrintLine("Read error");
+				return 0;
+			}
+			if (fs_WriteRaw(&sector_buffer, (i+512<srclen?512:srclen-i), 1, destfd, i) == -1) {
+				write_error:;
+				gui_PrintLine("Write error");
+				return 0;
+			}
+		}
+		fat_Close(&srcfile);
+
 	}
 	return 1;
 }
@@ -251,17 +235,27 @@ int main(int argc, char *argv[]) {
     }
 
 	if (!errored) {
-		if (!strcmp(argv[1], "-t")) {
-			gui_PrintLine("Transferring Files");
+		if (!strncmp(argv[1], "-r", 2)) {
+			// recieve file from msd
+			gui_PrintLine("Receiving Files");
 			for (int i = 2; i < argc; i += 2) {
-				if (!transfer_file(&fat, argv[i], argv[i+1])) {
+				if (!transfer_file(&fat, argv[i], argv[i+1], false)) {
+					transfer_failed:;
 					gui_PrintLine("Failed to transfer files.");
 					sys_WaitKeyCycle();
 					goto fat_error;
 				}
 			}
+		} else if (!strncmp(argv[1], "-s", 2)) {
+			// send file to msd
+			gui_PrintLine("Sending files");
+			for (int i = 2; i < argc; i += 2) {
+				if (!transfer_file(&fat, argv[i], argv[i+1], false)) {
+					goto transfer_failed;
+				}
+			}
 		} else {
-		// otherwise open the GUI
+			// otherwise open the GUI
 			fat_dir_entry_t msdentries[16];
 			void *fsentries[16];
 			char *namebuffer = sys_Malloc(14);
@@ -271,34 +265,39 @@ int main(int argc, char *argv[]) {
 			sk_key_t key;
 			uint8_t cursor = 0;
 			bool on_internal_fs = false;
+			bool redraw = true;
 			unsigned int skip_entries = 0;
 			namebuffer[13] = 0;
 			msdpath = "/";
+			fspath = "/";
 			do {
 				if (on_internal_fs) {
 					gui_DrawConsoleWindow("/");
-					num_entries = fs_DirList(&fsentries, fspath, 16, skip_entries);
+					gui_PrintLine(fspath);
+					if (redraw) num_entries = fs_DirList(&fsentries, fspath, 16, skip_entries);
 					for (uint8_t i=0; i<num_entries; i++) {
 						char *name = fs_CopyFileName(fsentries[i]);
-						bosgfx_SetTextPos(2, i+1);
-						if (((uint8_t*)fsentries[i])[0xB] & (1<<4)) // check if entry is a directory
+						bosgfx_SetTextPos(2, i+2);
+						if (isDirectory(fsentries[i])) // check if entry is a directory
 							gui_PrintChar('/');
 						gui_Print(name);
 						sys_Free(name);
 					}
 				} else {
 					gui_DrawConsoleWindow("MSD/");
-					num_entries = fat_DirList(&fat, msdpath, FAT_LIST_ALL, &msdentries, 16, skip_entries);
+					gui_PrintLine(msdpath);
+					if (redraw) num_entries = fat_DirList(&fat, msdpath, FAT_LIST_ALL, &msdentries, 16, skip_entries);
 					for (uint8_t i=0; i<(16<num_entries?16:num_entries); i++) {
-						bosgfx_SetTextPos(2, i+1);
+						bosgfx_SetTextPos(2, i+2);
 						if (msdentries[i].attrib & FAT_DIR) // check if entry is a directory
 							gui_PrintChar('/');
 						memcpy(namebuffer, &msdentries[i].filename, 13);
 						gui_Print(namebuffer);
 					}
 				}
-				bosgfx_SetTextPos(0, cursor+1);
+				bosgfx_SetTextPos(0, cursor+2);
 				gui_PrintLine(">"); // right-facing triangle
+				keywait:;
 				key = sys_WaitKeyCycle();
 				usb_HandleEvents();
 				if (key == sk_Up) {
@@ -308,25 +307,50 @@ int main(int argc, char *argv[]) {
 					if (cursor < 16 && cursor < num_entries) cursor++;
 					else if (skip_entries < num_entries) skip_entries++;
 				} else if (key == sk_Enter) {
-					char *fnamebuffer = sys_Malloc(256);
-					gui_DrawConsoleWindow("File to write:");
-					gui_Input(&fnamebuffer[1], 254);
-					if (fnamebuffer[1]) {
+					char *fnamebuffer;
+					if (on_internal_fs) {
+						if (isDirectory(fsentries[cursor])) {
+							char *tofree, *tofree2;
+							tofree = fspath;
+							fspath = fs_JoinPath(fspath, (tofree2 = fs_CopyFileName(fsentries[cursor])));
+							sys_Free(tofree);
+							sys_Free(tofree2);
+							cursor = 0;
+							continue;
+						}
+					} else {
+						if (msdentries[cursor].attrib & FAT_DIR) {
+							char *tofree;
+							tofree = msdpath;
+							msdpath = fs_JoinPath(msdpath, &msdentries[cursor].filename);
+							sys_Free(tofree);
+							cursor = 0;
+							continue;
+						}
+					}
+					fnamebuffer = sys_Malloc(256);
+					gui_DrawConsoleWindow("File to write: (default -> same)");
+					if (gui_Input(fnamebuffer, 255)) {
 						char *s, *d, *tofree;
 						if (on_internal_fs) {
-							s = fnamebuffer+1;
-							*fnamebuffer = '*';
-							tofree = d = fs_CopyFileName(fsentries[cursor]);
+							if (*fnamebuffer) {
+								s = fnamebuffer;
+							} else {
+								s = fs_CopyFileName(fsentries[cursor]);
+							}
+							memcpy((d = namebuffer), &msdentries[cursor].filename, 13);
 							d = fs_JoinPath(msdpath, d);
 							sys_Free(tofree);
 						} else {
-							d = fnamebuffer+1;
+							if (*fnamebuffer) {
+								d = fnamebuffer;
+							} else {
+								d = &msdentries[cursor].filename;
+							}
 							memcpy((s = namebuffer), &msdentries[cursor].filename, 13);
-							tofree = s = fs_JoinPath(msdpath, s);
-							s = fs_JoinPath("*", s);
-							sys_Free(tofree);
+							s = fs_JoinPath(msdpath, s);
 						}
-						if (!transfer_file(&fat, s, d)) {
+						if (!transfer_file(&fat, s, d, on_internal_fs)) {
 							gui_PrintLine("Failed to transfer files.");
 						} else {
 							gui_PrintLine("Transfer completed successfuly.");
@@ -334,6 +358,21 @@ int main(int argc, char *argv[]) {
 						sys_WaitKeyCycle();
 					}
 					sys_Free(fnamebuffer);
+				} else if (key == sk_Alpha || key == sk_Window) {
+					char *tofree;
+					if (on_internal_fs) {
+						tofree = fspath;
+						fspath = fs_ParentDir(fspath);
+						sys_Free(tofree);
+					} else {
+						tofree = msdpath;
+						msdpath = fs_ParentDir(msdpath);
+						sys_Free(tofree);
+					}
+				} else if (key == sk_Mode) {
+					on_internal_fs = !on_internal_fs;
+				} else if (key != sk_Clear) {
+					goto keywait;
 				}
 			} while (key != sk_Clear);
 			sys_Free(namebuffer);
