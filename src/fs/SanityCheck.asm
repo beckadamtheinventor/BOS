@@ -130,6 +130,7 @@ fs_SanityCheck:
 	ld a,(fs_root_dir_address)
 	inc a
 	call z,fs_ExtractRootDir
+	call fs_InitClusterMap
 	call .check_root_dirs
 	call fs_ExtractOSOptBinaries
 	jq fs_GarbageCollect

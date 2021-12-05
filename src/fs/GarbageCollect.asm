@@ -15,22 +15,19 @@ fs_GarbageCollect:
 	; ld (ix-12),hl
 
 	ld hl,(ti.mpLcdUpbase)
-	push hl
-	ld bc,$D40000
+	ld (ix-18),hl
+	ld bc,$D52C00
 	or a,a
 	sbc hl,bc
-	jq nz,.no_buffer_swap
+	jq z,.no_buffer_swap
 	add hl,bc
 	ld de,$D52C00
-	ld bc,$010000
+	ld bc,ti.lcdWidth*ti.lcdHeight
 	push de
 	ldir
 	pop de
 	ld (ti.mpLcdUpbase),de
 .no_buffer_swap:
-	ld a,1
-	call gfx_SetDraw
-
 	call sys_FlashUnlock
 	xor a,a
 	ld (curcol),a
@@ -127,16 +124,14 @@ fs_GarbageCollect:
 	
 	; jq .shuffle_files
 ; .done_shuffling:
-	call fs_InitClusterMap
 
-	pop hl
-	ld bc,$D40000
+	ld bc,$D52C00
 	or a,a
 	sbc hl,bc
 	jq z,.no_restore_vram
 	add hl,bc
 	ld de,$D40000
-	ld bc,$010000
+	ld bc,ti.lcdWidth*ti.lcdHeight
 	push de
 	ldir
 	pop de
