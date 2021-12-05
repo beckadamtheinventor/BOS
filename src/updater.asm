@@ -29,7 +29,10 @@ updater_start:
 	jp bos.sys_WaitKeyCycle
 .update:
 	os_create $04 ;just overwrite OS sectors, let the boot process do the rest
-	jp bos._UnpackUpdates
+	ld a,(bos._UnpackUpdates)
+	cp a,$C3
+	jp z,bos._UnpackUpdates
+	rst 0
 
 
 installing_string:
