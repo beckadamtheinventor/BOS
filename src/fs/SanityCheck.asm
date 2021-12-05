@@ -3,11 +3,11 @@
 fs_SanityCheck:
 	ld a,(fs_filesystem_address)
 	inc a
-	jq z,.run_first_init
+	jq z,.run_init
 	ld a,(fs_root_dir_address)
 	inc a
-	jq nz,.check_root_dirs
-.run_first_init:
+	ret nz
+.run_init:
 	ld a,24
 	ld (currow),a
 ; splash screen credit to LogicalJoe: https://github.com/LogicalJoe
@@ -124,7 +124,15 @@ fs_SanityCheck:
 	ld a,255
 	ld (lcd_text_fg),a
 
-	call fs_Format
+	ld a,(fs_filesystem_address)
+	inc a
+	call z,fs_ExtractOSBinaries
+	ld a,(fs_root_dir_address)
+	inc a
+	call z,fs_ExtractRootDir
+	call .check_root_dirs
+	call fs_ExtractOSOptBinaries
+	jq fs_GarbageCollect
 
 .check_root_dirs:
 	ld hl,current_working_dir
@@ -139,16 +147,12 @@ fs_SanityCheck:
 	call .check_file_fd
 	ld hl,str_sbin_dir
 	ld de,fs_root_dir_data+32
-	; call .check_file_fd
-
-	
-	; ret
 
 .check_file_fd:
 	push de,hl
 	call fs_OpenFile
 	pop bc,de
-	jq c,.create_missing_entry ; fail if file couldn't be located
+	jq c,.create_missing_entry ; create if dir couldn't be located
 	ld bc,16
 	push bc,de,hl
 	call ti._memcmp

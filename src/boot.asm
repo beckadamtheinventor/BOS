@@ -288,9 +288,6 @@ os_return:
 	call fs_SanityCheck
 
 	call os_check_recovery_key
-	call unpack_updates
-
-	call os_check_recovery_key
 	call generate_boot_configs
 	jq nc,.run_boot_cmd
 ; if we can't find the boot config files and can't initialize them try to run the main gui
