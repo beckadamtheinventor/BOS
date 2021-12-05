@@ -6,6 +6,7 @@ gui_DrawConsoleWindow:
 	push hl
 	xor a,a
 	ld (currow),a
+	ld (curcol),a
 	ld a,(lcd_text_bg)
 	call gfx_BufClear
 	pop hl
