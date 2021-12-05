@@ -93,7 +93,8 @@ secondary_in_ram:
 do_installation:
 	ld hl,installing_string
 	call _printline
-	os_create $05 ;erase up until sector $05 to erase OS sectors and trigger BOS to format/convert the filesystem.
+	os_create $3B ;erase all user flash sectors
+	rst 0
 
 fail_missing_secondary:
 	ld hl,missing_secondary_str

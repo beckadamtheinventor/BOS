@@ -160,6 +160,7 @@ namespace bos
 ?fs_BaseName                     := $20370
 ?fs_MoveFile                     := $20374
 ?fs_WriteRaw                     := $20378
+?_UnpackUpdates                  := $2037C
 ; defines
 ?LCD_PAL?    := 0E30200h
 ?LCD_CTRL?   := 0E30018h

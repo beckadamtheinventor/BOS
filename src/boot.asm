@@ -453,7 +453,7 @@ os_recovery_menu:
 	ret
 
 
-unpack_updates:
+_UnpackUpdates:
 	db $3E ; smc'd into a nop once updates are unpacked
 	ret ; this will only be executed if updates are already unpacked
 .extract:
@@ -462,7 +462,7 @@ unpack_updates:
 
 	call sys_FlashUnlock
 	xor a,a
-	ld de,unpack_updates
+	ld de,_UnpackUpdates
 	call sys_WriteFlashA
 	jq sys_FlashLock
 

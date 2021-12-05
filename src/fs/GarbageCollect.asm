@@ -70,8 +70,13 @@ fs_GarbageCollect:
 .next_512:
 	pop bc
 	djnz .cleanup_freed_loop
+	ld a,iyl
+	or a,a
+	jq z,.cleanup_next
 	ld a,(ix-4)
+	push iy
 	call sys_EraseFlashSector
+	pop iy
 .rewrite_loop:
 	ld a,iyl
 	or a,a
@@ -81,11 +86,12 @@ fs_GarbageCollect:
 	ld de,(ix-6)
 	ld d,h
 	ld bc,512
+	push iy
 	call sys_WriteFlash ; write back 512 bytes
+	pop iy
 	dec iy
 	jq .rewrite_loop
 .cleanup_next:
-	call sys_FlashLock
 	ld a,(ix-4)
 	inc a
 	ld (ix-4),a

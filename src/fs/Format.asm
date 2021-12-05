@@ -7,25 +7,17 @@ fs_Format:
 
 	call sys_FlashUnlock
 
-	ld a,($0401FF) ;stores last sector of TIOS, will be 0xFF otherwise
-	ld ($D2FFFF),a
-	inc a
 	ld a,$04
-	jq z,.erase_all_loop
-.erase_some_loop:
-	call .erase_one
-	cp a,$2B ;this is the sector where TIOS gets backed up from the installer
-	jq nz,.erase_some_loop
-	jq .done
 .erase_all_loop: ;erase all filesystem flash sectors
 	call .erase_one
-	cp a,end_of_user_archive shr 16
+	cp a,$3B
 	jr nz,.erase_all_loop
 .done:
 	ld hl,str_ErasedUserMemory
 	call gui_PrintLine
 	call fs_ExtractRootDir
-	jq unpack_updates.extract
+	call fs_ExtractOSBinaries
+	jq fs_ExtractOSOptBinaries
 
 ; ._next_header      := $D3FF00
 ; ._file_len_header  := $D3FF03

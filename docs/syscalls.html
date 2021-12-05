@@ -155,6 +155,7 @@
 <tr><td><a href="#fs_BaseName">bos.fs_BaseName</a></td><td><a href="#fs_BaseName">020370</a></td></tr>
 <tr><td><a href="#fs_MoveFile">bos.fs_MoveFile</a></td><td><a href="#fs_MoveFile">020374</a></td></tr>
 <tr><td><a href="#fs_WriteRaw">bos.fs_WriteRaw</a></td><td><a href="#fs_WriteRaw">020378</a></td></tr>
+<tr><td><a href="#_UnpackUpdates">bos._UnpackUpdates</a></td><td><a href="#_UnpackUpdates">02037C</a></td></tr>
 </table><div id="boot_os"><h1>boot_os</h1>	<h3>syscall Adress 020108</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
@@ -594,7 +595,7 @@ DO NOT free process ID 1 since it is used by the OS and should be preserved.</td
 </table></div><div id="fs_GarbageCollect"><h1>fs_GarbageCollect</h1>	<h3>syscall Adress 0202C8</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Clean up the filesystem, resetting freed areas.</td><td>None</td><td>None</td><td></td><td>
-will sanity-check the filesystem if the cluster map is not found.</td></tr>
+</td></tr>
 </table></div><div id="gfx_SwapTextColors"><h1>gfx_SwapTextColors</h1>	<h3>syscall Adress 0202CC</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Swap lcd_text_fg and lcd_text_fg2</td><td></td><td></td><td></td><td>
@@ -776,5 +777,9 @@ Cf set, hl = -1 if failed</td><td></td><td>
 </table></div><div id="fs_WriteRaw"><h1>fs_WriteRaw</h1>	<h3>syscall Adress 020378</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Attempt to write data to a file directly, failing if the data can't be written correctly or if the file isnt large enough.</td><td>void *fs_WriteRaw(void *data, int len, uint8_t count, void *fd, int offset);</td><td>New file descriptor or -1 and Cf set if failed.</td><td></td><td>
+</td></tr>
+</table></div><div id="_UnpackUpdates"><h1>_UnpackUpdates</h1>	<h3>syscall Adress 02037C</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td></td><td></td><td></td><td>
 </td></tr>
 </table></div></body></html>

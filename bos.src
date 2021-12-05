@@ -150,6 +150,7 @@
 	public _fs_BaseName
 	public _fs_MoveFile
 	public _fs_WriteRaw
+	public __UnpackUpdates
 _boot_os                         := $20108
 _handle_interrupt                := $2010C
 _HandleInstruction               := $20110
@@ -300,3 +301,4 @@ _sys_OpenFileInVar               := $2036C
 _fs_BaseName                     := $20370
 _fs_MoveFile                     := $20374
 _fs_WriteRaw                     := $20378
+__UnpackUpdates                  := $2037C

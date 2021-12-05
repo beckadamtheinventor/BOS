@@ -132,8 +132,7 @@ fs_SanityCheck:
 	call z,fs_ExtractRootDir
 	call fs_InitClusterMap
 	call .check_root_dirs
-	call fs_ExtractOSOptBinaries
-	jq fs_GarbageCollect
+	jq fs_ExtractOSOptBinaries
 
 .check_root_dirs:
 	ld hl,current_working_dir
