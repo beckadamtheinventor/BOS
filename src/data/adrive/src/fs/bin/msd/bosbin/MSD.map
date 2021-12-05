@@ -3,11 +3,11 @@ Section     Base   Top    High   Length
 .icon       D1A882 D1A882             0h
 .launcher   D1A882 D1A8A7            25h
 .libs       D1A8A7 D1A91C            75h
-.start      D1A91C D1A982            66h
-.cleanup    D1A982 D1A990             Eh
-.text       D1A990 D1BAFC          116Ch
-.data       D1BAFC D1BAFC             0h
-.rodata     D1BAFC D1BD49           24Dh
+.start      D1A91C D1A9A9            8Dh
+.cleanup    D1A9A9 D1A9B7             Eh
+.text       D1A9B7 D1BB23          116Ch
+.data       D1BB23 D1BB23             0h
+.rodata     D1BB23 D1BD70           24Dh
 .init_array 000000 000000             0h
 .ctors      000000 000000             0h
 .dtors      000000 000000             0h
@@ -54,14 +54,14 @@ _fs_GetFDLen                 = 020358
 _fs_JoinPath                 = 020364
 _fs_WriteRaw                 = 020378
 _os_GetCSC                   = 020154
-_bosgfx_SetTextPos           = D1A990
-_gui_DrawConsoleWindow       = D1A9A0
-_gui_Print                   = D1A9A7
-_gui_PrintChar               = D1A9AE
-_gui_PrintInt                = D1A9B6
-_gui_PrintLine               = D1A9BD
-__frameset                   = D1A9C4
-__frameset0                  = D1A9D2
+_bosgfx_SetTextPos           = D1A9B7
+_gui_DrawConsoleWindow       = D1A9C7
+_gui_Print                   = D1A9CE
+_gui_PrintChar               = D1A9D5
+_gui_PrintInt                = D1A9DD
+_gui_PrintLine               = D1A9E4
+__frameset                   = D1A9EB
+__frameset0                  = D1A9F9
 __iand                       = 000134
 __imulu                      = 000158
 __ishru                      = 000184
@@ -69,50 +69,50 @@ __lcmpu                      = 0001AC
 __setflag                    = 000218
 _strlen                      = 0000D4
 _strncmp                     = 0000DC
-.missingappvar               = D1BAFC
-.libloadname                 = D1BB04
-.webaddress                  = D1BB15
+.missingappvar               = D1BB23
+.libloadname                 = D1BB2B
+.webaddress                  = D1BB3C
 start                        = D1A91C
-skip._exit                   = D1A977
-skip.__Exit                  = D1A977
-skip._abort                  = D1A977
-_transfer_file               = D1A9DD
-___main_argc_argv            = D1AED5
-_handleUsbEvent              = D1BA63
-LJTI2_0                      = D1BB28
-L_.str                       = D1BB34
-L_.str.1                     = D1BB42
-L_.str.2                     = D1BB47
-L_.str.3                     = D1BB5E
-L_.str.4                     = D1BB86
-L_.str.5                     = D1BBA9
-L_.str.6                     = D1BBB4
+skip._exit                   = D1A99E
+skip.__Exit                  = D1A99E
+skip._abort                  = D1A99E
+_transfer_file               = D1AA04
+___main_argc_argv            = D1AEFC
+_handleUsbEvent              = D1BA8A
+LJTI2_0                      = D1BB4F
+L_.str                       = D1BB5B
+L_.str.1                     = D1BB69
+L_.str.2                     = D1BB6E
+L_.str.3                     = D1BB85
+L_.str.4                     = D1BBAD
+L_.str.5                     = D1BBD0
+L_.str.6                     = D1BBDB
 ___main_argc_argv.partitions = D00C00
 ___main_argc_argv.global     = D00C50
 ___main_argc_argv.fat        = D01053
-L_.str.7                     = D1BBC0
-L_.str.8                     = D1BBD0
-L_.str.9                     = D1BBE5
-L_.str.10                    = D1BBF7
-L_.str.11                    = D1BC0A
-L_.str.12                    = D1BC15
-L_.str.13                    = D1BC2C
-L_.str.14                    = D1BC3F
-L_.str.15                    = D1BC54
-L_.str.16                    = D1BC6D
-L_.str.17                    = D1BC70
-L_.str.18                    = D1BC80
-L_.str.19                    = D1BC9A
-L_.str.20                    = D1BC9D
-L_.str.21                    = D1BCAB
-L_.str.22                    = D1BCAD
-L_.str.23                    = D1BCB2
-L_.str.24                    = D1BCB4
-L_.str.25                    = D1BCD5
-L_.str.26                    = D1BCF5
-L_.str.27                    = D1BD0D
-L_.str.28                    = D1BD22
-L_.str.29                    = D1BD35
+L_.str.7                     = D1BBE7
+L_.str.8                     = D1BBF7
+L_.str.9                     = D1BC0C
+L_.str.10                    = D1BC1E
+L_.str.11                    = D1BC31
+L_.str.12                    = D1BC3C
+L_.str.13                    = D1BC53
+L_.str.14                    = D1BC66
+L_.str.15                    = D1BC7B
+L_.str.16                    = D1BC94
+L_.str.17                    = D1BC97
+L_.str.18                    = D1BCA7
+L_.str.19                    = D1BCC1
+L_.str.20                    = D1BCC4
+L_.str.21                    = D1BCD2
+L_.str.22                    = D1BCD4
+L_.str.23                    = D1BCD9
+L_.str.24                    = D1BCDB
+L_.str.25                    = D1BCFC
+L_.str.26                    = D1BD1C
+L_.str.27                    = D1BD34
+L_.str.28                    = D1BD49
+L_.str.29                    = D1BD5C
 _#fat_Init                   = D1A8B2
 _#fat_Deinit                 = D1A8B6
 _#fat_DirList                = D1A8BA

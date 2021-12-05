@@ -43,11 +43,12 @@ macro os_private
 	macro os_create? final_sector
 		di
 		call	.create
-if defined INSTALLER8XP
-		rst 0
-else
-		ret
+if ~defined INSTALLER8XP
+		ld a,(bos._UnpackUpdates)
+		cp a,$C3
+		call z,bos._UnpackUpdates
 end if
+		rst 0
 .create:
 		ld	a,$d1
 		ld	mb,a
@@ -71,6 +72,7 @@ end if
 		ld a,c
 		or a,b
 		call	nz, $2E0 ;WriteFlash
+if defined INSTALLER8XP
 		ld	a,$04
 .erase:
 		push	af
@@ -79,6 +81,7 @@ end if
 		inc	a
 		cp	a,final_sector
 		jr	nz,.erase
+end if
 		call.is	.lock and $ffff
 		ld	a,$d0
 		ld	mb,a

@@ -457,7 +457,7 @@ _UnpackUpdates:
 	db $3E ; smc'd into a nop once updates are unpacked
 	ret ; this will only be executed if updates are already unpacked
 .extract:
-	call fs_ExtractOSBinaries
+	call gfx_SetDefaultFont
 	call fs_ExtractOSOptBinaries
 
 	call sys_FlashUnlock

@@ -10,15 +10,15 @@ df_main:
 	ld hl,.str_bytes_free
 	call bos.gui_Print
 	pop de
-	ld hl,$3B0000 - $040000
+	ld hl,$3B0000 - $050000
 	or a,a
 	sbc hl,de
 	call bos.gui_PrintUInt
 	ld hl,.str_bytes_used
 	call bos.gui_Print
 	pop hl
-	ld bc,1024
-	call ti._idivu
+	ld c,10
+	call ti._ishru
 	call bos.gui_PrintUInt
 	ld hl,.str_kb_free
 	call bos.gui_Print
@@ -36,4 +36,4 @@ df_main:
 .str_bytes_used:
 	db " bytes used,",$A,0
 .str_kb_free:
-	db " KB free of 3520 KB total.",$A,0
+	db " KB free of 3456 KB total.",$A,0
