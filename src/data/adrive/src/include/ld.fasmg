@@ -1,0 +1,757 @@
+assert "\"" = '"' ; check for patched fasmg
+include 'tiformat.inc'
+define ez80 ez80
+namespace ez80
+	include 'ez80.inc'
+end namespace
+macro ?! $        : $        , \
+         $@       : $@       , \
+         $$       : $$       , \
+         and      : and      , \
+         assert   : assert   , \
+         at       : at       , \
+         break    : break    , \
+         define   : define   , \
+         defined  : defined  , \
+         definite : definite , \
+         dup      : dup      , \
+         else     : else     , \
+         emit     : emit     , \
+         end      : end      , \
+         equ      : equ      , \
+         err      : err      , \
+         esc      : esc      , \
+         ez80     : ez80     , \
+         from     : from     , \
+         if       : if       , \
+         include  : include  , \
+         irpv     : irpv     , \
+         iterate  : iterate  , \
+         label    : label    , \
+         lengthof : lengthof , \
+         load     : load     , \
+         local    : local    , \
+         macro    : macro    , \
+         match    : match    , \
+         mod      : mod      , \
+         namespace: namespace, \
+         not      : not      , \
+         or       : or       , \
+         purge    : purge    , \
+         rb       : rb       , \
+         repeat   : repeat   , \
+         restore  : restore  , \
+         restruc  : restruc  , \
+         rawmatch : rawmatch , \
+         segment  : segment  , \
+         shl      : shl      , \
+         shr      : shr      , \
+         store    : store    , \
+         struc    : struc    , \
+         used     : used     , \
+         virtual  : virtual  , \
+         while    : while    , \
+         xor      : xor
+	local global, debug, files, segments, hex, output
+	global equ
+	segments equ
+	restore global, segments
+
+	macro files.libs.parse file, offset, isused, anyused*
+		local private
+		namespace private
+			macro library?! name, version*
+				end if
+					if anyused
+						emit 1: $C0, name, 0, version
+					end if
+				if 0
+			end macro
+			iterate each, export, export_pointer
+				macro each?! function*
+					end if
+						namespace ez80
+							if used global._#function
+								isused = 1
+							global._#function := $ + %-1
+								jp offset
+								virtual
+									local name
+									emit 1: '_', `function
+									load name: $ - $$ from $$
+									global equ name = global._#function
+								end virtual
+							end if
+							offset = offset + word + @ez80.il
+						end namespace
+					if 0
+				end macro
+			end iterate
+			if 0
+				esc include! file
+			end if
+		end namespace
+	end macro
+	macro files.libs.handle file, isused*
+		local offset, anyused
+		offset = 0
+		files.libs.parse file, offset, isused, anyused
+		anyused := isused
+	end macro
+
+	macro files.srcs.check file, isused*
+		local private
+		namespace private
+			iterate name, DEF, GLOBAL, PUBLIC, XDEF
+				iterate style, name, .name
+					macro style?! symbols*&
+						end if
+							iterate symbol, symbols
+								if used global.symbol
+									isused = 1
+								end if
+							end iterate
+						if 0
+					end macro
+				end iterate
+			end iterate
+			if 0
+				esc include! file
+			end if
+		end namespace
+	end macro
+	macro files.srcs.parse file*
+		local private
+		namespace private
+			virtual segments.code.area
+				?$ equ $
+				?XOR? equ xor
+				?AND? equ and
+				?OR?  equ or
+				?SHL? equ shl
+				?SHR? equ shr
+				?NOT? equ not
+				iterate name, LIST, NEWPAGE, NOLIST, PAGE
+					macro name?
+					end macro
+				end iterate
+				iterate name, CPU, TITLE
+					macro name? arg*
+					end macro
+				end iterate
+				iterate name, COPY, INCLUDE
+					macro name?! path*
+						include path
+					end macro
+				end iterate
+				iterate name, EXTERN, EXTERNAL, REF, XREF
+					macro name? symbols*&
+						match list : space, symbols
+							iterate symbol, list
+								symbol := global.symbol
+							end iterate
+						else
+							iterate symbol, symbols
+								symbol := global.symbol
+							end iterate
+						end match
+					end macro
+				end iterate
+				iterate name, DEF, GLOBAL, PUBLIC, XDEF
+					macro name? symbols*&
+						iterate symbol, symbols
+							global.symbol := symbol
+							virtual
+								local name
+								emit 1: `symbol
+								load name: $ - $$ from $$
+								global equ name = global.symbol
+							end virtual
+						end iterate
+					end macro
+				end iterate
+				struc (symbol) EQU? expr*
+					if definite symbol
+						err 'Symbol "', `symbol, '" already defined'
+					end if
+					?symbol = expr
+				end struc
+				iterate name, VAR, SET
+					struc (symbol) name? expr*
+						?symbol = expr
+					end struc
+				end iterate
+				macro DS? count
+					local c
+					c = count
+					rb c
+				end macro
+				struc DS? count
+				.:	DS? count
+				end struc
+				iterate <def,blk,size*>, B,B,1, W,W,2, W24,P,3, L,L,4
+					macro D#def? vals*&
+						local v
+						iterate val, vals
+							v = val
+							emit size: v
+						end iterate
+					end macro
+					macro BLK#blk? count*, init
+						local c, i
+						c = count
+						match, init
+							emit size: c dup ?
+						else
+							i = init
+							emit size: c dup i
+						end match
+					end macro
+					iterate name, D#def, BLK#blk
+						struc name? args&
+						.:	name? args
+						end struc
+					end iterate
+				end iterate
+				iterate <name,alias*>, TRIO,DW24, DF,DL
+					macro name? vals*&
+						alias? vals
+					end macro
+					struc name? args&
+					.:	name? args
+					end struc
+				end iterate
+				macro ALIGN? val*
+					local v
+					v = val
+					rb v-1 - ($ + v-1) mod v
+				end macro
+				macro SEGMENT? name*
+					segment name
+				end macro
+				macro ASSUME? expr*
+					namespace ez80
+						assume? expr
+					end namespace
+				end macro
+				iterate register, B, NZ, Z, NC, C, PO, PE, P, M, D, E,  \
+				                  H, IXH, IYH, L, IXL, IYL, F, A, I, R, \
+				                  MB, BC, DE, HL, IX, IY, SP, AF, AF' ;'
+					register? := ez80.register?
+				end iterate
+				iterate suffix, , .s?, .l?, .is?, .il?, .sis?, .sil?, .lis?, .lil?
+					irpv name, ez80.@ez80.oplist
+						rawmatch rawname, name
+							define rawname rawname
+							macro rawname#suffix args&
+								namespace ez80
+									name#suffix args
+								end namespace
+							end macro
+						end rawmatch
+					end irpv
+					macro LD? d, s*
+						namespace ez80
+							local dst, src
+							@ez80.classify dst, d
+							@ez80.classify src, s
+							if ~dst.ind & dst eq dst element 1 & dst @ez80.is_reg @ez80.wreg \
+							 & dst metadata 1 scale 1 and 001o & ~src.ind                    \
+							 & src relativeto src element 1 & src @ez80.is_reg @ez80.wreg
+								if src metadata 1 scale 1 = 007o
+									@ez80.push s
+									@ez80.pop d
+								else
+									@ez80.lea d, s
+								end if
+							else
+								@ez80.ld d, s
+							end if
+						end namespace
+					end macro
+					macro JR?#suffix args&
+						namespace ez80
+							jq?#suffix args
+						end namespace
+					end macro
+				end iterate
+				iterate <name,carry>, UEXT,<OR? A?,A>, SEXT,RLA
+					macro name? reg*
+						carry?
+						SBC? reg, reg
+					end macro
+				end iterate
+				macro COMMENT?! delim*&
+					end match
+					local inside
+					inside = 0
+					macro ?! line&
+						local length, text
+						length = 0
+						if inside
+							length = lengthof `line
+							text = `line
+						else if `line = 'end match'
+							inside = 1
+							length = lengthof `delim - 1
+							text = `delim shr 8
+						end if
+						repeat length
+							if ~text xor `delim and $FF
+								purge ?
+								break
+							end if
+							text = text shr 8
+						end repeat
+					end macro
+				end macro
+
+				if defined debug
+					debug.enabled = 0
+					debug.startAddr = $
+					iterate name, ALIAS, BASE, DEFINE, ENDREC, SPACE, TAG
+						macro name? str1*
+							if debug.enabled
+								virtual debug
+									debug.uleb128 debug.name
+									debug.string str1
+								end virtual
+							end if
+						end macro
+					end iterate
+					iterate name, BEGFUNC, ENDFUNC
+						macro name? str1, num1, str2*
+							if debug.enabled
+								local line, addr
+								line = num1
+								addr = $
+								virtual debug
+									debug.uleb128 debug.name
+									debug.string str1, str2
+									debug.uleb128 line - debug.line, addr - debug.addr
+								end virtual
+								debug.line = line
+								debug.addr = addr
+							end if
+						end macro
+					end iterate
+					macro BEGREC? str1, num1*
+						if debug.enabled
+							virtual debug
+								debug.uleb128 debug.BEGREC
+								debug.string str1
+								debug.uleb128 num1
+							end virtual
+						end if
+					end macro
+					iterate <name,signed>, CLASS,u, DIM,u, LENGTH,u, REG,u, SIZE,u, TYPE,s, VALUE,s
+						macro name? num1*
+							if debug.enabled
+								virtual debug
+									debug.uleb128 debug.name
+									debug.signed#leb128 num1
+								end virtual
+							end if
+						end macro
+					end iterate
+					macro DEBUG? str1*
+						virtual debug
+							debug.uleb128 debug.FILE, lengthof debug.source
+							emit 1: debug.source
+							debug.uleb128 debug.startAddr - debug.addr, debug.DEBUG
+							debug.string str1
+						end virtual
+						debug.enabled = 1
+						debug.line = 0
+						debug.addr = debug.startAddr
+					end macro
+					macro END?!
+						end if
+							if debug.enabled
+								local addr
+								segment code
+								addr = $
+								virtual debug
+									debug.uleb128 debug.END, addr - debug.addr
+								end virtual
+								debug.addr = addr
+							end if
+						if 0
+					end macro
+					macro ENDEF?
+						if debug.enabled
+							virtual debug
+								debug.uleb128 debug.ENDEF
+							end virtual
+						end if
+					end macro
+					macro FILE? str1*
+						debug.source = str1
+					end macro
+					macro LINE? num1*
+						local line, addr
+						line = num1
+						addr = $
+						if line <> debug.line | addr <> debug.addr & debug.enabled
+							virtual debug
+								debug.uleb128 debug.LINE, line - debug.line, addr - debug.addr
+							end virtual
+							debug.line = line
+							debug.addr = addr
+						end if
+					end macro
+				else
+					iterate name, ALIAS, BASE, BEGFUNC, BEGREC, CLASS, DEBUG,      \
+					              DEFINE, DIM, ENDEF, ENDFUNC, ENDREC, FILE,       \
+					              LENGTH, LINE, REG, SIZE, SPACE, TAG, TYPE, VALUE
+						macro name? args&
+						end macro
+					end iterate
+					macro END?!
+						end if
+						if 0
+					end macro
+				end if
+
+				struc ? def::&
+					. def
+				end struc
+				macro ? line&
+					match .rest, line
+						rest
+					else match first= .rest, line
+						first rest
+					else
+						line
+					end match
+				end macro
+				if 1
+					include file
+				end if
+				purge ?
+				restruc ?
+			end virtual
+		end namespace
+	end macro
+	macro files.srcs.handle file, isused*
+		if ~isused
+			files.srcs.check file, isused
+		end if
+		if isused
+			files.srcs.parse file
+		end if
+	end macro
+
+	macro symbol? args*&
+		iterate arg, args
+			rawmatch symbol == value, arg
+				namespace segments
+					global.symbol := value
+					virtual
+						local name
+						emit 1: `symbol
+						load name: $ - $$ from $$
+						global equ = name global.symbol
+					end virtual
+				end namespace
+			else
+				'Syntax error in symbol arguments'
+			end rawmatch
+		end iterate
+	end macro
+
+	iterate name, srcs, libs
+		macro files.name.add file, used*
+			local isused
+			rawmatch rawused, used
+				namespace segments
+					isused = rawused
+				end namespace
+			end rawmatch
+			if `file and $FF = "'"
+				files.name equ file, isused
+			else
+				files.name equ `file, isused
+			end if
+		end macro
+		macro name? args*&
+			local require
+			iterate arg, args
+				match file= =used? =if?= used, arg
+					files.name.add file, used
+				else match file= =used?, arg
+					files.name.add file, 1
+				else
+					files.name.add arg, 0
+				end match
+			end iterate
+		end macro
+	end iterate
+
+	macro locate? args*&
+		iterate arg, args
+			rawmatch name =at? location, arg
+				segments equ segments.name?
+				namespace segments
+					name? := `name
+					name.base? := location
+				end namespace
+			else
+				err 'Syntax error in locate argument'
+			end rawmatch
+		end iterate
+	end macro
+	macro range? args*&
+		iterate arg, args
+			rawmatch name lower : upper, arg
+				locate name at lower
+				namespace segments
+					name.high? := upper
+				end namespace
+			else
+				err 'Syntax error in range arguments'
+			end rawmatch
+		end iterate
+	end macro
+	macro order?: args*&
+		match first =, second =, rest, args
+			order first, second
+			order second, rest
+		else match first =, second, args
+			locate second at first.base + first.length
+		else
+			err 'Not enough order arguments'
+		end match
+	end macro
+	macro merge? args*&
+		match name == list, args
+			order list
+			iterate segment, list
+				locate name at segment.base
+				indx %%
+				namespace segments
+					name.top? := segment.base + segment.length
+					if defined segment.high
+						name.high? := segment.high
+					end if
+				end namespace
+				break
+			end iterate
+		else
+			err 'Syntax error in merge arguments'
+		end match
+	end macro
+
+	macro hex value*, leading: '0', digits: 6
+		local val, zero, digit, char
+		emit 1: ' '
+		val = value
+		zero = leading
+		repeat digits
+			digit = (val shr ((%% - %) shl 2)) and 0Fh
+			if digit < 10
+				char = '0' + digit
+			else
+				char = 'A' + digit - 10
+			end if
+			if digit
+				zero = '0'
+			else if % <> %%
+				char = zero
+			end if
+			emit 1: char
+		end repeat
+	end macro
+
+	macro map?
+		local longest, name
+		postpone ?
+			virtual as 'map'
+				longest = lengthof "Segment"
+				irpv segment, segments
+					if longest < lengthof segment
+						longest = lengthof segment
+					end if
+				end irpv
+				emit 1: "Segment", longest - lengthof "Segment" + 1 dup ' ', "Base   Top    High   Length", 10, longest dup '-', 4 dup " ------", '-', 10
+				irpv segment, segments
+					namespace segment
+						if longest < lengthof segment
+							longest = lengthof segment
+						end if
+						emit 1: segment, longest - lengthof segment dup ' '
+						hex base
+						hex top
+						if defined high
+							hex high
+						else
+							emit 1: 7 dup ' '
+						end if
+						hex length, ' '
+						emit 1: 'h', 10
+					end namespace
+				end irpv
+				match any, global
+					longest = lengthof "Label"
+					irpv symbol, global
+						match name == value, symbol
+							if longest < lengthof name
+								longest = lengthof name
+							end if
+						end match
+					end irpv
+					emit 1: 10, "Label", longest - lengthof "Label" + 3 dup ' ', "Value", 10, longest dup '-', 3 dup ' ', 6 dup '-', 10
+					irpv symbol, global
+						match name == value, symbol
+							emit 1: name, longest - lengthof name + 1 dup ' ', '='
+							hex value
+							emit 1: 10
+						end match
+					end irpv
+				end match
+			end virtual
+		end postpone
+	end macro
+	macro dbg?
+		virtual as 'dbg'
+		debug::
+		end virtual
+		namespace debug
+			virtual at 0
+				iterate name, EOF, ALIAS, BASE, BEGFUNC, BEGREC, CLASS, DEBUG, DEFINE, \
+				              DIM, END, ENDEF, ENDFUNC, ENDREC, FILE, LENGTH, LINE,    \
+				              REG, SIZE, SPACE, STRINGS, TAG, TYPE, VALUE
+					name rb 1
+				end iterate
+			end virtual
+			line = 0
+			addr = 0
+			macro uleb128 values*&
+				iterate value, values
+					local val
+					val = value
+					assert val >= 0
+					while val shr 7 > 0
+						emit 1: val and 07Fh or 080h
+						val = val shr 7
+					end while
+					emit 1: val
+				end iterate
+			end macro
+			macro sleb128 values*&
+				iterate value, values
+					local val
+					val = value
+					while val shr 6 <> 0 & val shr 6 <> -1
+						emit 1: val and 07Fh or 080h
+						val = val shr 7
+					end while
+					emit 1: val and 07Fh
+				end iterate
+			end macro
+			restore strings
+			macro string values*&
+				iterate value, values
+					local count, unfound
+					count = 0
+					unfound = 1
+					irpv each, debug.strings
+						if each = value
+							unfound = 0
+							debug.uleb128 %
+							break
+						end if
+						count = %%
+					end irpv
+					if unfound
+						debug.uleb128 count + 1
+						debug.strings =: value
+					end if
+				end iterate
+			end macro
+		end namespace
+	end macro
+
+	macro segment name*
+		end virtual
+		virtual segments.name.area
+	end macro
+
+	if ~defined segments
+		err 'No segments defined'
+	else
+		restore output.base, output.top ; forbid forward reference
+		irpv segment, segments
+			namespace segment
+				virtual at base
+				area?::
+				end virtual
+				if ~defined output.base | output.base > base & ~defined high
+					output.base = base
+				end if
+			end namespace
+		end irpv
+		irpv file, files.srcs
+			files = 0
+			files.srcs.handle file
+		end irpv
+		if ~defined files
+			err 'Please pass the input files with -i\'srcs "file1" [if require1], "file2" [if require2], ...\''
+		end if
+		irpv file, files.libs
+			virtual segments.libs.area
+				files.libs.handle file
+			end virtual
+		end irpv
+
+		if defined debug
+			virtual debug
+				if defined debug.strings
+					debug.uleb128 debug.STRINGS
+					irpv string, debug.strings
+						if % = 1
+							debug.uleb128 %%
+						end if
+						debug.uleb128 lengthof string
+						emit 1: string
+					end irpv
+				end if
+				debug.uleb128 debug.EOF
+			end virtual
+		end if
+
+		irpv segment, segments
+			namespace segment
+				virtual area
+					top? := $
+					length? := $ - $$
+					initlen? := $@ - $$
+				end virtual
+				if ~defined high
+					if ~defined output.top | output.top < top
+						output.top = top
+					end if
+				else if top > high
+					repeat 1, len: length, over: top - high, max: high - base
+						err 'Segment ', segment, ' is ', `len, ' bytes, ',  \
+						    `over, ' bytes larger than the maximum of ', \
+						    `max, ' bytes'
+					end repeat
+				end if
+			end namespace
+		end irpv
+		org output.base
+		rb output.top - $
+		postpone ?
+			irpv segment, segments
+				namespace segment
+					if ~defined high
+						load output: initlen from area: base
+						store output: initlen at base
+					end if
+				end namespace
+			end irpv
+		end postpone
+	end if
+	purge ?
+end macro
