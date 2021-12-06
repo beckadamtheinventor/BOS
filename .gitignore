@@ -21,6 +21,7 @@ src/data/temp
 src/data/updates.asm
 src/os
 src/os.inc
+src/data/adrive/src/include
 src/data/adrive/src/fs/include
 src/data/adrive/src/fs/bin/include
 src/data/adrive/src/fs/lib/include
