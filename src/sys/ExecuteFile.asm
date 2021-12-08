@@ -34,11 +34,13 @@ sys_ExecuteFile:
 	add hl,bc
 	bit fd_subdir,(hl)
 	jq nz,.fail ;can't execute a directory
-	or a,a
 	sbc hl,bc
 	push hl
+	call fs_GetFDLen
+	ex (sp),hl
+	push hl
 	call fs_GetFDPtr
-	pop bc
+	pop bc,bc
 	ld (running_program_ptr),hl
 .exec_check_loop:
 	ld a,(hl)
@@ -47,6 +49,8 @@ sys_ExecuteFile:
 	jq z,.skip1
 	cp a,$C3 ;jp
 	jq z,.skip3
+	cp a,'#'
+	jq z,.executable_text
 	cp a,$EF
 	jq nz,.fail ;fail if unrecognized header
 	ld a,(hl)
@@ -314,3 +318,19 @@ sys_ExecuteFile:
 	call sys_Free ;free the memory the program is allocated in if it's a TRX.
 	pop bc
 	EndThread ;assume we're still in the program's main thread
+
+.executable_text:
+	ld a,(hl)
+	inc hl
+	cp a,'!'
+	jq nz,.fail ; fail if unrecognized executable text format
+	push hl
+	pop de
+	ld a,$A
+	cpir
+	jq z,.executable_text_has_text
+	scf
+	sbc hl,hl
+.executable_text_has_text:
+	ex hl,de
+	jq .entryhlde

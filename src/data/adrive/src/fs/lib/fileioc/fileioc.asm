@@ -66,32 +66,7 @@ library 'FILEIOC', 7
 
 
 ;-------------------------------------------------------------------------------
-vat_ptr0:
-	dl 0
-vat_ptr1:
-	dl 0
-vat_ptr2:
-	dl 0
-vat_ptr3:
-	dl 0
-vat_ptr4:
-	dl 0
-data_ptr0:
-	dl 0
-data_ptr1:
-	dl 0
-data_ptr2:
-	dl 0
-data_ptr3:
-	dl 0
-data_ptr4:
-	dl 0
-resize_amount:
-	dl 0
-curr_slot:
-	dl 0
 TI_MAX_SIZE := 65505
-;-------------------------------------------------------------------------------
 
 ;-------------------------------------------------------------------------------
 ti_AllocString:
@@ -180,6 +155,8 @@ ti_AllocMatrix:
 	; inc	hl
 	; ld	(hl), d
 	; dec	hl
+	or a,a
+	sbc hl,hl
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -229,11 +206,16 @@ ti_Resize:
 	ret	z
 	push	hl
 	call	util_get_vat_ptr
-	ex	(sp),hl
-	push	hl
+	pop	de
+	ld	bc,(hl)
+	push	hl,bc,de
 	call	bos.fs_SetSize
+	pop	bc,de,de
+	ret	c
+	ex	hl,de
+	ld	(hl),de
+	push	bc
 	pop	hl
-	pop	bc
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -243,10 +225,10 @@ ti_IsArchived:
 ;  sp + 3 : Slot number
 ; return:
 ;  0 if not archived
-	;pop	de
-	;pop	bc
-	;push	bc
-	;push	de
+	; pop	de
+	; pop	bc
+	; push	bc
+	; push	de
 	; call	util_is_slot_open
 	; jp	z, util_ret_null
 ; util_is_in_ram:
@@ -263,8 +245,7 @@ ti_IsArchived:
 	; cp	a, $d0
 	; ret	nc
 	; inc	hl
-	scf
-	sbc a,a
+	ld a,1
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -469,50 +450,57 @@ ti_Write:
 ;  sp + 12 : slot index
 ; return:
 ;  hl = number of chunks written if success
-	call ti._frameset0
+	ld hl,-6
+	call ti._frameset
 	ld c,(ix+15)
 	call util_is_slot_open
 	jq nz,util_ret_null_pop_ix
 	call util_get_vat_ptr
 	ld hl,(hl)
-	ld bc,-$E
-	add hl,bc
-	push hl
+	ld (ix-3),hl
 	call util_get_offset
-	pop hl
-	push bc,hl
-	push bc
-	ld bc,0
-	ld c,(ix+12)
+	ld a,(ix+12)
 	ld hl,(ix+9)
-	call ti._imulu
-	ld (.write_total_size),hl
-	pop bc
-	add hl,bc
+	call ti._imul_b
+	add hl,bc ; offset+len*count
+	ld (ix-6),hl
 	push hl
 	call util_get_slot_size
 	pop hl
 	or a,a
 	sbc hl,bc
+	jr c,.dont_resize
 	add hl,bc
-	pop bc
+	ld de,(ix-3)
+	push de,hl
+	call bos.fs_SetSize
+	jq c,.done
+	ld (ix-3),hl
+	pop bc,bc
+.dont_resize:
+	call util_get_offset
 	push bc
-	push bc,hl
-	call nc,bos.fs_SetSize
-	pop bc
-	ld hl,(ix+12)
-	ex (sp),hl
+	ld bc,(ix-3)
+	push bc
+	ld bc,(ix+12)
+	push bc
 	ld bc,(ix+9)
 	push bc
 	ld bc,(ix+6)
 	push bc
 	call bos.fs_Write
-	pop bc,de,hl,bc,bc
-	ld bc,0
-.write_total_size:=$-3
+	pop bc,bc,bc,bc,bc
+	jr c,.done
+	push hl
+	call util_get_vat_ptr
+	pop de
+	ld (hl),de
+	ld bc,(ix-6)
+	call util_set_offset
+.done:
+	ld sp,ix
 	pop ix
-	jq util_set_offset
-
+	ret
 
 ;-------------------------------------------------------------------------------
 ti_Read:
@@ -1349,7 +1337,6 @@ util_set_var_str:
 
 ;-------------------------------------------------------------------------------
 util_insert_mem:
-	; call	util_get_data_ptr
 	; push	hl
 	; ld	hl, (hl)
 	; push	hl
@@ -1470,6 +1457,8 @@ util_get_slot_size:
 	call	util_get_vat_ptr
 	ld	hl,(hl)
 	ld	bc, 0
+	ld	c,$E
+	add	hl,bc
 	ld	c, (hl)
 	inc	hl
 	ld	b, (hl)
@@ -1524,8 +1513,28 @@ util_get_open_slot:
 
 
 vat_ptrs:
-	dl	5 dup $800000
+vat_ptr0:
+	dl $800000
+vat_ptr1:
+	dl $800000
+vat_ptr2:
+	dl $800000
+vat_ptr3:
+	dl $800000
+vat_ptr4:
+	dl $800000
 data_ptrs:
-	dl	5 dup 0
+data_ptr0:
+	dl 0
+data_ptr1:
+	dl 0
+data_ptr2:
+	dl 0
+data_ptr3:
+	dl 0
+data_ptr4:
+	dl 0
+curr_slot:
+	db 0
 variable_offsets:
 	dl	5 dup 0

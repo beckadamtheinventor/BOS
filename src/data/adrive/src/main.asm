@@ -18,8 +18,10 @@ fs_fs $040000
 ;"/sbin/" directory
 fs_dir sbin_dir
 	; fs_entry root_dir, "..", "", f_subdir
-	fs_entry fsutil_exe, "fsutil", "", f_readonly+f_system
-	fs_entry uninstaller_exe, "uninstlr", "", f_readonly+f_system
+	fs_sfentry gc_cmd, "gc", "", f_readonly+f_system+f_subfile
+	fs_sfentry gc_cmd, "cleanup", "", f_readonly+f_system+f_subfile
+	fs_sfentry fsutil_exe, "fsutil", "", f_readonly+f_system+f_subfile
+	fs_sfentry uninstaller_exe, "uninstlr", "", f_readonly+f_system+f_subfile
 	; fs_entry updater_exe, "updater", "", f_readonly+f_system
 end fs_dir
 
@@ -48,25 +50,43 @@ fs_dir bin_dir
 	fs_sfentry cp_exe, "cp", "", f_readonly+f_system+f_subfile
 	; fs_sfentry initdev_exe, "device", "", f_readonly+f_system+f_subfile
 	fs_sfentry df_exe, "df", "", f_readonly+f_system+f_subfile
-	fs_entry echo_exe, "echo", "", f_readonly+f_system
+	fs_sfentry echo_exe, "echo", "", f_readonly+f_system+f_subfile
 	fs_entry explorer_exe, "explorer", "", f_readonly+f_system
+	fs_entry memedit_exe, "hexed", "", f_readonly+f_system
+	fs_entry memedit_exe, "hexedit", "", f_readonly+f_system
 	fs_sfentry info_exe, "info", "", f_readonly+f_system+f_subfile
-	fs_sfentry json_exe, "json", "", f_readonly+f_system+f_subfile
+	; fs_sfentry json_exe, "json", "", f_readonly+f_system+f_subfile
+	fs_sfentry ls_exe, "l", "", f_readonly+f_system+f_subfile
+	fs_sfentry ls_exe, "la", "", f_readonly+f_system+f_subfile
 	fs_sfentry ls_exe, "ls", "", f_readonly+f_system+f_subfile
-	fs_entry mem_so, "mem", "so", f_readonly+f_system
+	fs_entry memedit_exe, "memed", "", f_readonly+f_system
 	fs_entry memedit_exe, "memedit", "", f_readonly+f_system
+	fs_sfentry mkdir_exe, "md", "", f_readonly+f_system+f_subfile
+	fs_sfentry mkdir_exe, "mkd", "", f_readonly+f_system+f_subfile
 	fs_sfentry mkdir_exe, "mkdir", "", f_readonly+f_system+f_subfile
+	fs_sfentry mkfile_exe, "mk", "", f_readonly+f_system+f_subfile
+	fs_sfentry mkfile_exe, "mkf", "", f_readonly+f_system+f_subfile
 	fs_sfentry mkfile_exe, "mkfile", "", f_readonly+f_system+f_subfile
-	fs_entry numstr_so, "numstr", "so", f_readonly+f_system
 	fs_sfentry off_exe, "off", "", f_readonly+f_system+f_subfile
-	fs_entry os_internal_subfiles, "osfiles", "dat", f_readonly+f_system
 	fs_sfentry peek_exe, "peek", "", f_readonly+f_system+f_subfile
 	fs_sfentry poke_exe, "poke", "", f_readonly+f_system+f_subfile
 	fs_sfentry rm_exe, "rm", "", f_readonly+f_system+f_subfile
 	fs_sfentry sleep_exe, "sleep", "", f_readonly+f_system+f_subfile
+	fs_sfentry numstr_so, "numstr", "so", f_readonly+f_system+f_subfile
+	fs_sfentry mem_so, "mem", "so", f_readonly+f_system+f_subfile
+	fs_entry os_internal_subfiles, "osfiles", "dat", f_readonly+f_system
 end fs_dir
 
 fs_file os_internal_subfiles
+
+	fs_subfile gc_cmd, sbin_dir
+		db "#!fsutil",$A,"-c"
+	end fs_subfile
+
+	fs_subfile fsutil_exe, sbin_dir
+		include 'fs/sbin/fsutil.asm'
+	end fs_subfile
+
 	fs_subfile writeinto_exe, bin_dir
 		include 'fs/bin/writeinto.asm'
 	end fs_subfile
@@ -139,18 +159,26 @@ fs_file os_internal_subfiles
 		include 'fs/bin/poke.asm'
 	end fs_subfile
 
-	fs_subfile json_exe, bin_dir
-		include 'fs/bin/json.asm'
+	fs_subfile uninstaller_exe, bin_dir
+		include 'fs/sbin/uninstlr.asm'
 	end fs_subfile
+
+	fs_subfile echo_exe, bin_dir
+		include 'fs/bin/echo.asm'
+	end fs_subfile
+
+	fs_subfile numstr_so, bin_dir
+		include 'fs/bin/numstr.so.asm'
+	end fs_subfile
+
+	fs_subfile mem_so, bin_dir
+		include 'fs/bin/mem.so.asm'
+	end fs_subfile
+	; fs_subfile json_exe, bin_dir
+		; include 'fs/bin/json.asm'
+	; end fs_subfile
 end fs_file
 
-fs_file numstr_so
-	include 'fs/bin/numstr.so.asm'
-end fs_file
-
-fs_file mem_so
-	include 'fs/bin/mem.so.asm'
-end fs_file
 
 ;-------------------------------------------------------------
 ;file data section
@@ -196,24 +224,12 @@ fs_file libload_lll
 	file '../obj/libload.bin'
 end fs_file
 
-fs_file uninstaller_exe
-	include 'fs/sbin/uninstlr.asm'
-end fs_file
-
-fs_file updater_exe
-	include 'fs/sbin/updater.asm'
-end fs_file
-
-fs_file echo_exe
-	include 'fs/bin/echo.asm'
-end fs_file
+; fs_file updater_exe
+	; include 'fs/sbin/updater.asm'
+; end fs_file
 
 fs_file memedit_exe
 	file '../obj/memedit.bin'
-end fs_file
-
-fs_file fsutil_exe
-	include 'fs/sbin/fsutil.asm'
 end fs_file
 
 end fs_fs

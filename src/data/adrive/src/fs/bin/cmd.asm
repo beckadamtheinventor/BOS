@@ -139,9 +139,17 @@ cmd_no_cmd_args:
 	call bos.gui_DrawConsoleWindow
 enter_input_clear:
 	ld hl,bos.InputBuffer
-	ld bc,256
-	call bos._MemClear
-	jq enter_input
+if bos.InputBuffer and $FF
+	ld b,0
+else
+	ld b,l
+end if
+	ld c,b
+.clear_buffer_loop:
+	ld (hl),c
+	inc hl
+	djnz .clear_buffer_loop
+	; jq enter_input
 recall_last: ; TODO: re-implement this in a less hacky way
 	; ld hl,(ix-3)
 	; add hl,bc
@@ -190,9 +198,9 @@ enter_input:
 execute_program_string:
 	push hl
 	call cmd_get_arguments
-	push hl
-	call cmd_terminate_arguments ;check arguments string for eol characters so we can process multi-line commands
-	pop hl
+	; push hl
+	; call cmd_terminate_arguments ;check arguments string for eol characters so we can process multi-line commands
+	; pop hl
 .noargs:
 	ex (sp),hl ;store args, restore path
 	push hl ;push path
@@ -291,26 +299,26 @@ cmd_exit:
 	pop ix
 	ret
 
-cmd_terminate_arguments:
-	xor a,a
-	ld (ix-26),a
-	ld c,a
-.loop:
-	ld a,(hl)
-	or a,a
-	ret z
-	cp a,':'
-	jq z,.eol
-	cp a,$A
-	jq z,.eol
-	inc hl
-	jq .loop
-.eol:
-	ld (ix-26),a
-	ld (hl),c
-	inc hl
-	ld (ix-29),hl
-	ret
+; cmd_terminate_arguments:
+	; xor a,a
+	; ld (ix-26),a
+	; ld c,a
+; .loop:
+	; ld a,(hl)
+	; or a,a
+	; ret z
+	; cp a,':'
+	; jq z,.eol
+	; cp a,$A
+	; jq z,.eol
+	; inc hl
+	; jq .loop
+; .eol:
+	; ld (ix-26),a
+	; ld (hl),c
+	; inc hl
+	; ld (ix-29),hl
+	; ret
 
 cmd_get_arguments.inc_twice:
 	inc hl

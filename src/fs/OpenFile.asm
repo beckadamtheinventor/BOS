@@ -44,6 +44,8 @@ fs_OpenFile:
 	jq z,.return
 	cp a,':'
 	jq z,.return
+	cp a,$A
+	jq z,.return
 	push hl
 	call .strlen
 	ld (ix-23),hl
@@ -76,25 +78,14 @@ fs_OpenFile:
 	jq z,._return ;return if at end of path
 	cp a,':'
 	jq z,._return ;return if at end of path
+	cp a,$A
+	jq z,._return ;return if at end of path
 .into_dir:
 	bit fsbit_subdirectory,(iy + fsentry_fileattr) ;check if we're entering a directory
 	jq z,.fail ;trying to path into a file?
 .step_into_dir:
-	bit fsbit_subfile,(iy + fsentry_fileattr) ;check if we're pathing into a subfile
-	ld de,(iy + fsentry_filesector) ;load file entry starting sector into de
-	jq z,.step_into_regular_dir ;step into a standard directory
-;otherwise step into a subfile subdirectory
-	ex.s hl,de
-	lea de,iy
-	ld e,0
-	res 0,d
-	add hl,de
-	push hl
-	pop iy
-	jq .main_search_loop
-.step_into_regular_dir:
-	push de
-	call fs_GetSectorAddress
+	push iy
+	call fs_GetFDPtr
 	ex (sp),hl
 	pop iy
 	jq .main_search_loop
@@ -185,6 +176,8 @@ fs_OpenFile:
 	cp a,' '
 	ret z
 	cp a,':'
+	ret z
+	cp a,$A
 	ret z
 	inc de
 	inc hl
