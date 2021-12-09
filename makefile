@@ -48,12 +48,12 @@ bosos:
 
 # Rule to build documentation
 documentation:
-	python3 build_docs.py
+	python build_docs.py
 
 # Rule to build include files
 includes:
-	python3 build_bos_inc.py
-	python3 build_bos_src.py
+	python build_bos_inc.py
+	python build_bos_src.py
 
 # Rule to create object and binary directories
 objdirs:

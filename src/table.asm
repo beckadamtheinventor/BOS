@@ -6,6 +6,9 @@
 	jp DONOTHING
 	jp handle_offsetcall ;handle_rst28
 	jp DONOTHING ;handle_rst30
+	include 'tiosjt.asm'
+	dd (($022400-$) shr 2) dup $C3 or handle_unimplemented shl 8
+;$=$022400
 	jp sys_ExecuteFile
 	jp os_GetOSInfo
 	jp fs_OpenFile

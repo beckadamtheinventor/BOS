@@ -11,9 +11,6 @@ boot_os:
 	ld a,3           ;set flash wait states to 3, same as the CE C toolchain
 	ld ($E00005),a
 
-	call gfx_SetDefaultFont
-	call gfx_Set8bpp
-
 	ld hl,$000f00		; 0/Wait 15*256 APB cycles before scanning each row/Mode 0/
 	ld (ti.DI_Mode),hl
 	ld hl,$08080f		; (nb of columns,nb of row) to scan/Wait 15 APB cycles before each scan
@@ -30,12 +27,8 @@ boot_os:
 	ld (lcd_text_fg2),a
 
 	ld hl,bos_UserMem
-	ld (bottom_of_RAM),hl
 	ld (top_of_UserMem),hl
-	ld hl,top_of_RAM-$010000
-	ld (free_RAM_ptr),hl
-	ld bc,-bos_UserMem
-	add hl,bc
+	ld hl,libload_bottom_ptr
 	ld (remaining_free_RAM),hl
 	or a,a
 	sbc hl,hl
@@ -273,8 +266,9 @@ generate_boot_configs:
 
 os_return:
 	call os_check_recovery_key
-	call gfx_Set8bpp
 	call sys_FreeAll
+	call gfx_SetDefaultFont
+	call gfx_Set8bpp
 	ld a,1
 	call gfx_SetDraw
 	xor a,a
@@ -500,5 +494,20 @@ end virtual
 data_reinstall_tios_program:
 	db data_reinstall_tios_program.data
 .len:=$-.
+
+handle_unimplemented:
+	DisableThreading
+	call gfx_Set8bpp
+	ld a,1
+	call gfx_SetDraw
+	ld hl,str_UnimplementedOSCall
+	call gui_DrawConsoleWindow
+.keywait:
+	call sys_WaitKeyCycle
+	cp a,15
+	ret z
+	cp a,9
+	jq nz,.keywait
+	jq boot_os
 
 

@@ -135,6 +135,14 @@ cmd_execute_next_line:
 	jq cmd_exit
 
 cmd_no_cmd_args:
+	xor a,a
+	ld (bos.lcd_text_bg),a
+	ld (bos.lcd_text_bg2),a
+	dec a
+	ld (bos.lcd_text_fg),a
+	ld a,5
+	ld (bos.lcd_text_fg2),a
+	ld (bos.cursor_color),a
 	ld hl,bos.current_working_dir
 	call bos.gui_DrawConsoleWindow
 enter_input_clear:
@@ -198,6 +206,8 @@ enter_input:
 execute_program_string:
 	push hl
 	call cmd_get_arguments
+	ld (ix-29),hl
+	ld (ix-26),a
 	; push hl
 	; call cmd_terminate_arguments ;check arguments string for eol characters so we can process multi-line commands
 	; pop hl
@@ -337,8 +347,7 @@ cmd_get_arguments:
 	cp a,' '
 	jq nz,.loop
 	ld (hl),0
-	inc hl
-	ret
+	jq .loop
 
 cmd_help_info:
 	db " cmd -h",$A,$9,"show this info",$A

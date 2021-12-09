@@ -125,7 +125,9 @@ def build_docs():
 			for lx in range(len(data)):
 				line = data[lx]
 				# print(line)
-				if "jp " in line:
+				if line.startswith(";$=$"):
+					counter = int(line[4:], 16)
+				elif "jp " in line:
 					e=[]
 					line=line[line.find("jp ")+3:]
 					if ";" in line:

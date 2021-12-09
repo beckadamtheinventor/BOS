@@ -23,71 +23,71 @@ RAM_START  := 0D00400h
 
 ; flag memory locations
 flag_start             := $D00000
+thread_map             := $D00000 ; thread map. 256 threads. Active threads have bit 7 set.
+thread_parents         := $D00200 ;256 bytes, one per thread. Saves ID of thread that spawned a given thread. A thread will only be run if it's parent thread is awake
 
-currow?                := console_line
-curcol?                := console_col
+currow?                := ti.curRow
+curcol?                := ti.curCol
+console_col            := curcol
+console_line           := currow
 
-lcd_bg_color           := $D00210
-lcd_text_fg            := $D00211
-lcd_text_bg            := $D00212
-color_primary          := $D00213
-font_spacing           := $D00214
-font_data              := $D00217
-lcd_x                  := $D0021A
-lcd_y                  := $D0021D
-free_RAM_ptr           := $D00220
-remaining_free_RAM     := $D00223
-cursor_color           := $D00226
-console_col            := $D00227
-op_stack_ptr           := $D00228
-console_line           := $D0022C
-bottom_of_RAM          := $D0022D
-flashStatusByte        := $D00230
-filesystem_driver      := $D00231
-on_interrupt_handler   := $D00235 ;3 bytes. Jump to on key interrupt handler. Byte preceeding this must be $C3 or $C9
-cur_lcd_buffer         := $D00238 ;3 bytes. Points to current LCD buffer
-running_process_id     := $D0023B ;1 byte. Current process ID (used for per-program memory allocation)
-lcd_text_fg2           := $D0023C
-lcd_text_bg2           := $D0023D
-running_program_ptr    := $D0023E ;3 bytes. Stores pointer to currently running program
-ScrapMem2              := $D00279
-ScrapByte              := $D0027C
-ScrapWord              := $D0027D
-ScrapMem               := $D0027D
-ExecutingFileFd        := $D00280 ; 3 bytes. Pointer to currently executing file descriptor. -1 if file not found. 0 if file descriptor is not applicable
-LastCommandResult      := $D00283 ; 4 bytes. Stores result of previously executed command
-last_keypress          := $D00287 ; 1 byte. Last keypress returned by an os getkey routine
-return_code_flags      := $D00288 ; flag byte that determines how to interpret the return value of the last run program. Is to be set within the program for non-default return interpretation.
-asm_prgm_size          := $D00289 ;3 bytes
-top_of_UserMem         := $D0028C ;3 bytes
-SaveSP                 := $D0028F ;3 bytes, saves SP when running programs.
-current_thread         := $D00292 ;1 byte, currently running thread ID
-threading_enabled      := $D00293 ;1 byte, determines if software threading is enabled and whether it should be used in OS routines
-copy_buffer            := $D00294 ;3 bytes, points to first copy buffer entry, or -1 if nothing is stored.
+color_primary          := ti.drawFGColor      ; 1 byte
+lcd_bg_color           := ti.drawFGColor+1    ; 1 byte
+lcd_text_fg            := ti.textFGcolor      ; 1 byte
+lcd_text_bg            := ti.textFGcolor+1    ; 1 byte
+lcd_text_fg2           := ti.textBGcolor      ; 1 byte
+lcd_text_bg2           := ti.textBGcolor+1    ; 1 byte
+cursor_color           := ti.statusBarBGColor ; 1 byte
+font_data              := ti.lFont_record
+font_spacing           := ti.lFont_record+3
+lcd_x                  := ti.lFont_record+6
+lcd_y                  := ti.lFont_record+9
+remaining_free_RAM     := ti.appData    ; 3 bytes
+op_stack_ptr           := ti.appData+3  ; 3 bytes
+on_interrupt_jump      := ti.appData+6  ; jump byte for on_interrupt_handler
+on_interrupt_handler   := ti.appData+7  ; 3 bytes. Jump to on key interrupt handler. Byte preceeding this should be $C3 or $C9
+cur_lcd_buffer         := ti.appData+10 ; 3 bytes. Points to current LCD buffer
+running_process_id     := ti.appData+13 ; 1 byte. Current process ID (used for per-program memory allocation)
+ScrapMem2              := ti.appData+14 ; 3 bytes
+top_of_UserMem         := ti.appData+17 ; 3 bytes
+LastCommandResult      := ti.appData+20 ; 4 bytes. Stores result of previously executed command
+ExecutingFileFd        := ti.appData+24 ; 3 bytes. Pointer to currently executing file descriptor. -1 if file not found. 0 if file descriptor is not applicable
+running_program_ptr    := ti.appData+27 ; 3 bytes. Stores pointer to currently running program
+return_code_flags      := ti.appData+30 ; flag byte that determines how to interpret the return value of the last run program. Is to be set within the program for non-default return interpretation.
+flashStatusByte        := ti.appData+31 ; 1 byte
+filesystem_driver      := ti.appData+32 ; 1 byte
+copy_buffer            := ti.appData+33 ;3 bytes, points to first copy buffer entry, or -1 if nothing is stored.
+threading_enabled      := ti.appData+36 ;1 byte, determines if software threading is enabled and whether it should be used in OS routines
+current_thread         := ti.appData+37 ;1 byte, currently running thread ID
+gfx_string_temp        := ti.appData+38 ;16 bytes, temp location for integer printing
+ScrapByte              := ti.flashByte
+ScrapWord              := ti.scrapMem
+ScrapMem               := ti.scrapMem
+last_keypress          := ti.kbdScanCode ; 1 byte. Last keypress returned by an os getkey routine
+asm_prgm_size          := ti.asm_prgm_size ;3 bytes
+SaveSP                 := ti.errSP ; 3 bytes, saves SP when running programs.
+fsOP1                  := ti.OP1
+fsOP2                  := ti.OP2
+fsOP3                  := ti.OP3
+fsOP4                  := ti.OP4
+fsOP5                  := ti.OP5
+fsOP6                  := ti.OP6
 
-; OP registers for compatibility routines and misc. scrap space for OS functions
-fsOP1                  := $D002A0
-fsOP2                  := $D002B0
-fsOP3                  := $D002C0
-gfx_string_temp        := $D002D0 ;16 bytes, temp location for integer printing
-fsOP4                  := $D002D0
-fsOP5                  := $D002E0
-fsOP6                  := $D002F0
-thread_parents         := $D00300 ;256 bytes, one per thread. Saves ID of thread that spawned a given thread. A thread will only be run if it's parent thread is awake
-InputBuffer            := $D00400
-current_working_dir    := $D00600
-op_stack_bot           := $D00700
-op_stack_top           := $D00800 ;256 bytes downward
-thread_map             := $D00900 ; thread map. 256 threads. Active threads have bit 7 set.
-
-safeRAM                := $D00C00 ; 62464 bytes scrap RAM
-safeRAM_len            := 62464
-usbArea                := $D13FD8 ; 14306 bytes used for usb, probably need to disable timer3/usb interrupts to use
-usbHandleKeys          := $D14091 ; zero this byte while using usbArea to keep GetCSC from affecting other parts of usbArea
-usbInited              := $D177B7 ; zero this byte while using usbArea and to reset the usb stack when interrupts are re-enabled
-reservedRAM            := $D177BA
+safeRAM                := ti.pixelShadow ; 69090 bytes scrap RAM
+safeRAM_len            := 69090
+usbArea                := ti.usbArea ; 14306 bytes used for usb, probably need to disable timer3/usb interrupts to use
+usbHandleKeys          := ti.usbHandleKeys ; zero this byte while using usbArea to keep GetCSC from affecting other parts of usbArea
+usbInited              := ti.usbInited ; zero this byte while using usbArea and to reset the usb stack when interrupts are re-enabled
+heapBot                := ti.heapBot
+ramCodeTop             := ti.ramCodeTop
+reservedRAM            := ti.ramCodeTop
 bos_UserMem            := $D1A881
-libload_top_ptr        := $D2F000
+libload_bottom_ptr     := libload_top_ptr-$400 ; 1024 bytes for executing libload
+libload_top_ptr        := thread_temp_save-$400
+op_stack_bot           := thread_temp_save-$400
+op_stack_top           := thread_temp_save-$300 ;256 bytes downward
+current_working_dir    := thread_temp_save-$200
+InputBuffer            := thread_temp_save-$100
 thread_temp_save       := $D2F000 ; temporary save location for registers when a thread switch is triggered. 16 bytes per thread, 256 threads = 4096 bytes.
 malloc_cache           := $D2F800 ;4096 bytes
 bottom_of_malloc_RAM   := $D30000
@@ -96,10 +96,17 @@ top_of_RAM             := $D40000
 
 ; Flash locations
 start_of_user_archive  := $040000 ;sector $04
+fs_root_dir_lba := $010000 shr 9
+fs_root_dir_address := start_of_user_archive + $010000
 end_of_user_archive    := $3B0000 ;sector $3B, start of certificate
+fs_cluster_map := $3BE000
+fs_cluster_map.len := 7040
+fs_cmap_length := fs_cluster_map.len
+; asset_locations_start  := $3C0000
 
 
-asset_locations_start      := $3C0000
+
+
 
 ; file entry flags
 fd_readonly   := 0
@@ -153,9 +160,3 @@ bReturnNotError      := 0
 bReturnHex           := 1
 bReturnLong          := 2
 bSilentReturn        := 3
-
-fs_cluster_map := $3BE000
-fs_cluster_map.len := 7040
-fs_cmap_length := fs_cluster_map.len
-fs_root_dir_lba := $010000 shr 9
-fs_root_dir_address := start_of_user_archive + $010000

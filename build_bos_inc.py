@@ -35,7 +35,9 @@ namespace bos
 ; jump table
 	""")
 		for line in data:
-			if "jp " in line:
+			if line.startswith(";$=$"):
+				counter = int(line[4:], 16)
+			elif "jp " in line:
 				line=line[line.find("jp ")+3:]
 				if ";" in line:
 					line=line.split(';')[0].strip("\t ")

@@ -118,8 +118,6 @@ sys_ExecuteFile:
 	pop bc
 .exec_setup_usermem_bc:
 	ld (asm_prgm_size),bc
-	ld hl,top_of_RAM-$010000
-	ld (free_RAM_ptr),hl
 	ld de,-bos_UserMem
 	add hl,de
 	ld (remaining_free_RAM),hl
@@ -128,6 +126,7 @@ sys_ExecuteFile:
 	add hl,bc
 	ld (top_of_UserMem),hl ;save top of usermem
 .exec_fex:
+	ld (SaveSP),sp
 	ld de,(fsOP6) ;push arguments
 	push de
 	call sys_NextProcessId

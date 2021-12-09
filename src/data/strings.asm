@@ -13,6 +13,11 @@ str_WritingFilesystem:
 	db "Writing filesystem...",0
 str_PressAnyKey:
 	db "Press any key to continue...",0
+str_UnimplementedOSCall:
+	db "Unimplemented OS routine called",$A
+	db "by running program.",$A
+	db "Press enter to terminate",$A," and return to OS.",$A
+	db "Press clear to continue",$A," and ignore this message.",$A,0
 str_Prompt:
 	db ">",0
 ; string_FilesystemCorrupt:
