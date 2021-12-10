@@ -206,11 +206,9 @@ enter_input:
 execute_program_string:
 	push hl
 	call cmd_get_arguments
-	ld (ix-29),hl
-	ld (ix-26),a
-	; push hl
-	; call cmd_terminate_arguments ;check arguments string for eol characters so we can process multi-line commands
-	; pop hl
+	push hl
+	call cmd_terminate_arguments ;check arguments string for eol characters so we can process multi-line commands
+	pop hl
 .noargs:
 	ex (sp),hl ;store args, restore path
 	push hl ;push path
@@ -309,26 +307,29 @@ cmd_exit:
 	pop ix
 	ret
 
-; cmd_terminate_arguments:
-	; xor a,a
-	; ld (ix-26),a
-	; ld c,a
-; .loop:
-	; ld a,(hl)
-	; or a,a
-	; ret z
-	; cp a,':'
-	; jq z,.eol
-	; cp a,$A
-	; jq z,.eol
-	; inc hl
-	; jq .loop
-; .eol:
-	; ld (ix-26),a
-	; ld (hl),c
-	; inc hl
-	; ld (ix-29),hl
-	; ret
+cmd_terminate_arguments:
+	xor a,a
+	ld (ix-26),a
+	ld c,a
+.loop:
+	ld a,(hl)
+	or a,a
+	ret z
+	cp a,':'
+	jq z,.eol
+	cp a,$A
+	jq z,.eol
+	inc hl
+	cp a,$5C ;backslash
+	jq nz,.loop
+	inc hl
+	jq .loop
+.eol:
+	ld (ix-26),a
+	ld (hl),c
+	inc hl
+	ld (ix-29),hl
+	ret
 
 cmd_get_arguments.inc_twice:
 	inc hl
@@ -347,7 +348,8 @@ cmd_get_arguments:
 	cp a,' '
 	jq nz,.loop
 	ld (hl),0
-	jq .loop
+	inc hl
+	ret
 
 cmd_help_info:
 	db " cmd -h",$A,$9,"show this info",$A

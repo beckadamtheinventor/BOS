@@ -127,9 +127,12 @@ def build_docs():
 				# print(line)
 				if line.startswith(";$=$"):
 					counter = int(line[4:], 16)
-				elif "jp " in line:
+				elif "jp " in line or "call " in line:
+					if "jp " in line:
+						line=line[line.find("jp ")+3:]
+					else:
+						line=line[line.find("call ")+5:]
 					e=[]
-					line=line[line.find("jp ")+3:]
 					if ";" in line:
 						line=line[:line.find(";")]
 					if "DONOTHING" in line:

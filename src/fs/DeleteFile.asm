@@ -12,12 +12,13 @@ fs_DeleteFile:
 	dec a
 	jq nz,.fail
 	call fs_OpenFile
-	ex (sp),hl
-	; jq c,.fail
-
-;free the file's data
-	call fs_Free
-	pop de
+	push hl
+	ld bc,fsentry_fileattr
+	add hl,bc
+	bit fd_link,(hl)
+; free the file's data if it's not a link file
+	call z,fs_Free
+	pop de,bc
 ; mark the file descriptor as deleted
 	call sys_FlashUnlock
 	xor a,a

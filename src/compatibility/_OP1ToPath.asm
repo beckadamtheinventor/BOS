@@ -3,16 +3,13 @@
 ;@OUTPUT hl = path
 ;@OUTPUT Cf set if failed
 _OP1ToPath:
-	ld hl,9+4+str_tivars_dir.len
+	ld hl,9+4
 	push hl
 	call sys_Malloc
 	pop bc
 	ret c
 	push hl
 	ex hl,de
-	ld hl,str_tivars_dir
-	ld bc,str_tivars_dir.len
-	ldir
 	ld b,8
 	ld hl,fsOP1+1
 .copy_name_loop:
@@ -24,6 +21,7 @@ _OP1ToPath:
 	inc de
 	djnz .copy_name_loop
 .done_copying_name:
+	ld c,0
 	ld b,c
 	ex hl,de
 	ld (hl),'.'

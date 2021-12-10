@@ -46,6 +46,15 @@ namespace bos
 				else:
 					f.write("?"+line.ljust(32," ")+(":= $"+myhex(counter))+"\n")
 				counter+=4
+			elif "call " in line:
+				line=line[line.find("call ")+5:]
+				if ";" in line:
+					line=line.split(';')[0].strip("\t ")
+				if line=="DONOTHING":
+					f.write(";DONOTHING                       := $"+myhex(counter)+"\n")
+				else:
+					f.write("?"+line.ljust(32," ")+(":= $"+myhex(counter))+"\n")
+				counter+=4
 			else:
 				f.write(";"+line+"\n")
 		f.write("""; defines

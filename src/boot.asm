@@ -502,6 +502,15 @@ handle_unimplemented:
 	call gfx_SetDraw
 	ld hl,str_UnimplementedOSCall
 	call gui_DrawConsoleWindow
+	ld hl,str_Address0x
+	call gui_PrintString
+	pop hl
+	dec hl ; account for pc increment by the address that called us
+	dec hl
+	dec hl
+	dec hl
+	call gui_PrintHexInt
+	call gui_NewLine
 .keywait:
 	call sys_WaitKeyCycle
 	cp a,15

@@ -27,6 +27,8 @@ fs_ExtractOSOptBinaries:
 	pop ix
 	jq .loop
 .extract_file:
+	bit fd_link,c
+	jq nz,.extract_link
 	ld a,'/'
 	call gui_PrintChar
 	lea hl,ix+1
@@ -63,6 +65,38 @@ fs_ExtractOSOptBinaries:
 .skip_file:
 	pop bc,hl,bc
 	add hl,bc
+.pushhl_popix_and_loop:
 	push hl
 	pop ix
 	jq .loop
+.extract_link:
+	push bc
+	pea ix+1
+	call fs_DeleteFile ; delete the old link file if it exists
+	call fs_CreateFileEntry ; create the linking file
+	pop bc,bc
+	push hl
+	lea hl,ix+1
+	ld bc,0
+	xor a,a
+	cpir
+	push hl
+	call fs_OpenFile
+	ex hl,de
+	pop bc,hl
+	jq c,.dont_link
+	ld bc,fsentry_filesector
+	add hl,bc
+	ex hl,de
+	add hl,bc ; hl = linked file sector address, de = linking file sector address
+	call sys_FlashUnlock
+	ld bc,16-fsentry_filesector
+	call sys_WriteFlash ; write sector address and length of linked file to linking file
+	call sys_FlashLock
+.dont_link:
+	lea hl,ix+1
+	ld bc,0
+	xor a,a
+	cpir
+	cpir
+	jq .pushhl_popix_and_loop

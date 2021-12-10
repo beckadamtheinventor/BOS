@@ -1,3 +1,20 @@
+_CreateString:
+	ld a,ti.StrngObj
+	jq _CreateVar
+_CreateProg:
+	ld a,ti.ProgObj
+	jq _CreateVar
+_CreateProtProg:
+	ld a,ti.ProtProgObj
+	jq _CreateVar
+_CreateAppVar:
+	ld a,ti.AppVarObj
+	jq _CreateVar
+
+
+
+
+
 ;@DOES create a file in the /usr/tivars/ directory
 ;@INPUT OP1+1 = 8 byte name of var to create
 ;@INPUT A = var type

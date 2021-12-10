@@ -3,9 +3,13 @@
 ;@OUTPUT New file descriptor or -1 and Cf set if failed.
 ;@DESTROYS All
 fs_WriteRaw:
-	call ti._frameset0
-	ld hl,(ix + 15) ; file descriptor
-	push hl
+	ld hl,-3
+	call ti._frameset
+	ld (ix-3),iy
+	ld iy,(ix+15) ;void *fd
+	bit fd_link,(iy+fsentry_fileattr)
+	jq nz,.fail
+	push iy
 	call fs_CheckWritableFD
 	dec a
 	jq nz,.fail
@@ -61,6 +65,7 @@ fs_WriteRaw:
 	scf
 	sbc hl,hl
 	or a,a
+	ld iy,(ix-3)
 	ld sp,ix
 	pop ix
 	ret

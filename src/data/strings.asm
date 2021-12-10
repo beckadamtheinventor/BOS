@@ -17,7 +17,9 @@ str_UnimplementedOSCall:
 	db "Unimplemented OS routine called",$A
 	db "by running program.",$A
 	db "Press enter to terminate",$A," and return to OS.",$A
-	db "Press clear to continue",$A," and ignore this message.",$A,0
+	db "Press clear to continue",$A," and ignore this error.",$A,0
+str_Address0x:
+	db "Address: 0x",0
 str_Prompt:
 	db ">",0
 ; string_FilesystemCorrupt:
@@ -27,8 +29,9 @@ str_Prompt:
 str_GarbageCollecting:
 	db "Garbage collecting...",0
 str_tivars_dir:
-	db "/usr/tivars/"
+	db "/tivars/"
 .len:=$-.
+	db 0
 str_HexChars:
 	db "0123456789ABCDEF"
 string_os_info:
@@ -78,11 +81,11 @@ str_bin_dir:
 	db $10, "opt/"
 str_lib_dir:
 	db "lib",0
+	db $10, "tivars",0
 	db $10, "tmp",0
 	db $10, "usr",0
 	db $10, "usr/bin",0
 	db $10, "usr/lib",0
-	db $10, "usr/tivars",0
 	db $10, "var",0
 
 	db $00, "etc/fontlibc/DrMono",0
@@ -138,6 +141,17 @@ end virtual
 fs_file_data_lib:
 	file "adrive/obj/LIB.zx7.bin"
 fs_file_data_lib.zlen:=$-.
+
+	db $00, "var/TIVARS",0
+	dw fs_file_data_tivars.len
+	dw fs_file_data_tivars.zlen
+virtual
+	file "adrive/obj/TIVARS.bin"
+	fs_file_data_tivars.len := $-$$
+end virtual
+fs_file_data_tivars:
+	file "adrive/obj/TIVARS.zx7.bin"
+fs_file_data_tivars.zlen:=$-.
 	dw 0
 
 ; bosfs_filesystem_header:
@@ -152,6 +166,8 @@ fs_file_data_lib.zlen:=$-.
 	; db "/",$F2,"OS/ELEVATED",0
 str_sbin_dir:
 	db "sbin",0
+str_var_tivars:
+	db "/var/TIVARS",0
 string_path_variable:
 	db "/var/PATH",0
 string_lib_var:

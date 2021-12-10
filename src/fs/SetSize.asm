@@ -7,8 +7,10 @@ fs_SetSize:
 	ld hl,-22
 	call ti._frameset
 	ld (ix-22),iy
-	ld bc,(ix+9)
-	push bc
+	ld iy,(ix+9) ;void *fd
+	bit fd_link,(iy+fsentry_fileattr)
+	jq nz,.fail
+	push iy
 	call fs_CheckWritableFD
 	dec a
 	jq nz,.fail

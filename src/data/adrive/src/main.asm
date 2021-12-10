@@ -37,6 +37,7 @@ fs_dir lib_dir
 	fs_entry srldrvce_lll, "SRLDRVCE","dll", f_readonly+f_system
 	fs_entry usbdrvce_lll, "USBDRVCE","dll", f_readonly+f_system
 	fs_entry libload_lll, "LibLoad", "dll", f_readonly+f_system
+	fs_entry libload_v15, "LibLoad", "v15", f_readonly+f_system
 end fs_dir
 
 ;"/bin/" directory
@@ -222,6 +223,14 @@ end fs_file
 
 fs_file libload_lll
 	file '../obj/libload.bin'
+end fs_file
+
+fs_file libload_v15
+	db ti.AppVarObj, "LibLoad", 0, 7, 7 dup 0
+	dw libload_v15_internal_len
+libload_v15_internal_data:
+	file '../obj/libload.bin'
+libload_v15_internal_len:=$-libload_v15_internal_data
 end fs_file
 
 ; fs_file updater_exe

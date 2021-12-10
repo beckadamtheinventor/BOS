@@ -118,10 +118,14 @@ $(call NATIVEPATH,$(FSSRC)/fs/bin/msd/bosbin/MSD.bin): $(call NATIVEPATH,$(FSSRC
 $(call NATIVEPATH,$(FSOBJ)/LIB.bin): $(call NATIVEPATH,$(FSSRC)/fs/var/LIB.asm)
 	fasmg $(call NATIVEPATH,$(FSSRC)/fs/var/LIB.asm) $(call NATIVEPATH,$(FSOBJ)/LIB.bin)
 	convbin -i $(call NATIVEPATH,$(FSOBJ)/LIB.bin) -o $(call NATIVEPATH,$(FSOBJ)/LIB.zx7.bin) -j bin -k bin -c zx7
-	
+
 $(call NATIVEPATH,$(FSOBJ)/PATH.bin): $(call NATIVEPATH,$(FSSRC)/fs/var/PATH.asm)
 	fasmg $(call NATIVEPATH,$(FSSRC)/fs/var/PATH.asm) $(call NATIVEPATH,$(FSOBJ)/PATH.bin)
 	convbin -i $(call NATIVEPATH,$(FSOBJ)/PATH.bin) -o $(call NATIVEPATH,$(FSOBJ)/PATH.zx7.bin) -j bin -k bin -c zx7
+
+$(call NATIVEPATH,$(FSOBJ)/TIVARS.bin): $(call NATIVEPATH,$(FSSRC)/fs/var/TIVARS.asm)
+	fasmg $(call NATIVEPATH,$(FSSRC)/fs/var/TIVARS.asm) $(call NATIVEPATH,$(FSOBJ)/TIVARS.bin)
+	convbin -i $(call NATIVEPATH,$(FSOBJ)/TIVARS.bin) -o $(call NATIVEPATH,$(FSOBJ)/TIVARS.zx7.bin) -j bin -k bin -c zx7
 
 # Rule to build Filesytem and compress it
 filesystem: $(call NATIVEPATH,$(FSSRC)/main.asm) $(call NATIVEPATH,$(FSSRC)/fs/lib/libload/bos_libload.asm) $(call NATIVEPATH,$(FSSRC)/fs/lib/fatdrvce/fatdrvce.asm) \
@@ -134,7 +138,8 @@ $(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/bosbin/CEDIT.bin) $(call NATIVEPATH,$(FS
 $(call NATIVEPATH,$(FSOBJ)/msddrvce.bin) $(call NATIVEPATH,$(FSSRC)/fs/bin/msd/bosbin/MSD.bin) $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/config.asm) \
 $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/data.asm) $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/display.asm) $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/files.asm) \
 $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/libloader.asm) $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/loadconfig.asm) $(call NATIVEPATH,$(FSOBJ)/PATH.bin) \
-$(call NATIVEPATH,$(FSSRC)/fs/var/PATH.asm) $(call NATIVEPATH,$(FSOBJ)/LIB.bin) $(call NATIVEPATH,$(FSSRC)/fs/var/LIB.asm)
+$(call NATIVEPATH,$(FSSRC)/fs/var/PATH.asm) $(call NATIVEPATH,$(FSOBJ)/LIB.bin) $(call NATIVEPATH,$(FSSRC)/fs/var/LIB.asm) $(call NATIVEPATH,$(FSOBJ)/TIVARS.bin) \
+$(call NATIVEPATH,$(FSSRC)/fs/var/TIVARS.asm)
 	convbin -i $(call NATIVEPATH,$(FSSRC)/fs/etc/fontlibc/DrMono.dat) -o $(call NATIVEPATH,$(FSOBJ)/DrMono.zx7.dat) -j bin -k bin -c zx7
 	fasmg $(call NATIVEPATH,$(FSSRC)/main.asm) $(call NATIVEPATH,src/data/adrive/main.bin)
 	convbin -i $(call NATIVEPATH,src/data/adrive/main.bin) -o $(call NATIVEPATH,src/data/adrive/data.bin) -j bin -k bin -c zx7

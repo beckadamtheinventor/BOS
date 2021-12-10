@@ -18,7 +18,7 @@ TEXT_MAX_ROW    := 231
 ; OS defines
 ;-------------------------------------------------------------------------------
 
-RAM_START  := 0D00400h
+RAM_START  := 0D00000h
 
 
 ; flag memory locations
@@ -115,6 +115,7 @@ fd_system     := 2
 fd_subfile    := 3
 fd_subdir     := 4
 fd_device     := 5
+fd_link       := 6
 fd_elevated   := 7
 
 ; file entry first byte

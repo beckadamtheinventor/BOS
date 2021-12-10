@@ -17,12 +17,8 @@ fs_GetSectorAddress:
 	ret
 .ram_sector:
 	res 7,h
-	bit 6,h
-	jq nz,.mmio
-	ld b,4
-	ld de,$D00000
-	jq .mult_loop
-.mmio:
-	res 6,h
-	ld de,$D40000
-	jq .mult_loop
+	ld de,ti.userMem
+	add hl,hl
+	add hl,hl
+	add hl,de
+	ret

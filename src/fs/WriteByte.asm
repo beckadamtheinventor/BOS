@@ -4,8 +4,10 @@
 ;@NOTE Fails if the byte can't be written without swapping
 fs_WriteByte:
 	call ti._frameset0
-	ld hl,(ix + 9)
-	push hl
+	ld iy,(ix + 9) ;void *fd
+	bit fd_link,(iy+fsentry_fileattr)
+	jq nz,.fail
+	push iy
 	call fs_CheckWritableFD
 	dec a
 	jq nz,.fail

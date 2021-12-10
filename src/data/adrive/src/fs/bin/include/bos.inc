@@ -11,7 +11,7 @@ namespace bos
 ?handle_offsetcall               := $2011C
 ;DONOTHING                       := $20120
 ;	include 'tiosjt.asm'
-;	dd (($022400-$) shr 2) dup $C3 or handle_unimplemented shl 8
+;	dd (($022400-$) shr 2) dup $CD or handle_unimplemented shl 8
 ?sys_ExecuteFile                 := $22400
 ?os_GetOSInfo                    := $22404
 ?fs_OpenFile                     := $22408
@@ -173,7 +173,7 @@ namespace bos
 ?LCD_8BPP?   := $27
 ?LCD_16BPP?  := $2D
 ?TEXT_MAX_ROW    := 231
-?RAM_START  := 0D00400h
+?RAM_START  := 0D00000h
 ?flag_start             := $D00000
 ?thread_map             := $D00000 ; thread map. 256 threads. Active threads have bit 7 set.
 ?thread_parents         := $D00200 ;256 bytes, one per thread. Saves ID of thread that spawned a given thread. A thread will only be run if it's parent thread is awake
@@ -254,6 +254,7 @@ namespace bos
 ?fd_subfile    := 3
 ?fd_subdir     := 4
 ?fd_device     := 5
+?fd_link       := 6
 ?fd_elevated   := 7
 ?fsentry_endofdir        := $00
 ?fsentry_dot             := $2E

@@ -1,3 +1,12 @@
+
+_DelAppVar:
+	ld a,ti.AppVarObj
+	jq _DelVarA
+
+_DelVarA:
+	ld (fsOP1),a
+	jq _DelVar
+
 ;@DOES delete a file in the /usr/tivars/ directory
 ;@INPUT OP1 = type byte, 8 byte name of var to delete
 ;@OUTPUT Cf set if failed

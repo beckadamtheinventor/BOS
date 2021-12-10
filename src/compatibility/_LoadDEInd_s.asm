@@ -1,4 +1,4 @@
-;@DOES load DE with 16-bit value at HL, advancing DE+=2
+;@DOES load DE with 16-bit value at HL, advancing HL+=2
 _LoadDEInd_s:
 	ld de,0
 	ld e,(hl)

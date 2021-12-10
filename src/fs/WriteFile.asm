@@ -6,8 +6,10 @@ fs_WriteFile:
 	ld hl,-9
 	call ti._frameset
 	ld (ix-3),iy
-	ld bc,(ix+12)
-	push bc
+	ld iy,(ix+12) ;void *fd
+	bit fd_link,(iy+fsentry_fileattr)
+	jq nz,.fail
+	push iy
 	call fs_CheckWritableFD
 	dec a
 	pop iy
