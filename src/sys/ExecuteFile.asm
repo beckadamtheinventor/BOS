@@ -52,11 +52,34 @@ sys_ExecuteFile:
 	cp a,'#'
 	jq z,.executable_text
 	cp a,$EF
-	jq nz,.fail ;fail if unrecognized header
+	jq nz,.tryvarheader
 	ld a,(hl)
 	inc hl
 	cp a,$7B
-	jq z,.exec_rex_entryhl ;jump if $EF,$7B header
+	jq z,.exec_rex_entryhl ;jump to execute if $EF,$7B header
+	dec hl
+.tryvarheader: ; try running it as a ti formatted var file
+	dec hl
+	ld bc,0
+	ld c,(hl)
+	add hl,bc
+	ld c,(hl)
+	inc hl
+	ld b,(hl)
+	inc hl
+	ld a,(hl)
+	cp a,$EF
+	jq nz,.fail
+	inc hl
+	ld a,(hl)
+	cp a,$7B
+	jq nz,.fail
+	inc hl
+	dec bc
+	dec bc
+	ld a,c
+	or a,b
+	jq nz,.exec_copy_to_usermem ; execute if valid header and there is program data to copy
 ; fail if unrecognized header
 .fail:
 	scf
@@ -111,6 +134,7 @@ sys_ExecuteFile:
 	push de
 	pop bc
 	pop hl
+.exec_copy_to_usermem:
 	ld de,bos_UserMem
 	push de ;save jump address
 	push bc
@@ -118,13 +142,13 @@ sys_ExecuteFile:
 	pop bc
 .exec_setup_usermem_bc:
 	ld (asm_prgm_size),bc
-	ld de,-bos_UserMem
+	ex hl,de
+	ld (top_of_UserMem),hl ;save top of usermem
+	ld de,-libload_bottom_ptr
 	add hl,de
 	ld (remaining_free_RAM),hl
 	pop hl  ;usermem
 	ld (running_program_ptr),hl
-	add hl,bc
-	ld (top_of_UserMem),hl ;save top of usermem
 .exec_fex:
 	ld (SaveSP),sp
 	ld de,(fsOP6) ;push arguments
@@ -191,6 +215,9 @@ sys_ExecuteFile:
 	call util_Zx7Decompress
 	pop de,hl,bc
 	push de
+	ex hl,de
+	add hl,bc
+	ex hl,de
 	jq .exec_setup_usermem_bc
 .jptoprogram:
 	ld hl,(running_program_ptr)

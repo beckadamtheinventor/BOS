@@ -15,6 +15,8 @@ typedef struct global global_t;
 #include <string.h>
 
 #define isDirectory(entry) (((uint8_t*)(entry))[0xB] & (1<<4))
+#define O_8X_VAR_TYPE 59
+#define O_8X_VAR_NAME 60
 
 #define MAX_PARTITIONS 10
 
@@ -52,6 +54,17 @@ static usb_error_t handleUsbEvent(usb_event_t event, void *event_data,
     }
 
     return USB_SUCCESS;
+}
+
+bool checkIs8xVar(const char *path) {
+	char *ext, *base;
+	base = fs_BaseName(path);
+	sys_Free(base); //memory isnt mangled until next malloc
+	if (ext = strchr(base, '.')) {
+		if (!strncmp(ext, ".8x", 3)) return true;
+		if (!strncmp(ext, ".8X", 3)) return true;
+	}
+	return false;
 }
 
 bool transfer_file(fat_t *fat, const char *src, const char *dest, bool send) {
@@ -97,6 +110,8 @@ bool transfer_file(fat_t *fat, const char *src, const char *dest, bool send) {
 		fat_Close(&destfile);
 	} else {
 		uint32_t srclen;
+		unsigned int write_offset;
+		int i;
 		for (char *ptr = src; *ptr; ptr++) {
 			if ((unsigned)(*ptr - 'a') < 26) *ptr ^= 0x20;
 		}
@@ -106,26 +121,80 @@ bool transfer_file(fat_t *fat, const char *src, const char *dest, bool send) {
 		}
 		srclen = fat_GetSize(&srcfile);
 		if (srclen > 65535) {
+			size_error:;
 			fat_Close(&srcfile);
 			gui_PrintLine("File too large for internal filesystem!");
 			return 0;
 		}
-		destfd = fs_CreateFile(dest, 0, (int)srclen);
+		if (checkIs8xVar(src)) {
+			if (fat_Read(&srcfile, 1, &sector_buffer) != 1) {
+				goto read_error;
+			}
+			if (!strcmp(&sector_buffer, "**TI83F*\x1A\x0A")) {
+				char *varname = TIVarToPath(&sector_buffer[O_8X_VAR_NAME], sector_buffer[O_8X_VAR_TYPE]);
+				char *varpath = fs_JoinPath("/tivars", varname);
+				uint8_t nlen = strlen(&sector_buffer[O_8X_VAR_NAME]);
+				unsigned int len;
+				if (nlen < 8) {
+					nlen += 4;
+				} else {
+					nlen = 11;
+				}
+				len = *(uint16_t*)&sector_buffer[O_8X_VAR_NAME + nlen + 4];
+				sys_Free(varname);
+				if (len+nlen > 65534) {
+					goto size_error;
+				} else {
+					gui_Print("Transferring 8x var to ");
+					gui_PrintLine(varpath);
+					// Allocate space for the header length byte, header, var size word, and var data
+					destfd = fs_CreateFile(varpath, 0, (unsigned int)len + nlen + 1);
+					sys_Free(varpath);
+					// Write header length byte
+					if (fs_WriteByte(nlen+2, destfd, 0) == -1) goto write_error;
+					// Write header data
+					if (fs_WriteRaw(&sector_buffer[O_8X_VAR_TYPE], nlen-2, 1, destfd, 1) == -1)
+							goto write_error;
+					// Write the remaining data in the sector buffer
+					if (srclen <= FAT_BLOCK_SIZE) {
+						write_offset = srclen;
+						i = -1; // tell the copy loop it doesn't need to copy any more data
+					} else {
+						write_offset = FAT_BLOCK_SIZE;
+						i = FAT_BLOCK_SIZE; // tell the copy loop it starts at file LBA 1
+					}
+					write_offset -= O_8X_VAR_TYPE + nlen + 4;
+					// 
+					if (fs_WriteRaw(&sector_buffer[O_8X_VAR_TYPE + nlen + 4], write_offset, 1, destfd, nlen-1) == -1)
+							goto write_error;
+					// Calculate offset in destination file to continue writing additional data
+					write_offset += nlen-1;
+				}
+			}
+		} else {
+			destfd = fs_CreateFile(dest, 0, (unsigned int)srclen);
+			i = write_offset = 0;
+		}
 		if (destfd == -1) {
 			destination_file_error:;
 			gui_PrintLine("Failed to create destination file!");
 			return 0;
 		}
-		for (int i = 0; i < (int)srclen; i += FAT_BLOCK_SIZE) {
-			if (fat_Read(&srcfile, 1, &sector_buffer) != 1) {
-				fat_Close(&srcfile);
-				gui_PrintLine("Read error");
-				return 0;
-			}
-			if (fs_WriteRaw(&sector_buffer, (i+512<srclen?512:srclen-i), 1, destfd, i) == -1) {
-				write_error:;
-				gui_PrintLine("Write error");
-				return 0;
+		// Copy remaining sectors if there are any
+		if (i != -1) {
+			for (; i < (int)srclen; i += FAT_BLOCK_SIZE) {
+				if (fat_Read(&srcfile, 1, &sector_buffer) != 1) {
+					read_error:;
+					fat_Close(&srcfile);
+					gui_PrintLine("Read error");
+					return 0;
+				}
+				if (fs_WriteRaw(&sector_buffer, (i+512<srclen?512:srclen-i), 1, destfd, write_offset) == -1) {
+					write_error:;
+					gui_PrintLine("Write error");
+					return 0;
+				}
+				write_offset += FAT_BLOCK_SIZE;
 			}
 		}
 		fat_Close(&srcfile);

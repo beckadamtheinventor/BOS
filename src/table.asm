@@ -24,9 +24,9 @@
 	jp sys_GetKey
 	jp sys_KbScan
 	jp sys_Malloc
-	jp DONOTHING
+	jp fs_CreateRamFile
 	jp sys_MemSet
-	jp DONOTHING
+	jp fs_AllocRam
 	jp sys_WaitKey
 	jp sys_WaitKeyCycle
 	jp gui_DrawConsoleWindow

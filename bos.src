@@ -19,7 +19,9 @@
 	public _sys_GetKey
 	public _sys_KbScan
 	public _sys_Malloc
+	public _fs_CreateRamFile
 	public _sys_MemSet
+	public _fs_AllocRam
 	public _sys_WaitKey
 	public _sys_WaitKeyCycle
 	public _asm_gui_DrawConsoleWindow
@@ -170,7 +172,9 @@ _sys_FreeAll                     := $2242C
 _sys_GetKey                      := $22430
 _sys_KbScan                      := $22434
 _sys_Malloc                      := $22438
+_fs_CreateRamFile                := $2243C
 _sys_MemSet                      := $22440
+_fs_AllocRam                     := $22444
 _sys_WaitKey                     := $22448
 _sys_WaitKeyCycle                := $2244C
 _asm_gui_DrawConsoleWindow           := $22450

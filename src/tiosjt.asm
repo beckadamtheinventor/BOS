@@ -246,13 +246,13 @@
 	call handle_unimplemented ;Rcl_StatVar               := 00204F0h
 	call handle_unimplemented ;CkOP2Real                 := 00204F4h
 	call handle_unimplemented ;Get_X_Indirect            := 00204F8h
-	call handle_unimplemented ;MemChk                    := 00204FCh
+	jp _MemChk ;MemChk                    := 00204FCh
 	call handle_unimplemented ;CmpPrgNamLen1             := 0020500h
 	call handle_unimplemented ;CmpPrgNamLen              := 0020504h
 	call handle_unimplemented ;FindProgSym               := 0020508h
 	jp _ChkFindSym
 	call handle_unimplemented ;FindSym                   := 0020510h
-	call handle_unimplemented ;InsertMem                 := 0020514h
+	jp _InsertMem ;InsertMem                 := 0020514h
 	call handle_unimplemented ;InsertMemA                := 0020518h
 	call handle_unimplemented ;EnoughMem                 := 002051Ch
 	call handle_unimplemented ;CmpMemNeed                := 0020520h
@@ -283,7 +283,7 @@
 	call handle_unimplemented ;Get_Form_Num              := 0020584h
 	jp _DelVar
 	call handle_unimplemented ;DelVarIO                  := 002058Ch
-	call handle_unimplemented ;DelMem                    := 0020590h
+	jp DONOTHING ;DelMem                    := 0020590h
 	call handle_unimplemented ;DelVar3D                  := 0020594h
 	call handle_unimplemented ;DelVar3C                  := 0020598h
 	call handle_unimplemented ;DelVar3DC                 := 002059Ch

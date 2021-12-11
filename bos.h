@@ -280,14 +280,47 @@ void sys_FlashLock(void);
  * @param path Path to file to be created.
  * @param flags File attribute byte.
  * @param len Length to allocate for new file.
- * @return New file descriptor, or -1 if failed.
+ * @return New file descriptor, or 0 if failed.
  */
 void *fs_CreateFile(const char *path, uint8_t flags, unsigned int len);
 
 /**
+ * Create a file in ram.
+ * @param path Path to file to be created.
+ * @param flags File attribute byte.
+ * @param ptr pointer to file data.
+ * @param len Length of file data.
+ * @return New file descriptor, or 0 if failed.
+ * @note File data in ram must be 32-bit aligned.
+ */
+void *fs_CreateRamFile(const char *path, uint8_t flags, void *ptr, unsigned int len);
+
+/**
+ * Allocate ram in usermem
+ * @param len number of bytes to allocate.
+ * @return pointer to memory, or -1 if failed.
+ * @note If success, the returned data will be 32-bit aligned.
+ */
+void *fs_AllocRam(unsigned int len);
+
+/**
+ * Convert OP1 into a BOS path and return it.
+ * @return BOS filesystem path.
+ */
+char *_OP1ToPath(void);
+
+/**
+ * Copy into OP1 and convert into a BOS path.
+ * @param name Variable name.
+ * @param type Variable type.
+ * @return BOS filesystem path.
+ */
+char *TIVarToPath(const char *name, const uint8_t type);
+
+/**
  * Get the absolute path of argument.
  * @param path Path to get absolute version of.
- * @return Absolute path.
+ * @return Absolute path. -1 if failed.
  * @note This basically joins the current working directory with the argument unless \
 it is already an absolute path.
  */

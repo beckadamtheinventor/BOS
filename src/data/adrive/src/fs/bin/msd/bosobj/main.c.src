@@ -1,11 +1,80 @@
 	section	.text,"ax",@progbits
 	assume	adl = 1
 	section	.text,"ax",@progbits
+	public	_checkIs8xVar
+_checkIs8xVar:
+	ld	hl, -3
+	call	__frameset
+	ld	hl, (ix + 6)
+	push	hl
+	call	_fs_BaseName
+	ld	(ix - 3), hl
+	pop	de
+	push	hl
+	call	_sys_Free
+	pop	hl
+	ld	hl, 46
+	push	hl
+	ld	hl, (ix - 3)
+	push	hl
+	call	_strchr
+	pop	de
+	pop	de
+	add	hl, bc
+	or	a, a
+	sbc	hl, bc
+	jq	z, BB0_4
+	ld	de, L_.str
+	ld	bc, 3
+	push	bc
+	push	de
+	ld	(ix - 3), hl
+	push	hl
+	call	_strncmp
+	pop	de
+	pop	de
+	pop	de
+	add	hl, bc
+	or	a, a
+	sbc	hl, bc
+	jq	nz, BB0_3
+	ld	a, 1
+	jq	BB0_5
+BB0_3:
+	ld	hl, L_.str.1
+	ld	de, 3
+	push	de
+	push	hl
+	ld	hl, (ix - 3)
+	push	hl
+	call	_strncmp
+	pop	de
+	pop	de
+	pop	de
+	add	hl, bc
+	or	a, a
+	sbc	hl, bc
+	ld	a, 1
+	jq	z, BB0_5
+BB0_4:
+	xor	a, a
+BB0_5:
+	pop	hl
+	pop	ix
+	ret
+	section	.text,"ax",@progbits
+
+	section	.text,"ax",@progbits
 	public	_transfer_file
 _transfer_file:
-	ld	hl, -670
+	ld	hl, -673
 	call	__frameset
-	ld	hl, L_.str
+	ld	hl, L_.str.2
+	ld	de, 0
+	ld	bc, -652
+	lea	iy, ix
+	add	iy, bc
+	ld	(iy), de
 	push	hl
 	call	_gui_Print
 	pop	hl
@@ -13,7 +82,7 @@ _transfer_file:
 	push	hl
 	call	_gui_Print
 	pop	hl
-	ld	hl, L_.str.1
+	ld	hl, L_.str.3
 	push	hl
 	call	_gui_Print
 	pop	hl
@@ -23,7 +92,7 @@ _transfer_file:
 	pop	hl
 	call	_gui_NewLine
 	bit	0, (ix + 15)
-	jq	z, BB0_1
+	jq	z, BB1_1
 	ld	hl, (ix + 12)
 	push	hl
 	call	_fs_ParentDir
@@ -68,30 +137,35 @@ _transfer_file:
 	pop	af
 	ld	(iy), de
 	ld	bc, (ix - 3)
-	jq	nz, BB0_7
+	jq	nz, BB1_7
 	ld	a, 0
-	jq	BB0_9
-BB0_1:
-	lea	hl, ix - 70
-	ld	bc, -649
+	jq	BB1_9
+BB1_1:
+	ld	bc, -646
 	lea	iy, ix
 	add	iy, bc
-	ld	(iy), hl
-	ld	bc, -646
-	lea	hl, ix
-	add	hl, bc
+	lea	hl, ix - 70
 	push	ix
-	ld	bc, -652
+	ld	bc, -658
+	add	ix, bc
+	ld	(ix), iy
+	pop	ix
+	lea	de, iy
+	ld	bc, -655
+	lea	iy, ix
+	add	iy, bc
+	ld	(iy), de
+	ld	iy, (ix + 9)
+	push	ix
+	ld	bc, -649
 	add	ix, bc
 	ld	(ix), hl
 	pop	ix
-	ld	iy, (ix + 9)
-BB0_2:
-	ld	hl, (ix + 6)
+BB1_2:
 	ld	e, (iy)
 	ld	a, e
 	or	a, a
-	jq	z, BB0_3
+	jq	z, BB1_3
 	ld	a, e
 	rlc	a
 	sbc	hl, hl
@@ -101,21 +175,22 @@ BB0_2:
 	ld	bc, 26
 	or	a, a
 	sbc	hl, bc
-	jq	nc, BB0_22
+	jq	nc, BB1_22
 	ld	a, e
 	xor	a, 32
 	ld	(iy), a
-BB0_22:
+BB1_22:
 	inc	iy
-	jq	BB0_2
-BB0_3:
-	ld	de, (ix + 9)
-	push	de
-	push	hl
 	ld	bc, -649
 	lea	hl, ix
 	add	hl, bc
 	ld	hl, (hl)
+	jq	BB1_2
+BB1_3:
+	ld	de, (ix + 9)
+	push	de
+	ld	de, (ix + 6)
+	push	de
 	push	hl
 	call	_fat_Open
 	pop	de
@@ -124,7 +199,7 @@ BB0_3:
 	add	hl, bc
 	or	a, a
 	sbc	hl, bc
-	jq	nz, BB0_12
+	jq	nz, BB1_12
 	ld	bc, -649
 	lea	hl, ix
 	add	hl, bc
@@ -137,8 +212,15 @@ BB0_3:
 	pop	hl
 	ld	hl, 65535
 	ld	e, 0
+	ld	(ix - 3), de
+	ld	de, -661
+	lea	iy, ix
+	add	iy, de
+	ld	(iy), bc
+	ld	de, (ix - 3)
 	call	__lcmpu
-	jq	nc, BB0_23
+	jq	nc, BB1_23
+BB1_5:
 	ld	bc, -649
 	lea	hl, ix
 	add	hl, bc
@@ -146,15 +228,11 @@ BB0_3:
 	push	hl
 	call	_fat_Close
 	pop	hl
-	ld	hl, L_.str.3
-	jq	BB0_13
-BB0_7:
+	ld	hl, L_.str.5
+	jq	BB1_13
+BB1_7:
 	ld	a, 1
-BB0_9:
-	ld	bc, -649
-	lea	hl, ix
-	add	hl, bc
-	ld	de, (hl)
+BB1_9:
 	ld	bc, -134
 	lea	hl, ix
 	add	hl, bc
@@ -162,11 +240,15 @@ BB0_9:
 	lea	iy, ix
 	add	iy, bc
 	ld	(iy), hl
-	inc	de
 	ld	bc, -649
 	lea	hl, ix
 	add	hl, bc
-	ld	(hl), de
+	ld	hl, (hl)
+	inc	hl
+	push	ix
+	add	ix, bc
+	ld	(ix), hl
+	pop	ix
 	and	a, 1
 	or	a, a
 	sbc	hl, hl
@@ -180,11 +262,11 @@ BB0_9:
 	lea	hl, ix
 	add	hl, bc
 	ld	iy, (hl)
-BB0_10:
+BB1_10:
 	ld	e, (iy)
 	ld	a, e
 	or	a, a
-	jq	z, BB0_11
+	jq	z, BB1_11
 	ld	a, e
 	rlc	a
 	sbc	hl, hl
@@ -194,14 +276,14 @@ BB0_10:
 	ld	bc, 26
 	or	a, a
 	sbc	hl, bc
-	jq	nc, BB0_16
+	jq	nc, BB1_16
 	ld	a, e
 	xor	a, 32
 	ld	(iy), a
-BB0_16:
+BB1_16:
 	inc	iy
-	jq	BB0_10
-BB0_11:
+	jq	BB1_10
+BB1_11:
 	ld	c, 9
 	ld	de, -652
 	lea	hl, ix
@@ -227,11 +309,11 @@ BB0_11:
 	ld	de, -1
 	or	a, a
 	sbc	hl, de
-	jq	nz, BB0_17
-BB0_12:
-	ld	hl, L_.str.2
-	jq	BB0_13
-BB0_17:
+	jq	nz, BB1_17
+BB1_12:
+	ld	hl, L_.str.4
+	jq	BB1_13
+BB1_17:
 	ld	bc, (ix + 12)
 	push	bc
 	pop	hl
@@ -276,7 +358,7 @@ BB0_17:
 	add	hl, bc
 	or	a, a
 	sbc	hl, bc
-	jq	nz, BB0_34
+	jq	nz, BB1_46
 	ld	hl, (ix + 12)
 	push	hl
 	ld	hl, (ix + 6)
@@ -293,7 +375,7 @@ BB0_17:
 	add	hl, bc
 	or	a, a
 	sbc	hl, bc
-	jq	nz, BB0_34
+	jq	nz, BB1_46
 	ld	bc, -652
 	lea	hl, ix
 	add	hl, bc
@@ -340,97 +422,27 @@ BB0_17:
 	or	a, a
 	sbc	hl, de
 	ld	a, 1
-	jq	z, BB0_33
-	jq	BB0_31
-BB0_23:
-	ld	de, -658
-	lea	hl, ix
-	add	hl, de
-	ld	(hl), a
-	ld	de, -655
-	lea	iy, ix
-	add	iy, de
-	ld	(iy), bc
-	push	bc
-	or	a, a
-	sbc	hl, hl
-	push	hl
-	ld	hl, (ix + 12)
-	push	hl
-	call	_fs_CreateFile
-	push	hl
-	pop	bc
-	pop	hl
-	pop	hl
-	pop	hl
-	ld	de, -1
-	push	bc
-	pop	hl
-	or	a, a
-	sbc	hl, de
-	jq	nz, BB0_24
-BB0_34:
-	ld	hl, L_.str.4
-BB0_13:
-	push	hl
-	call	_gui_PrintLine
-	pop	hl
-	xor	a, a
-BB0_33:
-	ld	sp, ix
-	pop	ix
-	ret
-BB0_24:
-	ld	hl, 512
-	ld	(ix - 3), bc
-	ld	bc, -655
-	lea	iy, ix
-	add	iy, bc
-	ld	de, (iy)
-	push	ix
-	ld	bc, -661
-	add	ix, bc
-	ld	(ix), de
-	pop	ix
-	ld	de, -512
-	ld	bc, (ix - 3)
-	ld	(ix - 3), de
-	push	ix
-	ld	de, -664
-	add	ix, de
-	ld	(ix), bc
-	pop	ix
-	ld	de, (ix - 3)
-BB0_25:
-	push	hl
-	pop	iy
-	add	iy, de
-	ex	de, hl
-	lea	hl, iy
-	ld	(ix - 3), de
-	push	ix
-	ld	de, -655
-	add	ix, de
-	ld	bc, (ix)
-	pop	ix
-	or	a, a
-	sbc	hl, bc
-	call	__setflag
-	ld	de, (ix - 3)
-	jq	p, BB0_32
-	ld	bc, -670
+	jq	z, BB1_52
+BB1_50:
+	ld	hl, L_.str.11
+	jq	BB1_13
+BB1_23:
+	ld	bc, -664
 	lea	hl, ix
 	add	hl, bc
-	ld	(hl), iy
-	ld	bc, -667
-	lea	iy, ix
-	add	iy, bc
-	ld	(iy), de
-	push	ix
-	ld	bc, -652
-	add	ix, bc
-	ld	hl, (ix)
-	pop	ix
+	ld	(hl), a
+	ld	hl, (ix + 9)
+	push	hl
+	call	_checkIs8xVar
+	pop	hl
+	ld	l, 1
+	xor	a, l
+	bit	0, a
+	jq	nz, BB1_45
+	ld	bc, -655
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
 	push	hl
 	ld	hl, 1
 	push	hl
@@ -446,69 +458,532 @@ BB0_25:
 	ld	de, 1
 	or	a, a
 	sbc	hl, de
-	jq	nz, BB0_27
-	ld	e, 0
+	jq	nz, BB1_44
+	ld	hl, L_.str.6
+	push	hl
+	ld	bc, -655
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	push	hl
+	call	_strcmp
+	pop	de
+	pop	de
+	add	hl, bc
+	or	a, a
+	sbc	hl, bc
+	ld	bc, -655
+	lea	iy, ix
+	push	af
+	add	iy, bc
+	pop	af
+	ld	iy, (iy)
+	jq	nz, BB1_51
+	lea	de, iy + 60
+	ld	bc, -667
+	lea	hl, ix
+	add	hl, bc
+	ld	(hl), de
+	ld	bc, -658
+	lea	iy, ix
+	add	iy, bc
+	ld	iy, (iy)
+	ld	a, (iy + 59)
+	ld	l, a
+	push	hl
+	push	de
+	call	_TIVarToPath
+	pop	de
+	pop	de
+	ld	bc, -658
+	lea	iy, ix
+	add	iy, bc
+	ld	(iy), hl
+	push	hl
+	ld	hl, L_.str.7
+	push	hl
+	call	_fs_JoinPath
+	ld	bc, -652
+	lea	iy, ix
+	add	iy, bc
+	ld	(iy), hl
+	pop	hl
+	pop	hl
 	ld	bc, -667
 	lea	hl, ix
 	add	hl, bc
 	ld	hl, (hl)
-	ld	(ix - 3), de
-	ld	de, -655
+	push	hl
+	call	_strlen
+	pop	de
+	ld	a, l
+	and	a, -8
+	ld	de, 4
+	add	hl, de
+	ld	bc, 255
+	call	__iand
+	or	a, a
+	jq	z, BB1_28
+	ld	hl, 11
+BB1_28:
+	ld	bc, -667
 	lea	iy, ix
+	add	iy, bc
+	ld	(iy), hl
+	ld	de, 64
+	add	hl, de
+	ex	de, hl
+	ld	bc, -655
+	lea	hl, ix
+	add	hl, bc
+	ld	iy, (hl)
 	add	iy, de
-	ld	bc, (iy)
-	push	ix
-	ld	de, -658
-	add	ix, de
-	ld	a, (ix)
-	pop	ix
-	ld	de, (ix - 3)
-	call	__lcmpu
-	ld	hl, 512
-	ld	(ix - 3), bc
-	push	ix
-	ld	bc, -661
-	push	af
-	add	ix, bc
-	pop	af
-	ld	iy, (ix)
-	pop	ix
-	ld	bc, (ix - 3)
-	jq	c, BB0_30
-	lea	hl, iy
-BB0_30:
+	ld	hl, (iy)
+	ld	de, 0
+	ld	e, l
+	ld	d, h
+	ld	bc, -670
+	lea	hl, ix
+	add	hl, bc
+	ld	(hl), de
+	ld	bc, -658
+	lea	iy, ix
+	add	iy, bc
+	ld	hl, (iy)
+	push	hl
+	call	_sys_Free
+	pop	hl
+	ld	bc, -667
+	lea	hl, ix
+	add	hl, bc
+	ld	iy, (hl)
 	push	ix
 	ld	bc, -670
 	add	ix, bc
 	ld	de, (ix)
 	pop	ix
-	push	de
-	push	ix
-	ld	bc, -664
-	add	ix, bc
-	ld	de, (ix)
-	pop	ix
-	push	de
-	ld	de, 1
-	push	de
+	add	iy, de
+	ld	de, 65535
+	lea	hl, iy
+	or	a, a
+	sbc	hl, de
+	jq	nc, BB1_5
+	ld	hl, L_.str.8
+	push	hl
+	ld	bc, -658
+	lea	hl, ix
+	add	hl, bc
+	ld	(hl), iy
+	call	_gui_Print
+	pop	hl
+	ld	bc, -652
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	push	hl
+	call	_gui_PrintLine
+	pop	hl
+	ld	bc, -658
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	inc	hl
+	push	hl
+	or	a, a
+	sbc	hl, hl
 	push	hl
 	ld	bc, -652
 	lea	hl, ix
 	add	hl, bc
 	ld	hl, (hl)
 	push	hl
+	call	_fs_CreateFile
+	ld	bc, -658
+	lea	iy, ix
+	add	iy, bc
+	ld	(iy), hl
+	pop	hl
+	pop	hl
+	pop	hl
+	ld	bc, -652
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	push	hl
+	call	_sys_Free
+	pop	hl
+	ld	bc, -667
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	ld	a, l
+	add	a, 2
+	ld	l, a
+	ld	de, 0
+	push	de
+	ld	bc, -658
+	lea	iy, ix
+	add	iy, bc
+	ld	de, (iy)
+	push	de
+	push	hl
+	call	_fs_WriteByte
+	pop	de
+	pop	de
+	pop	de
+	ld	de, -1
+	or	a, a
+	sbc	hl, de
+	ld	bc, -655
+	lea	hl, ix
+	push	af
+	add	hl, bc
+	pop	af
+	ld	iy, (hl)
+	jq	z, BB1_50
+	ld	bc, -667
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	ld	de, -2
+	add	hl, de
+	ld	de, 1
+	push	de
+	ld	(ix - 3), de
+	push	ix
+	ld	de, -658
+	add	ix, de
+	ld	bc, (ix)
+	pop	ix
+	push	bc
+	ld	de, (ix - 3)
+	push	de
+	push	hl
+	pea	iy + 59
+	call	_fs_WriteRaw
+	ld	de, -661
+	lea	iy, ix
+	add	iy, de
+	ld	bc, (iy)
+	pop	de
+	pop	de
+	pop	de
+	pop	de
+	pop	de
+	ld	de, -1
+	or	a, a
+	sbc	hl, de
+	jq	z, BB1_50
+	ld	de, -667
+	lea	hl, ix
+	add	hl, de
+	ld	iy, (hl)
+	push	bc
+	pop	hl
+	push	ix
+	ld	bc, -664
+	add	ix, bc
+	ld	e, (ix)
+	pop	ix
+	ld	bc, 513
+	xor	a, a
+	call	__lcmpu
+	jq	c, BB1_32
+	ld	a, 0
+	jq	BB1_34
+BB1_45:
 	ld	bc, -661
 	lea	hl, ix
 	add	hl, bc
-	ld	(hl), iy
+	ld	hl, (hl)
+	push	hl
+	or	a, a
+	sbc	hl, hl
+	push	hl
+	ld	hl, (ix + 12)
+	push	hl
+	call	_fs_CreateFile
+	pop	de
+	pop	de
+	pop	de
+	ld	bc, -658
+	lea	iy, ix
+	add	iy, bc
+	ld	(iy), hl
+	ld	de, -1
+	or	a, a
+	sbc	hl, de
+	ld	hl, 0
+	push	hl
+	pop	bc
+	jq	nz, BB1_41
+BB1_46:
+	ld	hl, L_.str.9
+BB1_13:
+	push	hl
+	call	_gui_PrintLine
+	pop	hl
+	xor	a, a
+BB1_52:
+	ld	sp, ix
+	pop	ix
+	ret
+BB1_32:
+	ld	a, 1
+BB1_34:
+	ld	bc, -1
+	bit	0, a
+	ld	de, -661
+	lea	hl, ix
+	push	af
+	add	hl, de
+	pop	af
+	ld	hl, (hl)
+	ld	de, 512
+	jq	nz, BB1_36
+	push	de
+	pop	hl
+BB1_36:
+	bit	0, a
+	jq	nz, BB1_38
+	push	de
+	pop	bc
+BB1_38:
+	push	ix
+	ld	de, -670
+	add	ix, de
+	ld	(ix), bc
+	pop	ix
+	lea	bc, iy
+	ld	de, 63
+	add	iy, de
+	lea	de, iy
+	or	a, a
+	sbc	hl, de
+	ld	(ix - 3), bc
+	ld	bc, -652
+	lea	iy, ix
+	add	iy, bc
+	ld	(iy), hl
+	push	ix
+	ld	bc, -655
+	add	ix, bc
+	ld	iy, (ix)
+	pop	ix
+	add	iy, de
+	ld	bc, (ix - 3)
+	dec	bc
+	push	ix
+	ld	de, -667
+	add	ix, de
+	ld	(ix), bc
+	pop	ix
+	push	bc
+	push	ix
+	ld	bc, -658
+	add	ix, bc
+	ld	hl, (ix)
+	pop	ix
+	push	hl
+	ld	hl, 1
+	push	hl
+	ld	bc, -652
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	push	hl
+	push	iy
 	call	_fs_WriteRaw
 	pop	de
 	pop	de
 	pop	de
 	pop	de
 	pop	de
-	ld	de, -512
+	ld	bc, -652
+	lea	iy, ix
+	add	iy, bc
+	ld	iy, (iy)
+	push	ix
+	ld	bc, -667
+	add	ix, bc
+	ld	de, (ix)
+	pop	ix
+	add	iy, de
+	push	ix
+	ld	bc, -652
+	add	ix, bc
+	ld	(ix), iy
+	pop	ix
+	ld	de, -1
+	or	a, a
+	sbc	hl, de
+	jq	z, BB1_50
+	ld	bc, -658
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	ld	de, -1
+	or	a, a
+	sbc	hl, de
+	jq	z, BB1_46
 	ld	bc, -661
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	ld	bc, -664
+	lea	iy, ix
+	add	iy, bc
+	ld	e, (iy)
+	ld	bc, 513
+	xor	a, a
+	call	__lcmpu
+	ld	(ix - 3), de
+	push	ix
+	ld	de, -670
+	push	af
+	add	ix, de
+	pop	af
+	ld	bc, (ix)
+	pop	ix
+	ld	de, (ix - 3)
+	jq	nc, BB1_41
+BB1_51:
+	ld	bc, -649
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	push	hl
+	call	_fat_Close
+	pop	hl
+	ld	a, 1
+	jq	BB1_52
+BB1_41:
+	ld	(ix - 3), bc
+	ld	bc, -661
+	lea	hl, ix
+	add	hl, bc
+	ld	de, (hl)
+	push	de
+	pop	hl
+	ld	bc, (ix - 3)
+	or	a, a
+	sbc	hl, bc
+	ld	(ix - 3), de
+	ld	de, -667
+	lea	iy, ix
+	add	iy, de
+	ld	(iy), hl
+	push	bc
+	pop	hl
+	ld	de, (ix - 3)
+BB1_42:
+	ld	bc, -670
+	lea	iy, ix
+	add	iy, bc
+	ld	(iy), hl
+	or	a, a
+	sbc	hl, de
+	call	__setflag
+	jq	p, BB1_51
+	ld	bc, -655
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	push	hl
+	ld	hl, 1
+	push	hl
+	ld	bc, -649
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	push	hl
+	call	_fat_Read
+	pop	de
+	pop	de
+	pop	de
+	ld	de, 1
+	or	a, a
+	sbc	hl, de
+	jq	nz, BB1_44
+	ld	de, -670
+	lea	hl, ix
+	add	hl, de
+	ld	hl, (hl)
+	push	hl
+	pop	iy
+	push	hl
+	pop	bc
+	ld	hl, 512
+	ex	de, hl
+	add	iy, de
+	ld	(ix - 3), de
+	ld	de, -673
+	lea	hl, ix
+	add	hl, de
+	ld	(hl), iy
+	push	bc
+	pop	hl
+	ld	de, (ix - 3)
+	add	hl, de
+	push	hl
+	pop	bc
+	push	bc
+	pop	iy
+	add	iy, iy
+	sbc	hl, hl
+	push	hl
+	pop	de
+	push	bc
+	pop	hl
+	ld	(ix - 3), de
+	ld	de, -661
+	lea	iy, ix
+	add	iy, de
+	ld	bc, (iy)
+	push	ix
+	ld	de, -664
+	add	ix, de
+	ld	a, (ix)
+	pop	ix
+	ld	de, (ix - 3)
+	call	__lcmpu
+	ld	hl, 512
+	push	hl
+	pop	bc
+	jq	c, BB1_49
+	ld	de, -667
+	lea	hl, ix
+	add	hl, de
+	ld	bc, (hl)
+BB1_49:
+	ld	de, -652
+	lea	hl, ix
+	add	hl, de
+	ld	hl, (hl)
+	push	hl
+	ld	(ix - 3), bc
+	ld	bc, -658
+	lea	hl, ix
+	add	hl, bc
+	ld	de, (hl)
+	push	de
+	ld	de, 1
+	push	de
+	ld	bc, (ix - 3)
+	push	bc
+	ld	bc, -655
+	lea	iy, ix
+	add	iy, bc
+	ld	hl, (iy)
+	push	hl
+	call	_fs_WriteRaw
+	pop	de
+	pop	de
+	pop	de
+	pop	de
+	pop	de
+	ld	de, 512
+	ld	bc, -652
 	lea	iy, ix
 	add	iy, bc
 	ld	iy, (iy)
@@ -517,39 +992,34 @@ BB0_30:
 	add	ix, bc
 	ld	(ix), iy
 	pop	ix
-	ld	bc, 512
-	ld	(ix - 3), de
-	ld	de, -667
+	ld	de, -512
+	ld	bc, -667
 	lea	iy, ix
-	add	iy, de
-	ld	iy, (iy)
 	add	iy, bc
-	ld	bc, -1
+	ld	iy, (iy)
+	add	iy, de
+	push	ix
+	add	ix, bc
+	ld	(ix), iy
+	pop	ix
+	ld	de, -1
 	or	a, a
-	sbc	hl, bc
-	ld	de, -664
+	sbc	hl, de
+	ld	bc, -673
 	lea	hl, ix
 	push	af
-	add	hl, de
+	add	hl, bc
 	pop	af
-	ld	bc, (hl)
-	lea	hl, iy
-	ld	de, (ix - 3)
-	jq	nz, BB0_25
-BB0_31:
-	ld	hl, L_.str.6
-	jq	BB0_13
-BB0_32:
-	ld	bc, -649
-	lea	hl, ix
-	add	hl, bc
 	ld	hl, (hl)
-	push	hl
-	call	_fat_Close
-	ld	a, 1
-	pop	hl
-	jq	BB0_33
-BB0_27:
+	ld	bc, -661
+	lea	iy, ix
+	push	af
+	add	iy, bc
+	pop	af
+	ld	de, (iy)
+	jq	nz, BB1_42
+	jq	BB1_50
+BB1_44:
 	ld	bc, -649
 	lea	hl, ix
 	add	hl, bc
@@ -557,8 +1027,8 @@ BB0_27:
 	push	hl
 	call	_fat_Close
 	pop	hl
-	ld	hl, L_.str.5
-	jq	BB0_13
+	ld	hl, L_.str.10
+	jq	BB1_13
 	section	.text,"ax",@progbits
 
 	section	.text,"ax",@progbits
@@ -590,7 +1060,7 @@ ___main_argc_argv:
 	ldir
 	ld	iy, 0
 	ld	hl, 36104
-BB1_1:
+BB2_1:
 	ld	(___main_argc_argv.global), iy
 	push	hl
 	push	iy
@@ -607,29 +1077,29 @@ BB1_1:
 	or	a, a
 	sbc	hl, bc
 	ld	de, 0
-	jq	nz, BB1_2
-BB1_5:
+	jq	nz, BB2_2
+BB2_5:
 	ld	bc, (___main_argc_argv.global)
 	push	de
 	pop	hl
 	add	hl, bc
 	or	a, a
 	sbc	hl, bc
-	jq	nz, BB1_9
+	jq	nz, BB2_9
 	push	bc
 	pop	hl
 	add	hl, bc
 	or	a, a
 	sbc	hl, bc
-	jq	nz, BB1_9
+	jq	nz, BB2_9
 	call	_os_GetCSC
 	or	a, a
-	jq	nz, BB1_8
+	jq	nz, BB2_8
 	call	_usb_WaitForInterrupt
 	push	hl
 	pop	de
-	jq	BB1_5
-BB1_9:
+	jq	BB2_5
+BB2_9:
 	ld	(ix - 3), de
 	ld	de, -359
 	lea	hl, ix
@@ -643,20 +1113,20 @@ BB1_9:
 	sbc	hl, bc
 	ld	iy, 0
 	ld	hl, 36104
-	jq	z, BB1_1
+	jq	z, BB2_1
 	ex	de, hl
 	add	hl, bc
 	or	a, a
 	sbc	hl, bc
-	jq	z, BB1_12
-	ld	hl, L_.str.9
-	jq	BB1_3
-BB1_2:
-	ld	hl, L_.str.7
-BB1_3:
+	jq	z, BB2_12
+	ld	hl, L_.str.14
+	jq	BB2_3
+BB2_2:
+	ld	hl, L_.str.12
+BB2_3:
 	push	hl
 	call	_gui_PrintLine
-BB1_94:
+BB2_94:
 	pop	hl
 	call	_usb_Cleanup
 	or	a, a
@@ -664,7 +1134,7 @@ BB1_94:
 	ld	sp, ix
 	pop	ix
 	ret
-BB1_12:
+BB2_12:
 	ld	bc, -359
 	lea	hl, ix
 	add	hl, bc
@@ -678,8 +1148,8 @@ BB1_12:
 	add	hl, bc
 	or	a, a
 	sbc	hl, bc
-	jq	nz, BB1_13
-	ld	hl, L_.str.11
+	jq	nz, BB2_13
+	ld	hl, L_.str.16
 	push	hl
 	call	_gui_PrintLine
 	pop	hl
@@ -692,7 +1162,7 @@ BB1_12:
 	add	hl, bc
 	or	a, a
 	sbc	hl, bc
-	jq	nz, BB1_15
+	jq	nz, BB2_15
 	ld	hl, 10
 	push	hl
 	ld	hl, ___main_argc_argv.partitions
@@ -705,22 +1175,22 @@ BB1_12:
 	pop	de
 	pop	de
 	or	a, a
-	jq	nz, BB1_19
+	jq	nz, BB2_19
+	ld	hl, L_.str.18
+	jq	BB2_16
+BB2_8:
 	ld	hl, L_.str.13
-	jq	BB1_16
-BB1_8:
-	ld	hl, L_.str.8
-	jq	BB1_3
-BB1_13:
-	ld	hl, L_.str.10
-	jq	BB1_3
-BB1_15:
-	ld	hl, L_.str.12
-BB1_16:
+	jq	BB2_3
+BB2_13:
+	ld	hl, L_.str.15
+	jq	BB2_3
+BB2_15:
+	ld	hl, L_.str.17
+BB2_16:
 	push	hl
 	call	_gui_PrintLine
-	jq	BB1_93
-BB1_19:
+	jq	BB2_93
+BB2_19:
 	ld	de, _msd_Read
 	ld	(___main_argc_argv.fat), de
 	ld	de, _msd_Write
@@ -737,7 +1207,7 @@ BB1_19:
 	sbc	hl, hl
 	ex	de, hl
 	ld	iy, ___main_argc_argv.partitions+4
-BB1_20:
+BB2_20:
 	ld	bc, -362
 	lea	hl, ix
 	add	hl, bc
@@ -762,7 +1232,7 @@ BB1_20:
 	add	hl, bc
 	or	a, a
 	sbc	hl, bc
-	jq	z, BB1_23
+	jq	z, BB2_23
 	ld	bc, -359
 	lea	hl, ix
 	add	hl, bc
@@ -780,13 +1250,13 @@ BB1_20:
 	pop	ix
 	or	a, a
 	sbc	hl, de
-	jq	nz, BB1_20
-	ld	hl, L_.str.15
+	jq	nz, BB2_20
+	ld	hl, L_.str.20
 	push	hl
 	call	_gui_PrintLine
-	jq	BB1_91
-BB1_23:
-	ld	hl, L_.str.14
+	jq	BB2_91
+BB2_23:
+	ld	hl, L_.str.19
 	push	hl
 	call	_gui_Print
 	pop	hl
@@ -802,7 +1272,7 @@ BB1_23:
 	ld	hl, (iy + 3)
 	ld	de, 2
 	push	de
-	ld	de, L_.str.16
+	ld	de, L_.str.21
 	push	de
 	push	hl
 	call	_strncmp
@@ -812,8 +1282,8 @@ BB1_23:
 	add	hl, bc
 	or	a, a
 	sbc	hl, bc
-	jq	nz, BB1_28
-	ld	hl, L_.str.17
+	jq	nz, BB2_28
+	ld	hl, L_.str.22
 	push	hl
 	call	_gui_PrintLine
 	pop	hl
@@ -821,7 +1291,7 @@ BB1_23:
 	lea	iy, iy + 9
 	or	a, a
 	sbc	hl, hl
-BB1_25:
+BB2_25:
 	ld	de, 2
 	add	hl, de
 	push	ix
@@ -833,7 +1303,7 @@ BB1_25:
 	or	a, a
 	sbc	hl, de
 	call	__setflag
-	jq	p, BB1_92
+	jq	p, BB2_92
 	lea	hl, iy + 6
 	push	ix
 	ld	bc, -356
@@ -867,14 +1337,14 @@ BB1_25:
 	pop	af
 	ld	hl, (ix)
 	pop	ix
-	jq	nz, BB1_25
-	jq	BB1_27
-BB1_28:
+	jq	nz, BB2_25
+	jq	BB2_27
+BB2_28:
 	ld	iy, (ix + 9)
 	ld	hl, (iy + 3)
 	ld	de, 2
 	push	de
-	ld	de, L_.str.19
+	ld	de, L_.str.24
 	push	de
 	push	hl
 	call	_strncmp
@@ -884,8 +1354,8 @@ BB1_28:
 	add	hl, bc
 	or	a, a
 	sbc	hl, bc
-	jq	nz, BB1_32
-	ld	hl, L_.str.20
+	jq	nz, BB2_32
+	ld	hl, L_.str.25
 	push	hl
 	call	_gui_PrintLine
 	pop	hl
@@ -893,7 +1363,7 @@ BB1_28:
 	lea	iy, iy + 9
 	or	a, a
 	sbc	hl, hl
-BB1_30:
+BB2_30:
 	ld	de, 2
 	add	hl, de
 	push	ix
@@ -905,7 +1375,7 @@ BB1_30:
 	or	a, a
 	sbc	hl, de
 	call	__setflag
-	jq	p, BB1_92
+	jq	p, BB2_92
 	lea	hl, iy + 6
 	push	ix
 	ld	bc, -356
@@ -939,15 +1409,15 @@ BB1_30:
 	pop	af
 	ld	hl, (ix)
 	pop	ix
-	jq	nz, BB1_30
-BB1_27:
-	ld	hl, L_.str.18
+	jq	nz, BB2_30
+BB2_27:
+	ld	hl, L_.str.23
 	push	hl
 	call	_gui_PrintLine
 	pop	hl
 	call	_sys_WaitKeyCycle
-	jq	BB1_92
-BB1_32:
+	jq	BB2_92
+BB2_32:
 	ld	hl, 14
 	push	hl
 	call	_sys_Malloc
@@ -959,7 +1429,7 @@ BB1_32:
 	add	hl, bc
 	ld	(hl), iy
 	ld	(iy + 13), 0
-	ld	hl, L_.str.21
+	ld	hl, L_.str.26
 	ld	bc, -375
 	lea	iy, ix
 	add	iy, bc
@@ -976,7 +1446,7 @@ BB1_32:
 	add	hl, bc
 	ld	(hl), a
 	ld	iy, 0
-BB1_33:
+BB2_33:
 	ld	bc, -359
 	lea	hl, ix
 	add	hl, bc
@@ -991,8 +1461,8 @@ BB1_33:
 	add	iy, bc
 	ld	a, (iy)
 	or	a, a
-	jq	z, BB1_37
-	ld	hl, L_.str.21
+	jq	z, BB2_37
+	ld	hl, L_.str.26
 	push	hl
 	call	_gui_DrawConsoleWindow
 	pop	hl
@@ -1033,7 +1503,7 @@ BB1_33:
 	lea	hl, ix
 	add	hl, de
 	ld	(hl), bc
-BB1_35:
+BB2_35:
 	ld	a, iyl
 	add	a, -2
 	ld	de, 0
@@ -1042,7 +1512,7 @@ BB1_35:
 	pop	hl
 	or	a, a
 	sbc	hl, bc
-	jq	nc, BB1_42
+	jq	nc, BB2_42
 	ex	de, hl
 	ld	bc, 3
 	call	__imulu
@@ -1117,9 +1587,9 @@ BB1_35:
 	add	ix, de
 	ld	bc, (ix)
 	pop	ix
-	jq	BB1_35
-BB1_37:
-	ld	hl, L_.str.22
+	jq	BB2_35
+BB2_37:
+	ld	hl, L_.str.27
 	push	hl
 	call	_gui_DrawConsoleWindow
 	pop	hl
@@ -1171,13 +1641,13 @@ BB1_37:
 	add	hl, de
 	pop	af
 	ld	(hl), bc
-	jq	c, BB1_39
+	jq	c, BB2_39
 	ld	hl, 16
 	ld	de, -371
 	lea	iy, ix
 	add	iy, de
 	ld	(iy), hl
-BB1_39:
+BB2_39:
 	ld	a, 2
 	ld	iyl, a
 	ld	de, 2
@@ -1187,7 +1657,7 @@ BB1_39:
 	add	hl, de
 	ld	(hl), bc
 	ld	de, (ix - 3)
-BB1_40:
+BB2_40:
 	ld	a, iyl
 	add	a, -2
 	or	a, a
@@ -1207,7 +1677,7 @@ BB1_40:
 	or	a, a
 	sbc	hl, bc
 	ld	de, (ix - 3)
-	jq	nc, BB1_42
+	jq	nc, BB2_42
 	ld	bc, -381
 	lea	hl, ix
 	add	hl, bc
@@ -1269,8 +1739,8 @@ BB1_40:
 	ld	iy, (hl)
 	inc	iyl
 	ld	de, 2
-	jq	BB1_40
-BB1_42:
+	jq	BB2_40
+BB2_42:
 	or	a, a
 	sbc	hl, hl
 	push	hl
@@ -1292,11 +1762,11 @@ BB1_42:
 	call	_bosgfx_SetTextPos
 	pop	hl
 	pop	hl
-	ld	hl, L_.str.23
+	ld	hl, L_.str.28
 	push	hl
 	call	_gui_PrintLine
 	pop	hl
-BB1_43:
+BB2_43:
 	call	_sys_WaitKeyCycle
 	ld	bc, -365
 	lea	hl, ix
@@ -1308,7 +1778,7 @@ BB1_43:
 	add	hl, bc
 	ld	a, (hl)
 	cp	a, 1
-	jq	z, BB1_58
+	jq	z, BB2_58
 	cp	a, 4
 	ld	bc, -362
 	lea	hl, ix
@@ -1323,17 +1793,17 @@ BB1_43:
 	pop	af
 	ld	e, (ix)
 	pop	ix
-	jq	z, BB1_53
+	jq	z, BB2_53
 	cp	a, 9
-	jq	z, BB1_64
+	jq	z, BB2_64
 	cp	a, 15
-	jq	z, BB1_90
+	jq	z, BB2_90
 	cp	a, 48
-	jq	z, BB1_84
+	jq	z, BB2_84
 	cp	a, 52
-	jq	z, BB1_84
+	jq	z, BB2_84
 	cp	a, 55
-	jq	nz, BB1_43
+	jq	nz, BB2_43
 	ld	bc, -372
 	lea	hl, ix
 	add	hl, bc
@@ -1346,16 +1816,16 @@ BB1_43:
 	add	iy, bc
 	pop	af
 	ld	iy, (iy)
-	jq	z, BB1_52
+	jq	z, BB2_52
 	ld	a, 0
-BB1_52:
+BB2_52:
 	and	a, 1
 	ld	bc, -372
 	lea	hl, ix
 	add	hl, bc
 	ld	(hl), a
-	jq	BB1_88
-BB1_58:
+	jq	BB2_88
+BB2_58:
 	ld	bc, -359
 	lea	hl, ix
 	add	hl, bc
@@ -1377,7 +1847,7 @@ BB1_58:
 	ld	bc, (ix)
 	pop	ix
 	ld	de, (ix - 3)
-	jq	nc, BB1_61
+	jq	nc, BB2_61
 	ld	(ix - 3), de
 	ld	de, -371
 	lea	hl, ix
@@ -1386,17 +1856,17 @@ BB1_58:
 	or	a, a
 	sbc	hl, bc
 	ld	de, (ix - 3)
-	jq	nc, BB1_61
+	jq	nc, BB2_61
 	inc	e
-	jq	BB1_33
-BB1_61:
+	jq	BB2_33
+BB2_61:
 	lea	hl, iy
 	or	a, a
 	sbc	hl, bc
 	ld	a, 1
-	jq	c, BB1_63
+	jq	c, BB2_63
 	ld	a, 0
-BB1_63:
+BB2_63:
 	and	a, 1
 	ld	de, 0
 	ld	e, a
@@ -1405,25 +1875,25 @@ BB1_63:
 	lea	hl, ix
 	add	hl, bc
 	ld	e, (hl)
-	jq	BB1_33
-BB1_53:
+	jq	BB2_33
+BB2_53:
 	ld	a, e
 	or	a, a
-	jq	nz, BB1_54
+	jq	nz, BB2_54
 	lea	hl, iy
 	add	hl, bc
 	or	a, a
 	sbc	hl, bc
 	ld	hl, 0
-	jq	z, BB1_57
+	jq	z, BB2_57
 	dec	iy
 	lea	hl, iy
-BB1_57:
+BB2_57:
 	ld	e, 0
 	push	hl
 	pop	iy
-	jq	BB1_33
-BB1_64:
+	jq	BB2_33
+BB2_64:
 	ld	bc, -372
 	lea	hl, ix
 	add	hl, bc
@@ -1435,7 +1905,7 @@ BB1_64:
 	add	iy, bc
 	pop	af
 	ld	de, (iy)
-	jq	z, BB1_67
+	jq	z, BB2_67
 	ex	de, hl
 	ld	bc, 3
 	call	__imulu
@@ -1450,7 +1920,7 @@ BB1_64:
 	ld	iy, (hl)
 	bit	4, (iy + 11)
 	ld	bc, (ix - 3)
-	jq	z, BB1_70
+	jq	z, BB2_70
 	push	iy
 	call	_fs_CopyFileName
 	ld	bc, -365
@@ -1490,11 +1960,11 @@ BB1_64:
 	add	hl, bc
 	ld	hl, (hl)
 	ld	bc, -378
-	jq	BB1_69
-BB1_54:
+	jq	BB2_69
+BB2_54:
 	dec	e
-	jq	BB1_33
-BB1_67:
+	jq	BB2_33
+BB2_67:
 	push	de
 	pop	hl
 	ld	bc, 18
@@ -1511,8 +1981,8 @@ BB1_67:
 	add	iy, de
 	bit	4, (iy + 13)
 	ld	bc, (ix - 3)
-	jq	nz, BB1_68
-BB1_70:
+	jq	nz, BB2_68
+BB2_70:
 	ld	hl, 256
 	push	hl
 	call	_sys_Malloc
@@ -1521,7 +1991,7 @@ BB1_70:
 	add	iy, bc
 	ld	(iy), hl
 	pop	hl
-	ld	hl, L_.str.24
+	ld	hl, L_.str.29
 	push	hl
 	call	_gui_DrawConsoleWindow
 	pop	hl
@@ -1544,7 +2014,7 @@ BB1_70:
 	add	iy, bc
 	pop	af
 	ld	hl, (iy)
-	jq	z, BB1_83
+	jq	z, BB2_83
 	ld	c, (hl)
 	ld	de, -372
 	lea	iy, ix
@@ -1552,10 +2022,10 @@ BB1_70:
 	ld	a, (iy)
 	or	a, a
 	ex	de, hl
-	jq	z, BB1_75
+	jq	z, BB2_75
 	ld	a, c
 	or	a, a
-	jq	nz, BB1_74
+	jq	nz, BB2_74
 	ld	de, -371
 	lea	hl, ix
 	add	hl, de
@@ -1577,7 +2047,7 @@ BB1_70:
 	push	hl
 	pop	de
 	pop	hl
-BB1_74:
+BB2_74:
 	ld	bc, -381
 	lea	hl, ix
 	add	hl, bc
@@ -1625,14 +2095,14 @@ BB1_74:
 	lea	hl, ix
 	add	hl, bc
 	ld	hl, (hl)
-	jq	BB1_78
-BB1_84:
+	jq	BB2_78
+BB2_84:
 	ld	bc, -372
 	lea	hl, ix
 	add	hl, bc
 	ld	a, (hl)
 	or	a, a
-	jq	z, BB1_89
+	jq	z, BB2_89
 	ld	bc, -378
 	lea	hl, ix
 	add	hl, bc
@@ -1656,8 +2126,8 @@ BB1_84:
 	add	hl, bc
 	ld	hl, (hl)
 	ld	bc, -378
-	jq	BB1_86
-BB1_68:
+	jq	BB2_86
+BB2_68:
 	push	bc
 	pop	hl
 	ld	bc, 18
@@ -1696,7 +2166,7 @@ BB1_68:
 	add	hl, bc
 	ld	hl, (hl)
 	ld	bc, -375
-BB1_69:
+BB2_69:
 	lea	iy, ix
 	add	iy, bc
 	ld	(iy), hl
@@ -1705,8 +2175,8 @@ BB1_69:
 	lea	hl, ix
 	add	hl, bc
 	ld	iy, (hl)
-	jq	BB1_33
-BB1_89:
+	jq	BB2_33
+BB2_89:
 	ld	bc, -375
 	lea	hl, ix
 	add	hl, bc
@@ -1730,12 +2200,12 @@ BB1_89:
 	add	hl, bc
 	ld	hl, (hl)
 	ld	bc, -375
-BB1_86:
+BB2_86:
 	lea	iy, ix
 	add	iy, bc
 	ld	(iy), hl
-	jq	BB1_87
-BB1_75:
+	jq	BB2_87
+BB2_75:
 	ld	(ix - 3), de
 	ld	de, -371
 	lea	hl, ix
@@ -1755,10 +2225,10 @@ BB1_75:
 	push	hl
 	pop	bc
 	ld	de, (ix - 3)
-	jq	z, BB1_77
+	jq	z, BB2_77
 	push	de
 	pop	bc
-BB1_77:
+BB2_77:
 	ld	de, -368
 	lea	iy, ix
 	add	iy, de
@@ -1779,7 +2249,7 @@ BB1_77:
 	push	hl
 	call	_fs_JoinPath
 	pop	de
-BB1_78:
+BB2_78:
 	pop	de
 	ld	bc, -372
 	lea	iy, ix
@@ -1788,10 +2258,10 @@ BB1_78:
 	or	a, a
 	ld	a, 1
 	ld	e, a
-	jq	nz, BB1_80
+	jq	nz, BB2_80
 	ld	a, 0
 	ld	e, a
-BB1_80:
+BB2_80:
 	push	de
 	ld	bc, -368
 	lea	iy, ix
@@ -1807,10 +2277,10 @@ BB1_80:
 	pop	hl
 	pop	hl
 	bit	0, a
-	ld	hl, L_.str.25
-	jq	nz, BB1_82
-	ld	hl, L_.str.18
-BB1_82:
+	ld	hl, L_.str.30
+	jq	nz, BB2_82
+	ld	hl, L_.str.23
+BB2_82:
 	push	hl
 	call	_gui_PrintLine
 	pop	hl
@@ -1819,41 +2289,41 @@ BB1_82:
 	lea	hl, ix
 	add	hl, bc
 	ld	hl, (hl)
-BB1_83:
+BB2_83:
 	push	hl
 	call	_sys_Free
 	pop	hl
-BB1_87:
+BB2_87:
 	ld	bc, -362
 	lea	hl, ix
 	add	hl, bc
 	ld	iy, (hl)
-BB1_88:
+BB2_88:
 	push	ix
 	ld	bc, -359
 	add	ix, bc
 	ld	e, (ix)
 	pop	ix
-	jq	BB1_33
-BB1_90:
+	jq	BB2_33
+BB2_90:
 	ld	bc, -384
 	lea	hl, ix
 	add	hl, bc
 	ld	hl, (hl)
 	push	hl
 	call	_sys_Free
-BB1_91:
+BB2_91:
 	pop	hl
-BB1_92:
+BB2_92:
 	ld	hl, ___main_argc_argv.fat
 	push	hl
 	call	_fat_Deinit
-BB1_93:
+BB2_93:
 	pop	hl
 	ld	hl, ___main_argc_argv.global+3
 	push	hl
 	call	_msd_Close
-	jq	BB1_94
+	jq	BB2_94
 	section	.text,"ax",@progbits
 
 	section	.text,"ax",@progbits
@@ -1870,17 +2340,17 @@ _handleUsbEvent:
 	ld	bc, 4
 	or	a, a
 	sbc	hl, bc
-	jq	nc, BB2_7
+	jq	nc, BB3_7
 	ld	bc, (ix + 9)
 	ld	iy, (ix + 12)
-	ld	hl, LJTI2_0
+	ld	hl, LJTI3_0
 	add	hl, de
 	add	hl, de
 	add	hl, de
 	ld	hl, (hl)
 	jp	(hl)
-BB2_2:
-	ld	hl, L_.str.26
+BB3_2:
+	ld	hl, L_.str.31
 	push	hl
 	call	_gui_PrintLine
 	ld	iy, (ix + 12)
@@ -1896,22 +2366,22 @@ BB2_2:
 	ld	de, 0
 	ld	(hl), de
 	ld	iy, 0
-	jq	BB2_7
-BB2_5:
-	ld	hl, L_.str.29
+	jq	BB3_7
+BB3_5:
+	ld	hl, L_.str.34
 	push	hl
 	call	_gui_PrintLine
 	ld	iy, 100
-	jq	BB2_6
-BB2_4:
-	ld	hl, L_.str.28
+	jq	BB3_6
+BB3_4:
+	ld	hl, L_.str.33
 	ld	(iy), bc
 	push	hl
 	call	_gui_PrintLine
 	ld	iy, 0
-	jq	BB2_6
-BB2_3:
-	ld	hl, L_.str.27
+	jq	BB3_6
+BB3_3:
+	ld	hl, L_.str.32
 	push	hl
 	call	_gui_PrintLine
 	pop	hl
@@ -1920,55 +2390,80 @@ BB2_3:
 	call	_usb_ResetDevice
 	push	hl
 	pop	iy
-BB2_6:
+BB3_6:
 	pop	hl
-BB2_7:
+BB3_7:
 	lea	hl, iy
 	pop	ix
 	ret
 	section	.text,"ax",@progbits
 	section	.rodata,"a",@progbits
-lJTI2_0:
-	private	LJTI2_0
-LJTI2_0:
-	dl	BB2_2
-	dl	BB2_3
-	dl	BB2_5
-	dl	BB2_4
+lJTI3_0:
+	private	LJTI3_0
+LJTI3_0:
+	dl	BB3_2
+	dl	BB3_3
+	dl	BB3_5
+	dl	BB3_4
 
 	section	.rodata,"a",@progbits
 	private	L_.str
 L_.str:
-	db	"Transferring ", 0
+	db	".8x", 0
 
 	section	.rodata,"a",@progbits
 	private	L_.str.1
 L_.str.1:
-	db	" to ", 0
+	db	".8X", 0
 
 	section	.rodata,"a",@progbits
 	private	L_.str.2
 L_.str.2:
-	db	"source file not found!", 0
+	db	"Transferring ", 0
 
 	section	.rodata,"a",@progbits
 	private	L_.str.3
 L_.str.3:
-	db	"File too large for internal filesystem!", 0
+	db	" to ", 0
 
 	section	.rodata,"a",@progbits
 	private	L_.str.4
 L_.str.4:
-	db	"Failed to create destination file!", 0
+	db	"source file not found!", 0
 
 	section	.rodata,"a",@progbits
 	private	L_.str.5
 L_.str.5:
-	db	"Read error", 0
+	db	"File too large for internal filesystem!", 0
 
 	section	.rodata,"a",@progbits
 	private	L_.str.6
 L_.str.6:
+	db	"**TI83F*", 26, 10, 0
+
+	section	.rodata,"a",@progbits
+	private	L_.str.7
+L_.str.7:
+	db	"/tivars", 0
+
+	section	.rodata,"a",@progbits
+	private	L_.str.8
+L_.str.8:
+	db	"Transferring 8x var to ", 0
+
+	section	.rodata,"a",@progbits
+	private	L_.str.9
+L_.str.9:
+	db	"Failed to create destination file!", 0
+
+	section	.rodata,"a",@progbits
+	private	L_.str.10
+L_.str.10:
+	db	"Read error", 0
+
+	section	.rodata,"a",@progbits
+	private	L_.str.11
+L_.str.11:
 	db	"Write error", 0
 
 	section	.bss,"aw",@nobits
@@ -1987,118 +2482,118 @@ ___main_argc_argv.fat:
 	rb	1041
 
 	section	.rodata,"a",@progbits
-	private	L_.str.7
-L_.str.7:
-	db	"usb init error.", 0
-
-	section	.rodata,"a",@progbits
-	private	L_.str.8
-L_.str.8:
-	db	"operation cancelled.", 0
-
-	section	.rodata,"a",@progbits
-	private	L_.str.9
-L_.str.9:
-	db	"usb enable error.", 0
-
-	section	.rodata,"a",@progbits
-	private	L_.str.10
-L_.str.10:
-	db	"failed opening msd", 0
-
-	section	.rodata,"a",@progbits
-	private	L_.str.11
-L_.str.11:
-	db	"opened msd", 0
-
-	section	.rodata,"a",@progbits
 	private	L_.str.12
 L_.str.12:
-	db	"error getting msd info", 0
+	db	"usb init error.", 0
 
 	section	.rodata,"a",@progbits
 	private	L_.str.13
 L_.str.13:
-	db	"no paritions found", 0
+	db	"operation cancelled.", 0
 
 	section	.rodata,"a",@progbits
 	private	L_.str.14
 L_.str.14:
-	db	"opened fat partition", 0
+	db	"usb enable error.", 0
 
 	section	.rodata,"a",@progbits
 	private	L_.str.15
 L_.str.15:
-	db	"no fat32 paritions found", 0
+	db	"failed opening msd", 0
 
 	section	.rodata,"a",@progbits
 	private	L_.str.16
 L_.str.16:
-	db	"-r", 0
+	db	"opened msd", 0
 
 	section	.rodata,"a",@progbits
 	private	L_.str.17
 L_.str.17:
-	db	"Receiving Files", 0
+	db	"error getting msd info", 0
 
 	section	.rodata,"a",@progbits
 	private	L_.str.18
 L_.str.18:
-	db	"Failed to transfer files.", 0
+	db	"no paritions found", 0
 
 	section	.rodata,"a",@progbits
 	private	L_.str.19
 L_.str.19:
-	db	"-s", 0
+	db	"opened fat partition", 0
 
 	section	.rodata,"a",@progbits
 	private	L_.str.20
 L_.str.20:
-	db	"Sending files", 0
+	db	"no fat32 paritions found", 0
 
 	section	.rodata,"a",@progbits
 	private	L_.str.21
 L_.str.21:
-	db	"/", 0
+	db	"-r", 0
 
 	section	.rodata,"a",@progbits
 	private	L_.str.22
 L_.str.22:
-	db	"MSD/", 0
+	db	"Receiving Files", 0
 
 	section	.rodata,"a",@progbits
 	private	L_.str.23
 L_.str.23:
-	db	">", 0
+	db	"Failed to transfer files.", 0
 
 	section	.rodata,"a",@progbits
 	private	L_.str.24
 L_.str.24:
-	db	"File to write: (default -> same)", 0
+	db	"-s", 0
 
 	section	.rodata,"a",@progbits
 	private	L_.str.25
 L_.str.25:
-	db	"Transfer completed successfuly.", 0
+	db	"Sending files", 0
 
 	section	.rodata,"a",@progbits
 	private	L_.str.26
 L_.str.26:
-	db	"usb device disconnected", 0
+	db	"/", 0
 
 	section	.rodata,"a",@progbits
 	private	L_.str.27
 L_.str.27:
-	db	"usb device connected", 0
+	db	"MSD/", 0
 
 	section	.rodata,"a",@progbits
 	private	L_.str.28
 L_.str.28:
-	db	"usb device enabled", 0
+	db	">", 0
 
 	section	.rodata,"a",@progbits
 	private	L_.str.29
 L_.str.29:
+	db	"File to write: (default -> same)", 0
+
+	section	.rodata,"a",@progbits
+	private	L_.str.30
+L_.str.30:
+	db	"Transfer completed successfuly.", 0
+
+	section	.rodata,"a",@progbits
+	private	L_.str.31
+L_.str.31:
+	db	"usb device disconnected", 0
+
+	section	.rodata,"a",@progbits
+	private	L_.str.32
+L_.str.32:
+	db	"usb device connected", 0
+
+	section	.rodata,"a",@progbits
+	private	L_.str.33
+L_.str.33:
+	db	"usb device enabled", 0
+
+	section	.rodata,"a",@progbits
+	private	L_.str.34
+L_.str.34:
 	db	"usb device disabled", 0
 
 	ident	"clang version 14.0.0 (https://github.com/jacobly0/llvm-project a139def90d26173f771eb1eca797633d1fbb2797)"
@@ -2110,16 +2605,18 @@ L_.str.29:
 	extern	_fat_Close
 	extern	_msd_Read
 	extern	_fs_GetFDPtr
-	extern	_gui_PrintInt
 	extern	_fs_OpenFile
+	extern	_gui_PrintInt
 	extern	_msd_Open
 	extern	_strlen
 	extern	__setflag
 	extern	_fat_Init
 	extern	_msd_FindPartitions
 	extern	_fs_JoinPath
-	extern	_fat_Read
+	extern	_strchr
+	extern	_fs_WriteByte
 	extern	_fat_Deinit
+	extern	_fat_Read
 	extern	__iand
 	extern	_fs_ParentDir
 	extern	_sys_WaitKeyCycle
@@ -2128,18 +2625,21 @@ L_.str.29:
 	extern	_fat_Open
 	extern	_fat_Delete
 	extern	_gui_Input
-	extern	_gui_DrawConsoleWindow
 	extern	_os_GetCSC
+	extern	_gui_DrawConsoleWindow
 	extern	_usb_Cleanup
 	extern	_msd_Close
 	extern	_fs_WriteRaw
 	extern	_fat_Create
+	extern	_fs_BaseName
 	extern	__frameset
 	extern	_fat_Write
 	extern	_fs_CreateFile
 	extern	_gui_Print
 	extern	_fs_CopyFileName
+	extern	_strcmp
 	extern	_gui_PrintLine
+	extern	_TIVarToPath
 	extern	_fs_GetFDLen
 	extern	__ishru
 	extern	_usb_HandleEvents

@@ -27,9 +27,9 @@ namespace bos
 ?sys_GetKey                      := $22430
 ?sys_KbScan                      := $22434
 ?sys_Malloc                      := $22438
-;DONOTHING                       := $2243C
+?fs_CreateRamFile                := $2243C
 ?sys_MemSet                      := $22440
-;DONOTHING                       := $22444
+?fs_AllocRam                     := $22444
 ?sys_WaitKey                     := $22448
 ?sys_WaitKeyCycle                := $2244C
 ?gui_DrawConsoleWindow           := $22450

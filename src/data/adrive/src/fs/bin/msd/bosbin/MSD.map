@@ -5,22 +5,22 @@ Section     Base   Top    High   Length
 .libs       D1A8A7 D1A91C            75h
 .start      D1A91C D1A9A9            8Dh
 .cleanup    D1A9A9 D1A9B7             Eh
-.text       D1A9B7 D1BB23          116Ch
-.data       D1BB23 D1BB23             0h
-.rodata     D1BB23 D1BD70           24Dh
+.text       D1A9B7 D1BF45          158Eh
+.data       D1BF45 D1BF45             0h
+.rodata     D1BF45 D1C1C5           280h
 .init_array 000000 000000             0h
 .ctors      000000 000000             0h
 .dtors      000000 000000             0h
 .fini_array 000000 000000             0h
-.bss        D00C00 D01464 D0FFFF    864h
+.bss        D031F6 D03A5A D10000    864h
 .header     D1A87F D1A882             3h
 
 Label                          Value
 ----------------------------   ------
-___low_bss                   = D00C00
+___low_bss                   = D031F6
 ___len_bss                   = 000864
-___heaptop                   = D0FFFF
-___heapbot                   = D01464
+___heaptop                   = D10000
+___heapbot                   = D03A5A
 ___libs                      = D1A8A7
 ___init_array_count          = 000000
 ___ctors_count               = 000000
@@ -45,74 +45,86 @@ _fs_CreateFile               = 0224D0
 _fs_ParentDir                = 02251C
 _fs_DirList                  = 022524
 _sys_Free                    = 022528
+_fs_WriteByte                = 02254C
 __SetCursorPos               = 022554
 _asm_gui_PrintChar           = 02256C
 _asm_gui_PrintLine           = 022578
 _fs_GetFilePtr               = 022588
 _fs_GetFDPtr                 = 022630
 _fs_GetFDLen                 = 022634
+__OP1ToPath                  = 022638
 _fs_JoinPath                 = 022640
+_fs_BaseName                 = 02264C
 _fs_WriteRaw                 = 022654
 _os_GetCSC                   = 022430
 _bosgfx_SetTextPos           = D1A9B7
-_gui_DrawConsoleWindow       = D1A9C7
-_gui_Print                   = D1A9CE
-_gui_PrintChar               = D1A9D5
-_gui_PrintInt                = D1A9DD
-_gui_PrintLine               = D1A9E4
-__frameset                   = D1A9EB
-__frameset0                  = D1A9F9
+_gui_DrawConsoleWindow       = D1A9C6
+_gui_Print                   = D1A9CD
+_gui_PrintChar               = D1A9D4
+_gui_PrintInt                = D1A9DC
+_gui_PrintLine               = D1A9E3
+_TIVarToPath                 = D1A9EA
+__frameset                   = D1AA01
+__frameset0                  = D1AA0F
 __iand                       = 000134
 __imulu                      = 000158
 __ishru                      = 000184
 __lcmpu                      = 0001AC
 __setflag                    = 000218
+_strchr                      = 0000C4
+_strcmp                      = 0000C8
 _strlen                      = 0000D4
 _strncmp                     = 0000DC
-.missingappvar               = D1BB23
-.libloadname                 = D1BB2B
-.webaddress                  = D1BB3C
+.missingappvar               = D1BF45
+.libloadname                 = D1BF4D
+.webaddress                  = D1BF5E
 start                        = D1A91C
 skip._exit                   = D1A99E
 skip.__Exit                  = D1A99E
 skip._abort                  = D1A99E
-_transfer_file               = D1AA04
-___main_argc_argv            = D1AEFC
-_handleUsbEvent              = D1BA8A
-LJTI2_0                      = D1BB4F
-L_.str                       = D1BB5B
-L_.str.1                     = D1BB69
-L_.str.2                     = D1BB6E
-L_.str.3                     = D1BB85
-L_.str.4                     = D1BBAD
-L_.str.5                     = D1BBD0
-L_.str.6                     = D1BBDB
-___main_argc_argv.partitions = D00C00
-___main_argc_argv.global     = D00C50
-___main_argc_argv.fat        = D01053
-L_.str.7                     = D1BBE7
-L_.str.8                     = D1BBF7
-L_.str.9                     = D1BC0C
-L_.str.10                    = D1BC1E
-L_.str.11                    = D1BC31
-L_.str.12                    = D1BC3C
-L_.str.13                    = D1BC53
-L_.str.14                    = D1BC66
-L_.str.15                    = D1BC7B
-L_.str.16                    = D1BC94
-L_.str.17                    = D1BC97
-L_.str.18                    = D1BCA7
-L_.str.19                    = D1BCC1
-L_.str.20                    = D1BCC4
-L_.str.21                    = D1BCD2
-L_.str.22                    = D1BCD4
-L_.str.23                    = D1BCD9
-L_.str.24                    = D1BCDB
-L_.str.25                    = D1BCFC
-L_.str.26                    = D1BD1C
-L_.str.27                    = D1BD34
-L_.str.28                    = D1BD49
-L_.str.29                    = D1BD5C
+_checkIs8xVar                = D1AA1A
+_transfer_file               = D1AA8A
+___main_argc_argv            = D1B31E
+_handleUsbEvent              = D1BEAC
+LJTI3_0                      = D1BF71
+L_.str                       = D1BF7D
+L_.str.1                     = D1BF81
+L_.str.2                     = D1BF85
+L_.str.3                     = D1BF93
+L_.str.4                     = D1BF98
+L_.str.5                     = D1BFAF
+L_.str.6                     = D1BFD7
+L_.str.7                     = D1BFE2
+L_.str.8                     = D1BFEA
+L_.str.9                     = D1C002
+L_.str.10                    = D1C025
+L_.str.11                    = D1C030
+___main_argc_argv.partitions = D031F6
+___main_argc_argv.global     = D03246
+___main_argc_argv.fat        = D03649
+L_.str.12                    = D1C03C
+L_.str.13                    = D1C04C
+L_.str.14                    = D1C061
+L_.str.15                    = D1C073
+L_.str.16                    = D1C086
+L_.str.17                    = D1C091
+L_.str.18                    = D1C0A8
+L_.str.19                    = D1C0BB
+L_.str.20                    = D1C0D0
+L_.str.21                    = D1C0E9
+L_.str.22                    = D1C0EC
+L_.str.23                    = D1C0FC
+L_.str.24                    = D1C116
+L_.str.25                    = D1C119
+L_.str.26                    = D1C127
+L_.str.27                    = D1C129
+L_.str.28                    = D1C12E
+L_.str.29                    = D1C130
+L_.str.30                    = D1C151
+L_.str.31                    = D1C171
+L_.str.32                    = D1C189
+L_.str.33                    = D1C19E
+L_.str.34                    = D1C1B1
 _#fat_Init                   = D1A8B2
 _#fat_Deinit                 = D1A8B6
 _#fat_DirList                = D1A8BA
