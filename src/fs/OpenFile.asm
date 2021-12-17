@@ -6,6 +6,7 @@
 fs_OpenFile:
 	pop bc,hl
 	push hl,bc
+.entryhl:
 	ld a,(hl)
 	cp a,' '
 	jq z,.pathzero
@@ -47,7 +48,7 @@ fs_OpenFile:
 	cp a,$A
 	jq z,.return
 	push hl
-	call .strlen
+	call fs_PathLen
 	ld (ix-23),hl
 	ex (sp),hl
 	pop bc
@@ -163,22 +164,3 @@ fs_OpenFile:
 	xor a,a
 	inc a
 	ret
-
-.strlen:
-	pop bc,de
-	push de,bc
-	or a,a
-	sbc hl,hl
-.strlenloop:
-	ld a,(de)
-	or a,a
-	ret z
-	cp a,' '
-	ret z
-	cp a,':'
-	ret z
-	cp a,$A
-	ret z
-	inc de
-	inc hl
-	jq .strlenloop

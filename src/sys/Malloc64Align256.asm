@@ -21,6 +21,7 @@ sys_Malloc64Align256:
 	ld a,l
 	and a,256/32 - 1
 	jq nz,.loop ;continue checking if found block not aligned
+	ld (ScrapMem),hl
 	inc hl
 	ld a,(hl)
 	or a,a

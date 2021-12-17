@@ -23,6 +23,7 @@ sys_ExecuteFile:
 	ld a,(hl)
 	or a,a
 	jq z,.fail
+	ld (fsOP6+3),hl
 	ld (fsOP6),de
 	push hl
 	call sys_OpenFileInPath ;look for the file within dirs listed in $PATH
@@ -173,7 +174,7 @@ sys_ExecuteFile:
 	call .jptoprogram
 .ranthread:
 	pop bc
-	push hl
+	push de,hl
 	call .normalize_lcd
 	xor a,a
 	sbc hl,hl
@@ -182,7 +183,7 @@ sys_ExecuteFile:
 	ld (top_of_UserMem),hl
 	call sys_FreeRunningProcessId ;free memory allocated by the program
 	call sys_PrevProcessId
-	pop hl
+	pop hl,de
 	ret
 .exec_compressed_rex:
 	ld hl,(running_program_ptr)
@@ -350,13 +351,43 @@ sys_ExecuteFile:
 	inc hl
 	cp a,'!'
 	jq nz,.fail ; fail if unrecognized executable text format
+	ld (fsOP6+6),sp
+	push hl ; executable to execute file with
+	call fs_PathLen
+	inc de
+	push de ; de = pre-arguments
+	call fs_PathLen.entryde
+	push hl ; hl = length of pre-arguments
+	ld hl,(fsOP6+3) ; hl = file name
 	push hl
-	pop de
-	ld a,$A
-	cpir
-	jq z,.executable_text_has_text
+	call ti._strlen
+	pop bc ; bc = file name
+	pop de ; length of pre-arguments
+	push bc ; file name
+	add hl,de ; length of pre-arguments + file name
+	inc hl
+	inc hl ; length of pre-arguments + separator + file name + null terminator
+	push hl
+	call sys_Malloc ; malloc space for the arguments string
+	pop bc
+	jr c,.executable_text_fail
+	ex hl,de
+	ld (fsOP6+9),de ; save malloc'd memory pointer
+	pop bc ; bc = length of pre-arguments 
+	pop hl ; hl = file name
+	ex (sp),hl ; hl = pre-arguments
+	ldir ; copy pre-arguments
+	ld a,' '
+	ld (de),a ; add separator
+	push de
+	call ti._strcpy ; copy the file name string
+	pop bc,bc
+	ld de,(fsOP6+9) ; arguments string
+	pop hl ; program to run this with
+	jp .entryhlde
+
+.executable_text_fail:
+	ld sp,(fsOP6+6)
 	scf
 	sbc hl,hl
-.executable_text_has_text:
-	ex hl,de
-	jq .entryhlde
+	ret

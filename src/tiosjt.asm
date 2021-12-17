@@ -10,7 +10,7 @@
 	jp _DivHLBy10_s
 	jp _DivHLByA_s
 	jp kb_Scan
-	jp sys_GetKey
+	jp _GetCSC
 	call handle_unimplemented ;CoorMon                   := 0020150h
 	call handle_unimplemented ;Mon                       := 0020154h
 	call handle_unimplemented ;MonForceKey               := 0020158h
@@ -254,7 +254,7 @@
 	call handle_unimplemented ;FindSym                   := 0020510h
 	jp _InsertMem ;InsertMem                 := 0020514h
 	call handle_unimplemented ;InsertMemA                := 0020518h
-	call handle_unimplemented ;EnoughMem                 := 002051Ch
+	jp _EnoughMem ;EnoughMem                 := 002051Ch
 	call handle_unimplemented ;CmpMemNeed                := 0020520h
 	call handle_unimplemented ;CreatePVar4               := 0020524h
 	call handle_unimplemented ;CreatePVar3               := 0020528h
@@ -609,7 +609,7 @@
 	call handle_unimplemented ;CpyO1ToES13               := 0020A9Ch
 	call handle_unimplemented ;CpyO1ToES14               := 0020AA0h
 	call handle_unimplemented ;EvalF3A                   := 0020AA4h
-	call sys_WaitKey ;GetK                      := 0020AA8h
+	call _GetKey ;GetK                      := 0020AA8h
 	call handle_unimplemented ;SetTitle                  := 0020AACh
 	call handle_unimplemented ;DispVarVal                := 0020AB0h
 	call handle_unimplemented ;RecallEd                  := 0020AB4h
@@ -794,7 +794,7 @@
 	call handle_unimplemented ;SetEmptyEditPtr           := 0020D80h
 	call handle_unimplemented ;CloseEditEqu              := 0020D84h
 	call handle_unimplemented ;GetPrevTok                := 0020D88h
-	call sys_WaitKey ;GetK                    := 0020D8Ch
+	call _GetKey ;GetK                    := 0020D8Ch
 	call handle_unimplemented ;CanIndic                  := 0020D90h
 	call handle_unimplemented ;DFMin                     := 0020D94h
 	call handle_unimplemented ;FormDisp                  := 0020D98h
@@ -1220,14 +1220,14 @@
 	call handle_unimplemented ;ParseAndStoreSysVar       := 0021428h
 	call handle_unimplemented ;DisplayEditSysVar         := 002142Ch
 	call handle_unimplemented ;JForceWIndowSettings      := 0021430h
-	call handle_unimplemented ;DelVarArc                 := 0021434h
+	jp _DelVar ;DelVarArc                 := 0021434h
 	call handle_unimplemented ;DelVarNoArc               := 0021438h
 	call handle_unimplemented ;SetAllPlots               := 002143Ch
 	call handle_unimplemented ;SetYeditHook              := 0021440h
 	call handle_unimplemented ;ClrYeditHook              := 0021444h
-	jp DONOTHING ;Arc_Unarc                 := 0021448h
-	jp DONOTHING ;ArchiveVar                := 002144Ch
-	jp DONOTHING ;UnarchiveVar              := 0021450h
+	jp _Arc_Unarc ;Arc_Unarc                 := 0021448h
+	jp _Arc_Unarc.archive ;ArchiveVar                := 002144Ch
+	jp _Arc_Unarc.unarchive ;UnarchiveVar              := 0021450h
 	jp DONOTHING ;SetFontHook               := 0021454h
 	jp DONOTHING ;ClrFontHook               := 0021458h
 	jp DONOTHING ;SetRegraphHook            := 002145Ch
@@ -1797,9 +1797,9 @@
 	call handle_unimplemented ;os.PutStrFull             := 0021D2Ch
 	call handle_unimplemented ;os.PutStrLine             := 0021D30h
 	call handle_unimplemented ;os.SetCursorPos           := 0021D34h
-	call sys_WaitKey ;os.GetKey                 := 0021D38h
-	call sys_GetKey ;os.GetCSC                 := 0021D3Ch
-	call handle_unimplemented ;os.AppInit                := 0021D40h
+	jp _GetKey ;os.GetKey                 := 0021D38h
+	jp _GetCSC ;os.GetCSC                 := 0021D3Ch
+	jp DONOTHING ;os.AppInit                := 0021D40h
 	jp DONOTHING ;                          equ 0021D44h
 	call handle_unimplemented ;ChkBCIs0                  := 0021D48h
 	call handle_unimplemented ;ChkDEIs0                  := 0021D4Ch

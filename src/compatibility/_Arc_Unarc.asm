@@ -1,22 +1,40 @@
 
+_Arc_Unarc.unarchive:
+	xor a,a
+	inc a
+	db $06 ; ld b,...
+_Arc_Unarc.archive:
+	xor a,a
+	inc a
+	db $06 ; ld b,...
 _Arc_Unarc:
-	ld hl,-4
+	xor a,a
+	ld (ScrapMem),a
+	ld hl,-8
 	call ti._frameset
-	call _OP1ToPath
-	ld de,str_tivars_dir
-	push hl,de
-	call fs_JoinPath
-	ld (ix-3),hl
-	pop bc
-	call sys_Free
-	ld hl,(ix-3)
-	ex (sp),hl
-	call fs_GetFilePtr
-	ld de,$D00000
-	or a,a
+	ld hl,fsOP1+1
+	push hl
+	xor a,a
+	ld bc,8
+	cpir
+	pop de
 	sbc hl,de
-	add hl,de
-	jq nc,.toarchive
+	ld (ix-5),l ; save file name length
+	call _OP1ToAbsPath
+	ld (ix-3),hl
+	call fs_GetFilePtr.entryname
+	ld (ix-8),hl
+	call _ChkInRam
+	push af
+	ld a,(ScrapMem)
+	jr nz,.inarc
+	dec a
+.inarc:
+	dec a
+	jr z,.done ; dont move the file if we're trying to move it to X but it's already in X
+.toram:
+	pop af
+	jr z,.toarchive ; move into arc if in ram and vice versa
 	inc hl
 	dec bc
 	push hl,bc,bc
@@ -33,7 +51,11 @@ _Arc_Unarc:
 	inc hl
 	push bc,hl
 	ex hl,de
+	ld a,c
+	or a,b
+	jr z,.dont_copy
 	ldir
+.dont_copy:
 	ld hl,(ix-3)
 	ld c,0
 	push bc,hl
@@ -44,7 +66,7 @@ _Arc_Unarc:
 	call sys_Free
 	pop bc,bc,bc
 	ld a,(ix-4)
-.done:
+.done: ; Return if A=0, Memory error otherwise
 	ld sp,ix
 	pop ix
 	or a,a
@@ -52,22 +74,61 @@ _Arc_Unarc:
 	jq _ErrMemory
 
 .toarchive:
-	push iy
-	inc bc
-	push hl,bc
-	ld c,0
+	push bc,bc
+	pop hl
+ ; 3 bytes unused + var type byte + 6 bytes unused + name length byte + name + data length + file data
+	ld bc,10
+	add hl,bc
+	ld c,(ix-5)
+	add hl,bc ; 10 bytes header + file name bytes + file data bytes (including file length)
+	push hl
+	ld c,b
 	ld hl,(ix-3)
 	push bc,hl
 	call fs_CreateFile
 	pop bc,bc
-	ld bc,0
+
+	ld bc,3
 	push bc,hl
-	inc c
+	ld a,(fsOP1)
+	ld c,a
 	push bc
-	call fs_WriteByte ; write header byte into the file
-	pop bc,hl,bc,de,iy
-	ld bc,1
-	push bc,hl,bc,de,iy
-	call fs_Write ; write var length and file data
+	call fs_WriteByte ; write var type byte
+	pop bc,hl,bc
+
+	ld c,9
+	push bc,hl
+	ld c,(ix-5)
+	push bc
+	call fs_WriteByte ; write file name length
+	pop bc,hl,bc
+	
+	ld c,10
+	push bc,hl
+	ld c,1
+	push bc
+	ld a,(ix-5)
+	add a,11
+	push bc
+	ld hl,fsOP1
+	push hl
+	call fs_WriteRaw ; write file name
+	pop bc,bc,bc,hl,bc
+
+	ld a,(ix-5) ; file name length + 10
+	add a,10
+	ld c,a
+	push bc,hl
+	ld c,1
+	push bc
+	ld hl,(ix-8)
+	ld c,(hl)
+	inc hl
+	ld b,(hl)
+	dec hl
+	inc bc
+	inc bc
+	push bc,hl
+	call fs_WriteRaw ; write length prefixed file data
 	sbc a,a
 	jq .done

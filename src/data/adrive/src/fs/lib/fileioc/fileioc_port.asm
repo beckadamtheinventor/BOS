@@ -225,27 +225,22 @@ ti_IsArchived:
 ;  sp + 3 : Slot number
 ; return:
 ;  0 if not archived
-	; pop	de
-	; pop	bc
-	; push	bc
-	; push	de
-	; call	util_is_slot_open
-	; jp	z, util_ret_null
-; util_is_in_ram:
-	; call	util_get_vat_ptr
-	; ld	hl, (hl)
-	; dec	hl
-	; dec	hl
-	; dec	hl
-	; dec	hl
-	; dec	hl
-	; ld	a, (hl)
-	; or	a, a
-	; sbc	hl, hl
-	; cp	a, $d0
-	; ret	nc
-	; inc	hl
-	ld a,1
+	pop	de
+	pop	bc
+	push	bc
+	push	de
+	call	util_is_slot_open
+	jp	z, util_ret_null
+util_is_in_ram:
+	call	util_get_vat_ptr
+	ld	hl, (hl)
+	push	hl
+	call	bos.fs_GetFDPtr
+	pop	de
+	ld	de,$D00000
+	xor	a,a
+	sbc	hl,de
+	adc	a,a
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -281,6 +276,8 @@ ti_Open:
 	add	ix, sp
 	ld	c,1
 	ld	a,$80
+	ld	b,5
+.find_slot_loop:
 	ld	hl, vat_ptr0+2
 	cp	a,(hl)
 	jr	z, .slot
@@ -288,31 +285,13 @@ ti_Open:
 	inc hl
 	inc hl
 	inc hl
-	cp	a,(hl)
-	jr	z, .slot
-	inc c
-	inc hl
-	inc hl
-	inc hl
-	cp	a,(hl)
-	jr	z, .slot
-	inc c
-	inc hl
-	inc hl
-	inc hl
-	cp	a,(hl)
-	jr	z, .slot
-	inc c
-	inc hl
-	inc hl
-	inc hl
-	cp	a,(hl)
-	jp	nz, util_ret_null_pop_ix
+	djnz	.find_slot_loop
+	jp	util_ret_null_pop_ix
 .slot:
 	ld	a,c
 	ld	(curr_slot), a
 	ld	hl, (ix + 6)
-	ld	de, bos.fsOP1 + 1
+	ld	de, ti.OP1 + 1
 	call	bos._Mov8b
 	xor	a, a
 	ld	(de), a
@@ -379,65 +358,46 @@ ti_SetArchiveStatus:
 ;  sp + 6 : slot index
 ; return:
 ;  n/a
-	; pop	hl
-	; pop	de
-	; pop	bc
-	; push	bc
-	; push	de
-	; push	hl
-	; call	util_is_slot_open
-	; jp	z, util_ret_null
-	; ld	a, e
-	; push	af
-	; call	util_get_vat_ptr
-	; ld	hl, (hl)
-	; ld	a, (hl)
-	; ld	(OP1), a
-	; ld	bc, -6
-	; add	hl, bc
-	; ld	b, (hl)
-	; ld	de, OP1 + 1
-	; dec	hl
-; .copy_name:
-	; ld	a, (hl)
-	; ld	(de), a
-	; inc	de
-	; dec	hl
-	; djnz	.copy_name
-	; xor	a, a
-	; ld	(de), a
-	; call	_PushOP1
-	; ld	iy, ti.flags
-	; call	_ChkFindSym
-	; call	_ChkInRam
-	; push	af
-	; pop	bc
-	; pop	af
-	; or	a, a
-	; jr	z, .set_not_archived
-; .set_archived:
-	; push	bc
-	; pop	af
-	; call	z, util_Arc_Unarc
-	; jr	.relocate_var
-; .set_not_archived:
-	; push	bc
-	; pop	af
-	; call	nz, _Arc_Unarc
-; .relocate_var:
-	; call	_PopOP1
-	; call	_ChkFindSym
-	; jp	c, util_ret_neg_one
-	; call	_ChkInRam
-	; jr	z, .save_ptrs
-	; call	util_skip_archive_header
-; .save_ptrs:
-	; push	hl
-	; call	util_get_vat_ptr
-	; pop	bc
-	; ld	(hl), bc
-	; call	util_get_data_ptr
-	; ld	(hl), de
+	pop	hl
+	pop	de
+	pop	bc
+	push	bc
+	push	de
+	push	hl
+	call	util_is_slot_open
+	jp	z, util_ret_null
+	ld	a, e
+	push	af
+	call	util_get_vat_ptr
+	ld	hl, (hl)
+	push	hl
+	call	bos.fs_GetFDPtr
+	pop	de
+	call	_ChkInRam
+	push	af
+	pop	bc
+	pop	af
+	or	a, a
+	push	bc
+	jr	z, .set_not_archived
+.set_archived:
+	pop	af
+	call	z, bos.fs_ArcUnarcFD
+	jr	.relocate_var
+.set_not_archived:
+	pop	af
+	call	nz, bos.fs_ArcUnarcFD
+.relocate_var:
+	push	hl
+	call	util_get_vat_ptr
+	pop	bc
+	ld	(hl),bc
+	push	hl
+	call`	bos.fs_GetFDPtr
+	ex	(sp),hl
+	call	util_get_data_ptr
+	pop	de
+	ld	(hl), de
 	ret
 
 ;-------------------------------------------------------------------------------

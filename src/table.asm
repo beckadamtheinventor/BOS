@@ -79,7 +79,7 @@
 	jp sys_WriteFlash
 	jp sys_WriteFlashA
 	jp DONOTHING
-	jp DONOTHING
+	jp fs_PathLen
 	jp fs_ParentDir
 	jp fs_StrToFileEntry
 	jp fs_DirList

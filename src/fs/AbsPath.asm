@@ -1,7 +1,7 @@
 
 ;@DOES get absolute path representation of hl
 ;@INPUT char *fs_AbsPath(const char *path);
-;@OUTPUT hl = absolute path. Will be equal to the input if it is already an absolute path
+;@OUTPUT hl = absolute path. Will be the same as the input if it is already an absolute path
 ;@OUTPUT Cf set if failed
 fs_AbsPath:
 	ld hl,-12
@@ -19,19 +19,16 @@ fs_AbsPath:
 	jq nz,.cwdnonzero
 	ld (hl),'/'
 	inc hl
-	ld (hl),0
+	ld (hl),a
 .cwdnonzero:
 .entry:
-	ld hl,(ix-12)
-	push hl
-	call ti._strlen
-	pop bc
+	ld de,(ix-12)
+	call fs_PathLen.entryde
 	ld (ix-3),hl
 	push hl
-	ld hl,(ix-9)
-	push hl
-	call ti._strlen
-	pop bc,bc
+	ld de,(ix-9)
+	call fs_PathLen.entryde
+	pop bc
 	ld (ix-6),hl
 	add hl,bc
 	inc hl
@@ -43,8 +40,12 @@ fs_AbsPath:
 	ex hl,de
 	ld hl,(ix-9)
 	ld bc,(ix-6)
+	ld a,c
+	or a,b
+	jr z,.dontcopy_1
 	ldir
 	dec de
+.dontcopy_1:
 	ld a,(de)
 	inc de
 	cp a,'/'
@@ -55,8 +56,12 @@ fs_AbsPath:
 .dont_put_slash:
 	ld hl,(ix-12)
 	ld bc,(ix-3)
+	ld a,c
+	or a,b
+	jr z,.dontcopy_2
 	ldir
 	xor a,a
+.dontcopy_2:
 	ld (de),a
 	pop hl
 	db $01 ;ld bc,...

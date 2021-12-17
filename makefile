@@ -100,7 +100,9 @@ $(call NATIVEPATH,$(FSOBJ)/usbdrvce.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/usbd
 
 
 # OS Files build rules
-$(call NATIVEPATH,$(FSOBJ)/explorer.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/explorer.asm)
+$(call NATIVEPATH,$(FSOBJ)/explorer.bin):  $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/config.asm) \
+$(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/data.asm) $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/display.asm) $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/files.asm) \
+$(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/libloader.asm) $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/loadconfig.asm)
 	fasmg $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/explorer.asm) $(call NATIVEPATH,$(FSOBJ)/explorer.bin)
 
 $(call NATIVEPATH,$(FSOBJ)/memedit.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/memedit.asm)

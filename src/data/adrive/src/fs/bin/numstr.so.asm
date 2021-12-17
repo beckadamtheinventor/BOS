@@ -1,13 +1,18 @@
 
 ; shared str<-->num code for os executables
 
+	dd 1
 	jp osrt.str_to_int
 	jp osrt.hexstr_to_int
 	jp osrt.nibble
 	jp osrt.byte_to_hexstr
 	jp osrt.int_to_hexstr
 	jp osrt.long_to_hexstr
+	jp osrt.b_to_hexstr
 
+; convert a base-10 string into an integer
+; input int osrt.str_to_int(const char *str);
+; output hl = number, de = character where parsing stopped
 osrt.str_to_int:
 	pop bc,de
 	push de,bc
@@ -34,6 +39,9 @@ osrt.str_to_int:
 	add hl,bc
 	jr .loop
 
+; convert a base-16 string into an integer
+; input int osrt.str_to_int(const char *str);
+; output auhl/cuhl = number, de = character where parsing stopped
 osrt.hexstr_to_int:
 	pop bc,de
 	push de,bc
@@ -48,7 +56,7 @@ osrt.hexstr_to_int.loop:
 	ld a,(de)
 	or a,a
 	ret z
-	cp a,'G'
+	cp a,'F'+1
 	ccf
 	ret c
 	cp a,'A'
@@ -83,16 +91,22 @@ osrt.hexstr_to_int.add_a:
 ; input de pointer to output buffer
 osrt.long_to_hexstr:
 	ld b,4
-	inc hl
-	inc hl
-	db $01 ;dummify next 3 bytes
+	jr osrt.b_to_hexstr
 
 ; input hl pointer to number
 ; input de pointer to output buffer
 osrt.int_to_hexstr:
 	ld b,3
+
+; input hl pointer to number
+; input de pointer to output buffer
+; input b number of input bytes
+osrt.b_to_hexstr:
+	ld a,b
+osrt.int_to_hexstr.incloop:
 	inc hl
-	inc hl ;osrt.long_to_hexstr will enter here
+	djnz osrt.int_to_hexstr.incloop
+	ld b,a
 osrt.int_to_hexstr.loop:
 	call osrt.byte_to_hexstr
 	djnz osrt.int_to_hexstr.loop
@@ -101,6 +115,7 @@ osrt.int_to_hexstr.loop:
 ; input hl pointer to input
 ; input de pointer to output
 osrt.byte_to_hexstr:
+	dec hl
 	ld a,(hl)
 	rrca
 	rrca
@@ -110,7 +125,6 @@ osrt.byte_to_hexstr:
 	ld (de),a
 	inc de
 	ld a,(hl)
-	dec hl
 	call osrt.nibble
 	ld (de),a
 	inc de

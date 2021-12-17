@@ -4,3 +4,6 @@
 [submodule "src/data/adrive/src/fs/bin/cedit"]
 	path = src/data/adrive/src/fs/bin/cedit
 	url = https://github.com/beckadamtheinventor/cedit
+[submodule "src/data/adrive/internetce"]
+	path = src/data/adrive/internetce
+	url = https://github.com/MathisLav/internetce.git

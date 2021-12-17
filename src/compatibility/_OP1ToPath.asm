@@ -1,4 +1,4 @@
-;@DOES Convert a variable name from OP1 into a BOS filesystem path.
+;@DOES Convert a variable name from OP1 into a BOS file name.
 ;@INPUT OP1 variable type byte, 8 byte name
 ;@OUTPUT hl = path
 ;@OUTPUT Cf set if failed

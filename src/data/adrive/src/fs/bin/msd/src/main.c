@@ -28,6 +28,12 @@ struct global
 
 enum { USB_RETRY_INIT = USB_USER_ERROR };
 
+enum {
+	TT_COPY = 0,
+	TT_BPK,
+	TT_8X,
+};
+
 static usb_error_t handleUsbEvent(usb_event_t event, void *event_data,
                                   usb_callback_data_t *global)
 {
@@ -67,7 +73,7 @@ bool checkIs8xVar(const char *path) {
 	return false;
 }
 
-bool transfer_file(fat_t *fat, const char *src, const char *dest, bool send) {
+bool transfer_file(fat_t *fat, const char *src, const char *dest, bool send, uint8_t type) {
 	fat_file_t srcfile;
     fat_file_t destfile;
 	uint8_t sector_buffer[FAT_BLOCK_SIZE];
@@ -126,7 +132,7 @@ bool transfer_file(fat_t *fat, const char *src, const char *dest, bool send) {
 			gui_PrintLine("File too large for internal filesystem!");
 			return 0;
 		}
-		if (checkIs8xVar(src)) {
+		if (type == TT_8X || checkIs8xVar(src)) {
 			if (fat_Read(&srcfile, 1, &sector_buffer) != 1) {
 				goto read_error;
 			}
@@ -150,10 +156,10 @@ bool transfer_file(fat_t *fat, const char *src, const char *dest, bool send) {
 					// Allocate space for the header length byte, header, var size word, and var data
 					destfd = fs_CreateFile(varpath, 0, (unsigned int)len + nlen + 1);
 					sys_Free(varpath);
-					// Write header length byte
-					if (fs_WriteByte(nlen+2, destfd, 0) == -1) goto write_error;
 					// Write header data
-					if (fs_WriteRaw(&sector_buffer[O_8X_VAR_TYPE], nlen-2, 1, destfd, 1) == -1)
+					if (fs_WriteRaw(&sector_buffer[O_8X_VAR_TYPE], nlen-1, 1, destfd, 0) == -1)
+							goto write_error;
+					if (fs_WriteByte(1, destfd, nlen-1) == -1)
 							goto write_error;
 					// Write the remaining data in the sector buffer
 					if (srclen <= FAT_BLOCK_SIZE) {
@@ -163,9 +169,9 @@ bool transfer_file(fat_t *fat, const char *src, const char *dest, bool send) {
 						write_offset = FAT_BLOCK_SIZE;
 						i = FAT_BLOCK_SIZE; // tell the copy loop it starts at file LBA 1
 					}
+					// Calculate remaining data to write for this sector
 					write_offset -= O_8X_VAR_TYPE + nlen + 4;
-					// 
-					if (fs_WriteRaw(&sector_buffer[O_8X_VAR_TYPE + nlen + 4], write_offset, 1, destfd, nlen-1) == -1)
+					if (fs_WriteRaw(&sector_buffer[O_8X_VAR_TYPE + nlen + 4], write_offset, 1, destfd, nlen) == -1)
 							goto write_error;
 					// Calculate offset in destination file to continue writing additional data
 					write_offset += nlen-1;
@@ -213,6 +219,12 @@ int main(int argc, char *argv[]) {
     msd_error_t msderr;
     fat_error_t faterr;
 	bool errored = false;
+
+	if (argc > 1 && !strcmp(argv[1], "-h")) {
+		gui_PrintLine("Command-line arguments:\n\t-h\tshow this info\n\t-r\tReceive a file A from msd, writing to B\n\
+\t-s\tSend a file A to msd, writing to B\n\t-8x\tReceive an 8x (TI Variable) from usb");
+		return 0;
+	}
 
     memset(&global, 0, sizeof(global_t));
 
@@ -304,24 +316,39 @@ int main(int argc, char *argv[]) {
     }
 
 	if (!errored) {
-		if (!strncmp(argv[1], "-r", 2)) {
-			// recieve file from msd
-			gui_PrintLine("Receiving Files");
-			for (int i = 2; i < argc; i += 2) {
-				if (!transfer_file(&fat, argv[i], argv[i+1], false)) {
-					transfer_failed:;
-					gui_PrintLine("Failed to transfer files.");
-					sys_WaitKeyCycle();
-					goto fat_error;
+		if (argc > 1) {
+			for (int i=1; i<argc;) {
+				if (i+2<argc) {
+					if (!strcmp(argv[i], "-r")) {
+						// recieve file from msd
+						gui_PrintLine("Receiving File");
+						if (!transfer_file(&fat, argv[i+1], argv[i+2], false, TT_COPY)) {
+							transfer_failed:;
+							gui_PrintLine("Failed to transfer files.");
+							sys_WaitKeyCycle();
+							goto fat_error;
+						}
+					} else if (!strcmp(argv[i], "-s")) {
+						// send file to msd
+						gui_PrintLine("Sending file");
+						if (!transfer_file(&fat, argv[i+1], argv[i+2], true, TT_COPY)) {
+							goto transfer_failed;
+						}
+					}
+					i += 3;
+					continue;
 				}
-			}
-		} else if (!strncmp(argv[1], "-s", 2)) {
-			// send file to msd
-			gui_PrintLine("Sending files");
-			for (int i = 2; i < argc; i += 2) {
-				if (!transfer_file(&fat, argv[i], argv[i+1], false)) {
-					goto transfer_failed;
+				if (!strcmp(argv[i], "-8x")) {
+					// recieve 8x var
+					gui_PrintLine("Receiving 8x file");
+					if (!transfer_file(&fat, argv[i+1], NULL, false, TT_8X)) {
+						goto transfer_failed;
+					}
+				} else {
+					gui_PrintLine("Unknown argument passed:");
+					gui_PrintLine(argv[i]);
 				}
+				i++;
 			}
 		} else {
 			// otherwise open the GUI
@@ -419,7 +446,7 @@ int main(int argc, char *argv[]) {
 							memcpy((s = namebuffer), &msdentries[cursor].filename, 13);
 							s = fs_JoinPath(msdpath, s);
 						}
-						if (!transfer_file(&fat, s, d, on_internal_fs)) {
+						if (!transfer_file(&fat, s, d, on_internal_fs, TT_COPY)) {
 							gui_PrintLine("Failed to transfer files.");
 						} else {
 							gui_PrintLine("Transfer completed successfuly.");

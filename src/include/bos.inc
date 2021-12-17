@@ -82,7 +82,7 @@ namespace bos
 ?sys_WriteFlash                  := $2250C
 ?sys_WriteFlashA                 := $22510
 ;DONOTHING                       := $22514
-;DONOTHING                       := $22518
+?fs_PathLen                      := $22518
 ?fs_ParentDir                    := $2251C
 ?fs_StrToFileEntry               := $22520
 ?fs_DirList                      := $22524

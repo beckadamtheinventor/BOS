@@ -1,7 +1,7 @@
 ;@DOES insert HL bytes into userMem at address DE
 ;@INPUT hl = bytes to insert
 ;@OUTPUT hl = new top of UserMem
-;@NOTE resets usermem area if de = usermem
+;@NOTE frees usermem area if de = usermem
 _InsertMem:
 	ex hl,de
 	push bc

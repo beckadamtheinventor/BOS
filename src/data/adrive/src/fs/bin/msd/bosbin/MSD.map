@@ -3,11 +3,11 @@ Section     Base   Top    High   Length
 .icon       D1A882 D1A882             0h
 .launcher   D1A882 D1A8A7            25h
 .libs       D1A8A7 D1A91C            75h
-.start      D1A91C D1A9A9            8Dh
-.cleanup    D1A9A9 D1A9B7             Eh
-.text       D1A9B7 D1BF45          158Eh
-.data       D1BF45 D1BF45             0h
-.rodata     D1BF45 D1C1C5           280h
+.start      D1A91C D1A9AD            91h
+.cleanup    D1A9AD D1A9BB             Eh
+.text       D1A9BB D1C0BB          1700h
+.data       D1C0BB D1C0BB             0h
+.rodata     D1C0BB D1C413           358h
 .init_array 000000 000000             0h
 .ctors      000000 000000             0h
 .dtors      000000 000000             0h
@@ -57,15 +57,15 @@ _fs_JoinPath                 = 022640
 _fs_BaseName                 = 02264C
 _fs_WriteRaw                 = 022654
 _os_GetCSC                   = 022430
-_bosgfx_SetTextPos           = D1A9B7
-_gui_DrawConsoleWindow       = D1A9C6
-_gui_Print                   = D1A9CD
-_gui_PrintChar               = D1A9D4
-_gui_PrintInt                = D1A9DC
-_gui_PrintLine               = D1A9E3
-_TIVarToPath                 = D1A9EA
-__frameset                   = D1AA01
-__frameset0                  = D1AA0F
+_bosgfx_SetTextPos           = D1A9BB
+_gui_DrawConsoleWindow       = D1A9CA
+_gui_Print                   = D1A9D1
+_gui_PrintChar               = D1A9D8
+_gui_PrintInt                = D1A9E0
+_gui_PrintLine               = D1A9E7
+_TIVarToPath                 = D1A9EE
+__frameset                   = D1AA05
+__frameset0                  = D1AA13
 __iand                       = 000134
 __imulu                      = 000158
 __ishru                      = 000184
@@ -75,56 +75,61 @@ _strchr                      = 0000C4
 _strcmp                      = 0000C8
 _strlen                      = 0000D4
 _strncmp                     = 0000DC
-.missingappvar               = D1BF45
-.libloadname                 = D1BF4D
-.webaddress                  = D1BF5E
+.missingappvar               = D1C0BB
+.libloadname                 = D1C0C3
+.webaddress                  = D1C0D4
 start                        = D1A91C
-skip._exit                   = D1A99E
-skip.__Exit                  = D1A99E
-skip._abort                  = D1A99E
-_checkIs8xVar                = D1AA1A
-_transfer_file               = D1AA8A
-___main_argc_argv            = D1B31E
-_handleUsbEvent              = D1BEAC
-LJTI3_0                      = D1BF71
-L_.str                       = D1BF7D
-L_.str.1                     = D1BF81
-L_.str.2                     = D1BF85
-L_.str.3                     = D1BF93
-L_.str.4                     = D1BF98
-L_.str.5                     = D1BFAF
-L_.str.6                     = D1BFD7
-L_.str.7                     = D1BFE2
-L_.str.8                     = D1BFEA
-L_.str.9                     = D1C002
-L_.str.10                    = D1C025
-L_.str.11                    = D1C030
+skip._exit                   = D1A9A2
+skip.__Exit                  = D1A9A2
+skip._abort                  = D1A9A2
+_checkIs8xVar                = D1AA1E
+_transfer_file               = D1AA8E
+___main_argc_argv            = D1B304
+_handleUsbEvent              = D1C022
+LJTI3_0                      = D1C0E7
+L_.str                       = D1C0F3
+L_.str.1                     = D1C0F7
+L_.str.2                     = D1C0FB
+L_.str.3                     = D1C109
+L_.str.4                     = D1C10E
+L_.str.5                     = D1C125
+L_.str.6                     = D1C14D
+L_.str.7                     = D1C158
+L_.str.8                     = D1C160
+L_.str.9                     = D1C178
+L_.str.10                    = D1C19B
+L_.str.11                    = D1C1A6
 ___main_argc_argv.partitions = D031F6
 ___main_argc_argv.global     = D03246
 ___main_argc_argv.fat        = D03649
-L_.str.12                    = D1C03C
-L_.str.13                    = D1C04C
-L_.str.14                    = D1C061
-L_.str.15                    = D1C073
-L_.str.16                    = D1C086
-L_.str.17                    = D1C091
-L_.str.18                    = D1C0A8
-L_.str.19                    = D1C0BB
-L_.str.20                    = D1C0D0
-L_.str.21                    = D1C0E9
-L_.str.22                    = D1C0EC
-L_.str.23                    = D1C0FC
-L_.str.24                    = D1C116
-L_.str.25                    = D1C119
-L_.str.26                    = D1C127
-L_.str.27                    = D1C129
-L_.str.28                    = D1C12E
-L_.str.29                    = D1C130
-L_.str.30                    = D1C151
-L_.str.31                    = D1C171
-L_.str.32                    = D1C189
-L_.str.33                    = D1C19E
-L_.str.34                    = D1C1B1
+L_.str.12                    = D1C1B2
+L_.str.13                    = D1C1B5
+L_.str.14                    = D1C25D
+L_.str.15                    = D1C26D
+L_.str.16                    = D1C282
+L_.str.17                    = D1C294
+L_.str.18                    = D1C2A7
+L_.str.19                    = D1C2B2
+L_.str.20                    = D1C2C9
+L_.str.21                    = D1C2DC
+L_.str.22                    = D1C2F1
+L_.str.23                    = D1C30A
+L_.str.24                    = D1C30D
+L_.str.25                    = D1C31C
+L_.str.26                    = D1C336
+L_.str.27                    = D1C339
+L_.str.28                    = D1C346
+L_.str.29                    = D1C34A
+L_.str.30                    = D1C35C
+L_.str.31                    = D1C375
+L_.str.32                    = D1C377
+L_.str.33                    = D1C37C
+L_.str.34                    = D1C37E
+L_.str.35                    = D1C39F
+L_.str.36                    = D1C3BF
+L_.str.37                    = D1C3D7
+L_.str.38                    = D1C3EC
+L_.str.39                    = D1C3FF
 _#fat_Init                   = D1A8B2
 _#fat_Deinit                 = D1A8B6
 _#fat_DirList                = D1A8BA

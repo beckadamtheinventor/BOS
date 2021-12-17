@@ -73,6 +73,7 @@
 	public _fs_InitClusterMap
 	public _sys_WriteFlash
 	public _sys_WriteFlashA
+	public _fs_PathLen
 	public _fs_ParentDir
 	public _fs_StrToFileEntry
 	public _fs_DirList
@@ -226,6 +227,7 @@ _gui_InputNoClear                := $22504
 _fs_InitClusterMap               := $22508
 _sys_WriteFlash                  := $2250C
 _sys_WriteFlashA                 := $22510
+_fs_PathLen                      := $22518
 _fs_ParentDir                    := $2251C
 _fs_StrToFileEntry               := $22520
 _fs_DirList                      := $22524

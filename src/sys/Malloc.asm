@@ -8,6 +8,7 @@ sys_Malloc:
 	pop hl
 	push hl
 	push bc
+.entryhl:
 	add hl,de
 	or a,a
 	sbc hl,de

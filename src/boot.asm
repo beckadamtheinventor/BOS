@@ -7,6 +7,16 @@ boot_os:
 	out0 ($1D),a
 	out0 ($1E),a
 	call sys_FlashLock
+
+os_return:
+	ld hl,bos_UserMem
+	ld (top_of_UserMem),hl
+	ld hl,libload_bottom_ptr-bos_UserMem
+	ld (remaining_free_RAM),hl
+	or a,a
+	sbc hl,hl
+	ld (asm_prgm_size),hl
+
 	call ti.boot.Set48MHzMode
 	ld a,3           ;set flash wait states to 3, same as the CE C toolchain
 	ld ($E00005),a
@@ -26,13 +36,6 @@ boot_os:
 	ld a,7
 	ld (lcd_text_fg2),a
 
-	ld hl,bos_UserMem
-	ld (top_of_UserMem),hl
-	ld hl,libload_bottom_ptr
-	ld (remaining_free_RAM),hl
-	or a,a
-	sbc hl,hl
-	ld (asm_prgm_size),hl
 	ld hl,op_stack_top
 	ld (op_stack_ptr),hl
 	ld de,os_recovery_menu
@@ -54,7 +57,7 @@ boot_os:
 	call th_ResetThreadMemory
 assert ~thread_temp_save and $FF
 	ld hl,thread_temp_save
-	ld de,os_return
+	ld de,os_return_soft
 	ld (hl),de
 	ld l,12
 	ld (hl),de
@@ -264,7 +267,7 @@ generate_boot_configs:
 	pop bc
 	ret
 
-os_return:
+os_return_soft:
 	call os_check_recovery_key
 	call sys_FreeAll
 	call gfx_SetDefaultFont
@@ -337,7 +340,7 @@ os_recovery_menu:
 	cp a,ti.skDel
 	jq z,.uninstall
 	cp a,ti.skClear
-	jq z,boot_os
+	jq z,os_return
 	cp a,ti.skMatrix
 	jq z,.reinstalltios
 	; cp a,ti.sk6
@@ -347,7 +350,7 @@ os_recovery_menu:
 
 .turn_off:
 	call sys_TurnOff
-	jq boot_os
+	rst 0
 
 .reset_fs:
 	call .confirm
@@ -365,7 +368,7 @@ os_recovery_menu:
 	inc hl
 	inc hl
 	inc hl
-	ld (hl),$CF ;rst $08
+	ld (hl),$C7 ;rst 0
 	ld hl,flashStatusByte
 	set bKeepFlashUnlocked,(hl)
 	call sys_FlashUnlock
@@ -517,6 +520,6 @@ handle_unimplemented:
 	ret z
 	cp a,9
 	jq nz,.keywait
-	jq boot_os
+	jq os_return
 
 

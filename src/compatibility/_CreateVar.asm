@@ -15,39 +15,30 @@ _CreateAppVar:
 
 
 
-;@DOES create a file in the /usr/tivars/ directory
+;@DOES create a file in the /tivars/ directory
 ;@INPUT OP1+1 = 8 byte name of var to create
 ;@INPUT A = var type
 ;@INPUT hl = length to allocate for file
 ;@OUTPUT hl = pointer to 2 byte file length, de = pointer to file data section
-;@OUTPUT Cf set if failed
+;@OUTPUT Cf set and HL = -1 if failed
 ;DESTROYS All
 _CreateVar:
-	push hl
 	ld (fsOP1),a
-	call _OP1ToPath
-	pop bc
+	call fs_AllocVar
 	ret c
 	push bc,hl
-	call fs_OpenFile
-	pop hl,bc
-	ccf
-	ret c
-	ld e,0
-	push bc,de,hl
-	call fs_CreateFile
-	ex (sp),hl
-	push hl
+	call _OP1ToAbsPath
+	ld c,0
+	push bc,hl
+	call fs_CreateRamFile
+	pop hl
+	push af,hl
 	call sys_Free
-	pop bc,de,bc,bc
-	ld hl,fsentry_filelen
-	add hl,de
-	push hl,de
-	call fs_GetFDPtr
-	ex hl,de
-	pop bc,hl
-	or a,a
+	pop bc,af,bc,hl,bc
+	push hl
+	pop de
+	inc de
+	inc de
+	ret nc
+	sbc hl,hl
 	ret
-
-
-

@@ -69,6 +69,54 @@ end if
 	ld bc,20
 	call explorer_display_bc_chars
 
+	call ti.usb_IsBusPowered
+	jr z,.not_charging
+	ld c,$E4
+	push bc
+	call gfx_SetTextFGColor
+	pop bc
+	ld hl,_charging_icon
+	jq .print_icon
+.not_charging:
+	call ti.GetBatteryStatus
+	ld l,$C0
+	jr c,.draw_battery
+	ld l,$C2
+	or a,a
+	jr z,.draw_battery
+	ld l,$E7
+	dec a
+	jr z,.draw_battery
+	ld l,$87
+	dec a
+	jr z,.draw_battery
+	ld l,$47
+	dec a
+	jr z,.draw_battery
+	ld l,$07
+.draw_battery:
+	push hl
+	call gfx_SetTextFGColor
+	pop bc
+	ld hl,_battery_icon
+.print_icon:
+	ld bc,1
+	push hl,bc
+	ld b,c
+	ld c,300-256
+	push bc
+	call gfx_SetTextXY
+	pop bc,bc
+	ld a,2
+	call explorer_set_text_scale
+	pop hl
+	call explorer_print_icon
+	ld a,1
+	call explorer_set_text_scale
+	ld bc,(explorer_foreground_color)
+	push bc
+	call gfx_SetTextFGColor
+	pop bc
 ;	jq explorer_display_diritems
 
 explorer_display_diritems:
@@ -347,6 +395,22 @@ _subdir_icon:
 ; *  *| *  |
 _dotdot_icon:
 	db $00,$00,$00,$00,$00,$00,$54,$54
+;    |*** |
+;   *|* **|
+;   *|   *|
+;   *|   *|
+;   *|   *|
+;   *|****|
+_battery_icon:
+	db $00,$0E,$1B,$11,$11,$11,$11,$1F
+;    |*** |
+;   *|* **|
+;   *|  **|
+;   *| ***|
+;   *| * *|
+;   *|****|
+_charging_icon:
+	db $00,$0E,$1B,$13,$17,$15,$11,$1F
 
 
 draw_taskbar:
@@ -429,3 +493,11 @@ explorer_display_bc_chars:
 	call gfx_PrintChar
 	pop bc,hl
 	jq .loop
+
+explorer_set_text_scale:
+	ld c,a
+	push bc,bc
+	call gfx_SetTextScale
+	pop bc,bc
+	ret
+

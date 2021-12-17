@@ -3,33 +3,37 @@
 ;@OUTPUT HL = file data pointer, BC = file data length, A = file flags, Cf set and HL = -1 if failed
 fs_GetFilePtr:
 	pop bc,hl
-	push hl,bc,hl
+	push hl,bc
+.entryname:
+	push hl
 	call fs_OpenFile
 	pop bc
 	ret c
-	ld bc,$B
+.entryfd:
+	ld bc,fsentry_fileattr
 	add hl,bc
 	ld a,(hl)
 	inc hl
 	push af
-	ld de,(hl)
+	ld c,(hl)
+	inc hl
+	ld b,(hl)
+	inc hl
 	push hl
 	bit fsbit_subfile, a
 	jq z,.get_file_sector
-	ex.s hl,de
-	ld e,0
-	res 0,d
-	add hl,de
-	jq .located_file
+	ld l,0
+	res 0,h
+	add hl,bc
+	ex hl,de
+	jr .located_file
 .get_file_sector:
-	push de
+	push bc
 	call fs_GetSectorAddress
 	ex hl,de
 	pop hl
 .located_file:
 	pop hl
-	inc hl
-	inc hl
 	ld c,(hl)
 	inc hl
 	ld b,(hl)

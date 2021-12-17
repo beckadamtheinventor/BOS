@@ -4,6 +4,7 @@
 sys_Free:
 	pop bc,hl
 	push hl,bc
+.entryhl:
 	ld de,bottom_of_malloc_RAM
 	or a,a
 	sbc hl,de ;ptr - bottom_of_malloc_RAM

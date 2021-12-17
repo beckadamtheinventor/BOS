@@ -52,6 +52,8 @@ gfx_FillRectangle:
 	jp 108
 gfx_TransparentSprite:
 	jp 174
+gfx_SetTextScale:
+	jp 222
 gfx_SetTransparentColor:
 	jp 225
 gfx_ScaleSprite:

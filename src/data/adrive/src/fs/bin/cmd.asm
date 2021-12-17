@@ -274,6 +274,8 @@ execute_program_string:
 .program_returned_long:
 	call osrt.long_to_hexstr
 .print_string_temp:
+	xor a,a
+	ld (de),a
 	ld hl,bos.gfx_string_temp
 	call bos.gui_PrintLine
 	jp bos.gfx_BlitBuffer
