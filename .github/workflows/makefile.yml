@@ -19,5 +19,5 @@ jobs:
     - run: export CEdev='~/CEdev'
     - run: export PATH='$PATH:~/CEdev/bin'
     - run: git clone https://github.com/beckadamtheinventor/BOS.git --recursive
-    - run: make -C ~/BOS
+    - run: make -C BOS
       
