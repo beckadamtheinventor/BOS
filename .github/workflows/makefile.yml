@@ -18,5 +18,6 @@ jobs:
     - run: tar -xzf linux_CEdev_v9.2.2.tar.gz
     - run: export CEdev='~/CEdev'
     - run: export PATH='$PATH:~/CEdev/bin'
+    - run: git clone https://github.com/beckadamtheinventor/BOS.git --recursive
     - run: make -C ~/BOS
       
