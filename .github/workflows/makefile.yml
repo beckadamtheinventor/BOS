@@ -14,10 +14,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       
-    - run: wget https://github.com/CE-Programming/toolchain/releases/download/v9.2.2/linux_CEdev_v9.2.2.tar.gz ~/CEdev.tar.gz
-    - run: tar -xzf ~/CEdev.tar.gz ~/
+    - run: wget https://github.com/CE-Programming/toolchain/releases/download/v9.2.2/linux_CEdev_v9.2.2.tar.gz
+    - run: tar -xzf CEdev.tar.gz
     - run: export CEdev='~/CEdev'
     - run: export PATH='$PATH:~/CEdev/bin'
-    - name: Build all
-      run: make -C ~/BOS
+    = run: make -C ~/BOS
       
