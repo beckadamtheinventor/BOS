@@ -7,7 +7,8 @@ sys_NextProcessId:
 	ld a,(hl)
 	inc a
 	ld (hl),a
-	ret p
-	ld a,1
+	inc a
+	ret nz
+	inc a
 	ld (hl),a
 	ret

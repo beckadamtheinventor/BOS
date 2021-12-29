@@ -2,17 +2,17 @@
 	jr _echo_exe
 	db "FEX",0
 _echo_exe:
+	call ti._frameset0
 	ld hl,bos.return_code_flags
 	set bos.bSilentReturn,(hl)
-	pop bc,hl
-	push hl,bc
+	call osrt.argv_1
 	ld a,(hl)
 	or a,a
-	jq z,.fail
+	jr z,.fail
 	push hl
 	call bos.sys_VarString
 	pop bc
-	ret c
+	jr c,.fail
 	push hl
 	call bos.gui_PrintLine
 	call ti._strlen
@@ -21,7 +21,7 @@ _echo_exe:
 	push hl
 	call bos.sys_Malloc
 	pop bc,de
-	ret c
+	jr c,.fail
 	push hl
 	dec bc
 	dec bc
@@ -39,9 +39,11 @@ _echo_exe:
 	call bos.sys_Free
 	pop bc
 	pop hl
-	ret
+	db $01
 .fail:
 	scf
 	sbc hl,hl
+	ld sp,ix
+	pop ix
 	ret
 

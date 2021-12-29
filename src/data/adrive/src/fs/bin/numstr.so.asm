@@ -40,7 +40,7 @@ osrt.str_to_int:
 	jr .loop
 
 ; convert a base-16 string into an integer
-; input int osrt.str_to_int(const char *str);
+; input int osrt.hexstr_to_int(const char *str);
 ; output auhl/cuhl = number, de = character where parsing stopped
 osrt.hexstr_to_int:
 	pop bc,de

@@ -78,11 +78,13 @@ end if
 	ld hl,_charging_icon
 	jq .print_icon
 .not_charging:
-	call ti.GetBatteryStatus
+	ld a,0
+explorer_battery_status:=$-1
 	ld l,$C0
-	jr c,.draw_battery
+	inc a
+	jr z,.draw_battery
 	ld l,$C2
-	or a,a
+	dec a
 	jr z,.draw_battery
 	ld l,$E7
 	dec a

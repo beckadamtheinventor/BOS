@@ -141,14 +141,14 @@ relocate _libloadstart, bos.libload_top_ptr - _libloadstart.length
 	jr	z,_startrelocating	; if not, just run it from wherever de was pointing
 	jp	(hl)			; return to execution if there are no libs
 _startrelocating:
-	push	hl
-	ld	hl,_libloadstart.length  ;because we're running from the tail of usermem we should allocate ourselves properly
-	push	hl
-	call	bos._EnoughMem
-	jq	c,_throw_memoryerror  ;fail if not enough memory
-	pop	hl
-	call	bos._InsertMem
-	pop	hl
+	; push	hl
+	; ld	hl,_libloadstart.length  ;because we're running from the tail of usermem we should allocate ourselves properly
+	; push	hl
+	; call	bos._EnoughMem
+	; jq	c,_throw_memoryerror  ;fail if not enough memory
+	; pop	hl
+	; call	bos._InsertMem
+	; pop	hl
 _extractlib:				; hl->NULL terminated libray name string -> $C0,"LIBNAME",0
 	ld	(hl),AppVarObj	; change $C0 byte to mark as extracted
 	push	hl
@@ -522,7 +522,7 @@ _throwerror:				; draw the error message onscreen
 	pop	hl
 	call	bos._PutS
 _waitkeyloop:
-	call	bos._GetCSC
+	call	bos.sys_WaitKeyCycle
 	cp	a,skEnter
 	jr	z,_exitwaitloop
 	cp	a,skClear

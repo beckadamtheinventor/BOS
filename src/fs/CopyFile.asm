@@ -1,8 +1,8 @@
-;@DOES Move a file given paths and return a file descriptor.
-;@INPUT void *fs_MoveFile(const char *src, const char *dest);
+;@DOES Copy a file given paths and return a file descriptor.
+;@INPUT void *fs_CopyFile(const char *src, const char *dest);
 ;@OUTPUT file descriptor of new file. Returns 0 if failed.
-fs_MoveFile:
-	ld hl,-9
+fs_CopyFile:
+	ld hl,-10
 	call ti._frameset
 	ld (ix-3),iy
 	ld (ix-7),0
@@ -22,35 +22,28 @@ fs_MoveFile:
 	ex (sp),hl ; then pass it on as the new dest file path
 .different_dest_name:
 	call fs_OpenFile
-	jr nc,.fail ; fail if it exists
+	jr nc,.fail ; fail if the destination exists
 	ld hl,(ix+6) ; source file
 	ex (sp),hl
 	call fs_OpenFile
-	jq c,.fail
-	ld (ix-6),hl ; save source file descriptor
+	jq c,.fail ; fail if the source doesnt exist
 	ld bc,fsentry_fileattr
 	add hl,bc
-	ld l,(hl)
-	ex (sp),hl
+	ld a,(hl)
+	ld (ix-10),a
+	call fs_GetFDLen
+	ld (ix-6),hl
+	call fs_GetFDPtr
+	pop bc
+	ld bc,(ix-6)
+	push bc,hl ; len, data
 	ld hl,(ix+9)
-	push hl
-	call fs_CreateFileEntry
-	add hl,bc
-	or a,a
-	sbc hl,bc
-	jr z,.fail
-	ld bc,fsentry_filesector
-	add hl,bc
-	ex hl,de
-	ld hl,(ix-6)
-	add hl,bc
-	ld c,4
-	call sys_FlashUnlock
-	call sys_WriteFlash ; copy over the file size and length data
-	ld de,(ix-6)
-	xor a,a
-	call sys_WriteFlashA ; delete the old file descriptor
-	call sys_FlashLock
+	ld a,(ix-10)
+	and a,1 shl fd_hidden or 1 shl fd_device or 1 shl fd_elevated
+	ld c,a
+	push bc,hl ; flags, path
+	call fs_WriteNewFile ; write destination file
+	jr c,.fail
 	db $01
 .fail:
 	or a,a

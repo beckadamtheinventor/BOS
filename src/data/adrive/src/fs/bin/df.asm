@@ -25,12 +25,8 @@ df_main:
 	or a,a
 	sbc hl,hl
 	ret
-.cmap_file:
-	db "/dev/cmap.dat",0
 .checking_used:
 	db "Checking for used memory...",$A,0
-.memfree:
-	db "Free memory:",$9,0
 .str_bytes_free:
 	db " bytes free,",$A,0
 .str_bytes_used:

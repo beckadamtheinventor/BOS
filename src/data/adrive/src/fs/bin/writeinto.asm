@@ -2,6 +2,7 @@
 	jr _writeinto
 	db "FEX",0
 _writeinto:
+	call ti._frameset0
 	ld hl,(bos.LastCommandResult)
 	add hl,bc
 	or a,a
@@ -12,8 +13,8 @@ _writeinto:
 	or a,a
 	sbc hl,bc
 	jq z,.fail ;fail if -1
-	pop bc,hl
-	push hl,bc,hl
+	call osrt.argv_1
+	push hl
 	call bos.fs_OpenFile
 	pop de
 	ld bc,0
@@ -31,8 +32,11 @@ _writeinto:
 	push af,bc
 	call bos.sys_Free
 	pop bc,af,bc
-	sbc hl,hl
-	ret ;previous routine returns what we want to return
+	sbc hl,hl ;previous routine returns what we want to return
+.exit:
+	ld sp,ix
+	pop ix
+	ret
 .overwritefile:
 	ex hl,de
 	ld hl,(bos.LastCommandResult)
@@ -58,5 +62,5 @@ _writeinto:
 .fail:
 	scf
 	sbc hl,hl
-	ret
+	jr .exit
 

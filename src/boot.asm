@@ -1,7 +1,7 @@
 
 boot_os:
 	call sys_FlashUnlock
-	ld a,$04 ;set privleged code end address to $040000 (up until the first filesystem sector)
+	ld a,$05 ;set privleged code end address to $050000 (up until the first non-os filesystem sector)
 	out0 ($1F),a
 	xor a,a
 	out0 ($1D),a
@@ -9,9 +9,9 @@ boot_os:
 	call sys_FlashLock
 
 os_return:
-	ld hl,bos_UserMem
+	ld hl,ti.userMem
 	ld (top_of_UserMem),hl
-	ld hl,libload_bottom_ptr-bos_UserMem
+	ld hl,end_of_usermem - ti.userMem
 	ld (remaining_free_RAM),hl
 	or a,a
 	sbc hl,hl
@@ -25,7 +25,7 @@ os_return:
 	ld (ti.DI_Mode),hl
 	ld hl,$08080f		; (nb of columns,nb of row) to scan/Wait 15 APB cycles before each scan
 	ld (ti.DI_Mode+3),hl
-	ld a,1
+	ld a,2
 	ld (running_process_id),a
 	xor a,a
 	ld (lcd_bg_color),a

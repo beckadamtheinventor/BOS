@@ -7,3 +7,9 @@
 [submodule "src/data/adrive/internetce"]
 	path = src/data/adrive/internetce
 	url = https://github.com/MathisLav/internetce.git
+[submodule "src/data/adrive/src/fs/bin/bpm/internetce"]
+	path = src/data/adrive/src/fs/bin/bpm/internetce
+	url = https://github.com/MathisLav/internetce.git
+[submodule "src/data/adrive/src/fs/bin/bpm/src/internetce"]
+	path = src/data/adrive/src/fs/bin/bpm/src/internetce
+	url = https://github.com/MathisLav/internetce.git

@@ -10,7 +10,7 @@
 <tr><td><a href="#fs_OpenFile">bos.fs_OpenFile</a></td><td><a href="#fs_OpenFile">022408</a></td></tr>
 <tr><td><a href="#fs_GetSectorAddress">bos.fs_GetSectorAddress</a></td><td><a href="#fs_GetSectorAddress">02240C</a></td></tr>
 <tr><td><a href="#fs_CheckDirExists">bos.fs_CheckDirExists</a></td><td><a href="#fs_CheckDirExists">022410</a></td></tr>
-<tr><td><a href="#fs_GetPathLastName">bos.fs_GetPathLastName</a></td><td><a href="#fs_GetPathLastName">022414</a></td></tr>
+<tr class="no_op"></tr><td><a href="#DONOTHING">bos.DONOTHING</a></td><td><a href="#DONOTHING">022414</a></td></tr>
 <tr><td><a href="#fs_CopyFileName">bos.fs_CopyFileName</a></td><td><a href="#fs_CopyFileName">022418</a></td></tr>
 <tr><td><a href="#fs_Read">bos.fs_Read</a></td><td><a href="#fs_Read">02241C</a></td></tr>
 <tr><td><a href="#fs_Write">bos.fs_Write</a></td><td><a href="#fs_Write">022420</a></td></tr>
@@ -75,18 +75,18 @@
 <tr><td><a href="#sys_WriteFlash">bos.sys_WriteFlash</a></td><td><a href="#sys_WriteFlash">02250C</a></td></tr>
 <tr><td><a href="#sys_WriteFlashA">bos.sys_WriteFlashA</a></td><td><a href="#sys_WriteFlashA">022510</a></td></tr>
 <tr class="no_op"></tr><td><a href="#DONOTHING">bos.DONOTHING</a></td><td><a href="#DONOTHING">022514</a></td></tr>
-<tr class="no_op"></tr><td><a href="#DONOTHING">bos.DONOTHING</a></td><td><a href="#DONOTHING">022518</a></td></tr>
+<tr><td><a href="#fs_PathLen">bos.fs_PathLen</a></td><td><a href="#fs_PathLen">022518</a></td></tr>
 <tr><td><a href="#fs_ParentDir">bos.fs_ParentDir</a></td><td><a href="#fs_ParentDir">02251C</a></td></tr>
 <tr><td><a href="#fs_StrToFileEntry">bos.fs_StrToFileEntry</a></td><td><a href="#fs_StrToFileEntry">022520</a></td></tr>
 <tr><td><a href="#fs_DirList">bos.fs_DirList</a></td><td><a href="#fs_DirList">022524</a></td></tr>
 <tr><td><a href="#sys_Free">bos.sys_Free</a></td><td><a href="#sys_Free">022528</a></td></tr>
 <tr><td><a href="#sys_CallExecuteFile">bos.sys_CallExecuteFile</a></td><td><a href="#sys_CallExecuteFile">02252C</a></td></tr>
 <tr><td><a href="#sys_JumpExecuteFile">bos.sys_JumpExecuteFile</a></td><td><a href="#sys_JumpExecuteFile">022530</a></td></tr>
-<tr><td><a href="#sys_InitDevice">bos.sys_InitDevice</a></td><td><a href="#sys_InitDevice">022534</a></td></tr>
-<tr><td><a href="#sys_DeinitDevice">bos.sys_DeinitDevice</a></td><td><a href="#sys_DeinitDevice">022538</a></td></tr>
-<tr><td><a href="#sys_GetDeviceAddress">bos.sys_GetDeviceAddress</a></td><td><a href="#sys_GetDeviceAddress">02253C</a></td></tr>
-<tr><td><a href="#sys_ReadDevice">bos.sys_ReadDevice</a></td><td><a href="#sys_ReadDevice">022540</a></td></tr>
-<tr><td><a href="#sys_WriteDevice">bos.sys_WriteDevice</a></td><td><a href="#sys_WriteDevice">022544</a></td></tr>
+<tr><td><a href="#sys_OpenDevice">bos.sys_OpenDevice</a></td><td><a href="#sys_OpenDevice">022534</a></td></tr>
+<tr class="no_op"></tr><td><a href="#DONOTHING">bos.DONOTHING</a></td><td><a href="#DONOTHING">022538</a></td></tr>
+<tr class="no_op"></tr><td><a href="#DONOTHING">bos.DONOTHING</a></td><td><a href="#DONOTHING">02253C</a></td></tr>
+<tr class="no_op"></tr><td><a href="#DONOTHING">bos.DONOTHING</a></td><td><a href="#DONOTHING">022540</a></td></tr>
+<tr class="no_op"></tr><td><a href="#DONOTHING">bos.DONOTHING</a></td><td><a href="#DONOTHING">022544</a></td></tr>
 <tr><td><a href="#fs_GetSector">bos.fs_GetSector</a></td><td><a href="#fs_GetSector">022548</a></td></tr>
 <tr><td><a href="#fs_WriteByte">bos.fs_WriteByte</a></td><td><a href="#fs_WriteByte">02254C</a></td></tr>
 <tr><td><a href="#fs_RenameFile">bos.fs_RenameFile</a></td><td><a href="#fs_RenameFile">022550</a></td></tr>
@@ -190,10 +190,6 @@ If OS threading is disabled, execute a file in a new thread given a relative or 
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>check if a directory exists.</td><td>bool fs_CheckDirExists(char *path);</td><td>true if path exists, else false</td><td></td><td>
 </td></tr>
-</table></div><div id="fs_GetPathLastName"><h1>fs_GetPathLastName</h1>	<h3>syscall Adress 022414</h3>
-<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>get last file name from a path. Equivalent to python path.split("/")[-1]</td><td>char *fs_GetPathLastName(char *path);</td><td>pointer to file name</td><td></td><td>
-this will return the last entry in the path, regardless of whether the path exists or if it points to a program entrypoint.</td></tr>
 </table></div><div id="fs_CopyFileName"><h1>fs_CopyFileName</h1>	<h3>syscall Adress 022418</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>copies file name from file descriptor</td><td>char *fs_CopyFileName(void *fd);</td><td>returns -1 on fail</td><td></td><td>
@@ -323,8 +319,8 @@ Cf set if file not found or otherwise cannot be opened.</td><td></td><td>
 </td></tr>
 </table></div><div id="_InsertMem"><h1>_InsertMem</h1>	<h3>syscall Adress 022494</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>insert HL bytes into userMem at address DE</td><td>hl = bytes to insert</td><td>hl = new top of UserMem</td><td></td><td>
-resets usermem area if de = usermem</td></tr>
+<tr><td>insert HL bytes into a ram file at address DE</td><td>hl = bytes to insert, de = address to insert at</td><td>hl = new end of file, de = pointer to the space inserted</td><td></td><td>
+</td></tr>
 </table></div><div id="_SetHLUTo0"><h1>_SetHLUTo0</h1>	<h3>syscall Adress 022498</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Sets the top byte of HL to zero.</td><td></td><td></td><td></td><td>
@@ -335,6 +331,8 @@ resets usermem area if de = usermem</td></tr>
 </td></tr>
 </table></div><div id="_GetCSC"><h1>_GetCSC</h1>	<h3>syscall Adress 0224A0</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Get the current keypress and return it in A</td><td></td><td></td><td></td><td>
+</td></tr>
 </table></div><div id="_NewLine"><h1>_NewLine</h1>	<h3>syscall Adress 0224A4</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 </table></div><div id="_ClrScrn"><h1>_ClrScrn</h1>	<h3>syscall Adress 0224A8</h3>
@@ -391,7 +389,7 @@ if len is zero, the file data section will not be initialized.</td></tr>
 </td></tr>
 </table></div><div id="fs_AbsPath"><h1>fs_AbsPath</h1>	<h3>syscall Adress 0224DC</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>get absolute path representation of hl</td><td>char *fs_AbsPath(const char *path);</td><td>hl = absolute path. Will be equal to the input if it is already an absolute path<br>
+<tr><td>get absolute path representation of hl</td><td>char *fs_AbsPath(const char *path);</td><td>hl = absolute path. Will be the same as the input if it is already an absolute path<br>
 Cf set if failed</td><td></td><td>
 </td></tr>
 </table></div><div id="fs_MultByBytesPerSector"><h1>fs_MultByBytesPerSector</h1>	<h3>syscall Adress 0224E0</h3>
@@ -429,10 +427,10 @@ string stored at gfx_string_temp</td><td></td><td>
 </td></tr>
 </table></div><div id="_CreateVar"><h1>_CreateVar</h1>	<h3>syscall Adress 022500</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>create a file in the /usr/tivars/ directory</td><td>OP1+1 = 8 byte name of var to create<br>
+<tr><td>create a ram file in the /tivars/ directory</td><td>OP1+1 = 8 byte name of var to create<br>
 A = var type<br>
 hl = length to allocate for file</td><td>hl = pointer to 2 byte file length, de = pointer to file data section<br>
-Cf set if failed</td><td></td><td>
+Cf set and HL = -1 if failed</td><td></td><td>
 </td></tr>
 </table></div><div id="gui_InputNoClear"><h1>gui_InputNoClear</h1>	<h3>syscall Adress 022504</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -449,6 +447,10 @@ uses the first half of vRam as scrap.</td></tr>
 </table></div><div id="sys_WriteFlashA"><h1>sys_WriteFlashA</h1>	<h3>syscall Adress 022510</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>write a byte from A to flash at address DE</td><td>A, DE</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="fs_PathLen"><h1>fs_PathLen</h1>	<h3>syscall Adress 022518</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Get the length of a path string</td><td>int fs_PathLen(const char *path);</td><td>hl = length of path, de = pointer to end of path, a = end of path character</td><td></td><td>
 </td></tr>
 </table></div><div id="fs_ParentDir"><h1>fs_ParentDir</h1>	<h3>syscall Adress 02251C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -478,29 +480,10 @@ bc = file to return to</td><td></td><td></td><td>
 <tr><td>Jump execution to an executable file</td><td>hl = file to execute<br>
 de = arguments</td><td></td><td></td><td>
 </td></tr>
-</table></div><div id="sys_InitDevice"><h1>sys_InitDevice</h1>	<h3>syscall Adress 022534</h3>
+</table></div><div id="sys_OpenDevice"><h1>sys_OpenDevice</h1>	<h3>syscall Adress 022534</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Initialize a device given a path to it</td><td>void *sys_InitDevice(const char *name);</td><td>pointer to device file descriptor<br>
-hl=-1 and Cf set if failed</td><td></td><td>
-</td></tr>
-</table></div><div id="sys_DeinitDevice"><h1>sys_DeinitDevice</h1>	<h3>syscall Adress 022538</h3>
-<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Deinitialize a device given a pointer to its file descriptor</td><td>int sys_DeinitDevice(void *fd);</td><td>hl = -1 and Cf set if failed. Otherwise assume 0.</td><td></td><td>
-</td></tr>
-</table></div><div id="sys_GetDeviceAddress"><h1>sys_GetDeviceAddress</h1>	<h3>syscall Adress 02253C</h3>
-<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Get a pointer for raw access to a device given a file descriptor</td><td>void *sys_GetDeviceAddress(void *dest, void *src, size_t len, void *fd);</td><td>assume hl points to device address. Device return may vary. Some devices do not have a physical address.<br>
-hl = 0 and Cf set if failed</td><td></td><td>
-</td></tr>
-</table></div><div id="sys_ReadDevice"><h1>sys_ReadDevice</h1>	<h3>syscall Adress 022540</h3>
-<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Read from a device given a file descriptor</td><td>int sys_ReadDevice(void *dest, void *src, size_t len, void *fd);</td><td>assume hl = number of bytes read. Device return may vary.<br>
-hl = 0 and Cf set if failed</td><td></td><td>
-</td></tr>
-</table></div><div id="sys_WriteDevice"><h1>sys_WriteDevice</h1>	<h3>syscall Adress 022544</h3>
-<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Write to a device given a file descriptor</td><td>int sys_WriteDevice(void *dest, void *src, size_t len, void *fd);</td><td>assume hl = number of bytes written. Device return may vary.<br>
-hl = 0 and Cf set if failed</td><td></td><td>
+<tr><td>Initialize a device and return a device structure.</td><td>device_t *sys_OpenDevice(const char *name);</td><td>pointer to device structure. (file data)<br>
+hl=-1 and Cf set if failed.</td><td></td><td>
 </td></tr>
 </table></div><div id="fs_GetSector"><h1>fs_GetSector</h1>	<h3>syscall Adress 022548</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -750,7 +733,7 @@ $VAR must be terminated with a space " " which is not included in the output.</t
 </td></tr>
 </table></div><div id="_OP1ToPath"><h1>_OP1ToPath</h1>	<h3>syscall Adress 022638</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Convert a variable name from OP1 into a BOS filesystem path.</td><td>OP1 variable type byte, 8 byte name</td><td>hl = path<br>
+<tr><td>Convert a variable name from OP1 into a BOS file name.</td><td>OP1 variable type byte, 8 byte name</td><td>hl = path<br>
 Cf set if failed</td><td></td><td>
 </td></tr>
 </table></div><div id="th_WaitKeyCycle"><h1>th_WaitKeyCycle</h1>	<h3>syscall Adress 02263C</h3>

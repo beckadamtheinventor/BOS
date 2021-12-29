@@ -5,6 +5,22 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+typedef struct __device_t__ {
+	uint8_t header;
+	uint8_t flags;
+	uint8_t type;
+	uint8_t version;
+	
+} device_t;
+
+
+/**
+ * Initialize a device and return its device_t structure.
+ * @param path Path to device file.
+ * @return Device structure, or -1 if failed.
+ */
+device_t sys_OpenDevice(const char *path);
+
 /**
  * Execute a given file, not preserving current program state.
  * @param path Path to file to execute.
@@ -30,7 +46,7 @@ void *fs_OpenFile(const char *path);
 /**
  * Get pointer to file data given a file descriptor
  * @param fd File descriptor.
- * @return Pointer to file data.
+ * @return Pointer to file data, or -1 if failed.
  */
 void *fs_GetFDPtr(const void *fd);
 
@@ -62,7 +78,7 @@ bool fs_CheckDirExists(const char *path);
  * @return Pointer to file name.
  * @note Basically the same as python's os.path.basename(path).
  */
-char *fs_GetPathLastName(const char *path);
+char *fs_BaseName(const char *path);
 
 /**
  * Copy a file name from a file descriptor.

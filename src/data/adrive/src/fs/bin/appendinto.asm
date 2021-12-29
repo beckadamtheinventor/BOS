@@ -2,6 +2,8 @@
 	jr _appendinto_exe
 	db "FEX",0
 _appendinto_exe:
+	ld hl,-6
+	call ti._frameset
 	ld hl,(bos.LastCommandResult)
 	add hl,bc
 	or a,a
@@ -12,8 +14,8 @@ _appendinto_exe:
 	or a,a
 	sbc hl,bc
 	jq z,.fail ;fail if -1
-	pop bc,hl
-	push hl,bc,hl
+	call osrt.argv_1
+	push hl
 	call bos.fs_OpenFile
 	pop de
 	ld bc,0
@@ -31,14 +33,10 @@ _appendinto_exe:
 	push af,bc
 	call bos.sys_Free
 	pop bc,af,bc
-	sbc hl,hl ;return -1 if Cf set, or 0 otherwise
-	ret
+	jr .exit_cf ;return -1 if Cf set, or 0 otherwise
 .appendfile:
 	push hl
-	ld hl,-6
-	call ti._frameset
-	ld hl,(ix+3)
-	ld bc,$E
+	ld bc,bos.fsentry_filelen
 	add hl,bc
 	ld de,(hl)
 	ex.s hl,de
@@ -85,8 +83,9 @@ _appendinto_exe:
 	db $3E ;dummify following scf
 .fail:
 	scf
+.exit_cf:
 	sbc hl,hl
 	ld sp,ix
-	pop ix,bc
+	pop ix
 	ret
 

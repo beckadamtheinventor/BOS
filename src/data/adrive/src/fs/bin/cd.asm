@@ -1,31 +1,30 @@
 	jq cd_main
 	db "FEX",0
 cd_main:
-	pop bc
-	pop hl
-	push hl
-	push bc
+	call ti._frameset0
+	ld a,(ix+6)
+	cp a,2
+	jr nz,.info
+	call osrt.argv_1
 	ld a,(hl)
-	or a,a
-	jq z,.help
 	cp a,'/'
 	jq z,.abspath
 	cp a,'.'
 	jq nz,.not_dot
 	inc hl
 	cp a,(hl)
-	jq nz,.return
+	jr nz,.return
 	ld hl,bos.current_working_dir
 	push hl
 	call bos.fs_ParentDir
 	push hl
 	call bos.fs_OpenFile
 	pop hl,bc
-	jq c,.fail
+	jr c,.fail
 	ld de,bos.current_working_dir
 	ld bc,255
 	ldir
-	jq .return
+	jr .return
 .not_dot:
 	push hl
 	call bos.fs_AbsPath
@@ -34,11 +33,11 @@ cd_main:
 	push hl
 	call bos.fs_OpenFile
 	pop de
-	jq c,.fail
+	jr c,.fail
 	ld bc,$B
 	add hl,bc
 	bit bos.fd_subdir,(hl)
-	jq z,.fail
+	jr z,.fail
 	push de
 	call ti._strlen
 	ex (sp),hl
@@ -50,7 +49,7 @@ cd_main:
 	ld a,'/'
 	cp a,(hl)
 	inc hl
-	jq z,.dont_put_fwd
+	jr z,.dont_put_fwd
 	ld (hl),a
 	inc hl
 .dont_put_fwd:
@@ -58,16 +57,19 @@ cd_main:
 .return:
 	xor a,a
 	sbc hl,hl
+.exit:
+	ld sp,ix
+	pop ix
 	ret
 .fail:
 	ld hl,str_DirDoesNotExist
 	call bos.gui_PrintLine
 	ld hl,-2
-	ret
-.help:
+	jr .exit
+.info:
 	ld hl,str_HelpDoc
 	call bos.gui_Print
-	jq .return
+	jr .return
 str_DirDoesNotExist:
 	db $9,"Directory does not exist.",$A,0
 str_HelpDoc:

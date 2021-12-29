@@ -9,24 +9,32 @@ cmd_exe_main:
 	ld (ix-10),a
 	ld (ix-6),hl
 	ld (ix-9),hl
-	ld (ix-22),hl
+	ld (ix-16),hl
 	ld hl,(ix+6)
-	push hl
+	ld bc,(ix+9)
+	push bc,hl
+	call bos.sys_JoinArgv
+	ld (ti.curPC),hl
+	ld (ti.begPC),hl
+	pop bc
+	ex (sp),hl
 	call ti._strlen
 	ld (ix-19),hl
-	pop hl
-	ld a,(hl)
+	pop bc
+	add hl,bc
+	ld (ti.endPC),hl
+	ld a,(bc)
 	or a,a
 	jq z,cmd_no_cmd_args
 
-	ld (ix-16),hl
 	cp a,'-'
 	jq nz,cmd_execute_next_line ;if first argument isn't a flag
 	inc hl
 	ld a,(hl)
 	inc hl
 	inc hl
-	ld (ix-16),hl
+	ld (ti.curPC),hl
+	ld (ti.begPC),hl
 	cp a,'h'
 	jq z,cmd_print_help_info
 	cp a,'x'
@@ -34,8 +42,11 @@ cmd_exe_main:
 	push hl
 	call bos.fs_GetFilePtr
 	jq c,cmd_exit_retneg1
-	ld (ix-16),hl
+	ld (ti.curPC),hl
+	ld (ti.begPC),hl
 	ld (ix-19),bc
+	add hl,bc
+	ld (ti.endPC),hl
 	pop hl
 	jq cmd_execute_next_line
 .not_exec_file:
@@ -53,24 +64,29 @@ cmd_print_help_info:
 ;execute argument as if from command line if argument passed
 cmd_execute_next_line:
 .loop:
-	ld bc,(ix-19)
-	ld a,b
-	or a,c
-	jq z,cmd_exit_retzero
-	ld de,(ix-22)
+	ld hl,(ti.endPC)
+	ld bc,(ti.curPC)
+	scf
+	sbc hl,bc
+	jq c,cmd_exit_retzero
+	ld de,(ix-16)
 	push de
 	call bos.sys_Free
 	pop bc
-	ld hl,(ix-16)
+	ld hl,(ti.endPC)
+	ld bc,(ti.curPC)
+	or a,a
+	sbc hl,bc
+	push bc
+	ex (sp),hl
+	pop bc ; bc = endpc-curpc, hl = curpc
 	ld (ix-25),hl
-	ld bc,(ix-19)
 	ld a,(hl)
 	push af
 	call .linelen
 	pop af
-	ld (ix-13),de
-	ld (ix-16),hl
-	ld (ix-19),bc
+	ld (ix-13),de ; length of line
+	ld (ti.curPC),hl ; pointer to next line
 	cp a,'#'
 	jq z,.nextline ;only copy line and execute if line not commented
 	ld a,e
@@ -80,7 +96,7 @@ cmd_execute_next_line:
 	call bos.sys_Malloc
 	pop bc
 	jq c,cmd_exit_retneg2 ;return if failed to malloc
-	ld (ix-22),hl
+	ld (ix-16),hl
 	ex hl,de
 	ld hl,(ix-25)
 	ld bc,(ix-13)
@@ -99,11 +115,11 @@ cmd_execute_next_line:
 	sbc hl,bc
 	jq nz,cmd_exit
 .nextline:
-	ld hl,(ix-19)
-	add hl,bc
-	or a,a
+	ld hl,(ti.endPC)
+	ld bc,(ti.curPC)
+	scf
 	sbc hl,bc
-	jq nz,.loop ;execute next line if there are more characters in the file to be read
+	jq nc,.loop ;execute next line if there are more characters in the file to be read
 	ld a,(ix-10)
 	cp a,'i'
 	jq nz,.returnerrorcode
@@ -204,12 +220,11 @@ enter_input:
 	jq enter_input_clear
 
 execute_program_string:
-	push hl
+	push ix,hl
 	call cmd_get_arguments
 	push hl
 	call cmd_terminate_arguments ;check arguments string for eol characters so we can process multi-line commands
 	pop hl
-.noargs:
 	ex (sp),hl ;store args, restore path
 	push hl ;push path
 	call bos.sys_ExecuteFile
@@ -222,8 +237,8 @@ execute_program_string:
 	or a,a
 	sbc hl,bc
 	jq z,.file_not_found ;if the executing file descriptor is -1, the file could not be located
-	pop bc,bc
-	ld a,(ix-26)
+	pop bc,bc,ix
+	ld a,(ix-20)
 	ld hl,(ix-29)
 	or a,a
 	jq nz,execute_program_string ;continue executing if an eol character was found before the null terminator
@@ -280,7 +295,7 @@ execute_program_string:
 	call bos.gui_PrintLine
 	jp bos.gfx_BlitBuffer
 .file_not_found:
-	pop bc,bc
+	pop bc,bc,ix
 	ld a,(ix-10)
 	cp a,'i'
 	ret z ;return if ignoring errors
@@ -311,7 +326,7 @@ cmd_exit:
 
 cmd_terminate_arguments:
 	xor a,a
-	ld (ix-26),a
+	ld (ix-20),a
 	ld c,a
 .loop:
 	ld a,(hl)
@@ -327,10 +342,10 @@ cmd_terminate_arguments:
 	inc hl
 	jq .loop
 .eol:
-	ld (ix-26),a
+	ld (ix-20),a
 	ld (hl),c
 	inc hl
-	ld (ix-29),hl
+	ld (ix-19),hl ; save eol ptr
 	ret
 
 cmd_get_arguments.inc_twice:

@@ -10,10 +10,14 @@ ls_main:
 	or a,a
 	sbc hl,hl
 	ld (ix-6),hl
-	ld hl,(ix+6)
+	ld a,(ix+6)
+	dec a
+	jr z,.no_arguments
+	call osrt.argv_1
 	ld a,(hl)
 	or a,a
 	jq nz,.non_null_dir
+.no_arguments:
 	ld hl,bos.current_working_dir
 .non_null_dir:
 	ld (ix-9),hl

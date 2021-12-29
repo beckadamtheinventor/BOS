@@ -14,7 +14,7 @@
 	jp fs_OpenFile
 	jp fs_GetSectorAddress
 	jp fs_CheckDirExists
-	jp fs_GetPathLastName
+	jp fs_CeilDivBySector
 	jp fs_CopyFileName
 	jp fs_Read
 	jp fs_Write
@@ -78,7 +78,7 @@
 	jp fs_InitClusterMap
 	jp sys_WriteFlash
 	jp sys_WriteFlashA
-	jp DONOTHING
+	jp sys_JoinArgv
 	jp fs_PathLen
 	jp fs_ParentDir
 	jp fs_StrToFileEntry
@@ -86,11 +86,11 @@
 	jp sys_Free
 	jp sys_CallExecuteFile
 	jp sys_JumpExecuteFile
-	jp sys_InitDevice
-	jp sys_DeinitDevice
-	jp sys_GetDeviceAddress
-	jp sys_ReadDevice
-	jp sys_WriteDevice
+	jp sys_OpenDevice
+	jp fs_CopyFile
+	jp DONOTHING
+	jp DONOTHING
+	jp DONOTHING
 	jp fs_GetSector
 	jp fs_WriteByte
 	jp fs_RenameFile

@@ -44,6 +44,7 @@ end fs_dir
 fs_dir bin_dir
 	fs_sfentry writeinto_exe, ">", "", f_readonly+f_system+f_subfile
 	fs_sfentry appendinto_exe, ">>", "", f_readonly+f_system+f_subfile
+	fs_sfentry argv_so, "argv", "so", f_readonly+f_system+f_subfile
 	fs_sfentry cat_exe, "cat", "", f_readonly+f_system+f_subfile
 	fs_sfentry cd_exe, "cd", "", f_readonly+f_system+f_subfile
 	fs_sfentry cmd_exe, "cmd", "", f_readonly+f_system+f_subfile
@@ -68,6 +69,7 @@ fs_dir bin_dir
 	fs_sfentry mkfile_exe, "mk", "", f_readonly+f_system+f_subfile
 	fs_sfentry mkfile_exe, "mkf", "", f_readonly+f_system+f_subfile
 	fs_sfentry mkfile_exe, "mkfile", "", f_readonly+f_system+f_subfile
+	fs_sfentry mv_exe, "mv", "", f_readonly+f_system+f_subfile
 	fs_sfentry off_exe, "off", "", f_readonly+f_system+f_subfile
 	fs_sfentry peek_exe, "peek", "", f_readonly+f_system+f_subfile
 	fs_sfentry poke_exe, "poke", "", f_readonly+f_system+f_subfile
@@ -144,6 +146,10 @@ fs_file os_internal_subfiles
 		include 'fs/bin/mkfile.asm'
 	end fs_subfile
 
+	fs_subfile mv_exe, bin_dir
+		include 'fs/bin/mv.asm'
+	end fs_subfile
+
 	fs_subfile off_exe, bin_dir
 		include 'fs/bin/off.asm'
 	end fs_subfile
@@ -170,6 +176,10 @@ fs_file os_internal_subfiles
 
 	fs_subfile numstr_so, bin_dir
 		include 'fs/bin/numstr.so.asm'
+	end fs_subfile
+
+	fs_subfile argv_so, bin_dir
+		include 'fs/bin/argv.so.asm'
 	end fs_subfile
 
 	fs_subfile mem_so, bin_dir

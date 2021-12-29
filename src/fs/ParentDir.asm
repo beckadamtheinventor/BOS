@@ -5,6 +5,7 @@
 fs_ParentDir:
 	pop bc,hl
 	push hl,bc
+.entryhl:
 	push hl
 	call fs_AbsPath
 	inc hl

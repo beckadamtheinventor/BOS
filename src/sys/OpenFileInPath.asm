@@ -42,7 +42,7 @@ sys_OpenFileInPath:
 	ld hl,(ix-9)
 	or a,a
 	sbc hl,de
-	jr z,.fail ; fail if no more directories to search in
+	jr c,.fail ; fail if no more directories to search in
 	ld (ix-9),hl
 	jr .loop
 .success:

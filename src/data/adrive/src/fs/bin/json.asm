@@ -4,7 +4,7 @@
 json_main:
 	ld hl,-6
 	call ti._frameset
-	ld hl,(ix+6) ; grab program arguments
+	call osrt.argv_1 ; grab program arguments
 	ld a,(hl)
 	or a,a
 	jq z,.display_info

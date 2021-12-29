@@ -1,8 +1,5 @@
 explorer_configure_theme:
 	call .main
-	ld a,c
-	or a,b
-	ret z ; return if we're at the end of the themes file
 	ld a,(de)
 	ld (explorer_background_color),a
 	inc de
@@ -166,6 +163,14 @@ explorer_configure_theme:
 	pop bc,bc,bc,bc
 	ret
 
+.colors:
+	db 4 dup 0
+.exit:
+	ld c,1
+	push bc
+	call gfx_SetDraw
+	pop bc,bc ; pop caller of explorer_configure_theme.main
+	ret
 .custom:
 	ld c,1
 	push bc
@@ -215,16 +220,12 @@ explorer_configure_theme:
 .dontincrementcolor:
 	cp a,ti.skClear
 	jq z,.exit
-	
-	ret
-.colors:
-	db 4 dup 0
-.exit:
-	ld c,1
-	push bc
-	call gfx_SetDraw
-	pop bc
-	ret
+	cp a,ti.skEnter
+	jq nz,.custom
+	call explorer_write_config
+	pop hl
+	ret c ; return to caller of explorer_configure_theme if malloc failed
+	jp (hl) ; return to caller of explorer_configure_theme.main
 
 explorer_write_config:
 	ld de,512
@@ -266,20 +267,15 @@ explorer_background_file:=$-3
 	ld (de),a
 	pop bc,bc
 .no_background_loaded:
-	pop iy
 	ld hl,explorer_config_file
-	ld de,512 ; low byte is 0 so we can also use this as the flags argument
-	push de,de,hl
+	push hl
 	call bos.fs_OpenFile
-	call c,bos.fs_CreateFile
-	pop bc,bc,bc
-
-	ex hl,de
-	ld hl,512
-	ex (sp),hl
-	push hl,de
-	call bos.fs_WriteFile
-	pop bc,bc,bc
+	call c,bos.fs_DeleteFile
+	pop hl
+	ld de,512 ; low byte is 0 so we can also use this as the flags argument
+	push iy,de,de,hl
+	call bos.fs_WriteNewFile
+	pop bc,bc,bc,bc,iy
 	ret
 
 ; input iy pointer to output

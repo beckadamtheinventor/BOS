@@ -45,6 +45,7 @@ explorer_init:
 	sbc hl,hl
 	ret
 explorer_init_2:
+	call gfx_Begin
 	EnableOSThreading
 	ld bc,258
 	push bc
@@ -119,6 +120,9 @@ explorer_dont_run_preload:
 	; sbc hl,bc
 	; jq z,explorer_dirlist
 explorer_dirlist:
+	call ti.GetBatteryStatus
+	sbc a,0
+	ld (explorer_battery_status),a
 	ld hl,0
 explorer_files_skip:=$-3
 	push hl
@@ -269,13 +273,14 @@ explorer_selected_file_desc:=$-3
 	bit bos.fd_subdir,(iy+bos.fsentry_fileattr)
 	jq z,.open_file
 	call .path_into
+	jr .jpdirlist
+.callpathout:
+	call .pathout
+.jpdirlist:
 	or a,a
 	sbc hl,hl
 	ld (explorer_files_skip),hl
-	jq explorer_dirlist
-.callpathout:
-	call .pathout
-	jq explorer_dirlist
+	jp explorer_dirlist
 .open_file:
 	ld hl,(explorer_dirname_buffer)
 	push hl

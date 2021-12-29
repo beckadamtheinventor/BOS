@@ -1,15 +1,21 @@
 	jr peek_main
 	db "FEX",0
 peek_main:
-	pop bc,de
-	push de,bc
+	ld hl,-1
+	call ti._frameset
 	ld hl,bos.return_code_flags
 	ld a,(hl)
-	push hl,af
+	ld (ix-1),a
 	set bos.bReturnHex,a
 	set bos.bReturnNotError,a
 	set bos.bReturnLong,a
 	ld (hl),a
+	ld a,(ix+6)
+	cp a,2
+	jr nz,.info
+	call osrt.argv_1
+	ex hl,de
+	ld hl,bos.return_code_flags
 	ld a,(de)
 	inc de
 	ld c,4
@@ -32,15 +38,18 @@ peek_main:
 	pop bc,bc
 	ld a,c
 	call osrt.read_a_from_addr
-	pop bc,bc
-	ret
+	jr .done
 .info:
 	ld hl,.infostr
 	call bos.gui_PrintLine
-	pop af,hl
+	ld hl,bos.return_code_flags
+	ld a,(ix-1)
 	ld (hl),a
 	or a,a
 	sbc hl,hl
+.done:
+	ld sp,ix
+	pop ix
 	ret
 
 .infostr:

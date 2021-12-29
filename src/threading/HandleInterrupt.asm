@@ -71,13 +71,9 @@ th_HandleNextThread:
 	; reti
 
 th_FindFreeThread:
-	ld a,(current_thread)
 	ld hl,thread_map
 	set bThreadAlive,(hl) ;thread 0 is always active
-	inc a
-	ld l,a
 	xor a,a
-	sub a,l
 	ld b,a
 .search_loop:
 	bit bThreadAlive,(hl)
@@ -86,25 +82,36 @@ th_FindFreeThread:
 	djnz .search_loop
 	ld l,b
 .found_thread:
-	ld a,l
+	or a,l
 	ret
 
 th_FindNextThread:
 	ld a,(current_thread)
 assert ~thread_map and $FF
+assert ~thread_parents and $FF
 	ld hl,thread_map
 	set bThreadAlive,(hl) ;thread 0 is always alive
 	ld b,l
 	ld l,a
+if ~(thread_map shr 8) + 1 = (thread_parents shr 8)
 	ld d,h
+end if
 .search_loop:
 	inc l
 	bit bThreadSleeping,(hl) ;check if thread is sleeping
 	jq nz,.search_next
 assert thread_parents shr 16 = thread_map shr 16
+if (thread_map shr 8) + 1 = (thread_parents shr 8)
+	inc h
+else
 	ld h,$FF and (thread_parents shr 8)
+end if
 	ld l,(hl) ;get parent thread ID
+if (thread_map shr 8) + 1 = (thread_parents shr 8)
+	dec h
+else
 	ld h,d
+end if
 	bit bThreadSleeping,(hl) ;check if parent thread is sleeping
 	jq nz,.search_next
 	bit bThreadAlive,(hl)
@@ -129,7 +136,9 @@ th_ResetThreadMemory:
 	ld (hl),a
 	inc l
 	djnz .loop
+if ~(thread_map shr 8) + 1 = (thread_parents shr 8)
 	ld h,$FF and (thread_parents shr 8)
+end if
 .loop2:
 	ld (hl),a
 	inc l

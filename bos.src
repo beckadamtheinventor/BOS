@@ -9,7 +9,7 @@
 	public _fs_OpenFile
 	public _fs_GetSectorAddress
 	public _fs_CheckDirExists
-	public _fs_GetPathLastName
+	public _fs_CeilDivBySector
 	public _fs_CopyFileName
 	public _fs_Read
 	public _fs_Write
@@ -73,6 +73,7 @@
 	public _fs_InitClusterMap
 	public _sys_WriteFlash
 	public _sys_WriteFlashA
+	public _sys_JoinArgv
 	public _fs_PathLen
 	public _fs_ParentDir
 	public _fs_StrToFileEntry
@@ -80,11 +81,8 @@
 	public _sys_Free
 	public _sys_CallExecuteFile
 	public _sys_JumpExecuteFile
-	public _sys_InitDevice
-	public _sys_DeinitDevice
-	public _sys_GetDeviceAddress
-	public _sys_ReadDevice
-	public _sys_WriteDevice
+	public _sys_OpenDevice
+	public _fs_CopyFile
 	public _fs_GetSector
 	public _fs_WriteByte
 	public _fs_RenameFile
@@ -163,7 +161,7 @@ _os_GetOSInfo                    := $22404
 _fs_OpenFile                     := $22408
 _fs_GetSectorAddress             := $2240C
 _fs_CheckDirExists               := $22410
-_fs_GetPathLastName              := $22414
+_fs_CeilDivBySector              := $22414
 _fs_CopyFileName                 := $22418
 _fs_Read                         := $2241C
 _fs_Write                        := $22420
@@ -227,6 +225,7 @@ _gui_InputNoClear                := $22504
 _fs_InitClusterMap               := $22508
 _sys_WriteFlash                  := $2250C
 _sys_WriteFlashA                 := $22510
+_sys_JoinArgv                    := $22514
 _fs_PathLen                      := $22518
 _fs_ParentDir                    := $2251C
 _fs_StrToFileEntry               := $22520
@@ -234,11 +233,8 @@ _fs_DirList                      := $22524
 _sys_Free                        := $22528
 _sys_CallExecuteFile             := $2252C
 _sys_JumpExecuteFile             := $22530
-_sys_InitDevice                  := $22534
-_sys_DeinitDevice                := $22538
-_sys_GetDeviceAddress            := $2253C
-_sys_ReadDevice                  := $22540
-_sys_WriteDevice                 := $22544
+_sys_OpenDevice                  := $22534
+_fs_CopyFile                     := $22538
 _fs_GetSector                    := $22548
 _fs_WriteByte                    := $2254C
 _fs_RenameFile                   := $22550

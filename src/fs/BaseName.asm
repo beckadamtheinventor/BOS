@@ -1,14 +1,18 @@
 ;@DOES return the last path word of a path
 ;@INPUT char *fs_BaseName(const char *path);
-;@OUTPUT last path word, or same as input if it is the only path word.
+;@OUTPUT copy of last path word, or same as input if it is the only path word, or pointer to '/' if that is the last character of the path.
 fs_BaseName:
 	pop bc,hl
-	push hl,bc,hl
+	push hl,bc
+.entryhl:
+	push hl
 	call ti._strlen
 	ex (sp),hl
 	pop bc
 	add hl,bc
 	ld a,'/'
+	cp a,(hl)
+	ret z
 	cpdr
 	inc hl ; increment to first character of the string
 	ret po ; return if '/' not found in path string

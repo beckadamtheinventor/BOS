@@ -16,6 +16,8 @@ load_libload:
 
 .relocations:
 	db	$C0, "GRAPHX", $00, 11
+gfx_Begin:
+	jp 0
 gfx_SetColor:
 	jp 6
 gfx_FillScreen:

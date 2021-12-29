@@ -3,11 +3,11 @@ Section     Base   Top    High   Length
 .icon       D1A882 D1A882             0h
 .launcher   D1A882 D1A8A7            25h
 .libs       D1A8A7 D1A91C            75h
-.start      D1A91C D1A9AD            91h
-.cleanup    D1A9AD D1A9BB             Eh
-.text       D1A9BB D1C0BB          1700h
-.data       D1C0BB D1C0BB             0h
-.rodata     D1C0BB D1C413           358h
+.start      D1A91C D1A952            36h
+.cleanup    D1A952 D1A960             Eh
+.text       D1A960 D1C060          1700h
+.data       D1C060 D1C060             0h
+.rodata     D1C060 D1C3B8           358h
 .init_array 000000 000000             0h
 .ctors      000000 000000             0h
 .dtors      000000 000000             0h
@@ -57,15 +57,15 @@ _fs_JoinPath                 = 022640
 _fs_BaseName                 = 02264C
 _fs_WriteRaw                 = 022654
 _os_GetCSC                   = 022430
-_bosgfx_SetTextPos           = D1A9BB
-_gui_DrawConsoleWindow       = D1A9CA
-_gui_Print                   = D1A9D1
-_gui_PrintChar               = D1A9D8
-_gui_PrintInt                = D1A9E0
-_gui_PrintLine               = D1A9E7
-_TIVarToPath                 = D1A9EE
-__frameset                   = D1AA05
-__frameset0                  = D1AA13
+_bosgfx_SetTextPos           = D1A960
+_gui_DrawConsoleWindow       = D1A96F
+_gui_Print                   = D1A976
+_gui_PrintChar               = D1A97D
+_gui_PrintInt                = D1A985
+_gui_PrintLine               = D1A98C
+_TIVarToPath                 = D1A993
+__frameset                   = D1A9AA
+__frameset0                  = D1A9B8
 __iand                       = 000134
 __imulu                      = 000158
 __ishru                      = 000184
@@ -75,61 +75,61 @@ _strchr                      = 0000C4
 _strcmp                      = 0000C8
 _strlen                      = 0000D4
 _strncmp                     = 0000DC
-.missingappvar               = D1C0BB
-.libloadname                 = D1C0C3
-.webaddress                  = D1C0D4
+.missingappvar               = D1C060
+.libloadname                 = D1C068
+.webaddress                  = D1C079
 start                        = D1A91C
-skip._exit                   = D1A9A2
-skip.__Exit                  = D1A9A2
-skip._abort                  = D1A9A2
-_checkIs8xVar                = D1AA1E
-_transfer_file               = D1AA8E
-___main_argc_argv            = D1B304
-_handleUsbEvent              = D1C022
-LJTI3_0                      = D1C0E7
-L_.str                       = D1C0F3
-L_.str.1                     = D1C0F7
-L_.str.2                     = D1C0FB
-L_.str.3                     = D1C109
-L_.str.4                     = D1C10E
-L_.str.5                     = D1C125
-L_.str.6                     = D1C14D
-L_.str.7                     = D1C158
-L_.str.8                     = D1C160
-L_.str.9                     = D1C178
-L_.str.10                    = D1C19B
-L_.str.11                    = D1C1A6
+skip._exit                   = D1A947
+skip.__Exit                  = D1A947
+skip._abort                  = D1A947
+_checkIs8xVar                = D1A9C3
+_transfer_file               = D1AA33
+___main_argc_argv            = D1B2A9
+_handleUsbEvent              = D1BFC7
+LJTI3_0                      = D1C08C
+L_.str                       = D1C098
+L_.str.1                     = D1C09C
+L_.str.2                     = D1C0A0
+L_.str.3                     = D1C0AE
+L_.str.4                     = D1C0B3
+L_.str.5                     = D1C0CA
+L_.str.6                     = D1C0F2
+L_.str.7                     = D1C0FD
+L_.str.8                     = D1C105
+L_.str.9                     = D1C11D
+L_.str.10                    = D1C140
+L_.str.11                    = D1C14B
 ___main_argc_argv.partitions = D031F6
 ___main_argc_argv.global     = D03246
 ___main_argc_argv.fat        = D03649
-L_.str.12                    = D1C1B2
-L_.str.13                    = D1C1B5
-L_.str.14                    = D1C25D
-L_.str.15                    = D1C26D
-L_.str.16                    = D1C282
-L_.str.17                    = D1C294
-L_.str.18                    = D1C2A7
-L_.str.19                    = D1C2B2
-L_.str.20                    = D1C2C9
-L_.str.21                    = D1C2DC
-L_.str.22                    = D1C2F1
-L_.str.23                    = D1C30A
-L_.str.24                    = D1C30D
-L_.str.25                    = D1C31C
-L_.str.26                    = D1C336
-L_.str.27                    = D1C339
-L_.str.28                    = D1C346
-L_.str.29                    = D1C34A
-L_.str.30                    = D1C35C
-L_.str.31                    = D1C375
-L_.str.32                    = D1C377
-L_.str.33                    = D1C37C
-L_.str.34                    = D1C37E
-L_.str.35                    = D1C39F
-L_.str.36                    = D1C3BF
-L_.str.37                    = D1C3D7
-L_.str.38                    = D1C3EC
-L_.str.39                    = D1C3FF
+L_.str.12                    = D1C157
+L_.str.13                    = D1C15A
+L_.str.14                    = D1C202
+L_.str.15                    = D1C212
+L_.str.16                    = D1C227
+L_.str.17                    = D1C239
+L_.str.18                    = D1C24C
+L_.str.19                    = D1C257
+L_.str.20                    = D1C26E
+L_.str.21                    = D1C281
+L_.str.22                    = D1C296
+L_.str.23                    = D1C2AF
+L_.str.24                    = D1C2B2
+L_.str.25                    = D1C2C1
+L_.str.26                    = D1C2DB
+L_.str.27                    = D1C2DE
+L_.str.28                    = D1C2EB
+L_.str.29                    = D1C2EF
+L_.str.30                    = D1C301
+L_.str.31                    = D1C31A
+L_.str.32                    = D1C31C
+L_.str.33                    = D1C321
+L_.str.34                    = D1C323
+L_.str.35                    = D1C344
+L_.str.36                    = D1C364
+L_.str.37                    = D1C37C
+L_.str.38                    = D1C391
+L_.str.39                    = D1C3A4
 _#fat_Init                   = D1A8B2
 _#fat_Deinit                 = D1A8B6
 _#fat_DirList                = D1A8BA

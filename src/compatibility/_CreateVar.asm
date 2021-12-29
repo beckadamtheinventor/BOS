@@ -15,7 +15,7 @@ _CreateAppVar:
 
 
 
-;@DOES create a file in the /tivars/ directory
+;@DOES create a ram file in the /tivars/ directory
 ;@INPUT OP1+1 = 8 byte name of var to create
 ;@INPUT A = var type
 ;@INPUT hl = length to allocate for file

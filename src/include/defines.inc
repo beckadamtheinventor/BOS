@@ -21,10 +21,8 @@ TEXT_MAX_ROW    := 231
 RAM_START  := 0D00000h
 
 
-; flag memory locations
+; memory locations
 flag_start             := $D00000
-thread_map             := $D00000 ; thread map. 256 threads. Active threads have bit 7 set.
-thread_parents         := $D00200 ;256 bytes, one per thread. Saves ID of thread that spawned a given thread. A thread will only be run if it's parent thread is awake
 
 currow?                := ti.curRow
 curcol?                := ti.curCol
@@ -82,15 +80,19 @@ heapBot                := ti.heapBot
 ramCodeTop             := ti.ramCodeTop
 reservedRAM            := ti.ramCodeTop
 bos_UserMem            := $D1A881
-libload_bottom_ptr     := libload_top_ptr-$400 ; 1024 bytes for executing libload
+end_of_usermem         := libload_bottom_ptr-2
+libload_bottom_ptr     := libload_top_ptr-$3FE ; 1022 bytes for executing libload
 libload_top_ptr        := thread_temp_save-$400
 op_stack_bot           := thread_temp_save-$400
 op_stack_top           := thread_temp_save-$300 ;256 bytes downward
 current_working_dir    := thread_temp_save-$200
 InputBuffer            := thread_temp_save-$100
 thread_temp_save       := $D2F000 ; temporary save location for registers when a thread switch is triggered. 16 bytes per thread, 256 threads = 4096 bytes.
-malloc_cache           := $D2F800 ;4096 bytes
-bottom_of_malloc_RAM   := $D30000
+malloc_cache           := $D2F800 ; 4096 bytes
+thread_map             := $D30000 ; thread map. 256 threads. Active threads have bit 7 set.
+thread_parents         := $D30100 ; 256 bytes, one per thread. Saves ID of thread that spawned a given thread. A thread will only be run if it's parent thread is awake
+bottom_of_malloc_RAM   := $D30200
+top_of_vat             := top_of_RAM
 top_of_RAM             := $D40000
 
 
@@ -137,6 +139,44 @@ fsentry_filesector          := $0C
 fsentry_filesector.len      := 2
 fsentry_filelen             := $0E
 fsentry_filelen.len         := 2
+
+; device file field offsets
+device_Header               := 0
+device_Flags                := 1
+device_Type                 := 2
+device_Version              := 3
+device_JumpTable            := 4 ; jump table for device functions
+device_JumpInit             := 4
+device_JumpDeinit           := 8
+device_JumpRead             := 12
+device_JumpWrite            := 16
+device_JumpGetDMA           := 20
+device_CodeStart            := 24
+
+; device file field lengths
+device_Header.len           := 4
+device_Flags.len            := 1
+device_Type.len             := 1
+device_Version.len          := 1
+device_JumpTable.len        := 5*4 ; jump table for device functions
+
+; device file flag bits
+bDeviceWritable             := 7
+bDeviceReadable             := 6
+bDeviceHasDMA               := 5
+bDeviceDMAWritable          := 4
+bDeviceDMAReadable          := 3
+bDeviceNeedsInit            := 2
+bDeviceNeedsDeinit          := 1
+
+; device type equates
+devtSoftware                := $00
+devtMemory                  := $04
+devtMMIO                    := $08
+devtUSB                     := $10
+devtMSD                     := $14
+devtMSDFS                   := $15
+devtMSDFAT32                := $16
 
 
 ; threading_enabled values

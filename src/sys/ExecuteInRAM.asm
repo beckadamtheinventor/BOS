@@ -1,4 +1,4 @@
-;@DOES run a routine in RAM, in privledged mode.
+;@DOES run a routine in RAM.
 ;@INPUT ix routine to execute.
 ;@NOTE routine must begin with two-byte length of routine
 sys_ExecuteInRAM:

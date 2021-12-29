@@ -151,31 +151,33 @@ sys_ExecuteFile:
 	pop hl  ;usermem
 	ld (running_program_ptr),hl
 .exec_fex:
-	ld (SaveSP),sp
-	ld de,(fsOP6) ;push arguments
-	push de
 	call sys_NextProcessId
 	call sys_FreeRunningProcessId ;free memory allocated by the new process ID if there is any
-	call .normalize_lcd
+	ld de,(fsOP6) ;arguments string
+	call .load_argc_argv_loop
+	ld de,(fsOP6)
+	ld bc,(fsOP5)
+	push de,bc
+	; call .normalize_lcd
 	; ld a,(threading_enabled)
 	; cp a,2
 	; jr nz,.runnothreading
 	; SleepThread
 	; ld bc,(running_program_ptr)
-	; or a,a
-	; sbc hl,hl
+	; ld hl,-12
 	; add hl,sp
 	; push hl,bc
 	; call th_CreateThread.noparent
-	; pop bc,bc
+	; pop bc,bc,bc
+	; jq th_HandleNextThread.nosave
 	; HandleNextThread ;handle the thread we just spawned
 	; jr .ranthread
-; .runnothreading:
+.runnothreading:
 	call .jptoprogram
 .ranthread:
-	pop bc
+	pop bc,bc
 	push de,hl
-	call .normalize_lcd
+	; call .normalize_lcd
 	xor a,a
 	sbc hl,hl
 	ld (asm_prgm_size),hl
@@ -222,15 +224,16 @@ sys_ExecuteFile:
 	jq .exec_setup_usermem_bc
 .jptoprogram:
 	ld hl,(running_program_ptr)
+sys_jphl:=$
 	jp (hl)
-.normalize_lcd:
-	ld bc,ti.vRam
-	ld (ti.mpLcdUpbase),bc
-	ld a,ti.lcdBpp8
-	ld (ti.mpLcdCtrl),a
-	xor a,a
-	ld (curcol),a
-	ret
+; .normalize_lcd:
+	; ld bc,ti.vRam
+	; ld (ti.mpLcdUpbase),bc
+	; ld a,ti.lcdBpp8
+	; ld (ti.mpLcdCtrl),a
+	; xor a,a
+	; ld (curcol),a
+	; ret
 
 .exec_threaded_rex:
 	ld hl,(running_program_ptr)
@@ -391,3 +394,76 @@ sys_ExecuteFile:
 	scf
 	sbc hl,hl
 	ret
+
+; input de = string
+.load_argc_argv_loop:
+	ld	bc,1
+	ld	a,(de)
+	or	a,a
+	jr	z,.doneargv
+	jr	.argvappend
+.argvloop:	; loop over argument string
+	inc de
+	ld	a,(de)
+	or	a,a
+	jr	z,.doneargv
+	cp	a,' '
+	jr	nz,.argvloop
+	xor	a,a
+	ld	(de),a
+.argvspacesloop:
+	inc	de
+	ld	a,(de)
+	cp	a,' '
+	jr	z,.argvspacesloop
+	or	a,a
+	jr	z,.doneargv
+.argvappend:
+	inc	bc
+	push	de
+	jr	.argvloop
+.doneargv:
+	sbc hl,hl
+	add hl,bc
+	add hl,bc
+	add hl,bc
+	push bc,hl
+	call sys_Malloc
+	push hl
+	ld	hl,(ExecutingFileFd)
+	push	hl
+	call	fs_CopyFileName	; get file name from running file descriptor
+	ex hl,de
+	pop	bc
+	pop hl ; char *argv[]
+	ld (fsOP6),hl
+	pop bc ; argc*3
+	add hl,bc
+	pop bc	; int argc
+	ld (fsOP5),bc
+	ld (fsOP5+3),de
+	dec bc
+	ld a,c
+	or a,b
+	jr z,.argv_no_args
+.argv_copy_loop:
+	pop de
+	dec hl
+	dec hl
+	dec hl
+	ld (hl),de
+	dec bc
+	ld a,c
+	or a,b
+	jq nz,.argv_copy_loop
+.argv_no_args:
+	ld de,(fsOP5+3)
+	dec hl
+	dec hl
+	dec hl
+	ld (hl),de
+	ret
+
+
+
+
