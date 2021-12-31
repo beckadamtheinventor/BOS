@@ -88,13 +88,13 @@ str_ExplorerExecutable:
 explorer_config_dir:
 	db "/etc/config/explorer",0
 explorer_themes_file:
-	db "/etc/config/explorer/themes.lst",0
+	db "/etc/config/explorer/themes.dat",0
 explorer_config_file:
 	db "/etc/config/explorer/explorer.cfg",0
 explorer_preload_cmd:
 	db "cmd -x "
 explorer_preload_file:
-	db "/etc/config/explorer/prerun.cfg",0
+	db "/etc/config/explorer/prerun.cmd",0
 
 explorer_default_directory:
 	db "/home/user",0

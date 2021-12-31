@@ -88,18 +88,20 @@ explorer_foreground2_color:=$-1
 	ld (explorer_cursor_y),a
 	; call ti.GetBatteryStatus
 	; ld (battery_status),a
-	ld hl,bos.thread_map + 2
-	bit 7,(hl)
-	jq nz,explorer_dont_run_preload
-	ld hl,explorer_preload_file
-	push hl
-	call bos.fs_OpenFile
-	ld hl,explorer_preload_cmd
-	ex (sp),hl
-	ld hl,str_CmdExecutable
-	push hl
-	call nc,bos.sys_ExecuteFile
-	pop bc,bc
+	; ld hl,bos.thread_map + 2
+	; bit 7,(hl)
+	; jq nz,explorer_dont_run_preload
+	; ld hl,explorer_preload_file
+	; ld bc,0
+	; push bc,bc,hl
+	; call bos.fs_OpenFile
+	; call c,bos.fs_CreateFile
+	; ld hl,explorer_preload_cmd
+	; ex (sp),hl
+	; ld hl,str_CmdExecutable
+	; push hl
+	; call bos.sys_ExecuteFile
+	; pop bc,bc,bc,bc
 explorer_dont_run_preload:
 ; explorer_load_extensions:
 	; ld hl,2

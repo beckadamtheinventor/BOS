@@ -1,4 +1,6 @@
-
+;@DOES Join argv into a space-delimited string.
+;@INPUT char *sys_JoinArgv(int argc, char *argv[]);
+;@OUTPUT Pointer to string.
 sys_JoinArgv:
 	ld hl,-3
 	call ti._frameset
@@ -27,6 +29,7 @@ sys_JoinArgv:
 	jr nz,.loop
 	call sys_Malloc.entryhl
 	jr c,.exit
+	push hl
 	ex hl,de
 	ld bc,(ix+6)
 	ld iy,(ix+9)
@@ -51,6 +54,7 @@ sys_JoinArgv:
 	jr nz,.loop2
 	dec de
 	ld (de),a
+	pop hl
 	jr .exit
 .no_args:
 	ld hl,$FF0000

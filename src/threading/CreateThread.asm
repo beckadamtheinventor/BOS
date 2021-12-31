@@ -1,7 +1,8 @@
 
 ;@DOES spawn a thread
-;@INPUT uint8_t th_CreateThread(void *pc, void *sp, const char *args);
+;@INPUT uint8_t th_CreateThread(void *pc, void *sp, int argc, char *argv[]);
 ;@OUTPUT thread id. 0 if failed
+;@NOTE void *sp must be allocated at least 12 bytes behind it. If void *sp is 0, it will use the sp from the caller
 th_CreateThread:
 	db $3E ;ld a,...
 .noparent:
@@ -27,6 +28,8 @@ if (thread_map shr 8) and $FF = $FF
 end if
 	sbc hl,hl
 	ld l,c
+	ld a,c
+	push af
 	add hl,hl
 	add hl,hl
 	add hl,hl
@@ -40,15 +43,26 @@ end if
 	inc hl
 	inc hl
 	inc hl
-	ld bc,(iy+9) ; const char *args
-	push bc
-	ld iy,(iy+6) ; void *sp
+	push hl
+	ld hl,(iy+6) ; void *sp
+	ld a,(iy+8)
+	or a,h
+	or a,l
+	jr nz,.non_zero_sp
+	sbc hl,hl
+	add hl,sp
+.non_zero_sp:
+	ex (sp),hl ; save sp, restore thread save area
+	ex (sp),ix ; save ix, restore sp into ix
 	ld bc,._thread_return_handler
-	ld (iy-3),bc
-	pop bc
-	ld (iy-6),bc
-	lea iy,iy-6
-	ld (hl),iy
+	ld (ix-3),bc ; set return address
+	ld bc,(iy+12) ; int argv
+	ld (ix-6),bc
+	ld bc,(iy+9) ; int argc
+	ld (ix-9),bc
+	lea ix,ix-9
+	ld (hl),ix ; set thread saved sp
+	pop ix ; restore ix
 	ld bc,12-3
 	add hl,bc
 	ld (hl),de ; void *pc (initial pc)
@@ -57,6 +71,7 @@ end if
 	inc hl
 	ld a,(running_process_id) ; malloc id
 	ld (hl),a
+	pop af
 	ret
 
 ._thread_return_handler:

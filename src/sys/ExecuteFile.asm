@@ -323,31 +323,16 @@ sys_jphl:=$
 	pop bc
 	ret c ;return if failed to malloc
 
-	add hl,bc ;malloc'd pointer + length because the stack grows downwards
-	dec hl
-	dec hl
-	dec hl
+	add hl,bc ;malloc'd pointer for the stack + length because it grows downwards
 	ld de,(running_program_ptr)
-	ld (hl),de
-	dec hl
-	dec hl
-	dec hl
-	ld bc,.threaded_return_handler ;set program return location so its memory can be easily freed
-	ld (hl),bc
 	push hl,de
-	call th_CreateThread
+	call th_CreateThread ; queue the thread to be run on the next thread switch
 	ld a,(fsOP6+13)
 	ld (running_process_id),a
 	ld hl,return_code_flags
 	set bSilentReturn,(hl) ;return to caller silently
 	pop hl,de
 	ret
-
-.threaded_return_handler:
-	call sys_FreeRunningProcessId
-	call sys_Free ;free the memory the program is allocated in if it's a TRX.
-	pop bc
-	EndThread ;assume we're still in the program's main thread
 
 .executable_text:
 	ld a,(hl)
