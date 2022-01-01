@@ -49,6 +49,27 @@ quickmenu_item_strings:
 .l5:
 	db "edit",0
 
+new_file_option_strings:
+	dl .strings
+	db 4 dup $C9
+	jp explorer_create_new_file_image
+	jp explorer_create_new_file_link
+	jp explorer_create_new_file_dir
+	jp explorer_create_new_file_file
+.strings:
+	dl .l1, .l2, .l3, .l4, .l5
+.l1:
+	db "file",0
+.l2:
+	db "dir",0
+.l3:
+	db "link",0
+.l4:
+	db "image"
+.l5:
+	db 0
+
+
 explorer_themes_default:
 	db "BOS Blue",0,$08,$11,$FF,$07
 	db "BOS Green",0,$0C,$03,$AF,$C7
@@ -71,6 +92,12 @@ str_DestinationFilePrompt:
 	db "New name? ",0
 str_NewFileNamePrompt:
 	db "File name? ",0
+str_NewDirNamePrompt:
+	db "Directory name? ",0
+; str_NewLinkPrompt:
+	; db "Link file name? ",0
+; str_NewImagePrompt:
+	; db "Image file name? ",0
 str_CustomTheme:
 	db "Custom Theme",0
 ; str_UsbRecvExecutable:
@@ -108,5 +135,7 @@ explorer_background_image_sprite_default:
 	db 0
 ; explorer_extensions_dir:
 	; db "/opt/explorer/",0
+explorer_temp_name_input_buffer:
+	db 15 dup 0
 explorer_dirlist_buffer:
 	dl display_items_num_x * display_items_num_y dup 0

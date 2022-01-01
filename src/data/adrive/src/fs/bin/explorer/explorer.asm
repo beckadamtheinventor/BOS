@@ -382,24 +382,8 @@ explorer_dirname_buffer:=$-3
 .optionsmenu:
 	ld hl,options_item_strings
 .drawmenu:
-	push hl
-	call draw_background
-	call draw_taskbar
-	call gfx_BlitBuffer
-	call bos.sys_WaitKeyCycle
-	pop hl
-	sub a,ti.skGraph
-	cp a,5
-	jq nc,explorer_main
-	ld bc,explorer_dirlist
-	push bc
-	add a,a
-	add a,a
-	add a,3
-	ld bc,0
-	ld c,a
-	add hl,bc
-	jp (hl)
+	call explorer_taskbar_menu
+	jq explorer_dirlist
 
 .pathout:
 	ld hl,(current_working_dir) ; path into '..' entry

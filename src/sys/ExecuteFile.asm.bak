@@ -350,7 +350,7 @@ sys_jphl:=$
 	push hl
 	call ti._strlen
 	pop bc,de ; bc = file name, de = length of pre-arguments
-	push de,bc ; lenfgth of pre-arguments, file name
+	push de,bc ; file name
 	add hl,de ; length of pre-arguments + file name
 	inc hl
 	inc hl ; length of pre-arguments + separator + file name + null terminator

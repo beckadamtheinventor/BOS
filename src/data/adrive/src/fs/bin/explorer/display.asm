@@ -1,3 +1,22 @@
+
+explorer_taskbar_menu:
+	push hl
+	call draw_background
+	call draw_taskbar
+	call gfx_BlitBuffer
+	call bos.sys_WaitKeyCycle
+	pop hl
+	sub a,ti.skGraph
+	cp a,5
+	ret nc
+	add a,a
+	add a,a
+	add a,3
+	ld bc,0
+	ld c,a
+	add hl,bc
+	jp (hl)
+
 draw_background:
 	ld c,0
 	push bc

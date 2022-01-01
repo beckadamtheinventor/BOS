@@ -1,4 +1,9 @@
+
 explorer_create_new_file:
+	ld hl,new_file_option_strings
+	jq explorer_taskbar_menu
+
+explorer_create_new_file_file:
 	ld hl,$FF0000
 	ld de,str_NewFileNamePrompt
 	call explorer_input_file_name
@@ -6,7 +11,20 @@ explorer_create_new_file:
 	push bc,bc,hl
 	call bos.fs_CreateFile
 	pop bc,bc,bc
+explorer_create_new_file_link:
+explorer_create_new_file_image:
 	ret
+
+explorer_create_new_file_dir:
+	ld hl,$FF0000
+	ld de,str_NewDirNamePrompt
+	call explorer_input_file_name
+	ld c,1 shl bos.fd_subdir
+	push bc,hl
+	call bos.fs_CreateDir
+	pop bc,bc
+	ret
+
 
 explorer_delete_file:
 	ld hl,str_ConfirmDelete
@@ -105,27 +123,28 @@ explorer_cut_file_indicator:=$-1
 	ret
 
 explorer_input_file_name:
-	xor a,a
-	ld b,a
-	mlt bc
-	ld (bos.curcol),a
-	ld a,23
-	ld (bos.currow),a
 	push de
 	ld de,explorer_temp_name_input_buffer
-	ld c,14
+	ld bc,14
 	ldir
 	pop hl
-	call bos.gui_PrintString
-	ld hl,explorer_temp_name_input_buffer
-	ld bc,14
+	ld bc,188
+	push bc
+	ld c,b
 	push bc,hl
+	call gfx_PrintStringXY
+	pop bc,bc
+	ld hl,14
+	ex (sp),hl
+	ld hl,explorer_temp_name_input_buffer
+	push hl
+	xor a,a
+	ld (ti.curCol),a
+	ld a,22
+	ld (ti.curRow),a
 .paste_wait_input:
 	call bos.gui_InputNoClear
 	cp a,2
 	jq nc,.paste_wait_input
 	pop hl,bc
 	ret
-
-explorer_temp_name_input_buffer:
-	db 14 dup 0

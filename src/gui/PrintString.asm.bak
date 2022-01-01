@@ -43,8 +43,8 @@ gui_PrintString:
 	ret c
 	call	gfx_PrintChar			; saves de, hl
 	push	hl
-	ld	hl, curcol
-	inc	(hl)
+	ld hl,curcol
+	inc (hl)
 	ld	hl,(lcd_x)
 	or	a,a
 	sbc	hl,de
