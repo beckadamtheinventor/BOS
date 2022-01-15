@@ -35,7 +35,7 @@ explorer_init:
 	;push bc
 	;ld (explorer_args),hl
 
-	di
+	call bos.gfx_Set8bpp
 	ld (_SaveIX),ix
 	ld (_SaveSP),sp
 	call load_libload

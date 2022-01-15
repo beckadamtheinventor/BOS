@@ -9,7 +9,11 @@ _echo_exe:
 	ld a,(hl)
 	or a,a
 	jr z,.fail
-	push hl
+	ld hl,(ix+9)
+	push hl,bc
+	call bos.sys_JoinArgv
+	pop bc
+	ex (sp),hl
 	call bos.sys_VarString
 	pop bc
 	jr c,.fail

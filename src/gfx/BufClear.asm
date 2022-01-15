@@ -3,8 +3,8 @@
 ;@DESTROYS HL,DE,BC,F(P/V)
 gfx_BufClear:
 	ld	hl,LCD_BUFFER
-	ld	bc,LCD_WIDTH * LCD_HEIGHT - 1
 .clear:
+	ld	bc,LCD_WIDTH * LCD_HEIGHT - 1
 	push hl
 	pop de
 	inc de

@@ -33,6 +33,7 @@ sys_JoinArgv:
 	ex hl,de
 	ld bc,(ix+6)
 	ld iy,(ix+9)
+	dec bc
 .loop2:
 	push bc
 	lea iy,iy+3

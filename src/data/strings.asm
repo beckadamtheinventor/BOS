@@ -57,10 +57,10 @@ string_failed_to_reinstall:
 	db "Failed to reinstall TIOS, backup files are missing!",$A,0
 
 
-str_bosfs512_partition_header:
+str_bosfs512_partition_header: ; TODO: this shouldn't be static
 	db "bos512fsfs ", $14
 	dw fs_root_dir_lba ; LBA of the root directory
-	dw 512 ; directory section size
+	dw (end_of_user_archive - start_of_user_archive) shr 9 ; size of partition in LBAs
 .len:=$-.
 
 fs_root_dir_data:

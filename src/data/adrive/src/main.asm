@@ -6,6 +6,7 @@ include 'include/bos.inc'
 include 'include/threading.inc'
 include 'include/bos_trx.inc'
 
+
 org $040200
 fs_fs $040000
 
@@ -44,13 +45,14 @@ end fs_dir
 fs_dir bin_dir
 	fs_sfentry writeinto_exe, ">", "", f_readonly+f_system+f_subfile
 	fs_sfentry appendinto_exe, ">>", "", f_readonly+f_system+f_subfile
-	fs_sfentry argv_so, "argv", "so", f_readonly+f_system+f_subfile
+	fs_entry argv_so, "argv", "so", f_readonly+f_system
 	fs_sfentry cat_exe, "cat", "", f_readonly+f_system+f_subfile
 	fs_sfentry cd_exe, "cd", "", f_readonly+f_system+f_subfile
 	fs_sfentry cmd_exe, "cmd", "", f_readonly+f_system+f_subfile
 	fs_sfentry cls_exe, "cls", "", f_readonly+f_system+f_subfile
 	fs_sfentry cp_exe, "cp", "", f_readonly+f_system+f_subfile
 	; fs_sfentry initdev_exe, "device", "", f_readonly+f_system+f_subfile
+	fs_sfentry rm_exe, "del", "", f_readonly+f_system+f_subfile
 	fs_sfentry df_exe, "df", "", f_readonly+f_system+f_subfile
 	fs_sfentry echo_exe, "echo", "", f_readonly+f_system+f_subfile
 	fs_entry explorer_exe, "explorer", "", f_readonly+f_system
@@ -75,8 +77,8 @@ fs_dir bin_dir
 	fs_sfentry poke_exe, "poke", "", f_readonly+f_system+f_subfile
 	fs_sfentry rm_exe, "rm", "", f_readonly+f_system+f_subfile
 	fs_sfentry sleep_exe, "sleep", "", f_readonly+f_system+f_subfile
-	fs_sfentry numstr_so, "numstr", "so", f_readonly+f_system+f_subfile
-	fs_sfentry mem_so, "mem", "so", f_readonly+f_system+f_subfile
+	fs_entry numstr_so, "numstr", "so", f_readonly+f_system
+	fs_entry mem_so, "mem", "so", f_readonly+f_system
 	fs_entry os_internal_subfiles, "osfiles", "dat", f_readonly+f_system
 end fs_dir
 
@@ -174,26 +176,28 @@ fs_file os_internal_subfiles
 		include 'fs/bin/echo.asm'
 	end fs_subfile
 
-	fs_subfile numstr_so, bin_dir
-		include 'fs/bin/numstr.so.asm'
-	end fs_subfile
-
-	fs_subfile argv_so, bin_dir
-		include 'fs/bin/argv.so.asm'
-	end fs_subfile
-
-	fs_subfile mem_so, bin_dir
-		include 'fs/bin/mem.so.asm'
-	end fs_subfile
 	; fs_subfile json_exe, bin_dir
 		; include 'fs/bin/json.asm'
 	; end fs_subfile
 end fs_file
 
 
+
 ;-------------------------------------------------------------
-;file data section
+; file data section
 ;-------------------------------------------------------------
+
+fs_file libload_v15
+	db ti.AppVarObj, "LibLoad", 0, 7, 7 dup 0
+	dw libload_v15_internal_len
+libload_v15_internal_data:
+	file '../obj/libload.bin'
+	libload_v15_internal_len:=$-libload_v15_internal_data
+end fs_file
+
+fs_file libload_lll
+	file '../obj/libload.bin'
+end fs_file
 
 fs_file explorer_exe
 	file '../obj/explorer.bin'
@@ -231,18 +235,6 @@ fs_file usbdrvce_lll
 	file '../obj/usbdrvce.bin'
 end fs_file
 
-fs_file libload_lll
-	file '../obj/libload.bin'
-end fs_file
-
-fs_file libload_v15
-	db ti.AppVarObj, "LibLoad", 0, 7, 7 dup 0
-	dw libload_v15_internal_len
-libload_v15_internal_data:
-	file '../obj/libload.bin'
-libload_v15_internal_len:=$-libload_v15_internal_data
-end fs_file
-
 ; fs_file updater_exe
 	; include 'fs/sbin/updater.asm'
 ; end fs_file
@@ -250,6 +242,24 @@ end fs_file
 fs_file memedit_exe
 	file '../obj/memedit.bin'
 end fs_file
+
+;-------------------------------------------------------------
+; this needs to be at the end, and the address is expected to be reflected in osrt.asm
+;-------------------------------------------------------------
+db $04E000 - $ dup $FF
+
+fs_file argv_so
+	include 'fs/bin/argv.so.asm'
+end fs_file
+
+fs_file numstr_so
+	include 'fs/bin/numstr.so.asm'
+end fs_file
+
+fs_file mem_so
+	include 'fs/bin/mem.so.asm'
+end fs_file
+
 
 end fs_fs
 

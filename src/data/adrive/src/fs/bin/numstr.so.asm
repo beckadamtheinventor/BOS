@@ -1,6 +1,7 @@
 
 ; shared str<-->num code for os executables
 
+_osrt_numstr_so:
 	dd 1
 	jp osrt.str_to_int
 	jp osrt.hexstr_to_int
@@ -9,6 +10,18 @@
 	jp osrt.int_to_hexstr
 	jp osrt.long_to_hexstr
 	jp osrt.b_to_hexstr
+
+virtual
+	db "osrt.str_to_int       rb 4",$A
+	db "osrt.hexstr_to_int    rb 4",$A
+	db "osrt.nibble           rb 4",$A
+	db "osrt.byte_to_hexstr   rb 4",$A
+	db "osrt.int_to_hexstr    rb 4",$A
+	db "osrt.long_to_hexstr   rb 4",$A
+	db "osrt.b_to_hexstr      rb 4",$A
+	load _routines_osrt_numstr_so: $-$$ from $$
+end virtual
+
 
 ; convert a base-10 string into an integer
 ; input int osrt.str_to_int(const char *str);

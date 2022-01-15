@@ -52,6 +52,8 @@ documentation:
 
 # Rule to build include files
 includes:
+	fasmg $(call NATIVEPATH,src/data/adrive/osrt.asm) $(call NATIVEPATH,src/data/adrive/osrt.tmp)
+	$(CP) $(call NATIVEPATH,src/data/adrive/osrt.inc) $(call NATIVEPATH,src/include/osrt.inc)
 	python build_bos_inc.py
 	python build_bos_src.py
 

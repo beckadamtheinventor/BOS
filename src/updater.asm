@@ -28,7 +28,12 @@ updater_start:
 	call bos.gui_PrintLine
 	jp bos.sys_WaitKeyCycle
 .update:
-	os_create $04 ;just overwrite OS sectors, let the boot process do the rest
+	os_create $04 ; overwtite OS sectors
+
+	ld a,(bos._UnpackUpdates)
+	cp a,$C3
+	ret nz
+	jp bos._UnpackUpdates ; jump to update extractor (updated earlier)
 
 
 installing_string:

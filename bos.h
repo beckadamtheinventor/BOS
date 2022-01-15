@@ -227,11 +227,34 @@ void bosgfx_BlitBuffer(void);
 void bosgfx_PrintString(const char *str);
 
 /**
+ * Print a string at x,y.
+ * @param str Pointer to string to print.
+ * @param x X coordinate to print at.
+ * @param y Y coordinate to print at.
+ */
+void bosgfx_PrintStringXY(const char *str, int x, uint8_t y);
+
+/**
  * Set the text draw position to collumn, row
  * @param collumn zero indexed collumn number.
  * @param row zero indexed row number.
  */
 void bosgfx_SetTextPos(uint8_t collumn, uint8_t row);
+
+/**
+ * Set the text foreground color.
+ * @param color 8bpp color byte.
+ * @return old color.
+ */
+uint8_t bosgfx_SetTextFGColor(uint8_t color);
+
+/**
+ * Set the text background color.
+ * @param color 8bpp color byte.
+ * @return old color.
+ */
+uint8_t bosgfx_SetTextBGColor(uint8_t color);
+
 
 /**
  * Scan the keypad and return a scan code.

@@ -68,7 +68,7 @@
 ; some C code
 ; ```
 ; int main(int argc, char *argv[]){
-;    printsomething(argv); //this will likely still need to be included as part of a header file
+;    printsomething(argv); //this will need to be included as part of a header file
 ;    return 0;
 ; }
 ; ```
@@ -82,7 +82,8 @@
 ; section _main, ezsec.execany
 ;	call ti._frameset0
 ;	ld ix,(ix+6)
-;	pea ix+3
+;	ld hl,(ix+3)
+;	push hl
 ;   call _printsomething
 ;   pop bc
 ;   or a,a

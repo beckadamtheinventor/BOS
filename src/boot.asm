@@ -451,17 +451,18 @@ os_recovery_menu:
 
 
 _UnpackUpdates:
-	db $3E ; smc'd into a nop once updates are unpacked
-	ret ; this will only be executed if updates are already unpacked
+	; db $3E ; smc'd into a nop once updates are unpacked
+	; ret ; this will only be executed if updates are already unpacked
 .extract:
 	call gfx_SetDefaultFont
-	call fs_ExtractOSOptBinaries
+	call fs_ExtractOSBinaries
+	jq fs_ExtractOSOptBinaries
 
-	call sys_FlashUnlock
-	xor a,a
-	ld de,_UnpackUpdates
-	call sys_WriteFlashA
-	jq sys_FlashLock
+	; call sys_FlashUnlock
+	; xor a,a
+	; ld de,_UnpackUpdates
+	; call sys_WriteFlashA
+	; jq sys_FlashLock
 
 
 ;tios reinstaller

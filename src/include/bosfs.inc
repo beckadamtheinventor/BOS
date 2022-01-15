@@ -16,6 +16,7 @@ f_system     := 4
 f_subfile    := 8
 f_subdir     := $10
 f_device     := $20
+f_link       := $40
 f_elevated   := $80
 
 fb_readonly   := 0
@@ -24,6 +25,7 @@ fb_system     := 2
 fb_subfile    := 3
 fb_subdir     := 4
 fb_device     := 5
+fb_link       := 6
 fb_elevated   := 7
 
 macro fs_fs? fsbase
@@ -49,6 +51,10 @@ macro fs_fs? fsbase
 		dw (fdata - fs.base) shr 9
 		dw fdata.len
 	end macro
+
+;	macro fs_link? entryptr, name, ext, prop
+;		
+;	end macro
 
 	macro fs_longentry? fdata, name, prop
 		assert ((fdata - fs.base) shr 9) < 65536

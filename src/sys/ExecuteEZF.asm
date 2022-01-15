@@ -2,7 +2,7 @@
 ;@DOES execute an EZF file
 ;@INPUT int sys_ExecuteEZF(const char *path);
 ;@OUTPUT -1 and Cf set if file does not exist or is invalid or is malformed
-;@NOTE TODO; precise error messages and error codes.
+;@NOTE TODO/TBD
 sys_ExecuteEZF:
 	pop bc
 	ex (sp),hl

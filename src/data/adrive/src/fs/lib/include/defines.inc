@@ -44,7 +44,7 @@ remaining_free_RAM     := ti.appData    ; 3 bytes
 op_stack_ptr           := ti.appData+3  ; 3 bytes
 on_interrupt_jump      := ti.appData+6  ; jump byte for on_interrupt_handler
 on_interrupt_handler   := ti.appData+7  ; 3 bytes. Jump to on key interrupt handler. Byte preceeding this should be $C3 or $C9
-cur_lcd_buffer         := ti.appData+10 ; 3 bytes. Points to current LCD buffer
+cur_lcd_buffer         := ti.appData+10 ; 3 bytes. Points to current LCD draw buffer
 running_process_id     := ti.appData+13 ; 1 byte. Current process ID (used for per-program memory allocation)
 ScrapMem2              := ti.appData+14 ; 3 bytes
 top_of_UserMem         := ti.appData+17 ; 3 bytes
@@ -54,10 +54,11 @@ running_program_ptr    := ti.appData+27 ; 3 bytes. Stores pointer to currently r
 return_code_flags      := ti.appData+30 ; flag byte that determines how to interpret the return value of the last run program. Is to be set within the program for non-default return interpretation.
 flashStatusByte        := ti.appData+31 ; 1 byte
 filesystem_driver      := ti.appData+32 ; 1 byte
-copy_buffer            := ti.appData+33 ;3 bytes, points to first copy buffer entry, or -1 if nothing is stored.
-threading_enabled      := ti.appData+36 ;1 byte, determines if software threading is enabled and whether it should be used in OS routines
-current_thread         := ti.appData+37 ;1 byte, currently running thread ID
-gfx_string_temp        := ti.appData+38 ;16 bytes, temp location for integer printing
+copy_buffer            := ti.appData+33 ; 3 bytes, points to first copy buffer entry, or -1 if nothing is stored.
+threading_enabled      := ti.appData+36 ; 1 byte, determines if software threading is enabled and whether it should be used in OS routines
+current_thread         := ti.appData+37 ; 1 byte, currently running thread ID
+gfx_string_temp        := ti.appData+38 ; 16 bytes, temp location for integer printing
+saved_LcdUpbase        := ti.appData+54 ; 3 bytes, saves LcdUpbase during sector caching
 ScrapByte              := ti.flashByte
 ScrapWord              := ti.scrapMem
 ScrapMem               := ti.scrapMem
@@ -106,8 +107,9 @@ fs_cluster_map.len := 7040
 fs_cmap_length := fs_cluster_map.len
 ; asset_locations_start  := $3C0000
 
-
-
+fs_sector_size         := 512
+fs_partition_desc_size := 16
+fs_file_desc_size      := 16
 
 
 ; file entry flags

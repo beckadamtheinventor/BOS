@@ -4,7 +4,7 @@
 fs_GetFDPtr:
 	pop bc,hl
 	push hl,bc
-	ld bc,$B
+	ld bc,fsentry_fileattr
 	add hl,bc
 	bit fd_subfile,(hl)
 	inc hl

@@ -1,6 +1,7 @@
 
 ; shared memory access code for os executables
 
+_osrt_mem_so:
 	dd 1
 	jp osrt.check_address_writable
 	jp osrt.read_a_from_addr
@@ -16,6 +17,24 @@
 	jp osrt.xor_val_addr
 	jp osrt.or_val_addr
 	jp osrt.and_val_addr
+
+virtual
+	db "osrt.check_address_writable rb 4", $A
+	db "osrt.read_a_from_addr rb 4", $A
+	db "osrt.read_byte_from_addr rb 4", $A
+	db "osrt.read_word_from_addr rb 4", $A
+	db "osrt.read_int_from_addr rb 4", $A
+	db "osrt.read_long_from_addr rb 4", $A
+	db "osrt.set_a_at_addr rb 4", $A
+	db "osrt.set_byte_at_addr rb 4", $A
+	db "osrt.set_word_at_addr rb 4", $A
+	db "osrt.set_int_at_addr rb 4", $A
+	db "osrt.set_long_at_addr rb 4", $A
+	db "osrt.xor_val_addr rb 4", $A
+	db "osrt.or_val_addr rb 4", $A
+	db "osrt.and_val_addr rb 4", $A
+	load _routines_osrt_mem_so: $-$$ from $$
+end virtual
 
 ; input a number of bytes to read
 ; input hl address to read from

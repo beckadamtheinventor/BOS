@@ -2,6 +2,7 @@
 include 'include/ez80.inc'
 include 'include/ti84pceg.inc'
 include 'include/bos.inc'
+include 'include/osrt.inc'
 
 org ti.userMem
 	jq mem_edit
@@ -18,15 +19,20 @@ mem_edit_main:
 	push bc
 	call gfx_SetDraw
 	pop bc
-	ld hl,(ix+6)
+	ld a,(ix+6)
+	dec a
+	jr z,.run_readme
+	call osrt.argv_1
 	ld a,(hl)
 	or a,a
 	jr nz,.dont_run_readme
+.run_readme:
+	push hl
 	call mem_edit_readme
+	pop hl
 	cp a,15
 	jq z,.exit
 .dont_run_readme:
-	ld hl,(ix+6)
 	ld a,(hl)
 	or a,a
 	jq z,.dont_open_file
