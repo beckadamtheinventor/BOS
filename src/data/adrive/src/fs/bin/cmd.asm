@@ -29,17 +29,17 @@ cmd_exe_main:
 
 	cp a,'-'
 	jq nz,cmd_execute_next_line ;if first argument isn't a flag
-	inc hl
-	ld a,(hl)
-	inc hl
-	inc hl
-	ld (ti.curPC),hl
-	ld (ti.begPC),hl
+	inc bc
+	ld a,(bc)
+	inc bc
+	inc bc
+	ld (ti.curPC),bc
+	ld (ti.begPC),bc
 	cp a,'h'
 	jq z,cmd_print_help_info
 	cp a,'x'
 	jq nz,.not_exec_file
-	push hl
+	push bc
 	call bos.fs_GetFilePtr
 	jq c,cmd_exit_retneg1
 	ld (ti.curPC),hl

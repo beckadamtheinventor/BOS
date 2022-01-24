@@ -2,6 +2,7 @@
 include 'include/ti84pceg.inc'
 include 'include/ez80.inc'
 include 'include/defines.inc'
+include 'include/macros.inc'
 include 'include/ezf.inc'
 
 org $020108

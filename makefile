@@ -52,9 +52,10 @@ documentation:
 
 # Rule to build include files
 includes:
+	python build_bos_inc.py
+	$(CP) bos.inc $(call NATIVEPATH,$(FSSRC)/include/bos.inc)
 	fasmg $(call NATIVEPATH,src/data/adrive/osrt.asm) $(call NATIVEPATH,src/data/adrive/osrt.tmp)
 	$(CP) $(call NATIVEPATH,src/data/adrive/osrt.inc) $(call NATIVEPATH,src/include/osrt.inc)
-	python build_bos_inc.py
 	python build_bos_src.py
 
 # Rule to create object and binary directories
@@ -151,8 +152,10 @@ $(call NATIVEPATH,$(FSSRC)/fs/var/TIVARS.asm)
 	$(CP) $(call NATIVEPATH,src/data/adrive/data.bin) $(call NATIVEPATH,bin/BOSOSPT2.BIN)
 
 # Rule to build noti-ez80 submodule required for standalone ROM image
+notiez80: $(call NATIVEPATH,noti-ez80/bin/NOTI.rom)
+
 $(call NATIVEPATH,noti-ez80/bin/NOTI.rom):
-	fasmg $(call NATIVEPATH,noti-ez80/src/main.asm) $(call NATIVEPATH,noti-ez80/bin/NOTI.rom)
+	$(Q)make -f makefile -C $(call NATIVEPATH,noti-ez80/)
 
 # Rule to build Updater binary
 bosbin:
@@ -166,22 +169,29 @@ bos8xp:
 bosrom: $(call NATIVEPATH,noti-ez80/bin/NOTI.rom)
 	fasmg $(call NATIVEPATH,src/rom.asm) $(call NATIVEPATH,bin/BOSOS.rom)
 
+# Rule to clean noti-ez80 submodule
+clean-notiez80:
+	$(Q)make clean -f makefile -C $(call NATIVEPATH,noti-ez80/)
+
+# Rule to clean cedit submodule
 clean-cedit:
 	$(Q)make clean -f bos.makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/)
 	$(Q)echo Removed CEdit objects and binaries.
 
+# Rule to clean msd program
 clean-msd:
 	$(Q)make clean -f makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/msd/)
 	$(Q)echo Removed MSD objects and binaries.
+
 
 #make clean
 clean:
 	$(call RMDIR,bin)
 	$(call RMDIR,obj)
-	$(call RMDIR,$(call NATIVEPATH,noti-ez80/bin))
 	$(call RMDIR,$(call NATIVEPATH,src/data/adrive/obj))
 	$(RM) $(call NATIVEPATH,src/data/adrive/data.bin)
 	$(RM) $(call NATIVEPATH,src/data/adrive/main.bin)
+	$(Q)make clean -f makefile -C $(call NATIVEPATH,noti-ez80/)
 	$(Q)make clean -f bos.makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/)
 	$(Q)make clean -f makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/msd/)
 	$(Q)echo Removed objects and binaries.

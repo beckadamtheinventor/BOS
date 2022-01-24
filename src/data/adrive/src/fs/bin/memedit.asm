@@ -10,7 +10,7 @@ org ti.userMem
 mem_edit:
 	call libload_load
 	ret nz
-	ld hl,-14
+	ld hl,-17
 	call ti._frameset
 	xor a,a
 	ld (ix-12),a
@@ -22,6 +22,9 @@ mem_edit_main:
 	ld a,(ix+6)
 	dec a
 	jr z,.run_readme
+	scf
+	sbc hl,hl
+	ld (ix-17),hl
 	call osrt.argv_1
 	ld a,(hl)
 	or a,a
@@ -41,7 +44,14 @@ mem_edit_main:
 	push hl
 	call bos.fs_GetFilePtr
 	pop de
-	jq c,.dont_open_file
+	jq nc,.load_file
+	ld bc,0
+	push bc,bc,de
+	call bos.fs_CreateFile
+	pop de,bc,bc
+	jr c,.dont_open_file
+.load_file:
+	ld (ix-17),de
 	ld (ix-11),bc
 	push bc,hl,bc
 	ld hl,bos.safeRAM
@@ -116,6 +126,8 @@ mem_edit_main:
 	and a,7
 	ld (ix-7),a
 	jq .backwardpage
+;------------------------------------------
+; recalculate end of file
 .main_set_file_max:
 	ld a,(ix-12)
 	or a,a
@@ -137,6 +149,8 @@ mem_edit_main:
 	ld bc,bos.safeRAM
 	add hl,bc
 	ld (ix-14),hl
+;------------------------------------------
+; main editor draw code
 .main_draw:
 	call .clearscreen
 	call _setdefaultcolors
@@ -464,9 +478,9 @@ edited_file:=$-1
 	call .write_file
 	jq .main_loop
 .write_file:
-	ld hl,(ix+6) ;args
+	ld hl,(ix-17) ; file name
 	ld a,(hl)
-	cp a,'$'
+	or a,a
 	ret z
 	call gfx_ZeroScreen
 	ld bc,1
@@ -479,19 +493,12 @@ edited_file:=$-1
 	call bos.sys_WaitKeyCycle
 	cp a,9
 	ret nz
-	ld hl,(ix+6) ;args
+	ld hl,(ix-17)
 	push hl
 	call bos.fs_OpenFile
-	jq c,.write_new_file
-	ex (sp),hl
-	ld bc,(ix-11)
-	push bc
-	call bos.fs_SetSize
-	pop bc,bc
-	ret c
-	jq .write_file_data
+	jq nc,.write_file_data
 .write_new_file:
-	ld hl,(ix-11)
+	ld hl,(ix-11) ; current edit buffer length
 	ex (sp),hl
 	ld c,0
 	push bc,hl
@@ -499,16 +506,20 @@ edited_file:=$-1
 	pop bc,bc,bc
 	ret c
 .write_file_data:
-	ld bc,0
-	push bc,hl
+	push hl
 	ld c,1
 	push bc
-	ld bc,(ix-11)
+	ld bc,(ix-11) ; current edit buffer length
 	push bc
-	ld bc,bos.safeRAM
-	push bc
-	call nc,bos.fs_Write
-	pop bc,bc,bc,bc,bc
+	ld de,bos.safeRAM
+	push de
+	ld a,(ix+2-11) ; upper byte if edit buffer length
+	or a,b
+	or a,c ; Zf set if edit buffer is empty, and we shouldn't try to write 0 bytes
+	call nz,bos.fs_WriteFile
+	pop bc,bc,bc,bc
+	xor a,a
+	ld (edited_file),a
 	ret
 .exitaddrloop:
 	pop bc

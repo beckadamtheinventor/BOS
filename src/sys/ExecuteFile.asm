@@ -338,46 +338,82 @@ sys_jphl:=$
 	ld a,(hl)
 	inc hl
 	cp a,'!'
-	jq nz,.fail ; fail if unrecognized executable text format
-	ld (fsOP6+6),sp
-	push hl ; executable to execute file with
-	call fs_PathLen
-	inc de
-	push de ; de = pre-arguments
-	call fs_PathLen.entryde
-	push hl ; hl = length of pre-arguments
-	ld hl,(fsOP6+3) ; hl = file name
+	jr nz,.executable_text_fail ; fail if unrecognized executable text format
+	ld bc,(hl)
+	ex hl,de
+	db $21,"cmd"
+	or a,a
+	sbc hl,bc
+	jr nz,.executable_text_fail ; fail if unrecognized executable text format
+	
+	; ld (fsOP6+6),sp
+	; push hl ; executable to execute file with
+	; call fs_PathLen
+	; inc de
+	; push de ; de = pre-arguments
+	; call fs_PathLen.entryde
+	; push hl ; hl = length of pre-arguments
+	; ld hl,(fsOP6+3) ; hl = file name
+	; push hl
+	; call ti._strlen
+	; pop bc,de ; bc = file name, de = length of pre-arguments
+	; push de,bc ; lenfgth of pre-arguments, file name
+	; add hl,de ; length of pre-arguments + file name
+	; inc hl
+	; inc hl ; length of pre-arguments + separator + file name + null terminator
+	; push hl
+	; call sys_Malloc ; malloc space for the arguments string
+	; pop bc
+	; jr c,.executable_text_fail
+	; ex hl,de
+	; ld (fsOP6+9),de ; save malloc'd memory pointer
+	; pop hl ; hl = file name
+	; pop bc ; bc = length of pre-arguments 
+	; ex (sp),hl ; hl = pre-arguments
+	; ldir ; copy pre-arguments
+	; ld a,' '
+	; ld (de),a ; add separator
+	; inc de
+	; push de
+	; call ti._strcpy ; copy the file name string
+	; pop bc,bc
+	; ld de,(fsOP6+9) ; arguments string
+	; pop hl ; program to run this with
+	ld hl,(fsOP6+3) ; file name
 	push hl
 	call ti._strlen
-	pop bc,de ; bc = file name, de = length of pre-arguments
-	push de,bc ; lenfgth of pre-arguments, file name
-	add hl,de ; length of pre-arguments + file name
-	inc hl
-	inc hl ; length of pre-arguments + separator + file name + null terminator
 	push hl
-	call sys_Malloc ; malloc space for the arguments string
-	pop bc
+	inc hl
+	inc hl
+	inc hl
+	inc hl
+	push hl
+	call sys_Malloc
 	jr c,.executable_text_fail
+	ld (hl),'-'
+	inc hl
+	ld (hl),'x'
+	inc hl
+	ld (hl),' '
+	inc hl
 	ex hl,de
-	ld (fsOP6+9),de ; save malloc'd memory pointer
-	pop hl ; hl = file name
-	pop bc ; bc = length of pre-arguments 
-	ex (sp),hl ; hl = pre-arguments
-	ldir ; copy pre-arguments
-	ld a,' '
-	ld (de),a ; add separator
+	pop bc,bc,hl
 	push de
-	call ti._strcpy ; copy the file name string
-	pop bc,bc
-	ld de,(fsOP6+9) ; arguments string
-	pop hl ; program to run this with
+	ldir
+	xor a,a
+	ld (de),a
+	pop de
+	ld hl,str_CmdExecutable
 	jp .entryhlde
 
 .executable_text_fail:
-	ld sp,(fsOP6+6)
-	scf
-	sbc hl,hl
-	ret
+	jp .fail
+
+; .executable_text_fail:
+	; ld sp,(fsOP6+6)
+	; scf
+	; sbc hl,hl
+	; ret
 
 ; input de = string
 .load_argc_argv_loop:

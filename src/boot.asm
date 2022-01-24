@@ -226,12 +226,9 @@ handle_offsetcall:
 	add hl,sp
 	ld de,(hl) ;grab pointer to caller
 	ex hl,de
+	inc hl
 	ld bc,(hl) ;grab argument from caller
 	ex hl,de
-	inc de
-	inc de
-	inc de
-	ld (hl),de ;advance pointer to caller by 3 bytes so we return to caller+3
 	ld hl,(running_program_ptr) ;pointer to currently running program
 	add hl,bc ;jump to &running_program[offset]
 	pop bc,de,af

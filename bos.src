@@ -152,6 +152,164 @@
 	public _fs_MoveFile
 	public _fs_WriteRaw
 	public __UnpackUpdates
+	public _LCD_PAL?
+	public _LCD_CTRL?
+	public _LCD_VRAM?
+	public _LCD_BUFFER?
+	public _LCD_WIDTH?
+	public _LCD_HEIGHT?
+	public _LCD_8BPP?
+	public _LCD_16BPP?
+	public _TEXT_MAX_ROW
+	public _RAM_START
+	public _flag_start
+	public _currow?
+	public _curcol?
+	public _console_col
+	public _console_line
+	public _color_primary
+	public _lcd_bg_color
+	public _lcd_text_fg
+	public _lcd_text_bg
+	public _lcd_text_fg2
+	public _lcd_text_bg2
+	public _cursor_color
+	public _font_data
+	public _font_spacing
+	public _lcd_x
+	public _lcd_y
+	public _remaining_free_RAM
+	public _op_stack_ptr
+	public _on_interrupt_jump
+	public _on_interrupt_handler
+	public _cur_lcd_buffer
+	public _running_process_id
+	public _ScrapMem2
+	public _top_of_UserMem
+	public _LastCommandResult
+	public _ExecutingFileFd
+	public _running_program_ptr
+	public _return_code_flags
+	public _flashStatusByte
+	public _filesystem_driver
+	public _copy_buffer
+	public _threading_enabled
+	public _current_thread
+	public _bosgfx_string_temp
+	public _saved_LcdUpbase
+	public _ScrapByte
+	public _ScrapWord
+	public _ScrapMem
+	public _last_keypress
+	public _asm_prgm_size
+	public _SaveSP
+	public _fsOP1
+	public _fsOP2
+	public _fsOP3
+	public _fsOP4
+	public _fsOP5
+	public _fsOP6
+	public _safeRAM
+	public _safeRAM_len
+	public _usbArea
+	public _usbHandleKeys
+	public _usbInited
+	public _heapBot
+	public _ramCodeTop
+	public _reservedRAM
+	public _bos_UserMem
+	public _end_of_usermem
+	public _libload_bottom_ptr
+	public _libload_top_ptr
+	public _op_stack_bot
+	public _op_stack_top
+	public _current_working_dir
+	public _InputBuffer
+	public _thread_temp_save
+	public _malloc_cache
+	public _thread_map
+	public _thread_parents
+	public _bottom_of_malloc_RAM
+	public _top_of_vat
+	public _top_of_RAM
+	public _start_of_user_archive
+	public _fs_root_dir_lba
+	public _fs_root_dir_address
+	public _end_of_user_archive
+	public _fs_cluster_map
+	public _fs_cluster_map.len
+	public _fs_cmap_length
+	public _fs_sector_size
+	public _fs_partition_desc_size
+	public _fs_file_desc_size
+	public _fd_readonly
+	public _fd_hidden
+	public _fd_system
+	public _fd_subfile
+	public _fd_subdir
+	public _fd_device
+	public _fd_link
+	public _fd_elevated
+	public _fsentry_endofdir
+	public _fsentry_dot
+	public _fsentry_deleted
+	public _fsentry_longfilename
+	public _fsentry_unlisted
+	public _fsentry_endofdir2
+	public _fsentry_filename
+	public _fsentry_filename.len
+	public _fsentry_fileext
+	public _fsentry_fileext.len
+	public _fsentry_fileattr
+	public _fsentry_fileattr.len
+	public _fsentry_filesector
+	public _fsentry_filesector.len
+	public _fsentry_filelen
+	public _fsentry_filelen.len
+	public _device_Header
+	public _device_Flags
+	public _device_Type
+	public _device_Version
+	public _device_JumpTable
+	public _device_JumpInit
+	public _device_JumpDeinit
+	public _device_JumpRead
+	public _device_JumpWrite
+	public _device_JumpGetDMA
+	public _device_CodeStart
+	public _device_Header.len
+	public _device_Flags.len
+	public _device_Type.len
+	public _device_Version.len
+	public _device_JumpTable.len
+	public _bDeviceWritable
+	public _bDeviceReadable
+	public _bDeviceHasDMA
+	public _bDeviceDMAWritable
+	public _bDeviceDMAReadable
+	public _bDeviceNeedsInit
+	public _bDeviceNeedsDeinit
+	public _devtSoftware
+	public _devtMemory
+	public _devtMMIO
+	public _devtUSB
+	public _devtMSD
+	public _devtMSDFS
+	public _devtMSDFAT32
+	public _threadsDisabled
+	public _threadsEnabled
+	public _threadOSRoutines
+	public _bThreadAlive
+	public _bThreadPersistent
+	public _bThreadSleeping
+	public _bIsFlashUnlocked
+	public _bKeepFlashUnlocked
+	public _mIsFlashUnlocked
+	public _mKeepFlashUnlocked
+	public _bReturnNotError
+	public _bReturnHex
+	public _bReturnLong
+	public _bSilentReturn
 _boot_os                         := $20108
 _handle_interrupt                := $2010C
 _HandleInstruction               := $20110
@@ -304,3 +462,161 @@ _fs_BaseName                     := $2264C
 _fs_MoveFile                     := $22650
 _fs_WriteRaw                     := $22654
 __UnpackUpdates                  := $22658
+_LCD_PAL?    := 0E30200h
+_LCD_CTRL?   := 0E30018h
+_LCD_VRAM?   := 0D40000h
+_LCD_BUFFER? := LCD_VRAM + LCD_WIDTH*LCD_HEIGHT
+_LCD_WIDTH?  := 320
+_LCD_HEIGHT? := 240
+_LCD_8BPP?   := $27
+_LCD_16BPP?  := $2D
+_TEXT_MAX_ROW    := 231
+_RAM_START  := 0D00000h
+_flag_start             := $D00000
+_currow?                := ti.curRow
+_curcol?                := ti.curCol
+_console_col            := curcol
+_console_line           := currow
+_color_primary          := ti.drawFGColor      ; 1 byte
+_lcd_bg_color           := ti.drawFGColor+1    ; 1 byte
+_lcd_text_fg            := ti.textFGcolor      ; 1 byte
+_lcd_text_bg            := ti.textFGcolor+1    ; 1 byte
+_lcd_text_fg2           := ti.textBGcolor      ; 1 byte
+_lcd_text_bg2           := ti.textBGcolor+1    ; 1 byte
+_cursor_color           := ti.statusBarBGColor ; 1 byte
+_font_data              := ti.lFont_record
+_font_spacing           := ti.lFont_record+3
+_lcd_x                  := ti.lFont_record+6
+_lcd_y                  := ti.lFont_record+9
+_remaining_free_RAM     := ti.appData    ; 3 bytes
+_op_stack_ptr           := ti.appData+3  ; 3 bytes
+_on_interrupt_jump      := ti.appData+6  ; jump byte for on_interrupt_handler
+_on_interrupt_handler   := ti.appData+7  ; 3 bytes. Jump to on key interrupt handler. Byte preceeding this should be $C3 or $C9
+_cur_lcd_buffer         := ti.appData+10 ; 3 bytes. Points to current LCD draw buffer
+_running_process_id     := ti.appData+13 ; 1 byte. Current process ID (used for per-program memory allocation)
+_ScrapMem2              := ti.appData+14 ; 3 bytes
+_top_of_UserMem         := ti.appData+17 ; 3 bytes
+_LastCommandResult      := ti.appData+20 ; 4 bytes. Stores result of previously executed command
+_ExecutingFileFd        := ti.appData+24 ; 3 bytes. Pointer to currently executing file descriptor. -1 if file not found. 0 if file descriptor is not applicable
+_running_program_ptr    := ti.appData+27 ; 3 bytes. Stores pointer to currently running program
+_return_code_flags      := ti.appData+30 ; flag byte that determines how to interpret the return value of the last run program. Is to be set within the program for non-default return interpretation.
+_flashStatusByte        := ti.appData+31 ; 1 byte
+_filesystem_driver      := ti.appData+32 ; 1 byte
+_copy_buffer            := ti.appData+33 ; 3 bytes, points to first copy buffer entry, or -1 if nothing is stored.
+_threading_enabled      := ti.appData+36 ; 1 byte, determines if software threading is enabled and whether it should be used in OS routines
+_current_thread         := ti.appData+37 ; 1 byte, currently running thread ID
+_bosgfx_string_temp        := ti.appData+38 ; 16 bytes, temp location for integer printing
+_saved_LcdUpbase        := ti.appData+54 ; 3 bytes, saves LcdUpbase during sector caching
+_ScrapByte              := ti.flashByte
+_ScrapWord              := ti.scrapMem
+_ScrapMem               := ti.scrapMem
+_last_keypress          := ti.kbdScanCode ; 1 byte. Last keypress returned by an os getkey routine
+_asm_prgm_size          := ti.asm_prgm_size ;3 bytes
+_SaveSP                 := ti.errSP ; 3 bytes, saves SP when running programs.
+_fsOP1                  := ti.OP1
+_fsOP2                  := ti.OP2
+_fsOP3                  := ti.OP3
+_fsOP4                  := ti.OP4
+_fsOP5                  := ti.OP5
+_fsOP6                  := ti.OP6
+_safeRAM                := ti.pixelShadow ; 69090 bytes scrap RAM
+_safeRAM_len            := 69090
+_usbArea                := ti.usbArea ; 14306 bytes used for usb, probably need to disable timer3/usb interrupts to use
+_usbHandleKeys          := ti.usbHandleKeys ; zero this byte while using usbArea to keep GetCSC from affecting other parts of usbArea
+_usbInited              := ti.usbInited ; zero this byte while using usbArea and to reset the usb stack when interrupts are re-enabled
+_heapBot                := ti.heapBot
+_ramCodeTop             := ti.ramCodeTop
+_reservedRAM            := ti.ramCodeTop
+_bos_UserMem            := $D1A881
+_end_of_usermem         := libload_bottom_ptr-2
+_libload_bottom_ptr     := libload_top_ptr-$3FE ; 1022 bytes for executing libload
+_libload_top_ptr        := thread_temp_save-$400
+_op_stack_bot           := thread_temp_save-$400
+_op_stack_top           := thread_temp_save-$300 ;256 bytes downward
+_current_working_dir    := thread_temp_save-$200
+_InputBuffer            := thread_temp_save-$100
+_thread_temp_save       := $D2F000 ; temporary save location for registers when a thread switch is triggered. 16 bytes per thread, 256 threads = 4096 bytes.
+_malloc_cache           := $D2F800 ; 4096 bytes
+_thread_map             := $D30000 ; thread map. 256 threads. Active threads have bit 7 set.
+_thread_parents         := $D30100 ; 256 bytes, one per thread. Saves ID of thread that spawned a given thread. A thread will only be run if it's parent thread is awake
+_bottom_of_malloc_RAM   := $D30200
+_top_of_vat             := top_of_RAM
+_top_of_RAM             := $D40000
+_start_of_user_archive  := $040000 ;sector $04
+_fs_root_dir_lba := $010000 shr 9
+_fs_root_dir_address := start_of_user_archive + $010000
+_end_of_user_archive    := $3B0000 ;sector $3B, start of certificate
+_fs_cluster_map := $3BE000
+_fs_cluster_map.len := 7040
+_fs_cmap_length := fs_cluster_map.len
+_fs_sector_size         := 512
+_fs_partition_desc_size := 16
+_fs_file_desc_size      := 16
+_fd_readonly   := 0
+_fd_hidden     := 1
+_fd_system     := 2
+_fd_subfile    := 3
+_fd_subdir     := 4
+_fd_device     := 5
+_fd_link       := 6
+_fd_elevated   := 7
+_fsentry_endofdir        := $00
+_fsentry_dot             := $2E
+_fsentry_deleted         := $F0
+_fsentry_longfilename    := $F1
+_fsentry_unlisted        := $F2
+_fsentry_endofdir2       := $FF
+_fsentry_filename            := $00
+_fsentry_filename.len        := 8
+_fsentry_fileext             := $08
+_fsentry_fileext.len         := 3
+_fsentry_fileattr            := $0B
+_fsentry_fileattr.len        := 1
+_fsentry_filesector          := $0C
+_fsentry_filesector.len      := 2
+_fsentry_filelen             := $0E
+_fsentry_filelen.len         := 2
+_device_Header               := 0
+_device_Flags                := 1
+_device_Type                 := 2
+_device_Version              := 3
+_device_JumpTable            := 4 ; jump table for device functions
+_device_JumpInit             := 4
+_device_JumpDeinit           := 8
+_device_JumpRead             := 12
+_device_JumpWrite            := 16
+_device_JumpGetDMA           := 20
+_device_CodeStart            := 24
+_device_Header.len           := 4
+_device_Flags.len            := 1
+_device_Type.len             := 1
+_device_Version.len          := 1
+_device_JumpTable.len        := 5*4 ; jump table for device functions
+_bDeviceWritable             := 7
+_bDeviceReadable             := 6
+_bDeviceHasDMA               := 5
+_bDeviceDMAWritable          := 4
+_bDeviceDMAReadable          := 3
+_bDeviceNeedsInit            := 2
+_bDeviceNeedsDeinit          := 1
+_devtSoftware                := $00
+_devtMemory                  := $04
+_devtMMIO                    := $08
+_devtUSB                     := $10
+_devtMSD                     := $14
+_devtMSDFS                   := $15
+_devtMSDFAT32                := $16
+_threadsDisabled             := 0
+_threadsEnabled              := 1
+_threadOSRoutines            := 2
+_bThreadAlive                := 7
+_bThreadPersistent           := 6
+_bThreadSleeping             := 5
+_bIsFlashUnlocked     := 0
+_bKeepFlashUnlocked   := 1
+_mIsFlashUnlocked     := 1
+_mKeepFlashUnlocked   := 2
+_bReturnNotError      := 0
+_bReturnHex           := 1
+_bReturnLong          := 2
+_bSilentReturn        := 3

@@ -3,8 +3,6 @@ include 'include/ez80.inc'
 include 'include/ti84pceg.inc'
 include 'include/bosfs.inc'
 include 'include/bos.inc'
-include 'include/threading.inc'
-include 'include/bos_trx.inc'
 
 
 org $040200
@@ -77,6 +75,7 @@ fs_dir bin_dir
 	fs_sfentry poke_exe, "poke", "", f_readonly+f_system+f_subfile
 	fs_sfentry rm_exe, "rm", "", f_readonly+f_system+f_subfile
 	fs_sfentry sleep_exe, "sleep", "", f_readonly+f_system+f_subfile
+	; fs_sfentry var_exe, "var", "", f_readonly+f_system+f_subfile
 	fs_entry numstr_so, "numstr", "so", f_readonly+f_system
 	fs_entry mem_so, "mem", "so", f_readonly+f_system
 	fs_entry os_internal_subfiles, "osfiles", "dat", f_readonly+f_system
@@ -85,12 +84,16 @@ end fs_dir
 fs_file os_internal_subfiles
 
 	fs_subfile gc_cmd, sbin_dir
-		db "#!fsutil",$A,"-c"
+		db "#!cmd",$A,"fsutil -c",$A
 	end fs_subfile
 
 	fs_subfile fsutil_exe, sbin_dir
 		include 'fs/sbin/fsutil.asm'
 	end fs_subfile
+
+	; fs_subfile var_exe, bin_dir
+		; include 'fs/bin/var.asm'
+	; end fs_subfile
 
 	fs_subfile writeinto_exe, bin_dir
 		include 'fs/bin/writeinto.asm'

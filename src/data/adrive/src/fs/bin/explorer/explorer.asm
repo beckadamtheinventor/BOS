@@ -2,7 +2,6 @@
 include '../include/ez80.inc'
 include '../include/ti84pceg.inc'
 include '../include/bos.inc'
-include '../include/threading.inc'
 
 
 display_items_num_x   := 4

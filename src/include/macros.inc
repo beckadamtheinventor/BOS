@@ -1,7 +1,14 @@
 ;-------------------------------------------------------------------------------
-; Software-level multithreading commands
+; Call/jump to currently running program at offset
 ;-------------------------------------------------------------------------------
+macro OffsetInstruction? instruction*
+	rst $28
+	instruction
+end macro
 
+;-------------------------------------------------------------------------------
+; Software threading instructions
+;-------------------------------------------------------------------------------
 macro EnableThreading?
 	rst $10
 	nop
@@ -48,5 +55,3 @@ macro HandleNextThread_IfOSThreading?
 	rst $10
 	rst $30
 end macro
-
-

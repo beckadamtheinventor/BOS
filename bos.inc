@@ -1,4 +1,65 @@
 
+;-------------------------------------------------------------------------------
+; Call/jump to currently running program at offset
+;-------------------------------------------------------------------------------
+macro OffsetInstruction? instruction*
+	rst $28
+	instruction
+end macro
+
+;-------------------------------------------------------------------------------
+; Software threading instructions
+;-------------------------------------------------------------------------------
+macro EnableThreading?
+	rst $10
+	nop
+end macro
+
+macro EnableOSThreading?
+	rst $10
+	rst $28
+end macro
+
+macro DisableThreading?
+	rst $10
+	rst $38
+end macro
+
+macro SleepThread?
+	rst $10
+	halt
+end macro
+
+macro WakeThread?
+	rst $10
+	rst $20
+end macro
+
+macro EndThread?
+	rst $10
+	ret
+end macro
+
+macro SpawnThread? start_pc, start_sp
+	rst $10
+	push bc
+	dl start_sp
+	dl start_pc
+end macro
+
+macro HandleNextThread?
+	rst $10
+	pop bc
+end macro
+
+macro HandleNextThread_IfOSThreading?
+	rst $10
+	rst $30
+end macro
+
+;-------------------------------------------------------------------------------
+; OS call defines
+;-------------------------------------------------------------------------------
 define bos? bos
 namespace bos
 ; jump table
@@ -163,7 +224,9 @@ namespace bos
 ?fs_MoveFile                     := $22650
 ?fs_WriteRaw                     := $22654
 ?_UnpackUpdates                  := $22658
-; defines
+;-------------------------------------------------------------------------------
+; OS memory areas and misc defines
+;-------------------------------------------------------------------------------
 ?LCD_PAL?    := 0E30200h
 ?LCD_CTRL?   := 0E30018h
 ?LCD_VRAM?   := 0D40000h
