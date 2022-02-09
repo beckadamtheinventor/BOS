@@ -11,30 +11,12 @@ fs_CheckWritable:
 	ld a,l
 	ret c
 .entry:
-	ld bc,$B
+	xor a,a
+	ld bc,fsentry_fileattr
 	add hl,bc
 	bit fsbit_readonly,(hl)
-	jq z,.success
-;if the readonly flag is set, check whether we're in elevated mode
-	; call fs_GetElevationFile
-	; ld a,c
-	; or a,b
-	; ret z
-; .searchloop:
-	; ld a,(hl)
-	; or a,a
-	; jq nz,.foundid
-	; inc hl
-	; dec bc
-	; ld a,b
-	; or a,c
-	; jq nz,.searchloop
-; .foundid:
-	; cp a,$5A
-	; jq z,.success ;if we're in elevated mode, all files are writable
-	xor a,a
-	ret
-.success:
-	xor a,a
-	inc a
+	jr nz,.fail
+	scf
+.fail:
+	adc a,a
 	ret

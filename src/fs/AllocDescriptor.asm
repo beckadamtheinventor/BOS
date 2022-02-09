@@ -32,6 +32,7 @@ fs_AllocDescriptor:
 	ld hl,(hl)
 	call fs_GetSectorAddress.entry
 	jq .get_end_of_dir_loop_entry
+
 .allocate_dir_section: ; allocate a new directory section and return it
 	ld c,b
 	inc b
@@ -55,8 +56,7 @@ fs_AllocDescriptor:
 	xor a,a
 	ld l,a
 	ex hl,de
-	dec a
-	dec a
+	ld a,$FE ; directory extender byte
 	call sys_WriteFlashA
 	call sys_FlashLock
 	pop hl

@@ -43,6 +43,7 @@ end fs_dir
 fs_dir bin_dir
 	fs_sfentry writeinto_exe, ">", "", f_readonly+f_system+f_subfile
 	fs_sfentry appendinto_exe, ">>", "", f_readonly+f_system+f_subfile
+	fs_sfentry continuecmd_exe, "@cmd", "", f_readonly+f_system+f_subfile
 	fs_entry argv_so, "argv", "so", f_readonly+f_system
 	fs_sfentry cat_exe, "cat", "", f_readonly+f_system+f_subfile
 	fs_sfentry cd_exe, "cd", "", f_readonly+f_system+f_subfile
@@ -111,6 +112,10 @@ fs_file os_internal_subfiles
 		include 'fs/bin/cd.asm'
 	end fs_subfile
 
+	fs_subfile continuecmd_exe, bin_dir
+		include 'fs/bin/@cmd.asm'
+	end fs_subfile
+	
 	fs_subfile cmd_exe, bin_dir
 		include 'fs/bin/cmd.asm'
 	end fs_subfile

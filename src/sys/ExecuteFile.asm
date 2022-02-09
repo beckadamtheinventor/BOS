@@ -338,14 +338,20 @@ sys_jphl:=$
 	ld a,(hl)
 	inc hl
 	cp a,'!'
-	jr nz,.executable_text_fail ; fail if unrecognized executable text format
-	ld bc,(hl)
-	ex hl,de
-	db $21,"cmd"
-	or a,a
-	sbc hl,bc
-	jr nz,.executable_text_fail ; fail if unrecognized executable text format
-	
+	jp nz,.fail ; fail if unrecognized executable text format
+	dec bc
+	dec bc
+	ld a,$A
+	cpir
+	jp po,.fail
+	ld (ti.begPC),hl
+	ld (ti.curPC),hl
+	add hl,bc
+	ld (ti.endPC),hl
+	ld hl,str_CmdContinueExecutable
+	ld de,$FF0000
+	jp .entryhlde
+
 	; ld (fsOP6+6),sp
 	; push hl ; executable to execute file with
 	; call fs_PathLen
@@ -379,35 +385,6 @@ sys_jphl:=$
 	; pop bc,bc
 	; ld de,(fsOP6+9) ; arguments string
 	; pop hl ; program to run this with
-	ld hl,(fsOP6+3) ; file name
-	push hl
-	call ti._strlen
-	push hl
-	inc hl
-	inc hl
-	inc hl
-	inc hl
-	push hl
-	call sys_Malloc
-	jr c,.executable_text_fail
-	ld (hl),'-'
-	inc hl
-	ld (hl),'x'
-	inc hl
-	ld (hl),' '
-	inc hl
-	ex hl,de
-	pop bc,bc,hl
-	push de
-	ldir
-	xor a,a
-	ld (de),a
-	pop de
-	ld hl,str_CmdExecutable
-	jp .entryhlde
-
-.executable_text_fail:
-	jp .fail
 
 ; .executable_text_fail:
 	; ld sp,(fsOP6+6)

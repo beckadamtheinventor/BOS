@@ -197,6 +197,8 @@ str_EtcConfigDir:
 	db "/etc/config",0
 str_EtcConfigBootDir:
 	db "/etc/config/boot",0
+str_CmdContinueExecutable:
+	db "/bin/@cmd",0
 str_CmdArguments:
 	db "-x " ;flow into next string for efficiency
 str_BootConfigFile:

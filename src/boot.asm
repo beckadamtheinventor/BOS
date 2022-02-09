@@ -340,6 +340,8 @@ os_recovery_menu:
 	jq z,os_return
 	cp a,ti.skMatrix
 	jq z,.reinstalltios
+	cp a,ti.skAlpha
+	jq z,.emergencyshell
 	; cp a,ti.sk6
 	; jq z,.validate
 	cp a,ti.sk2nd
@@ -445,6 +447,16 @@ os_recovery_menu:
 	cp a,9
 	jq nz,os_recovery_menu
 	ret
+
+.emergencyshell:
+	ld bc,256
+	push bc
+	call sys_Malloc
+	push hl
+	call gui_Input
+	pop hl,bc
+	
+	jq os_recovery_menu
 
 
 _UnpackUpdates:

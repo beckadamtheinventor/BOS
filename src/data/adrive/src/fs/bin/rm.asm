@@ -12,8 +12,6 @@ rm_main:
 	pop iy
 	bit fb_readonly, (iy + bos.fsentry_fileattr)
 	jq nz,.fail_readonly
-	bit fb_subdir, (iy + bos.fsentry_fileattr)
-	jq nz,.fail_subdir
 .delete:
 	push hl
 	call bos.fs_DeleteFile
@@ -36,9 +34,6 @@ rm_main:
 	; ex.s hl,de
 	; sbc hl,de
 	; jq c,.delete
-.fail_subdir:
-	ld hl,.string_subdir
-	jq .error_print
 .fail_readonly:
 	ld hl,.string_readonly
 .error_print:
@@ -52,6 +47,4 @@ rm_main:
 	db "rm file",0
 .string_readonly:
 	db $9,"Read only file cannot be removed.",0
-.string_subdir:
-	db $9,"Cannot remove subdirectory.",0
 

@@ -284,9 +284,8 @@ explorer_background_file:=$-3
 .write_entry_byte:
 	ld c,a
 	ld (iy),de
-	ld a,'x'
-	ld (iy+3),a
-	ld a,c
+	ld (iy+3),'='
+	ld (iy+4),'x'
 	rrca
 	rrca
 	rrca
@@ -297,7 +296,7 @@ explorer_background_file:=$-3
 	jq c,.under_10
 	add a,'A'-'9'+1
 .under_10:
-	ld (iy+4),a
+	ld (iy+5),a
 	ld a,c
 	and a,$F
 	add a,'0'
@@ -305,8 +304,7 @@ explorer_background_file:=$-3
 	jq c,.under_10_2
 	add a,'A'-'9'+1
 .under_10_2:
-	ld (iy+5),a
-	ld a,$A
 	ld (iy+6),a
-	lea iy,iy+6
+	ld (iy+7),$A
+	lea iy,iy+7
 	ret

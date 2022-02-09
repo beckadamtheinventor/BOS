@@ -4,6 +4,7 @@
 fs_Free:
 	pop bc,hl
 	push hl,bc
+.entryhl:
 	ld bc,fsentry_fileattr
 	add hl,bc
 	bit fd_subfile,(hl)
@@ -20,7 +21,7 @@ fs_Free:
 	ld a,c
 	or a,b
 	jq z,.zero ; dont free it if it hasnt been allocated
-.entrydebc:
+.entrydebc: ; free bc bytes starting at sector de
 	ex.s hl,de
 	ld de,fs_cluster_map
 	add hl,de

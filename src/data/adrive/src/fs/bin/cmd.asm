@@ -14,15 +14,19 @@ cmd_exe_main:
 	ld bc,(ix+9)
 	push bc,hl
 	call bos.sys_JoinArgv
+	pop bc
 	ld (ti.curPC),hl
 	ld (ti.begPC),hl
-	pop bc
 	ex (sp),hl
 	call ti._strlen
 	ld (ix-19),hl
+	add hl,bc
+	or a,a
+	sbc hl,bc
 	pop bc
 	add hl,bc
 	ld (ti.endPC),hl
+	jq z,cmd_no_cmd_args
 	ld a,(bc)
 	or a,a
 	jq z,cmd_no_cmd_args
@@ -369,11 +373,10 @@ cmd_get_arguments:
 	ret
 
 cmd_help_info:
-	db " cmd -h",$A,$9,"show this info",$A
-	db " cmd commands",$A,$9,"run command(s) but exit if one returns an error",$A
-	db " cmd -a commands",$A,$9,"run all commands(s) regardless of error codes",$A
-	db " cmd -i commands",$A,$9,"run commands(s), ignoring all errors",$A
-	db " cmd -x file",$A,$9,"run a command file",$A,0
+	db " cmd cmds",$A,$9,"run command(s) but exit if one returns an error",$A
+	db " cmd -a cmds",$A,$9,"run all commands(s) regardless of error codes",$A
+	db " cmd -i cmds",$A,$9,"run commands(s), ignoring all errors",$A
+	db " cmd -x file",$A,$9,"run a file",$A,0
 
 str_system_path:
 	db "/bin/"
