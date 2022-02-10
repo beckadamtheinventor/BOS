@@ -10,11 +10,11 @@ fs_SetSize:
 	ld iy,(ix+9) ;void *fd
 	bit fd_link,(iy+fsentry_fileattr)
 	jq nz,.fail
-	push iy
-	call fs_CheckWritableFD
-	dec a
-	jq nz,.fail
-	pop hl
+	; push iy
+	; call fs_CheckWritableFD
+	; dec a
+	; jq nz,.fail
+	; pop hl
 	; ld bc,fsentry_filelen
 	; add hl,bc
 	; ld hl,(hl)
@@ -22,14 +22,14 @@ fs_SetSize:
 	; ld hl,(ix+6)
 	; or a,a
 	; sbc hl,de
-	; ld hl,(ix+9)
 	; jq z,.success
+	ld hl,(ix+9)
 	lea de,ix-16
-	ld c,fsentry_fileattr+1
+	ld bc,fsentry_fileattr+1
 	ldir ; copy old descriptor into ram
 
 	dec hl
-	bit fsbit_subfile, (hl)
+	bit fd_subfile, (hl)
 	ld hl,(ix+9)
 	push hl
 	call z, fs_Free ;free the old file clusters if not a subfile

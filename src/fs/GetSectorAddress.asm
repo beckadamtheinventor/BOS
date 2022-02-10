@@ -9,7 +9,7 @@ fs_GetSectorAddress:
 	ld b,9
 	bit 7,h
 	jq nz,.ram_sector
-	ld de,fs_filesystem_root_address
+	ld de,start_of_user_archive
 .mult_loop:
 	add hl,hl
 	djnz .mult_loop

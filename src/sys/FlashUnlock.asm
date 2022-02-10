@@ -1,5 +1,5 @@
 ;@DOES Unlocks flash.
-;@NOTE Will check permissions and re-lock flash if the caller doesn't have sufficient permissions
+;;@NOTE Will check permissions and re-lock flash if the caller doesn't have sufficient permissions
 sys_FlashUnlock:
 flash_unlock:
 	push af
@@ -26,7 +26,8 @@ flash_unlock:
 	; out0	($28),c
 
 	pop af
-	call sys_CheckElevated ;check if we're elevated
-	ret nz
-	call sys_FlashLock
-	jq os_return
+	; call sys_CheckElevated ;check if we're elevated
+	; ret nz
+	; call sys_FlashLock
+	; jq os_return
+	ret

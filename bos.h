@@ -575,23 +575,6 @@ void bosgfx_SetDefaultFont(void);
 void bosgfx_SetDraw(uint8_t loc);
 
 /**
- * Write data to flash using vRam as swap space
- * @param dest Destination to write data.
- * @param src Data to write.
- * @param len Length of data to write.
- * @return True if success, false if failed.
- */
-bool sys_WriteFlashFullRam(void *dest, void *src, int len);
-
-/**
- * Write a byte to flash using vRam as swap space
- * @param dest Destination to write byte.
- * @param byte Byte to write.
- * @return True if success, false if failed.
- */
-bool sys_WriteFlashByteFullRam(void *dest, uint8_t byte);
-
-/**
  * Turn off the calculator until the user presses the [ON] key
  */
 void sys_TurnOff(void);

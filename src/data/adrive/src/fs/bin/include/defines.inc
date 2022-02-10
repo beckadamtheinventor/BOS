@@ -113,7 +113,7 @@ fs_file_desc_size      := 16
 
 
 ; file entry flags
-fd_readonly   := 0
+fd_executable := 0
 fd_hidden     := 1
 fd_system     := 2
 fd_subfile    := 3

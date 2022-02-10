@@ -3,19 +3,19 @@
 fs_GetSector:
 	pop bc,hl
 	push hl,bc
-	ld a,(filesystem_driver)
-	or a,a
-	ld de,-fs_filesystem_root_address
-	jq nz,.otherfs
-	ld bc,512
-.div:
+	; ld a,(filesystem_driver)
+	; or a,a
+	ld de,-start_of_user_archive
+	; jq nz,.otherfs
+	ld c,9
+; .div:
 	add hl,de
-	jp ti._idivu
-.otherfs:
-	ld bc,256
-	cp a,1 ;alternative bosfs with 256b clusters
-	jq z,.div
+	jp ti._ishru
+; .otherfs:
+	; ld c,8
+	; cp a,1 ;alternative bosfs with 256b clusters
+	; jq z,.div
 	
-	ret
+	; ret
 
 

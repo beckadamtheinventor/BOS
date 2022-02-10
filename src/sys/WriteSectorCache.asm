@@ -1,7 +1,12 @@
 ;@DOES Write the currently cached sector back to flash sector A
 sys_WriteSectorCache:
-	call sys_FlashUnlock
+	pop bc
+	ex (sp),hl
+	push bc
+	ld a,l
+.entry:
 	push af
+	call sys_FlashUnlock
 	call sys_EraseFlashSector
 	dec sp
 	pop de ; DEu = A
@@ -16,9 +21,11 @@ sys_WriteSectorCache:
 	or a,a
 	sbc hl,de
 	jr nz,.dont_writeback_vram
-	ex hl,de
 	ld hl,LCD_BUFFER
 	ld bc,LCD_WIDTH*LCD_HEIGHT
+	push de
 	ldir
+	pop de
+	ld (ti.mpLcdUpbase),de
 .dont_writeback_vram:
 	jq sys_FlashLock

@@ -10,7 +10,6 @@ macro pad_db? str, pad, amt
 	end if
 end macro
 
-f_readonly   := 1
 f_hidden     := 2
 f_system     := 4
 f_subfile    := 8
@@ -19,7 +18,6 @@ f_device     := $20
 f_link       := $40
 f_elevated   := $80
 
-fb_readonly   := 0
 fb_hidden     := 1
 fb_system     := 2
 fb_subfile    := 3

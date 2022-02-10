@@ -15,9 +15,7 @@ fs_Format:
 .done:
 	ld hl,str_ErasedUserMemory
 	call gui_PrintLine
-	call fs_ExtractRootDir
-	call fs_ExtractOSBinaries
-	jq fs_ExtractOSOptBinaries
+	jq boot_os
 
 ; ._next_header      := $D3FF00
 ; ._file_len_header  := $D3FF03

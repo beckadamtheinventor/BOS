@@ -17,69 +17,69 @@ fs_fs $040000
 ;"/sbin/" directory
 fs_dir sbin_dir
 	; fs_entry root_dir, "..", "", f_subdir
-	fs_sfentry gc_cmd, "gc", "", f_readonly+f_system+f_subfile
-	fs_sfentry gc_cmd, "cleanup", "", f_readonly+f_system+f_subfile
-	fs_sfentry fsutil_exe, "fsutil", "", f_readonly+f_system+f_subfile
-	fs_sfentry uninstaller_exe, "uninstlr", "", f_readonly+f_system+f_subfile
-	; fs_entry updater_exe, "updater", "", f_readonly+f_system
+	fs_sfentry gc_cmd, "gc", "", f_system+f_subfile
+	fs_sfentry gc_cmd, "cleanup", "", f_system+f_subfile
+	fs_sfentry fsutil_exe, "fsutil", "", f_system+f_subfile
+	fs_sfentry uninstaller_exe, "uninstlr", "", f_system+f_subfile
+	; fs_entry updater_exe, "updater", "", f_system
 end fs_dir
 
 ;"/lib/" directory
 fs_dir lib_dir
 	; fs_entry root_dir, "..", "", f_subdir
-	fs_entry fatdrvce_lll, "FATDRVCE","dll", f_readonly+f_system
-	fs_entry fileioc_lll, "FILEIOC","dll", f_readonly+f_system
-	fs_entry fontlibc_lll, "FONTLIBC","dll", f_readonly+f_system
-	fs_entry graphx_lll, "GRAPHX","dll", f_readonly+f_system
-	fs_entry keypadc_lll, "KEYPADC", "dll", f_readonly+f_system
-	fs_entry msddrvce_lll, "MSDDRVCE", "dll", f_readonly+f_system
-	fs_entry srldrvce_lll, "SRLDRVCE","dll", f_readonly+f_system
-	fs_entry usbdrvce_lll, "USBDRVCE","dll", f_readonly+f_system
-	fs_entry libload_lll, "LibLoad", "dll", f_readonly+f_system
-	fs_entry libload_v15, "LibLoad", "v15", f_readonly+f_system
+	fs_entry fatdrvce_lll, "FATDRVCE","dll", f_system
+	fs_entry fileioc_lll, "FILEIOC","dll", f_system
+	fs_entry fontlibc_lll, "FONTLIBC","dll", f_system
+	fs_entry graphx_lll, "GRAPHX","dll", f_system
+	fs_entry keypadc_lll, "KEYPADC", "dll", f_system
+	fs_entry msddrvce_lll, "MSDDRVCE", "dll", f_system
+	fs_entry srldrvce_lll, "SRLDRVCE","dll", f_system
+	fs_entry usbdrvce_lll, "USBDRVCE","dll", f_system
+	fs_entry libload_lll, "LibLoad", "dll", f_system
+	fs_entry libload_v15, "LibLoad", "v15", f_system
 end fs_dir
 
 ;"/bin/" directory
 fs_dir bin_dir
-	fs_sfentry writeinto_exe, ">", "", f_readonly+f_system+f_subfile
-	fs_sfentry appendinto_exe, ">>", "", f_readonly+f_system+f_subfile
-	fs_sfentry continuecmd_exe, "@cmd", "", f_readonly+f_system+f_subfile
-	fs_entry argv_so, "argv", "so", f_readonly+f_system
-	fs_sfentry cat_exe, "cat", "", f_readonly+f_system+f_subfile
-	fs_sfentry cd_exe, "cd", "", f_readonly+f_system+f_subfile
-	fs_sfentry cmd_exe, "cmd", "", f_readonly+f_system+f_subfile
-	fs_sfentry cls_exe, "cls", "", f_readonly+f_system+f_subfile
-	fs_sfentry cp_exe, "cp", "", f_readonly+f_system+f_subfile
-	; fs_sfentry initdev_exe, "device", "", f_readonly+f_system+f_subfile
-	fs_sfentry rm_exe, "del", "", f_readonly+f_system+f_subfile
-	fs_sfentry df_exe, "df", "", f_readonly+f_system+f_subfile
-	fs_sfentry echo_exe, "echo", "", f_readonly+f_system+f_subfile
-	fs_entry explorer_exe, "explorer", "", f_readonly+f_system
-	fs_entry memedit_exe, "hexed", "", f_readonly+f_system
-	fs_entry memedit_exe, "hexedit", "", f_readonly+f_system
-	fs_sfentry info_exe, "info", "", f_readonly+f_system+f_subfile
-	; fs_sfentry json_exe, "json", "", f_readonly+f_system+f_subfile
-	fs_sfentry ls_exe, "l", "", f_readonly+f_system+f_subfile
-	fs_sfentry ls_exe, "la", "", f_readonly+f_system+f_subfile
-	fs_sfentry ls_exe, "ls", "", f_readonly+f_system+f_subfile
-	fs_entry memedit_exe, "memed", "", f_readonly+f_system
-	fs_entry memedit_exe, "memedit", "", f_readonly+f_system
-	fs_sfentry mkdir_exe, "md", "", f_readonly+f_system+f_subfile
-	fs_sfentry mkdir_exe, "mkd", "", f_readonly+f_system+f_subfile
-	fs_sfentry mkdir_exe, "mkdir", "", f_readonly+f_system+f_subfile
-	fs_sfentry mkfile_exe, "mk", "", f_readonly+f_system+f_subfile
-	fs_sfentry mkfile_exe, "mkf", "", f_readonly+f_system+f_subfile
-	fs_sfentry mkfile_exe, "mkfile", "", f_readonly+f_system+f_subfile
-	fs_sfentry mv_exe, "mv", "", f_readonly+f_system+f_subfile
-	fs_sfentry off_exe, "off", "", f_readonly+f_system+f_subfile
-	fs_sfentry peek_exe, "peek", "", f_readonly+f_system+f_subfile
-	fs_sfentry poke_exe, "poke", "", f_readonly+f_system+f_subfile
-	fs_sfentry rm_exe, "rm", "", f_readonly+f_system+f_subfile
-	fs_sfentry sleep_exe, "sleep", "", f_readonly+f_system+f_subfile
-	; fs_sfentry var_exe, "var", "", f_readonly+f_system+f_subfile
-	fs_entry numstr_so, "numstr", "so", f_readonly+f_system
-	fs_entry mem_so, "mem", "so", f_readonly+f_system
-	fs_entry os_internal_subfiles, "osfiles", "dat", f_readonly+f_system
+	fs_sfentry writeinto_exe, ">", "", f_system+f_subfile
+	fs_sfentry appendinto_exe, ">>", "", f_system+f_subfile
+	fs_sfentry continuecmd_exe, "@cmd", "", f_system+f_subfile
+	fs_entry argv_so, "argv", "so", f_system
+	fs_sfentry cat_exe, "cat", "", f_system+f_subfile
+	fs_sfentry cd_exe, "cd", "", f_system+f_subfile
+	fs_sfentry cmd_exe, "cmd", "", f_system+f_subfile
+	fs_sfentry cls_exe, "cls", "", f_system+f_subfile
+	fs_sfentry cp_exe, "cp", "", f_system+f_subfile
+	; fs_sfentry initdev_exe, "device", "", f_system+f_subfile
+	fs_sfentry rm_exe, "del", "", f_system+f_subfile
+	fs_sfentry df_exe, "df", "", f_system+f_subfile
+	fs_sfentry echo_exe, "echo", "", f_system+f_subfile
+	fs_entry explorer_exe, "explorer", "", f_system
+	fs_entry memedit_exe, "hexed", "", f_system
+	fs_entry memedit_exe, "hexedit", "", f_system
+	fs_sfentry info_exe, "info", "", f_system+f_subfile
+	; fs_sfentry json_exe, "json", "", f_system+f_subfile
+	fs_sfentry ls_exe, "l", "", f_system+f_subfile
+	fs_sfentry ls_exe, "la", "", f_system+f_subfile
+	fs_sfentry ls_exe, "ls", "", f_system+f_subfile
+	fs_entry memedit_exe, "memed", "", f_system
+	fs_entry memedit_exe, "memedit", "", f_system
+	fs_sfentry mkdir_exe, "md", "", f_system+f_subfile
+	fs_sfentry mkdir_exe, "mkd", "", f_system+f_subfile
+	fs_sfentry mkdir_exe, "mkdir", "", f_system+f_subfile
+	fs_sfentry mkfile_exe, "mk", "", f_system+f_subfile
+	fs_sfentry mkfile_exe, "mkf", "", f_system+f_subfile
+	fs_sfentry mkfile_exe, "mkfile", "", f_system+f_subfile
+	fs_sfentry mv_exe, "mv", "", f_system+f_subfile
+	fs_sfentry off_exe, "off", "", f_system+f_subfile
+	fs_sfentry peek_exe, "peek", "", f_system+f_subfile
+	fs_sfentry poke_exe, "poke", "", f_system+f_subfile
+	fs_sfentry rm_exe, "rm", "", f_system+f_subfile
+	fs_sfentry sleep_exe, "sleep", "", f_system+f_subfile
+	; fs_sfentry var_exe, "var", "", f_system+f_subfile
+	fs_entry numstr_so, "numstr", "so", f_system
+	fs_entry mem_so, "mem", "so", f_system
+	fs_entry os_internal_subfiles, "osfiles", "dat", f_system
 end fs_dir
 
 fs_file os_internal_subfiles

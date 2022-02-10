@@ -6,12 +6,14 @@ fs_DeleteFile:
 	call ti._frameset0
 
 ; open the file to be deleted and check if it's writable
+	; ld hl,(ix+6)
+	; call fs_CheckWritable.entryfd
+	; dec a
+	; jq nz,.fail
 	ld hl,(ix+6)
 	push hl
-	call fs_CheckWritable
-	dec a
-	jq nz,.fail
 	call fs_OpenFile
+	jr c,.fail
 	pop bc
 .entryfd:
 	ex hl,de

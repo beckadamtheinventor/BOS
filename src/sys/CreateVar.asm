@@ -1,6 +1,6 @@
-;@DOES Create a var in the /var directory and return a pointer to it
+;@DOES (TODO) Create a var in the /var directory and return a pointer to it
 ;@INPUT void *sys_CreateVar(varstruct_t *var);
-;@OUTPUT hl pointer to var data, Cf set and hl = -1 if failed
+;@OUTPUT hl pointer to var data, or Cf set and hl = -1 if failed
 ;@NOTE This routine expects var to be persistent if it is a pointer type
 sys_CreateVar:
 	ld hl,-8

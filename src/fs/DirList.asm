@@ -12,7 +12,7 @@ fs_DirList:
 	jq c,.fail
 	ld bc,$B
 	add hl,bc
-	bit fsbit_subdirectory,(hl)
+	bit fd_subdir,(hl)
 	jq z,.fail ;fail if not a subdirectory
 	inc hl
 	ld hl,(hl)

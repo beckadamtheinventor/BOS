@@ -73,13 +73,7 @@ ls_main:
 	jq nz,.subdir
 	bit bos.fd_device,(iy+$B)
 	jq nz,.device
-	bit bos.fd_readonly,(iy+$B)
-	jq nz,.readonly
 	ld a,$FF
-	jq .set_colors
-.readonly:
-	ld a,$A0
-	ld c,$20
 	jq .set_colors
 .subdir:
 	ld a,$3F

@@ -5,7 +5,4 @@
 fs_DeleteFileFD:
 	call ti._frameset0
 	ld hl,(ix+6)
-	push hl
-	call fs_CheckWritable.entry
-	pop hl
 	jr fs_DeleteFile.entryfd

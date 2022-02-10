@@ -8,11 +8,11 @@ fs_WriteByte:
 	ld iy,(ix + 9) ;void *fd
 	bit fd_link,(iy+fsentry_fileattr)
 	jq nz,.fail
-	push iy
-	call fs_CheckWritableFD
-	dec a
-	pop iy
-	jq nz,.fail
+	; push iy
+	; call fs_CheckWritableFD
+	; dec a
+	; pop iy
+	; jq nz,.fail
 	ld de, (iy + fsentry_filelen)
 	ex.s hl,de
 	ld de, (ix + 12)

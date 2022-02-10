@@ -169,8 +169,8 @@ namespace bos
 ?gui_PrintString                 := $22574
 ?gui_PrintLine                   := $22578
 ?gui_PrintUInt                   := $2257C
-?sys_WriteFlashFullRam           := $22580
-?sys_WriteFlashByteFullRam       := $22584
+;DONOTHING                       := $22580
+;DONOTHING                       := $22584
 ?fs_GetFilePtr                   := $22588
 ?sys_ExecuteFileFromPtr          := $2258C
 ?sys_ExecuteFileHL               := $22590
@@ -208,8 +208,8 @@ namespace bos
 ?gfx_PrintStringXY               := $22610
 ?gfx_GetTextX                    := $22614
 ?gfx_GetTextY                    := $22618
-?fs_CheckWritable                := $2261C
-?fs_CheckWritableFD              := $22620
+;DONOTHING                       := $2261C
+;DONOTHING                       := $22620
 ?sys_OpenFileInPath              := $22624
 ?sys_VarString                   := $22628
 ?fs_GetFreeSpace                 := $2262C
@@ -224,6 +224,8 @@ namespace bos
 ?fs_MoveFile                     := $22650
 ?fs_WriteRaw                     := $22654
 ?_UnpackUpdates                  := $22658
+?sys_ReadSectorCache             := $2265C
+?sys_WriteSectorCache            := $22660
 ;-------------------------------------------------------------------------------
 ; OS memory areas and misc defines
 ;-------------------------------------------------------------------------------
@@ -317,7 +319,7 @@ namespace bos
 ?fs_sector_size         := 512
 ?fs_partition_desc_size := 16
 ?fs_file_desc_size      := 16
-?fd_readonly   := 0
+?fd_executable := 0
 ?fd_hidden     := 1
 ?fd_system     := 2
 ?fd_subfile    := 3

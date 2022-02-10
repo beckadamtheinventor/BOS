@@ -6,8 +6,9 @@ osrt.argv_2 rb 4
 osrt.argv_3 rb 4
 osrt.argv_4 rb 4
 osrt.argv_a rb 4
+osrt.argv_fail rb 4
 end virtual
-virtual at 319622
+virtual at 319626
 osrt.mem_so.version rb 4
 osrt.check_address_writable rb 4
 osrt.read_a_from_addr rb 4
@@ -24,7 +25,7 @@ osrt.xor_val_addr rb 4
 osrt.or_val_addr rb 4
 osrt.and_val_addr rb 4
 end virtual
-virtual at 319969
+virtual at 319973
 osrt.numstr_so.version rb 4
 osrt.str_to_int       rb 4
 osrt.hexstr_to_int    rb 4

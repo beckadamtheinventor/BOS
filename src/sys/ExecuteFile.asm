@@ -42,8 +42,8 @@ sys_ExecuteFile:
 	push hl
 	call fs_GetFDPtr
 	pop bc,bc
-	ld (running_program_ptr),hl
 .exec_check_loop:
+	ld (running_program_ptr),hl
 	ld a,(hl)
 	inc hl
 	cp a,$18 ;jr

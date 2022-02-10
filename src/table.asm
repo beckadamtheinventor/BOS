@@ -105,8 +105,8 @@
 	jp gui_PrintString
 	jp gui_PrintLine
 	jp gui_PrintUInt
-	jp sys_WriteFlashFullRam
-	jp sys_WriteFlashByteFullRam
+	jp DONOTHING ;sys_WriteFlashFullRam
+	jp DONOTHING ;sys_WriteFlashByteFullRam
 	jp fs_GetFilePtr
 	jp sys_ExecuteFileFromPtr
 	jp sys_ExecuteFileHL
@@ -144,8 +144,8 @@
 	jp gfx_PrintStringXY
 	jp gfx_GetTextX
 	jp gfx_GetTextY
-	jp fs_CheckWritable
-	jp fs_CheckWritableFD
+	jp DONOTHING ; fs_CheckWritable
+	jp DONOTHING ; fs_CheckWritableFD
 	jp sys_OpenFileInPath
 	jp sys_VarString
 	jp fs_GetFreeSpace
@@ -160,3 +160,5 @@
 	jp fs_MoveFile
 	jp fs_WriteRaw
 	jp _UnpackUpdates
+	jp sys_ReadSectorCache
+	jp sys_WriteSectorCache

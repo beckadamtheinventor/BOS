@@ -44,7 +44,7 @@ fs_InitClusterMap:
 ; de = current flash sector
 ; (ix-4) = cluster map sector counter (128 per physical 64k sector)
 ; bc = remaining cluster map sectors to be processed
-	ld de,fs_filesystem_address
+	ld de,start_of_user_archive
 	ld a,65536/512
 	ld (ix-4),a
 	jq .copy_next_sector
@@ -151,7 +151,7 @@ assert ~ti.vRam and $FFFF
 	jq z,.traverse_into_jump
 	cp a,'.'+2
 	jq z,.traverse_next
-	bit fsbit_subfile, (iy+fsentry_fileattr)
+	bit fd_subfile, (iy+fsentry_fileattr)
 	jq z,.regular_file
 	ld hl,(iy+fsentry_filesector)
 	ex.s hl,de
@@ -189,7 +189,7 @@ assert ~ti.vRam and $FFFF
 	inc de
 	djnz .mark_file_loop
 	pop iy
-	bit fsbit_subdirectory, (iy+fsentry_fileattr)
+	bit fd_subdir, (iy+fsentry_fileattr)
 	call nz,.traverse_into
 .traverse_next:
 	lea iy,iy+16

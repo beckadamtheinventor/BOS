@@ -1,10 +1,12 @@
+
 fs_ExtractRootDir:
-	ld a,(fs_root_dir_address)
-	inc a
-	ret nz
-	call sys_FlashUnlock
+	call fs_SanityCheck.check_root
+	ret z ; don't re-init the root directory if it's already initialized
+	ld a,fs_root_dir_address shr 16
+	call sys_ReadSectorCache.entry
+	ex hl,de
 	ld hl,fs_root_dir_data
 	ld bc,fs_root_dir_data.len
-	ld de,fs_root_dir_address
-	call sys_WriteFlash
-	jq sys_FlashLock
+	ldir
+	ld a,fs_root_dir_address shr 16
+	jq sys_WriteSectorCache.entry

@@ -20,7 +20,7 @@ fs_GetFilePtr:
 	ld b,(hl)
 	inc hl
 	push hl
-	bit fsbit_subfile, a
+	bit fd_subfile, a
 	jq z,.get_file_sector
 	ld l,0
 	res 0,h

@@ -1,7 +1,7 @@
 
-;@DOES Opens a file given a path and a pointer to the dir to start searching from. Returns file descriptor.
+;@DOES Opens a file given a path and a file descriptor to start searching in. Returns file descriptor.
 ;@INPUT void *fs_OpenFileInDir(char *path, void *dir);
-;@OUTPUT hl = file descriptor. hl is -1 if file does not exist.
+;@OUTPUT hl = file descriptor. hl is -1 if file does not exist, or if trying to start search in a file.
 ;@DESTROYS All
 fs_OpenFileInDir:
 	pop bc,hl,de
@@ -20,22 +20,14 @@ fs_OpenFileInDir:
 	ld (ix-20),iy
 	ld hl,(ix+6)
 	ld (ix-3),hl
-	ld iy,(ix+9)
-	ld de,(iy+fsentry_filesector)
-	bit fsbit_subfile,(iy+fsentry_fileattr)
-	jq z,.open_regular_file
-	ex.s hl,de
-	lea de,iy
-	ld e,0
-	res 0,d
-	add hl,de
+	ld hl,(ix+9)
 	push hl
-	jq .open_from_stack
-.open_regular_file:
-	push de
-	call fs_GetSectorAddress
+	ld bc,fsentry_fileattr
+	add hl,bc
+	bit fd_subdir,(hl)
+	jr z,.fail
+	call fs_GetFDPtr
 	ex (sp),hl
-.open_from_stack:
 	pop iy
 	call fs_OpenFile.entry
 	jq c,.fail

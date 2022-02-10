@@ -9,11 +9,11 @@ fs_WriteRaw:
 	ld iy,(ix+15) ;void *fd
 	bit fd_link,(iy+fsentry_fileattr)
 	jq nz,.fail
-	push iy
-	call fs_CheckWritableFD
-	dec a
-	jq nz,.fail
-	pop iy
+	; push iy
+	; call fs_CheckWritableFD
+	; dec a
+	; jq nz,.fail
+	; pop iy
 	or a,a
 	sbc hl,hl
 	ld de, (ix + 9) ; len

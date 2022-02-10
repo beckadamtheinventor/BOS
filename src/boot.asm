@@ -267,16 +267,6 @@ generate_boot_configs:
 os_return_soft:
 	call os_check_recovery_key
 	call sys_FreeAll
-	call gfx_SetDefaultFont
-	call gfx_Set8bpp
-	ld a,1
-	call gfx_SetDraw
-	xor a,a
-	ld (lcd_text_bg),a
-	dec a
-	ld (lcd_text_fg),a
-	call os_GetOSInfo
-	call gui_DrawConsoleWindow
 
 	call os_check_recovery_key
 	call fs_SanityCheck
@@ -449,14 +439,37 @@ os_recovery_menu:
 	ret
 
 .emergencyshell:
+	ld hl,str_EmergencyShellInfo
+	call gui_DrawConsoleWindow
 	ld bc,256
-	push bc
-	call sys_Malloc
-	push hl
+	ld hl,InputBuffer
+	push bc,hl
 	call gui_Input
 	pop hl,bc
-	
-	jq os_recovery_menu
+	or a,a
+	jq z,os_recovery_menu
+	ld a,(hl)
+	or a,a
+	jr z,.emergencyshell
+	ld de,emergency_shell_fs
+	push de,hl
+	call fs_OpenFileInDir
+	pop de,bc
+	jr c,.emergencyshell
+	push de,hl
+	call fs_GetFDPtr
+	pop bc
+	ex (sp),hl
+	push hl
+	call ti._strlen
+	ex (sp),hl
+	pop bc
+	ld a,' '
+	cpir
+	ex hl,de
+	pop hl
+	call sys_ExecuteFileFromPtr.entryhlde
+	jq .emergencyshell
 
 
 _UnpackUpdates:

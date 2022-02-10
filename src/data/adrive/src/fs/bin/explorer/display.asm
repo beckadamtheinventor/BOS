@@ -255,8 +255,6 @@ explorer_display_diritems:
 	inc hl
 	ld de,(hl)
 	push de
-	bit bos.fd_readonly,a
-	call nz,.readonly
 	bit bos.fd_system,a
 	call nz,.system
 	bit bos.fd_device,a
@@ -367,9 +365,6 @@ explorer_sprite_temp:=$-3
 	jq explorer_print_icon
 .device:
 	ld hl,_device_icon
-	jq explorer_print_icon
-.readonly:
-	ld hl,_readonly_icon
 explorer_print_icon:
 	ld c,$80
 	push af,hl,bc
@@ -384,8 +379,8 @@ explorer_print_icon:
 ; *** |* * |
 ; ** *|* * |
 ; ** *| *  |
-_readonly_icon:
-	db $00,$00,$F0,$D4,$EA,$DA,$D4
+; _readonly_icon:
+	; db $00,$00,$F0,$D4,$EA,$DA,$D4
 ; *** |*** |
 ; *   |*   |
 ;  *  | *  |

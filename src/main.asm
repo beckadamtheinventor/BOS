@@ -4,6 +4,7 @@ include 'include/ez80.inc'
 include 'include/defines.inc'
 include 'include/macros.inc'
 include 'include/ezf.inc'
+include 'include/bosfs.inc'
 
 org $020108
 

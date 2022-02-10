@@ -97,8 +97,6 @@
 	public _asm_gui_PrintString
 	public _asm_gui_PrintLine
 	public _asm_gui_PrintUInt
-	public _sys_WriteFlashFullRam
-	public _sys_WriteFlashByteFullRam
 	public _fs_GetFilePtr
 	public _sys_ExecuteFileFromPtr
 	public _sys_ExecuteFileHL
@@ -136,8 +134,6 @@
 	public _asm_bosgfx_PrintStringXY
 	public _bosgfx_GetTextX
 	public _bosgfx_GetTextY
-	public _fs_CheckWritable
-	public _fs_CheckWritableFD
 	public _sys_OpenFileInPath
 	public _sys_VarString
 	public _fs_GetFreeSpace
@@ -152,6 +148,8 @@
 	public _fs_MoveFile
 	public _fs_WriteRaw
 	public __UnpackUpdates
+	public _sys_ReadSectorCache
+	public _sys_WriteSectorCache
 	public _LCD_PAL?
 	public _LCD_CTRL?
 	public _LCD_VRAM?
@@ -242,7 +240,7 @@
 	public _fs_sector_size
 	public _fs_partition_desc_size
 	public _fs_file_desc_size
-	public _fd_readonly
+	public _fd_executable
 	public _fd_hidden
 	public _fd_system
 	public _fd_subfile
@@ -407,8 +405,6 @@ _bosgfx_SetDraw                     := $22570
 _asm_gui_PrintString                 := $22574
 _asm_gui_PrintLine                   := $22578
 _asm_gui_PrintUInt                   := $2257C
-_sys_WriteFlashFullRam           := $22580
-_sys_WriteFlashByteFullRam       := $22584
 _fs_GetFilePtr                   := $22588
 _sys_ExecuteFileFromPtr          := $2258C
 _sys_ExecuteFileHL               := $22590
@@ -446,8 +442,6 @@ _sys_Malloc64Align256            := $2260C
 _asm_bosgfx_PrintStringXY               := $22610
 _bosgfx_GetTextX                    := $22614
 _bosgfx_GetTextY                    := $22618
-_fs_CheckWritable                := $2261C
-_fs_CheckWritableFD              := $22620
 _sys_OpenFileInPath              := $22624
 _sys_VarString                   := $22628
 _fs_GetFreeSpace                 := $2262C
@@ -462,6 +456,8 @@ _fs_BaseName                     := $2264C
 _fs_MoveFile                     := $22650
 _fs_WriteRaw                     := $22654
 __UnpackUpdates                  := $22658
+_sys_ReadSectorCache             := $2265C
+_sys_WriteSectorCache            := $22660
 _LCD_PAL?    := 0E30200h
 _LCD_CTRL?   := 0E30018h
 _LCD_VRAM?   := 0D40000h
@@ -552,7 +548,7 @@ _fs_cmap_length := fs_cluster_map.len
 _fs_sector_size         := 512
 _fs_partition_desc_size := 16
 _fs_file_desc_size      := 16
-_fd_readonly   := 0
+_fd_executable := 0
 _fd_hidden     := 1
 _fd_system     := 2
 _fd_subfile    := 3

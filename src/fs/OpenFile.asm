@@ -13,8 +13,8 @@ fs_OpenFile:
 	or a,a
 	jq nz,.pathnonzero
 .pathzero:
-	ld hl,fs_filesystem_address
-	ret ;return root directory
+	ld hl,start_of_user_archive
+	ret ;return root directory descriptor
 .pathnonzero:
 	ld hl,-26
 	call ti._frameset
@@ -23,13 +23,13 @@ fs_OpenFile:
 	push hl
 	call fs_AbsPath
 	pop bc
+	ld iy,start_of_user_archive
 	inc hl
-	ld (ix-3),hl
-	ld iy,fs_filesystem_root_address
 	ld a,(hl)
 	or a,a
-	jq z,.return
-	ld hl,(fs_filesystem_address+fsentry_filesector)
+	jq z,._return
+	ld (ix-3),hl
+	ld hl,(iy + fsentry_filesector)
 	push hl
 	call fs_GetSectorAddress
 	ex (sp),hl
@@ -82,7 +82,7 @@ fs_OpenFile:
 	cp a,$A
 	jq z,._return ;return if at end of path
 .into_dir:
-	bit fsbit_subdirectory,(iy + fsentry_fileattr) ;check if we're entering a directory
+	bit fd_subdir,(iy + fsentry_fileattr) ;check if we're entering a directory
 	jq z,.fail ;trying to path into a file?
 .step_into_dir:
 	push iy
