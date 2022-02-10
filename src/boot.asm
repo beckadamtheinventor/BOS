@@ -328,8 +328,8 @@ os_recovery_menu:
 	jq z,.uninstall
 	cp a,ti.skClear
 	jq z,os_return
-	cp a,ti.skMatrix
-	jq z,.reinstalltios
+	; cp a,ti.skMatrix
+	; jq z,.reinstalltios
 	cp a,ti.skAlpha
 	jq z,.emergencyshell
 	; cp a,ti.sk6
@@ -364,22 +364,22 @@ os_recovery_menu:
 	ld a,2
 	jq sys_EraseFlashSector ;erase first OS sector, bootcode will handle the rest
 
-.reinstalltios:
-	call .confirm
-	ld a,($0401FF)
-	inc a
-	jq nz,.reinstalltios_start
-	ld hl,string_failed_to_reinstall
-	call gui_DrawConsoleWindow
-	call sys_WaitKeyCycle
-	jq os_recovery_menu
-.reinstalltios_start:
-	ld de,bos_UserMem
-	push de
-	ld hl,data_reinstall_tios_program
-	ld bc,data_reinstall_tios_program.len
-	ldir
-	jp sys_FlashUnlock
+; .reinstalltios:
+	; call .confirm
+	; ld a,($0401FF)
+	; inc a
+	; jq nz,.reinstalltios_start
+	; ld hl,string_failed_to_reinstall
+	; call gui_DrawConsoleWindow
+	; call sys_WaitKeyCycle
+	; jq os_recovery_menu
+; .reinstalltios_start:
+	; ld de,bos_UserMem
+	; push de
+	; ld hl,data_reinstall_tios_program
+	; ld bc,data_reinstall_tios_program.len
+	; ldir
+	; jp sys_FlashUnlock
 
 .attempt_recovery:
 	call .confirm
@@ -488,38 +488,38 @@ _UnpackUpdates:
 
 
 ;tios reinstaller
-virtual at ti.userMem
-	ld a,$02
-data_reinstall_tios_program.loop:
-	push af
-	call data_reinstall_tios_program.sectorerase
-	pop af
-	inc a
-	cp a,$12
-	jq nz,data_reinstall_tios_program.loop
-	ld hl,$2B0000
-	ld de,$020000
-	ld bc,$120000
-	call sys_WriteFlash
-	ld a,$12
-data_reinstall_tios_program.loop2:
-	push af
-	call data_reinstall_tios_program.sectorerase
-	pop af
-	inc a
-	cp a,$3B
-	jq nz,data_reinstall_tios_program.loop2
-	rst 0
-data_reinstall_tios_program.sectorerase:
-	ld bc,$F8
-	push bc
-	jp $2DC
-	load data_reinstall_tios_program.data:$-$$ from $$
-end virtual
+; virtual at ti.userMem
+	; ld a,$02
+; data_reinstall_tios_program.loop:
+	; push af
+	; call data_reinstall_tios_program.sectorerase
+	; pop af
+	; inc a
+	; cp a,$12
+	; jq nz,data_reinstall_tios_program.loop
+	; ld hl,$2B0000
+	; ld de,$020000
+	; ld bc,$120000
+	; call sys_WriteFlash
+	; ld a,$12
+; data_reinstall_tios_program.loop2:
+	; push af
+	; call data_reinstall_tios_program.sectorerase
+	; pop af
+	; inc a
+	; cp a,$3B
+	; jq nz,data_reinstall_tios_program.loop2
+	; rst 0
+; data_reinstall_tios_program.sectorerase:
+	; ld bc,$F8
+	; push bc
+	; jp $2DC
+	; load data_reinstall_tios_program.data:$-$$ from $$
+; end virtual
 
-data_reinstall_tios_program:
-	db data_reinstall_tios_program.data
-.len:=$-.
+; data_reinstall_tios_program:
+	; db data_reinstall_tios_program.data
+; .len:=$-.
 
 handle_unimplemented:
 	DisableThreading

@@ -10,7 +10,7 @@
 <tr><td><a href="#fs_OpenFile">bos.fs_OpenFile</a></td><td><a href="#fs_OpenFile">022408</a></td></tr>
 <tr><td><a href="#fs_GetSectorAddress">bos.fs_GetSectorAddress</a></td><td><a href="#fs_GetSectorAddress">02240C</a></td></tr>
 <tr><td><a href="#fs_CheckDirExists">bos.fs_CheckDirExists</a></td><td><a href="#fs_CheckDirExists">022410</a></td></tr>
-<tr class="no_op"></tr><td><a href="#DONOTHING">bos.DONOTHING</a></td><td><a href="#DONOTHING">022414</a></td></tr>
+<tr><td><a href="#fs_CeilDivBySector">bos.fs_CeilDivBySector</a></td><td><a href="#fs_CeilDivBySector">022414</a></td></tr>
 <tr><td><a href="#fs_CopyFileName">bos.fs_CopyFileName</a></td><td><a href="#fs_CopyFileName">022418</a></td></tr>
 <tr><td><a href="#fs_Read">bos.fs_Read</a></td><td><a href="#fs_Read">02241C</a></td></tr>
 <tr><td><a href="#fs_Write">bos.fs_Write</a></td><td><a href="#fs_Write">022420</a></td></tr>
@@ -74,7 +74,7 @@
 <tr><td><a href="#fs_InitClusterMap">bos.fs_InitClusterMap</a></td><td><a href="#fs_InitClusterMap">022508</a></td></tr>
 <tr><td><a href="#sys_WriteFlash">bos.sys_WriteFlash</a></td><td><a href="#sys_WriteFlash">02250C</a></td></tr>
 <tr><td><a href="#sys_WriteFlashA">bos.sys_WriteFlashA</a></td><td><a href="#sys_WriteFlashA">022510</a></td></tr>
-<tr class="no_op"></tr><td><a href="#DONOTHING">bos.DONOTHING</a></td><td><a href="#DONOTHING">022514</a></td></tr>
+<tr><td><a href="#sys_JoinArgv">bos.sys_JoinArgv</a></td><td><a href="#sys_JoinArgv">022514</a></td></tr>
 <tr><td><a href="#fs_PathLen">bos.fs_PathLen</a></td><td><a href="#fs_PathLen">022518</a></td></tr>
 <tr><td><a href="#fs_ParentDir">bos.fs_ParentDir</a></td><td><a href="#fs_ParentDir">02251C</a></td></tr>
 <tr><td><a href="#fs_StrToFileEntry">bos.fs_StrToFileEntry</a></td><td><a href="#fs_StrToFileEntry">022520</a></td></tr>
@@ -83,7 +83,7 @@
 <tr><td><a href="#sys_CallExecuteFile">bos.sys_CallExecuteFile</a></td><td><a href="#sys_CallExecuteFile">02252C</a></td></tr>
 <tr><td><a href="#sys_JumpExecuteFile">bos.sys_JumpExecuteFile</a></td><td><a href="#sys_JumpExecuteFile">022530</a></td></tr>
 <tr><td><a href="#sys_OpenDevice">bos.sys_OpenDevice</a></td><td><a href="#sys_OpenDevice">022534</a></td></tr>
-<tr class="no_op"></tr><td><a href="#DONOTHING">bos.DONOTHING</a></td><td><a href="#DONOTHING">022538</a></td></tr>
+<tr><td><a href="#fs_CopyFile">bos.fs_CopyFile</a></td><td><a href="#fs_CopyFile">022538</a></td></tr>
 <tr class="no_op"></tr><td><a href="#DONOTHING">bos.DONOTHING</a></td><td><a href="#DONOTHING">02253C</a></td></tr>
 <tr class="no_op"></tr><td><a href="#DONOTHING">bos.DONOTHING</a></td><td><a href="#DONOTHING">022540</a></td></tr>
 <tr class="no_op"></tr><td><a href="#DONOTHING">bos.DONOTHING</a></td><td><a href="#DONOTHING">022544</a></td></tr>
@@ -101,8 +101,8 @@
 <tr><td><a href="#gui_PrintString">bos.gui_PrintString</a></td><td><a href="#gui_PrintString">022574</a></td></tr>
 <tr><td><a href="#gui_PrintLine">bos.gui_PrintLine</a></td><td><a href="#gui_PrintLine">022578</a></td></tr>
 <tr><td><a href="#gui_PrintUInt">bos.gui_PrintUInt</a></td><td><a href="#gui_PrintUInt">02257C</a></td></tr>
-<tr><td><a href="#sys_WriteFlashFullRam">bos.sys_WriteFlashFullRam</a></td><td><a href="#sys_WriteFlashFullRam">022580</a></td></tr>
-<tr><td><a href="#sys_WriteFlashByteFullRam">bos.sys_WriteFlashByteFullRam</a></td><td><a href="#sys_WriteFlashByteFullRam">022584</a></td></tr>
+<tr class="no_op"></tr><td><a href="#DONOTHING ">bos.DONOTHING </a></td><td><a href="#DONOTHING ">022580</a></td></tr>
+<tr class="no_op"></tr><td><a href="#DONOTHING ">bos.DONOTHING </a></td><td><a href="#DONOTHING ">022584</a></td></tr>
 <tr><td><a href="#fs_GetFilePtr">bos.fs_GetFilePtr</a></td><td><a href="#fs_GetFilePtr">022588</a></td></tr>
 <tr><td><a href="#sys_ExecuteFileFromPtr">bos.sys_ExecuteFileFromPtr</a></td><td><a href="#sys_ExecuteFileFromPtr">02258C</a></td></tr>
 <tr><td><a href="#sys_ExecuteFileHL">bos.sys_ExecuteFileHL</a></td><td><a href="#sys_ExecuteFileHL">022590</a></td></tr>
@@ -140,8 +140,8 @@
 <tr><td><a href="#gfx_PrintStringXY">bos.gfx_PrintStringXY</a></td><td><a href="#gfx_PrintStringXY">022610</a></td></tr>
 <tr><td><a href="#gfx_GetTextX">bos.gfx_GetTextX</a></td><td><a href="#gfx_GetTextX">022614</a></td></tr>
 <tr><td><a href="#gfx_GetTextY">bos.gfx_GetTextY</a></td><td><a href="#gfx_GetTextY">022618</a></td></tr>
-<tr><td><a href="#fs_CheckWritable">bos.fs_CheckWritable</a></td><td><a href="#fs_CheckWritable">02261C</a></td></tr>
-<tr><td><a href="#fs_CheckWritableFD">bos.fs_CheckWritableFD</a></td><td><a href="#fs_CheckWritableFD">022620</a></td></tr>
+<tr class="no_op"></tr><td><a href="#DONOTHING ">bos.DONOTHING </a></td><td><a href="#DONOTHING ">02261C</a></td></tr>
+<tr class="no_op"></tr><td><a href="#DONOTHING ">bos.DONOTHING </a></td><td><a href="#DONOTHING ">022620</a></td></tr>
 <tr><td><a href="#sys_OpenFileInPath">bos.sys_OpenFileInPath</a></td><td><a href="#sys_OpenFileInPath">022624</a></td></tr>
 <tr><td><a href="#sys_VarString">bos.sys_VarString</a></td><td><a href="#sys_VarString">022628</a></td></tr>
 <tr><td><a href="#fs_GetFreeSpace">bos.fs_GetFreeSpace</a></td><td><a href="#fs_GetFreeSpace">02262C</a></td></tr>
@@ -156,6 +156,8 @@
 <tr><td><a href="#fs_MoveFile">bos.fs_MoveFile</a></td><td><a href="#fs_MoveFile">022650</a></td></tr>
 <tr><td><a href="#fs_WriteRaw">bos.fs_WriteRaw</a></td><td><a href="#fs_WriteRaw">022654</a></td></tr>
 <tr><td><a href="#_UnpackUpdates">bos._UnpackUpdates</a></td><td><a href="#_UnpackUpdates">022658</a></td></tr>
+<tr><td><a href="#sys_ReadSectorCache">bos.sys_ReadSectorCache</a></td><td><a href="#sys_ReadSectorCache">02265C</a></td></tr>
+<tr><td><a href="#sys_WriteSectorCache">bos.sys_WriteSectorCache</a></td><td><a href="#sys_WriteSectorCache">022660</a></td></tr>
 </table><div id="boot_os"><h1>boot_os</h1>	<h3>syscall Adress 020108</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
@@ -189,6 +191,10 @@ If OS threading is disabled, execute a file in a new thread given a relative or 
 </table></div><div id="fs_CheckDirExists"><h1>fs_CheckDirExists</h1>	<h3>syscall Adress 022410</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>check if a directory exists.</td><td>bool fs_CheckDirExists(char *path);</td><td>true if path exists, else false</td><td></td><td>
+</td></tr>
+</table></div><div id="fs_CeilDivBySector"><h1>fs_CeilDivBySector</h1>	<h3>syscall Adress 022414</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>divide by 512, adding 1 to the result if there is a remainder. Returns 1 if HL is 0</td><td>HL = number to divide</td><td>HL = result</td><td></td><td>
 </td></tr>
 </table></div><div id="fs_CopyFileName"><h1>fs_CopyFileName</h1>	<h3>syscall Adress 022418</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -402,7 +408,7 @@ Cf set if failed</td><td></td><td>
 </td></tr>
 </table></div><div id="fs_OpenFileInDir"><h1>fs_OpenFileInDir</h1>	<h3>syscall Adress 0224E8</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Opens a file given a path and a pointer to the dir to start searching from. Returns file descriptor.</td><td>void *fs_OpenFileInDir(char *path, void *dir);</td><td>hl = file descriptor. hl is -1 if file does not exist.</td><td></td><td>
+<tr><td>Opens a file given a path and a file descriptor to start searching in. Returns file descriptor.</td><td>void *fs_OpenFileInDir(char *path, void *dir);</td><td>hl = file descriptor. hl is -1 if file does not exist, or if trying to start search in a file.</td><td></td><td>
 </td></tr>
 </table></div><div id="fs_SetSize"><h1>fs_SetSize</h1>	<h3>syscall Adress 0224EC</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -419,7 +425,7 @@ string stored at gfx_string_temp</td><td></td><td>
 </td></tr>
 </table></div><div id="fs_DeleteFile"><h1>fs_DeleteFile</h1>	<h3>syscall Adress 0224F8</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>delete a file given a file name</td><td>bool fs_DeleteFile(const char *name);</td><td>true/nz if success, false/zf if fail</td><td></td><td>
+<tr><td>delete a file/directory given a path</td><td>bool fs_DeleteFile(const char *name);</td><td>true/nz if success, false/zf if fail</td><td></td><td>
 </td></tr>
 </table></div><div id="_DelVar"><h1>_DelVar</h1>	<h3>syscall Adress 0224FC</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -447,6 +453,10 @@ uses the first half of vRam as scrap.</td></tr>
 </table></div><div id="sys_WriteFlashA"><h1>sys_WriteFlashA</h1>	<h3>syscall Adress 022510</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>write a byte from A to flash at address DE</td><td>A, DE</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="sys_JoinArgv"><h1>sys_JoinArgv</h1>	<h3>syscall Adress 022514</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Join argv into a space-delimited string.</td><td>char *sys_JoinArgv(int argc, char *argv[]);</td><td>Pointer to string.</td><td></td><td>
 </td></tr>
 </table></div><div id="fs_PathLen"><h1>fs_PathLen</h1>	<h3>syscall Adress 022518</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -484,6 +494,10 @@ de = arguments</td><td></td><td></td><td>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Initialize a device and return a device structure.</td><td>device_t *sys_OpenDevice(const char *name);</td><td>pointer to device structure. (file data)<br>
 hl=-1 and Cf set if failed.</td><td></td><td>
+</td></tr>
+</table></div><div id="fs_CopyFile"><h1>fs_CopyFile</h1>	<h3>syscall Adress 022538</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Copy a file given paths and return a file descriptor.</td><td>void *fs_CopyFile(const char *src, const char *dest);</td><td>file descriptor of new file. Returns 0 if failed.</td><td></td><td>
 </td></tr>
 </table></div><div id="fs_GetSector"><h1>fs_GetSector</h1>	<h3>syscall Adress 022548</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -542,14 +556,6 @@ If you need a routine callable from C, this is not the one you'll want to use.</
 </table></div><div id="gui_PrintUInt"><h1>gui_PrintUInt</h1>	<h3>syscall Adress 02257C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Print an unsigned integer. Dos not swap buffers.</td><td>hl = integer</td><td></td><td></td><td>
-</td></tr>
-</table></div><div id="sys_WriteFlashFullRam"><h1>sys_WriteFlashFullRam</h1>	<h3>syscall Adress 022580</h3>
-<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>store data to flash, surpassing flash AND logic using the first half of VRAM for swap if needed.</td><td></td><td>uint8_t sys_WriteFlashFullRam(void *dest, void *src, int len);</td><td></td><td>
-Assume maximum write length is 65536.</td></tr>
-</table></div><div id="sys_WriteFlashByteFullRam"><h1>sys_WriteFlashByteFullRam</h1>	<h3>syscall Adress 022584</h3>
-<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Write a byte to flash, surpassing flash AND logic using the first half of VRAM for swap if needed.</td><td>bool sys_WriteFlashByteFullRam(void *dest, uint8_t byte);</td><td>true if success, false if failed</td><td></td><td>
 </td></tr>
 </table></div><div id="fs_GetFilePtr"><h1>fs_GetFilePtr</h1>	<h3>syscall Adress 022588</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -703,14 +709,6 @@ Cf set if failed to malloc</td><td></td><td>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
 </td></tr>
-</table></div><div id="fs_CheckWritable"><h1>fs_CheckWritable</h1>	<h3>syscall Adress 02261C</h3>
-<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Check if a file can be written to.</td><td>uint8_t fs_CheckWritable(const char *path);</td><td>0 if file cannot be written to, -1 and Cf set if file doesn't exist, 1 if the file can be written to.</td><td></td><td>
-takes into consideration whether the OS is in "elevated" mode</td></tr>
-</table></div><div id="fs_CheckWritableFD"><h1>fs_CheckWritableFD</h1>	<h3>syscall Adress 022620</h3>
-<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Check if a file descriptor is writable.</td><td>uint8_t fs_CheckWritableFD(void *fd);</td><td></td><td></td><td>
-</td></tr>
 </table></div><div id="sys_OpenFileInPath"><h1>sys_OpenFileInPath</h1>	<h3>syscall Adress 022624</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>open a file, looking in directories from $PATH variable if file not found</td><td>void *sys_OpenFileInPath(const char *path);</td><td>pointer to file descriptor</td><td></td><td>
@@ -755,11 +753,11 @@ Cf set, hl = -1 if failed</td><td></td><td>
 </td></tr>
 </table></div><div id="fs_BaseName"><h1>fs_BaseName</h1>	<h3>syscall Adress 02264C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>return the last path word of a path</td><td>char *fs_BaseName(const char *path);</td><td>last path word, or same as input if it is the only path word.</td><td></td><td>
+<tr><td>return the last path word of a path</td><td>char *fs_BaseName(const char *path);</td><td>copy of last path word, or same as input if it is the only path word, or pointer to '/' if that is the last character of the path.</td><td></td><td>
 </td></tr>
 </table></div><div id="fs_MoveFile"><h1>fs_MoveFile</h1>	<h3>syscall Adress 022650</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Move a file given paths and return a file descriptor.</td><td>void *fs_MoveFile(const char *src, const char *dest);</td><td>file descriptor of destination file. Returns 0 if failed.</td><td></td><td>
+<tr><td>Move a file given paths and return a file descriptor.</td><td>void *fs_MoveFile(const char *src, const char *dest);</td><td>file descriptor of new file. Returns 0 if failed.</td><td></td><td>
 </td></tr>
 </table></div><div id="fs_WriteRaw"><h1>fs_WriteRaw</h1>	<h3>syscall Adress 022654</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -768,5 +766,13 @@ Cf set, hl = -1 if failed</td><td></td><td>
 </table></div><div id="_UnpackUpdates"><h1>_UnpackUpdates</h1>	<h3>syscall Adress 022658</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="sys_ReadSectorCache"><h1>sys_ReadSectorCache</h1>	<h3>syscall Adress 02265C</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Read flash sector A into the sector cache (VRAM)</td><td></td><td>returns pointer to sector cache in hl</td><td></td><td>
+</td></tr>
+</table></div><div id="sys_WriteSectorCache"><h1>sys_WriteSectorCache</h1>	<h3>syscall Adress 022660</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Write the currently cached sector back to flash sector A</td><td></td><td></td><td></td><td>
 </td></tr>
 </table></div></body></html>
