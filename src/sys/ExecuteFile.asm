@@ -2,7 +2,7 @@
 ;@DOES Execute a file.
 ;@INPUT int sys_ExecuteFile(const char *path, char *args);
 ;@OUTPUT -1 and Cf set if file does not exist or is not a valid executable format, or if malloc failed somewhere.
-;@OUTPUT ExecutingFileFd set to point to file descriptor. -1 if file not found
+;@OUTPUT ExecutingFileFd set to point to file descriptor. -1 if file not found, -2 if /var/PATH not found.
 ;@DESTROYS All, OP6.
 ;@NOTE If you're running a threaded executable, the thread is spawned but won't actually start until it's thread is handled.
 ;;;@NOTE If OS threading is enabled, sleep current thread and execute a file in a new thread given a relative or absolute path. Returns to caller if starting a threaded executable.
@@ -26,9 +26,22 @@ sys_ExecuteFile:
 	ld (fsOP6+3),hl
 	ld (fsOP6),de
 	push hl
-	call sys_OpenFileInPath ;look for the file within dirs listed in $PATH
+	call fs_OpenFile ; look for the file directly
+	call c,sys_OpenFileInPath ;look for the file within dirs listed in $PATH
 	pop bc
-	jq c,.fail ;fail if both fs_OpenFile and sys_OpenFileInPath failed to locate the file
+	jr nc,.open_fd
+;fail if both fs_OpenFile and sys_OpenFileInPath failed to locate the file
+	push de
+	call fs_OpenFile ; check for /var/PATH
+	pop bc
+	ccf
+	sbc hl,hl
+	ret c
+	ld a,$FE
+	ld (ExecutingFileFd),a
+	dec hl
+	scf
+	ret
 .open_fd:
 	ld (ExecutingFileFd),hl
 	ld bc,fsentry_fileattr

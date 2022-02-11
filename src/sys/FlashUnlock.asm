@@ -3,19 +3,26 @@
 sys_FlashUnlock:
 flash_unlock:
 	push af
-	di
+	ld a,$8C
+	out0 ($24),a
 	in0 a,($06)
 	set 2,a
 	out0 ($06),a
-	ld a,$04
-	di
-	jr $+2
-	di
-	rsmix
-	im 1
+	ld a,4
 	out0 ($28),a
-	in0 a,($28)
-	bit 2,a
+
+	; in0 a,($06)
+	; set 2,a
+	; out0 ($06),a
+	; ld a,$04
+	; di
+	; jr $+2
+	; di
+	; rsmix
+	; im 1
+	; out0 ($28),a
+	; in0 a,($28)
+	; bit 2,a
 
 	; ld	a,$8c
 	; out0	($24),a

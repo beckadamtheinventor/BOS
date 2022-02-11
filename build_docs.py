@@ -4,7 +4,7 @@ def error(e):
 	print("Something went wrong building!\nError:",e)
 	quit()
 
-def myhex(n):
+def inttohex(n):
 	h="0123456789ABCDEF"
 	l=[]
 	for x in range(6):
@@ -95,7 +95,7 @@ def build_docs():
 		color: #22e;
 	}
 	.no_op{
-		color: #C02020;
+		color: #C22;
 	}
 	.assembly{
 		color: #4F1;
@@ -140,7 +140,7 @@ def build_docs():
 					else:
 						f.write("<tr>")
 						f2.write("<div id=\""+line+"\"><h1>"+line+"</h1>\
-	<h3>syscall Adress "+myhex(counter)+"</h3>\n")
+	<h3>syscall Adress "+inttohex(counter)+"</h3>\n")
 						f2.write("<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>\n")
 						a=[]; b=[]; c=[]; d=[]
 						dt,ix=FindTextInFiles(SrcDirListing,line+":")
@@ -174,7 +174,7 @@ def build_docs():
 									# break
 							# f2.write("</div>")
 
-					f.write("<td><a href=\"#"+line+"\">bos."+line+"</a></td><td><a href=\"#"+line+"\">"+myhex(counter)+"</a></td></tr>\n")
+					f.write("<td><a href=\"#"+line+"\">bos."+line+"</a></td><td><a href=\"#"+line+"\">"+inttohex(counter)+"</a></td></tr>\n")
 					counter+=4
 			
 		f.write("</table>")

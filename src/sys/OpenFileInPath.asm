@@ -9,8 +9,8 @@ sys_OpenFileInPath:
 .entryhl:
 	push hl
 	call fs_GetFilePtr
-	jr c,.fail ;fail if /var/PATH not found
 	pop de
+	jr c,.fail ;fail if /var/PATH not found
 .entry_hlbc:
 	ld (ix-6),hl
 	ld (ix-9),bc

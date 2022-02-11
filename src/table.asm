@@ -162,3 +162,4 @@
 	jp _UnpackUpdates
 	jp sys_ReadSectorCache
 	jp sys_WriteSectorCache
+; end of jump table

@@ -117,7 +117,9 @@ namespace bos
 					f.write("?"+line.ljust(32," ")+(":= $"+myhex(counter))+"\n")
 				counter+=4
 			else:
-				f.write(";"+line+"\n")
+				if not line.startswith(";"):
+					f.write(";")
+				f.write(line+"\n")
 		f.write(""";-------------------------------------------------------------------------------
 ; OS memory areas and misc defines
 ;-------------------------------------------------------------------------------

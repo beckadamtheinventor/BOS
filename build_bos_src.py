@@ -25,7 +25,7 @@ def build_bos_src():
 			else:
 				publics.append(line[1:line.find(" ")])
 				defines.append(line[1:])
-		elif line.startswith("; defines"):
+		elif line.startswith("; end of jump table"):
 			break
 	with open(os.path.join(d, "bos.src"),"w") as f:
 		f.write("\n; BOS jump table functions\n")

@@ -369,18 +369,18 @@ fs_subfile emergency_shell_files, emergency_shell_fs
 end fs_subfile
 
 fs_subfile emergency_extractos, emergency_shell_fs
-	db $18,$04,"FEX",0
 	jp fs_ExtractOSBinaries.silent
+	db "FEX",0
 end fs_subfile
 
 fs_subfile emergency_extractopt, emergency_shell_fs
-	db $18,$04,"FEX",0
 	jp fs_ExtractOSOptBinaries
+	db "FEX",0
 end fs_subfile
 
 fs_subfile emergency_extractroot, emergency_shell_fs
-	db $18,$04,"FEX",0
 	jp fs_ExtractRootDir
+	db "FEX",0
 end fs_subfile
 
 ; fs_subfile emergency_flashunlock, emergency_shell_fs

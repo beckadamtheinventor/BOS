@@ -226,6 +226,7 @@ namespace bos
 ?_UnpackUpdates                  := $22658
 ?sys_ReadSectorCache             := $2265C
 ?sys_WriteSectorCache            := $22660
+; end of jump table
 ;-------------------------------------------------------------------------------
 ; OS memory areas and misc defines
 ;-------------------------------------------------------------------------------
