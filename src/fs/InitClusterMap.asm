@@ -29,7 +29,7 @@ end if
 	ld (ti.vRam + (fs_cluster_map and $FFFF)),a
 	push iy
 	ld iy,$040000
-	call .traverse
+	call .traverse_into_jump
 	pop iy
 
 	ld a,fs_cluster_map shr 16
@@ -72,19 +72,23 @@ end if
 	ld b,l
 	ld de,(iy+fsentry_filesector)
 	ex.s hl,de
-	ld de,ti.vRam+$10000
+	ld de,ti.vRam + (fs_cluster_map and $FFFF)
 	add hl,de
 	ex hl,de
 .mark_file_entry:
-	push iy
 	ld a,fscluster_allocated
+	bit fd_subdir, (iy+fsentry_fileattr)
+	jr z,.not_a_directory
+	ld (de),a
+	call .traverse_into
+	jr .traverse_next
+.not_a_directory:
+	push iy
 .mark_file_loop:
 	ld (de),a
 	inc de
 	djnz .mark_file_loop
 	pop iy
-	bit fd_subdir, (iy+fsentry_fileattr)
-	call nz,.traverse_into
 .traverse_next:
 	lea iy,iy+16
 	jq .traverse
@@ -99,5 +103,9 @@ end if
 	call fs_GetSectorAddress
 	ex (sp),hl
 	pop iy
+	ex.s hl,de
+	ld hl,ti.vRam + (fs_cluster_map and $FFFF)
+	add hl,de
+	ld (hl),fscluster_allocated
 	jq .traverse
 

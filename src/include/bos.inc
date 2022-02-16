@@ -3,8 +3,14 @@
 ; Executable formats
 ;-------------------------------------------------------------------------------
 macro format?.ram?.executable?
+	format ram executable at ti.userMem
+end macro
+
+macro format?.ram?.executable?.at? addr
+	org addr
 	db $18,$04,"REX",$00
 end macro
+
 
 macro format?.flash?.executable?
 	display "Make sure you're using OffsetInstruction for absolute addressing within your program, or handle relocations appropriately.",$A
@@ -351,6 +357,7 @@ namespace bos
 ?fsentry_dot             := $2E
 ?fsentry_longfilename    := $F1
 ?fsentry_unlisted        := $F2
+?fsentry_dirextender     := $FF
 ?fsentry_endofdir2       := $FF
 ?fsentry_filename            := $00
 ?fsentry_filename.len        := 8

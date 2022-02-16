@@ -18,12 +18,13 @@ fs_GetFDPtr:
 	ret
 .hasdatasection:
 	dec hl
-	bit fd_subfile,(hl)
 	ex hl,de
 	sbc hl,hl
 	ld l,c
 	ld h,b
-	jq z,fs_GetSectorAddress.entry
+	ld a,(de)
+	bit fd_subfile,a
+	jr z,fs_GetSectorAddress.entry
 .subfile:
 	ld e,0
 	res 0,d

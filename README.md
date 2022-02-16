@@ -50,10 +50,16 @@ To uninstall, press the reset button found on the back of the calculator, open t
 
 # BOS Recovery Options
 From BOS's homescreen, press the "Y=" key. (also known as "F1") If this doesn't go to the recovery menu, press "clear" to go back, then "F1" again.
-From there, you can reboot, attempt filesystem recovery / run filesystem cleanup, reset the filesystem, and uninstall BOS.
+From there, you can reboot, attempt filesystem recovery / run filesystem cleanup, reset the filesystem, uninstall BOS, or run emergency shell.
 If you still cannot access the recovery menu, press the reset button found on the back of the calculator while pressing the recovery menu key.
 If that still doesn't work, hold on+2nd+del and press reset, then reinstall TIOS using TI-Connect CE or TiLP.
 
+## Emergency shell
+`extract.all` Extract the filesystem without formatting.
+`extract.os` Extract the OS filesystem sector.
+`extract.rot` Extract the root directory.
+`extract.opt` Extract files and directories that would be extracted on a fresh format.
+`format` Format the filesystem
 
 # Contributing
 If there's a feature you want to see in BOS, you found a bug, or have any questions or concerns, feel free to make an [issue](https://github.com/beckadamtheinventor/BOS/issues).
@@ -83,21 +89,17 @@ As well, do not directly write directly to files in BOS! All files are stored in
 
 
 ## Writing Assembly Programs for BOS
-NOTE: This guide will be heavily modified once I implement an ELF-derived executable and linkable format.
-The header of your program is different depending if it is meant to run from RAM/USB, or flash.
+NOTE: This guide will be heavily modified if/when I implement an ELF-derived executable and linkable format.
+The header of your program will be different depending if it is meant to run from RAM/USB, or flash.
 
-
-### If your program runs from RAM or USB
+### If your program runs from RAM/USB (usermem)
 header:
 ```
 include 'include/ez80.inc'
 include 'include/ti84pceg.inc'
 include 'include/bos.inc'
 
-org ti.userMem ;the address this executable runs from
-	jr main ;jump to code
-	db "REX",0 ;header to mark this program as a Ram EXecutable.
-main:
+format ram executable
 	;your code here
 ```
 
@@ -127,7 +129,7 @@ BOS comes pre-loaded with the standard libload libraries, including the USB driv
 + usbdrvce (stable, subject to change)
 
 There are three ways to use libload in BOS, depending on where your program runs from.
-
+When writing an assembly program using `boslibloader.inc` you can use routines from any library loaded with the `libload` macro. The macros will handle the rest.
 
 ### Method A
 Program runs from RAM, default libload settings, optionally displaying libload messages.
@@ -135,34 +137,12 @@ Program runs from RAM, default libload settings, optionally displaying libload m
 include 'include/ez80.inc'
 include 'include/ti84pceg.inc'
 include 'include/bos.inc'
+include 'include/boslibloader.inc'
 
-org ti.userMem ;the address this executable runs from
-	jr init ;jump to code
-	db "REX",0 ;header to mark this program as a Ram EXecutable.
-init:
-	call load_libload
-	jq z,main
-	scf
-	sbc hl,hl
-	ret
-
-load_libload:
-	ld hl,libload_name
-	push hl
-	call bos.fs_GetFilePtr
-	pop bc
-	jr c,.notfound
-	ld   de,libload_relocations ;pointer to libraries / routines to load. Same format as libload programs written for TIOS
-	ld   bc,.notfound
-	push   bc
-	ld	bc,$aa55aa ;remove this line to silence libload messages
-	jp   (hl)
-.notfound:
-	xor   a,a
-	inc   a
-	ret
-
-main:
+format ram executable
+	libload load
+	ret nz
+	libload graphx ; or another standard libload library
 	;your code here
 ```
 
@@ -173,35 +153,13 @@ Program runs from RAM, libload uses malloc'd memory, libload does not display me
 include 'include/ez80.inc'
 include 'include/ti84pceg.inc'
 include 'include/bos.inc'
+include 'include/boslibloader.inc'
 
-org ti.userMem ;the address this executable runs from
-	jr init ;jump to code
-	db "REX",0 ;header to mark this program as a Ram EXecutable.
-init:
-	call load_libload
-	jq z,main
-	scf
-	sbc hl,hl
-	ret
-
-load_libload:
-	ld hl,libload_name
-	push hl
-	call bos.fs_GetFilePtr
-	pop bc
-	jr c,.notfound
-	ld   de,libload_relocations ;pointer to libraries / routines to load. Same format as libload programs written for TIOS
-	ld   bc,.notfound
-	push   bc
-	ld	bc,$aa5aa5
-	jp   (hl)
-.notfound:
-	xor   a,a
-	inc   a
-	ret
-
-main:
-	;your code here
+format ram executable
+	libload load LIBLOAD_USEMALLOC
+	ret nz
+	libload graphx ; or another standard libload library
+	; your code here
 ```
 
 
@@ -211,36 +169,4 @@ This is an advanced method!
 This method is the most difficult to use due to it requiring either relocation or offsets of the program file.
 To use this method, make sure the libload relocations are not stored in flash and BC = $aa5aa5 before the jump to libload.
 In addition, the program will likely need a way to reference itself due to it not knowing where it's run from until runtime.
-
-
-## Libload Relocations
-All libraries and routines to be used in the program must be passed along to libload in DE before the jump to libload.
-The library include header starts with the byte 0xC0 ($C0) and is followed by the null-terminated library name, which is then followed by a version byte.
-Note that since BOS comes pre-loaded with some of the latest libload libraries, it is unlikely that you will see a version error.
-Headers for libload libraries included in BOS:
-+ fatdrvce: `db $C0,"FATDRVCE",0,1`
-+ fontlibc: `db $C0, "FONTLIBC",0,2`
-+ fileioc: `db $C0,"FILEIOC",0,7`
-+ graphx: `db $C0,"GRAPHX",0,11`
-+ keypadc: `db $C0,"KEYPADC",0,2`
-+ msddrvce: `db $C0,"MSDDRVCE",0,1`
-+ srldrvce: `db $C0,"SRLDRVCE",0,0`
-+ usbdrvce: `db $C0,"USBDRVCE",0,0`
-
-Example usage:
-```
-libload_relocations:
-	db $C0,"GRAPHX",0,11
-gfx_SetColor:
-	jp 2*3
-gfx_ZeroScreen:
-	jp 76*3
-
-; end of relocations marker. This is important, and is executed by libload on successful load.
-	xor a,a
-	pop hl ;pop error handler
-	ret
-
-```
-
 

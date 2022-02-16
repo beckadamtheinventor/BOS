@@ -20,6 +20,8 @@ fs_StrToFileEntry:
 	jr z,.checkpathext
 	djnz .checkpathnameloop
 	ld a,(hl)
+	or a,a
+	jr z,.notlongfilename
 	cp a,'.'
 	jr nz,._fail
 .checkpathext:
@@ -29,6 +31,9 @@ fs_StrToFileEntry:
 	or a,a
 	jr z,.notlongfilename
 	djnz .checkpathext
+	ld a,(hl)
+	or a,a
+	jr z,.notlongfilename
 ._fail:
 	pop hl,hl
 .__fail:
@@ -59,7 +64,6 @@ fs_StrToFileEntry:
 	inc de
 	djnz .copy_file_name_loop
 	ld c,(hl)
-	inc hl
 	jq .copy_file_name_ext
 .pad_file_name:
 	ld a,' '

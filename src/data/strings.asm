@@ -344,8 +344,8 @@ str_ystem:
 
 str_EmergencyShellInfo:
 	db "available commands:",$A
-	db "extract.[os|opt|rot]",$A
-	db "  extract OS|OSopt|rootdir",$A
+	db "extract.[all|os|opt|rot]",$A
+	db "format",$A
 	; db "flock/funlock",$A
 	; db "  lock/unlock flash",$A
 	; db "secclear hex",$A
@@ -359,6 +359,7 @@ emergency_shell_fs:
 	fs_sfentry emergency_shell_files, "emshell", "fs", (1 shl fd_subfile) or (1 shl fd_subdir)
 	db $FF
 fs_subfile emergency_shell_files, emergency_shell_fs
+	fs_sfentry emergency_extractall, "extract", "all", 1 shl fd_subfile
 	fs_sfentry emergency_extractos, "extract", "os", 1 shl fd_subfile
 	fs_sfentry emergency_extractopt, "extract", "opt", 1 shl fd_subfile
 	fs_sfentry emergency_extractroot, "extract", "rot", 1 shl fd_subfile
@@ -366,6 +367,15 @@ fs_subfile emergency_shell_files, emergency_shell_fs
 	; fs_sfentry emergency_flashunlock, "funlock", "", 1 shl fd_subfile
 	; fs_sfentry emergency_eraseflashsector, "secclear", "", 1 shl fd_subfile
 	db $FF
+end fs_subfile
+
+fs_subfile emergency_extractall, emergency_shell_fs
+	jr emergency_extractall.main
+	db "FEX",0
+emergency_extractall.main:
+	call fs_ExtractOSBinaries.silent
+	call fs_ExtractRootDir
+	jp fs_ExtractOSOptBinaries
 end fs_subfile
 
 fs_subfile emergency_extractos, emergency_shell_fs

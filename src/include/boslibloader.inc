@@ -1,31 +1,31 @@
 
-LIBLOAD_DEFAULT  :=  0
-LIBLOAD_SILENT   :=  $AA55AA
-LIBLOAD_MALLOC   :=  $AA5AA5
+LIBLOAD_DEFAULT     :=  0
+LIBLOAD_SILENT      :=  $AA55AA
+LIBLOAD_USEMALLOC   :=  $AA5AA5
 
-macro libload?.load? whence
+macro libload?.load? whence:LIBLOAD_DEFAULT
 	virtual
 		__libload_relocation_data::
 	end virtual
 
 	call __libload_load
-	ret c
 	postpone
 		__libload_load:
 			ld hl,__libload_name
 			push hl
 			call bos.sys_OpenFileInLib
 			pop bc
-			ret c
+			jr c,__libload_fail
 			ld bc,__libload_fail
+			push bc
 			if whence > 0
 				ld bc,whence
 			end if
 			ld de,__libload_relocations
-			push de
 			jp (hl)
 		__libload_fail:
-			scf
+			xor a,a
+			inc a
 			ret
 		__libload_name:
 			db "/lib/LibLoad.dll",0
@@ -34,6 +34,9 @@ macro libload?.load? whence
 				load __libload_relocation_data.data: $-$$ from $$
 			end virtual
 			db __libload_relocation_data.data
+			pop hl
+			xor a,a
+			ret
 	end postpone
 end macro
 
