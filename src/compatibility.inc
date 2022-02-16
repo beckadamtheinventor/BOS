@@ -1,5 +1,6 @@
 
 ; BOS compatility routines
+include 'compatibility/_os_GetSystemStats.asm'
 include 'compatibility/_DivHLBy10_s.asm'
 include 'compatibility/_HLTimes9.asm'
 include 'compatibility/_ClrScrn.asm'

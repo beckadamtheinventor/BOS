@@ -45,7 +45,6 @@ explorer_init:
 	ret
 explorer_init_2:
 	call gfx_Begin
-	EnableOSThreading
 	ld bc,258
 	push bc
 	call bos.sys_Malloc
@@ -232,8 +231,11 @@ explorer_cursor_x:=$-3
 	call gfx_Rectangle
 	pop bc,bc,bc,bc
 	call gfx_BlitBuffer
+	EnableOSThreading
 .key_loop:
+	ei
 	call bos.sys_WaitKeyCycle
+	di
 	dec a
 	jq z,explorer_cursor_down
 	dec a

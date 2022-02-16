@@ -4,7 +4,7 @@
 	jp HandleInstruction ;thread control instructions and more
 	jp DONOTHING
 	jp DONOTHING
-	jp handle_offsetcall ;handle_rst28
+	jp handle_offsetinstruction ;handle_rst28
 	jp DONOTHING ;handle_rst30
 	include 'tiosjt.asm'
 	dd (($022400-$) shr 2) dup $CD or handle_unimplemented shl 8
@@ -162,4 +162,5 @@
 	jp _UnpackUpdates
 	jp sys_ReadSectorCache
 	jp sys_WriteSectorCache
+	jp sys_OpenFileInLib
 ; end of jump table

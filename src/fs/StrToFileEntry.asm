@@ -1,19 +1,49 @@
 ;@DOES convert a file.ext string to a file entry
 ;@INPUT char *fs_StrToFileEntry(char *dest, const char *src);
-;@OUTPUT pointer to file entry, 0 if failed
+;@OUTPUT pointer to file entry, 0 if failed. First byte of file entry will be fsentry_longfilename if file's name is too long for an 8.3 path.
 ;@OUTPUT Cf set if failed
 fs_StrToFileEntry:
 	pop bc,de,hl
 	push hl,de,bc
 	ld a,(hl)
 	or a,a
-	jq nz,.main
-	xor a,a
+	jr z,.__fail
+.main:
+	push de,hl
+	ld b,8
+.checkpathnameloop:
+	ld a,(hl)
+	inc hl
+	or a,a
+	jr z,.notlongfilename
+	cp a,'.'
+	jr z,.checkpathext
+	djnz .checkpathnameloop
+	ld a,(hl)
+	cp a,'.'
+	jr nz,._fail
+.checkpathext:
+	ld b,3
+	ld a,(hl)
+	inc hl
+	or a,a
+	jr z,.notlongfilename
+	djnz .checkpathext
+._fail:
+	pop hl,hl
+.__fail:
 	sbc hl,hl
 	scf
 	ret
-.main:
-	push de
+; .definitelylongfilename:
+	; pop hl,hl
+	; ld (hl),fsentry_longfilename
+	; or a,a
+	; sbc hl,hl
+	; scf
+	; ret
+.notlongfilename:
+	pop hl
 	ld b,8
 .copy_file_name_loop:
 	ld a,(hl)
@@ -71,5 +101,3 @@ fs_StrToFileEntry:
 	scf
 	sbc hl,hl
 	ret
-
-

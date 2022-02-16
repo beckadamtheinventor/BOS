@@ -18,31 +18,28 @@ fs_CreateFile:
 
 	ld (ix-7),hl ; save file descriptor
 
-	ld bc,(ix+12)
-	ld a,c
-	or a,b
-	jq z,.zerolen
+	ld hl,(ix+12)
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	jr z,.zerolen
 
-	ld a,b
-	inc a
-	jq nz,.under64k
-	ld c,b
-.under64k:
-	ld (ix-2),c
-	ld (ix-1),b
+	ld (ix-2),l
+	ld (ix-1),h
 .alloc:
-	push bc
+	push hl
 	call fs_Alloc ;allocate space for file
 	jq c,.fail
 	pop bc
 	ld (ix-4),l
 	ld (ix-3),h
-	jq .writedescriptor
+	jr .writedescriptor
 
 .zerolen:
+	scf
 	sbc hl,hl
 	ld (ix-3),hl
-	ld (ix-4),a
+	ld (ix-4),l
 .writedescriptor:
 	ld hl,(ix-7) ; restore file descriptor
 	ld bc,fsentry_filesector

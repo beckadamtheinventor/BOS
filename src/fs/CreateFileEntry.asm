@@ -48,7 +48,14 @@ fs_CreateFileEntry:
 	push hl
 	pea ix-19
 	call fs_StrToFileEntry
+	jq c,.fail
+	ld a,(ix-19)
+	sub a,fsentry_longfilename
+	or a,a ; make sure Cf is unset
+	call z,fs_CreateLongFileName
+	jq c,.fail
 	pop bc,bc
+
 
 	ld a, (ix+9)
 	ld (ix + fsentry_fileattr - 19), a     ;setup new file descriptor contents

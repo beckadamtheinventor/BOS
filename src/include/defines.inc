@@ -105,11 +105,16 @@ end_of_user_archive    := $3B0000 ;sector $3B, start of certificate
 fs_cluster_map := $3BE000
 fs_cluster_map.len := 7040
 fs_cmap_length := fs_cluster_map.len
-; asset_locations_start  := $3C0000
 
-fs_sector_size         := 512
-fs_partition_desc_size := 16
-fs_file_desc_size      := 16
+fs_sector_size                := 512
+fscluster_smallallocblocksize := 1024
+fs_partition_desc_size        := 16
+fs_file_desc_size             := 16
+
+; Filesystem cluster map allocation markers
+fscluster_freed             := $00
+fscluster_allocated         := $FE
+fscluster_clean             := $FF
 
 
 ; file entry flags
@@ -123,9 +128,8 @@ fd_link       := 6
 fd_elevated   := 7
 
 ; file entry first byte
-fsentry_endofdir        := $00
+fsentry_deleted         := $00
 fsentry_dot             := $2E
-fsentry_deleted         := $F0
 fsentry_longfilename    := $F1
 fsentry_unlisted        := $F2
 fsentry_endofdir2       := $FF

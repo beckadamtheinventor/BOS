@@ -1,24 +1,31 @@
 ;@DOES Return pointer to file data given a file descriptor
 ;@INPUT void *fs_GetFDPtr(void *fd);
-;@OUTPUT pointer to file data
+;@OUTPUT pointer to file data, or -1 if file data has not been allocated yet.
 fs_GetFDPtr:
 	pop bc,hl
 	push hl,bc
-	ld bc,fsentry_fileattr
+.entry:
+	ld bc,fsentry_filesector
 	add hl,bc
-	bit fd_subfile,(hl)
-	inc hl
-	jq nz,.subfile
-	ld hl,(hl)
-	push hl
-	call fs_GetSectorAddress
-	pop bc
+	ld bc,(hl)
+	ld a,c
+	and a,b
+	inc a
+	jr nz,.hasdatasection
+.retneg1:
+	scf
+	sbc hl,hl
 	ret
+.hasdatasection:
+	dec hl
+	bit fd_subfile,(hl)
+	ex hl,de
+	sbc hl,hl
+	ld l,c
+	ld h,b
+	jq z,fs_GetSectorAddress.entry
 .subfile:
-	ld c,(hl)
-	inc hl
-	ld b,(hl)
-	ld l,0
-	res 0,h
-	add hl,bc
+	ld e,0
+	res 0,d
+	add hl,de
 	ret

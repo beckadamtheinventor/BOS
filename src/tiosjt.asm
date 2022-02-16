@@ -130,7 +130,7 @@
 	jp _Mov9ToOP1
 	call handle_unimplemented ;_Mov9OP1OP2
 	jp _Mov9ToOP2
-	call handle_unimplemented ;_MovFROP1
+	jp _MovFROP1 ;_MovFROP1
 	call handle_unimplemented ;OP4Set1                   := 0020330h
 	call handle_unimplemented ;OP3Set1                   := 0020334h
 	call handle_unimplemented ;OP2Set8                   := 0020338h
@@ -1006,8 +1006,8 @@
 	call handle_unimplemented ;DispOP1A                  := 00210D0h
 	jp DONOTHING ;                          equ 00210D4h
 	call handle_unimplemented ;SetTblGraphDraw           := 00210D8h
-	call handle_unimplemented ;MemClear                  := 00210DCh
-	call handle_unimplemented ;MemSet                    := 00210E0h
+	jp _MemClear ;MemClear                  := 00210DCh
+	jp _MemSet ;MemSet                    := 00210E0h
 	call handle_unimplemented ;PointOn                   := 00210E4h
 	call handle_unimplemented ;ExecuteNewPrgm            := 00210E8h
 	call handle_unimplemented ;StrLength                 := 00210ECh
@@ -1028,8 +1028,8 @@
 	call handle_unimplemented ;AppGetCBLUSB              := 0021128h
 	call handle_unimplemented ;SetIgnoreKey              := 002112Ch
 	call handle_unimplemented ;SetSendThisKeyBack        := 0021130h
-	call handle_unimplemented ;DisableAPD                := 0021134h
-	call handle_unimplemented ;EnableAPD                 := 0021138h
+	jp DONOTHING ;DisableAPD                := 0021134h
+	jp DONOTHING ;EnableAPD                 := 0021138h
 	call handle_unimplemented ;Set2IY34                  := 002113Ch
 	call handle_unimplemented ;ForceCmd                  := 0021140h
 	call handle_unimplemented ;ApdSetup                  := 0021144h
@@ -1900,7 +1900,7 @@
 	call handle_unimplemented ;os.SetTimer1              := 0021EC8h
 	call handle_unimplemented ;os.DisableTimer1          := 0021ECCh
 	call handle_unimplemented ;os.SetKbdKey              := 0021ED0h
-	call handle_unimplemented ;os.GetSystemStats         := 0021ED4h
+	jp _os_GetSystemStats ;         := 0021ED4h
 	jp DONOTHING ;                          equ 0021ED8h
 	jp DONOTHING ;                          equ 0021EDCh
 	call handle_unimplemented ;DispHL                    := 0021EE0h

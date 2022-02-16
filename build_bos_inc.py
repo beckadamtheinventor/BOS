@@ -31,7 +31,21 @@ def build_bos_inc():
 	with open(path.join(path.dirname(__file__), "bos.inc"),"w") as f:
 		f.write("""
 ;-------------------------------------------------------------------------------
-; Call/jump to currently running program at offset
+; Executable formats
+;-------------------------------------------------------------------------------
+macro format?.ram?.executable?
+	db $18,$04,"REX",$00
+end macro
+
+macro format?.flash?.executable?
+	display "Make sure you're using OffsetInstruction for absolute addressing within your program, or handle relocations appropriately.",$A
+	db $18,$04,"FEX",$00
+end macro
+
+;-------------------------------------------------------------------------------
+; Run instruction offsetting its argument by the pointer to the running program.
+; NOTE: Only use this with opcodes that have a 24-bit argument, and do not use opcode suffixes.
+;       Furthermore, avoid using this macro unless you have to. It's a lot more expensive than the instruction would otherwise be.
 ;-------------------------------------------------------------------------------
 macro OffsetInstruction? instruction*
 	rst $28

@@ -3,6 +3,7 @@
 fs_GetSector:
 	pop bc,hl
 	push hl,bc
+.entry:
 	; ld a,(filesystem_driver)
 	; or a,a
 	ld de,-start_of_user_archive

@@ -8,8 +8,8 @@ def convert(fnamein, fnameout):
 		os.mkdir(tmp)
 	with Image.open(fnamein) as img:
 		img = img.resize((320, (img.height*320)//img.width))
-		if img.height > 200:
-			img = img.crop((0, 100-img.height//2, 320, 100+img.height//2))
+		if img.height > 220:
+			img = img.crop((0, 110-img.height//2, 320, 110+img.height//2))
 		img.save(os.path.join(tmp, "image.png"))
 	yaml = os.path.join(tmp, "convimg.yaml")
 	with open(yaml, "w") as f:

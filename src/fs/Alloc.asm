@@ -1,9 +1,16 @@
-;@DOES allocate space for a file
+
+;@DOES allocate space in flash for a file
 ;@INPUT int fs_Alloc(int len);
-;@OUTPUT hl = first sector allocated
+;@OUTPUT hl = first sector allocated, or -1 and Cf set if failed.
 fs_Alloc:
-	ld hl,-4
+	ld a,fscluster_allocated
+;@DOES allocate space in flash with a specified allocation marker
+;@INPUT int fs_Alloc(int len); (input allocation marker in A)
+;@NOTE You probably shoudln't be calling this in your code unless you know what you're doing.
+fs_AllocWithMarker:
+	ld hl,-5
 	call ti._frameset
+	ld (ix-5),a
 	ld bc,(ix+6)
 	ld a,b
 	and a,1
@@ -22,6 +29,7 @@ fs_Alloc:
 .search_loop:
 	ld a,(hl)
 	inc hl
+assert fscluster_clean = $FF
 	inc a
 	jq z,.found
 	dec bc
@@ -55,7 +63,7 @@ fs_Alloc:
 	ld de,(ix-3)
 	dec de
 	ld b,(ix-4)
-	ld c,$FE
+	ld c,(ix-5)
 .reserve_loop:
 	push bc,de
 	ld a,c

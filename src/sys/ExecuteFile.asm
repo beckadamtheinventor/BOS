@@ -3,15 +3,17 @@
 ;@INPUT int sys_ExecuteFile(const char *path, char *args);
 ;@OUTPUT -1 and Cf set if file does not exist or is not a valid executable format, or if malloc failed somewhere.
 ;@OUTPUT ExecutingFileFd set to point to file descriptor. -1 if file not found, -2 if /var/PATH not found.
-;@DESTROYS All, OP6.
+;@DESTROYS All, OP5, OP6.
 ;@NOTE If you're running a threaded executable, the thread is spawned but won't actually start until it's thread is handled.
 ;;;@NOTE If OS threading is enabled, sleep current thread and execute a file in a new thread given a relative or absolute path. Returns to caller if starting a threaded executable.
 ;@NOTE If OS threading is disabled, execute a file in a new thread given a relative or absolute path. Returns to caller if starting a threaded executable.
 sys_ExecuteFile:
+	xor a,a
+	ld (fsOP5+10),a
+.__entry:
 	scf
 	sbc hl,hl
 	ld (ExecutingFileFd),hl
-	xor a,a
 	ld (return_code_flags),a
 	pop bc
 	pop hl
@@ -166,8 +168,11 @@ sys_ExecuteFile:
 .exec_fex:
 	call sys_NextProcessId
 	call sys_FreeRunningProcessId ;free memory allocated by the new process ID if there is any
+
+	ld a,(fsOP5+10)
+	or a,a
 	ld de,(fsOP6) ;arguments string
-	call .load_argc_argv_loop
+	call z,.load_argc_argv_loop
 	ld de,(fsOP6)
 	ld bc,(fsOP5)
 	push de,bc
@@ -264,7 +269,7 @@ sys_jphl:=$
 	inc hl
 	push hl,de
 	ld a,(running_process_id)
-	ld (fsOP6+13),a
+	ld (fsOP5+9),a
 	call sys_NextProcessId
 	call sys_Malloc
 	pop bc
@@ -279,7 +284,7 @@ sys_jphl:=$
 	add hl,bc
 	add hl,bc ;each entry is 2 bytes. hl should now point to code needing relocation
 	pop bc,de
-	ld (fsOP6+9),de
+	ld (fsOP5+6),de
 	ldir
 	ld bc,(fsOP6+6)
 	ld a,b
@@ -292,11 +297,11 @@ sys_jphl:=$
 	ld c,(iy)
 	ld b,(iy+1)
 	lea iy,iy+2
-	ld hl,(fsOP6+9)
+	ld hl,(fsOP5+6)
 	add hl,bc
 	ld bc,(hl)
 	ex hl,de
-	ld hl,(fsOP6+9)
+	ld hl,(fsOP5+6)
 	add hl,bc
 	ex hl,de
 	ld (hl),de
@@ -308,12 +313,12 @@ sys_jphl:=$
 	pop iy
 .no_relocations:
 	ld hl,(running_program_ptr)
-	ld de,(fsOP6+9)
+	ld de,(fsOP5+6)
 	ld (running_program_ptr),de
 	jq .exec_threaded_hl
 .exec_threaded_fex:
 	ld a,(running_process_id)
-	ld (fsOP6+13),a
+	ld (fsOP5+9),a
 	ld a,1
 	ld (running_process_id),a
 	ld hl,(running_program_ptr)
@@ -340,7 +345,7 @@ sys_jphl:=$
 	ld de,(running_program_ptr)
 	push hl,de
 	call th_CreateThread ; queue the thread to be run on the next thread switch
-	ld a,(fsOP6+13)
+	ld a,(fsOP5+9)
 	ld (running_process_id),a
 	ld hl,return_code_flags
 	set bSilentReturn,(hl) ;return to caller silently
@@ -385,7 +390,7 @@ sys_jphl:=$
 	; pop bc
 	; jr c,.executable_text_fail
 	; ex hl,de
-	; ld (fsOP6+9),de ; save malloc'd memory pointer
+	; ld (fsOP5+6),de ; save malloc'd memory pointer
 	; pop hl ; hl = file name
 	; pop bc ; bc = length of pre-arguments 
 	; ex (sp),hl ; hl = pre-arguments
@@ -396,7 +401,7 @@ sys_jphl:=$
 	; push de
 	; call ti._strcpy ; copy the file name string
 	; pop bc,bc
-	; ld de,(fsOP6+9) ; arguments string
+	; ld de,(fsOP5+6) ; arguments string
 	; pop hl ; program to run this with
 
 ; .executable_text_fail:

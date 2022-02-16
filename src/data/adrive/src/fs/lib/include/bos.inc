@@ -1,6 +1,20 @@
 
 ;-------------------------------------------------------------------------------
-; Call/jump to currently running program at offset
+; Executable formats
+;-------------------------------------------------------------------------------
+macro format?.ram?.executable?
+	db $18,$04,"REX",$00
+end macro
+
+macro format?.flash?.executable?
+	display "Make sure you're using OffsetInstruction for absolute addressing within your program, or handle relocations appropriately.",$A
+	db $18,$04,"FEX",$00
+end macro
+
+;-------------------------------------------------------------------------------
+; Run instruction offsetting its argument by the pointer to the running program.
+; NOTE: Only use this with opcodes that have a 24-bit argument, and do not use opcode suffixes.
+;       Furthermore, avoid using this macro unless you have to. It's a lot more expensive than the instruction would otherwise be.
 ;-------------------------------------------------------------------------------
 macro OffsetInstruction? instruction*
 	rst $28
@@ -69,7 +83,7 @@ namespace bos
 ?HandleInstruction               := $20110
 ;DONOTHING                       := $20114
 ;DONOTHING                       := $20118
-?handle_offsetcall               := $2011C
+?handle_offsetinstruction        := $2011C
 ;DONOTHING                       := $20120
 ;	include 'tiosjt.asm'
 ;	dd (($022400-$) shr 2) dup $CD or handle_unimplemented shl 8
@@ -226,6 +240,7 @@ namespace bos
 ?_UnpackUpdates                  := $22658
 ?sys_ReadSectorCache             := $2265C
 ?sys_WriteSectorCache            := $22660
+?sys_OpenFileInLib               := $22664
 ; end of jump table
 ;-------------------------------------------------------------------------------
 ; OS memory areas and misc defines
@@ -317,9 +332,13 @@ namespace bos
 ?fs_cluster_map := $3BE000
 ?fs_cluster_map.len := 7040
 ?fs_cmap_length := fs_cluster_map.len
-?fs_sector_size         := 512
-?fs_partition_desc_size := 16
-?fs_file_desc_size      := 16
+?fs_sector_size                := 512
+?fscluster_smallallocblocksize := 1024
+?fs_partition_desc_size        := 16
+?fs_file_desc_size             := 16
+?fscluster_freed             := $00
+?fscluster_allocated         := $FE
+?fscluster_clean             := $FF
 ?fd_executable := 0
 ?fd_hidden     := 1
 ?fd_system     := 2
@@ -328,9 +347,8 @@ namespace bos
 ?fd_device     := 5
 ?fd_link       := 6
 ?fd_elevated   := 7
-?fsentry_endofdir        := $00
+?fsentry_deleted         := $00
 ?fsentry_dot             := $2E
-?fsentry_deleted         := $F0
 ?fsentry_longfilename    := $F1
 ?fsentry_unlisted        := $F2
 ?fsentry_endofdir2       := $FF

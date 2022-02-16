@@ -3,7 +3,7 @@
 	public _boot_os
 	public _handle_interrupt
 	public _HandleInstruction
-	public _handle_offsetcall
+	public _handle_offsetinstruction
 	public _sys_ExecuteFile
 	public _os_GetOSInfo
 	public _fs_OpenFile
@@ -150,10 +150,11 @@
 	public __UnpackUpdates
 	public _sys_ReadSectorCache
 	public _sys_WriteSectorCache
+	public _sys_OpenFileInLib
 _boot_os                         := $20108
 _handle_interrupt                := $2010C
 _HandleInstruction               := $20110
-_handle_offsetcall               := $2011C
+_handle_offsetinstruction        := $2011C
 _sys_ExecuteFile                 := $22400
 _os_GetOSInfo                    := $22404
 _fs_OpenFile                     := $22408
@@ -300,3 +301,4 @@ _fs_WriteRaw                     := $22654
 __UnpackUpdates                  := $22658
 _sys_ReadSectorCache             := $2265C
 _sys_WriteSectorCache            := $22660
+_sys_OpenFileInLib               := $22664

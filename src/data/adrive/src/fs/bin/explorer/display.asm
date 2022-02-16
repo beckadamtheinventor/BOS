@@ -43,7 +43,7 @@ explorer_background_image_full:=$-3
 	jq z,.dont_draw_background_image
 	inc hl
 	ld de,ti.vRam + ti.lcdWidth*ti.lcdHeight + ti.lcdWidth*20
-	ld bc,ti.lcdWidth*200
+	ld bc,ti.lcdWidth*220
 	ldir
 	jq .dont_draw_background_image_sprite
 .dont_draw_background_image:

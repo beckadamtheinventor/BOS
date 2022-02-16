@@ -2,6 +2,8 @@
 _Mov18b:
 	ld c,18
 	jr _MovCb
+_MovFROP1:
+	ld hl,ti.OP1
 ;@DOES copy 11 bytes from HL to DE
 _Mov11b:
 	ld c,11

@@ -116,29 +116,18 @@ fs_OpenFile:
 	push hl
 	call sys_Free
 	pop bc
-	ld a,(iy)
 	lea iy,iy+16
-	cp a,fsentry_longfilename
-	jq nz,.search_loop
-	or a,a
-	sbc hl,hl
-	ld l,(iy-15)
-	lea bc,iy
-	add hl,bc
-	push hl
-	pop iy
-
 ;searches for a file name in a directory listing
 .search_loop:
 	ld a,(iy)
 	inc a
 	ret z ; reached end of directory
 	inc a
-	jq z,.search_next_section ; reached end of directory section
+	jr z,.search_next_section ; reached end of directory section
 	cp a,fsentry_longfilename+2
-	jq z,.search_next
 	push iy
-	call fs_CopyFileName ;get file name string from file entry
+	ld hl,(iy+1)
+	call nz,fs_CopyFileName ;get file name string from file entry if not a long file name
 	ld (ix-6),hl
 	push hl
 	call ti._strlen ;get length of file name string from file entry

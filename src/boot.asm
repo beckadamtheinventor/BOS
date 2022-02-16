@@ -220,20 +220,61 @@ handle_safeop:
 	pop af
 	ret
 
-handle_offsetcall:
-	push hl,af,de,bc
-	ld hl,12
-	add hl,sp
-	ld de,(hl) ;grab pointer to caller
-	ex hl,de
+;@DESTROYS OP5
+handle_offsetinstruction:
+	push hl,de,iy,af
+	ld iy,12
+	add iy,sp
+	ld hl,(iy) ;grab pointer to caller
+	ld a,(hl)
 	inc hl
-	ld bc,(hl) ;grab argument from caller
+	ld (fsOP5),a ; first opcode byte
+	cp a,$DD ; two byte instruction
+	jr z,.isa2binstruction
+	cp a,$ED ; two byte instruction
+	jr z,.isa2binstruction
+	cp a,$FD ; two byte instruction
+	jr nz,.isnota2binstruction
+.isa2binstruction:
+	inc de
+	ld a,(de)
+	inc de
+	ld (fsOP5+1),a ; second opcode byte
 	ex hl,de
+	ld de,(hl) ;grab argument from caller
+	inc hl
+	inc hl
+	inc hl
+	ld (iy),hl ; increment caller past the original instruction
 	ld hl,(running_program_ptr) ;pointer to currently running program
-	add hl,bc ;jump to &running_program[offset]
-	pop bc,de,af
-	ex (sp),hl ;push jump location, restore HL
-	ret
+	add hl,de ;&running_program[argument]
+	ld (fsOP5+2),hl ; load relocated argument
+	ld a,$C9 ; ret opcode
+	ld (fsOP5+5),a
+	jr .finish
+.isnota2binstruction:
+	ex hl,de
+	ld de,(hl) ;grab argument from caller
+	inc hl
+	inc hl
+	inc hl
+	ld (iy),hl ; increment caller past the original instruction
+	ld hl,(running_program_ptr) ;pointer to currently running program
+	add hl,de ;&running_program[argument]
+	ld (fsOP5+1),hl ; load relocated argument
+	ld a,$C9 ; ret opcode
+	ld (fsOP5+4),a
+.finish:
+	call _PushOP5
+	pop af,iy
+	ld hl,_PopOP5
+	ex (sp),hl ; push return location (_PopOP5), restore de
+	inc sp
+	inc sp
+	inc sp
+	ex hl,de
+	ex (sp),hl ; push jump location (address returned by _PushOP5), restore hl
+	ret ; jump to the pushed relocated instruction stored by _PushOP5, Which will return to _PopOP5, Then to the original caller.
 
 os_GetOSInfo:
 	ld hl,string_os_info
@@ -267,6 +308,9 @@ generate_boot_configs:
 os_return_soft:
 	call os_check_recovery_key
 	call sys_FreeAll
+	call gfx_Set8bpp
+	xor a,a
+	call gfx_SetDraw
 
 	call os_check_recovery_key
 	call fs_SanityCheck

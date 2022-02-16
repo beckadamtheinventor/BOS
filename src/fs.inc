@@ -1,6 +1,7 @@
 
 ; BOS filesystem functions
 
+include 'fs/AllocSmall.asm'
 include 'fs/AllocRam.asm'
 include 'fs/AllocVar.asm'
 include 'fs/PathLen.asm'
@@ -15,6 +16,7 @@ include 'fs/CopyFileName.asm'
 include 'fs/CopyFile.asm'
 include 'fs/CreateRamFile.asm'
 include 'fs/CreateDir.asm'
+include 'fs/CreateLongFileName.asm'
 include 'fs/CreateFile.asm'
 include 'fs/CreateFileEntry.asm'
 include 'fs/DeleteFileFD.asm'

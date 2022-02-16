@@ -1,7 +1,7 @@
 iterate num, 1, 2, 3, 4, 5, 6
 	_PushOP#num:
 		ld hl,fsOP#num + 10
-		jq _PushOPStack
+		jr _PushOPStack
 end iterate
 
 _PushOPStack:
