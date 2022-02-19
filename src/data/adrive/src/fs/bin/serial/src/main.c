@@ -23,7 +23,7 @@
 #include <usbdrvce.h>
 #include <srldrvce.h>
 
-#include "network/network.h"
+#include "network.h"
 
 int main(void)
 {

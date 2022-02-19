@@ -10,7 +10,7 @@ org ti.userMem
 mem_edit:
 	call libload_load
 	ret nz
-	ld hl,-17
+	ld hl,-20
 	call ti._frameset
 	xor a,a
 	ld (ix-12),a
@@ -24,7 +24,7 @@ mem_edit_main:
 	jr z,.run_readme
 	scf
 	sbc hl,hl
-	ld (ix-17),hl
+	ld (ix-20),hl
 	call osrt.argv_1
 	ld a,(hl)
 	or a,a
@@ -49,11 +49,22 @@ mem_edit_main:
 	push bc,bc,de
 	call bos.fs_CreateFile
 	pop de,bc,bc
-	jr c,.dont_open_file
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	jq z,.dont_open_file
+	push hl
+	call bos.fs_GetFDLen
+	ex (sp),hl
+	push hl
+	call bos.fs_GetFDPtr
+	pop bc,bc
 .load_file:
-	ld (ix-17),de
+	ld (ix-17),hl
 	ld (ix-11),bc
 	push bc,hl,bc
+	call osrt.argv_1
+	ld (ix-20),hl
 	ld hl,bos.safeRAM
 	ld bc,65536
 	push hl
@@ -61,12 +72,29 @@ mem_edit_main:
 	inc de
 	ld (hl),c
 	ldir
+	ld bc,(ix-17)
+	ld a,(ix+2-17)
+	and a,c
+	and a,b
+	inc a
 	pop bc,hl
-	inc bc
+	jr nz,.load_file_nonzero_length
+	pop bc
+	ld hl,bos.safeRAM
+	ld (ix-14),hl
+	jq .init_editor
+.load_file_nonzero_length:
+	ld a,c
+	or a,b
+	jr nz,.load_file_under_64k
+	ld bc,65536
+.load_file_under_64k:
 	ld de,bos.safeRAM
 	push de
 	ldir
-	pop de,hl
+	pop de
+.load_file_zero_length:
+	pop hl
 	add hl,de
 	ld (ix-14),hl
 	ex hl,de
@@ -478,7 +506,7 @@ edited_file:=$-1
 	call .write_file
 	jq .main_loop
 .write_file:
-	ld hl,(ix-17) ; file name
+	ld hl,(ix-20) ; file name
 	ld a,(hl)
 	or a,a
 	ret z
@@ -493,10 +521,10 @@ edited_file:=$-1
 	call bos.sys_WaitKeyCycle
 	cp a,9
 	ret nz
-	ld hl,(ix-17)
+	ld hl,(ix-20)
 	push hl
 	call bos.fs_OpenFile
-	jq nc,.write_file_data
+	jr nc,.write_file_data
 .write_new_file:
 	ld hl,(ix-11) ; current edit buffer length
 	ex (sp),hl
@@ -506,18 +534,13 @@ edited_file:=$-1
 	pop bc,bc,bc
 	ret c
 .write_file_data:
-	push hl
-	ld c,1
-	push bc
+	ex (sp),hl ; push file descriptor
 	ld bc,(ix-11) ; current edit buffer length
 	push bc
-	ld de,bos.safeRAM
+	ld de,bos.safeRAM ; edit buffer
 	push de
-	ld a,(ix+2-11) ; upper byte if edit buffer length
-	or a,b
-	or a,c ; Zf set if edit buffer is empty, and we shouldn't try to write 0 bytes
-	call nz,bos.fs_WriteFile
-	pop bc,bc,bc,bc
+	call bos.fs_WriteFile
+	pop bc,bc,bc
 	xor a,a
 	ld (edited_file),a
 	ret

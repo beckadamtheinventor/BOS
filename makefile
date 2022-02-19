@@ -119,6 +119,11 @@ $(call NATIVEPATH,$(FSSRC)/fs/bin/msd/bosbin/MSD.bin): $(call NATIVEPATH,$(FSSRC
 	$(Q)make -f makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/msd/)
 	convbin -i $(call NATIVEPATH,$(FSSRC)/fs/bin/msd/bosbin/MSD.bin) -o $(call NATIVEPATH,$(FSOBJ)/MSD.zx7.bin) -j bin -k bin -c zx7
 
+$(call NATIVEPATH,$(FSSRC)/fs/bin/serial/bosbin/serial.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/serial/src/main.c) \
+$(call NATIVEPATH,$(FSSRC)/fs/bin/serial/src/network.c) $(call NATIVEPATH,$(FSSRC)/fs/bin/serial/src/network.h)
+	$(Q)make -f makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/serial/)
+	convbin -i $(call NATIVEPATH,$(FSSRC)/fs/bin/serial/bosbin/serial.bin) -o $(call NATIVEPATH,$(FSOBJ)/SRL.zx7.bin) -j bin -k bin -c zx7
+
 # filesystem var build rules
 $(call NATIVEPATH,$(FSOBJ)/LIB.bin): $(call NATIVEPATH,$(FSSRC)/fs/var/LIB.asm)
 	fasmg $(call NATIVEPATH,$(FSSRC)/fs/var/LIB.asm) $(call NATIVEPATH,$(FSOBJ)/LIB.bin)
@@ -144,7 +149,7 @@ $(call NATIVEPATH,$(FSOBJ)/msddrvce.bin) $(call NATIVEPATH,$(FSSRC)/fs/bin/msd/b
 $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/data.asm) $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/display.asm) $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/files.asm) \
 $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/libloader.asm) $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/loadconfig.asm) $(call NATIVEPATH,$(FSOBJ)/PATH.bin) \
 $(call NATIVEPATH,$(FSSRC)/fs/var/PATH.asm) $(call NATIVEPATH,$(FSOBJ)/LIB.bin) $(call NATIVEPATH,$(FSSRC)/fs/var/LIB.asm) $(call NATIVEPATH,$(FSOBJ)/TIVARS.bin) \
-$(call NATIVEPATH,$(FSSRC)/fs/var/TIVARS.asm)
+$(call NATIVEPATH,$(FSSRC)/fs/var/TIVARS.asm) $(call NATIVEPATH,$(FSSRC)/fs/bin/serial/bosbin/serial.bin)
 	convbin -i $(call NATIVEPATH,$(FSSRC)/fs/etc/fontlibc/DrMono.dat) -o $(call NATIVEPATH,$(FSOBJ)/DrMono.zx7.dat) -j bin -k bin -c zx7
 	fasmg $(call NATIVEPATH,$(FSSRC)/main.asm) $(call NATIVEPATH,src/data/adrive/main.bin)
 	convbin -i $(call NATIVEPATH,src/data/adrive/main.bin) -o $(call NATIVEPATH,src/data/adrive/data.bin) -j bin -k bin -c zx7
@@ -181,7 +186,12 @@ clean-cedit:
 # Rule to clean msd program
 clean-msd:
 	$(Q)make clean -f makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/msd/)
-	$(Q)echo Removed MSD objects and binaries.
+	$(Q)echo Removed msd objects and binaries.
+
+# Rule to clean serial program
+clean-serial:
+	$(Q)make clean -f makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/serial/)
+	$(Q)echo Removed serial objects and binaries.
 
 
 #make clean

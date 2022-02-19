@@ -400,10 +400,11 @@ void *fs_SetSize(int len, void *fd);
 void *fs_WriteFile(void *data, unsigned int len, uint8_t count, void *fd, unsigned int offset);
 
 /**
- * Delete a file.
+ * Delete a file / directory.
  * @param path Path to file to be deleted.
+ * @return true if success, false if failed.
  */
-void fs_DeleteFile(const char *path);
+bool fs_DeleteFile(const char *path);
 
 /**
  * Get user input.

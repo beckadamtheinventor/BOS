@@ -9,20 +9,22 @@ fs_CreateFile:
 	ld hl,(ix+6)
 	ld e,(ix+9)
 	push de,hl
+	call fs_OpenFile
+	jr nc,.check_entry
 	call fs_CreateFileEntry
 	pop de,de
 	add hl,bc
 	or a,a
 	sbc hl,bc
 	jq z,.fail
-
+.alloc_uninited_descriptor:
 	ld (ix-7),hl ; save file descriptor
 
 	ld hl,(ix+12)
 	add hl,bc
 	or a,a
 	sbc hl,bc
-	jr z,.zerolen
+	jr z,.done
 
 	ld (ix-2),l
 	ld (ix-1),h
@@ -35,11 +37,18 @@ fs_CreateFile:
 	ld (ix-3),h
 	jr .writedescriptor
 
-.zerolen:
-	scf
-	sbc hl,hl
-	ld (ix-3),hl
-	ld (ix-4),l
+.check_entry:
+	push hl
+	call fs_GetFDPtr.entry
+	jr nc,.fail ; fail if trying to create an existing file with an already initialized data section.
+	pop hl
+	jr .alloc_uninited_descriptor
+
+; .zerolen:
+	; scf
+	; sbc hl,hl
+	; ld (ix-3),hl
+	; ld (ix-4),l
 .writedescriptor:
 	ld hl,(ix-7) ; restore file descriptor
 	ld bc,fsentry_filesector
@@ -50,8 +59,8 @@ fs_CreateFile:
 	call sys_FlashUnlock
 	call sys_WriteFlash
 	call sys_FlashLock
-	ld hl,(ix-7)
 .done:
+	ld hl,(ix-7)
 	db $01
 .fail:
 	xor a,a

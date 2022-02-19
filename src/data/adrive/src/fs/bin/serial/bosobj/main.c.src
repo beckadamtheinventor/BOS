@@ -7,20 +7,20 @@ _main:
 	ld	l, 1
 	xor	a, l
 	bit	0, a
-	jq	nz, BB0_3
-BB0_2:
+	jq	nz, BB0_2
+BB0_1:
 	call	_ntwk_process
 	call	_sys_GetKey
 	cp	a, 15
-	jq	nz, BB0_2
-BB0_3:
+	jq	nz, BB0_1
+BB0_2:
 	call	_usb_Cleanup
 	or	a, a
 	sbc	hl, hl
 	ret
 	section	.text,"ax",@progbits
 
-	ident	"clang version 12.0.0 (https://github.com/jacobly0/llvm-project 170be88120e3aa88c20eea5615ba76b8f1d6c647)"
+	ident	"clang version 14.0.0 (https://github.com/jacobly0/llvm-project a139def90d26173f771eb1eca797633d1fbb2797)"
 	extern	__Unwind_SjLj_Register
 	extern	__Unwind_SjLj_Unregister
 	extern	_sys_GetKey

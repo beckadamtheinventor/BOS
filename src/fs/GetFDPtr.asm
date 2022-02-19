@@ -1,6 +1,6 @@
 ;@DOES Return pointer to file data given a file descriptor
 ;@INPUT void *fs_GetFDPtr(void *fd);
-;@OUTPUT pointer to file data, or -1 if file data has not been allocated yet.
+;@OUTPUT pointer to file data, or -1 and Cf set if file data has not been allocated yet.
 fs_GetFDPtr:
 	pop bc,hl
 	push hl,bc

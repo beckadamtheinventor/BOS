@@ -15,13 +15,18 @@ fs_GetFilePtr:
 	ld a,(hl)
 	inc hl
 	push af
+	ld e,a
 	ld c,(hl)
 	inc hl
 	ld b,(hl)
+	ld a,c
+	and a,b
+	inc a
+	jr z,.fail ; fail if file data section hasn't been initialized yet
 	inc hl
 	push hl
-	bit fd_subfile, a
-	jq z,.get_file_sector
+	bit fd_subfile, e
+	jr z,.get_file_sector
 	ld l,0
 	res 0,h
 	add hl,bc
@@ -39,4 +44,9 @@ fs_GetFilePtr:
 	ld b,(hl)
 	ex hl,de
 	pop af
+	ret
+.fail:
+	pop af
+	scf
+	sbc hl,hl
 	ret

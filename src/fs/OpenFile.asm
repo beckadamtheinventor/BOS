@@ -6,7 +6,7 @@
 fs_OpenFile:
 	pop bc,hl
 	push hl,bc
-.entryhl:
+; .entryhl:
 	ld a,(hl)
 	cp a,' '
 	jq z,.pathzero

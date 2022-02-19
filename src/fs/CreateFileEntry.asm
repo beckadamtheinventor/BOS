@@ -15,7 +15,8 @@ fs_CreateFileEntry:
 	jq z,.fail
 	push hl
 	call fs_OpenFile
-	jq nc,.fail ;fail if file exists
+	jq nc,.fail ; fail if file exists
+.dontfail:
 	call fs_ParentDir
 	ld (ix-3),hl
 	ex (sp),hl
@@ -87,3 +88,4 @@ fs_CreateFileEntry:
 	ld sp,ix
 	pop ix
 	ret
+
