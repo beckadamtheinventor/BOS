@@ -13,4 +13,6 @@ sys_ExecuteFileFromPtr:
 .entryhlde:
 	ld (fsOP6),de
 	ld (fsOP6+3),hl
+	xor a,a
+	ld (fsOP5+10),a
 	jq sys_ExecuteFile.exec_check_loop

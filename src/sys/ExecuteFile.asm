@@ -72,7 +72,7 @@ sys_ExecuteFile:
 	ld a,(hl)
 	inc hl
 	cp a,$7B
-	jq z,.exec_rex_entryhl ;jump to execute if $EF,$7B header
+	jq z,.normalize_16_bpp_and_execute ;jump to execute if $EF,$7B header
 	dec hl
 .tryvarheader: ; try running it as a ti formatted var file
 	dec hl
@@ -95,7 +95,12 @@ sys_ExecuteFile:
 	dec bc
 	ld a,c
 	or a,b
-	jq nz,.exec_copy_to_usermem ; execute if valid header and there is program data to copy
+	jr z,.fail
+.normalize_16_bpp_and_execute:
+	push bc,hl
+	call .normalize_lcd_16bpp
+	pop hl,bc
+	jq .exec_copy_to_usermem ; execute if valid header and there is program data to copy
 ; fail if unrecognized header
 .fail:
 	scf
@@ -190,12 +195,13 @@ sys_ExecuteFile:
 	; jq th_HandleNextThread.nosave
 	; HandleNextThread ;handle the thread we just spawned
 	; jr .ranthread
+	; call .normalize_lcd
 .runnothreading:
 	call .jptoprogram
 .ranthread:
 	pop bc,bc
 	push de,hl
-	; call .normalize_lcd
+	call .normalize_lcd_8bpp
 	xor a,a
 	sbc hl,hl
 	ld (asm_prgm_size),hl
@@ -244,14 +250,29 @@ sys_ExecuteFile:
 	ld hl,(running_program_ptr)
 sys_jphl:=$
 	jp (hl)
-; .normalize_lcd:
-	; ld bc,ti.vRam
-	; ld (ti.mpLcdUpbase),bc
-	; ld a,ti.lcdBpp8
-	; ld (ti.mpLcdCtrl),a
-	; xor a,a
-	; ld (curcol),a
-	; ret
+
+.normalize_lcd_16bpp:
+	ld a,ti.lcdBpp16
+	jr .setlcdmode
+
+.normalize_lcd_8bpp:
+	ld a,ti.lcdBpp8
+.setlcdmode:
+	ld hl,ti.mpLcdCtrl
+	cp a,(hl)
+	ret z ; dont reinit the display if we're already in the correct lcd mode
+	ld hl,ti.vRam
+	ld l,a
+	push hl
+	call ti.boot.ClearVRAM
+	pop hl
+	ld a,l
+	ld l,h
+	ld (ti.mpLcdUpbase),hl
+	ld (ti.mpLcdCtrl),a
+	xor a,a
+	ld (curcol),a
+	ret
 
 .exec_threaded_rex:
 	ld hl,(running_program_ptr)
