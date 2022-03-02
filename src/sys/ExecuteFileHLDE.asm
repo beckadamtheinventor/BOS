@@ -1,9 +1,6 @@
 
-;@DOES execute a file given a pointer to it's data section in HL
-;@INPUT HL = pointer to file data section, DE = pointer to args
-;@OUTPUT -1 if file is not a valid executable format
+;@DOES execute a file given a pointer to it's path in HL and arguments string in DE
+;@INPUT HL = pointer to file path, DE = pointer to arguments string.
+;@OUTPUT same as sys_ExecuteFile
 ;@DESTROYS All, OP5, OP6.
-sys_ExecuteFileHLDE:
-	xor a,a
-	ld (fsOP5+10),a
-	jq sys_ExecuteFile.entryhlde
+sys_ExecuteFileHLDE:=sys_ExecuteFile.entryhlde

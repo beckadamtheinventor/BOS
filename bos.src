@@ -98,7 +98,6 @@
 	public _asm_gui_PrintLine
 	public _asm_gui_PrintUInt
 	public _fs_GetFilePtr
-	public _sys_ExecuteFileFromPtr
 	public _sys_ExecuteFileHL
 	public _sys_TurnOff
 	public _sys_NextProcessId
@@ -249,7 +248,6 @@ _asm_gui_PrintString                 := $22574
 _asm_gui_PrintLine                   := $22578
 _asm_gui_PrintUInt                   := $2257C
 _fs_GetFilePtr                   := $22588
-_sys_ExecuteFileFromPtr          := $2258C
 _sys_ExecuteFileHL               := $22590
 _sys_TurnOff                     := $22594
 _sys_NextProcessId               := $22598

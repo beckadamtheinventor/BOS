@@ -31,111 +31,59 @@ sys_ExecuteFile:
 	call fs_OpenFile ; look for the file directly
 	call c,sys_OpenFileInPath ;look for the file within dirs listed in $PATH
 	pop bc
-	jr nc,.open_fd
+	jr nc,.entryfd
 ;fail if both fs_OpenFile and sys_OpenFileInPath failed to locate the file
-	push de
+	push de ; sys_OpenFileInPath returns pointer to "/var/PATH" in de
 	call fs_OpenFile ; check for /var/PATH
 	pop bc
 	ccf
 	sbc hl,hl
-	ret c
+	ret c ; return -1 and ExecutingFileFD = -1 if file not found but /var/PATH was found
 	ld a,$FE
-	ld (ExecutingFileFd),a
+	ld (ExecutingFileFd),a ; return -1 and ExecutingFileFD = -2 if /var/PATH not found
 	dec hl
 	scf
 	ret
-.open_fd:
+; .entry_ptr_hlbc:
+	; call sys_GetExecType.entryhlbc
+.entryfd:
 	ld (ExecutingFileFd),hl
-	ld bc,fsentry_fileattr
-	add hl,bc
-	bit fd_subdir,(hl)
+	call fs_GetFilePtr.entryfd
+	bit fd_subdir,a
 	jq nz,.fail ;can't execute a directory
-	sbc hl,bc
-	push hl
-	call fs_GetFDLen
-	ex (sp),hl
-	push hl
-	call fs_GetFDPtr
-	pop bc,bc
 .exec_check_loop:
-	ld (running_program_ptr),hl
-	ld a,(hl)
-	inc hl
-	cp a,$18 ;jr
-	jq z,.skip1
-	cp a,$C3 ;jp
-	jq z,.skip3
-	cp a,'#'
-	jq z,.executable_text
-	cp a,$EF
-	jq nz,.tryvarheader
-	ld a,(hl)
-	inc hl
-	cp a,$7B
-	jq z,.normalize_16_bpp_and_execute ;jump to execute if $EF,$7B header
-	dec hl
-.tryvarheader: ; try running it as a ti formatted var file
-	dec hl
-	ld bc,0
-	ld c,(hl)
-	add hl,bc
-	ld c,(hl)
-	inc hl
-	ld b,(hl)
-	inc hl
+	call sys_GetExecTypeFD.entry
+	jq c,.fail ; fail if unrecognized executable type
+	ld (running_program_ptr),de
 	ld a,(hl)
 	cp a,$EF
-	jq nz,.fail
+	jr nz,.not_ef7b
 	inc hl
 	ld a,(hl)
+	dec hl
 	cp a,$7B
-	jq nz,.fail
-	inc hl
-	dec bc
-	dec bc
-	ld a,c
-	or a,b
-	jr z,.fail
+	jr nz,.not_ef7b
 .normalize_16_bpp_and_execute:
-	push bc,hl
+	push bc,de
 	call .normalize_lcd_16bpp
 	pop hl,bc
 	jq .exec_copy_to_usermem ; execute if valid header and there is program data to copy
-; fail if unrecognized header
-.fail:
-	scf
-	sbc hl,hl
-	ret
-.skip3:
+.not_ef7b:
+	ld a,(hl)
+	cp a,'#'
+	jr nz,.not_executable_text
 	inc hl
-	inc hl
-.skip1:
-	inc hl
-	; ld a,$7F
-	; cp a,(hl)
-	; jq nz,.notezf
-	; inc hl
-	; ld de,(hl)
-	; db $21, 'EZF'
+	ld a,(hl)
+	cp a,'!'
+	jq z,.executable_text
+	dec hl
+.not_executable_text:
+	push hl
+	ld de,(hl)
+	; db $21, 'CRX' ;ld hl, 'CRX' ;Compressed Ram eXecutable
 	; or a,a
 	; sbc hl,de
-	; jq nz,.fail
-	; ld hl,(ExecutingFileFD)
-	; jq sys_ExecuteEZF.loadfromfd
-.notezf:
-	ld de,(hl)
-	db $21, 'TRX' ;ld hl, 'TRX' ;Threaded Ram eXecutable
-	or a,a
-	sbc hl,de
-	jq z,.exec_threaded_rex
-	db $21, 'TFX' ;ld hl, 'TFX' ;Threaded Flash eXecutable
-	or a,a
-	sbc hl,de
-	jq z,.exec_threaded_fex
-	db $21, 'CRX' ;ld hl, 'CRX' ;Compressed Ram eXecutable
-	or a,a
-	sbc hl,de
-	jq z,.exec_compressed_rex
+	; jq z,.exec_compressed_rex
 	db $21, 'FEX' ;ld hl, 'FEX' ;Flash EXecutable
 	or a,a
 	sbc hl,de
@@ -143,20 +91,33 @@ sys_ExecuteFile:
 	db $21, 'REX' ;ld hl, 'REX' ;Ram EXecutable
 	or a,a
 	sbc hl,de
-	jq nz,.fail ;if it's neither a Flash Executable nor a Ram Executable, return -1
-
+	jq z,.exec_rex
+	db $21, 'TFX' ;ld hl, 'TFX' ;Threadable Flash eXecutable
+	or a,a
+	sbc hl,de
+	jq z,.exec_fex
+	db $21, 'TRX' ;ld hl, 'TRX' ;Threadable Ram eXecutable
+	or a,a
+	sbc hl,de
+	jq z,.exec_rex
+	pop hl
+; if it's neither a Flash Executable nor a Ram Executable, return -1
+.fail:
+	scf
+	sbc hl,hl
+	ret
 .exec_rex:
 	ld hl,(running_program_ptr)
-.exec_rex_entryhl:
-	push hl
-	ld iy,(ExecutingFileFd)
-	ld hl,(iy+fsentry_filelen)
-	ex.s hl,de
-	push de
-	pop bc
-	pop hl
+; no need to reload BC with the program executable length
+	; push hl
+	; ld iy,(ExecutingFileFd)
+	; ld hl,(iy+fsentry_filelen)
+	; ex.s hl,de
+	; push de
+	; pop bc
+	; pop hl
 .exec_copy_to_usermem:
-	ld de,bos_UserMem
+	ld de,ti.userMem ; where to copy the executable
 	push de ;save jump address
 	push bc
 	ldir
@@ -178,20 +139,31 @@ sys_ExecuteFile:
 	or a,a
 	ld de,(fsOP6) ;arguments string
 	call z,.load_argc_argv_loop
-	ld de,(fsOP6)
-	ld bc,(fsOP5)
-	push de,bc
 	; call .normalize_lcd
-	; ld a,(threading_enabled)
-	; cp a,2
-	; jr nz,.runnothreading
-	; SleepThread
-	; ld bc,(running_program_ptr)
-	; ld hl,-12
-	; add hl,sp
-	; push hl,bc
-	; call th_CreateThread.noparent
-	; pop bc,bc,bc
+
+	ld a,(threading_enabled)
+	cp a,threadPrograms
+	jr z,.run_threading
+	cp a,threadAlways
+	jr nz,.runnothreading
+
+.run_threading:
+	ld hl,threadMallocStackSize
+	call sys_Malloc.entryhl
+	jr nc,.run_thread_with_stack
+	sbc hl,hl
+	ret
+
+.run_thread_with_stack:
+	ld de,(fsOP6) ; argv
+	ld bc,(fsOP5) ; argc
+	push de,bc
+	ld bc,(running_program_ptr)
+	push hl,bc
+	call th_CreateThread
+	pop bc,bc,bc,bc
+	or a,a
+	
 	; jq th_HandleNextThread.nosave
 	; HandleNextThread ;handle the thread we just spawned
 	; jr .ranthread
@@ -211,44 +183,11 @@ sys_ExecuteFile:
 	call sys_PrevProcessId
 	pop hl,de
 	ret
-.exec_compressed_rex:
-	ld hl,(running_program_ptr)
-	ld a,(hl)
-	cp a,$18 ;jr
-	jq z,.compressed_rex_skip2
-	cp a,$C3 ;jp
-	jq nz,.fail
-.compressed_rex_skip4:
-	inc hl
-	inc hl
-.compressed_rex_skip2:
-	ld bc,6
-	add hl,bc ;skip "CRX\0"
-	ld de,(hl)
-	ld c,4
-	add hl,bc ;skip "zx7\0" or whatnot
-	ex hl,de
-	db $01,"zx7" ;ld bc,...
-	or a,a
-	sbc hl,bc
-	jq nz,.fail ;fail if not zx7 compressed
-	ex hl,de
-	ld bc,(hl) ;load extracted size
-	inc hl
-	inc hl
-	inc hl
-	ld de,bos_UserMem
-	push bc,hl,de
-	call util_Zx7Decompress
-	pop de,hl,bc
-	push de
-	ex hl,de
-	add hl,bc
-	ex hl,de
-	jq .exec_setup_usermem_bc
+
 .jptoprogram:
 	ld hl,(running_program_ptr)
-sys_jphl:=$
+
+sys_jphl := $
 	jp (hl)
 
 .normalize_lcd_16bpp:
@@ -373,64 +312,6 @@ sys_jphl:=$
 	pop hl,de
 	ret
 
-.executable_text:
-	ld a,(hl)
-	inc hl
-	cp a,'!'
-	jp nz,.fail ; fail if unrecognized executable text format
-	dec bc
-	dec bc
-	ld a,$A
-	cpir
-	jp po,.fail
-	ld (ti.begPC),hl
-	ld (ti.curPC),hl
-	add hl,bc
-	ld (ti.endPC),hl
-	ld hl,str_CmdContinueExecutable
-	ld de,$FF0000
-	jp .entryhlde
-
-	; ld (fsOP6+6),sp
-	; push hl ; executable to execute file with
-	; call fs_PathLen
-	; inc de
-	; push de ; de = pre-arguments
-	; call fs_PathLen.entryde
-	; push hl ; hl = length of pre-arguments
-	; ld hl,(fsOP6+3) ; hl = file name
-	; push hl
-	; call ti._strlen
-	; pop bc,de ; bc = file name, de = length of pre-arguments
-	; push de,bc ; lenfgth of pre-arguments, file name
-	; add hl,de ; length of pre-arguments + file name
-	; inc hl
-	; inc hl ; length of pre-arguments + separator + file name + null terminator
-	; push hl
-	; call sys_Malloc ; malloc space for the arguments string
-	; pop bc
-	; jr c,.executable_text_fail
-	; ex hl,de
-	; ld (fsOP5+6),de ; save malloc'd memory pointer
-	; pop hl ; hl = file name
-	; pop bc ; bc = length of pre-arguments 
-	; ex (sp),hl ; hl = pre-arguments
-	; ldir ; copy pre-arguments
-	; ld a,' '
-	; ld (de),a ; add separator
-	; inc de
-	; push de
-	; call ti._strcpy ; copy the file name string
-	; pop bc,bc
-	; ld de,(fsOP5+6) ; arguments string
-	; pop hl ; program to run this with
-
-; .executable_text_fail:
-	; ld sp,(fsOP6+6)
-	; scf
-	; sbc hl,hl
-	; ret
-
 ; input de = string
 .load_argc_argv_loop:
 	ld	bc,1
@@ -500,6 +381,19 @@ sys_jphl:=$
 	ld (hl),de
 	ret
 
+.executable_text:
+	ld a,c
+	or a,b
+	jr nz,.executable_text_has_contents
+	sbc hl,hl
+	ret
 
+.executable_text_has_contents:
+	ex hl,de
+	call sys_PushExecutableText
+	ld hl,str_CmdContinueExecutable
+	ld de,$FF0000
+	call .entryhlde
+	jq sys_PopExecutableText
 
 

@@ -185,11 +185,15 @@ devtMSD                     := $14
 devtMSDFS                   := $15
 devtMSDFAT32                := $16
 
+; threading defines
+threadMallocStackSize       := 512
 
 ; threading_enabled values
 threadsDisabled             := 0
 threadsEnabled              := 1
 threadOSRoutines            := 2
+threadPrograms              := 3
+threadAlways                := 250
 
 ; thread_map flags
 bThreadAlive                := 7

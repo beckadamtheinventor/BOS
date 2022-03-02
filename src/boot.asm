@@ -500,11 +500,7 @@ os_recovery_menu:
 	call fs_OpenFileInDir
 	pop de,bc
 	jr c,.emergencyshell
-	push de,hl
-	call fs_GetFDPtr
-	pop bc
-	ex (sp),hl
-	push hl
+	push hl,de
 	call ti._strlen
 	ex (sp),hl
 	pop bc
@@ -512,8 +508,8 @@ os_recovery_menu:
 	cpir
 	ex hl,de
 	pop hl
-	call sys_ExecuteFileFromPtr.entryhlde
-	jq .emergencyshell
+	call sys_ExecuteFileFD
+	jr .emergencyshell
 
 
 _UnpackUpdates:

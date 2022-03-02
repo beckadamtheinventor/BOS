@@ -192,7 +192,7 @@ namespace bos
 ;DONOTHING                       := $22580
 ;DONOTHING                       := $22584
 ?fs_GetFilePtr                   := $22588
-?sys_ExecuteFileFromPtr          := $2258C
+;DONOTHING                       := $2258C
 ?sys_ExecuteFileHL               := $22590
 ?sys_TurnOff                     := $22594
 ?sys_NextProcessId               := $22598
@@ -399,9 +399,12 @@ namespace bos
 ?devtMSD                     := $14
 ?devtMSDFS                   := $15
 ?devtMSDFAT32                := $16
+?threadMallocStackSize       := 512
 ?threadsDisabled             := 0
 ?threadsEnabled              := 1
 ?threadOSRoutines            := 2
+?threadPrograms              := 3
+?threadAlways                := 250
 ?bThreadAlive                := 7
 ?bThreadPersistent           := 6
 ?bThreadSleeping             := 5

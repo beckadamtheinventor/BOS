@@ -108,7 +108,7 @@
 	jp DONOTHING ;sys_WriteFlashFullRam
 	jp DONOTHING ;sys_WriteFlashByteFullRam
 	jp fs_GetFilePtr
-	jp sys_ExecuteFileFromPtr
+	jp DONOTHING ;sys_ExecuteFileFromPtr
 	jp sys_ExecuteFileHL
 	jp sys_TurnOff
 	jp sys_NextProcessId
