@@ -52,7 +52,7 @@ sys_ExecuteFile:
 	bit fd_subdir,a
 	jq nz,.fail ;can't execute a directory
 .exec_check_loop:
-	call sys_GetExecTypeFD.entry
+	call sys_GetExecType.entryhlbc
 	jq c,.fail ; fail if unrecognized executable type
 	ld (running_program_ptr),de
 	ld a,(hl)
@@ -132,6 +132,7 @@ sys_ExecuteFile:
 	pop hl  ;usermem
 	ld (running_program_ptr),hl
 .exec_fex:
+	pop bc
 	call sys_NextProcessId
 	call sys_FreeRunningProcessId ;free memory allocated by the new process ID if there is any
 
@@ -163,12 +164,19 @@ sys_ExecuteFile:
 	call th_CreateThread
 	pop bc,bc,bc,bc
 	or a,a
+	ret nz
+	scf
+	sbc hl,hl
+	ret
 	
 	; jq th_HandleNextThread.nosave
 	; HandleNextThread ;handle the thread we just spawned
 	; jr .ranthread
 	; call .normalize_lcd
 .runnothreading:
+	ld de,(fsOP6) ; argv
+	ld bc,(fsOP5) ; argc
+	push de,bc
 	call .jptoprogram
 .ranthread:
 	pop bc,bc

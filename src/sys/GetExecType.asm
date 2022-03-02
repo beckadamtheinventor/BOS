@@ -40,10 +40,10 @@ sys_GetExecType:
 	pop hl
 	ret ; return hl = start of file, de = next line following start of file, or the end of the file, bc = remaining length of file.
 .not_executable_text:
-	push hl
 	ld a,(hl)
 	cp a,$EF
 	jr nz,.not_ef7b
+	push hl
 	inc hl
 	ld a,(hl)
 	inc hl
@@ -56,40 +56,15 @@ sys_GetExecType:
 	inc bc
 	inc bc
 .not_ef7b:
-	push bc
-	ld b,0    ; try interpreting it as a tivar
-	ld c,(hl)
-	add hl,bc
-	ld c,(hl)
-	inc hl
-	ld b,(hl)
-	inc hl
-	ld a,(hl)
-	cp a,$EF
-	jr nz,.not_var_header
-	inc hl
-	ld a,(hl)
-	dec hl
-	cp a,$7B
-	jr nz,.not_var_header
-	pop de
-	push hl
-	pop de
-	inc de
-	inc de
-	dec bc ; adjust length for header
-	dec bc
-	ret
-.not_var_header: ; it's not a 0xEF,0x7B executable
-	pop bc
 	ld a,b
 	or a,a
-	ret nz
+	jr nz,.check_jump_byte
 	ld a,c
 	cp a,6
 	jr c,.ret_cf
-	dec de ; rewind pointer to executable code by 2
-	dec de
+.check_jump_byte:
+	push hl
+	pop de
 	ld a,(hl)
 	inc hl
 	inc hl
@@ -99,8 +74,33 @@ sys_GetExecType:
 	inc hl
 	cp a,$C3 ; jp byte
 	ret z ; return &fileptr[4] as the executable header
+
+	ld b,0    ; try interpreting it as a tivar
+	ld c,(hl)
+	add hl,bc
+	ld c,(hl)
+	inc hl
+	ld b,(hl)
+	inc hl
+	ld a,(hl)
+	cp a,$EF
+	jr nz,.fail ; fail if it's not a TI formatted 0xEF,0x7B executable
+	inc hl
+	ld a,(hl)
+	dec hl
+	cp a,$7B
+	jr nz,.fail ; fail if it's not a TI formatted 0xEF,0x7B executable
+	push hl
+	pop de
+	dec bc ; adjust length for header
+	dec bc
+	inc de
+	inc de
+	ret
+
 .fail:
 	scf
 .ret_cf:
 	sbc hl,hl
 	ret
+
