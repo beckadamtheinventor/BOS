@@ -6,5 +6,6 @@ sys_JumpExecuteFile:
 	call sys_FreeProcessId
 	call sys_PrevProcessId
 	pop hl,de
+	pop bc,bc ; pop old argc/argv
 	jq sys_ExecuteFileHLDE
 

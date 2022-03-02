@@ -232,9 +232,6 @@ execute_program_string:
 	ex (sp),hl ;store args, restore path
 	push hl ;push path
 	call bos.sys_ExecuteFile
-	ld (bos.LastCommandResult),hl
-	ld a,e
-	ld (bos.LastCommandResult+3),a
 	ld hl,(bos.ExecutingFileFd) ;check if the currently executing file descriptor is -1
 	inc hl
 	add hl,bc

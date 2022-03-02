@@ -4,12 +4,10 @@
 ;@OUTPUT -1 and Cf set if file does not exist or is not a valid executable format, or if malloc failed somewhere.
 ;@OUTPUT ExecutingFileFd set to point to file descriptor. -1 if file not found, -2 if /var/PATH not found.
 ;@DESTROYS All, OP5, OP6.
-;@NOTE If you're running a threaded executable, the thread is spawned but won't actually start until it's thread is handled.
-;;;@NOTE If OS threading is enabled, sleep current thread and execute a file in a new thread given a relative or absolute path. Returns to caller if starting a threaded executable.
-;@NOTE If OS threading is disabled, execute a file in a new thread given a relative or absolute path. Returns to caller if starting a threaded executable.
 sys_ExecuteFile:
 	xor a,a
 	ld (fsOP5+10),a
+	ld (fsOP6+10),a
 .__entry:
 	scf
 	sbc hl,hl
@@ -133,6 +131,11 @@ sys_ExecuteFile:
 	ld (running_program_ptr),hl
 .exec_fex:
 	pop bc
+	ld hl,(running_program_ptr)
+	ld a,(fsOP6+10)
+	or a,a
+	ret nz ; return if only set to load the program
+
 	call sys_NextProcessId
 	call sys_FreeRunningProcessId ;free memory allocated by the new process ID if there is any
 
@@ -178,6 +181,9 @@ sys_ExecuteFile:
 	ld bc,(fsOP5) ; argc
 	push de,bc
 	call .jptoprogram
+	ld (LastCommandResult),hl
+	ld a,e
+	ld (LastCommandResult+3),a
 .ranthread:
 	pop bc,bc
 	push de,hl

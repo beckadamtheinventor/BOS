@@ -1,7 +1,7 @@
 ;@DOES Jump execution to an executable file and return to caller afterwards
-;@INPUT hl = file to execute
+;@INPUT hl = program file to execute
 ;@INPUT de = arguments
-;@INPUT bc = file to return to
+;@INPUT bc = program file to return to
 sys_CallExecuteFile:
 	push hl,de,bc
 	call ti._strlen
@@ -17,8 +17,19 @@ sys_CallExecuteFile:
 	push bc,de,hl
 	call sys_ExecuteFile
 	pop bc,bc,hl
-	jq sys_ExecuteFileHL
+	ld a,1
+	db $01 ; dummify next 3 bytes
 .fail:
 	pop bc,bc
-	jq sys_ExecuteFileHL
+	xor a,a
+.return:
+	push af,hl
+	call sys_LoadProgramNoExec
+	jp c,os_return ; reboot if loading the caller failed
+	pop bc,af
+	push hl,bc
+	or a,a
+	call nz,sys_Free ; free malloc'd caller name if it was malloc'd
+	pop bc
+	ret ; return to program address returned from sys_LoadProgramNoExec
 
