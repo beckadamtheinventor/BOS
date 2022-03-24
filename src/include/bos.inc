@@ -2,29 +2,58 @@
 ;-------------------------------------------------------------------------------
 ; Executable formats
 ;-------------------------------------------------------------------------------
-macro format?.ram?.executable?
-	format ram executable at ti.userMem
+macro ram_executable?
+	ram_executable_at ti.userMem
 end macro
 
-macro format?.ram?.executable?.at? addr
+macro ram_executable_at? addr
 	org addr
 	db $18,$04,"REX",$00
 end macro
 
+macro flash_executable?
+	local prgm, prgmdata, prgmlen, prgmend
+	virtual at $01000000
+		prgm:
+		db $18,$04,"FEX",$00
 
-macro format?.flash?.executable?
-	display "Make sure you're using OffsetInstruction for absolute addressing within your program, or handle relocations appropriately.",$A
-	db $18,$04,"FEX",$00
-end macro
-
-;-------------------------------------------------------------------------------
-; Run instruction offsetting its argument by the pointer to the running program.
-; NOTE: Only use this with opcodes that have a 24-bit argument, and do not use opcode suffixes.
-;       Furthermore, avoid using this macro unless you have to. It's a lot more expensive than the instruction would otherwise be.
-;-------------------------------------------------------------------------------
-macro OffsetInstruction? instruction*
-	rst $28
-	instruction
+		macro call? addr
+			if addr >= prgm & addr < prgmend
+				rst $28
+			end if
+			call addr and $FFFFFF
+		end macro
+		macro jp? addr
+			if addr >= prgm & addr < prgmend
+				rst $28
+			end if
+			jp addr and $FFFFFF
+		end macro
+		macro ld? lhs, rhs
+			match (addr), lhs
+				if addr >= prgm & addr < prgmend
+					rst $28
+				end if
+				ld (addr and $FFFFFF), rhs
+			else match (addr), rhs
+				if addr >= prgm & addr < prgmend
+					rst $28
+				end if
+				ld lhs, (addr and $FFFFFF)
+			else
+				if rhs >= prgm & rhs < prgmend
+					rst $28
+				end if
+				ld lhs, rhs and $FFFFFF
+			end match
+		end macro
+	postpone
+		prgmend:
+		prgmlen := $-$$
+		load prgmdata: $-$$ from $$
+		end virtual
+		db prgmdata
+	end postpone
 end macro
 
 ;-------------------------------------------------------------------------------
@@ -295,7 +324,9 @@ namespace bos
 ?threading_enabled      := ti.appData+36 ; 1 byte, determines if software threading is enabled and whether it should be used in OS routines
 ?current_thread         := ti.appData+37 ; 1 byte, currently running thread ID
 ?gfx_string_temp        := ti.appData+38 ; 16 bytes, temp location for integer printing
-?saved_LcdUpbase        := ti.appData+54 ; 3 bytes, saves LcdUpbase during sector caching
+?offset_inst_hl_temp    := ti.appData+54 ; 3 bytes, used by handle_offsetinstruction
+?offset_inst_sp_temp    := ti.appData+57 ; 3 bytes, used by handle_offsetinstruction
+?saved_LcdUpbase        := ti.appData+60 ; 3 bytes, saves LcdUpbase during sector caching
 ?ScrapByte              := ti.flashByte
 ?ScrapWord              := ti.scrapMem
 ?ScrapMem               := ti.scrapMem

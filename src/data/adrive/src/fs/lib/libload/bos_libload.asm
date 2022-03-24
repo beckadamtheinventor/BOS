@@ -332,10 +332,10 @@ _needtoextractlib:
 ; hl=size of library
 	ld	hl,(extractedsize)
 	push	bc,de,hl
-	call	bos._EnoughMem
+	call	ti.EnoughMem
 	pop	hl,de,bc
 	jq	c,_throw_memoryerror		; throw a memory error -- need more ram!
-	call	bos._InsertMem		; insert memory for the relocated library (de)
+	call	ti.InsertMem		; insert memory for the relocated library (de)
 
 	ld	hl,(extractedsize)	; extracted size = dependency jumps + library code
 	ld	de,(bos.asm_prgm_size)

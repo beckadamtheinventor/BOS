@@ -76,12 +76,13 @@ sys_ExecuteFile:
 	jq z,.executable_text
 	dec hl
 .not_executable_text:
-	push hl
 	ld de,(hl)
-	; db $21, 'CRX' ;ld hl, 'CRX' ;Compressed Ram eXecutable
-	; or a,a
-	; sbc hl,de
-	; jq z,.exec_compressed_rex
+	push hl
+	db $21, 'CRX' ;ld hl, 'CRX' ;Compressed Ram eXecutable
+	or a,a
+	sbc hl,de
+	jr z,.exec_compressed_rex
+	pop hl
 	db $21, 'FEX' ;ld hl, 'FEX' ;Flash EXecutable
 	or a,a
 	sbc hl,de
@@ -89,7 +90,7 @@ sys_ExecuteFile:
 	db $21, 'REX' ;ld hl, 'REX' ;Ram EXecutable
 	or a,a
 	sbc hl,de
-	jq z,.exec_rex
+	jr z,.exec_rex
 	db $21, 'TFX' ;ld hl, 'TFX' ;Threadable Flash eXecutable
 	or a,a
 	sbc hl,de
@@ -97,13 +98,39 @@ sys_ExecuteFile:
 	db $21, 'TRX' ;ld hl, 'TRX' ;Threadable Ram eXecutable
 	or a,a
 	sbc hl,de
-	jq z,.exec_rex
-	pop hl
+	jr z,.exec_rex
 ; if it's neither a Flash Executable nor a Ram Executable, return -1
 .fail:
 	scf
 	sbc hl,hl
 	ret
+.exec_compressed_rex:
+	pop hl
+	ld hl,(running_program_ptr)
+	ld c,(hl)
+	inc hl
+	ld b,(hl)
+	inc hl
+	push hl,bc
+	ld de,(asm_prgm_size)
+	ld a,(asm_prgm_size+2)
+	or a,d
+	or a,e
+	ld hl,ti.userMem
+	call nz,_DelMem
+	pop hl
+	ld (asm_prgm_size),hl
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	ld de,ti.userMem
+	call nz,_InsertMem
+	ld de,ti.userMem
+	ld (running_program_ptr),de
+	push de
+	call util_Zx7Decompress
+	pop hl,de
+	jr .exec_fex_entry_hl
 .exec_rex:
 	ld hl,(running_program_ptr)
 ; no need to reload BC with the program executable length
@@ -115,6 +142,21 @@ sys_ExecuteFile:
 	; pop bc
 	; pop hl
 .exec_copy_to_usermem:
+	push hl,bc
+	ld de,(asm_prgm_size)
+	ld a,(asm_prgm_size+2)
+	or a,d
+	or a,e
+	ld hl,ti.userMem
+	call nz,_DelMem
+	pop hl
+	push hl
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	ld de,ti.userMem
+	call nz,_InsertMem
+	pop bc,hl
 	ld de,ti.userMem ; where to copy the executable
 	push de ;save jump address
 	push bc
@@ -122,16 +164,11 @@ sys_ExecuteFile:
 	pop bc
 .exec_setup_usermem_bc:
 	ld (asm_prgm_size),bc
-	ex hl,de
-	ld (top_of_UserMem),hl ;save top of usermem
-	ld de,-libload_bottom_ptr
-	add hl,de
-	ld (remaining_free_RAM),hl
 	pop hl  ;usermem
 	ld (running_program_ptr),hl
 .exec_fex:
-	pop bc
 	ld hl,(running_program_ptr)
+.exec_fex_entry_hl:
 	ld a,(fsOP6+10)
 	or a,a
 	ret nz ; return if only set to load the program

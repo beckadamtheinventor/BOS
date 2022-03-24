@@ -220,15 +220,18 @@ handle_safeop:
 	pop af
 	ret
 
-;@DESTROYS OP5
 handle_offsetinstruction:
-	push hl,de,iy,af
-	ld iy,12
-	add iy,sp
-	ld hl,(iy) ;grab pointer to caller
+.offset_inst_temp := -15
+	ld (offset_inst_hl_temp),hl ; save original value of hl
+	push de,iy,af ; save de, iy, af
+	ld iy,9
+	add iy,sp ; grab pointer to arguments
+	lea hl,iy + -3 + .offset_inst_temp ; grab pointer to 9 bytes of stack space below the current stack pointer
+	ld (offset_inst_sp_temp),hl
+	ld hl,(iy) ; grab pointer to caller
 	ld a,(hl)
 	inc hl
-	ld (fsOP5),a ; first opcode byte
+	ld (iy + .offset_inst_temp),a ; first opcode byte
 	cp a,$DD ; two byte instruction
 	jr z,.isa2binstruction
 	cp a,$ED ; two byte instruction
@@ -236,11 +239,9 @@ handle_offsetinstruction:
 	cp a,$FD ; two byte instruction
 	jr nz,.isnota2binstruction
 .isa2binstruction:
-	inc de
-	ld a,(de)
-	inc de
-	ld (fsOP5+1),a ; second opcode byte
-	ex hl,de
+	ld a,(hl)
+	inc hl
+	ld (iy + .offset_inst_temp+1),a ; second opcode byte
 	ld de,(hl) ;grab argument from caller
 	inc hl
 	inc hl
@@ -248,12 +249,11 @@ handle_offsetinstruction:
 	ld (iy),hl ; increment caller past the original instruction
 	ld hl,(running_program_ptr) ;pointer to currently running program
 	add hl,de ;&running_program[argument]
-	ld (fsOP5+2),hl ; load relocated argument
+	ld (iy + .offset_inst_temp+2),hl ; load relocated argument
 	ld a,$C9 ; ret opcode
-	ld (fsOP5+5),a
+	ld (iy + .offset_inst_temp+5),a
 	jr .finish
 .isnota2binstruction:
-	ex hl,de
 	ld de,(hl) ;grab argument from caller
 	inc hl
 	inc hl
@@ -261,20 +261,28 @@ handle_offsetinstruction:
 	ld (iy),hl ; increment caller past the original instruction
 	ld hl,(running_program_ptr) ;pointer to currently running program
 	add hl,de ;&running_program[argument]
-	ld (fsOP5+1),hl ; load relocated argument
+	ld (iy + .offset_inst_temp+1),hl ; load relocated argument
 	ld a,$C9 ; ret opcode
-	ld (fsOP5+4),a
+	ld (iy + .offset_inst_temp+4),a
 .finish:
-	call _PushOP5
-	pop af,iy
-	ld hl,_PopOP5
-	ex (sp),hl ; push return location (_PopOP5), restore de
-	inc sp
-	inc sp
-	inc sp
-	ex hl,de
-	ex (sp),hl ; push jump location (address returned by _PushOP5), restore hl
-	ret ; jump to the pushed relocated instruction stored by _PushOP5, Which will return to _PopOP5, Then to the original caller.
+	lea hl,iy + .offset_inst_temp
+	ld iy,(offset_inst_sp_temp)
+	ld de,.return_here ; return here after running the routine
+	ld (iy),de
+	pop af,iy,de ; restore af, iy, de
+	ld sp,(offset_inst_sp_temp)
+	push hl ; push jump location
+	ld hl,(offset_inst_hl_temp) ; restore original value of hl
+	ret ; return to the routine, which will return to .return_here
+
+.return_here:
+	push af,hl
+	ld hl,6-.offset_inst_temp ; hl = sp when handle_offsetinstruction started
+	add hl,sp
+	ld (offset_inst_sp_temp),hl
+	pop hl,af
+	ld sp,(offset_inst_sp_temp)
+	ret
 
 os_GetOSInfo:
 	ld hl,string_os_info
