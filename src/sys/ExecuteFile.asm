@@ -106,7 +106,10 @@ sys_ExecuteFile:
 	ret
 .exec_compressed_rex:
 	pop hl
-	ld hl,(running_program_ptr)
+	inc hl
+	inc hl
+	inc hl
+	inc hl
 	ld c,(hl)
 	inc hl
 	ld b,(hl)
