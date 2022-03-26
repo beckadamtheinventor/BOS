@@ -35,15 +35,18 @@ QUOTE_ARG  = '$(subst ','\'',$1)'#'
 APPEND     = @echo $(call QUOTE_ARG,$1) >>$@
 endif
 
+# source: http://blog.jgc.org/2011/07/gnu-make-recursive-wildcard-function.html
+rwildcard = $(strip $(foreach d,$(wildcard $1/*),$(call rwildcard,$d,$2) $(filter $(subst %%,%,%$(subst *,%,$2)),$d)))
+
 FSOBJ ?= $(call NATIVEPATH,src/data/adrive/obj)
 FSSRC ?= $(call NATIVEPATH,src/data/adrive/src)
 
 #build rules
 
-all: objdirs include_dirs filesystem bosos bosbin bos8xp bosrom
+all: objdirs include_dirs noti filesystem bosos bosbin bos8xp bosrom
 
 # Rule to build OS data
-bosos:
+bosos: $(call rwildcard,src,*.asm) $(call rwildcard,src,*.inc)
 	fasmg $(call NATIVEPATH,src/main.asm) $(call NATIVEPATH,obj/bosos.bin)
 
 # Rule to build documentation
@@ -103,24 +106,21 @@ $(call NATIVEPATH,$(FSOBJ)/usbdrvce.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/usbd
 
 
 # OS Files build rules
-$(call NATIVEPATH,$(FSOBJ)/explorer.bin):  $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/config.asm) \
-$(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/data.asm) $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/display.asm) $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/files.asm) \
-$(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/libloader.asm) $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/loadconfig.asm)
+$(call NATIVEPATH,$(FSOBJ)/explorer.bin): $(call rwildcard,$(call NATIVEPATH,$(FSSRC)/fs/bin/explorer),*)
 	fasmg $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/explorer.asm) $(call NATIVEPATH,$(FSOBJ)/explorer.bin)
 
 $(call NATIVEPATH,$(FSOBJ)/memedit.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/memedit.asm)
 	fasmg $(call NATIVEPATH,$(FSSRC)/fs/bin/memedit.asm) $(call NATIVEPATH,$(FSOBJ)/memedit.bin)
 
-$(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/bosbin/CEDIT.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/src/main.c)
+$(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/bosbin/CEDIT.bin): $(call rwildcard,$(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/src),*)
 	$(Q)make -f bos.makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/)
 	convbin -i $(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/bosbin/CEDIT.bin) -o $(call NATIVEPATH,$(FSOBJ)/CEDIT.zx7.bin) -j bin -k bin -c zx7
 
-$(call NATIVEPATH,$(FSSRC)/fs/bin/msd/bosbin/MSD.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/msd/src/main.c)
+$(call NATIVEPATH,$(FSSRC)/fs/bin/msd/bosbin/MSD.bin): $(call rwildcard,$(call NATIVEPATH,$(FSSRC)/fs/bin/msd/src),*)
 	$(Q)make -f makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/msd/)
 	convbin -i $(call NATIVEPATH,$(FSSRC)/fs/bin/msd/bosbin/MSD.bin) -o $(call NATIVEPATH,$(FSOBJ)/MSD.zx7.bin) -j bin -k bin -c zx7
 
-$(call NATIVEPATH,$(FSSRC)/fs/bin/serial/bosbin/serial.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/serial/src/main.c) \
-$(call NATIVEPATH,$(FSSRC)/fs/bin/serial/src/network.c) $(call NATIVEPATH,$(FSSRC)/fs/bin/serial/src/network.h)
+$(call NATIVEPATH,$(FSSRC)/fs/bin/serial/bosbin/serial.bin): $(call rwildcard,$(call NATIVEPATH,$(FSSRC)/fs/bin/serial/src),*)
 	$(Q)make -f makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/serial/)
 	convbin -i $(call NATIVEPATH,$(FSSRC)/fs/bin/serial/bosbin/serial.bin) -o $(call NATIVEPATH,$(FSOBJ)/SRL.zx7.bin) -j bin -k bin -c zx7
 
@@ -138,18 +138,7 @@ $(call NATIVEPATH,$(FSOBJ)/TIVARS.bin): $(call NATIVEPATH,$(FSSRC)/fs/var/TIVARS
 	convbin -i $(call NATIVEPATH,$(FSOBJ)/TIVARS.bin) -o $(call NATIVEPATH,$(FSOBJ)/TIVARS.zx7.bin) -j bin -k bin -c zx7
 
 # Rule to build Filesytem and compress it
-filesystem: $(call NATIVEPATH,$(FSSRC)/main.asm) $(call NATIVEPATH,$(FSSRC)/fs/lib/libload/bos_libload.asm) $(call NATIVEPATH,$(FSSRC)/fs/lib/fatdrvce/fatdrvce.asm) \
-$(call NATIVEPATH,$(FSSRC)/fs/lib/fileioc/fileioc.asm) $(call NATIVEPATH,$(FSSRC)/fs/lib/fontlibc/fontlibc.asm) \
-$(call NATIVEPATH,$(FSSRC)/fs/lib/graphx/graphx.asm) $(call NATIVEPATH,$(FSSRC)/fs/lib/keypadc/keypadc.asm) $(call NATIVEPATH,$(FSSRC)/fs/lib/srldrvce/srldrvce.asm) \
-$(call NATIVEPATH,$(FSSRC)/fs/lib/usbdrvce/usbdrvce.asm) $(call NATIVEPATH,$(FSSRC)/fs/bin/memedit.asm) $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/explorer.asm) \
-$(call NATIVEPATH,$(FSOBJ)/libload.bin) $(call NATIVEPATH,$(FSOBJ)/fatdrvce.bin) $(call NATIVEPATH,$(FSOBJ)/fileioc.bin) $(call NATIVEPATH,$(FSOBJ)/fontlibc.bin) \
-$(call NATIVEPATH,$(FSOBJ)/graphx.bin) $(call NATIVEPATH,$(FSOBJ)/keypadc.bin) $(call NATIVEPATH,$(FSOBJ)/srldrvce.bin) $(call NATIVEPATH,$(FSOBJ)/usbdrvce.bin) \
-$(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/bosbin/CEDIT.bin) $(call NATIVEPATH,$(FSOBJ)/explorer.bin) $(call NATIVEPATH,$(FSOBJ)/memedit.bin) \
-$(call NATIVEPATH,$(FSOBJ)/msddrvce.bin) $(call NATIVEPATH,$(FSSRC)/fs/bin/msd/bosbin/MSD.bin) $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/config.asm) \
-$(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/data.asm) $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/display.asm) $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/files.asm) \
-$(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/libloader.asm) $(call NATIVEPATH,$(FSSRC)/fs/bin/explorer/loadconfig.asm) $(call NATIVEPATH,$(FSOBJ)/PATH.bin) \
-$(call NATIVEPATH,$(FSSRC)/fs/var/PATH.asm) $(call NATIVEPATH,$(FSOBJ)/LIB.bin) $(call NATIVEPATH,$(FSSRC)/fs/var/LIB.asm) $(call NATIVEPATH,$(FSOBJ)/TIVARS.bin) \
-$(call NATIVEPATH,$(FSSRC)/fs/var/TIVARS.asm) $(call NATIVEPATH,$(FSSRC)/fs/bin/serial/bosbin/serial.bin)
+filesystem: $(call rwildcard,$(call NATIVEPATH,$(FSSRC)),*)
 	convbin -i $(call NATIVEPATH,$(FSSRC)/fs/etc/fontlibc/DrMono.dat) -o $(call NATIVEPATH,$(FSOBJ)/DrMono.zx7.dat) -j bin -k bin -c zx7
 	fasmg $(call NATIVEPATH,$(FSSRC)/main.asm) $(call NATIVEPATH,src/data/adrive/main.bin)
 	convbin -i $(call NATIVEPATH,src/data/adrive/main.bin) -o $(call NATIVEPATH,src/data/adrive/data.bin) -j bin -k bin -c zx7
@@ -157,9 +146,9 @@ $(call NATIVEPATH,$(FSSRC)/fs/var/TIVARS.asm) $(call NATIVEPATH,$(FSSRC)/fs/bin/
 	$(CP) $(call NATIVEPATH,src/data/adrive/data.bin) $(call NATIVEPATH,bin/BOSOSPT2.BIN)
 
 # Rule to build noti-ez80 submodule required for standalone ROM image
-notiez80: $(call NATIVEPATH,noti-ez80/bin/NOTI.rom)
+noti: $(call NATIVEPATH,noti-ez80/bin/NOTI.rom)
 
-$(call NATIVEPATH,noti-ez80/bin/NOTI.rom):
+$(call NATIVEPATH,noti-ez80/bin/NOTI.rom): $(call rwildcard,$(call NATIVEPATH,noti-ez80/src),*)
 	$(Q)make -f makefile -C $(call NATIVEPATH,noti-ez80/)
 
 # Rule to build Updater binary
@@ -175,7 +164,7 @@ bosrom: $(call NATIVEPATH,noti-ez80/bin/NOTI.rom)
 	fasmg $(call NATIVEPATH,src/rom.asm) $(call NATIVEPATH,bin/BOSOS.rom)
 
 # Rule to clean noti-ez80 submodule
-clean-notiez80:
+clean-noti:
 	$(Q)make clean -f makefile -C $(call NATIVEPATH,noti-ez80/)
 
 # Rule to clean cedit submodule

@@ -270,7 +270,7 @@ explorer_background_file:=$-3
 	ld hl,explorer_config_file
 	push hl
 	call bos.fs_OpenFile
-	call c,bos.fs_DeleteFile
+	call nc,bos.fs_DeleteFile
 	pop hl
 	ld de,512 ; low byte is 0 so we can also use this as the flags argument
 	push iy,de,de,hl
