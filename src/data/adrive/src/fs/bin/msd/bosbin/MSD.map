@@ -1,19 +1,19 @@
 Section     Base   Top    High   Length
 ----------- ------ ------ ------ -------
-.icon       D1A888 D1A888             0h
-.launcher   D1A888 D1A8AD            25h
-.libs       D1A8AD D1A922            75h
-.start      D1A922 D1A958            36h
-.cleanup    D1A958 D1A966             Eh
-.text       D1A966 D1C066          1700h
-.data       D1C066 D1C066             0h
-.rodata     D1C066 D1C3BE           358h
+.icon       D1A887 D1A887             0h
+.launcher   D1A887 D1A8AC            25h
+.libs       D1A8AC D1A921            75h
+.start      D1A921 D1A957            36h
+.cleanup    D1A957 D1A965             Eh
+.text       D1A965 D1C065          1700h
+.data       D1C065 D1C065             0h
+.rodata     D1C065 D1C3BD           358h
 .init_array 000000 000000             0h
 .ctors      000000 000000             0h
 .dtors      000000 000000             0h
 .fini_array 000000 000000             0h
 .bss        D031F6 D03A5A D10000    864h
-.header     D1A881 D1A888             7h
+.header     D1A881 D1A887             6h
 
 Label                          Value
 ----------------------------   ------
@@ -21,7 +21,7 @@ ___low_bss                   = D031F6
 ___len_bss                   = 000864
 ___heaptop                   = D10000
 ___heapbot                   = D03A5A
-___libs                      = D1A8AD
+___libs                      = D1A8AC
 ___init_array_count          = 000000
 ___ctors_count               = 000000
 ___dtors_count               = 000000
@@ -57,15 +57,15 @@ _fs_JoinPath                 = 022640
 _fs_BaseName                 = 02264C
 _fs_WriteRaw                 = 022654
 _os_GetCSC                   = 022430
-_bosgfx_SetTextPos           = D1A966
-_gui_DrawConsoleWindow       = D1A975
-_gui_Print                   = D1A97C
-_gui_PrintChar               = D1A983
-_gui_PrintInt                = D1A98B
-_gui_PrintLine               = D1A992
-_TIVarToPath                 = D1A999
-__frameset                   = D1A9B0
-__frameset0                  = D1A9BE
+_bosgfx_SetTextPos           = D1A965
+_gui_DrawConsoleWindow       = D1A974
+_gui_Print                   = D1A97B
+_gui_PrintChar               = D1A982
+_gui_PrintInt                = D1A98A
+_gui_PrintLine               = D1A991
+_TIVarToPath                 = D1A998
+__frameset                   = D1A9AF
+__frameset0                  = D1A9BD
 __iand                       = 000134
 __imulu                      = 000158
 __ishru                      = 000184
@@ -75,79 +75,79 @@ _strchr                      = 0000C4
 _strcmp                      = 0000C8
 _strlen                      = 0000D4
 _strncmp                     = 0000DC
-.missingappvar               = D1C066
-.libloadname                 = D1C06E
-.webaddress                  = D1C07F
-start                        = D1A922
-skip._exit                   = D1A94D
-skip.__Exit                  = D1A94D
-skip._abort                  = D1A94D
-_checkIs8xVar                = D1A9C9
-_transfer_file               = D1AA39
-___main_argc_argv            = D1B2AF
-_handleUsbEvent              = D1BFCD
-LJTI3_0                      = D1C092
-L_.str                       = D1C09E
-L_.str.1                     = D1C0A2
-L_.str.2                     = D1C0A6
-L_.str.3                     = D1C0B4
-L_.str.4                     = D1C0B9
-L_.str.5                     = D1C0D0
-L_.str.6                     = D1C0F8
-L_.str.7                     = D1C103
-L_.str.8                     = D1C10B
-L_.str.9                     = D1C123
-L_.str.10                    = D1C146
-L_.str.11                    = D1C151
+.missingappvar               = D1C065
+.libloadname                 = D1C06D
+.webaddress                  = D1C07E
+start                        = D1A921
+skip._exit                   = D1A94C
+skip.__Exit                  = D1A94C
+skip._abort                  = D1A94C
+_checkIs8xVar                = D1A9C8
+_transfer_file               = D1AA38
+___main_argc_argv            = D1B2AE
+_handleUsbEvent              = D1BFCC
+LJTI3_0                      = D1C091
+L_.str                       = D1C09D
+L_.str.1                     = D1C0A1
+L_.str.2                     = D1C0A5
+L_.str.3                     = D1C0B3
+L_.str.4                     = D1C0B8
+L_.str.5                     = D1C0CF
+L_.str.6                     = D1C0F7
+L_.str.7                     = D1C102
+L_.str.8                     = D1C10A
+L_.str.9                     = D1C122
+L_.str.10                    = D1C145
+L_.str.11                    = D1C150
 ___main_argc_argv.partitions = D031F6
 ___main_argc_argv.global     = D03246
 ___main_argc_argv.fat        = D03649
-L_.str.12                    = D1C15D
-L_.str.13                    = D1C160
-L_.str.14                    = D1C208
-L_.str.15                    = D1C218
-L_.str.16                    = D1C22D
-L_.str.17                    = D1C23F
-L_.str.18                    = D1C252
-L_.str.19                    = D1C25D
-L_.str.20                    = D1C274
-L_.str.21                    = D1C287
-L_.str.22                    = D1C29C
-L_.str.23                    = D1C2B5
-L_.str.24                    = D1C2B8
-L_.str.25                    = D1C2C7
-L_.str.26                    = D1C2E1
-L_.str.27                    = D1C2E4
-L_.str.28                    = D1C2F1
-L_.str.29                    = D1C2F5
-L_.str.30                    = D1C307
-L_.str.31                    = D1C320
-L_.str.32                    = D1C322
-L_.str.33                    = D1C327
-L_.str.34                    = D1C329
-L_.str.35                    = D1C34A
-L_.str.36                    = D1C36A
-L_.str.37                    = D1C382
-L_.str.38                    = D1C397
-L_.str.39                    = D1C3AA
-_#fat_Init                   = D1A8B8
-_#fat_Deinit                 = D1A8BC
-_#fat_DirList                = D1A8C0
-_#fat_Open                   = D1A8C4
-_#fat_Close                  = D1A8C8
-_#fat_GetSize                = D1A8CC
-_#fat_Read                   = D1A8D0
-_#fat_Write                  = D1A8D4
-_#fat_Create                 = D1A8D8
-_#fat_Delete                 = D1A8DC
-_#msd_Open                   = D1A8EB
-_#msd_Close                  = D1A8EF
-_#msd_Info                   = D1A8F3
-_#msd_Read                   = D1A8F7
-_#msd_Write                  = D1A8FB
-_#msd_FindPartitions         = D1A8FF
-_#usb_Init                   = D1A90E
-_#usb_Cleanup                = D1A912
-_#usb_HandleEvents           = D1A916
-_#usb_WaitForInterrupt       = D1A91A
-_#usb_ResetDevice            = D1A91E
+L_.str.12                    = D1C15C
+L_.str.13                    = D1C15F
+L_.str.14                    = D1C207
+L_.str.15                    = D1C217
+L_.str.16                    = D1C22C
+L_.str.17                    = D1C23E
+L_.str.18                    = D1C251
+L_.str.19                    = D1C25C
+L_.str.20                    = D1C273
+L_.str.21                    = D1C286
+L_.str.22                    = D1C29B
+L_.str.23                    = D1C2B4
+L_.str.24                    = D1C2B7
+L_.str.25                    = D1C2C6
+L_.str.26                    = D1C2E0
+L_.str.27                    = D1C2E3
+L_.str.28                    = D1C2F0
+L_.str.29                    = D1C2F4
+L_.str.30                    = D1C306
+L_.str.31                    = D1C31F
+L_.str.32                    = D1C321
+L_.str.33                    = D1C326
+L_.str.34                    = D1C328
+L_.str.35                    = D1C349
+L_.str.36                    = D1C369
+L_.str.37                    = D1C381
+L_.str.38                    = D1C396
+L_.str.39                    = D1C3A9
+_#fat_Init                   = D1A8B7
+_#fat_Deinit                 = D1A8BB
+_#fat_DirList                = D1A8BF
+_#fat_Open                   = D1A8C3
+_#fat_Close                  = D1A8C7
+_#fat_GetSize                = D1A8CB
+_#fat_Read                   = D1A8CF
+_#fat_Write                  = D1A8D3
+_#fat_Create                 = D1A8D7
+_#fat_Delete                 = D1A8DB
+_#msd_Open                   = D1A8EA
+_#msd_Close                  = D1A8EE
+_#msd_Info                   = D1A8F2
+_#msd_Read                   = D1A8F6
+_#msd_Write                  = D1A8FA
+_#msd_FindPartitions         = D1A8FE
+_#usb_Init                   = D1A90D
+_#usb_Cleanup                = D1A911
+_#usb_HandleEvents           = D1A915
+_#usb_WaitForInterrupt       = D1A919
+_#usb_ResetDevice            = D1A91D

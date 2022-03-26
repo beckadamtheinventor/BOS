@@ -1,15 +1,28 @@
 explorer_configure_theme:
 	call .main
-	ld a,(de)
+	ret po
+	ld a,(hl)
+	inc hl
+	and a,(hl)
+	inc hl
+	and a,(hl)
+	inc hl
+	and a,(hl)
+	dec hl
+	dec hl
+	dec hl
+	inc a
+	ret z
+	ld a,(hl)
 	ld (explorer_background_color),a
-	inc de
-	ld a,(de)
+	inc hl
+	ld a,(hl)
 	ld (explorer_statusbar_color),a
-	inc de
-	ld a,(de)
+	inc hl
+	ld a,(hl)
 	ld (explorer_foreground_color),a
-	inc de
-	ld a,(de)
+	inc hl
+	ld a,(hl)
 	ld (explorer_foreground2_color),a
 	jq explorer_write_config
 .main:
@@ -65,12 +78,12 @@ explorer_configure_theme:
 	jq nz,.display_theme_loop_skip_4b_loop
 	jq .display_themes_loop
 .done_displaying_themes:
-	ld hl,(.smc_y)
-	ld de,display_margin_left+11
-	ld bc,str_CustomTheme
-	push hl,de,bc
-	call gfx_PrintStringXY
-	pop bc,bc,bc
+	; ld hl,(.smc_y)
+	; ld de,display_margin_left+11
+	; ld bc,str_CustomTheme
+	; push hl,de,bc
+	; call gfx_PrintStringXY
+	; pop bc,bc,bc
 	or a,a
 	sbc hl,hl
 	ld (.smc_selection),hl
@@ -119,19 +132,20 @@ explorer_configure_theme:
 .smc_themes_len:=$-3
 	ld de,(.smc_selection)
 .get_theme_loop:
-	ld a,$A
+	xor a,a
 	cpir
-	dec de
+	ret po
 	ld a,d
 	or a,e
 	ret z
+	dec de
 	ld a,4
 .next_theme_loop_skip_4b_loop:
 	cpi
 	ret po
 	dec a
-	jq nz,.next_theme_loop_skip_4b_loop
-	jq .custom
+	jr nz,.next_theme_loop_skip_4b_loop
+	jr .get_theme_loop
 .cursor_down:
 	ld hl,(.smc_selection)
 	inc hl
@@ -163,69 +177,124 @@ explorer_configure_theme:
 	pop bc,bc,bc,bc
 	ret
 
-.colors:
-	db 4 dup 0
-.exit:
-	ld c,1
-	push bc
-	call gfx_SetDraw
-	pop bc,bc ; pop caller of explorer_configure_theme.main
-	ret
-.custom:
-	ld c,1
-	push bc
-	call gfx_SetDraw
-	pop bc
-	call draw_background
-	call gfx_BlitBuffer
-	ld hl,.colors
-	ld a,(explorer_background_color)
-	ld (hl),a
-	ld a,(explorer_statusbar_color)
-	ld (.colors+1),a
-	ld a,(explorer_foreground_color)
-	ld (.colors+2),a
-	ld a,(explorer_foreground2_color)
-	ld (.colors+3),a
-.custom_menu:
-	push hl
-	call bos.sys_WaitKey
-	pop hl
-	cp a,ti.skUp
-	jq nz,.dontprevcolor
-	dec hl
-.dontprevcolor:
-	cp a,ti.skDown
-	jq nz,.dontnextcolor
-	inc hl
-.dontnextcolor:
-	ld c,a
-	ld a,l
-	cp a, (.colors-1) and $FF
-	jq nz,.notunder
-	ld l, (.colors+3) and $FF
-.notunder:
-	cp a, (.colors+4) and $FF
-	jq nz,.notover
-	ld l, .colors and $FF
-.notover:
-	ld a,c
-	cp a,ti.skLeft
-	jq nz,.dontdecrementcolor
-	dec (hl)
-.dontdecrementcolor:
-	cp a,ti.skRight
-	jq nz,.dontincrementcolor
-	inc (hl)
-.dontincrementcolor:
-	cp a,ti.skClear
-	jq z,.exit
-	cp a,ti.skEnter
-	jq nz,.custom
-	call explorer_write_config
-	pop hl
-	ret c ; return to caller of explorer_configure_theme if malloc failed
-	jp (hl) ; return to caller of explorer_configure_theme.main
+; .colors:
+	; db 4 dup 0
+; .exit:
+	; ld c,1
+	; push bc
+	; call gfx_SetDraw
+	; pop bc,bc ; pop caller of explorer_configure_theme.main
+	; ret
+; .custom:
+	; ld a,(explorer_background_color)
+	; ld (.colors+0),a
+	; ld a,(explorer_statusbar_color)
+	; ld (.colors+1),a
+	; ld a,(explorer_foreground_color)
+	; ld (.colors+2),a
+	; ld a,(explorer_foreground2_color)
+	; ld (.colors+3),a
+	; ld hl,.colors
+; .customloop:
+	; push hl
+	; ld c,1
+	; push bc
+	; call gfx_SetDraw
+	; pop bc
+	; ld bc,10
+	; ld (.drawbox_x_smc),bc
+	; ld a,(.colors+0)
+	; ld (explorer_background_color),a
+	; ld a,(.colors+1)
+	; ld (explorer_statusbar_color),a
+	; ld a,(.colors+2)
+	; ld (explorer_foreground_color),a
+	; ld a,(.colors+3)
+	; ld (explorer_foreground2_color),a
+
+	; call draw_background
+	; ld a,(explorer_background_color)
+	; call .drawbox
+	; ld a,(explorer_statusbar_color)
+	; call .drawbox
+	; ld a,(explorer_foreground_color)
+	; call .drawbox
+	; ld a,(explorer_foreground2_color)
+	; call .drawbox
+	; ld c,0
+	; push bc
+	; call gfx_SetColor
+	; pop bc
+	; ld bc,16
+	; push bc
+	; ld c,60
+	; push bc
+	; ld bc,0
+; .custom_selected_x:=$-3
+	; push bc
+	; call gfx_HorizLine
+	; pop bc,bc,bc
+	; call gfx_BlitBuffer
+	; ld a,20
+	; call ti.DelayTenTimesAms
+	; call bos.sys_WaitKey
+	; pop hl
+	; cp a,ti.skRight
+	; jq nz,.dontprevcolor
+	; dec hl
+; .dontprevcolor:
+	; cp a,ti.skLeft
+	; jq nz,.dontnextcolor
+	; inc hl
+; .dontnextcolor:
+	; ld c,a
+	; ld a,l
+	; cp a, (.colors-1) and $FF
+	; jq nz,.notunder
+	; ld l, (.colors+3) and $FF
+; .notunder:
+	; cp a, (.colors+4) and $FF
+	; jq nz,.notover
+	; ld l, .colors and $FF
+; .notover:
+	; ld a,c
+	; cp a,ti.skUp
+	; jq nz,.dontdecrementcolor
+	; dec (hl)
+; .dontdecrementcolor:
+	; cp a,ti.skDown
+	; jq nz,.dontincrementcolor
+	; inc (hl)
+; .dontincrementcolor:
+	; cp a,ti.skClear
+	; jq z,.exit
+	; cp a,ti.skEnter
+	; jq nz,.customloop
+	; call explorer_write_config
+	; pop hl
+	; ret c ; return to caller of explorer_configure_theme if malloc failed
+	; jp (hl) ; otherwise return to caller of explorer_configure_theme.main
+
+; .drawbox:
+	; ld c,a
+	; push bc
+	; call gfx_SetColor
+	; pop bc
+	; ld bc,16
+	; push bc,bc
+	; ld bc,40
+	; push bc
+	; ld bc,0
+; .drawbox_x_smc:=$-3
+	; push bc
+	; call gfx_FillRectangle
+	; pop bc,bc,bc,de
+	; ld hl,(.drawbox_x_smc)
+	; add hl,bc
+	; inc hl
+	; ld (.drawbox_x_smc),hl
+	; ret
+
 
 explorer_write_config:
 	ld de,512
@@ -233,8 +302,9 @@ explorer_write_config:
 	call bos.sys_Malloc
 	pop bc
 	ret c
-	push hl,hl
+	push hl
 	ex (sp),iy
+	push iy
 	db $11,"BGC"
 	ld a,(explorer_background_color)
 	call .write_entry_byte
@@ -247,6 +317,8 @@ explorer_write_config:
 	db $11,"FG2"
 	ld a,(explorer_foreground2_color)
 	call .write_entry_byte
+	ld hl,32
+	ld (.file_size_smc),hl
 	ld hl,0
 explorer_background_file:=$-3
 	add hl,de
@@ -255,25 +327,35 @@ explorer_background_file:=$-3
 	jq z,.no_background_loaded
 	db $11,"IMG"
 	ld (iy),de
-	ld a,'"'
-	ld (iy+3),a
-	push hl
-	pea iy+4
+	ld (iy+3),"="
+	ld (iy+4),'"'
+	push hl,hl
+	pea iy+5
 	call ti._strcpy ; copy the path
 	ld a,$A
-	ld (de),a ; write the newline (which follows the end quote)
+	ld (de),a ; write the newline
 	dec de
 	ld a,'"'  ; write the end quote
 	ld (de),a
 	pop bc,bc
+	call ti._strlen
+	ld bc,(.file_size_smc)
+	add hl,bc
+	ld c,7 ; (.file_size_smc) should always be less than 256 initially
+	add hl,bc
+	ld (.file_size_smc),hl
+	pop bc
 .no_background_loaded:
 	ld hl,explorer_config_file
 	push hl
 	call bos.fs_OpenFile
 	call nc,bos.fs_DeleteFile
-	pop hl
-	ld de,512 ; low byte is 0 so we can also use this as the flags argument
-	push iy,de,de,hl
+	pop hl,bc
+	ld de,0
+.file_size_smc := $-3
+	push de,bc
+	ld e,0
+	push de,hl
 	call bos.fs_WriteNewFile
 	pop bc,bc,bc,bc,iy
 	ret
@@ -294,7 +376,7 @@ explorer_background_file:=$-3
 	add a,'0'
 	cp a,'9'+1
 	jq c,.under_10
-	add a,'A'-'9'+1
+	add a,'A'-1-'9'
 .under_10:
 	ld (iy+5),a
 	ld a,c
@@ -302,9 +384,9 @@ explorer_background_file:=$-3
 	add a,'0'
 	cp a,'9'+1
 	jq c,.under_10_2
-	add a,'A'-'9'+1
+	add a,'A'-1-'9'
 .under_10_2:
 	ld (iy+6),a
 	ld (iy+7),$A
-	lea iy,iy+7
+	lea iy,iy+8
 	ret

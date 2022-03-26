@@ -72,8 +72,8 @@ new_file_option_strings:
 
 explorer_themes_default:
 	db "BOS Blue",0,$08,$11,$FF,$07
-	db "BOS Green",0,$0C,$03,$AF,$C7
-	db "BOS Red",0,$C0,$A0,$E6,$E2
+	db "BOS Green",0,$04,$02,$AF,$C7
+	db "BOS Red",0,$40,$80,$E6,$A3
 .len := $-.
 
 ; input_dir_string:
