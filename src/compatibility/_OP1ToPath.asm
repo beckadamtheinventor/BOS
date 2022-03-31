@@ -35,17 +35,22 @@ _OP1ToPath:
 	rrca
 	rrca
 	and a,$F
-	ld hl,str_HexChars
-	ld c,a
-	add hl,bc
-	ldi
+	add a,'0'
+	cp a,'9'+1
+	jr c,.under_A
+	add a,7 ; distance between '9' and 'A'
+.under_A:
+	ld (de),a
+	inc de
 	ld a,(fsOP1)
-	ld c,0
 	and a,$F
-	ld c,a
-	ld hl,str_HexChars
-	add hl,bc
-	ldi
+	add a,'0'
+	cp a,'9'+1
+	jr c,.under_A_2
+	add a,7 ; distance between '9' and 'A'
+.under_A_2:
+	ld (de),a
+	inc de
 	xor a,a
 	ld (de),a
 	pop hl

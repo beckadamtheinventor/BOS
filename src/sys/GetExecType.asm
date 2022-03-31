@@ -12,13 +12,19 @@ sys_GetExecType:
 .entryhlbc:
 	ld a,c
 	or a,b
-	jr z,.fail
+	jr nz,.dontfail
+.fail_early:
+	scf
+.fail_early_cf:
+	sbc hl,hl
+	ret
+.dontfail:
 	ld a,b
 	or a,a
 	jr nz,.over_min_size
 	ld a,c
 	cp a,2
-	jr c,.ret_cf
+	jr c,.fail_early_cf
 .over_min_size:
 	ld a,(hl)
 	cp a,'#'
@@ -58,13 +64,41 @@ sys_GetExecType:
 .not_ef7b:
 	ld a,b
 	or a,a
-	jr nz,.check_jump_byte
+	jr nz,.check_arc_header
 	ld a,c
 	cp a,6
 	jr c,.ret_cf
-.check_jump_byte:
+.check_arc_header:
+	push hl,bc
+	ld bc,9
+	add hl,bc
+	ld c,(hl)
+	add hl,bc
+	inc hl
+	ld a,(hl)
+	cp a,$EF
+	jr nz,.not_arc_header
+	inc hl
+	ld a,(hl)
+	dec hl
+	cp a,$7B
+	jr nz,.not_arc_header
+	ex (sp),hl
+	or a,a
+	sbc hl,bc
+	ld c,12
+	sbc hl,bc  ; hl = filelen - (9 + fileptr[9] + 1 + 2)
+	ex (sp),hl
+	pop bc,de
 	push hl
 	pop de
+	inc de
+	inc de
+	ret ; return &fileptr[10 + fileptr[9]] as the executable header
+.not_arc_header:
+	pop bc,de
+	push de
+	pop hl
 	ld a,(hl)
 	inc hl
 	inc hl

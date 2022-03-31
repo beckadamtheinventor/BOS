@@ -179,10 +179,8 @@ sys_ExecuteFile:
 	call sys_NextProcessId
 	call sys_FreeRunningProcessId ;free memory allocated by the new process ID if there is any
 
-	ld a,(fsOP5+10)
-	or a,a
 	ld de,(fsOP6) ;arguments string
-	call z,.load_argc_argv_loop
+	call .load_argc_argv_loop
 	; call .normalize_lcd
 
 	ld a,(threading_enabled)
@@ -217,9 +215,9 @@ sys_ExecuteFile:
 	; jr .ranthread
 	; call .normalize_lcd
 .runnothreading:
-	ld de,(fsOP6) ; argv
+	ld hl,(fsOP6) ; argv
 	ld bc,(fsOP5) ; argc
-	push de,bc
+	push hl,bc
 	call .jptoprogram
 	ld (LastCommandResult),hl
 	ld a,e
@@ -366,8 +364,40 @@ sys_jphl := $
 	; pop hl,de
 	; ret
 
+.copy_to_op1:
+	ld de,fsOP1
+	ld a,ti.ProtProgObj
+	ld (de),a
+	inc de
+	ld b,8
+.copy_to_op1_loop:
+	ld a,(hl)
+	cp a,'.'
+	jr z,.copy_to_op1_eos
+	ld (de),a
+	or a,a
+	ret z
+	inc hl
+	inc de
+	djnz .copy_to_op1_loop
+.copy_to_op1_eos:
+	xor a,a
+	ld (de),a
+	ret
+
 ; input de = string
 .load_argc_argv_loop:
+	ld a,(fsOP5+10)
+	or a,a
+	jr z,.load_argc_argv_program_has_args
+	ld hl,(ExecutingFileFd)
+	push hl
+	call fs_CopyFileName
+	call .copy_to_op1
+	pop bc
+	ret
+
+.load_argc_argv_program_has_args:
 	ld	bc,1
 	ld	a,(de)
 	or	a,a
@@ -404,7 +434,9 @@ sys_jphl := $
 	ld	hl,(ExecutingFileFd)
 	push	hl
 	call	fs_CopyFileName	; get file name from running file descriptor
-	ex hl,de
+	push hl
+	call .copy_to_op1
+	pop de
 	pop	bc
 	pop hl ; char *argv[]
 	ld (fsOP6),hl

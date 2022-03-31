@@ -1,10 +1,34 @@
 # !/usr/bin/python3
 import os, sys
 
-default_dir_entry = [
-	ord("."),ord("."),0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,  0x10,  0x00, 0x00, 0x00, 0x00,
-	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+default_dir_entry = [0xFF]*0x1F0 + [0xFE] + [0xFF]*0xF
+
+partition_default_entry = [
+	"bosfs200fs ", 0x14, 0x80, 0x00, 0x80, 0x1B
 ]
+
+root_dir_data = [
+	"bin        ", 0x10, 0x03, 0x00, 0x00, 0x02,
+	"lib        ", 0x10, 0x02, 0x00, 0x00, 0x02,
+	"sbin       ", 0x10, 0x01, 0x00, 0x00, 0x02,
+] + [0xFF]*0x1C0 + [0xFE] + [0xFF]*0xF
+
+
+
+def copy_data(rom, data, addr=None):
+	if addr is None:
+		addr = len(rom)
+	i = j = 0
+	while i<len(data):
+		if type(data[i]) is int:
+			rom[addr+j] = data[i]
+			j+=1
+		else:
+			for c in data[i]:
+				rom[addr+j] = ord(c)
+				j+=1
+		i+=1
+	return j
 
 def get_file_data(rom, path):
 	ent = search_for_entry(rom, path)
@@ -25,7 +49,7 @@ def search_for_entry(rom, path):
 	L = len(path)-1
 	# print(L, path)
 
-	ptr = 0x040200
+	ptr = 0x050000
 	dnum = 0
 	while rom[ptr] != 0x00 and rom[ptr] != 0xFF:
 		fn = copy_file_name(rom[ptr:ptr+16])
@@ -76,12 +100,7 @@ def alloc_space_for_file(rom, length):
 	return j
 
 def free_file_descriptor(rom, ptr):
-	cmap = search_for_entry(rom, "/dev/cmap.dat")
-	if cmap is None:
-		print("/dev/cmap.dat not found on rom!\nAborting.")
-		exit(1)
-
-	cmap_data = 0x040000+(rom[cmap+0xC]+rom[cmap+0xD]*0x100)*0x200
+	cmap_data = 0x3BE000
 	cmap_len = 7040
 	i = cmap_data+rom[ptr+0xC]+rom[ptr+0xD]*0x100
 	data = 0x040000+(rom[ptr+0xC]+rom[ptr+0xD]*0x100)*0x200
@@ -109,20 +128,15 @@ def build_cluster_map(rom):
 	cmap_data = 0x3BE000
 	rom[cmap_data] = 0xFE
 	rom[cmap_data+1] = 0xFE
-	build_cluster_map_dir(rom, cmap_data, 0x040000)
+	build_cluster_map_dir(rom, 0x040000)
 
 
-def build_cluster_map_dir(rom, cmap, entry, dirprefix="/"):
-	k = rom[entry+0xC]+rom[entry+0xD]*0x100
-	l = rom[entry+0xE]+rom[entry+0xF]*0x100
-	i = 0x040000+k*0x200
-	m = 0
-	# print(dirprefix, copy_file_name(rom[entry:entry+16]), hex(l))
-	while m<l:
-		# print("allocated sector", hex(k))
-		rom[cmap + k] = 0xFE
-		k += 1
-		m += 0x200
+def build_cluster_map_dir(rom, entry, dirprefix="/"):
+	# print(f"building cluster map at {hex(entry)}")
+	cmap = 0x3BE000
+	k = rom[entry+0xC] + rom[entry+0xD]*0x100
+	i = 0x040000 + k*0x200
+	rom[cmap + k] = 0xFE
 	
 	# maxi = i+(rom[entry+0xE]+rom[entry+0xF]*0x100)-16
 	while i<len(rom):
@@ -148,7 +162,7 @@ def build_cluster_map_dir(rom, cmap, entry, dirprefix="/"):
 			# print(hex(i+0xB), bin(rom[i+0xB]))
 			if copy_file_name(rom[i:i+16]) not in [".", ".."]: #check if a directory and not '.' or '..'
 				# print(f"pathing into {dirprefix}{copy_file_name(rom[i:i+16])}")
-				build_cluster_map_dir(rom, cmap, i, dirprefix+copy_file_name(rom[i:i+16])+"/")
+				build_cluster_map_dir(rom, i, dirprefix+copy_file_name(rom[i:i+16])+"/")
 		else:
 			flen = rom[i+0xE]+rom[i+0xF]*0x100
 			if flen % 0x200:
@@ -203,7 +217,10 @@ def add_file_to_rom(rom, fout, flags, fin_data):
 	else:
 		name = fn
 		ext = ""
-	sector = alloc_space_for_file(rom, len(fin_data))
+	if flags & 0x10:
+		sector = alloc_space_for_file(rom, 0x200)
+	else:
+		sector = alloc_space_for_file(rom, len(fin_data))
 	if not sector:
 		print(f"Failed to allocate space for file on rom: {fout}\nAborting.")
 		exit(1)
@@ -216,11 +233,20 @@ def add_file_to_rom(rom, fout, flags, fin_data):
 	rom[ptr+0xB] = flags
 	rom[ptr+0xC] = sector&0xFF
 	rom[ptr+0xD] = sector//0x100
-	rom[ptr+0xE] = len(fin_data)&0xFF
-	rom[ptr+0xF] = len(fin_data)//0x100
+
 	sptr = 0x040000+sector*0x200
+
+	if flags & 0x10:
+		rom[ptr+0xE] = 0x00
+		rom[ptr+0xF] = 0x01
+		rom[sptr+0x1F0] = 0xFE
+	else:
+		rom[ptr+0xE] = len(fin_data)&0xFF
+		rom[ptr+0xF] = len(fin_data)//0x100
+
 	while sptr+len(fin_data) > len(rom):
 		rom.extend([0xFF]*512)
+
 	for i in range(len(fin_data)):
 		rom[sptr+i] = fin_data[i]
 
@@ -257,6 +283,12 @@ if __name__=='__main__':
 						except FileNotFoundError:
 							print(f'Could not locate rom image "{rom_in}". Did you build BOS yet?\nAborting.')
 							exit(1)
+						if len(rom) <= 0x050000:
+							with open(os.path.join(os.path.dirname(__file__), "src", "data", "adrive", "main.bin"), 'rb') as f:
+								rom.extend(list(f.read()))
+							rom.extend([0xFF] * (0x3C0000-len(rom)))
+							copy_data(rom, partition_default_entry, 0x040000)
+							copy_data(rom, root_dir_data, 0x050000)
 						build_cluster_map(rom)
 					f2.write(bytes(rom))
 				print(f"[Success] {fin}, {len(rom)} bytes")
@@ -273,7 +305,12 @@ if __name__=='__main__':
 				except FileNotFoundError:
 						print(f'Could not locate rom image "{rom_in}".\nAborting.')
 						exit(1)
-
+			if len(rom) <= 0x050000:
+				with open(os.path.join(os.path.dirname(__file__), "src", "data", "adrive", "main.bin"), 'rb') as f:
+					rom.extend(list(f.read()))
+				rom.extend([0xFF] * (0x3C0000-len(rom)))
+				copy_data(rom, partition_default_entry, 0x040000)
+				copy_data(rom, root_dir_data, 0x050000)
 			build_cluster_map(rom)
 
 			fout = _argv.pop(0)
