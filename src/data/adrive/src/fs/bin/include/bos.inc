@@ -245,6 +245,7 @@ namespace bos
 ?sys_ReadSectorCache             := $2265C
 ?sys_WriteSectorCache            := $22660
 ?sys_OpenFileInLib               := $22664
+?sys_LoadHookThreads             := $22668
 ; end of jump table
 ;-------------------------------------------------------------------------------
 ; OS memory areas and misc defines

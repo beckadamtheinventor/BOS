@@ -10,7 +10,7 @@
 	jp _DivHLBy10_s
 	jp _DivHLByA_s
 	jp kb_Scan
-	jp _GetCSC
+	jp _slow_GetCSC
 	call handle_unimplemented ;CoorMon                   := 0020150h
 	call handle_unimplemented ;Mon                       := 0020154h
 	call handle_unimplemented ;MonForceKey               := 0020158h
@@ -1010,7 +1010,7 @@
 	jp _MemSet ;MemSet                    := 00210E0h
 	call handle_unimplemented ;PointOn                   := 00210E4h
 	call handle_unimplemented ;ExecuteNewPrgm            := 00210E8h
-	call handle_unimplemented ;StrLength                 := 00210ECh
+	jp _StrLength ;StrLength                 := 00210ECh
 	call handle_unimplemented ;VPutMapRec                := 00210F0h
 	call handle_unimplemented ;FindAppUp                 := 00210F4h
 	call handle_unimplemented ;FindAppDown               := 00210F8h
@@ -1601,18 +1601,18 @@
 	jp DONOTHING ;                          equ 0021A1Ch
 	jp DONOTHING ;                          equ 0021A20h
 	jp DONOTHING ;                          equ 0021A24h
-	call handle_unimplemented ;SetDrawFGColorA           := 0021A28h
+	jp DONOTHING ;SetDrawFGColorA           := 0021A28h
 	jp DONOTHING ;                          equ 0021A2Ch
 	jp DONOTHING ;                          equ 0021A30h
 	jp DONOTHING ;                          equ 0021A34h
-	call handle_unimplemented ;DrawGraphBackground       := 0021A38h
-	call handle_unimplemented ;DrawStatusBar             := 0021A3Ch
+	jp DONOTHING ;DrawGraphBackground       := 0021A38h
+	jp DONOTHING ;DrawStatusBar             := 0021A3Ch
 	jp DONOTHING ;                          equ 0021A40h
 	jp DONOTHING ;                          equ 0021A44h
 	jp DONOTHING ;                          equ 0021A48h
 	jp DONOTHING ;                          equ 0021A4Ch
-	call handle_unimplemented ;DrawBatteryIndicator      := 0021A50h
-	call handle_unimplemented ;DrawBatteryStatus         := 0021A54h
+	jp DONOTHING ;DrawBatteryIndicator      := 0021A50h
+	jp DONOTHING ;DrawBatteryStatus         := 0021A54h
 	call handle_unimplemented ;VDispHL                   := 0021A58h
 	call handle_unimplemented ;PDspGrphNoColorReload     := 0021A5Ch
 	jp DONOTHING ;                          equ 0021A60h
@@ -1636,7 +1636,7 @@
 	jp DONOTHING ;                          equ 0021AA8h
 	jp DONOTHING ;                          equ 0021AACh
 	jp DONOTHING ;                          equ 0021AB0h
-	call handle_unimplemented ;DrawStatusBarInfo         := 0021AB4h
+	jp DONOTHING ;DrawStatusBarInfo         := 0021AB4h
 	call handle_unimplemented ;RestoreLCDBrightness      := 0021AB8h
 	call handle_unimplemented ;RestoreLCDBrightness_     := 0021ABCh
 	call handle_unimplemented ;DimLCDSlow                := 0021AC0h
@@ -1647,18 +1647,18 @@
 	jp DONOTHING ;                          equ 0021AD4h
 	jp DONOTHING ;                          equ 0021AD8h
 	jp DONOTHING ;                          equ 0021ADCh
-	call handle_unimplemented ;SetTextFGBGcolors         := 0021AE0h
-	call handle_unimplemented ;SetTextFGBGcolors_        := 0021AE4h
-	call handle_unimplemented ;SetTextBGcolor            := 0021AE8h
+	jp DONOTHING ;SetTextFGBGcolors         := 0021AE0h
+	jp DONOTHING ;SetTextFGBGcolors_        := 0021AE4h
+	jp DONOTHING ;SetTextBGcolor            := 0021AE8h
 	call handle_unimplemented ;VPutPS                    := 0021AECh
 	jp DONOTHING ;                          equ 0021AF0h
 	jp DONOTHING ;                          equ 0021AF4h
 	jp DONOTHING ;                          equ 0021AF8h
 	jp DONOTHING ;                          equ 0021AFCh
-	call handle_unimplemented ;DrawTILogo                := 0021B00h
-	call handle_unimplemented ;DrawThickRectBorder       := 0021B04h
+	jp DONOTHING ;DrawTILogo                := 0021B00h
+	jp DONOTHING ;DrawThickRectBorder       := 0021B04h
 	jp DONOTHING ;                          equ 0021B08h
-	call handle_unimplemented ;DrawStatusBarTextClr      := 0021B0Ch
+	jp DONOTHING ;DrawStatusBarTextClr      := 0021B0Ch
 	jp DONOTHING ;                          equ 0021B10h
 	jp DONOTHING ;                          equ 0021B14h
 	jp DONOTHING ;                          equ 0021B18h
@@ -1680,7 +1680,7 @@
 	jp DONOTHING ;                          equ 0021B58h
 	jp DONOTHING ;                          equ 0021B5Ch
 	jp DONOTHING ;                          equ 0021B60h
-	call handle_unimplemented ;DrawSprite16bpp           := 0021B64h
+	jp DONOTHING ;DrawSprite16bpp           := 0021B64h
 	jp DONOTHING ;                          equ 0021B68h
 	jp DONOTHING ;                          equ 0021B6Ch
 	jp DONOTHING ;                          equ 0021B70h
@@ -1705,13 +1705,13 @@
 	jp DONOTHING ;                          equ 0021BBCh
 	jp DONOTHING ;                          equ 0021BC0h
 	call handle_unimplemented ;GraphBGColorToDrawBGColor := 0021BC4h
-	call handle_unimplemented ;SetWhiteDrawBGColor       := 0021BC8h
+	jp DONOTHING ;SetWhiteDrawBGColor       := 0021BC8h
 	jp DONOTHING ;                          equ 0021BCCh
 	call handle_unimplemented ;ChkResAppTextSave         := 0021BD0h
 	call handle_unimplemented ;ChkCxMain                 := 0021BD4h
 	jp DONOTHING ;                          equ 0021BD8h
 	jp DONOTHING ;                          equ 0021BDCh
-	call handle_unimplemented ;DrawRectBorder__          := 0021BE0h
+	jp DONOTHING ;DrawRectBorder__          := 0021BE0h
 	jp DONOTHING ;                          equ 0021BE4h
 	jp DONOTHING ;                          equ 0021BE8h
 	jp DONOTHING ;                          equ 0021BECh
@@ -1737,7 +1737,7 @@
 	jp DONOTHING ;                          equ 0021C3Ch
 	jp DONOTHING ;                          equ 0021C40h
 	jp DONOTHING ;                          equ 0021C44h
-	call handle_unimplemented ;DrawLineEndEntry          := 0021C48h
+	jp DONOTHING ;DrawLineEndEntry          := 0021C48h
 	jp DONOTHING ;                          equ 0021C4Ch
 	jp DONOTHING ;                          equ 0021C50h
 	jp DONOTHING ;nop_ret                     equ 0021C54h
@@ -1801,33 +1801,33 @@
 	jp _GetCSC ;os.GetCSC                 := 0021D3Ch
 	jp DONOTHING ;os.AppInit                := 0021D40h
 	jp DONOTHING ;                          equ 0021D44h
-	call handle_unimplemented ;ChkBCIs0                  := 0021D48h
-	call handle_unimplemented ;ChkDEIs0                  := 0021D4Ch
-	call handle_unimplemented ;ChkHLIs0                  := 0021D50h
-	call handle_unimplemented ;SetAToBCU                 := 0021D54h
-	call handle_unimplemented ;SetAToDEU                 := 0021D58h
-	call handle_unimplemented ;SetAToHLU                 := 0021D5Ch
-	call handle_unimplemented ;SetBCUToA                 := 0021D60h
-	call handle_unimplemented ;SetBCUToB                 := 0021D64h
-	call handle_unimplemented ;SetDEUToA                 := 0021D68h
-	call handle_unimplemented ;SetDEUToB                 := 0021D6Ch
-	call handle_unimplemented ;SetHLUToA                 := 0021D70h
-	call handle_unimplemented ;SetHLUToB                 := 0021D74h
+	jp _ChkBCIs0 ;ChkBCIs0                  := 0021D48h
+	jp _ChkDEIs0 ;ChkDEIs0                  := 0021D4Ch
+	jp _ChkHLIs0 ;ChkHLIs0                  := 0021D50h
+	jp _SetAToBCU ;SetAToBCU                 := 0021D54h
+	jp _SetAToDEU ;SetAToDEU                 := 0021D58h
+	jp _SetAToHLU ;SetAToHLU                 := 0021D5Ch
+	jp _SetBCUToA ;SetBCUToA                 := 0021D60h
+	jp _SetBCUToB ;SetBCUToB                 := 0021D64h
+	jp _SetDEUToA ;SetDEUToA                 := 0021D68h
+	jp _SetDEUToB ;SetDEUToB                 := 0021D6Ch
+	jp _SetHLUToA ;SetHLUToA                 := 0021D70h
+	jp _SetHLUToB ;SetHLUToB                 := 0021D74h
 	call handle_unimplemented ;SignExtendBC              := 0021D78h
 	call handle_unimplemented ;SignExtendDE              := 0021D7Ch
 	call handle_unimplemented ;SignExtendHL              := 0021D80h
-	call handle_unimplemented ;SetBCUTo0                 := 0021D84h
-	call handle_unimplemented ;SetDEUTo0                 := 0021D88h
-	call handle_unimplemented ;SetHLUTo0                 := 0021D8Ch
+	jp _SetBCUTo0 ;SetBCUTo0                 := 0021D84h
+	jp _SetDEUTo0 ;SetDEUTo0                 := 0021D88h
+	jp _SetHLUTo0 ;SetHLUTo0                 := 0021D8Ch
 	call handle_unimplemented ;DivHLByA                  := 0021D90h
-	call handle_unimplemented ;CpHLDE_s                  := 0021D94h
-	call handle_unimplemented ;CpHLDE_                   := 0021D98h
-	call handle_unimplemented ;LoadDEInd_s               := 0021D9Ch
-	call handle_unimplemented ;LoadDEInd                 := 0021DA0h
+	jp _CpHLDE_s ;CpHLDE_s                  := 0021D94h
+	jp _CpHLDE ;CpHLDE_                   := 0021D98h
+	jp _LoadDEInd_s ;LoadDEInd_s               := 0021D9Ch
+	jp _LoadDEInd ;LoadDEInd                 := 0021DA0h
 	call handle_unimplemented ;CpHLDEBC                  := 0021DA4h
-	call handle_unimplemented ;NegBC                     := 0021DA8h
-	call handle_unimplemented ;NegDE                     := 0021DACh
-	call handle_unimplemented ;StrCmpre                  := 0021DB0h
+	jp _NegBC ;NegBC                     := 0021DA8h
+	jp _NegDE ;NegDE                     := 0021DACh
+	jp _StrCmpre ;StrCmpre                  := 0021DB0h
 	jp sys_AddHLAndA
 	call handle_unimplemented ;NextFlashPage             := 0021DB8h
 	call handle_unimplemented ;PrevFlashPage             := 0021DBCh
@@ -1943,7 +1943,7 @@
 	jp DONOTHING ;                          equ 0021F74h
 	jp DONOTHING ;                          equ 0021F78h
 	jp DONOTHING ;                          equ 0021F7Ch
-	call handle_unimplemented ;MovFrOP1OP2               := 0021F80h
+	jp _MovFROP1OP2 ;MovFrOP1OP2               := 0021F80h
 	jp DONOTHING ;                          equ 0021F84h
 	jp DONOTHING ;                          equ 0021F88h
 	jp DONOTHING ;                          equ 0021F8Ch
@@ -1991,8 +1991,8 @@
 	jp DONOTHING ;                          equ 0022034h
 	jp DONOTHING ;                          equ 0022038h
 	jp DONOTHING ;                          equ 002203Ch
-	call handle_unimplemented ;ArcChk                    := 0022040h
-	call handle_unimplemented ;LoadDEIndFlash            := 0022044h
+	jp _ArcChk ; ArcChk                    := 0022040h
+	jp _LoadDEIndFlash ;LoadDEIndFlash            := 0022044h
 	call handle_unimplemented ;ChkInRamB                 := 0022048h
 	jp DONOTHING ;                          equ 002204Ch
 	jp DONOTHING ;                          equ 0022050h

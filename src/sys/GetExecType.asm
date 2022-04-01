@@ -75,6 +75,8 @@ sys_GetExecType:
 	ld c,(hl)
 	add hl,bc
 	inc hl
+	inc hl
+	inc hl
 	ld a,(hl)
 	cp a,$EF
 	jr nz,.not_arc_header
@@ -86,15 +88,15 @@ sys_GetExecType:
 	ex (sp),hl
 	or a,a
 	sbc hl,bc
-	ld c,12
-	sbc hl,bc  ; hl = filelen - (9 + fileptr[9] + 1 + 2)
+	ld c,14
+	sbc hl,bc  ; hl = filelen - (9 + fileptr[9] + 1 + 2 + 2)
 	ex (sp),hl
 	pop bc,de
 	push hl
 	pop de
+	inc de ; return de = &fileptr[14 + fileptr[9]] as the executable code
 	inc de
-	inc de
-	ret ; return &fileptr[10 + fileptr[9]] as the executable header
+	ret ; return hl = &fileptr[12 + fileptr[9]] as the executable header
 .not_arc_header:
 	pop bc,de
 	push de

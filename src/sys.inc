@@ -1,6 +1,7 @@
 
 ; BOS system routines
 
+include 'sys/LoadHookThreads.asm'
 include 'sys/AddHLAndA.asm'
 include 'sys/AnyKey.asm'
 include 'sys/CallExecuteFile.asm'

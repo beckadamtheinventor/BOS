@@ -66,14 +66,26 @@ explorer_init_2:
 	push de
 	call bos.fs_GetFilePtr
 	pop de
-	jq c,.dontloadconfig
+	jr c,.dontloadconfig
 	ld a,b
 	or a,c
-	jq z,.dontloadconfig
+	jr z,.dontloadconfig
 	push bc,hl
 	call explorer_load_config
 	pop bc,bc
 .dontloadconfig:
+
+	ld de,explorer_hooks_file
+	push de
+	call bos.fs_GetFilePtr
+	pop de
+	jr c,.dontloadhooks
+	ld a,b
+	or a,c
+	jr z,.dontloadhooks
+	call bos.sys_LoadHookThreads
+.dontloadhooks:
+	
 	ld a,(explorer_foreground_color)
 	ld (bos.lcd_text_fg),a
 	ld a,(explorer_background_color)

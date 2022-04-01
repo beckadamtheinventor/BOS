@@ -118,6 +118,8 @@ explorer_themes_file:
 	db "/etc/config/explorer/themes.dat",0
 explorer_config_file:
 	db "/etc/config/explorer/explorer.cfg",0
+explorer_hooks_file:
+	db "/etc/config/explorer/hooks.dat",0
 explorer_preload_cmd:
 	db "cmd -x "
 explorer_preload_file:

@@ -226,7 +226,7 @@ handle_offsetinstruction:
 	push de,iy,af ; save de, iy, af
 	ld iy,9
 	add iy,sp ; grab pointer to arguments
-	lea hl,iy + -3 + .offset_inst_temp ; grab pointer to 9 bytes of stack space below the current stack pointer
+	lea hl,iy + -3 + .offset_inst_temp ; grab pointer to 10 bytes of stack space below the current stack pointer
 	ld (offset_inst_sp_temp),hl
 	ld hl,(iy) ; grab pointer to caller
 	ld a,(hl)
@@ -241,29 +241,28 @@ handle_offsetinstruction:
 .isa2binstruction:
 	ld a,(hl)
 	inc hl
-	ld (iy + .offset_inst_temp+1),a ; second opcode byte
+	ld (iy + .offset_inst_temp + 1),a ; second opcode byte
 	ld de,(hl) ;grab argument from caller
 	inc hl
 	inc hl
 	inc hl
 	ld (iy),hl ; increment caller past the original instruction
-	ld hl,(running_program_ptr) ;pointer to currently running program
-	add hl,de ;&running_program[argument]
-	ld (iy + .offset_inst_temp+2),hl ; load relocated argument
-	ld a,$C9 ; ret opcode
-	ld (iy + .offset_inst_temp+5),a
+	call .resolve_argument ; load &caller[argument] or lib entry point
+	ld (iy + .offset_inst_temp + 2),hl ; load relocated argument
+	ld a,$C9   ; ret opcode
+	ld (iy + .offset_inst_temp + 5),a
 	jr .finish
 .isnota2binstruction:
 	ld de,(hl) ;grab argument from caller
 	inc hl
 	inc hl
+	ld a,(hl)
 	inc hl
 	ld (iy),hl ; increment caller past the original instruction
-	ld hl,(running_program_ptr) ;pointer to currently running program
-	add hl,de ;&running_program[argument]
-	ld (iy + .offset_inst_temp+1),hl ; load relocated argument
-	ld a,$C9 ; ret opcode
-	ld (iy + .offset_inst_temp+4),a
+	call .resolve_argument ; load &caller[argument] or lib entry point
+	ld (iy + .offset_inst_temp + 1),hl ; load relocated argument
+	ld a,$C9   ; ret opcode
+	ld (iy + .offset_inst_temp + 4),a
 .finish:
 	lea hl,iy + .offset_inst_temp
 	ld iy,(offset_inst_sp_temp)
@@ -283,6 +282,27 @@ handle_offsetinstruction:
 	pop hl,af
 	ld sp,(offset_inst_sp_temp)
 	ret
+
+._osrt_lib_table := $04E000
+.resolve_argument:
+	ld hl,(iy)
+	add hl,de
+	sub a,$80
+	ret c
+	ld l,a  ; a*=3
+	add a,a ; a*2
+	add a,l ; a*2 + a
+	ld hl,._osrt_lib_table
+	call sys_AddHLAndA
+	ld hl,(hl)
+	add hl,de
+	ld a,(hl)
+	cp a,$CD
+	jr z,.jump
+	cp a,$C3
+	ret nz
+.jump:
+	jp (hl)
 
 os_GetOSInfo:
 	ld hl,string_os_info

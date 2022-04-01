@@ -21,20 +21,21 @@ fs_CreateRamFile:
 	or a,a
 	sbc hl,bc
 	jq c,.createfile
-	ld a,l
-	rr h
-	rra
-	rr h
-	rra
-	set 7,h ; mark file sector number as a ram offset
+	push de
+	call _GetVATEntryNFromPtr
+	pop de
+	set 7,h
+	ld (ix+17),h
 	call sys_FlashUnlock
 	call sys_WriteFlashA
-	ld a,h
+	ld a,(ix+17)
 	call sys_WriteFlashA
 	ld a,(ix+15)
 	call sys_WriteFlashA
 	ld a,(ix+16)
 	call sys_WriteFlashA
+	xor a,a
+	ld (ix+17),a
 	call sys_FlashLock
 	jq .done
 .createfile:

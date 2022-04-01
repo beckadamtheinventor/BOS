@@ -98,12 +98,6 @@ end if
 	pop bc
 	push de,hl
 	; call .normalize_lcd
-	xor a,a
-	sbc hl,hl
-	ld (asm_prgm_size),hl
-	ld hl,bos_UserMem
-	ld (top_of_UserMem),hl
 	call sys_FreeRunningProcessId ;free memory allocated by the program
-	call sys_PrevProcessId
 	pop hl,de
 	jq th_HandleNextThread.nosave

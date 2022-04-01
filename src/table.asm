@@ -163,4 +163,5 @@
 	jp sys_ReadSectorCache
 	jp sys_WriteSectorCache
 	jp sys_OpenFileInLib
+	jp sys_LoadHookThreads
 ; end of jump table

@@ -14,7 +14,6 @@ root_dir_data = [
 ] + [0xFF]*0x1C0 + [0xFE] + [0xFF]*0xF
 
 
-
 def copy_data(rom, data, addr=None):
 	if addr is None:
 		addr = len(rom)
@@ -82,7 +81,8 @@ def copy_file_name(entry):
 def alloc_space_for_file(rom, length):
 	cmap_data = 0x3BE000
 	cmap_len = 7040
-	i = j = l = 0
+	j = l = 0
+	i = 0x010000//0x200
 	while l<length and i<cmap_len:
 		while rom[cmap_data+i] != 0xFF and i<cmap_len:
 			i+=1

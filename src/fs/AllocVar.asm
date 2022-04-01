@@ -8,7 +8,12 @@ fs_AllocVar:
 	push hl
 	inc hl
 	inc hl
-	ld de,(top_of_UserMem)
+	push hl
+	ld de,(ti.asm_prgm_size)
+	ld hl,ti.userMem
+	add hl,de
+	ex hl,de
+	pop hl
 	push de
 	call _InsertMem
 	pop hl

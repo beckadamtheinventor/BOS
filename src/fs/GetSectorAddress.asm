@@ -17,8 +17,7 @@ fs_GetSectorAddress:
 	ret
 .ram_sector:
 	res 7,h
-	ld de,ti.userMem
-	add hl,hl
-	add hl,hl
-	add hl,de
+	call _GetVATEntryN
+	
+	
 	ret

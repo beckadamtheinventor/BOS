@@ -72,6 +72,7 @@ fs_dir bin_dir
 	fs_sfentry mkfile_exe, "mkfile", "", f_system+f_subfile
 	fs_sfentry mv_exe, "mv", "", f_system+f_subfile
 	fs_sfentry off_exe, "off", "", f_system+f_subfile
+	fs_entry _osrt_lib_table, "osrt", "tbl", f_system
 	fs_sfentry peek_exe, "peek", "", f_system+f_subfile
 	fs_sfentry poke_exe, "poke", "", f_system+f_subfile
 	fs_sfentry rm_exe, "rm", "", f_system+f_subfile
@@ -256,6 +257,12 @@ end fs_file
 ;-------------------------------------------------------------
 db $04E000 - $ dup $FF
 
+fs_file _osrt_lib_table
+	dl _osrt_argv_so
+	dl _osrt_numstr_so
+	dl _osrt_mem_so
+end fs_file
+
 fs_file argv_so
 	include 'fs/bin/argv.so.asm'
 end fs_file
@@ -267,7 +274,6 @@ end fs_file
 fs_file mem_so
 	include 'fs/bin/mem.so.asm'
 end fs_file
-
 
 end fs_fs
 
