@@ -7,7 +7,7 @@ include 'include/os.inc'
 include 'include/defines.inc'
 
 ROM_BUILD:
-file '../noti-ez80/bin/NOTI.rom'
+file '../noti-ez80/bin/NOTI-autoboot.rom'
 ;-------------------------------------------------------------------------------
 	os_rom
 ;-------------------------------------------------------------------------------
@@ -23,3 +23,4 @@ file '../noti-ez80/bin/NOTI.rom'
 	file 'src/data/adrive/data.bin'
 
 	db $040000-$ dup $FF
+

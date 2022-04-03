@@ -19,7 +19,7 @@ _CreateAppVar:
 ;@INPUT OP1+1 = 8 byte name of var to create
 ;@INPUT A = var type
 ;@INPUT hl = length to allocate for file
-;@OUTPUT hl = pointer to 2 byte file length, de = pointer to file data section
+;@OUTPUT hl = pointer to 2 byte file length, de = pointer to file data
 ;@OUTPUT Cf set and HL = -1 if failed
 ;DESTROYS All
 _CreateVar:
@@ -37,8 +37,6 @@ _CreateVar:
 	pop bc,af,bc,hl,bc
 	push hl
 	pop de
-	inc de
-	inc de
 	ret nc
 	sbc hl,hl
 	ret

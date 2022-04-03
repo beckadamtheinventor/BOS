@@ -154,7 +154,7 @@ $(call NATIVEPATH,$(FSOBJ)/PATH.bin) $(call NATIVEPATH,$(FSOBJ)/TIVARS.bin) $(ca
 noti: $(call NATIVEPATH,noti-ez80/bin/NOTI.rom)
 
 $(call NATIVEPATH,noti-ez80/bin/NOTI.rom): $(call rwildcard,$(call NATIVEPATH,noti-ez80/src),*)
-	$(Q)make -f makefile -C $(call NATIVEPATH,noti-ez80/)
+	$(Q)make autostart -f makefile -C $(call NATIVEPATH,noti-ez80/)
 
 # Rule to build Updater binary
 bosbin:

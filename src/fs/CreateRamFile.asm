@@ -15,17 +15,23 @@ fs_CreateRamFile:
 	pop bc,bc
 	ld bc,fsentry_filesector
 	add hl,bc
-	ex hl,de
+	push hl
+	ld hl,(ix+12)
+	call _AddVATEntry
+	jq c,.fail
+	pop de
 	ld hl,(ix+12)
 	ld bc,$D00000
 	or a,a
 	sbc hl,bc
-	jq c,.createfile
+	jr c,.fail
+	add hl,bc
 	push de
 	call _GetVATEntryNFromPtr
 	pop de
 	set 7,h
 	ld (ix+17),h
+	ld a,l
 	call sys_FlashUnlock
 	call sys_WriteFlashA
 	ld a,(ix+17)
@@ -37,10 +43,7 @@ fs_CreateRamFile:
 	xor a,a
 	ld (ix+17),a
 	call sys_FlashLock
-	jq .done
-.createfile:
-	add hl,bc
-	
+	jr .done
 .fail:
 	or a,a
 	sbc hl,hl

@@ -54,10 +54,11 @@ _UpdateVAT:
 	ld a,(iy-7)
 	or a,a
 	jr z,.finished
-.nameloop:
-	dec iy
-	dec a
-	jr nz,.nameloop
+	lea iy,iy-8
+; .nameloop:
+	; dec iy
+	; dec a
+	; jr nz,.nameloop
 	jr .loop
 .finished:
 	ld (ti.pTemp),iy

@@ -3,8 +3,7 @@
 ;@INPUT HL = VAT entry number
 ;@OUTPUT HL = VAT entry pointer
 _GetVATEntryN:
-	ld iy,top_of_vat
-	ld (ti.progPtr),iy
+	ld iy,top_of_vat-1
 	add hl,bc
 	or a,a
 	sbc hl,bc
@@ -19,6 +18,7 @@ _GetVATEntryN:
 	or a,d
 	or a,e
 	jr z,.finished
+	lea iy,iy-8
 	ld de,1
 	sbc hl,de
 	jr nz,.loop

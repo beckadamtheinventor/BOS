@@ -1,5 +1,6 @@
 
 ; BOS compatility routines
+include 'compatibility/_AddVATEntry.asm'
 include 'compatibility/_ChkRRIs0.asm'
 include 'compatibility/_SetAToRRU.asm'
 include 'compatibility/_SetRRUTo0.asm'

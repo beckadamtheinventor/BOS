@@ -334,6 +334,8 @@ generate_boot_configs:
 	ret
 
 os_return_soft:
+	ld hl,ti.symTable
+	ld (ti.pTemp),hl
 	call os_check_recovery_key
 	call sys_FreeAll
 	call gfx_Set8bpp
@@ -344,7 +346,11 @@ os_return_soft:
 	call fs_SanityCheck
 
 	call os_check_recovery_key
-	call generate_boot_configs
+	ld bc,str_BootConfigFile
+	push bc
+	call fs_OpenFile
+	pop bc
+	call c,generate_boot_configs
 	jq nc,.run_boot_cmd
 ; if we can't find the boot config files and can't initialize them try to run the main gui
 	ld bc,$FF0000

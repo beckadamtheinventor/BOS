@@ -7,7 +7,6 @@ macro ram_executable?
 end macro
 
 macro ram_executable_at? addr
-	include 'include/ez80.inc'
 	org addr
 	db $18,$04,"REX",$00
 end macro

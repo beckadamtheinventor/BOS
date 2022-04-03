@@ -2,7 +2,6 @@
 ;@DOES Search the VAT for a file descriptor containing address in HL
 ;@OUTPUT HL = VAT entry number, DE = VAT entry pointer (high)
 _GetVATEntryNFromPtr:
-	ld (ti.scrapMem),hl
 	push hl
 	pop bc
 	ex hl,de
