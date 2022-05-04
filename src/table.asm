@@ -164,4 +164,5 @@
 	jp sys_WriteSectorCache
 	jp sys_OpenFileInLib
 	jp sys_LoadHookThreads
+	jp gfx_BlitScreen
 ; end of jump table
