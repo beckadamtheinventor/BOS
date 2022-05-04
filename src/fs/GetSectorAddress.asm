@@ -18,6 +18,11 @@ fs_GetSectorAddress:
 .ram_sector:
 	res 7,h
 	call _GetVATEntryN
-	
-	
-	ret
+	inc hl
+	ld a,(hl)
+	inc hl
+	ld d,(hl)
+	inc hl
+	ld l,(hl)
+	ld h,d
+	jp _SetHLUToA

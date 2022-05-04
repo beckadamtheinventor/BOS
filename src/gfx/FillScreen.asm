@@ -3,12 +3,4 @@
 ;@DESTROYS HL,DE,BC,F(P/V)
 gfx_FillScreen:
 	ld	hl,(cur_lcd_buffer)
-	ld	bc,LCD_WIDTH * LCD_HEIGHT - 1
-.clear:
-	push hl
-	pop de
-	inc de
-	ld (hl),a
-	ldir
-	ret
-
+	jq	gfx_BufClear.clear

@@ -3,6 +3,7 @@
 gfx_BlitBuffer:
 	ld	hl,LCD_BUFFER
 	ld	de,LCD_VRAM
+.copy:
 	ld	bc,LCD_WIDTH * LCD_HEIGHT
 	ldir
 	ret

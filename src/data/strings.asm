@@ -105,11 +105,11 @@ fs_file_data_drmono.zlen:=$-.
 	dw fs_file_data_cedit.len
 	dw fs_file_data_cedit.zlen
 virtual
-	file "adrive/src/fs/bin/cedit/bosbin/CEDIT.bin"
+	file "adrive/src/fs/bin/CEDIT/bosbin/CEDIT.bin"
 	fs_file_data_cedit.len := $-$$
 end virtual
 fs_file_data_cedit:
-	file "adrive/obj/CEDIT.zx7.bin"
+	file "adrive/obj/cedit.zx7.bin"
 fs_file_data_cedit.zlen:=$-.
 
 	db $00, "opt/bin/msd",0
@@ -120,19 +120,20 @@ virtual
 	fs_file_data_msd.len := $-$$
 end virtual
 fs_file_data_msd:
-	file "adrive/obj/MSD.zx7.bin"
+	file "adrive/obj/msd.zx7.bin"
 fs_file_data_msd.zlen:=$-.
 
-	; db $00, "opt/bin/srl",0
-	; dw fs_file_data_srl.len
-	; dw fs_file_data_srl.zlen
-; virtual
-	; file "adrive/src/fs/bin/serial/bosbin/serial.bin"
-	; fs_file_data_srl.len := $-$$
-; end virtual
-; fs_file_data_srl:
-	; file "adrive/obj/SRL.zx7.bin"
-; fs_file_data_srl.zlen:=$-.
+	db $00, "opt/bin/srl",0
+	dw fs_file_data_srl.len
+	dw fs_file_data_srl.zlen
+virtual
+	file "adrive/src/fs/bin/serial/bosbin/serial.bin"
+	fs_file_data_srl.len := $-$$
+end virtual
+fs_file_data_srl:
+	file "adrive/obj/serial.zx7.bin"
+fs_file_data_srl.zlen:=$-.
+
 	db $00, "var/PATH",0
 	dw fs_file_data_path.len
 	dw fs_file_data_path.zlen
@@ -347,7 +348,7 @@ BOS_O := BOS_B + (BOS_B_width * BOS_B_height) + 2 + 1
 BOS_S := BOS_O + (BOS_O_width * BOS_O_height) + 2 + 1
 
 str_ecks:
-	db	'eck''s',0
+	db	"eck's",0
 str_perate:
 	db	'perating',0
 str_ystem:

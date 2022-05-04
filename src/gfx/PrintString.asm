@@ -9,28 +9,23 @@ gfx_PrintString:
 	ld	a,(lcd_y)
 	cp	a,TEXT_MAX_ROW
 	ret nc
-	ld	de,LCD_WIDTH - 10
 .loop:
 	ld	a,(hl)
 	inc hl
-	or	a,a
-	ret	z
 	cp a,$20
 	ret c
 	cp a,$80
 	ccf
 	ret c
 	call	gfx_PrintChar			; saves de, hl
-	push	hl
+	ex	hl,de
+	ld	bc,LCD_WIDTH - 8
 	ld	hl,(lcd_x)
 	or	a,a
-	sbc	hl,de
-	jr	c,.next
-	xor a,a   ; return a=0, but set the carry flag so the caller knows we hit the end of the line
+	sbc	hl,bc
+	ex	hl,de
+	jr	c,.loop
+	xor a,a   ; return a=0 to inform the caller we returned without a control code, but set the carry flag so the caller knows that we hit the end of the line (on screen)
 	scf
-	pop hl
 	ret
-.next:
-	pop hl
-	jr	.loop
 

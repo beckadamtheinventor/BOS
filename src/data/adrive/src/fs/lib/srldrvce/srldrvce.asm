@@ -18,15 +18,7 @@ include_library '../usbdrvce/usbdrvce.asm'
 	export	srl_Read
 	export	srl_Write
 	export	srl_GetCDCStandardDescriptors
-; temp
-	export	get_device_type_
-	export	get_endpoint_addresses_
-	export	ring_buf_contig_avail_
-	export	ring_buf_has_consecutive_region_
-	export	ring_buf_push_
-	export	ring_buf_pop_
-	export	ring_buf_update_read_
-	export	ring_buf_update_write_
+	export	srl_UsbEventCallback
 ;-------------------------------------------------------------------------------
 macro compare_hl_zero?
 	add	hl,de
@@ -85,6 +77,7 @@ struct srl_device
 	subtype				rb 1
 	rx_buf				ring_buf_ctrl
 	tx_buf				ring_buf_ctrl
+	error				rl 1
 	size := $-.
 end struct
 
@@ -116,15 +109,14 @@ end virtual
 
 SRL_INTERFACE_ANY	:= $FF
 
-virtual at 0
-	SRL_SUCCESS			rb 1
-	SRL_ERROR_INVALID_PARAM		rb 1
-	SRL_ERROR_USB_FAILED		rb 1
-	SRL_ERROR_NOT_SUPPORTED		rb 1
-	SRL_ERROR_INVALID_DEVICE	rb 1
-	SRL_ERROR_INVALID_INTERFACE	rb 1
-	SRL_ERROR_NO_MEMORY		rb 1
-end virtual
+SRL_SUCCESS			:= 0
+SRL_ERROR_INVALID_PARAM		:= -1
+SRL_ERROR_USB_FAILED		:= -2
+SRL_ERROR_NOT_SUPPORTED		:= -3
+SRL_ERROR_INVALID_DEVICE	:= -4
+SRL_ERROR_INVALID_INTERFACE	:= -5
+SRL_ERROR_NO_MEMORY		:= -6
+SRL_ERROR_DEVICE_DISCONNECTED	:= -7
 
 ; enum usb_transfer_status
 ?USB_TRANSFER_COMPLETED		:= 0
@@ -136,6 +128,15 @@ end virtual
 ?USB_TRANSFER_BUS_ERROR		:= 1 shl 5
 ?USB_TRANSFER_FAILED		:= 1 shl 6
 ?USB_TRANSFER_CANCELLED		:= 1 shl 7
+
+struct setuppkt, requestType: ?, request: ?, value: ?, index: ?, length: ?
+	label .: 8
+	bmRequestType		db requestType
+	bRequest		db request
+	wValue			dw value
+	wIndex			dw index
+	wLength			dw length
+end struct
 
 struct descriptor
 	label .: 2
@@ -256,6 +257,8 @@ srl_Open:
 	ld	(xsrl_device.rx_buf.dma_active),a	; reset dma_active
 	ld	(xsrl_device.tx_buf.dma_active),a
 
+	ld	(xsrl_device.error),hl			; reset error
+
 	push	iy
 	call	usb_GetRole
 	pop	iy
@@ -323,16 +326,14 @@ srl_Open:
 	compare_hl_zero
 	jq	nz,.exit
 
-	ld	de,1
-.current_config = $-3
-
-	ld	a,e					; chech if config is 0
-	or	a,a
-	ld	a,SRL_ERROR_INVALID_DEVICE
-	jq	z,.exit
-
 	push	iy
+	ld	de,0
+.current_config = $-3
+	ld	a,e
+	or	a,a
+	jq	z,.noPrevConfig
 	dec	de
+.noPrevConfig:
 	push	de
 	ld	bc,(xsrl_device.dev)
 	push	bc
@@ -362,7 +363,11 @@ srl_Open:
 	add	hl,bc
 	push	hl
 	ld	bc,(.current_config)			; index = current config - 1
+	ld	a,c
+	or	a,a
+	jq	z,.noPrevConfig2
 	dec	bc
+.noPrevConfig2:
 	push	bc
 	ld	c,CONFIGURATION_DESCRIPTOR
 	push	bc
@@ -382,17 +387,34 @@ srl_Open:
 	sbc	hl,de
 	jq	nz,.exit
 
+	ld	a,(.current_config)
+	or	a,a
+	jq	nz,.configured
+
+	push	iy
+	push	de					; size of conf. descriptor
+	ld	hl,(iy+9)				; buffer
+	ld	bc,18
+	add	hl,bc
+	push	hl
+	ld	bc,(xsrl_device.dev)
+	push	bc
+	call	usb_SetConfiguration
+	pop	bc,bc,bc,iy
+
+	ld	a,SRL_ERROR_USB_FAILED
+	compare_hl_zero
+	jq	nz,.exit
+
+.configured:
+	ld	a,(iy+15)				; a = interface number
+	push	iy
 	call	get_device_type
+	pop	iy
 	ld	a,(xsrl_device.type)			; check if type is unknown
 	cp	a,SRL_TYPE_UNKNOWN
 	ld	a,SRL_ERROR_INVALID_DEVICE
 	jq	z,.exit
-
-	ld	a,(iy+15)				; a = interface number
-	call	get_endpoint_addresses
-	ld	a,l					; check for error
-	or	a,a
-	jq	nz,.exit_hl
 
 	call	init_device
 	ld	a,l					; check for error
@@ -417,8 +439,11 @@ srl_Open:
 
 	xor	a,a					; a = USB_SUCCESS
 .exit:
-	ld	hl,0
+	scf
+	sbc	hl,hl
+	dec	a
 	ld	l,a
+	inc	hl
 .exit_hl:
 	pop	ix
 	ret
@@ -436,6 +461,10 @@ srl_Read:
 	add	iy,sp
 	push	ix
 	ld	ix,(iy+3)
+	ld	hl,(xsrl_device.error)
+	compare_hl_zero
+	jq	nz,.exit
+
 	ld	hl,(iy+6)
 	ld	bc,(iy+9)
 	lea	ix,xsrl_device.rx_buf
@@ -458,6 +487,10 @@ srl_Write:
 	add	iy,sp
 	push	ix
 	ld	ix,(iy+3)
+	ld	hl,(xsrl_device.error)
+	compare_hl_zero
+	jq	nz,.exit
+
 	ld	hl,(iy+6)
 	ld	bc,(iy+9)
 	lea	ix,xsrl_device.tx_buf
@@ -474,7 +507,7 @@ srl_Write:
 
 ;usb_standard_descriptors_t *srl_GetCDCStandardDescriptors(void);
 srl_GetCDCStandardDescriptors:
-	; call	ti.os.GetSystemStats
+	; call	ti.os.GetSystemInfo
 	; ld	de,4
 	; add	hl,de
 	; bit	0,(hl)
@@ -530,7 +563,7 @@ srl_GetCDCStandardDescriptors:
 	dl .strings
 .device emit $12: $1201000202000040C016E105200201020001 bswap $12
 .configurations dl .configuration1
-.configuration1 emit $3e: $09023e00020100c0320904000001020200000524000110042402000524060001070582030800ff09040100020a0000000705040240000107058302400001 bswap $3e
+.configuration1 emit $3e: $09023e00020100c0320904000001020200000524000110042402000524060001070582030800ff09040100020a0200000705040240000107058302400001 bswap $3e
 .langids dw $0304, $0409
 .strings dl .string1
 .model dl .string84
@@ -540,37 +573,213 @@ srl_GetCDCStandardDescriptors:
 .string84 dw $031C, 'T','I','-','8','4',' ','P','l','u','s',' ','C','E'
 .stringserialnum dw $0316, '0','0','0','0','0','0','0','0','0','0'
 
+;usb_error_t srl_UsbEventCallback(usb_event_t event, void *event_data,
+;                                    usb_callback_data_t *callback_data) {
+;    if (event == USB_DEFAULT_SETUP_EVENT) {
+;        static uint8_t line_coding[7];
+;        usb_control_setup_t *setup = (usb_control_setup_t*)event_data;
+;        // Hack because Windows doesn't follow the damn specification
+;        if ((setup->bmRequestType == 0xA1 && setup->bRequest == 0x21) ||
+;            (setup->bmRequestType == 0x21 && setup->bRequest == 0x20)) {
+;                usb_ScheduleDefaultControlTransfer(usb_FindDevice(NULL, NULL, USB_SKIP_HUBS), setup, line_coding, NULL, NULL);
+;            return USB_IGNORE;
+;        }
+;    }
+;    return USB_SUCCESS;
+;}
+srl_UsbEventCallback:
+	call	ti._frameset0
+	ld	hl, (ix + 6)
+	ld	bc, 0
+	ld	de, 11
+	sbc	hl, de
+	jq	nz, .BB0_5
+	ld	iy, (ix + 9)
+	ld	a, (iy)
+	cp	a, -95
+	jq	nz, .BB0_2
+	ld	a, (iy + 1)
+	cp	a, 33
+	jq	z, .BB0_4
+	jq	.BB0_5
+.BB0_2:
+	cp	a, 33
+	jq	nz, .BB0_5
+	ld	a, (iy + 1)
+	cp	a, 32
+	jq	nz, .BB0_5
+.BB0_4:
+	ld	de, 0
+	ld	hl, 8
+	push	hl
+	push	de
+	push	de
+	call	usb_FindDevice
+	pop	de
+	pop	de
+	pop	de
+	ld	de, 0
+	push	de
+	push	hl
+	call	usb_GetDeviceEndpoint
+	pop	de
+	pop	de
+	ld	de, 0
+	push	de
+	push	de
+	ld	de, .line_coding
+	push	de
+	ld	de, (ix + 9)
+	push	de
+	push	hl
+	call	usb_ScheduleControlTransfer
+	ld	bc, 1
+	pop	hl
+	pop	hl
+	pop	hl
+	pop	hl
+	pop	hl
+.BB0_5:
+	push	bc
+	pop	hl
+	pop	ix
+	ret
+.line_coding:
+	rb	7
+
 
 ; Gets the device type and subtype based on the descriptors
 ; Inputs:
 ;  ix: Serial device struct
-;  xsrl_device.buffer: Device descriptor, followed by config descriptor
+;  a: Interface number
+;  xsrl_device.rx_buf.buf_start: Device descriptor, followed by config descriptor
 ; Returns:
 ;  xsrl_device.type: Device type
 ;  xsrl_device.subtype: Device subtype
+;  xsrl_device.rx_addr: Receive endpoint address
+;  xsrl_device.tx_addr: Transmit endpoint address
 get_device_type:
+	ld	(.expectedIntNum),a
+
+; todo: vendor-specific devices
+
+; check for CDC ACM device
+	ld	hl,(xsrl_device.rx_buf.buf_start)
+	call	next_descriptor
+	inc	hl
+	inc	hl
+	ld	de,0
+	ld	e,(hl)	; total descriptor length
+	inc	hl
+	ld	d,(hl)
+	dec	hl
+	dec	hl
+	dec	hl
+	ex	de,hl
+	add	hl,de
+	ex	de,hl	; hl, de = start, end of config desc.
+.find_int_loop:
+	call	next_interface_descriptor
+	jq	nc,.none
+.process_int:
+	push	hl
+	pop	iy
+	ld	a,0
+.expectedIntNum = $-1
+	cp	a,SRL_INTERFACE_ANY
+	jq	z,.any
+	cp	a,(yinterfaceDescriptor.bInterfaceNumber)
+	jq	nz,.find_int_loop
+.any:
+	ld	bc,0
+	ld	a,(yinterfaceDescriptor.bInterfaceClass)
+	cp	a,$a	; CDC data class
+	jq	nz,.find_int_loop
+
+.find_ep_loop:
+	push	bc
+	call	next_descriptor
+	pop	bc
+	jq	nc,.int_complete
+	push	hl
+	pop	iy
+	ld	a,(ydescriptor.bDescriptorType)
+	cp	a,INTERFACE_DESCRIPTOR
+	jq	nz,.not_int
+.int_complete:
+	; check if both EPs found
+	ld	a,b
+	or	a,a
+	jq	z,.process_int
+	ld	a,c
+	or	a,a
+	jq	z,.process_int
+	
+	ld	(xsrl_device.tx_addr),b
+	ld	(xsrl_device.rx_addr),c
+	ld	a,SRL_TYPE_CDC
+	ld	(xsrl_device.type),a
+	ret
+.not_int:
+	cp	a,ENDPOINT_DESCRIPTOR
+	jq	nz,.find_int_loop
+
+	ld	a,(yendpointDescriptor.bmAttributes)
+	cp	a,2	; bulk endpoint
+	jq	nz,.find_ep_loop
+
+	ld	a,(yendpointDescriptor.bEndpointAddress)
+	cp	a,$80
+	jq	c,.outEp
+	ld	c,a
+	jq	.find_ep_loop
+.outEp:
+	ld	b,a
+	jq	.find_ep_loop
+
+.none:
 	xor	a,a
 	ld	(xsrl_device.type),a
 	ld	(xsrl_device.subtype),a
-	ret
-
-; Gets the endpoint addresses based on the descriptors and device type
-; Inputs:
-;  ix: Serial device struct
-;  a: Interface number
-;  xsrl_device.buffer: Device descriptor, followed by config descriptor
-;  xsrl_device.type: Device type
-;  xsrl_device.subtype: Device subtype
-; Returns:
-;  xsrl_device.rx_addr: Receive endpoint address
-;  xsrl_device.tx_addr: Transmit endpoint address
-;  hl: Error or SRL_SUCCESS
-get_endpoint_addresses:
-	xor	a,a
 	ld	(xsrl_device.rx_addr),a
 	ld	(xsrl_device.tx_addr),a
-	ld	hl,0
 	ret
+
+; Skips to the next descriptor
+; Inputs:
+;  hl: The current descriptor
+;  de: The end of the config descriptor
+; Outputs:
+;  hl: The next descriptor
+;  nc if end of config descriptor was reached
+; Destroys: bc
+next_descriptor:
+	ld	bc,0
+	ld	c,(hl)
+	add	hl,bc
+	compare_hl_de
+	ret
+
+; Skips to the next interface descriptor
+; Inputs:
+;  hl: The current descriptor
+;  de: The end of the config descriptor
+; Outputs:
+;  hl: The next interface descriptor
+;  nc if end of config descriptor was reached
+; Destroys: a, bc
+next_interface_descriptor:
+	ld	a,INTERFACE_DESCRIPTOR
+.loop:
+	call	next_descriptor
+	ret	nc
+	inc	hl
+	cp	a,(hl)
+	dec	hl
+	jr	nz,.loop
+	scf
+	ret
+
 
 ; Initializes a serial device whose type has been determined
 ; Inputs:
@@ -616,7 +825,35 @@ set_rate:
 ; Returns:
 ;  hl: Error or SRL_SUCCESS
 set_rate_cdc:
+	ld	(.linecoding),hl
+	ld	bc,0
+	push	bc	; transferred
+	ld	bc,50
+	push	bc	; num retries
+	ld	bc,.linecoding
+	push	bc	; data
+	ld	bc,.setup
+	push	bc	; setup
+
+	ld	bc,0
+	push	bc	; ep addr
+	ld	bc,(xsrl_device.dev)
+	push	bc	; device
+	call	usb_GetDeviceEndpoint
+	pop	bc,bc
+
+	push	hl	; endpoint
+	call	usb_ControlTransfer
+	pop	bc,bc,bc,bc,bc
+	ld	a,l
+	or	a,a
+	ret	z
+	ld	l,SRL_ERROR_USB_FAILED
 	ret
+.setup	setuppkt	$21,$20,$0000,$0000,$0007
+.linecoding:
+	db	$80,$25,0,0,0,0,8
+
 
 ; Sets the baud rate of a FTDI device
 ; Inputs:
@@ -827,49 +1064,6 @@ ring_buf_pop:
 	add	hl,de
 	ret
 
-; Update a ring buffer after it's been DMA'd into
-; Inputs:
-;  ix: ring_buf_ctrl struct
-;  bc: Number of bytes written
-;  a: Size of minimum consecutive region
-ring_buf_update_read:
-	ld	hl,(xring_buf_ctrl.data_end)
-	add	hl,bc
-	ld	(xring_buf_ctrl.data_end),hl
-	ex	de,hl					; de = data_end
-	ld	hl,(xring_buf_ctrl.data_break)
-	compare_hl_zero
-	ret	nz
-	ld	hl,(xring_buf_ctrl.buf_end)
-	or	a,a
-	sbc	hl,de
-	ld	bc,0
-	ld	c,a
-	or	a,a
-	sbc	hl,bc
-	ret	nc					; ret if >= region
-	ld	(xring_buf_ctrl.data_break),de		; data_break = data_end
-	ld	de,(xring_buf_ctrl.buf_start)
-	ld	(xring_buf_ctrl.data_end),de
-	ret
-
-; Update a ring buffer after it's been DMA'd from
-; Inputs:
-;  ix: ring_buf_ctrl struct
-;  bc: Number of bytes written
-ring_buf_update_write:
-	ld	hl,(xring_buf_ctrl.data_start)
-	add	hl,bc
-	ld	(xring_buf_ctrl.data_start),hl
-	ld	bc,(xring_buf_ctrl.data_break)
-	or	a,a
-	sbc	hl,bc
-	ret	nz
-	ld	(xring_buf_ctrl.data_break),hl		; hl = 0
-	ld	hl,(xring_buf_ctrl.buf_start)
-	ld	(xring_buf_ctrl.data_start),hl
-	ret
-
 ;usb_error_t (usb_endpoint_t endpoint, usb_transfer_status_t status, size_t transferred, srl_device_t *data);
 read_callback:
 	ld	iy,0
@@ -882,15 +1076,18 @@ read_callback:
 	jq	nz,.no_device
 
 	ld	bc,(iy+9)
-	ld	a,64
 	lea	ix,xsrl_device.rx_buf
-	call	ring_buf_update_read
+	ld	hl,(xring_buf_ctrl.data_end)
+	add	hl,bc
+	ld	(xring_buf_ctrl.data_end),hl
 	call	start_read
 	pop	ix
 	xor	a,a
 	ret
 
 .no_device:
+	ld	a,SRL_ERROR_DEVICE_DISCONNECTED
+	ld	(xsrl_device.error),a
 	xor	a,a
 	ld	(xsrl_device.rx_buf.dma_active),a
 	pop	ix
@@ -908,15 +1105,18 @@ write_callback:
 	jq	nz,.no_device
 
 	ld	bc,(iy+9)
-	ld	a,64
 	lea	ix,xsrl_device.tx_buf
-	call	ring_buf_update_write
+	ld	hl,(xring_buf_ctrl.data_start)
+	add	hl,bc
+	ld	(xring_buf_ctrl.data_start),hl
 	call	start_write
 	pop	ix
 	xor	a,a
 	ret
 
 .no_device:
+	ld	a,SRL_ERROR_DEVICE_DISCONNECTED
+	ld	(xsrl_device.error),a
 	xor	a,a
 	ld	(xsrl_device.tx_buf.dma_active),a
 	pop	ix
@@ -930,9 +1130,22 @@ write_callback:
 start_read:
 	ld	a,64
 	call	ring_buf_has_consecutive_region
-	lea	ix,ix - srl_device.rx_buf
-	jq	c,.error
+	jq	nc,.has_region
 
+	ld	hl,(xring_buf_ctrl.data_break)
+	compare_hl_zero
+	jq	nz,.error2
+
+	; no break - add one
+
+	ld	hl,(xring_buf_ctrl.data_end)
+	ld	(xring_buf_ctrl.data_break),hl
+	ld	hl,(xring_buf_ctrl.buf_start)
+	ld	(xring_buf_ctrl.data_end),hl
+	jq	start_read
+
+.has_region:
+	lea	ix,ix - srl_device.rx_buf
 	ld	c,(xsrl_device.rx_addr)			; ix = srl device
 	push	bc
 	ld	bc,(xsrl_device.dev)
@@ -962,6 +1175,8 @@ start_read:
 	inc	a					; a = 1
 	ld	(xsrl_device.rx_buf.dma_active),a
 	ret
+.error2:
+	lea	ix,ix - srl_device.rx_buf
 .error:
 	xor	a,a
 	ld	(xsrl_device.rx_buf.dma_active),a
@@ -974,9 +1189,25 @@ start_read:
 ;  ix.dma_active: 1 if transfer was started, 0 otherwise
 start_write:
 	call	ring_buf_contig_avail
-	lea	ix,ix - srl_device.tx_buf
 	compare_hl_zero
-	jq	z,.error
+	jq	nz,.has_data
+
+	ld	hl,(xring_buf_ctrl.data_break)
+	compare_hl_zero
+	jq	z,.error2
+
+	; has break - try removing it
+
+	ld	hl,(xring_buf_ctrl.buf_start)
+	ld	(xring_buf_ctrl.data_start),hl
+	or	a,a
+	sbc	hl,hl
+	ld	(xring_buf_ctrl.data_break),hl
+
+	jq	start_write
+
+.has_data:
+	lea	ix,ix - srl_device.tx_buf
 	push	hl
 
 	ld	c,(xsrl_device.tx_addr)			; ix = srl device
@@ -1008,6 +1239,8 @@ start_write:
 	inc	a					; a = 1
 	ld	(xsrl_device.tx_buf.dma_active),a
 	ret
+.error2:
+	lea	ix,ix - srl_device.tx_buf
 .error:
 	xor	a,a
 	ld	(xsrl_device.tx_buf.dma_active),a
@@ -1019,13 +1252,6 @@ get_device_type_:
 	pop	bc,de,ix
 	push	ix,de,bc
 	call	get_device_type
-	pop	ix
-	ret
-get_endpoint_addresses_:
-	push	ix
-	pop	bc,de,ix
-	push	ix,de,bc
-	call	get_endpoint_addresses
 	pop	ix
 	ret
 ring_buf_contig_avail_:
@@ -1066,22 +1292,13 @@ ring_buf_pop_:
 	call	ring_buf_pop
 	pop	ix
 	ret
-ring_buf_update_read_:
+
+set_rate_:
 	push	ix
 	ld	ix,3
 	add	ix,sp
-	ld	bc,(ix+6)
-	ld	a,(ix+9)
+	ld	hl,(ix+6)
 	ld	ix,(ix+3)
-	call	ring_buf_update_read
-	pop	ix
-	ret
-ring_buf_update_write_:
-	push	ix
-	ld	ix,3
-	add	ix,sp
-	ld	bc,(ix+6)
-	ld	ix,(ix+3)
-	call	ring_buf_update_write
+	call	set_rate
 	pop	ix
 	ret

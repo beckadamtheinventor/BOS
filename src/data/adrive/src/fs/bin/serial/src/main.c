@@ -27,6 +27,7 @@
 
 int main(void)
 {
+	gui_DrawConsoleWindow("Connecting to PC over USB serial...");
 	if(init_usb())
 	{
 		do {

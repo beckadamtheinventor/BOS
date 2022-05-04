@@ -3,7 +3,7 @@
 <tr><td><a href="#HandleInstruction ">bos.HandleInstruction </a></td><td><a href="#HandleInstruction ">020110</a></td></tr>
 <tr class="no_op"></tr><td><a href="#DONOTHING">bos.DONOTHING</a></td><td><a href="#DONOTHING">020114</a></td></tr>
 <tr class="no_op"></tr><td><a href="#DONOTHING">bos.DONOTHING</a></td><td><a href="#DONOTHING">020118</a></td></tr>
-<tr><td><a href="#handle_offsetcall ">bos.handle_offsetcall </a></td><td><a href="#handle_offsetcall ">02011C</a></td></tr>
+<tr><td><a href="#handle_offsetinstruction ">bos.handle_offsetinstruction </a></td><td><a href="#handle_offsetinstruction ">02011C</a></td></tr>
 <tr class="no_op"></tr><td><a href="#DONOTHING ">bos.DONOTHING </a></td><td><a href="#DONOTHING ">020120</a></td></tr>
 <tr><td><a href="#sys_ExecuteFile">bos.sys_ExecuteFile</a></td><td><a href="#sys_ExecuteFile">022400</a></td></tr>
 <tr><td><a href="#os_GetOSInfo">bos.os_GetOSInfo</a></td><td><a href="#os_GetOSInfo">022404</a></td></tr>
@@ -104,7 +104,7 @@
 <tr class="no_op"></tr><td><a href="#DONOTHING ">bos.DONOTHING </a></td><td><a href="#DONOTHING ">022580</a></td></tr>
 <tr class="no_op"></tr><td><a href="#DONOTHING ">bos.DONOTHING </a></td><td><a href="#DONOTHING ">022584</a></td></tr>
 <tr><td><a href="#fs_GetFilePtr">bos.fs_GetFilePtr</a></td><td><a href="#fs_GetFilePtr">022588</a></td></tr>
-<tr><td><a href="#sys_ExecuteFileFromPtr">bos.sys_ExecuteFileFromPtr</a></td><td><a href="#sys_ExecuteFileFromPtr">02258C</a></td></tr>
+<tr class="no_op"></tr><td><a href="#DONOTHING ">bos.DONOTHING </a></td><td><a href="#DONOTHING ">02258C</a></td></tr>
 <tr><td><a href="#sys_ExecuteFileHL">bos.sys_ExecuteFileHL</a></td><td><a href="#sys_ExecuteFileHL">022590</a></td></tr>
 <tr><td><a href="#sys_TurnOff">bos.sys_TurnOff</a></td><td><a href="#sys_TurnOff">022594</a></td></tr>
 <tr><td><a href="#sys_NextProcessId">bos.sys_NextProcessId</a></td><td><a href="#sys_NextProcessId">022598</a></td></tr>
@@ -158,6 +158,8 @@
 <tr><td><a href="#_UnpackUpdates">bos._UnpackUpdates</a></td><td><a href="#_UnpackUpdates">022658</a></td></tr>
 <tr><td><a href="#sys_ReadSectorCache">bos.sys_ReadSectorCache</a></td><td><a href="#sys_ReadSectorCache">02265C</a></td></tr>
 <tr><td><a href="#sys_WriteSectorCache">bos.sys_WriteSectorCache</a></td><td><a href="#sys_WriteSectorCache">022660</a></td></tr>
+<tr><td><a href="#sys_OpenFileInLib">bos.sys_OpenFileInLib</a></td><td><a href="#sys_OpenFileInLib">022664</a></td></tr>
+<tr><td><a href="#sys_LoadHookThreads">bos.sys_LoadHookThreads</a></td><td><a href="#sys_LoadHookThreads">022668</a></td></tr>
 </table><div id="boot_os"><h1>boot_os</h1>	<h3>syscall Adress 020108</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
@@ -168,14 +170,13 @@
 </td></tr>
 </table></div><div id="HandleInstruction "><h1>HandleInstruction </h1>	<h3>syscall Adress 020110</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-</table></div><div id="handle_offsetcall "><h1>handle_offsetcall </h1>	<h3>syscall Adress 02011C</h3>
+</table></div><div id="handle_offsetinstruction "><h1>handle_offsetinstruction </h1>	<h3>syscall Adress 02011C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 </table></div><div id="sys_ExecuteFile"><h1>sys_ExecuteFile</h1>	<h3>syscall Adress 022400</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Execute a file.</td><td>int sys_ExecuteFile(const char *path, char *args);</td><td>-1 and Cf set if file does not exist or is not a valid executable format, or if malloc failed somewhere.<br>
-ExecutingFileFd set to point to file descriptor. -1 if file not found</td><td></td><td>
-If you're running a threaded executable, the thread is spawned but won't actually start until it's thread is handled.<br>
-If OS threading is disabled, execute a file in a new thread given a relative or absolute path. Returns to caller if starting a threaded executable.</td></tr>
+ExecutingFileFd set to point to file descriptor. -1 if file not found, -2 if /var/PATH not found.</td><td></td><td>
+</td></tr>
 </table></div><div id="os_GetOSInfo"><h1>os_GetOSInfo</h1>	<h3>syscall Adress 022404</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
@@ -329,7 +330,7 @@ Cf set if file not found or otherwise cannot be opened.</td><td></td><td>
 </td></tr>
 </table></div><div id="_SetHLUTo0"><h1>_SetHLUTo0</h1>	<h3>syscall Adress 022498</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Sets the top byte of HL to zero.</td><td></td><td></td><td></td><td>
+<tr><td></td><td></td><td></td><td></td><td>
 </td></tr>
 </table></div><div id="_PutS"><h1>_PutS</h1>	<h3>syscall Adress 02249C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -435,7 +436,7 @@ string stored at gfx_string_temp</td><td></td><td>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>create a ram file in the /tivars/ directory</td><td>OP1+1 = 8 byte name of var to create<br>
 A = var type<br>
-hl = length to allocate for file</td><td>hl = pointer to 2 byte file length, de = pointer to file data section<br>
+hl = length to allocate for file</td><td>hl = pointer to 2 byte file length, de = pointer to file data<br>
 Cf set and HL = -1 if failed</td><td></td><td>
 </td></tr>
 </table></div><div id="gui_InputNoClear"><h1>gui_InputNoClear</h1>	<h3>syscall Adress 022504</h3>
@@ -468,7 +469,7 @@ uses the first half of vRam as scrap.</td></tr>
 </td></tr>
 </table></div><div id="fs_StrToFileEntry"><h1>fs_StrToFileEntry</h1>	<h3>syscall Adress 022520</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>convert a file.ext string to a file entry</td><td>char *fs_StrToFileEntry(char *dest, const char *src);</td><td>pointer to file entry, 0 if failed<br>
+<tr><td>convert a file.ext string to a file entry</td><td>char *fs_StrToFileEntry(char *dest, const char *src);</td><td>pointer to file entry, 0 if failed. First byte of file entry will be fsentry_longfilename if file's name is too long for an 8.3 path.<br>
 Cf set if failed</td><td></td><td>
 </td></tr>
 </table></div><div id="fs_DirList"><h1>fs_DirList</h1>	<h3>syscall Adress 022524</h3>
@@ -481,9 +482,9 @@ integer arguments "num" and "skip" must be less than 65536.</td></tr>
 </td></tr>
 </table></div><div id="sys_CallExecuteFile"><h1>sys_CallExecuteFile</h1>	<h3>syscall Adress 02252C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Jump execution to an executable file and return to caller afterwards</td><td>hl = file to execute<br>
+<tr><td>Jump execution to an executable file and return to caller afterwards</td><td>hl = program file to execute<br>
 de = arguments<br>
-bc = file to return to</td><td></td><td></td><td>
+bc = program file to return to</td><td></td><td></td><td>
 </td></tr>
 </table></div><div id="sys_JumpExecuteFile"><h1>sys_JumpExecuteFile</h1>	<h3>syscall Adress 022530</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -561,13 +562,9 @@ If you need a routine callable from C, this is not the one you'll want to use.</
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>get a pointer to a file's data section</td><td>void *fs_GetFilePtr(const char *path);</td><td>HL = file data pointer, BC = file data length, A = file flags, Cf set and HL = -1 if failed</td><td></td><td>
 </td></tr>
-</table></div><div id="sys_ExecuteFileFromPtr"><h1>sys_ExecuteFileFromPtr</h1>	<h3>syscall Adress 02258C</h3>
-<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>execute a file given a pointer to it's data section</td><td>int sys_ExecuteFileFromPtr(void *ptr, char *args);</td><td>-1 if file is not a valid executable format</td><td></td><td>
-</td></tr>
 </table></div><div id="sys_ExecuteFileHL"><h1>sys_ExecuteFileHL</h1>	<h3>syscall Adress 022590</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>execute a file given a pointer to it's path in HL</td><td>HL = pointer to file path</td><td>-1 if file is not a valid executable format</td><td></td><td>
+<tr><td>execute a file given a pointer to it's path in HL</td><td>HL = pointer to file path</td><td>same as sys_ExecuteFile</td><td></td><td>
 </td></tr>
 </table></div><div id="sys_TurnOff"><h1>sys_TurnOff</h1>	<h3>syscall Adress 022594</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -723,11 +720,11 @@ $VAR must be terminated with a space " " which is not included in the output.</t
 </td></tr>
 </table></div><div id="fs_GetFDPtr"><h1>fs_GetFDPtr</h1>	<h3>syscall Adress 022630</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Return pointer to file data given a file descriptor</td><td>void *fs_GetFDPtr(void *fd);</td><td>pointer to file data</td><td></td><td>
+<tr><td>Return pointer to file data given a file descriptor</td><td>void *fs_GetFDPtr(void *fd);</td><td>pointer to file data, or -1 and Cf set if file data has not been allocated yet.</td><td></td><td>
 </td></tr>
 </table></div><div id="fs_GetFDLen"><h1>fs_GetFDLen</h1>	<h3>syscall Adress 022634</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Return length of file data given a file descriptor</td><td>int fs_GetFDLen(void *fd);</td><td>length of file data</td><td></td><td>
+<tr><td>Return length of file data given a file descriptor</td><td>int fs_GetFDLen(void *fd);</td><td>length of file data. Will be 0 if data has not been initizlized yet.</td><td></td><td>
 </td></tr>
 </table></div><div id="_OP1ToPath"><h1>_OP1ToPath</h1>	<h3>syscall Adress 022638</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -775,4 +772,12 @@ Cf set, hl = -1 if failed</td><td></td><td>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Write the currently cached sector back to flash sector A</td><td></td><td></td><td></td><td>
 </td></tr>
+</table></div><div id="sys_OpenFileInLib"><h1>sys_OpenFileInLib</h1>	<h3>syscall Adress 022664</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>open a file, looking in directories listed in /var/LIB.</td><td>void *sys_OpenFileInLib(const char *path);</td><td>pointer to file descriptor</td><td></td><td>
+</td></tr>
+</table></div><div id="sys_LoadHookThreads"><h1>sys_LoadHookThreads</h1>	<h3>syscall Adress 022668</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>run threads given a pointer to a file path structure</td><td>void sys_LoadHookThreads(void *ptr, size_t len);</td><td></td><td></td><td>
+data structure: type byte, entry length byte, offset of data in file (2 bytes), stack size byte, file name (null-terminated), end of entry</td></tr>
 </table></div></body></html>

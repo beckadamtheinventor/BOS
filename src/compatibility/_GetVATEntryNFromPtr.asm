@@ -32,12 +32,13 @@ _GetVATEntryNFromPtr:
 	inc hl
 	ex (sp),hl
 	ld a,(iy-7)
+	lea iy,iy-7
 	or a,a
 	jr z,.fail
-.nameloop:
+	ld b,a
+.skip_name_loop:
 	dec iy
-	dec a
-	jr nz,.nameloop
+	djnz .skip_name_loop
 	jr .loop
 .fail:
 	pop hl

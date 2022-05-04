@@ -12,11 +12,23 @@ max_packet_size = 513
 
 serial_device = None
 
+def WaitForAck():
+	global serial_device
+	try:
+		size = int.from_bytes(serial_device.read(3), 'little')
+		data = serial_device.read(size)
+	except:
+		return False
+	if data[0] != 4:
+		return False
+	return True
+
+
 def SendFile(path):
 	global serial_device
 	if serial_device is None:
-		print("Err: serial_device is None")
-		return False
+		if not ConnectCalcSerial():
+			return False
 	try:
 		with open(path, 'rb') as f:
 			fdata = f.read()
@@ -29,14 +41,20 @@ def SendFile(path):
 		name, ext = os.path.splitext(os.path.basename(input("File name on calc?")))
 	fname = name + "." + ext
 	serial_device.write(bytes([1] + list(len(fdata).to_bytes(3, 'little')) + [ord(c) for c in fname] + [0]))
+	if not WaitForAck():
+		return False
+
 	try:
-		size = int.from_bytes(serial_device.read(3), 'little')
-		data = serial_device.read(size)
+		i = 0
+		while i < len(fdata):
+			serial_device.write(bytes([2] + list(fdata[i:i+max_packet_size-1])))
+			i += max_packet_size-1
+			if not WaitForAck():
+				return False
 	except:
 		return False
-	if data[0] == 4:
-		return True
-	return False
+
+	return True
 
 def RequestFile(path):
 	global serial_device
@@ -70,17 +88,18 @@ def ConnectCalcSerial():
 		print("Multiple devices detected - using {}".format(serial_name))
 
 	try:
-		ser = serial.Serial(timeout=60)
-	except:
+		ser = serial.Serial(serial_name, timeout=None)
+	except Exception as e:
+		print(e)
 		return False
-	ser.port = serial_name
-	ser.baudrate = 115200
+	# ser.port = serial_name
+	# ser.baudrate = 115200
 	ser_in = ser
 	ser_out = ser
-	try:
-		ser.open()
-	except:
-		return False
+	# try:
+		# ser.open()
+	# except:
+		# return False
 	serial_device = ser
 	return True
 
@@ -92,45 +111,45 @@ def DisconnectCalcSerial():
 	serial_device = None
 	return True
 
-
-# print("""
-# BOS Serial File Transfer Program
-# --------------------------------
-# connect      | attempt to connect a calc
-# send file    | sends a file to the connected calc
-# request file | request a file from the connected calc
-# list [dir]   | list files in a directory on the connected calc
-# quit         | disconnect and exit the program
-# --------------------------------
-# """)
+print("""
+BOS Serial File Transfer Program
+--------------------------------
+connect      | attempt to connect a calc
+send file    | sends a file to the connected calc
+request file | request a file from the connected calc
+list [dir]   | list files in a directory on the connected calc
+quit         | disconnect and exit the program
+--------------------------------
+""")
 devpath = ""
 connected = False
 try:
 	while True:
 		line = input(f"{devpath}> ")
-		w = line.split()[0].lower()
-		if w == "quit":
-			break
-		elif w == "connect":
-			if connected:
-				DisconnectCalcSerial()
-				connected = False
-			if ConnectCalcSerial():
-				print("Connected successfuly.")
-				connected = True
-			else:
-				print("Failed to connect.")
-		elif connected:
-			if w == "send":
-				if SendFile(line.split(maxsplit=1)[1]):
-					print("Sent file successfuly.")
+		if len(line):
+			w = line.split()[0].lower()
+			if w == "quit":
+				break
+			elif w == "connect":
+				if connected:
+					DisconnectCalcSerial()
+					connected = False
+				if ConnectCalcSerial():
+					print("Connected successfuly.")
+					connected = True
 				else:
-					print("Failed to send file.")
-			# elif w == "request":
-				# if RequestFile(line.split(maxsplit=1)[1]):
-					# print("Recieved file successfuly.")
-				# else:
-					# print("Failed to recieve file.")
+					print("Failed to connect.")
+			elif connected:
+				if w == "send":
+					if SendFile(line.split(maxsplit=1)[1]):
+						print("Sent file successfuly.")
+					else:
+						print("Failed to send file.")
+				# elif w == "request":
+					# if RequestFile(line.split(maxsplit=1)[1]):
+						# print("Recieved file successfuly.")
+					# else:
+						# print("Failed to recieve file.")
 except KeyboardInterrupt:
 	if connected:
 		DisconnectCalcSerial()

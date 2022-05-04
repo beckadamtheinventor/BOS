@@ -1,10 +1,13 @@
 /**
  * @file
+ * @author John "commandblockguy" Cesarz
  * @brief USB Serial Driver
  *
- * (todo: description)
+ * This library sits on top of usbdrvce to act as a driver for serial devices.
+ * In addition to handling USB serial devices while in host mode, srldrvce can
+ * also emulate a serial device itself, which is useful for communicating with
+ * a computer with minimal setup required on the other end.
  *
- * @author John "commandblockguy" Cesarz
  */
 
 #ifndef H_SRLDRVCE
@@ -57,6 +60,17 @@ typedef struct {
     bool dma_active;
 } ring_buf_ctrl_t;
 
+typedef enum {
+    SRL_SUCCESS = 0,
+    SRL_ERROR_INVALID_PARAM = -1,
+    SRL_ERROR_USB_FAILED = -2,
+    SRL_ERROR_NOT_SUPPORTED = -3,
+    SRL_ERROR_INVALID_DEVICE = -4,
+    SRL_ERROR_INVALID_INTERFACE = -5,
+    SRL_ERROR_NO_MEMORY = -6,
+    SRL_ERROR_DEVICE_DISCONNECTED = -7,
+} srl_error_t;
+
 typedef struct {
     usb_device_t dev; /**< USB device */
     /**< An OUT endpoint if in device mode, an IN endpoint otherwise */
@@ -67,17 +81,9 @@ typedef struct {
     srl_device_subtype_t subtype;
     ring_buf_ctrl_t rx_buf;
     ring_buf_ctrl_t tx_buf;
+    srl_error_t err;
+    uint8_t reserved[16];
 } srl_device_t;
-
-typedef enum {
-    SRL_SUCCESS = 0,
-    SRL_ERROR_INVALID_PARAM,
-    SRL_ERROR_USB_FAILED,
-    SRL_ERROR_NOT_SUPPORTED,
-    SRL_ERROR_INVALID_DEVICE,
-    SRL_ERROR_INVALID_INTERFACE,
-    SRL_ERROR_NO_MEMORY
-} srl_error_t;
 
 #define SRL_INTERFACE_ANY 0xFF
 
@@ -121,11 +127,11 @@ void srl_Close(srl_device_t *srl);
  * @param data Buffer to read into.
           Should be at least @param length bytes long.
  * @param length Number of bytes to read.
- * @return The number of bytes read, or 0 upon error.
+ * @return The number of bytes read, or a negative number upon error.
  */
-size_t srl_Read(srl_device_t *srl,
-                void *data,
-                size_t length);
+int srl_Read(srl_device_t *srl,
+             void *data,
+             size_t length);
 
 /**
  * Writes data to a serial device.
@@ -134,16 +140,24 @@ size_t srl_Read(srl_device_t *srl,
  * @param srl SRL device structure.
  * @param data Data to write to serial.
  * @param length Number of bytes to write.
- * @return The number of bytes written, or 0 upon error.
+ * @return The number of bytes written, or a negative number upon error.
  */
-size_t srl_Write(srl_device_t *srl,
-                 const void *data,
-                 size_t length);
+int srl_Write(srl_device_t *srl,
+              const void *data,
+              size_t length);
 
 /**
  * Returns a pointer to CDC ACM descriptors, to be used with usb_Init.
  */
 const usb_standard_descriptors_t *srl_GetCDCStandardDescriptors(void);
+
+/**
+ * USB callback handler.
+ * Can either be passed as the handler argument to usb_Init, or be delegated to
+ * from a custom USB event handler.
+ */
+usb_error_t srl_UsbEventCallback(usb_event_t event, void *event_data,
+                                 usb_callback_data_t *callback_data);
 
 #ifdef __cplusplus
 }

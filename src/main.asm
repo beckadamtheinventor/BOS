@@ -37,4 +37,4 @@ MAIN_CODE_LENGTH strcalc $-$$
 fs_drive_a_data_compressed_bin := $+4 ; this MUST be at the end of the OS data, so we can write the filesystem data directly following. The +4 is important.
 
 
-display "OS code size: ",MAIN_CODE_LENGTH,$A,$A
+display $A,"OS size: ",MAIN_CODE_LENGTH,$A,$A

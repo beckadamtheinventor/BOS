@@ -4,13 +4,14 @@
 ;@OUTPUT hl = first sector allocated, or -1 and Cf set if failed.
 fs_Alloc:
 	ld a,fscluster_allocated
-;@DOES allocate space in flash with a specified allocation marker
+;@DOES allocate space in flash using a specified allocation marker
 ;@INPUT int fs_Alloc(int len); (input allocation marker in A)
 ;@NOTE You probably shoudln't be calling this in your code unless you know what you're doing.
 fs_AllocWithMarker:
 	ld hl,-5
 	call ti._frameset
 	ld (ix-5),a
+.entry:
 	ld bc,(ix+6)
 	ld a,b
 	and a,1
@@ -31,15 +32,15 @@ fs_AllocWithMarker:
 	inc hl
 assert fscluster_clean = $FF
 	inc a
-	jq z,.found
+	jr z,.found
 	dec bc
 	ld a,c
 	or a,b
-	jq nz,.search_loop
+	jr nz,.search_loop
 ;we've hit the end of the cluster map, and we need to do a garbage collect
 .garbage_collect:
 	call fs_GarbageCollect
-	jq .fail ;still make it a fail case for now, until garbage collect actually moves things around
+	jr .entry
 ;found an empty cluster
 .found:
 	ld (ix-3),hl
@@ -50,12 +51,12 @@ assert fscluster_clean = $FF
 	ld a,(hl)
 	inc hl
 	inc a
-	jq nz,.search_loop ; area not long enough
+	jr nz,.search_loop ; area not long enough
 	dec bc
 	ld a,c
 	or a,b
-	jq nz,.len_loop
-	jq .garbage_collect ;we've hit the end of the cluster map, and we need to do a garbage collect
+	jr nz,.len_loop
+	jr .garbage_collect ;we've hit the end of the cluster map, and we need to do a garbage collect
 ; if we're here, we found a large enough space
 .success:
 	call sys_FlashUnlock

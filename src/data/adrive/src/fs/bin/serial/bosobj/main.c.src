@@ -3,6 +3,10 @@
 	section	.text,"ax",@progbits
 	public	_main
 _main:
+	ld	hl, L_.str
+	push	hl
+	call	_gui_DrawConsoleWindow
+	pop	hl
 	call	_init_usb
 	ld	l, 1
 	xor	a, l
@@ -20,10 +24,16 @@ BB0_2:
 	ret
 	section	.text,"ax",@progbits
 
+	section	.rodata,"a",@progbits
+	private	L_.str
+L_.str:
+	db	"Connecting to PC over USB serial...", 0
+
 	ident	"clang version 14.0.0 (https://github.com/jacobly0/llvm-project a139def90d26173f771eb1eca797633d1fbb2797)"
 	extern	__Unwind_SjLj_Register
 	extern	__Unwind_SjLj_Unregister
 	extern	_sys_GetKey
 	extern	_ntwk_process
+	extern	_gui_DrawConsoleWindow
 	extern	_usb_Cleanup
 	extern	_init_usb

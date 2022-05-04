@@ -2,7 +2,7 @@
 ;@INPUT HL line X coordinate
 ;@INPUT E line Y coordinate
 ;@INPUT BC line length
-;@DESTROYS HL,DE,BC,F(P/V)
+;@DESTROYS HL,BC,F(P/V)
 gfx_HorizLine:
 	call	gfx_Compute			; hl -> drawing location
 .computed:

@@ -61,6 +61,7 @@ gfx_string_temp        := ti.appData+38 ; 16 bytes, temp location for integer pr
 offset_inst_hl_temp    := ti.appData+54 ; 3 bytes, used by handle_offsetinstruction
 offset_inst_sp_temp    := ti.appData+57 ; 3 bytes, used by handle_offsetinstruction
 saved_LcdUpbase        := ti.appData+60 ; 3 bytes, saves LcdUpbase during sector caching
+text_flags             := ti.appData+63 ; 1 byte. Instructs the OS character printing routines
 ScrapByte              := ti.flashByte
 ScrapWord              := ti.scrapMem
 ScrapMem               := ti.scrapMem
@@ -118,6 +119,10 @@ fscluster_freed             := $00
 fscluster_allocated         := $FE
 fscluster_clean             := $FF
 
+
+; text_flags flag bits
+textflag_transparent_bg := 0	; set to draw text with a transparent background
+textflag_transparent_fg := 1	; set to draw text with a transparent foreground unless transparent background is set.
 
 ; file entry flags
 fd_executable := 0

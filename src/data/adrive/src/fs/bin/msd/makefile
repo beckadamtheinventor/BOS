@@ -2,10 +2,11 @@
 # Makefile Options
 # ----------------------------
 
-NAME = MSD
+NAME := MSD
+COMPRESSED := NO
 
-CFLAGS = -Wall -Wextra -Oz
-CXXFLAGS = -Wall -Wextra -Oz
+CFLAGS = -Oz
+CXXFLAGS = -Oz
 
 # ----------------------------
 

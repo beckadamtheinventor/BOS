@@ -1,28 +1,24 @@
 
 ;@DOES Initialise the standard (8bpp) XLibC palette
-;@DESTROYS DE,BC,AF
+;@DESTROYS HL,DE,B,AF
 gfx_InitStdPalette:
-; setup common items
-	ld	a,$27
-	ld	(LCD_CTRL),a
-	ld	de,LCD_PAL  ; address of mmio palette
-	ld	b,e         ; b = 0
+	ld	hl,ti.mpLcdPalette
+	ld	b,l
+assert ti.mpLcdPalette and $FF = 0
 .loop:
+	ld	d,b
 	ld	a,b
-	rrca
-	xor	a,b
-	and	a,224
-	xor	a,b
-	ld	(de),a
-	inc	de
-	ld	a,b
-	rla
-	rla
-	rla
-	ld	a,b
+	and	a,192
+	srl	d
 	rra
-	ld	(de),a
-	inc	de
+	ld	e,a
+	ld	a,31
+	and	a,b
+	or	a,e
+	ld	(hl),a
+	inc	hl
+	ld	(hl),d
+	inc	hl
 	inc	b
-	jr	nz,.loop		; loop for 256 times to fill palette
+	jr	nz,.loop
 	ret
