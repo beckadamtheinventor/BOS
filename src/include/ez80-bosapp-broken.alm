@@ -1,4 +1,11 @@
 
+calminstruction (var) strcalc? val
+	compute val, val        ; compute expression
+	arrange val, val        ; convert result to a decimal token
+	stringify val           ; convert decimal token to string
+	publish var, val
+end calminstruction
+
 define @ez80 @ez80
 element @ez80.dummy
 @ez80.unique = 0
@@ -463,13 +470,13 @@ macro ?! isreg: metadata 1 element 1 eq @ez80
 			      lhs metadata 1 scale 0 and 007o = 001o
 			jno errcondition
 			compute opcode, lhs metadata 1 scale 0 and 070o or 302o
-			
 
 			check @rhs >= $$
 			jno farconditionalnoneedrst28
-			compute addrvalue, @rhs + 1 - $
-			emit 1: $EF, @opcode
-			execute =@ez80.=word wordsize, addrvalue
+			compute addrvalue, @rhs-$-5
+			emit 1: $EF
+			emit 1: @opcode
+			execute =@ez80.=word wordsize, @addrvalue
 			jump after
 		farconditionalnoneedrst28:
 			emitsuffix
@@ -479,9 +486,10 @@ macro ?! isreg: metadata 1 element 1 eq @ez80
 		farunconditional:
 			check @rhs >= $$
 			jno farunconditionalnoneedrst28
-			compute addrvalue, @rhs + 1 - $
-			emit 1: $EF, 303o
-			execute =@ez80.=word wordsize, addrvalue
+			compute addrvalue, @rhs-$-5
+			emit 1: $EF
+			emit 1: @opcode
+			execute =@ez80.=word wordsize, @addrvalue
 			jump after
 		farunconditionalnoneedrst28:
 			emitsuffix
@@ -561,15 +569,14 @@ macro ?! isreg: metadata 1 element 1 eq @ez80
 			emit 1: 355o, 327o
 			exit
 		setwordimmediate:
-			compute addrvalue, @rhs
-			check addrvalue >= $$
+			check @rhs >= $$
 			jno wordimmediatenoneedrst28
-			compute addrvalue, addrvalue-5-$
+			compute addrvalue, addrvalue - 5 - $
 			emit 1: $EF
 			indexprefix lhs
 			compute opcode, lhs metadata 1 scale 0 or 001o
 			emit 1: @opcode
-			execute =@ez80.=word wordsize, addrvalue
+			execute =@ez80.=word wordsize, @addrvalue
 			exit
 		wordimmediatenoneedrst28:
 			emitsuffix
@@ -655,10 +662,10 @@ macro ?! isreg: metadata 1 element 1 eq @ez80
 			compute addrvalue, @lhs
 			check addrvalue >= $$
 			jno storefromanoneedrst28
-			compute addrvalue, addrvalue-5-$
+			compute addrvalue, addrvalue - 5 - $
 			emit 1: $EF
 			emit 1: 062o
-			execute =@ez80.=word wordsize, addrvalue
+			execute =@ez80.=word wordsize, @addrvalue
 			exit
 		storefromanoneedrst28:
 			emitsuffix
@@ -674,11 +681,11 @@ macro ?! isreg: metadata 1 element 1 eq @ez80
 			compute addrvalue, @lhs
 			check addrvalue >= $$
 			jno storefromindexnoneedrst28
-			compute addrvalue, addrvalue-5-$
+			compute addrvalue, addrvalue - 5 - $
 			emit 1: $EF
 			indexprefix rhs
 			emit 1: 042o
-			execute =@ez80.=word wordsize, addrvalue
+			execute =@ez80.=word wordsize, @addrvalue
 			exit
 		storefromindexnoneedrst28:
 			emitsuffix
@@ -691,9 +698,9 @@ macro ?! isreg: metadata 1 element 1 eq @ez80
 			compute addrvalue, @lhs
 			check addrvalue >= $$
 			jno notstorefromindexnoneedrst28
-			compute addrvalue, addrvalue-5-$
+			compute addrvalue, addrvalue - 5 - $
 			emit 1: $EF, 355o, @opcode
-			execute =@ez80.=word wordsize, addrvalue
+			execute =@ez80.=word wordsize, @addrvalue
 			exit
 		notstorefromindexnoneedrst28:
 			emitsuffix
@@ -754,9 +761,9 @@ macro ?! isreg: metadata 1 element 1 eq @ez80
 			compute addrvalue, @rhs
 			check addrvalue >= $$
 			jno loadimmediatenoneedrst28
-			compute addrvalue, addrvalue-5-$
+			compute addrvalue, addrvalue - 5 - $
 			emit 1: $EF, 072o
-			execute =@ez80.=word wordsize, addrvalue
+			execute =@ez80.=word wordsize, @addrvalue
 			exit
 		loadimmediatenoneedrst28:
 			emitsuffix
@@ -768,14 +775,13 @@ macro ?! isreg: metadata 1 element 1 eq @ez80
 			jno errarguments
 			check lhs metadata 1 scale 0 = 040o
 			jno loadotherwordimmediate
-			compute addrvalue, @rhs
+			compute addrvalue, @rhs - 5 - $
 			check addrvalue >= $$
 			jno loadwordimmediatenoneedrst28
-			compute addrvalue, addrvalue-5-$
 			emit 1: $EF
 			indexprefix lhs
 			emit 1: 052o
-			execute =@ez80.=word wordsize, addrvalue
+			execute =@ez80.=word wordsize, @addrvalue
 			exit
 		loadwordimmediatenoneedrst28:
 			emitsuffix
@@ -788,9 +794,9 @@ macro ?! isreg: metadata 1 element 1 eq @ez80
 			compute addrvalue, @rhs
 			check addrvalue >= $$
 			jno loadotherwordimmediatenoneedrst28
-			compute addrvalue, addrvalue-5-$
+			compute addrvalue, @rhs - 5 - $
 			emit 1: $EF, 355o, @opcode
-			execute =@ez80.=word wordsize, addrvalue
+			execute =@ez80.=word wordsize, @addrvalue
 			exit
 		loadotherwordimmediatenoneedrst28:
 			emitsuffix
@@ -1125,9 +1131,9 @@ macro ?! isreg: metadata 1 element 1 eq @ez80
 			compute addrvalue, @rhs
 			check addrvalue >= $$
 			jno noneedrst28
-			compute addrvalue, addrvalue-5-$
+			compute addrvalue, addrvalue - 5 - $
 			emit 1: $EF, @opcode
-			execute =@ez80.=word wordsize, addrvalue
+			execute =@ez80.=word wordsize, @addrvalue
 			exit
 		noneedrst28:
 			emit 1: @opcode
@@ -1139,9 +1145,9 @@ macro ?! isreg: metadata 1 element 1 eq @ez80
 			check addrvalue >= $$
 			jno unconditionalnoneedrst28
 			emit 1: $EF
-			compute addrvalue, addrvalue-5-$
+			compute addrvalue, addrvalue - 5 - $
 			emit 1: $EF, 303o
-			execute =@ez80.=word wordsize, addrvalue
+			execute =@ez80.=word wordsize, @addrvalue
 			exit
 		unconditionalnoneedrst28:
 			emitsuffix
@@ -1185,7 +1191,7 @@ macro ?! isreg: metadata 1 element 1 eq @ez80
 			jno noneedrst28
 			compute addrvalue, rhs+1-$
 			emit 1: $EF, @opcode
-			execute =@ez80.=word wordsize, addrvalue
+			execute =@ez80.=word wordsize, @addrvalue
 			exit
 		noneedrst28:
 			emit 1: @opcode
@@ -1197,7 +1203,7 @@ macro ?! isreg: metadata 1 element 1 eq @ez80
 			jno unconditionalnoneedrst28
 			compute addrvalue, @lhs-5-$
 			emit 1: $EF, 315o
-			execute =@ez80.=word wordsize, addrvalue
+			execute =@ez80.=word wordsize, @addrvalue
 			exit
 		unconditionalnoneedrst28:
 			emit 1: 315o
