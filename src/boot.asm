@@ -220,130 +220,121 @@ handle_safeop:
 	pop af
 	ret
 
-handle_offsetinstruction:=handle_unimplemented
-; .offset_inst_temp := -15
-	; ld (offset_inst_hl_temp),hl ; save original value of hl
-	; push de,iy,af ; save de, iy, af
-	; xor a,a
-	; ld (offset_inst_doesnt_call),a
-	; ld iy,9
-	; add iy,sp ; grab pointer to arguments
-	; lea hl,iy + -3 + .offset_inst_temp ; grab pointer to 10 bytes of stack space below the current stack pointer
-	; ld (offset_inst_sp_temp),hl
-	; ld hl,(iy) ; grab pointer to caller
-	; ld a,(hl)
-	; inc hl
-	; ld (iy + .offset_inst_temp),a ; first opcode byte
-	; cp a,$DD ; two byte instruction
-	; jr z,.isa2binstruction
-	; cp a,$ED ; two byte instruction
-	; jr z,.isa2binstruction
-	; cp a,$FD ; two byte instruction
-	; jr nz,.isnota2binstruction
-; .isa2binstruction:
-	; ld a,(hl)
-	; inc hl
-	; ld (iy + .offset_inst_temp + 1),a ; second opcode byte
-	; call .resolve_argument ; load &caller[argument] or lib entry point
-	; ld (iy + .offset_inst_temp + 2),hl ; load relocated argument
-	; ld a,$C9   ; ret opcode
-	; ld (iy + .offset_inst_temp + 5),a
-	; jr .finish
-; .isnota2binstruction:
-	; call .resolve_argument ; load &caller[argument] or lib entry point
-	; ld (iy + .offset_inst_temp + 1),hl ; load relocated argument
-	; ld a,$C9   ; ret opcode
-	; ld (iy + .offset_inst_temp + 4),a
-; .finish:
-	; lea hl,iy + .offset_inst_temp ; location of relocated code
-	; ld iy,(offset_inst_sp_temp)
-	; ld de,.return_here ; return here after running a recursive offset instruction
-	; ld a,(offset_inst_doesnt_call)
-	; or a,a
-	; jr z,.dont_free_allocated_stack
-; .free_allocated_stack:
-	; lea de,iy + 3 - .offset_inst_temp ; relative to original sp stored at offset_inst_sp_temp
-	; dec a
-	; jr z,.not_a_jump_instruction
-	; inc de
-	; inc de
-	; inc de
-; .not_a_jump_instruction:
-	; ld (offset_inst_sp_temp),de
-	; ld de,$F8 ; return here after running a non-recursive offset instruction. (pointer to ret instruction)
-; .dont_free_allocated_stack:
-	; ld (iy),de
-	; pop af,iy,de ; restore af, iy, de
-	; ld sp,(offset_inst_sp_temp)
-	; push hl ; push jump location
-	; ld hl,(offset_inst_hl_temp) ; restore original value of hl
-	; ret ; return to the routine, which will return to .return_here
+handle_offsetinstruction:
+.offset_inst_temp := -20
+	ld (offset_inst_hl_temp),hl ; save original value of hl
+	push de,iy,af ; save de, iy, af
+	ld iy,9
+	add iy,sp ; grab pointer to arguments
+	ld hl,(iy) ; grab pointer to caller
+	ld a,(hl)
+	call .check_opcode_is_call ; returns cf if not a call instruction
+	jq c,.offset_non_call_instruction
+.offset_call_instruction:
+	lea de,iy + -3 + .offset_inst_temp ; grab pointer to 23 bytes of stack space below the current stack pointer
+	ld (offset_inst_sp_temp),de
+	ld a,(hl)
+	inc hl
+	ld (iy + .offset_inst_temp),a ; first opcode byte
+	call .resolve_argument ; load &caller[argument] or lib entry point
+	ld (iy + .offset_inst_temp + 1),hl ; load relocated argument
+	ld a,$C9   ; ret opcode
+	ld (iy + .offset_inst_temp + 4),a
 
-; .return_here:
-	; push af,hl
-; ; set hl to sp when handle_offsetinstruction started
-	; ld hl, 6 - .offset_inst_temp ; relative to current sp
-	; add hl,sp
-	; ld (offset_inst_sp_temp),hl
-	; pop hl,af
-	; ld sp,(offset_inst_sp_temp)
-	; ret
+	ld hl,(offset_inst_sp_temp)
+	ld de,.return_here ; return here after running a recursive offset instruction
+	ld (hl),de
+	lea hl,iy + .offset_inst_temp ; location of relocated code
+	jq .jump_to_offset_inst
 
+.offset_non_call_instruction:
+	lea de,iy+3 ; pop caller off the stack because we jump to it instead of returning to it
+	ld (offset_inst_sp_temp),de
+	ld iy,ti.OP4
+	ld a,(hl)
+	inc hl
+	ld (iy),a ; first opcode byte
+	cp a,$DD ; two byte instruction
+	jr z,.isa2binstruction
+	cp a,$ED ; two byte instruction
+	jr z,.isa2binstruction
+	cp a,$FD ; two byte instruction
+	jr nz,.isnota2binstruction
+.isa2binstruction:
+	ld a,(hl)
+	inc hl
+	ld (iy + 1),a ; second opcode byte
+	call .resolve_argument ; load &caller[argument] or lib entry point
+	ld (iy + 2),hl ; load relocated argument
+	jr .finish
+.isnota2binstruction:
+	call .resolve_argument ; load &caller[argument] or lib entry point
+	ld (iy + 1),hl ; load relocated argument
+	xor a,a
+	ld (iy + 4),a
+.finish:
+	ld a,$C3   ; unconditional jp opcode
+	ld (iy + 5),a
+	ld (iy + 6),de ; instruction following that of the caller
+	lea hl,iy ; location of relocated code
+.jump_to_offset_inst:
+	pop af,iy,de ; restore af, iy, de
+	ld sp,(offset_inst_sp_temp)
+	push hl ; push jump location
+	ld hl,(offset_inst_hl_temp) ; restore original value of hl
+	ret ; return to the routine, which will return to .return_here if an offset call instruction is being executed
 
-; ._osrt_lib_table := $04E000
-; .resolve_argument:
-	; ld e,a
-	; cp a,$CD
-	; jr z,.is_a_call_opcode
-	; sub a,$C4 ; lowest call opcode byte
-	; jr c,.not_a_call_opcode
-	; and a,$F
-	; jr z,.is_a_call_opcode
-	; cp a,8
-	; jr z,.is_a_call_opcode
-; .not_a_call_opcode:
-	; ld a,e
-	; cp a,$C3
-	; jr z,.is_a_jp_opcode
-	; sub a,$C2
-	; jr c,.is_not_a_jp_opcode
-	; and a,$F
-	; jr z,.is_a_jp_opcode
-	; cp a,8
-	; jr nz,.is_not_a_jp_opcode
-; .is_a_jp_opcode:
-	; ld a,2
-	; jr .set_opcode_jump_type
-; .is_not_a_jp_opcode:
-	; ld a,1
-; .set_opcode_jump_type:
-	; ld (offset_inst_doesnt_call),a
-; .is_a_call_opcode:
-	; ld de,(hl) ;grab argument from caller
-	; inc hl
-	; inc hl
-	; ld a,(hl)
-	; inc hl
+.return_here:
+	push af,hl
+; set hl to sp when handle_offsetinstruction started
+	ld hl, 6 - .offset_inst_temp ; relative to current sp
+	add hl,sp
+	ld (offset_inst_sp_temp),hl
+	pop hl,af
+	ld sp,(offset_inst_sp_temp)
+	ret
+
+; returns cf if A is not a call instruction
+.check_opcode_is_call:
+	cp a,$CD
+	ret z
+	sub a,$C4 ; lowest call opcode byte
+	ret c
+	and a,$F
+	ret z
+	cp a,8
+	ret z
+	scf
+	ret
+
+._osrt_lib_table := $04E000
+.resolve_argument:
+	ld de,(hl) ;grab argument from caller
+	inc hl
+	inc hl
+	ld a,(hl)
+	inc hl
 	; ld (iy),hl ; increment caller past the original instruction
-	; add hl,de
-	; inc a
-	; ret z
-	; dec a
-	; ret z
-	; ld l,a  ; a*=3
-	; add a,a ; a*2
-	; add a,l ; a*2 + a
-	; ld hl,._osrt_lib_table
-	; call sys_AddHLAndA
-	; ld hl,(hl)
-	; add hl,de
-	; ld a,(hl)
-	; cp a,$CD
-	; jr z,.jump
-	; cp a,$C3
-	; ret nz
-; .jump:
-	; jp (hl)
+	ex hl,de
+	add hl,de
+	inc a
+	ret z
+	dec a
+	ret z
+	ld l,a  ; a*=3
+	add a,a ; a*2
+	add a,l ; a*2 + a
+	ld hl,._osrt_lib_table
+	call sys_AddHLAndA
+	ld hl,(hl)
+	add hl,de
+	ld a,(hl)
+	cp a,$CD
+	jr z,.jump
+	cp a,$C3
+	ret nz
+.jump:
+	jp (hl)
 
 os_GetOSInfo:
 	ld hl,string_os_info
