@@ -12,17 +12,65 @@ macro ram_executable_at? addr
 end macro
 
 macro flash_executable?
-	local prgmdata, prgmlen
-	virtual at 0
+	virtual at $01000000
 		db $18,$04,"FEX",$00
-	postpone
+	macro end?.flash_executable?
+		purge ?
+		purge end?.flash_executable?
+		local prgmdata, prgmlen
 		prgmlen := $-$$
 		load prgmdata: $-$$ from $$
 		end virtual
 		db prgmdata
-	end postpone
+	end macro
+	macro ? line&
+		match opcode= args, line
+			if `opcode = "call" | `opcode = "jp" | `opcode = "jq" | `opcode = "ld"
+				match lhs=,rhs, args
+					match (val), lhs
+						if val relativeto $$ & val >= $$
+							rst $28
+							opcode (0), rhs
+							store val - $ : 3 at $ - 3
+						else
+							opcode (val), rhs
+						end if
+					else match (val), rhs
+						if val relativeto $$ & val >= $$
+							rst $28
+							opcode lhs, (0)
+							store val - $ : 3 at $ - 3
+						else
+							opcode lhs, (val)
+						end if
+					else if rhs relativeto $$ & rhs >= $$
+						rst $28
+						opcode lhs, 0
+						store rhs - $ : 3 at $ - 3
+					else
+						opcode lhs, rhs
+					end if
+				else match opcode= lhs, line
+					match (val), lhs
+						opcode lhs
+					else if lhs relativeto $$ & lhs >= $$
+						rst $28
+						opcode 0
+						store lhs - $ : 3 at $ - 3
+					else
+						opcode lhs
+					end if
+				else
+					opcode lhs,rhs
+				end match
+			else
+				opcode args
+			end if
+		else
+			line
+		end match
+	end macro
 end macro
-
 
 ;-------------------------------------------------------------------------------
 ; Software threading instructions
