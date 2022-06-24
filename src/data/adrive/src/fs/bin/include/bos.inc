@@ -347,6 +347,7 @@ namespace bos
 ?offset_inst_sp_temp    := ti.appData+57 ; 3 bytes, used by handle_offsetinstruction
 ?saved_LcdUpbase        := ti.appData+60 ; 3 bytes, saves LcdUpbase during sector caching
 ?text_flags             := ti.appData+63 ; 1 byte. Instructs the OS character printing routines
+?gfx_routine_temp       := ti.appData+64 ; 16 bytes, temp location for graphics routines
 ?ScrapByte              := ti.flashByte
 ?ScrapWord              := ti.scrapMem
 ?ScrapMem               := ti.scrapMem

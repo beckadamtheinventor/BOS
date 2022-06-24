@@ -7,16 +7,9 @@
 ;@NOTE If you need a routine callable from C, this is not the one you'll want to use.
 gui_PrintString:
 	push hl
-	or a,a
-	sbc hl,hl
-	ld a,(curcol)
-	ld l,a
-	push hl
-	add hl,hl
-	add hl,hl
-	add hl,hl
-	pop de
-	add hl,de
+	ld hl,(curcol)
+	ld h,9
+	mlt hl
 	ld (lcd_x),hl
 	ld a,(currow)
 	ld c,a
@@ -32,13 +25,13 @@ gui_PrintString:
 	ret nc
 	ld	de,LCD_WIDTH - 10
 .loop:
-	ld	a,(hl)
+	ld	a,(hl) ; character to print
 	inc hl
 	or	a,a
 	ret	z
-	cp a,$20
+	cp a,$20 ; check character < 0x20
 	ret c
-	cp a,$80
+	cp a,$80 ; check character >= 0x80
 	ccf
 	ret c
 	call	gfx_PrintChar			; saves de, hl
@@ -48,12 +41,9 @@ gui_PrintString:
 	ld	hl,(lcd_x)
 	or	a,a
 	sbc	hl,de
-	jr	c,.next
+	pop hl
+	jr	c,.loop
 	xor a,a   ; return a=0, but set the carry flag so the caller knows we hit the end of the line
 	scf
-	pop hl
 	ret
-.next:
-	pop hl
-	jr	.loop
 

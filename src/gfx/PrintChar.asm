@@ -88,7 +88,7 @@ character_height := 8
 	pop	hl
 	ret
 
-virtual at gfx_string_temp
+virtual at gfx_routine_temp
 	.ram_code_location:
 	.horiz_loop:
 		rlca

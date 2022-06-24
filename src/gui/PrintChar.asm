@@ -5,10 +5,10 @@
 gui_PrintChar:
 	push hl,af
 	ld hl,(curcol)
-	ld h,8
+	ld h,9
 	mlt hl
 	ld (lcd_x),hl
-	ld a,(console_line)
+	ld a,(currow)
 	ld c,a
 	add a,a
 	add a,a
@@ -32,12 +32,11 @@ gui_PrintChar:
 	sbc hl,hl
 	ld (lcd_x),hl
 	ld (curcol),a
-	ld a,(console_line)
+	ld a,(currow)
 	cp a,25
 	jq nc,.scroll
 	inc a
 	ld (currow),a
-	ld (console_line),a
 .done:
 	call gfx_BlitBuffer
 	pop hl
@@ -56,11 +55,11 @@ gui_PrintChar:
 	inc a
 	jq .advance_entry
 .nextline:
-	ld a,(console_line)
+	ld a,(currow)
 	cp a,25
 	jq nc,.scroll
 	inc a
-	ld (console_line),a
+	ld (currow),a
 	call gfx_BlitBuffer
 	jq .advance
 
