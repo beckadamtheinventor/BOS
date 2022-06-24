@@ -3,13 +3,15 @@ An Operating system (WIP) for the TI-84+CE family (eZ80) graphing calculators, w
 
 
 # Eye Candy
+![](https://raw.githubusercontent.com/beckadamtheinventor/BOS/master/cap/cap6.gif)
+![](https://raw.githubusercontent.com/beckadamtheinventor/BOS/master/cap/cap7.gif)
+
 ![](https://raw.githubusercontent.com/beckadamtheinventor/BOS/master/cap/cap2.gif)
 ![](https://raw.githubusercontent.com/beckadamtheinventor/BOS/master/cap/cap3.gif)
 
 ![](https://raw.githubusercontent.com/beckadamtheinventor/BOS/master/cap/cap4.gif)
 ![](https://raw.githubusercontent.com/beckadamtheinventor/BOS/master/cap/cap5.gif)
 
-![](https://raw.githubusercontent.com/beckadamtheinventor/BOS/master/cap/cap6.gif)
 
 
 # A note on ".rom" Files
@@ -22,7 +24,7 @@ If you are getting the rom image from another author, read the author's provided
 Before installing BOS, know that it is very much incomplete and lacks many features that TI-OS has.
 
 *IMPORTANT NOTE* BOS will not work on any python edition calculator! BOS will *only* work on the TI-84+CE and TI-83 premium CE calculators. Additionally, BOS will not work on any calculator revision M or higher. Check the last character of the serial number on the back of the calculator. If it's "M" or higher, BOS will not work.
-BOS will also fail to work on a non-patched bootcode 5.3.0 or higher due to boot-time OS verification. See BootSwap [https://github.com/commandblockguy/bootswap] for details on disabling OS verification. Warning: *DO NOT INSTALL ANY CUSTOM BOOTCODE UNLESS YOU ABSOLUTELY KNOW WHAT YOU ARE DOING!!! YOU COULD PERMANENTLY TURN YOUR CALCULATOR INTO A PAPERWEIGHT!* Only use the "disable OS verification" option!
+BOS will also fail to work on a non-patched bootcode 5.3.0 or higher due to boot-time OS verification. Patching your bootcode can be dangerous if done wrong, and unfortunately there is no longer a repo up containing the program necessary to patch your bootcode. You're on your own for now if your bootcode version is 5.3.0 or higher.
 
 Before installing BOS, note that it will erase all memory on your calculator! Both RAM and Archive! Make sure to back up your calculator's files before installing BOS!
 In order to install BOS on a calculator:
