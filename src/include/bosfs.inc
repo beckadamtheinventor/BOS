@@ -34,6 +34,7 @@ macro fs_fs? fsbase
 		pad_db name, ' ', 8
 		pad_db ext, ' ', 3
 		db prop
+		fdata.offset = fdata - ($ and not $1FF)
 		assert fdata.offset < 65536
 		dw fdata.offset
 		assert fdata.len < 65536
@@ -92,9 +93,8 @@ macro fs_fs? fsbase
 		end macro
 	end macro
 
-	macro fs_subfile? flabel, base
+	macro fs_subfile? flabel, base:0
 		flabel := $
-		flabel.offset := $ - base
 		macro end?.fs_subfile?
 			flabel.len := $ - flabel
 			purge end?.fs_subfile?

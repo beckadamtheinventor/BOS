@@ -294,6 +294,7 @@ namespace bos
 ?sys_OpenFileInLib               := $22664
 ?sys_LoadHookThreads             := $22668
 ?gfx_BlitScreen                  := $2266C
+?th_CreateThread                 := $22670
 ; end of jump table
 ;-------------------------------------------------------------------------------
 ; OS memory areas and misc defines

@@ -12,6 +12,7 @@ sys_ExecuteFile:
 	scf
 	sbc hl,hl
 	ld (ExecutingFileFd),hl
+	xor a,a
 	ld (return_code_flags),a
 	pop bc
 	pop hl
@@ -31,7 +32,8 @@ sys_ExecuteFile:
 	pop bc
 	jr nc,.entryfd
 ;fail if both fs_OpenFile and sys_OpenFileInPath failed to locate the file
-	push de ; sys_OpenFileInPath returns pointer to "/var/PATH" in de
+	ld hl,string_path_variable
+	push hl
 	call fs_OpenFile ; check for /var/PATH
 	pop bc
 	ccf

@@ -165,4 +165,5 @@
 	jp sys_OpenFileInLib
 	jp sys_LoadHookThreads
 	jp gfx_BlitScreen
+	jp th_CreateThread
 ; end of jump table

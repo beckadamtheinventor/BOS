@@ -1,3 +1,4 @@
+
 	jr rm_main
 	db "FEX",0
 rm_main:
@@ -25,7 +26,7 @@ rm_main:
 	bit fb_subdir, a
 	; jr z,.check_readonly
 	jr z,.delete
-	and a,c ; this only destroys A if C is 0. In this case, if C is 0 we should throw an error. Which means we won't need to preserve A. \m/
+	and a,c ; this only destroys A if C is not 0xff. In this case, if C is 0 we should throw an error. Which means we won't need to preserve A. \m/
 	jr z,.fail_subdir
 ; .check_readonly:
 	; bit fb_readonly, a
