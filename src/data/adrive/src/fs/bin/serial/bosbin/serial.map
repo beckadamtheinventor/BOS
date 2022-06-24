@@ -1,0 +1,87 @@
+Section     Base   Top    High   Length
+----------- ------ ------ ------ -------
+.icon       D1A882 D1A882             0h
+.launcher   D1A882 D1A8A7            25h
+.libs       D1A8A7 D1A8DD            36h
+.start      D1A8DD D1A90B            2Eh
+.cleanup    D1A90B D1A919             Eh
+.text       D1A919 D1AE27           50Eh
+.data       D1AE27 D1AE27             0h
+.rodata     D1AE27 D1AF28           101h
+.init_array 000000 000000             0h
+.ctors      000000 000000             0h
+.dtors      000000 000000             0h
+.fini_array 000000 000000             0h
+.bss        D031F6 D03843 D10000    64Dh
+.header     D1A87F D1A882             3h
+
+Label                             Value
+-------------------------------   ------
+___low_bss                      = D031F6
+___len_bss                      = 00064D
+___heaptop                      = D10000
+___heapbot                      = D03843
+___libs                         = D1A8A7
+___init_array_count             = 000000
+___ctors_count                  = 000000
+___dtors_count                  = 000000
+___fini_array_count             = 000000
+__stack                         = D1A87E
+_fs_OpenFile                    = 022408
+_sys_GetKey                     = 022430
+_sys_Malloc                     = 022438
+_sys_WaitKeyCycle               = 02244C
+_asm_gui_DrawConsoleWindow      = 022450
+__MemClear                      = 022470
+_fs_CreateFile                  = 0224D0
+_fs_DeleteFile                  = 0224F8
+_sys_Free                       = 022528
+_asm_gui_PrintLine              = 022578
+_fs_GetFilePtr                  = 022588
+_fs_GetFDPtr                    = 022630
+_fs_GetFDLen                    = 022634
+_fs_WriteRaw                    = 022654
+_gui_DrawConsoleWindow          = D1A919
+_gui_PrintLine                  = D1A920
+__frameset                      = D1A927
+__frameset0                     = D1A935
+_memcpy                         = 0000A4
+_strlen                         = 0000D4
+.missingappvar                  = D1AE27
+.libloadname                    = D1AE2F
+.webaddress                     = D1AE40
+start                           = D1A8DD
+skip._exit                      = D1A900
+skip.__Exit                     = D1A900
+skip._abort                     = D1A900
+_main                           = D1A940
+L_.str                          = D1AE53
+_ntwk_process                   = D1A968
+_usb_read_to_size               = D1A9A6
+_conn_HandleInput               = D1A9FA
+LJTI2_0                         = D1AE77
+_ntwk_send                      = D1ACE9
+_usb_write                      = D1AD44
+_malloc_error                   = D1AD5E
+_init_usb                       = D1AD7E
+_handle_usb_event               = D1ADAB
+_incoming_data                  = D031F6
+_network_up                     = D031F9
+_net_buf                        = D031FA
+_incoming_file                  = D033FB
+_outgoing_file                  = D0340A
+L_.str                          = D1AE83
+L_.str.1                        = D1AEC0
+L_.str.2                        = D1AED7
+L_.str.3                        = D1AEF8
+_usb_read_to_size.bytes_read    = D03419
+_srl                            = D0341C
+_srl_buf                        = D03443
+_#srl_Open                      = D1A8B2
+_#srl_Read                      = D1A8B6
+_#srl_Write                     = D1A8BA
+_#srl_GetCDCStandardDescriptors = D1A8BE
+_#usb_Init                      = D1A8CD
+_#usb_Cleanup                   = D1A8D1
+_#usb_HandleEvents              = D1A8D5
+_#usb_GetRole                   = D1A8D9
