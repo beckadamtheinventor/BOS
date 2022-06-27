@@ -295,6 +295,7 @@ namespace bos
 ?sys_LoadHookThreads             := $22668
 ?gfx_BlitScreen                  := $2266C
 ?th_CreateThread                 := $22670
+?gfx_ZeroVRAM                    := $22674
 ; end of jump table
 ;-------------------------------------------------------------------------------
 ; OS memory areas and misc defines

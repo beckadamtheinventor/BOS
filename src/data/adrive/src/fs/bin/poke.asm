@@ -80,7 +80,9 @@ poke_main:
 	ret
 
 .infostr:
-	db "usage: poke [l|i|s|b][addr] [=^|&] [val]",$A
-	db "Writes 32|24|16|8 bits to address from val.",$A
-	db "operators =^|& correspond to set|xor|or|and.",$A
-	db "addr and val are interpreted in hexadecimal.",$A
+	db "usage:",$A
+	db "poke [l|i|s|b][addr] [=^|&] [val]",$A
+	db "Writes 4|3|2|1 bytes to address from val.",$A
+	db "operators [=^|&] are set|xor|or|and.",$A
+	db "addr and val are read in hex.",$A
+	db 0

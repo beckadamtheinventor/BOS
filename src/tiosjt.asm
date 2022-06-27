@@ -401,7 +401,7 @@
 	call handle_unimplemented ;ErrDimMismatch            := 002075Ch
 	call handle_unimplemented ;ErrDimension              := 0020760h
 	call handle_unimplemented ;ErrUndefined              := 0020764h
-	call handle_unimplemented ;ErrMemory                 := 0020768h
+	jp _ErrMemory ;ErrMemory                 := 0020768h
 	call handle_unimplemented ;ErrInvalid                := 002076Ch
 	call handle_unimplemented ;ErrBreak                  := 0020770h
 	call handle_unimplemented ;ErrStat                   := 0020774h

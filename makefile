@@ -77,8 +77,8 @@ include_dirs: includes
 
 # LibLoad Library build rules
 
-$(call NATIVEPATH,$(FSOBJ)/libload.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/libload/bos_libload.asm)
-	fasmg $(call NATIVEPATH,$(FSSRC)/fs/lib/libload/bos_libload.asm) $(call NATIVEPATH,$(FSOBJ)/libload.bin)
+$(call NATIVEPATH,$(FSOBJ)/libload.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/libload/libload.asm)
+	fasmg $(call NATIVEPATH,$(FSSRC)/fs/lib/libload/libload.asm) $(call NATIVEPATH,$(FSOBJ)/libload.bin)
 
 $(call NATIVEPATH,$(FSOBJ)/fatdrvce.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/fatdrvce/fatdrvce.asm)
 	fasmg $(call NATIVEPATH,$(FSSRC)/fs/lib/fatdrvce/fatdrvce.asm) $(call NATIVEPATH,$(FSOBJ)/fatdrvce.bin)

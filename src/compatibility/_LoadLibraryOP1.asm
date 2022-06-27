@@ -1,4 +1,4 @@
-;@DOES locate and return a pointer to a library from a ".LLL" file in the "/lib/" directory
+;@DOES locate and return a pointer to a library from a ".dll" file in a directory listed in "/lib"
 ;@INPUT OP1 name of library
 ;@OUTPUT hl points to file length, de points to file data. Cf set if failed
 _LoadLibraryOP1:
@@ -8,8 +8,7 @@ _LoadLibraryOP1:
 	ex hl,de
 	pop bc
 	ret c
-	ld bc,string_lib_var
-	push iy,bc,de
+	push iy,de
 	ld hl,fsOP1+1
 	xor a,a
 	ld c,8
@@ -22,8 +21,8 @@ _LoadLibraryOP1:
 	ld hl,.ext_name
 	ld bc,.ext_len
 	ldir
-	call sys_OpenFileInVar
-	pop bc,bc,iy
+	call sys_OpenFileInLib
+	pop bc,iy
 	ret c
 	ld bc,fsentry_filesector
 	add hl,bc

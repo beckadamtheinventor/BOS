@@ -153,6 +153,7 @@
 	public _sys_LoadHookThreads
 	public _bosgfx_BlitScreen
 	public _th_CreateThread
+	public _bosgfx_ZeroVRAM
 _boot_os                         := $20108
 _handle_interrupt                := $2010C
 _HandleInstruction               := $20110
@@ -306,6 +307,7 @@ _sys_OpenFileInLib               := $22664
 _sys_LoadHookThreads             := $22668
 _bosgfx_BlitScreen                  := $2266C
 _th_CreateThread                 := $22670
+_bosgfx_ZeroVRAM                    := $22674
 
 public ram_executable
 public ram_executable_at

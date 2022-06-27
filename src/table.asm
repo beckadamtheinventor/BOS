@@ -166,4 +166,5 @@
 	jp sys_LoadHookThreads
 	jp gfx_BlitScreen
 	jp th_CreateThread
+	jp gfx_ZeroVRAM
 ; end of jump table
