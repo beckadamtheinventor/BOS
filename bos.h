@@ -182,9 +182,9 @@ uint8_t sys_WaitKeyCycle(void);
  * Get user input.
  * @param buffer Pointer to input buffer.
  * @param len Length of input buffer - 1.
- * @return Pointer to input buffer.
+ * @return 0 if user exit, 1 if user enter, 9/12 if user presses down/up arrow key.
  */
-char *gui_Input(char *buffer, unsigned int len);
+uint8_t gui_Input(char *buffer, unsigned int len);
 
 /**
  * Clear the screen and print a line.

@@ -402,7 +402,7 @@ fontlib_Home:
 	ld	(_TextX),hl
 	ret
 
-	
+
 ;-------------------------------------------------------------------------------
 fontlib_SetFont:
 ; Sets the current font to the data at the pointer given
@@ -444,6 +444,7 @@ fontlib_SetFont:
 .validateOffsets:
 ; Now convert offsets into actual pointers
 ; Validate that offset is at least semi-reasonable
+	xor	a,a
 	ld	de,$ff00		; Maximum reasonable font data size
 	ld	hl,(iy + strucFont.widthsTablePtr)
 	sbc	hl,de			; Doesn't really matter if we're off-by-one here
@@ -461,7 +462,7 @@ fontlib_SetFont:
 	ld	hl,arg0
 	add	hl,sp
 	ld	a,(hl)
-	or	a
+	or	a,a
 	jr	z,.true
 	lea	hl,iy + strucFont.spaceAbove
 	xor	a
@@ -891,7 +892,7 @@ fontlib_DrawInt:
 	push	de
 	add	hl,hl
 	db	$3E			; xor a,a -> ld a,*
-	
+
 ;-------------------------------------------------------------------------------
 fontlib_DrawUInt:
 ; Places an unsigned int at the current cursor position
@@ -1552,7 +1553,7 @@ fontlib_Newline:
 ;  None
 ; Returns:
 ;  A = 0 on success
-;  A > 0 if the text window is full
+;  A = 1 if the text window is full
 	ld	iy,DataBaseAddr
 	bit	bAutoClearToEOL,(iy + newlineControl)
 ; I hate how nearly every time I think CALL cc or RET cc would be useful
@@ -1576,15 +1577,14 @@ fontlib_Newline:
 	bit	bAutoScroll,(iy + newlineControl)
 	jr	z,.noScroll
 	call	fontlib_ScrollWindowDown
-	ld	iy,DataBaseAddr			; Don't need to write textY---cursor 
+	ld	iy,DataBaseAddr			; Don't need to write textY---cursor
 	jr	.checkPreClear			; didn't actually move!
 .noScroll:
 	ld	a,1
 	bit	bEnableAutoWrap,(iy + newlineControl)
 	ret	z
-	ld	a,(iy + textYMin)
-	ld	(iy + textY),a
-	ld	a,1
+	ld	b,(iy + textYMin)
+	ld	(iy + textY),b
 	ret
 .writeCursorY:
 	sub	a,b
