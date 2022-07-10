@@ -167,4 +167,5 @@
 	jp gfx_BlitScreen
 	jp th_CreateThread
 	jp gfx_ZeroVRAM
+	jp th_KillThread
 ; end of jump table

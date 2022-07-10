@@ -6,30 +6,31 @@ df_main:
 	call bos.gui_PrintLine
 	call bos.fs_GetFreeSpace
 	push hl,hl
-	call bos.gui_PrintUInt
-	ld hl,.str_bytes_free
-	call bos.gui_Print
-	pop de
+	ex hl,de
 	ld hl,$3B0000 - $050000
 	or a,a
 	sbc hl,de
 	call bos.gui_PrintUInt
 	ld hl,.str_bytes_used
-	call bos.gui_Print
+	call bos.gui_PrintLine
+	pop hl
+	call bos.gui_PrintUInt
+	ld hl,.str_bytes_free
+	call bos.gui_PrintLine
 	pop hl
 	ld c,10
 	call ti._ishru
 	call bos.gui_PrintUInt
 	ld hl,.str_kb_free
-	call bos.gui_Print
+	call bos.gui_PrintLine
 	or a,a
 	sbc hl,hl
 	ret
 .checking_used:
-	db "Checking for used memory...",$A,0
+	db "Checking used memory...",0
 .str_bytes_free:
-	db " bytes free,",$A,0
+	db " bytes free,",0
 .str_bytes_used:
-	db " bytes used,",$A,0
+	db " bytes used,",0
 .str_kb_free:
-	db " KB free of 3456 KB total.",$A,0
+	db "KB free of 3456KB total.",0

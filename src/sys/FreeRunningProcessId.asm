@@ -6,8 +6,8 @@ sys_FreeRunningProcessId:
 	ld de,(running_process_id) ;only e is used but this saves space
 .entry:
 	ld hl,malloc_cache
-	ld bc,4096
-	ld d,c
+	ld bc,malloc_cache_len
+	ld d,l
 .loop:
 	ld a,e
 	cpir
@@ -20,8 +20,8 @@ sys_FreeRunningProcessId:
 	ld a,$FF
 	cpi
 	ret po
-	jq nz,.loop
 	dec hl
+	jq nz,.loop
 	ld (hl),d
 	inc hl
 	jq .clear_loop

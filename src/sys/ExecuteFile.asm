@@ -179,7 +179,7 @@ sys_ExecuteFile:
 	ret nz ; return if only set to load the program
 
 	call sys_NextProcessId
-	call sys_FreeRunningProcessId ;free memory allocated by the new process ID if there is any
+	call sys_FreeRunningProcessId ; free memory allocated by the new process ID if there is any
 
 	ld de,(fsOP6) ;arguments string
 	call .load_argc_argv_loop

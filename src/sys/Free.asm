@@ -1,35 +1,36 @@
 ;@DOES Free as block of memory malloc'd by sys_Malloc
 ;@INPUT void sys_Free(void *ptr);
+;@OUTPUT Cf set if failed.
 ;@DESTROYS All
 sys_Free:
 	pop bc,hl
 	push hl,bc
 .entryhl:
-	ld de,bottom_of_malloc_RAM
+	ld de,bottom_of_malloc_ram
 	or a,a
-	sbc hl,de ;ptr - bottom_of_malloc_RAM
+	sbc hl,de ; ptr - bottom_of_malloc_RAM
 	ret c
-	ld bc,65536
+	ld bc,top_of_malloc_ram - bottom_of_malloc_ram
 	sbc hl,bc
 	ccf
 	ret c
 	add hl,bc
-	ld bc,32
-	call ti._idivu
-	ld de,malloc_cache ;index the malloc cache
-	add hl,de ;hl now points to 8-bit malloc cache entry
-	ld bc,malloc_cache+4096
+	ld bc,malloc_block_size
+	call ti._idvrmu
+	ex hl,de
+	ld bc,malloc_cache ; index the malloc cache
+	add hl,bc ; hl now points to 8-bit malloc cache entry
 	ld (hl),c
-	inc hl
-	dec bc
+	ld bc,malloc_cache + malloc_cache_len
 .loop2:
+	inc hl
 	ld a,(hl)
 	inc a
+	or a,a ; make sure the carry flag is unset
 	ret nz
 	ld (hl),a
-	dec bc
-	sbc hl,bc
 	add hl,bc
-	jq c,.loop2
+	sbc hl,bc
+	jr c,.loop2
 	ret
 

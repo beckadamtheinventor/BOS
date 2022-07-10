@@ -25,8 +25,8 @@ os_return:
 	ld (ti.DI_Mode),hl
 	ld hl,$08080f		; (nb of columns,nb of row) to scan/Wait 15 APB cycles before each scan
 	ld (ti.DI_Mode+3),hl
-	ld a,2
-	ld (running_process_id),a
+	; ld a,2
+	; ld (running_process_id),a
 	xor a,a
 	ld (lcd_bg_color),a
 	ld (lcd_text_bg),a
@@ -65,7 +65,7 @@ assert ~thread_temp_save and $FF
 	ld l,3
 	ld (hl),de
 	ld l,15
-	ld (hl),1
+	ld (hl),2
 	EnableThreading
 	jq th_HandleNextThread.nosave
 

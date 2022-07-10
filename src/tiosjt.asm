@@ -145,7 +145,7 @@
 	call handle_unimplemented ;OP1Set2                   := 002035Ch
 	call handle_unimplemented ;OP2Set2                   := 0020360h
 	call handle_unimplemented ;OP2Set1                   := 0020364h
-	call handle_unimplemented ;Zero16D                   := 0020368h
+	jp _Zero16D ;Zero16D                   := 0020368h
 	call handle_unimplemented ;OP5Set0                   := 002036Ch
 	call handle_unimplemented ;OP4Set0                   := 0020370h
 	call handle_unimplemented ;OP3Set0                   := 0020374h
@@ -156,7 +156,7 @@
 	jp _ZeroOP2
 	jp _ZeroOP3
 	call handle_unimplemented ;ZeroOP                    := 0020390h
-	call handle_unimplemented ;ClrLP                     := 0020394h
+	jp _ClrLP ;ClrLP                     := 0020394h
 	call handle_unimplemented ;ShrACC                    := 0020398h
 	call handle_unimplemented ;ShlACC                    := 002039Ch
 	call handle_unimplemented ;Shr18                     := 00203A0h

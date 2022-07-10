@@ -1,6 +1,6 @@
-;@DOES Malloc memory that is invalidated the next time sys_Malloc or sys_TempMalloc are called.
+;@DOES Malloc memory that is invalidated the next time sys_TempMalloc is called or usermem is extended.
 ;@INPUT void *sys_TempMalloc(int len);
-;@OUTPUT pointer to memory. Returns zero if not enough memory is avalible
+;@OUTPUT pointer to memory. Returns zero and Cf set if not enough memory is avalible
 sys_TempMalloc:
 	pop bc,de
 	push de,bc
@@ -15,5 +15,6 @@ sys_TempMalloc:
 .fail:
 	xor a,a
 	sbc hl,hl
+	scf
 	ret
 

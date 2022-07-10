@@ -57,6 +57,7 @@ fs_dir bin_dir
 	fs_entry explorer_exe, "explorer", "", f_system
 	fs_entry memedit_exe, "hexed", "", f_system
 	fs_entry memedit_exe, "hexedit", "", f_system
+	fs_sfentry mf_exe, "mf", "", f_system+f_subfile
 	fs_sfentry info_exe, "info", "", f_system+f_subfile
 	; fs_sfentry json_exe, "json", "", f_system+f_subfile
 	fs_sfentry ls_exe, "l", "", f_system+f_subfile
@@ -135,6 +136,10 @@ fs_file os_internal_subfiles
 
 	fs_subfile df_exe, bin_dir
 		include 'fs/bin/df.asm'
+	end fs_subfile
+
+	fs_subfile mf_exe, bin_dir
+		include 'fs/bin/mf.asm'
 	end fs_subfile
 
 	fs_subfile ls_exe, bin_dir

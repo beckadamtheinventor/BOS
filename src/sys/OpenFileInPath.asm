@@ -23,7 +23,7 @@ sys_OpenFileInPath:
 	push hl
 	call fs_OpenFile
 	pop bc
-	jr nc,.success_nofree ;succeed if file found
+	jr nc,.success ;succeed if file found
 .loop:
 	ld bc,(ix+6) ; argument
 	ld de,(ix-6) ; current search directory
@@ -32,6 +32,10 @@ sys_OpenFileInPath:
 	pop bc,bc
 	push hl
 	call fs_OpenFile
+	ex (sp),hl
+	push af
+	call sys_Free.entryhl
+	pop af,hl
 	jr nc,.success
 	ld de,(ix-6) ; current search directory
 	call fs_PathLen.entryde
@@ -46,10 +50,6 @@ sys_OpenFileInPath:
 	ld (ix-9),hl
 	jr .loop
 .success:
-	ex (sp),hl
-	call sys_Free.entryhl
-	pop hl
-.success_nofree:
 	db $01
 .fail:
 	scf

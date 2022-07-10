@@ -10,11 +10,10 @@ _ZeroOP1:
 _ZeroOP:
 	push bc
 	xor a,a
-	ld (hl),a
 	ld b,11
-.zeroloop:
-	inc hl
+.clrloop:
 	ld (hl),a
-	djnz .zeroloop
+	inc hl
+	djnz .clrloop
 	pop bc
 	ret

@@ -1,6 +1,6 @@
 
 ;@DOES spawn a thread
-;@INPUT uint8_t th_CreateThread(void *pc, void *sp, int argc, char *argv[]);
+;@INPUT uint8_t th_CreateThread(void *pc, void *sp, int argc, char **argv);
 ;@OUTPUT thread id. 0 if failed
 ;@NOTE void *sp must be allocated at least 12 bytes behind it. If void *sp is 0, it will use the sp from the caller
 th_CreateThread:
@@ -78,10 +78,10 @@ end if
 	ld hl,thread_map
 	ld a,(current_thread)
 	ld l,a
-if ~thread_map and $FF00
-	ld (hl),h
-else
+if thread_map and $FF00
 	ld (hl),0
+else
+	ld (hl),h
 end if
 if (thread_map shr 8) + 1 = (thread_parents shr 8)
 	inc h
@@ -91,13 +91,14 @@ end if
 	ld a,(hl)
 	or a,a
 	jq z,._ranthread
-	dec a ; guarantee the next thread processed is this thread's parent thread if it is a parented thread
 	ld (current_thread),a
 	call _WakeThread
+	ld hl,current_thread
+	dec (hl) ; guarantee the next thread processed is this thread's parent thread if it is a parented thread
 ._ranthread:
 	pop bc
-	push de,hl
+	; push de,hl
 	; call .normalize_lcd
-	call sys_FreeRunningProcessId ;free memory allocated by the program
-	pop hl,de
+	; call sys_FreeRunningProcessId ;free memory allocated by the thread
+	; pop hl,de
 	jq th_HandleNextThread.nosave

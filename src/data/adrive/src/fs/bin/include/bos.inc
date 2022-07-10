@@ -296,6 +296,7 @@ namespace bos
 ?gfx_BlitScreen                  := $2266C
 ?th_CreateThread                 := $22670
 ?gfx_ZeroVRAM                    := $22674
+?th_KillThread                   := $22678
 ; end of jump table
 ;-------------------------------------------------------------------------------
 ; OS memory areas and misc defines
@@ -370,20 +371,24 @@ namespace bos
 ?ramCodeTop             := ti.ramCodeTop
 ?reservedRAM            := ti.ramCodeTop
 ?bos_UserMem            := $D1A881
-?end_of_usermem         := libload_bottom_ptr-2
-?libload_bottom_ptr     := libload_top_ptr-$3FE ; 1022 bytes for executing libload
-?libload_top_ptr        := thread_temp_save-$400
-?op_stack_bot           := thread_temp_save-$400
-?op_stack_top           := thread_temp_save-$300 ;256 bytes downward
-?current_working_dir    := thread_temp_save-$200
-?InputBuffer            := thread_temp_save-$100
-?thread_temp_save       := $D2F000 ; temporary save location for registers when a thread switch is triggered. 16 bytes per thread, 256 threads = 4096 bytes.
-?malloc_cache           := $D2F800 ; 4096 bytes
+?end_of_usermem         := op_stack_bot
+?op_stack_bot           := malloc_cache-$300
+?op_stack_top           := malloc_cache-$200 ;256 bytes downward
+?current_working_dir    := malloc_cache-$200
+?InputBuffer            := malloc_cache-$100
+?malloc_cache           := thread_temp_save-$1000 ; 4064 ($FE0) bytes
+?malloc_cache_len       := 4064    ; ($010000-$200)/16 (each cache entry byte marks 16 bytes of memory)
+?thread_temp_save       := $D2F000 ; temporary save location for registers when a thread switch is triggered. 16 bytes per thread, 255 threads = 4080 bytes.
 ?thread_map             := $D30000 ; thread map. 256 threads. Active threads have bit 7 set.
 ?thread_parents         := $D30100 ; 256 bytes, one per thread. Saves ID of thread that spawned a given thread. A thread will only be run if it's parent thread is awake
-?bottom_of_malloc_RAM   := $D30200
-?top_of_vat             := top_of_RAM
-?top_of_RAM             := $D40000
+?bottom_of_malloc_ram   := $D30200 ; malloc memory needs to start 256 byte aligned
+?bottom_of_malloc_RAM   := bottom_of_malloc_ram
+?top_of_malloc_ram      := top_of_ram
+?malloc_block_size      := 16
+?malloc_block_size_bits := 4
+?top_of_ram             := $D40000
+?top_of_RAM             := top_of_ram
+?top_of_vat             := top_of_ram
 ?start_of_user_archive  := $040000 ;sector $04
 ?fs_root_dir_lba := $010000 shr 9
 ?fs_root_dir_address := start_of_user_archive + $010000

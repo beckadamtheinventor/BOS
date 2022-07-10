@@ -6,9 +6,7 @@ sys_NextProcessId:
 	ld hl,running_process_id
 	ld a,(hl)
 	inc a
-	ld (hl),a
-	inc a
+	bit 7,a
 	ret nz
-	inc a
 	ld (hl),a
 	ret

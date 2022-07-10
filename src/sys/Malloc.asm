@@ -12,22 +12,22 @@ sys_Malloc:
 	add hl,de
 	or a,a
 	sbc hl,de
-	jq z,.fail ;can't malloc 0 bytes
-	ld bc,32
-	call ti._idvrmu
+	jq z,.fail ; can't malloc 0 bytes
+	ld bc,malloc_block_size
+	call ti._idvrmu ; size to malloc / 32
 	ld a,l
 	or a,h
 	jq z,.exact_fit
 	inc de
 .exact_fit:
 	ld hl,malloc_cache
-	ld bc,4096
+	ld bc,malloc_cache_len
 	push de
 .loop:
 	xor a,a
 	cpir
 	jq z,.checklen
-	pop hl ;fail if no 0x00 (free blocks) found
+	pop hl ; fail if no 0x00 (free blocks) found
 .fail:
 	or a,a
 	sbc hl,hl
@@ -57,12 +57,10 @@ sys_Malloc:
 	ld hl,(ScrapMem)
 	ld de,-malloc_cache
 	add hl,de ; get offset from malloc_cache
-	add hl,hl ; multiply by 32
-	add hl,hl
-	add hl,hl
-	add hl,hl
-	add hl,hl
-	ld de,bottom_of_malloc_RAM ;index malloc ram with offset*32
+repeat malloc_block_size_bits
+	add hl,hl ; multiply by malloc_block_size
+end repeat
+	ld de,bottom_of_malloc_ram ;index malloc ram with offset*32
 	add hl,de
 	ex hl,de
 	ld hl,(ScrapMem)

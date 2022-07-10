@@ -4,7 +4,11 @@
 sys_FreeAll:
 	ld hl,malloc_cache   ;clear out the malloc cache
 	ld de,malloc_cache+1
-	ld bc,4096
-	ld (hl),c
+	ld bc,malloc_cache_len-1
+if ~malloc_cache and $FF
+	ld (hl),l
+else
+	ld (hl),0
+end if
 	ldir
 	ret

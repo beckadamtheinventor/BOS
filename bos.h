@@ -644,4 +644,39 @@ void *util_Zx7Decompress(void *dest, void *src);
 void *sys_OpenFileInVar(const char *path, const char *var);
 
 
+/**
+ * Create a thread to be run the next time a thread switch is triggered.
+ * @param pc Routine to run as a thread.
+ * @param sp Pointer to initial routine stack pointer. (Note that the stack grows downwards,
+ *           so you should pass the end of the memory you pass in.)
+ * @return Thread ID or 0 if failed.
+ * @note sp must be able to safely grow at least 12 bytes.
+ *       If null is passed, the same sp as the caller will be used, which may produce unexpected results.
+ */
+uint8_t th_CreateThread(void (*pc)(int, char**), void *sp, int argc, char **argv);
+
+/**
+ * Kill a thread by ID.
+ * @param id Thread ID to kill.
+ * @return Thread ID killed if success, otherwise 0.
+ */
+uint8_t th_KillThread(uint8_t id);
+
+/**
+ * Handle the next available thread, continuing from here if there are no other threads to handle,
+ * or once all other threads have been handled.
+ */
+inline void th_HandleNextThread(void) {asm("rst $10\npop bc");};
+
+/**
+ * End the currently running thread.
+ */
+inline void th_EndThread(void) {asm("rst $10\nret");};
+
+/**
+ * Sleep the currently running thread.
+ */
+inline void th_SleepThread(void) {asm("rst $10\nhalt");};
+
+
 #endif

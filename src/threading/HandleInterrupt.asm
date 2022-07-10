@@ -143,5 +143,6 @@ end if
 	ld (hl),a
 	inc l
 	djnz .loop2
+	ld (current_thread),a
 	ret
 
