@@ -26,7 +26,8 @@ fs_GetFDPtr:
 	bit fd_subfile,a
 	jr z,fs_GetSectorAddress.entry
 .subfile:
-	ld e,0
-	res 0,d
+	ld a,e
+	and a,not (fs_sector_size-1)
+	ld e,a
 	add hl,de
 	ret

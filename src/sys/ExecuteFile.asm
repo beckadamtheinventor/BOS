@@ -226,7 +226,9 @@ sys_ExecuteFile:
 	ld (LastCommandResult+3),a
 .ranthread:
 	pop bc,bc
-	push de,hl
+	push de,hl,bc
+	call sys_Free ; free argv
+	pop bc
 	call .normalize_lcd_8bpp
 	xor a,a
 	sbc hl,hl
@@ -391,16 +393,11 @@ sys_jphl := $
 .load_argc_argv_loop:
 	ld a,(fsOP5+10)
 	or a,a
+	ld	bc,1
 	jr z,.load_argc_argv_program_has_args
-	ld hl,(ExecutingFileFd)
-	push hl
-	call fs_CopyFileName
-	call .copy_to_op1
-	pop bc
-	ret
+	jr .doneargv
 
 .load_argc_argv_program_has_args:
-	ld	bc,1
 	ld	a,(de)
 	or	a,a
 	jr	z,.doneargv
@@ -431,7 +428,7 @@ sys_jphl := $
 	add hl,bc
 	add hl,bc
 	push bc,hl
-	call sys_Malloc
+	call sys_MallocPersistent
 	push hl
 	ld	hl,(ExecutingFileFd)
 	push	hl

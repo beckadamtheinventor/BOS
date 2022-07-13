@@ -60,15 +60,15 @@ string_failed_to_reinstall:
 
 
 str_bosfs512_partition_header: ; TODO: this shouldn't be static
-	db "bosfs200fs ", $14
+	db "bosfs040fs ", $14
 	dw fs_root_dir_lba ; LBA of the root directory
 	dw (end_of_user_archive - start_of_user_archive) shr 9 ; size of partition in LBAs
 .len:=$-.
 
 fs_root_dir_data:
-	db "bin        ", $14, $03,$00, $00,$20
-	db "lib        ", $14, $02,$00, $00,$20
-	db "sbin       ", $14, $01,$00, $00,$20
+	db "bin        ", $14, $0C,$00, $00,$03
+	db "lib        ", $14, $08,$00, $00,$01
+	db "sbin       ", $14, $04,$00, $00,$01
 .len:=$-.
 
 fs_root_file_initializers:
@@ -353,6 +353,9 @@ str_perate:
 	db	'perating',0
 str_ystem:
 	db	'ystem',0
+
+str_Zero:
+	db '0',0
 
 str_EmergencyShellInfo:
 	db "available commands:",$A

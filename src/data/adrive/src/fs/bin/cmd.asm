@@ -215,6 +215,7 @@ enter_input:
 	call bos.sys_Malloc
 	ex hl,de
 	pop bc,hl
+	jq c,cmd_exit_retneg2
 	push de,de
 	ldir
 	pop hl

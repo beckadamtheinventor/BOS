@@ -16,13 +16,23 @@ fs_OpenFile:
 	ld hl,start_of_user_archive
 	ret ;return root directory descriptor
 .pathnonzero:
-	ld hl,-26
+	ld hl,-18
 	call ti._frameset
-	ld (ix-20),iy
+	ld (ix-15),iy
+	or a,a
+	sbc hl,hl ; set it to null if it's the same pointer as the input path i.e. the path is already an absolute path
+	ld (ix-18),hl ; save pointer to path so we can free it later
 	ld hl,(ix+6)
 	push hl
 	call fs_AbsPath
 	pop bc
+	jq c,.fail
+	or a,a
+	sbc hl,bc
+	add hl,bc
+	jr z,.dont_set_mallocd_path
+	ld (ix-18),hl ; save pointer to path so we can free it later
+.dont_set_mallocd_path:
 	ld iy,start_of_user_archive
 	inc hl
 	ld a,(hl)
@@ -37,7 +47,7 @@ fs_OpenFile:
 .entry:
 .main_search_loop:
 	ld hl,(ix-3)
-	ld (ix-26),hl
+	ld (ix-12),hl
 	ld a,(hl)
 	or a,a
 	jq z,.return
@@ -49,7 +59,7 @@ fs_OpenFile:
 	jq z,.return
 	push hl
 	call fs_PathLen
-	ld (ix-23),hl
+	ld (ix-9),hl
 	ex (sp),hl
 	pop bc
 	ld a,'/'
@@ -65,10 +75,10 @@ fs_OpenFile:
 	dec hl
 .no_more_slash:
 	ld (ix-3),hl ;advance path entry
-	ld hl,(ix-23)
+	ld hl,(ix-9)
 	or a,a
 	sbc hl,bc ;how long was the string?
-	ld (ix-23),hl
+	ld (ix-9),hl
 	call .search_loop ;returns Zf if failed
 	jq z,.fail
 	ld hl,(ix-3)
@@ -99,7 +109,13 @@ fs_OpenFile:
 	db $01 ;ld bc,...
 ._return:
 	lea hl,iy ;is a 3 byte instruction
-	ld iy,(ix-20) ;restore iy
+	ld iy,(ix-15) ;restore iy
+
+	push af,hl
+	ld hl,(ix-18)
+	call sys_Free.entryhl
+	pop hl,af
+
 	ld sp,ix
 	pop ix
 	ret
@@ -107,16 +123,21 @@ fs_OpenFile:
 
 .search_next_section:
 	ld hl,(iy+fsentry_filesector)
+	ld a,l
+	and a,h
+	inc a
+	jr nz,.next_section_has_address
+	inc a
+	ret
+.next_section_has_address:
 	push hl
 	call fs_GetSectorAddress
 	ex (sp),hl
 	pop iy
 .search_next:
 	ld hl,(ix-6)
-	push hl
-	call sys_Free
-	pop bc
-	lea iy,iy+16
+	call sys_Free.entryhl ; free the memory malloc'd by fs_CopyFileName
+	lea iy,iy+fs_file_desc_size
 ;searches for a file name in a directory listing
 .search_loop:
 	ld a,(iy)
@@ -131,25 +152,23 @@ fs_OpenFile:
 	ld (ix-6),hl
 	push hl
 	call ti._strlen ;get length of file name string from file entry
-	ld bc,(ix-23) ;compare lengths
+	ld bc,(ix-9) ;compare lengths
 	or a,a
 	sbc hl,bc
 	add hl,bc
 	pop bc,iy
 	jq nz,.search_next
 	push iy,hl,bc
-	ld bc,(ix-26)
+	ld bc,(ix-12)
 	push bc
-	call ti._strncmp ;compare with the target directory if the lengths are the same
+	call ti._strncmp ; compare with the target directory if the lengths are the same
 	pop bc,bc,bc,iy
 	add hl,bc
 	or a,a
 	sbc hl,bc
 	jq nz,.search_next ;check next file entry
 	ld hl,(ix-6)
-	push hl
-	call sys_Free
-	pop bc
+	call sys_Free.entryhl ; free the memory malloc'd by fs_CopyFileName
 	xor a,a
 	inc a
 	ret

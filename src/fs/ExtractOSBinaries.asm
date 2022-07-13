@@ -13,7 +13,7 @@ fs_ExtractOSBinaries:
 
 	ld bc,fs_drive_a_data_compressed_bin
 	push bc
-	ld bc,start_of_user_archive+512
+	ld bc,start_of_user_archive+fs_directory_size
 	push bc
 	call util_Zx7DecompressToFlash
 	pop bc,bc

@@ -7,8 +7,8 @@ fs_GarbageCollect:
 	call ti._frameset
 	ld hl,str_GarbageCollecting
 	call gui_DrawConsoleWindow
-	ld hl,fs_cluster_map + 65536/512
-	; ld bc,fs_cluster_map.len - 65536/512
+	ld hl,fs_cluster_map + (65536/fs_sector_size * 2)
+	; ld bc,fs_cluster_map.len - 65536/fs_sector_size
 	ld (ix-3),hl
 	ld (ix-9),hl
 	; add hl,bc
@@ -36,6 +36,7 @@ fs_GarbageCollect:
 	ld hl,.str_cleaning_up
 	call gui_PrintString
 ; clean up freed sectors
+; cluster map pointer decrements within each 64k sector
 	ld bc,$050000
 	ld (ix-6),bc
 .cleanup_freed_loop_outer:
@@ -43,55 +44,81 @@ fs_GarbageCollect:
 	ld (lcd_x),hl
 	ld a,(ix-4)
 	call gfx_PrintHexA
+	ld hl,.str_trailing_zeroes
+	call gfx_PrintString
 	ld iy,$D50000
-	ld b,65536/512
+	ld bc,65536/fs_sector_size
 .cleanup_freed_loop:
-	ld hl,(ix-3)
+	ld a,c
+	or a,b
+	jr z,.done_checking_64k_sector
+	dec bc
+	ld hl,(ix-3) ; current cluster map byte
+	dec hl
 	ld a,(hl)
-	inc hl
 	ld (ix-3),hl
-	push bc
 	or a,a
-	jq z,.next_512
+	jr z,.cleanup_freed_loop
 	inc a
-	jq z,.next_512
-.copy_512:
+	jr z,.cleanup_freed_loop
+; mark the sector for copying
+.copy_sector:
+	push bc
+	ld h,b
+	ld l,c
+	ld c,fs_sector_size_bits
+	call ti._sshl
+	ld b,h
+	ld c,l
+	ld (iy),bc
+	lea iy,iy+2
 	ld hl,(ix-6)
-	ld a,128
-	sub a,b
-	add a,a
-	inc iy
-	ld (iy),a
-	ld h,a
+	ld h,b
+	ld l,c
 	ld de,$D40000
-	ld d,a
-	ld bc,512
+	ld d,b
+	ld e,c
+	ld bc,fs_sector_size
 	ldir
-.next_512:
 	pop bc
-	djnz .cleanup_freed_loop
+	jr .cleanup_freed_loop
+.done_checking_64k_sector:
+	ld a,iyh
+	or a,a
+	jr nz,.erase_and_writeback_sector
 	ld a,iyl
 	or a,a
-	jq z,.cleanup_next
+	jr z,.cleanup_next
+.erase_and_writeback_sector:
 	ld a,(ix-4)
 	push iy
 	call sys_EraseFlashSector
 	pop iy
 .rewrite_loop:
+	ld a,iyh
+	or a,a
+	jr nz,.writeback_sector
 	ld a,iyl
 	or a,a
-	jq z,.cleanup_next
+	jr z,.cleanup_next
+.writeback_sector:
 	ld hl,$D40000
-	ld h,(iy)
+	lea iy,iy-2
+	ld l,(iy)
+	ld h,(iy+1)
 	ld de,(ix-6)
 	ld d,h
-	ld bc,512
+	ld e,l
 	push iy
-	call sys_WriteFlash ; write back 512 bytes
+	ld bc,fs_sector_size
+	call sys_WriteFlash ; write back the sector
 	pop iy
-	dec iy
-	jq .rewrite_loop
+	jr .rewrite_loop
 .cleanup_next:
+	ld bc,65536/fs_sector_size * 2
+	ld hl,(ix-3)
+	add hl,bc
+	ld (ix-3),hl
 	ld a,(ix-4)
 	inc a
 	ld (ix-4),a
@@ -147,7 +174,9 @@ fs_GarbageCollect:
 	pop ix
 	ret
 
+.str_trailing_zeroes:
+	db "0000",0
 .str_cleaning_up:
-	db "Cleaning up sector: $"
+	db "Cleaning up address: $"
 .str_cleaning_up_len:=$-.str_cleaning_up
 	db 0

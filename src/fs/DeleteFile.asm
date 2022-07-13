@@ -59,7 +59,7 @@ fs_DeleteFile:
 	pop hl
 	jr z,.fail
 .skip_freed_entry:
-	ld bc,16
+	ld bc,fs_file_desc_size
 	add hl,bc
 	jr .next_entry_in_dir
 .end_of_dir_reached:
@@ -72,7 +72,7 @@ fs_DeleteFile:
 	call fs_Free.entrydebc
 	pop hl
 	; we don't need to check for the existence of the directory extender byte, only where it points to.
-	ld bc,512+fsentry_filesector-16
+	ld bc,fs_directory_size+fsentry_filesector-fs_file_desc_size
 	add hl,bc
 	ld hl,(hl)
 	ld a,h

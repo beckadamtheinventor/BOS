@@ -8,7 +8,7 @@ fs_GetSector:
 	; or a,a
 	ld de,-start_of_user_archive
 	; jq nz,.otherfs
-	ld c,9
+	ld c,fs_sector_size_bits
 ; .div:
 	add hl,de
 	jp ti._ishru

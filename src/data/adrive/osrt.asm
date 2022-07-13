@@ -11,13 +11,13 @@ calminstruction (var) strcalc? val
 end calminstruction
 
 virtual at $04E000
-	rb $200 - ($ and $1FF)
+	rb bos.fs_sector_size - ($ and (bos.fs_sector_size-1))
 	include "src/fs/bin/argv.so.asm"
-	rb $200 - ($ and $1FF)
+	rb bos.fs_sector_size - ($ and (bos.fs_sector_size-1))
 	include "src/fs/bin/mem.so.asm"
-	rb $200 - ($ and $1FF)
+	rb bos.fs_sector_size - ($ and (bos.fs_sector_size-1))
 	include "src/fs/bin/numstr.so.asm"
-	rb $200 - ($ and $1FF)
+	rb bos.fs_sector_size - ($ and (bos.fs_sector_size-1))
 end virtual
 
 
@@ -26,7 +26,7 @@ _addr_osrt_mem_so strcalc _osrt_mem_so
 _addr_osrt_numstr_so strcalc _osrt_numstr_so
 virtual as "inc"
 	db "virtual at $04E000",$A
-	db "_osrt_lib_table rb $200",$A
+	db "_osrt_lib_table rb bos.fs_sector_size",$A
 	db "end virtual",$A
 	db "virtual at ", _addr_osrt_argv_so, $A
 	db "osrt.argv_so.version rb 4", $A

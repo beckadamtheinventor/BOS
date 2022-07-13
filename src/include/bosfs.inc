@@ -34,7 +34,7 @@ macro fs_fs? fsbase
 		pad_db name, ' ', 8
 		pad_db ext, ' ', 3
 		db prop
-		fdata.offset = fdata - ($ and not $1FF)
+		fdata.offset = fdata - ($ and not $3F)
 		assert fdata.offset < 65536
 		dw fdata.offset
 		assert fdata.len < 65536
@@ -42,12 +42,12 @@ macro fs_fs? fsbase
 	end macro
 
 	macro fs_entry? fdata, name, ext, prop
-		assert ((fdata - fs.base) shr 9) < 65536
+		assert ((fdata - fs.base) shr 6) < 65536
 		assert fdata.len < 65536
 		pad_db name, ' ', 8
 		pad_db ext, ' ', 3
 		db prop
-		dw (fdata - fs.base) shr 9
+		dw (fdata - fs.base) shr 6
 		dw fdata.len
 	end macro
 
@@ -56,10 +56,10 @@ macro fs_fs? fsbase
 ;	end macro
 
 	macro fs_longentry? fdata, name, prop
-		assert ((fdata - fs.base) shr 9) < 65536
+		assert ((fdata - fs.base) shr 6) < 65536
 		assert fdata.len < 65536
 		db $F1,lengthof name,9 dup 0,prop
-		dw (fdata-fs.base) shr 9
+		dw (fdata-fs.base) shr 6
 		dw fdata.len
 		fdata.namestart:
 		db name,0
@@ -69,10 +69,10 @@ macro fs_fs? fsbase
 	macro fs_dir? flabel
 		fs_file flabel
 		macro end?.fs_dir?
-			if ($ and $1FF) >= $1F0
+			if ($ and $FF) >= $F0
 				db $10 dup $FF
 			end if
-			db ($1F0 - ($ and $1FF)) dup $FF
+			db ($F0 - ($ and $FF)) dup $FF
 			db $FE, 15 dup $FF
 			end fs_file
 			purge end?.fs_dir
@@ -80,14 +80,14 @@ macro fs_fs? fsbase
 	end macro
 
 	macro fs_file? flabel
-		if $ and $1FF > 0
-			db $200 - ($ and $1FF) dup $FF
+		if $ and $3F > 0
+			db $40 - ($ and $3F) dup $FF
 		end if
 		flabel := $
 		macro end?.fs_file?
 			flabel.len := $ - flabel
-			if $ and $1FF > 0
-				db ($200-($ and $1FF)) dup $FF
+			if $ and $3F > 0
+				db ($40-($ and $3F)) dup $FF
 			end if
 			purge end?.fs_file?
 		end macro

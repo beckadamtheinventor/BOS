@@ -28,14 +28,14 @@ fs_DirList:
 	dec bc
 .skip_loop_entry:
 	ld a,(iy)
-	lea iy,iy+16
+	lea iy,iy+fs_file_desc_size
 	or a,a
 	jq z,.skip_loop_entry ; skip deleted entry
 	inc a
 	jq z,.fail ; fail if we're at the end of the directory and still skipping
 	inc a
 	jq nz,.skip_loop_next_16
-	ld hl,(iy+fsentry_filesector-16)
+	ld hl,(iy+fsentry_filesector-fs_file_desc_size)
 	ld a,l
 	and a,h
 	inc a
@@ -63,7 +63,7 @@ fs_DirList:
 	ld bc,(ix+12)
 	jq .list_loop_entry_inner
 .list_loop:
-	lea iy,iy+16
+	lea iy,iy+fs_file_desc_size
 .list_loop_entry_inner:
 	ld a,b
 	or a,c
@@ -75,7 +75,7 @@ fs_DirList:
 	jq z,.endofdir
 	inc a
 	jq nz,.list_loop_next_16
-	ld hl,(iy+fsentry_filesector-16)
+	ld hl,(iy+fsentry_filesector-fs_file_desc_size)
 	ld a,l
 	and a,h
 	inc a

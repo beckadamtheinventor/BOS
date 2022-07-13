@@ -28,16 +28,17 @@ fs_SetSize:
 	ld bc,fsentry_fileattr+1
 	ldir ; copy old descriptor into ram
 
-	dec hl
-	bit fd_subfile, (hl)
-	ld hl,(ix+9)
 	push hl
-	call z, fs_Free ;free the old file clusters if not a subfile
-	pop hl
 	call fs_AllocDescriptor.entry
 	jq c,.fail
 	ld (ix-19),hl
-	
+	pop hl
+
+	dec hl
+	bit fd_subfile, (hl)
+	ld hl,(ix+9)
+	call z,fs_Free.entryhl ;free the old file if not a subfile
+
 	ld hl,(ix+6)
 	push hl
 	call fs_Alloc
@@ -54,7 +55,7 @@ fs_SetSize:
 	ld de,(ix-19)
 	push de
 	lea hl,ix-16
-	ld bc,16
+	ld bc,fs_file_desc_size
 	call sys_WriteFlash ; write the new file descriptor
 	pop hl
 .success:

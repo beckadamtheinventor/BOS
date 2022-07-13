@@ -27,8 +27,9 @@ fs_GetFilePtr:
 	push hl
 	bit fd_subfile, e
 	jr z,.get_file_sector
-	ld l,0
-	res 0,h
+	ld a,l
+	and a,not (fs_sector_size-1)
+	ld l,a
 	add hl,bc
 	ex hl,de
 	jr .located_file

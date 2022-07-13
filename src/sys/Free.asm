@@ -15,11 +15,11 @@ sys_Free:
 	ccf
 	ret c
 	add hl,bc
-	ld bc,malloc_block_size
-	call ti._idvrmu
-	ex hl,de
+	ld c,malloc_block_size_bits
+	call ti._sshru
 	ld bc,malloc_cache ; index the malloc cache
 	add hl,bc ; hl now points to 8-bit malloc cache entry
+assert ~malloc_cache and $FF
 	ld (hl),c
 	ld bc,malloc_cache + malloc_cache_len
 .loop2:
@@ -29,8 +29,8 @@ sys_Free:
 	or a,a ; make sure the carry flag is unset
 	ret nz
 	ld (hl),a
-	add hl,bc
 	sbc hl,bc
+	add hl,bc
 	jr c,.loop2
 	ret
 

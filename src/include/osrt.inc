@@ -1,7 +1,7 @@
 virtual at $04E000
-_osrt_lib_table rb $200
+_osrt_lib_table rb bos.fs_sector_size
 end virtual
-virtual at 320000
+virtual at 319552
 osrt.argv_so.version rb 4
 osrt.argv_0 rb 4
 osrt.argv_1 rb 4
@@ -11,7 +11,7 @@ osrt.argv_4 rb 4
 osrt.argv_a rb 4
 osrt.argv_fail rb 4
 end virtual
-virtual at 320512
+virtual at 319744
 osrt.mem_so.version rb 4
 osrt.check_address_writable rb 4
 osrt.read_a_from_addr rb 4
@@ -28,7 +28,7 @@ osrt.xor_val_addr rb 4
 osrt.or_val_addr rb 4
 osrt.and_val_addr rb 4
 end virtual
-virtual at 321024
+virtual at 320128
 osrt.numstr_so.version rb 4
 osrt.str_to_int       rb 4
 osrt.hexstr_to_int    rb 4

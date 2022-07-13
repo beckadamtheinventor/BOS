@@ -33,7 +33,7 @@ explorer_init:
 	;push hl
 	;push bc
 	;ld (explorer_args),hl
-
+	call bos.sys_FreeRunningProcessId
 	call bos.gfx_Set8bpp
 	ld (_SaveIX),ix
 	ld (_SaveSP),sp

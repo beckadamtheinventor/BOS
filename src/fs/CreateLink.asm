@@ -1,88 +1,50 @@
 ;@DOES Create a file linking to an existing file given a path and file descriptor, returning a new file descriptor.
-;@INPUT void *fs_CreateLink(const char *path, void *fd);
+;@INPUT void *fs_CreateLink(const char *path, const void *fd);
 ;@OUTPUT file descriptor. Returns 0 if failed to create link.
 fs_CreateLink:
-	ld hl,-19
+	ld hl,-16
 	call ti._frameset
 	ld hl,(ix+6)
-	ld a,(hl)
-	or a,a
-	jq z,.fail
-	cp a,' '
-	jq z,.fail
 	push hl
-	call fs_AbsPath
-	ex (sp),hl
 	call fs_OpenFile
 	jq nc,.fail ;fail if file exists
-	call fs_ParentDir
-	ld (ix-3),hl
-	ex (sp),hl
-	call fs_OpenFile
-	jq c,.fail ;fail if parent dir doesn't exist
-	ex (sp),hl
-	pop iy
-	bit fsbit_subdirectory,(iy+fsentry_fileattr)
-	jq z,.fail ;fail if parent dir is not a dir
-	lea de,ix-19
-	push iy,hl,de
-	call fs_StrToFileEntry
-	pop bc,bc,iy
-	ld de,(iy+fsentry_filelen)
-	ex.s hl,de
-	ld de,16
-	add hl,de
-	push iy,hl
-	ld hl,flashStatusByte
-	set bKeepFlashUnlocked,(hl)
-	call sys_FlashUnlock
-	call fs_SetSize ;resize parent directory up 16 bytes
-	jq c,.fail
-	ld iy,(ix+9)
-	ld a,(iy+fsentry_fileattr)
-	ld (ix + fsentry_fileattr - 19), a     ;setup new file descriptor contents
-	ld hl,(iy+fsentry_filesector)
-	ld (ix + fsentry_filesector - 19),hl
-	ld hl,(iy+fsentry_filelen)
-	ld (ix + fsentry_filelen - 19),l
-	ld (ix + fsentry_filelen+1 - 19),h
-	pop bc,iy
-
-	ld de,(iy+fsentry_filelen)
-	ex.s hl,de
-	ld bc,-32 ;write 32 bytes behind the new end of file, to overwrite the end of directory marker
-	add hl,bc
-	push hl,iy
-	ld bc,16
-	push bc
-	ld c,1
-	push bc
-	pea ix-19
-	call fs_Write ;write new file descriptor to parent directory
-	pop bc,bc,bc,iy,bc
-
-	ld de,(iy+fsentry_filelen)
-	ex.s hl,de
-	ld bc,-16 ;write 16 bytes behind the new end of file to write new end of directory marker
-	add hl,bc
-	push hl,iy
-	ld bc,16
-	push bc
-	ld c,1
-	push bc
-	ld bc,$03FFF0
-	push bc
-	call fs_Write ;write new file descriptor to parent directory
-	pop bc,bc,bc,iy,bc
-
-	ld hl,flashStatusByte
-	res bKeepFlashUnlocked,(hl)
-	call sys_FlashLock
-	ld hl,(ix+6)
+	call fs_BaseName
 	push hl
-	call fs_OpenFile ; get pointer to new file descriptor
+	pea ix-16
+	call fs_StrToFileEntry
 	pop bc
-	db $01
+	call sys_Free ; free the memory allocated by fs_BaseName
+
+; copy sector, length, and attribute data from file descriptor to new link descriptor
+	ex (sp),iy ; save iy
+	ld iy,(ix+9) ; const void *fd
+	ld hl, (iy + fsentry_filesector) ; 16 bit sector and low 8 bits of length
+	ld e, (iy + fsentry_filelen + 1) ; high 8 bits of length
+	ld (ix + fsentry_filesector - 16), hl
+	ld (ix + fsentry_filelen + 1 - 16), e
+	ld a,(iy + fsentry_fileattr)
+	set fd_link, a ; set file as a link file (contents of linked file are preserved when the link is deleted)
+	ld (ix + fsentry_fileattr - 16), a
+
+	ld iy,(ix+6) ; const char *path
+	ex (sp),iy ; restore iy, push link file path
+	call fs_ParentDir
+	ex (sp),hl
+	call fs_GetFilePtr
+	ex (sp),hl
+	push hl
+	call sys_Free ; free the memory allocated by fs_ParentDir
+	pop bc,hl
+	call fs_AllocDescriptor.entry ; allocate a descriptor for the link file
+	call sys_FlashUnlock
+	ex hl,de
+	lea hl,ix-16
+	ld bc,fs_file_desc_size ; write the descriptor in full
+	push de
+	call sys_WriteFlash
+	call sys_FlashLock
+	pop hl ; descriptor of created link file
+	db $01 ; dummify xor a,a / sbc hl,hl
 .fail:
 	xor a,a
 	sbc hl,hl

@@ -5,7 +5,7 @@ include 'include/bosfs.inc'
 include 'include/bos.inc'
 
 
-org $040200
+org $040000+bos.fs_directory_size
 fs_fs $040000
 
 ;-------------------------------------------------------------

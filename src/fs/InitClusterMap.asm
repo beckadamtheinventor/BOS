@@ -25,9 +25,14 @@ end if
 	ldir
 
 .dont_clean_up:
-	ld a,fscluster_allocated
-	ld (ti.vRam + (fs_cluster_map and $FFFF)),a
 	push iy
+	ld hl,ti.vRam + (fs_cluster_map and $FFFF)
+	ld a,fscluster_allocated
+	ld b,4
+.mark_boot_sector:
+	ld (hl),a
+	inc hl
+	djnz .mark_boot_sector
 	ld iy,$040000
 	call .traverse_into_jump
 	pop iy
@@ -50,8 +55,9 @@ end if
 	ld hl,(iy+fsentry_filesector)
 	ex.s hl,de
 	lea hl,iy
-	ld l,0
-	res 0,h
+	ld a,l
+	and a,fs_sector_size_bits
+	ld l,a
 	add hl,de
 	ld de,-$040000
 	add hl,de
@@ -63,34 +69,37 @@ end if
 	ex.s hl,de
 	call fs_CeilDivBySector
 	pop de
-	ld b,l
-	jq .mark_file_entry
+	ld c,l
+	ld b,h
+	jr .mark_file_entry
 .regular_file:
 	ld de,(iy+fsentry_filelen)
 	ex.s hl,de
 	call fs_CeilDivBySector
-	ld b,l
+	ld c,l
+	ld b,h
 	ld de,(iy+fsentry_filesector)
 	ex.s hl,de
 	ld de,ti.vRam + (fs_cluster_map and $FFFF)
 	add hl,de
 	ex hl,de
 .mark_file_entry:
-	ld a,fscluster_allocated
-	bit fd_subdir, (iy+fsentry_fileattr)
-	jr z,.not_a_directory
-	ld (de),a
-	call .traverse_into
-	jr .traverse_next
-.not_a_directory:
 	push iy
+	ex hl,de
 .mark_file_loop:
-	ld (de),a
-	inc de
-	djnz .mark_file_loop
+	ld (hl),fscluster_allocated
+	inc hl
+	dec bc
+	ld a,b
+	or a,c
+	jr nz,.mark_file_loop
+	; ex hl,de
 	pop iy
+	bit fd_subdir, (iy+fsentry_fileattr)
+	jr z,.traverse_next
+	call .traverse_into
 .traverse_next:
-	lea iy,iy+16
+	lea iy,iy+fs_file_desc_size
 	jq .traverse
 .traverse_into:
 	push iy

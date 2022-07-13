@@ -59,7 +59,7 @@ fs_CreateFileEntry:
 
 
 	ld a, (ix+9)
-	ld (ix + fsentry_fileattr - 19), a     ;setup new file descriptor contents
+	ld (ix + fsentry_fileattr - 19), a     ; setup new file descriptor flag byte
 
 	ld hl,(ix-3)
 	push hl
@@ -80,9 +80,8 @@ fs_CreateFileEntry:
 	sbc hl,hl
 	push hl,af
 	ld hl,(ix-3)
-	push hl
-	call sys_Free
-	pop bc,af,hl
+	call sys_Free.entryhl
+	pop af,hl
 	call sys_FlashLock
 	ld iy,(ix-22)
 	ld sp,ix

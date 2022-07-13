@@ -152,5 +152,5 @@ fs_Format:
 	inc a
 	ret
 
-string_restoring_var:
-	db "Restoring file: ",0
+; string_restoring_var:
+	; db "Restoring file: ",0

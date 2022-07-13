@@ -4,17 +4,17 @@
 mf_main:
 	ld hl,.str_usermem_bytes
 	call bos.gui_PrintLine
-	ld hl,bos.end_of_usermem-ti.userMem
-	ld de,(bos.top_of_UserMem)
-	or a,a
-	sbc hl,de
-	push hl
-	ld hl,-ti.userMem
+	ld hl,(bos.top_of_UserMem)
+	ld de,-ti.userMem
 	add hl,de
+	push hl
 	call bos.gui_PrintUInt
 	ld hl,.str_bytes_used
 	call bos.gui_PrintLine
-	pop hl
+	pop de
+	ld hl,bos.end_of_usermem-ti.userMem
+	or a,a
+	sbc hl,de
 	call bos.gui_PrintUInt
 	ld hl,.str_bytes_free
 	call bos.gui_PrintLine
@@ -28,7 +28,7 @@ mf_main:
 .check_malloc_loop:
 	inc de
 	cpir
-	jr z,.check_malloc_loop
+	jp pe,.check_malloc_loop
 	ex hl,de
 	ld c,bos.malloc_block_size_bits
 	call ti._ishl

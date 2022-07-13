@@ -39,6 +39,8 @@ th_HandleNextThread:
 	sbc hl,hl
 	add hl,sp
 	ld (ix+3),hl ; save sp
+	ld a,(running_process_id)
+	ld (ix+15),a
 
 .nosave:
 	call th_FindNextThread

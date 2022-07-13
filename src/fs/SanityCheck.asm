@@ -13,17 +13,14 @@ fs_SanityCheck:
 	ld a,(hl)
 assert ~start_of_user_archive and $FF
 	ld b,l
-	ld c,2
 .check_fs_descriptor:
 	inc hl
 	and a,(hl)
 	djnz .check_fs_descriptor
-	dec c
-	jr nz,.check_fs_descriptor
 	inc a
 	jq z,.run_init ; re-init the filesystem descriptor if no descriptors found
-	ld iy,start_of_user_archive+fsentry_filesector
-	ld b,512/16
+	ld iy,start_of_user_archive
+	ld b,fs_directory_size/fs_file_desc_size
 .check_for_valid_fs_descriptor:
 	ld a,(iy)
 	or a,a
@@ -40,7 +37,7 @@ assert ~start_of_user_archive and $FF
 	or a,(iy+fsentry_filelen+1)
 	jr nz,.has_valid_fs_descriptor
 .check_next_fs_descriptor:
-	lea iy,iy+16 ; check for next descriptor
+	lea iy,iy+fs_file_desc_size ; check for next descriptor
 	djnz .check_for_valid_fs_descriptor
 ; initialize a filesystem descriptor if no valid fs descriptors found
 	jr .run_init

@@ -11,8 +11,12 @@ fs_Free:
 	jq nz,.zero
 	inc hl
 	ld de,(hl)
-	bit 7,d
-	jq nz,.zero ; dont free it if its a ram or device file
+	; bit 7,d
+	; jq nz,.zero ; dont free it if its a ram or device file
+	ld a,d
+	and a,e
+	inc a
+	jr z,.zero
 	inc hl
 	inc hl
 	ld c,(hl)
@@ -20,26 +24,19 @@ fs_Free:
 	ld b,(hl)
 	ld a,c
 	or a,b
-	jq z,.zero ; dont free it if it hasnt been allocated
+	jr z,.zero ; dont free it if it hasnt been allocated
 .entrydebc: ; free bc bytes starting at sector de
 	ex.s hl,de
 	ld de,fs_cluster_map
 	add hl,de
-	ex hl,de
-	ld a,b
-	and a,1
-	or a,c
-	jq z,.exact
-	inc b
-	inc b
-	or a,a
-.exact:
-	ld a,b
-	rra
-	ld c,a
-	ld hl,$FF0000
-	ld b,l ; bc = file_len/512 + (file_len%512 > 0)
+	push hl
 	push bc
+	pop hl
+	call fs_CeilDivBySector
+	ex (sp),hl
+	pop bc
+	ld hl,$FF0000 ; pointer to null
+	push bc ; bc = ceil(file_len/512)
 	call sys_FlashUnlock
 	call sys_WriteFlash
 	call sys_FlashLock

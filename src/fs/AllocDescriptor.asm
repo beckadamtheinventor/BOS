@@ -10,7 +10,7 @@ fs_AllocDescriptor:
 	pop bc
 .entry:
 .get_end_of_dir_loop_entry:
-	ld bc,16
+	ld bc,fs_file_desc_size
 	db $3E ; dummify next instruction
 .get_end_of_dir_loop:
 	add hl,bc
@@ -34,8 +34,7 @@ fs_AllocDescriptor:
 	jq .get_end_of_dir_loop_entry
 
 .allocate_dir_section: ; allocate a new directory section and return it
-	ld c,b
-	inc b
+	ld bc,fs_directory_size
 	push hl,bc
 	call fs_Alloc ; allocate another directory section
 	push hl
@@ -52,9 +51,8 @@ fs_AllocDescriptor:
 	call sys_WriteFlashA
 	pop hl
 	push hl
-	inc h
-	xor a,a
-	ld l,a
+	ld bc,fs_directory_size-fs_file_desc_size
+	add hl,bc
 	ex hl,de
 	ld a,$FE ; directory extender byte
 	call sys_WriteFlashA

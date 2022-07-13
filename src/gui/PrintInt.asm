@@ -27,5 +27,10 @@ gui_PrintUInt:
 	call	sys_HLToString
 gui_PrintInt.print:
 	ex hl,de
-	jp	gui_PrintString
+	ld a,(hl)
+	or a,a
+	jr nz,.over_0
+	ld hl,str_Zero
+.over_0:
+	jq	gui_PrintString
 

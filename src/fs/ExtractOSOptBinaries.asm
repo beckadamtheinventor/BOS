@@ -90,7 +90,7 @@ fs_ExtractOSOptBinaries:
 	ex hl,de
 	add hl,bc ; hl = linked file sector address, de = linking file sector address
 	call sys_FlashUnlock
-	ld bc,16-fsentry_filesector
+	ld bc,fs_file_desc_size-fsentry_filesector
 	call sys_WriteFlash ; write sector address and length of linked file to linking file
 	call sys_FlashLock
 .dont_link:

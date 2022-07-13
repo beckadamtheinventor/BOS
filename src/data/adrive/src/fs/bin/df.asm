@@ -7,7 +7,7 @@ df_main:
 	call bos.fs_GetFreeSpace
 	push hl,hl
 	ex hl,de
-	ld hl,$3B0000 - $050000
+	ld hl,bos.end_of_user_archive - bos.start_of_user_archive
 	or a,a
 	sbc hl,de
 	call bos.gui_PrintUInt

@@ -3,7 +3,7 @@
 ;@INPUT void *fs_CreateDir(const char *path, uint8_t flags);
 ;@OUTPUT file descriptor. Returns 0 if failed to create directory. 
 fs_CreateDir:
-	ld de,512 ;size of directory section
+	ld de,fs_directory_size ;size of directory section
 ;.entry_de:
 	ld hl,3
 	add hl,sp
@@ -22,7 +22,7 @@ fs_CreateDir:
 	push hl
 	call sys_FlashUnlock
 	call fs_GetFDPtr
-	ld bc,512-16
+	ld bc,fs_directory_size - fs_file_desc_size
 	add hl,bc
 	ex hl,de
 	ld a,$FE
