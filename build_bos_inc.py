@@ -154,6 +154,33 @@ macro HandleNextThread_IfOSThreading?
 end macro
 
 ;-------------------------------------------------------------------------------
+; Device macros
+;-------------------------------------------------------------------------------
+
+macro device_file? flags, type, version, intsource
+	virtual
+	db $C9, flags, type, version, intsource, 0, 0, 0
+	repeat device_NumJumps
+		or a,a
+		sbc hl,hl
+		ret
+	end repeat
+	macro export? jumpno, function
+		if function > 0
+			store $C9: byte at $$+jumpno
+			store function: 3 at $$+jumpno+1
+		end if
+	end macro
+	macro end?.device_file?
+		local data
+		load data: $-$$ from $$
+		end virtual
+		db data
+		purge export?
+	end macro
+end macro
+
+;-------------------------------------------------------------------------------
 ; OS call defines
 ;-------------------------------------------------------------------------------
 define bos? bos

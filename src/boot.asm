@@ -445,11 +445,30 @@ os_recovery_menu:
 	; cp a,ti.sk6
 	; jq z,.validate
 	cp a,ti.sk2nd
+	jr z,.tryruncmd
+	cp a,ti.sk7
 	jq nz,.keywait
 
 .turn_off:
 	call sys_TurnOff
 	rst 0
+
+.tryruncmd:
+	ld hl,str_CmdExecutable
+	ld de,$FF0000
+	push de,hl
+	call sys_ExecuteFile
+	ld hl,(ExecutingFileFd)
+	inc hl
+	add hl,de
+	or a,a
+	sbc hl,de
+	jr nz,.successfulyrancmd
+	ld hl,str_CmdExecutableNotFound
+	call gui_PrintLine
+	call sys_WaitKeyCycle
+.successfulyrancmd:
+	jq os_recovery_menu
 
 .reset_fs:
 	call .confirm
@@ -458,6 +477,7 @@ os_recovery_menu:
 
 .uninstall:
 	call .confirm
+	call gfx_Set16bpp
 	ld hl,bos_UserMem
 	push hl ;return to usermem which immediately tells the calc to invalidate the OS and reboot
 	ld (hl),$CD

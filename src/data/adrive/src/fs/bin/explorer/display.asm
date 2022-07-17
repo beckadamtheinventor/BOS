@@ -89,14 +89,15 @@ end if
 	call explorer_display_bc_chars
 
 	call ti.usb_IsBusPowered
-	jr z,.not_charging
-	ld c,$E4
-	push bc
-	call gfx_SetTextFGColor
-	pop bc
-	ld hl,_charging_icon
-	jq .print_icon
-.not_charging:
+	push af
+	; jr z,.not_charging
+	; ld c,$E4
+	; push bc
+	; call gfx_SetTextFGColor
+	; pop bc
+	; ld hl,_charging_icon
+	; jq .print_icon
+; .not_charging:
 	ld a,0
 explorer_battery_status:=$-1
 	ld l,$C0
@@ -119,7 +120,10 @@ explorer_battery_status:=$-1
 	push hl
 	call gfx_SetTextFGColor
 	pop bc
+	pop af
 	ld hl,_battery_icon
+	jr nz,.print_icon
+	ld hl,_charging_icon
 .print_icon:
 	ld bc,1
 	push hl,bc

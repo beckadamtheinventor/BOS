@@ -167,20 +167,23 @@ device_Header               := 0
 device_Flags                := 1
 device_Type                 := 2
 device_Version              := 3
-device_JumpTable            := 4 ; jump table for device functions
-device_JumpInit             := 4
-device_JumpDeinit           := 8
-device_JumpRead             := 12
-device_JumpWrite            := 16
-device_JumpGetDMA           := 20
-device_CodeStart            := 24
+device_IntSource            := 4 ; what interrupt source this device responds to
+device_JumpTable            := 8 ; jump table for device functions
+device_JumpInit             := 8
+device_JumpDeinit           := 12
+device_JumpRead             := 16
+device_JumpWrite            := 20
+device_JumpGetDMA           := 24
+device_JumpInt              := 28
+device_CodeStart            := 32
 
 ; device file field lengths
-device_Header.len           := 4
+device_Header.len           := 1
 device_Flags.len            := 1
 device_Type.len             := 1
 device_Version.len          := 1
-device_JumpTable.len        := 5*4 ; jump table for device functions
+device_IntSource.len        := 1
+device_JumpTable.len        := 6*4 ; jump table for device functions
 
 ; device file flag bits
 bDeviceWritable             := 7
@@ -191,14 +194,35 @@ bDeviceDMAReadable          := 3
 bDeviceNeedsInit            := 2
 bDeviceNeedsDeinit          := 1
 
+; device file flag masks
+mDeviceWritable             := 1 shl bDeviceWritable
+mDeviceReadable             := 1 shl bDeviceReadable
+mDeviceHasDMA               := 1 shl bDeviceHasDMA
+mDeviceDMAWritable          := 1 shl bDeviceDMAWritable
+mDeviceDMAReadable          := 1 shl bDeviceDMAReadable
+mDeviceNeedsInit            := 1 shl bDeviceNeedsInit
+mDeviceNeedsDeinit          := 1 shl bDeviceNeedsDeinit
+
 ; device type equates
 devtSoftware                := $00
 devtMemory                  := $04
 devtMMIO                    := $08
+devtIntHandler              := $09
 devtUSB                     := $10
 devtMSD                     := $14
-devtMSDFS                   := $15
-devtMSDFAT32                := $16
+devtMTP                     := $15
+
+; device interrupt sources
+deviceIntNone               := $00
+deviceIntOn                 := $01
+deviceIntTmr1               := $02
+deviceIntTmr2               := $03
+deviceIntTmr3               := $04
+deviceIntOSTmr              := $05
+deviceIntKey                := $0B
+deviceIntLcd                := $0C
+deviceIntRtc                := $0D
+deviceIntUsb                := $0E
 
 ; threading defines
 threadMallocStackSize       := 512

@@ -42,11 +42,12 @@ str_SplashCredit:
 string_os_recovery_menu:
 	db "--OS Recovery/Reset--",$A
 	db $9,"Press clear to reboot",$A
-	db $9,"Press 2nd to turn off calculator",$A
+	db $9,"Press O/7 to turn off calculator",$A
 	db $9,"Press enter to attempt recovery",$A
 	; db $9,"Press 6/V to verify system files",$A
 	db $9,"Press mode to reset filesystem",$A
 	db $9,"Press del to uninstall BOS",$A
+	db $9,"Press 2nd to try running cmd line",$A
 	db $9,"Press alpha to open emergency shell",$A,0
 string_press_enter_confirm:
 	db "Press enter to confirm.",$A,0
@@ -189,7 +190,7 @@ string_lib_var:
 string_var_dir:
 	db "/var/",0
 str_var_index_name:
-	db "/var/cache"
+	db "/tmp/cache"
 .num:
 	db "000.dat",0
 str_ExtractingFiles:
@@ -203,6 +204,8 @@ str_BootFailed:
 	db "and cannot complete boot process.",$A
 	db "Missing system executable /bin/explorer",$A
 	db "Press any key to open recovery options.",$A,0
+str_CmdExecutableNotFound:
+	db "Could not locate system executable "
 str_CmdExecutable:
 	db "/bin/cmd",0
 str_ExplorerExecutable:
