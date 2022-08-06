@@ -451,7 +451,7 @@ os_recovery_menu:
 
 .turn_off:
 	call sys_TurnOff
-	rst 0
+	jq os_recovery_menu
 
 .tryruncmd:
 	ld hl,str_CmdExecutable
