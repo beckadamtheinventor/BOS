@@ -106,7 +106,7 @@ fs_file_data_drmono.zlen:=$-.
 	dw fs_file_data_cedit.len
 	dw fs_file_data_cedit.zlen
 virtual
-	file "adrive/src/fs/bin/CEDIT/bosbin/CEDIT.bin"
+	file "adrive/src/fs/bin/cedit/bosbin/CEDIT.bin"
 	fs_file_data_cedit.len := $-$$
 end virtual
 fs_file_data_cedit:
