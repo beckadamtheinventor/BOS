@@ -445,9 +445,6 @@ _SaveIX:=$-3
 _SaveSP:=$-3
 	jp bos.gfx_SetDefaultFont
 
-run_power_app:
-	ld hl,str_OffExecutable
-	jq explorer_call_file_noargs
 open_terminal:
 	ld hl,str_CmdExecutable
 explorer_call_file_noargs:
