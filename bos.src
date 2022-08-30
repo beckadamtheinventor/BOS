@@ -97,7 +97,7 @@
 	public _asm_gui_PrintString
 	public _asm_gui_PrintLine
 	public _asm_gui_PrintUInt
-	public _fs_GetFilePtr
+	public _fs_GetFilePtrRaw
 	public _sys_ExecuteFileHL
 	public _sys_TurnOff
 	public _sys_NextProcessId
@@ -136,8 +136,8 @@
 	public _sys_OpenFileInPath
 	public _sys_VarString
 	public _fs_GetFreeSpace
-	public _fs_GetFDPtr
-	public _fs_GetFDLen
+	public _fs_GetFDPtrRaw
+	public _fs_GetFDLenRaw
 	public __OP1ToPath
 	public _th_WaitKeyCycle
 	public _fs_JoinPath
@@ -145,7 +145,7 @@
 	public _sys_OpenFileInVar
 	public _fs_BaseName
 	public _fs_MoveFile
-	public _fs_WriteRaw
+	public _fs_WriteDirectly
 	public __UnpackUpdates
 	public _sys_ReadSectorCache
 	public _sys_WriteSectorCache
@@ -155,6 +155,10 @@
 	public _th_CreateThread
 	public _bosgfx_ZeroVRAM
 	public _th_KillThread
+	public _fs_GetFilePtr
+	public _fs_GetFDPtr
+	public _fs_GetFDLen
+	public _fs_ArcUnarcFD
 _boot_os                         := $20108
 _handle_interrupt                := $2010C
 _HandleInstruction               := $20110
@@ -252,7 +256,7 @@ _bosgfx_SetDraw                     := $22570
 _asm_gui_PrintString                 := $22574
 _asm_gui_PrintLine                   := $22578
 _asm_gui_PrintUInt                   := $2257C
-_fs_GetFilePtr                   := $22588
+_fs_GetFilePtrRaw                := $22588
 _sys_ExecuteFileHL               := $22590
 _sys_TurnOff                     := $22594
 _sys_NextProcessId               := $22598
@@ -291,8 +295,8 @@ _bosgfx_GetTextY                    := $22618
 _sys_OpenFileInPath              := $22624
 _sys_VarString                   := $22628
 _fs_GetFreeSpace                 := $2262C
-_fs_GetFDPtr                     := $22630
-_fs_GetFDLen                     := $22634
+_fs_GetFDPtrRaw                  := $22630
+_fs_GetFDLenRaw                  := $22634
 __OP1ToPath                      := $22638
 _th_WaitKeyCycle                 := $2263C
 _fs_JoinPath                     := $22640
@@ -300,7 +304,7 @@ _sys_MallocPersistent            := $22644
 _sys_OpenFileInVar               := $22648
 _fs_BaseName                     := $2264C
 _fs_MoveFile                     := $22650
-_fs_WriteRaw                     := $22654
+_fs_WriteDirectly                := $22654
 __UnpackUpdates                  := $22658
 _sys_ReadSectorCache             := $2265C
 _sys_WriteSectorCache            := $22660
@@ -310,6 +314,10 @@ _bosgfx_BlitScreen                  := $2266C
 _th_CreateThread                 := $22670
 _bosgfx_ZeroVRAM                    := $22674
 _th_KillThread                   := $22678
+_fs_GetFilePtr                   := $2267C
+_fs_GetFDPtr                     := $22680
+_fs_GetFDLen                     := $22684
+_fs_ArcUnarcFD                   := $22688
 
 public ram_executable
 public ram_executable_at

@@ -5,12 +5,51 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+typedef struct __filesystem_device_t__ {
+	uint8_t flags;
+	uint8_t unused[3];
+	// Called by the OS to open a file within this device as a filesystem.
+	uint8_t fs_OpenFileJP;
+	void *(*fs_OpenFile)(char *path);
+	// Called by the OS to create a file within this device as a filesystem.
+	uint8_t fs_CreateFileJP;
+	void *(*fs_CreateFile)(char *path, int flags);
+	// Called by the OS to delete a file within this device as a filesystem.
+	uint8_t fs_DeleteFileJP;
+	void *(*fs_DeleteFile)(char *path);
+	// Called by the OS to read from a file within this device as a filesystem. Data is a physical address where data is read into.
+	uint8_t fs_ReadJP;
+	unsigned int (*fs_Read)(void *data, unsigned int len, uint8_t count, void *fd);
+	// Called by the OS to write to a file within this device as a filesystem. Data is a physical address where data is written from.
+	uint8_t fs_WriteJP;
+	unsigned int (*fs_Write)(void *data, unsigned int len, uint8_t count, void *fd);
+} filesystem_device_t;
+
 typedef struct __device_t__ {
 	uint8_t header;
 	uint8_t flags;
 	uint8_t type;
 	uint8_t version;
-	
+	uint8_t intSource;
+	filesystem_device_t *fs;
+	// Initialize the device.
+	uint8_t initjp;
+	uint8_t (*init)(void);
+	// De-initialize the device.
+	uint8_t deinitjp;
+	uint8_t (*deinit)(void);
+	// Read from the device. Dest is a physical address, src is a device-side address.
+	uint8_t readjp;
+	unsigned int (*read)(void *dest, void *src, unsigned int len);
+	// Write to the device. Dest is a device-side address, src is a physical address.
+	uint8_t writejp;
+	unsigned int (*write)(void *dest, void *src, unsigned int len);
+	// Return a physical address (DMA) for a given device-side address.
+	uint8_t dmajp;
+	void *(*getdma)(void *src);
+	// Called by the OS to handle interrupts this device responds to.
+	uint8_t interrupthandlerjp;
+	uint8_t (*interruptHandler)(void);
 } device_t;
 
 

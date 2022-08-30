@@ -59,6 +59,7 @@ fs_dir bin_dir
 	fs_entry memedit_exe, "hexedit", "", f_system
 	fs_sfentry mf_exe, "mf", "", f_system+f_subfile
 	fs_sfentry info_exe, "info", "", f_system+f_subfile
+	fs_sfentry jump_exe, "jump", "", f_system+f_subfile
 	; fs_sfentry json_exe, "json", "", f_system+f_subfile
 	fs_sfentry ls_exe, "l", "", f_system+f_subfile
 	fs_sfentry ls_exe, "la", "", f_system+f_subfile
@@ -78,6 +79,7 @@ fs_dir bin_dir
 	fs_sfentry poke_exe, "poke", "", f_system+f_subfile
 	fs_sfentry rm_exe, "rm", "", f_system+f_subfile
 	fs_sfentry sleep_exe, "sleep", "", f_system+f_subfile
+	fs_entry str_so, "str", "so", f_system
 	; fs_sfentry var_exe, "var", "", f_system+f_subfile
 	fs_entry numstr_so, "numstr", "so", f_system
 	fs_entry mem_so, "mem", "so", f_system
@@ -190,6 +192,10 @@ fs_file os_internal_subfiles
 		include 'fs/bin/echo.asm'
 	end fs_subfile
 
+	fs_subfile jump_exe, bin_dir
+		include 'fs/bin/jump.asm'
+	end fs_subfile
+
 	; fs_subfile json_exe, bin_dir
 		; include 'fs/bin/json.asm'
 	; end fs_subfile
@@ -266,6 +272,7 @@ fs_file _osrt_lib_table
 	dl _osrt_argv_so
 	dl _osrt_numstr_so
 	dl _osrt_mem_so
+	dl _osrt_str_so
 end fs_file
 
 fs_file argv_so
@@ -278,6 +285,10 @@ end fs_file
 
 fs_file mem_so
 	include 'fs/bin/mem.so.asm'
+end fs_file
+
+fs_file str_so
+	include 'fs/bin/str.so.asm'
 end fs_file
 
 end fs_fs

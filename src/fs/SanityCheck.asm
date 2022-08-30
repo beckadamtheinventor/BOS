@@ -42,6 +42,7 @@ assert ~start_of_user_archive and $FF
 ; initialize a filesystem descriptor if no valid fs descriptors found
 	jr .run_init
 .has_valid_fs_descriptor:
+	call .check_ramfs
 	call .check_root ; check if root directory begins with the right directories
 	ret z
 .run_init:
@@ -182,6 +183,13 @@ assert ~start_of_user_archive and $FF
 	add hl,bc
 	or a,a
 	sbc hl,bc
+	ret
+
+
+.check_ramfs:
+	ld hl,str_ram_fs_device
+	
+	
 	ret
 
 ; .check_root_dirs:

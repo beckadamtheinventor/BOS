@@ -86,7 +86,10 @@ heapBot                := ti.heapBot
 ramCodeTop             := ti.ramCodeTop
 reservedRAM            := ti.ramCodeTop
 bos_UserMem            := $D1A881
-end_of_usermem         := op_stack_bot
+ram_fs_start           := end_of_usermem-$10
+end_of_usermem         := open_device_table
+open_device_table      := malloc_cache-$380
+open_device_table.len  := $80
 op_stack_bot           := malloc_cache-$300
 op_stack_top           := malloc_cache-$200 ;256 bytes downward
 current_working_dir    := malloc_cache-$200
@@ -167,8 +170,9 @@ device_Header               := 0
 device_Flags                := 1
 device_Type                 := 2
 device_Version              := 3
-device_IntSource            := 4 ; what interrupt source this device responds to
-device_JumpTable            := 8 ; jump table for device functions
+device_IntSource            := 4 ; what interrupt source this device responds to.
+device_FilesystemDevice     := 5 ; pointer to filesystem device if this device can be used as a filesystem.
+device_JumpTable            := 8 ; jump table for device functions.
 device_JumpInit             := 8
 device_JumpDeinit           := 12
 device_JumpRead             := 16
@@ -223,6 +227,15 @@ deviceIntKey                := $0B
 deviceIntLcd                := $0C
 deviceIntRtc                := $0D
 deviceIntUsb                := $0E
+
+; filesystem device field offsets
+devicefs_Flags              := 0
+devicefs_OpenFile           := 4
+devicefs_CreateFile         := 8
+devicefs_DeleteFile         := 12
+devicefs_Read               := 16
+devicefs_Write              := 20
+
 
 ; threading defines
 threadMallocStackSize       := 512

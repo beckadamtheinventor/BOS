@@ -193,6 +193,8 @@ str_var_index_name:
 	db "/tmp/cache"
 .num:
 	db "000.dat",0
+str_ram_fs_device:
+	db "/dev/ramfs",0
 str_ExtractingFiles:
 	db "Extracting files:",0
 str_ExtractingOSBinaries:

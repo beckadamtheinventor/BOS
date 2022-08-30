@@ -107,7 +107,7 @@
 	jp gui_PrintUInt
 	jp DONOTHING ;sys_WriteFlashFullRam
 	jp DONOTHING ;sys_WriteFlashByteFullRam
-	jp fs_GetFilePtr
+	jp fs_GetFilePtrRaw
 	jp DONOTHING ;sys_ExecuteFileFromPtr
 	jp sys_ExecuteFileHL
 	jp sys_TurnOff
@@ -149,8 +149,8 @@
 	jp sys_OpenFileInPath
 	jp sys_VarString
 	jp fs_GetFreeSpace
-	jp fs_GetFDPtr
-	jp fs_GetFDLen
+	jp fs_GetFDPtrRaw
+	jp fs_GetFDLenRaw
 	jp _OP1ToPath
 	jp th_WaitKeyCycle
 	jp fs_JoinPath
@@ -158,7 +158,7 @@
 	jp sys_OpenFileInVar
 	jp fs_BaseName
 	jp fs_MoveFile
-	jp fs_WriteRaw
+	jp fs_WriteDirectly
 	jp _UnpackUpdates
 	jp sys_ReadSectorCache
 	jp sys_WriteSectorCache
@@ -168,4 +168,8 @@
 	jp th_CreateThread
 	jp gfx_ZeroVRAM
 	jp th_KillThread
+	jp fs_GetFilePtr
+	jp fs_GetFDPtr
+	jp fs_GetFDLen
+	jp fs_ArcUnarcFD
 ; end of jump table

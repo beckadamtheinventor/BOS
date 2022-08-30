@@ -112,7 +112,7 @@ _Arc_Unarc:
 	push bc
 	ld hl,fsOP1
 	push hl
-	call fs_WriteRaw ; write file name
+	call fs_WriteDirectly ; write file name
 	pop bc,bc,bc,hl,bc
 
 	ld a,(ix-5) ; file name length + 10
@@ -129,6 +129,6 @@ _Arc_Unarc:
 	inc bc
 	inc bc
 	push bc,hl
-	call fs_WriteRaw ; write length prefixed file data
+	call fs_WriteDirectly ; write length prefixed file data
 	sbc a,a
 	jq .done
