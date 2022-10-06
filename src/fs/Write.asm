@@ -7,8 +7,25 @@ fs_Write:
 	call ti._frameset
 	ld (ix-6),iy
 	ld iy,(ix+15) ;void *fd
+	ld a,(ix+15+2)
+	cp a,$D0
+	jq nc,.write_to_ram_file
+	sub a,$40
+	jq nc,.write_to_device_fs
+.find_file_in_link:
+	ld a,(iy)
+	inc a
+	jq z,.fail ; fail if file linked to is deleted or non-existent
+	dec a
+	jq z,.fail ; fail if file linked to is deleted or non-existent
 	bit fd_link,(iy+fsentry_fileattr)
-	jq nz,.fail
+	jr z,.found_file_in_link
+	ld hl,(iy+fsentry_filesector)
+	call fs_GetSectorAddress.entry
+	push hl
+	pop iy
+	jr .find_file_in_link
+.found_file_in_link:
 	; push iy
 	; call fs_CheckWritableFD
 	; dec a
@@ -21,19 +38,41 @@ fs_Write:
 .mult_loop:
 	add hl,de
 	djnz .mult_loop
+	ld a,l
+	or a,h
+	jq z,.done ; do nothing if write length is 0
 	ld (ix-3),hl
 	ld de,(ix+18) ;int offset
 	add hl,de
 	ld bc,65535
 	or a,a
 	sbc hl,bc
-	jq nc,.fail ;check if write length + write offset > 65535
+	jq nc,.fail ; fail if write length + write offset > 65535
 	add hl,bc
 	ld (ix-12),hl
 	ld bc,(ix+15) ; void *fd
 	push bc,hl,bc
 	call fs_GetFDPtr ; get pointer to old file data section prior to clobbering it
+	jq c,.fail ; fail if we couldn't get a pointer to the file data section
+	pop bc
 	ld (ix-9),hl
+	ld bc,(ix+18) ; int offset
+	add hl,bc
+	ex hl,de
+	ld bc,(ix-3) ; write length (len*count)
+	ld hl,(ix+6) ; void *data
+	push de ; save pointer to write location
+.check_write_loop: ; check if we can write to the file successfuly without relocating it
+	ld a,(de)
+	and a,(hl)
+	cp a,(hl)
+	jr nz,.write_needs_file_moved
+	inc de
+	cpi
+	jp pe,.check_write_loop
+	pop de,bc,bc ; pop pointer to write location, discard arguments otherwise for fs_SetSize
+	jr .write_data
+.write_needs_file_moved:
 	pop bc
 	call fs_SetSize
 	jq c,.fail
@@ -51,6 +90,7 @@ fs_Write:
 	ld a,b
 	or a,c
 	call nz,sys_WriteFlash
+.write_data:
 	ld bc,(ix-3) ; len*count
 	ld hl,(ix+6) ; void *data
 	ld a,b
@@ -88,6 +128,7 @@ fs_Write:
 	; no need to free the old data section because it was already freed in fs_SetSize
 .done:
 	ld hl,(ix+15)
+.donereturnhl:
 	or a,a
 	db $01 ;ld bc,...
 .fail:
@@ -100,3 +141,42 @@ fs_Write:
 	pop ix
 	ret
 
+.write_to_ram_file:=.fail
+	
+	; jq .done
+
+.write_to_device_fs:
+	cp a,open_device_table.len / 4
+	jq nc,.fail
+	add a,a
+	add a,a
+	sbc hl,hl
+	ld l,a
+	ld de,open_device_table
+	add hl,de
+	ld a,(hl)
+	dec a
+	jq nz,.fail
+	inc hl
+	ld hl,(hl)
+	call fs_GetFDPtrRaw.entry
+	push hl
+	pop iy
+	ld a,(iy+device_FilesystemDevice+2)
+	ld iy,(iy+device_FilesystemDevice)
+	or a,iyh
+	or a,iyl
+	jq z,.fail ; fail if the device filesystem doesn't exist
+	bit bDeviceFsWriteable,(iy+deviceFs_Flags)
+	jq z,.fail ; fail if the device filesystem isn't writeable
+	lea hl,iy+deviceFs_Write
+	ld de,(ix+15)
+	ld c,(ix+12)
+	push de,bc
+	ld de,(ix+9)
+	ld bc,(ix+6)
+	push de,bc
+	call sys_jphl
+	pop bc,bc,bc,bc
+	jq c,.fail
+	jq .donereturnhl

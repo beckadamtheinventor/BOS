@@ -7,18 +7,18 @@ _writeinto:
 	add hl,bc
 	or a,a
 	sbc hl,bc
-	jq z,.fail ;fail if 0
+	jr z,.fail ;fail if 0
 	inc hl
 	add hl,bc
 	or a,a
 	sbc hl,bc
-	jq z,.fail ;fail if -1
+	jr z,.fail ;fail if -1
 	call osrt.argv_1
 	push hl
 	call bos.fs_OpenFile
+	call nc,bos.fs_DeleteFile
 	pop de
-	ld bc,0
-	jq nc,.overwritefile
+	mlt bc
 	ld hl,(bos.LastCommandResult)
 	ld c,(hl)
 	inc hl
@@ -37,28 +37,6 @@ _writeinto:
 	ld sp,ix
 	pop ix
 	ret
-.overwritefile:
-	ex hl,de
-	ld hl,(bos.LastCommandResult)
-	ld c,(hl)
-	inc hl
-	ld b,(hl)
-	inc hl
-	push hl,de,bc
-	call bos.fs_SetSize
-	pop bc,de,hl
-	push de,bc,hl
-	call bos.fs_WriteFile
-	add hl,bc
-	or a,a
-	sbc hl,bc
-	pop hl
-	push af,hl
-	call bos.sys_Free
-	pop hl,af,bc,de
-	jq z,.fail
-	xor a,a
-	db $3E ;dummify following scf
 .fail:
 	scf
 	sbc hl,hl

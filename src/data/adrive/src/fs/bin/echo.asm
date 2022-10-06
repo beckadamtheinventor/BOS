@@ -40,7 +40,7 @@ _echo_exe:
 	jq z,.dontcopy
 	ldir
 .dontcopy:
-	call bos.sys_Free
+	; call bos.sys_Free
 	pop bc
 	pop hl
 	db $01

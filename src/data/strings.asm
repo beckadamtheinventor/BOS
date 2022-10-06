@@ -13,9 +13,13 @@ str_WritingFilesystem:
 	db "Writing filesystem...",0
 str_PressAnyKey:
 	db "Press any key to continue...",0
+str_BadInterrupt:
+	db "Repeated interrupt restart",$A
+	db "called by program.",$A,0
 str_UnimplementedOSCall:
 	db "Unimplemented OS routine called",$A
-	db "by running program.",$A
+	db "by program.",$A,0
+str_TerminateOrContinue:
 	db "Press enter to terminate",$A," and return to OS.",$A
 	db "Press clear to continue",$A," and ignore this error.",$A,0
 str_Address0x:
@@ -26,6 +30,8 @@ str_Prompt:
 	; db "Filesystem corrupted!",$A,"Filesystem will now be formatted.",$A,"Press enter to continue.",$A,0
 ; string_FilesystemReformatted:
 	; db "Format complete.",$A,"Press enter to continue to BOS.",$A,0
+str_BuildingVAT:
+	db "Building VAT...",0
 str_GarbageCollecting:
 	db "Garbage collecting...",0
 str_tivars_dir:
@@ -51,13 +57,18 @@ string_os_recovery_menu:
 	db $9,"Press alpha to open emergency shell",$A,0
 string_press_enter_confirm:
 	db "Press enter to confirm.",$A,0
+str_ErrorMemory:
+	db $9,"Error: Not Enough Memory!",$A
+str_PressAnyKeyToSoftReboot:
+	db "Press any key to soft reboot.",$A,0
+
 ; string_program_requested_flash:
 	; db "Error: Unauthorized flash unlock!",$A
 	; db "Program requested flash unlock without elevation.",$A
 	; db "Aborting program execution.",$A
 	; db "Press any key to continue.",$A,0
-string_failed_to_reinstall:
-	db "Failed to reinstall TIOS, backup files are missing!",$A,0
+; string_failed_to_reinstall:
+	; db "Failed to reinstall TIOS, backup files are missing!",$A,0
 
 
 str_bosfs512_partition_header: ; TODO: this shouldn't be static

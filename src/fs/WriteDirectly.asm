@@ -46,13 +46,13 @@ fs_WriteDirectly:
 	ld a,(de)
 	and a,(hl)
 	cp a,(hl)
-	jq nz,.fail
+	jr nz,.fail
 	inc de
 	inc hl
 	dec bc
 	ld a,c
 	or a,b
-	jq nz,.write_check_loop
+	jr nz,.write_check_loop
 	call sys_FlashUnlock
 	pop bc,de ; restore write len and dest
 	ld hl, (ix+6)

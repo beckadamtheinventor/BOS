@@ -21,6 +21,10 @@ sys_OpenDevice:
 	call sys_SearchDeviceTable
 	pop bc,hl
 	ret nz ; don't reinit an already initialized device
+	push hl,bc
+	call sys_AppendDeviceTable
+	pop bc,hl
+	ret z
 	push hl
 	inc hl
 	bit bDeviceNeedsInit,(hl)

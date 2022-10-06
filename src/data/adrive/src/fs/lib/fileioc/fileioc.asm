@@ -772,12 +772,12 @@ ti_DetectVar:
 ;  sp + 9 : type of variable to search for
 ; return:
 ;  hl -> name of variable
-;	ld	hl,9
-;	add	hl,sp
-;	ld	a,(hl)
-;	jr	ti_Detect.start		; emulated by dummifying next instruction:
-;	db	$fe			; ld a,appVarObj -> cp a,$3E \ dec d
-;assert appVarObj = $15
+	ld	hl,9
+	add	hl,sp
+	ld	a,(hl)
+	; jr	ti_Detect.start		; emulated by dummifying next instruction:
+	db	$fe			; ld a,appVarObj -> cp a,$3E \ dec d
+assert ti.AppVarObj = $15
 
 ;-------------------------------------------------------------------------------
 ti_Detect:
@@ -786,132 +786,132 @@ ti_Detect:
 ;  sp + 6 : pointer to null terminated string of data to search for
 ; return:
 ;  hl -> name of variable
-	; ld	a,appVarObj
-; .start:
-	; ld	(.smc_type), a
-	; xor	a,a
-; .start_flag:
-	; ld	(.smc_flag), a
-	; push	ix
-	; ld	ix, 0
-	; add	ix, sp
-	; ld	hl, (ix + 9)
-	; add	hl, bc
-	; or	a, a
-	; sbc	hl, bc
-	; jr	nz, .detectall		; if null, then detect everything
-	; ld	hl, .fdetectall
-	; ld	(ix + 9), hl
-; .detectall:
-	; ld	hl, (ix + 6)
-	; add	hl, bc
-	; or	a, a
-	; sbc	hl, bc
-	; jr	z, .fstart
-	; ld	hl, (hl)
-	; add	hl, bc
-	; or	a, a
-	; sbc	hl, bc
-	; jr	nz, .fdetect
-; .fstart:
-	; ld	hl, (progPtr)
-; .fdetect:
-	; ld	de, (pTemp)
-	; or	a, a
-	; sbc	hl, de
-	; jr	c, .finish
-	; jr	z, .finish
-	; add	hl, de
-	; jr	.fcontinue
+	ld	a,ti.AppVarObj
+.start:
+	ld	(.smc_type), a
+	xor	a,a
+.start_flag:
+	ld	(.smc_flag), a
+	push	ix
+	ld	ix, 0
+	add	ix, sp
+	ld	hl, (ix + 9)
+	add	hl, bc
+	or	a, a
+	sbc	hl, bc
+	jr	nz, .detectall		; if null, then detect everything
+	ld	hl, .fdetectall
+	ld	(ix + 9), hl
+.detectall:
+	ld	hl, (ix + 6)
+	add	hl, bc
+	or	a, a
+	sbc	hl, bc
+	jr	z, .fstart
+	ld	hl, (hl)
+	add	hl, bc
+	or	a, a
+	sbc	hl, bc
+	jr	nz, .fdetect
+.fstart:
+	ld	hl, (ti.progPtr)
+.fdetect:
+	ld	de, (ti.pTemp)
+	or	a, a
+	sbc	hl, de
+	jr	c, .finish
+	jr	z, .finish
+	add	hl, de
+	jr	.fcontinue
 
-; .finish:
-	; xor	a, a
-	; sbc	hl, hl
-	; pop	ix
-	; ret
+.finish:
+	xor	a, a
+	sbc	hl, hl
+	pop	ix
+	ret
 
-; .fcontinue:
-	; push	hl
-	; ld	a, 0
-; .smc_flag := $-1
-	; or	a, a
-	; ld	a, (hl)
-	; jr	z, .fdetectnormal
-	; ld	de, (ix + 12)
-	; ld	(de), a
-	; jr	.fgoodtype
-; .fdetectnormal:
-	; cp	a, appVarObj
-; .smc_type := $-1
-	; jr	nz, .fskip
-; .fgoodtype:
-	; dec	hl
-	; dec	hl
-	; dec	hl
-	; ld	e, (hl)
-	; dec	hl
-	; ld	d, (hl)
-	; dec	hl
-	; ld	a, (hl)
-	; call	_SetDEUToA
-	; ex	de,hl
-	; cp	a, $d0
-	; jr	nc, .finram
-	; ld	de, 9
-	; add	hl, de			; skip archive vat stuff
-	; ld	e, (hl)
-	; add	hl, de
-	; inc	hl
-; .finram:
-	; inc	hl
-	; inc	hl			; hl -> data
-	; ld	bc, (ix + 9)
-; .fcmp:
-	; ld	a, (bc)
-	; or	a, a
-	; jr	z, .ffound
-	; cp	a, (hl)
-	; inc	bc
-	; inc	de
-	; inc	hl
-	; jr	z, .fcmp		; check the string in memory
-; .fskip:
-	; pop	hl
-	; call	.fbypassname
-	; jr	.fdetect
+.fcontinue:
+	push	hl
+	ld	a, 0
+.smc_flag := $-1
+	or	a, a
+	ld	a, (hl)
+	jr	z, .fdetectnormal
+	ld	de, (ix + 12)
+	ld	(de), a
+	jr	.fgoodtype
+.fdetectnormal:
+	cp	a, ti.AppVarObj
+.smc_type := $-1
+	jr	nz, .fskip
+.fgoodtype:
+	dec	hl
+	dec	hl
+	dec	hl
+	ld	e, (hl)
+	dec	hl
+	ld	d, (hl)
+	dec	hl
+	ld	a, (hl)
+	call	ti.SetDEUToA
+	ex	de,hl
+	cp	a, $d0
+	jr	nc, .finram
+	ld	de, 9
+	add	hl, de			; skip archive vat stuff
+	ld	e, (hl)
+	add	hl, de
+	inc	hl
+.finram:
+	inc	hl
+	inc	hl			; hl -> data
+	ld	bc, (ix + 9)
+.fcmp:
+	ld	a, (bc)
+	or	a, a
+	jr	z, .ffound
+	cp	a, (hl)
+	inc	bc
+	inc	de
+	inc	hl
+	jr	z, .fcmp		; check the string in memory
+.fskip:
+	pop	hl
+	call	.fbypassname
+	jr	.fdetect
 
-; .ffound:
-	; pop	hl
-	; call	.fbypassname
-	; ex	de, hl
-	; ld	hl, (ix + 6)
-	; add	hl, de
-	; or	a, a
-	; sbc	hl, de
-	; jr	z, .isnull
-	; ld	(hl), de
-; .isnull:
-	; ld	hl, OP6
-	; pop	ix
-	; ret
+.ffound:
+	pop	hl
+	call	.fbypassname
+	ex	de, hl
+	ld	hl, (ix + 6)
+	add	hl, de
+	or	a, a
+	sbc	hl, de
+	jr	z, .isnull
+	ld	(hl), de
+.isnull:
+	ld	hl, ti.OP6
+	pop	ix
+	ret
 
-; .fbypassname:				; bypass the name in the vat
-	; ld	de, OP6
-	; ld	bc, -6
-	; add	hl, bc
-	; ld	b, (hl)
-	; dec	hl
-; .loop:
-	; ld	a, (hl)
-	; ld	(de), a
-	; dec	hl
-	; inc	de
-	; djnz	.loop
-	; xor	a, a
-	; ld	(de), a
+.fbypassname:				; bypass the name in the vat
+	ld	de, ti.OP6
+	ld	bc, -6
+	add	hl, bc
+	ld	b, (hl)
+	dec	hl
+.loop:
+	ld	a, (hl)
+	ld	(de), a
+	dec	hl
+	inc	de
+	djnz	.loop
+	xor	a, a
+	ld	(de), a
 
-;.fdetectall:
-;	dl	0
+.fdetectall:
+	dl	0
 
 ;-------------------------------------------------------------------------------
 ti_GetTokenString:

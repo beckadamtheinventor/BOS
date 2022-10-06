@@ -9,10 +9,10 @@ fs_CreateFileEntry:
 	sbc hl,hl
 	ld (ix-3),hl
 	ld hl,(ix+6)
-	or a,(hl)
-	jq z,.fail
-	cp a,' '
-	jq z,.fail
+	; or a,(hl)
+	; jq z,.fail
+	; cp a,' '
+	; jq z,.fail
 	push hl
 	call fs_OpenFile
 	jq nc,.fail ; fail if file exists
@@ -70,7 +70,7 @@ fs_CreateFileEntry:
 	call sys_FlashUnlock
 	ex hl,de
 	lea hl,ix-19
-	ld bc,fsentry_filesector ; only write up until and including attribute byte
+	ld bc,fsentry_fileattr + 1 ; only write up until and including attribute byte
 	push de
 	call sys_WriteFlash
 	pop hl

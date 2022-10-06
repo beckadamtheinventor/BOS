@@ -1,4 +1,4 @@
-	jq cat_main
+	jr cat_main
 	db "FEX",0
 cat_main:
 	ld hl,bos.return_code_flags
@@ -8,15 +8,21 @@ cat_main:
 	xor a,a
 	ld (ix-1),a
 	ld hl,(ix+6)
+	ld bc,2
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	jp c,.help
+	call osrt.argv_1
 	ld a,(hl)
 	or a,a
-	jq z,.help
+	jp z,.help
 	cp a,'-'
-	jq nz,.print_file
+	jr nz,.print_file
 	inc hl
 	ld a,(hl)
 	cp a,'c'
-	jq z,.copy_file
+	jr z,.copy_file
 .print_file:
 	push hl
 	call bos.gui_NewLine
@@ -41,6 +47,7 @@ cat_main:
 	ld a,b
 	or a,c
 	jq nz,.print_loop
+	call bos.gui_NewLine
 	call bos.gui_NewLine
 	jq .done
 .copy_file:
