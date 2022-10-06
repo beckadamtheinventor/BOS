@@ -433,8 +433,10 @@ os_recovery_menu:
 
 	DisableThreading
 
-	ld hl,string_os_recovery_menu
+	ld hl,string_os_info
 	call gui_DrawConsoleWindow
+	ld hl,string_os_recovery_menu
+	call gui_PrintLine
 .keywait:
 	call sys_WaitKeyCycle
 	cp a,ti.skMode

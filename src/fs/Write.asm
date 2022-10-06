@@ -6,6 +6,7 @@ fs_Write:
 	ld hl,-13
 	call ti._frameset
 	ld (ix-6),iy
+	call sys_FlashUnlock
 	ld iy,(ix+15) ;void *fd
 	ld a,(ix+15+2)
 	cp a,$D0
@@ -85,7 +86,6 @@ fs_Write:
 	ex hl,de
 	ld hl,(ix-9) ; get pointer to old file data section
 	push de,hl
-	call sys_FlashUnlock
 	ld bc,(ix+18) ; int offset
 	ld a,b
 	or a,c

@@ -6,7 +6,6 @@
 srl_device_t srl;
 uint8_t srl_buf[1024];
 uint8_t net_buf[513];
-extern bool network_up;
 file_header_t incoming_file;
 file_header_t outgoing_file;
 uint8_t *incoming_data = 0;
@@ -18,7 +17,7 @@ void ntwk_process(void) {
 	/* Only read if the device is connected */
 	if(network_up) {
 		size_t len;
-		if (usb_read_to_size(3)){
+		if (usb_read_to_size(3)) {
 			len = *(unsigned int *)&net_buf;
 			len = usb_read_to_size(len);
 			if (len > 0){
@@ -46,7 +45,7 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
 	size_t data_size = buff_size-1;
 	char *file_name;
 	unsigned int len;
-	if (!incoming_data){
+	if (!incoming_data) {
 		incoming_data = sys_Malloc(incoming_data_buffer_len);
 	}
 	switch (in_buff->control) {
@@ -140,12 +139,14 @@ static usb_error_t handle_usb_event(usb_event_t event, void *event_data,
 	if ((event == USB_DEVICE_CONNECTED_EVENT && !(usb_GetRole() & USB_ROLE_DEVICE)) || event == USB_HOST_CONFIGURE_EVENT) {
 		usb_device_t device = event_data;
 		if (!(srl_error = srl_Open(&srl, device, srl_buf, (sizeof(srl_buf)), SRL_INTERFACE_ANY, 115200))) {
+			gui_PrintLine("Serial connection initialized.");
 			network_up = true;
 		}
 	}
 
 	/* When a device is disconnected */
 	if(event == USB_DEVICE_DISCONNECTED_EVENT) {
+		gui_PrintLine("USB disconnected.");
 		network_up = false;
 	}
 

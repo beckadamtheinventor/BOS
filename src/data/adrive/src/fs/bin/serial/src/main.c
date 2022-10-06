@@ -28,8 +28,8 @@
 int main(void)
 {
 	gui_DrawConsoleWindow("Connecting to PC over USB serial...");
-	if(init_usb())
-	{
+	if(init_usb()) {
+		gui_PrintLine("USB Initialized.");
 		do {
 			ntwk_process();
 		} while (sys_GetKey() != sk_Clear);
