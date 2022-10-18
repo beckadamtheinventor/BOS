@@ -1,8 +1,8 @@
 ;@DOES Attempt to write data to a file directly, failing if the data can't be written correctly or if the file isnt large enough.
-;@INPUT void *fs_WriteRaw(void *data, int len, uint8_t count, void *fd, int offset);
+;@INPUT void *fs_WriteDirectly(void *data, int len, uint8_t count, void *fd, int offset);
 ;@OUTPUT New file descriptor or -1 and Cf set if failed.
 ;@DESTROYS All
-fs_WriteRaw:
+fs_WriteDirectly:
 	ld hl,-3
 	call ti._frameset
 	ld (ix-3),iy
@@ -46,13 +46,13 @@ fs_WriteRaw:
 	ld a,(de)
 	and a,(hl)
 	cp a,(hl)
-	jq nz,.fail
+	jr nz,.fail
 	inc de
 	inc hl
 	dec bc
 	ld a,c
 	or a,b
-	jq nz,.write_check_loop
+	jr nz,.write_check_loop
 	call sys_FlashUnlock
 	pop bc,de ; restore write len and dest
 	ld hl, (ix+6)

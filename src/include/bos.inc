@@ -263,7 +263,7 @@ namespace bos
 ?gui_PrintUInt                   := $2257C
 ;DONOTHING                       := $22580
 ;DONOTHING                       := $22584
-?fs_GetFilePtr                   := $22588
+?fs_GetFilePtrRaw                := $22588
 ;DONOTHING                       := $2258C
 ?sys_ExecuteFileHL               := $22590
 ?sys_TurnOff                     := $22594
@@ -305,8 +305,8 @@ namespace bos
 ?sys_OpenFileInPath              := $22624
 ?sys_VarString                   := $22628
 ?fs_GetFreeSpace                 := $2262C
-?fs_GetFDPtr                     := $22630
-?fs_GetFDLen                     := $22634
+?fs_GetFDPtrRaw                  := $22630
+?fs_GetFDLenRaw                  := $22634
 ?_OP1ToPath                      := $22638
 ?th_WaitKeyCycle                 := $2263C
 ?fs_JoinPath                     := $22640
@@ -314,7 +314,7 @@ namespace bos
 ?sys_OpenFileInVar               := $22648
 ?fs_BaseName                     := $2264C
 ?fs_MoveFile                     := $22650
-?fs_WriteRaw                     := $22654
+?fs_WriteDirectly                := $22654
 ?_UnpackUpdates                  := $22658
 ?sys_ReadSectorCache             := $2265C
 ?sys_WriteSectorCache            := $22660
@@ -324,7 +324,14 @@ namespace bos
 ?th_CreateThread                 := $22670
 ?gfx_ZeroVRAM                    := $22674
 ?th_KillThread                   := $22678
+<<<<<<< HEAD
 ?util_Zx0Decompress              := $2267C
+=======
+?fs_GetFilePtr                   := $2267C
+?fs_GetFDPtr                     := $22680
+?fs_GetFDLen                     := $22684
+?fs_ArcUnarcFD                   := $22688
+>>>>>>> 01ea4980b8b8a681b87b41f1ce287c5964d0528a
 ; end of jump table
 ;-------------------------------------------------------------------------------
 ; OS memory areas and misc defines
@@ -399,7 +406,10 @@ namespace bos
 ?ramCodeTop             := ti.ramCodeTop
 ?reservedRAM            := ti.ramCodeTop
 ?bos_UserMem            := $D1A881
-?end_of_usermem         := op_stack_bot
+?ram_fs_start           := end_of_usermem-$10
+?end_of_usermem         := open_device_table
+?open_device_table      := malloc_cache-$380
+?open_device_table.len  := $80
 ?op_stack_bot           := malloc_cache-$300
 ?op_stack_top           := malloc_cache-$200 ;256 bytes downward
 ?current_working_dir    := malloc_cache-$200
@@ -463,8 +473,9 @@ namespace bos
 ?device_Flags                := 1
 ?device_Type                 := 2
 ?device_Version              := 3
-?device_IntSource            := 4 ; what interrupt source this device responds to
-?device_JumpTable            := 8 ; jump table for device functions
+?device_IntSource            := 4 ; what interrupt source this device responds to.
+?device_FilesystemDevice     := 6 ; offset in file of filesystem device descriptor if this device can be used as a filesystem.
+?device_JumpTable            := 8 ; jump table for device functions.
 ?device_JumpInit             := 8
 ?device_JumpDeinit           := 12
 ?device_JumpRead             := 16
@@ -509,6 +520,16 @@ namespace bos
 ?deviceIntLcd                := $0C
 ?deviceIntRtc                := $0D
 ?deviceIntUsb                := $0E
+?deviceFs_Flags              := 0
+?deviceFs_OpenFile           := 4
+?deviceFs_CreateFile         := 8
+?deviceFs_DeleteFile         := 12
+?deviceFs_Read               := 16
+?deviceFs_Write              := 20
+?bDeviceFsReadable           := 0
+?bDeviceFsWriteable          := 1
+?mDeviceFsReadable           := 1 shl bDeviceFsReadable
+?mDeviceFsWriteable          := 1 shl bDeviceFsWriteable
 ?threadMallocStackSize       := 512
 ?threadsDisabled             := 0
 ?threadsEnabled              := 1

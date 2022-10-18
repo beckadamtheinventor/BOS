@@ -4,6 +4,10 @@ gfx_Set8bpp:
 	xor	a,a
 	call	gfx_FillScreen
 .setup:
+	; ld	hl,LCD_VRAM
+	; ld	(ti.mpLcdUpbase),hl
+	; xor	a,a
+	; call	gfx_SetDraw
 	ld	a,ti.lcdBpp8 ; operate in 8bpp
 	ld	(ti.mpLcdCtrl), a
-	jq gfx_InitStdPalette
+	jq	gfx_InitStdPalette

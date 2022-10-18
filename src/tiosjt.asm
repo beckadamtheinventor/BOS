@@ -907,7 +907,7 @@
 	call handle_unimplemented ;StoT                      := 0020F44h
 	call handle_unimplemented ;StoX                      := 0020F48h
 	call handle_unimplemented ;StoOther                  := 0020F4Ch
-	call handle_unimplemented ;RclAns                    := 0020F50h
+	jp _RclAns ;RclAns                    := 0020F50h
 	call handle_unimplemented ;RclY                      := 0020F54h
 	call handle_unimplemented ;RclN                      := 0020F58h
 	call handle_unimplemented ;RclX                      := 0020F5Ch
@@ -1875,7 +1875,7 @@
 	jp DONOTHING ;                          equ 0021E64h
 	call handle_unimplemented ;ChkACplx                  := 0021E68h
 	jp DONOTHING ;                          equ 0021E6Ch
-	call handle_unimplemented ;os.RclAns                 := 0021E70h
+	jp _RclAns ;os.RclAns                 := 0021E70h
 	jp DONOTHING ;                          equ 0021E74h
 	jp DONOTHING ;                          equ 0021E78h
 	jp DONOTHING ;                          equ 0021E7Ch

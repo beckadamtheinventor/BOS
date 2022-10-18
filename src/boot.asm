@@ -75,6 +75,7 @@ handle_interrupt:
 	jr z,handle_interrupt_2
 	ld c,$09
 	rla
+	jr c,check_bad_interrupt
 	rla
 	jq c,high_bit_6_int
 	rla
@@ -85,11 +86,11 @@ handle_interrupt:
 	jq c,high_bit_3_int
 	ld a,$FF
 	out (bc),a
-	jq return_from_interrupt
+	jr return_from_interrupt
 handle_interrupt_2:
 	ld c,$14
 	in a,(bc)
-	jq z,return_from_interrupt
+	jr z,check_bad_interrupt
 	ld c,$08
 	rra
 	jq c,low_bit_0_int
@@ -103,6 +104,14 @@ handle_interrupt_2:
 	jq c,low_bit_4_int
 	ld a,$FF
 	out (bc),a
+	jr return_from_interrupt
+check_bad_interrupt:
+	ld hl,12
+	add hl,sp
+	ld hl,(hl)
+	ld a,(hl)
+	inc a
+	call z,handle_bad_interrupt
 return_from_interrupt:
 	ld iy,$D00080
 	res 6,(iy+$1B)
@@ -366,8 +375,6 @@ generate_boot_configs:
 	ret
 
 os_return_soft:
-	ld hl,ti.symTable
-	ld (ti.pTemp),hl
 	call os_check_recovery_key
 	call sys_FreeAll
 	call gfx_Set8bpp
@@ -426,8 +433,10 @@ os_recovery_menu:
 
 	DisableThreading
 
-	ld hl,string_os_recovery_menu
+	ld hl,string_os_info
 	call gui_DrawConsoleWindow
+	ld hl,string_os_recovery_menu
+	call gui_PrintLine
 .keywait:
 	call sys_WaitKeyCycle
 	cp a,ti.skMode
@@ -451,7 +460,7 @@ os_recovery_menu:
 
 .turn_off:
 	call sys_TurnOff
-	rst 0
+	jq os_recovery_menu
 
 .tryruncmd:
 	ld hl,str_CmdExecutable
@@ -647,28 +656,46 @@ _UnpackUpdates:
 	; db data_reinstall_tios_program.data
 ; .len:=$-.
 
+handle_bad_interrupt:
+	ld hl,threading_enabled
+	ld a,(hl)
+	push af
+	ld (hl),0
+	; call gfx_Set8bpp
+	ld hl,str_BadInterrupt
+	call gui_DrawConsoleWindow
+	jr handle_unimplemented.terminateorcontinue
+
 handle_unimplemented:
-	DisableThreading
-	call gfx_Set8bpp
-	ld a,1
-	call gfx_SetDraw
+	ld hl,threading_enabled
+	ld a,(hl)
+	push af
+	ld (hl),0
+	; call gfx_Set8bpp
 	ld hl,str_UnimplementedOSCall
 	call gui_DrawConsoleWindow
 	ld hl,str_Address0x
 	call gui_PrintString
-	pop hl
+	pop hl ; af->hl
+	ex (sp),hl ; hl->af, (sp)->hl
 	dec hl ; account for pc increment by the address that called us
 	dec hl
 	dec hl
 	dec hl
 	call gui_PrintHexInt
+.terminateorcontinue:
 	call gui_NewLine
+	ld hl,str_TerminateOrContinue
+	call gui_PrintLine
 .keywait:
 	call sys_WaitKeyCycle
 	cp a,15
-	ret z
+	jr z,.pop_threading_state
 	cp a,9
-	jq nz,.keywait
+	jr nz,.keywait
 	jq os_return
-
+.pop_threading_state:
+	pop af
+	ld (threading_enabled),a
+	ret
 

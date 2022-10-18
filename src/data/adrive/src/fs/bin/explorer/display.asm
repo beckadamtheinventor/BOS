@@ -122,7 +122,7 @@ explorer_battery_status:=$-1
 	pop bc
 	pop af
 	ld hl,_battery_icon
-	jr nz,.print_icon
+	jr z,.print_icon
 	ld hl,_charging_icon
 .print_icon:
 	ld bc,1

@@ -7,7 +7,7 @@ fs_GarbageCollect:
 	call ti._frameset
 	ld hl,str_GarbageCollecting
 	call gui_DrawConsoleWindow
-	ld hl,fs_cluster_map + (65536/fs_sector_size * 2)
+	ld hl,fs_cluster_map + 65536/fs_sector_size * 2
 	; ld bc,fs_cluster_map.len - 65536/fs_sector_size
 	ld (ix-3),hl
 	ld (ix-9),hl
@@ -49,17 +49,13 @@ fs_GarbageCollect:
 	ld iy,$D50000
 	ld bc,65536/fs_sector_size
 .cleanup_freed_loop:
-	ld a,c
-	or a,b
-	jr z,.done_checking_64k_sector
-	dec bc
 	ld hl,(ix-3) ; current cluster map byte
 	dec hl
 	ld a,(hl)
 	ld (ix-3),hl
-	or a,a
-	jr z,.cleanup_freed_loop
 	inc a
+	jr z,.cleanup_freed_loop
+	dec a
 	jr z,.cleanup_freed_loop
 ; mark the sector for copying
 .copy_sector:
@@ -81,13 +77,15 @@ fs_GarbageCollect:
 	ld bc,fs_sector_size
 	ldir
 	pop bc
-	jr .cleanup_freed_loop
+	dec bc
+	ld a,c
+	or a,b
+	jr nz,.cleanup_freed_loop
 .done_checking_64k_sector:
 	ld a,iyh
-	or a,a
-	jr nz,.erase_and_writeback_sector
-	ld a,iyl
-	or a,a
+	cp a,512/fs_sector_size
+	jr z,.cleanup_next
+	or a,iyl
 	jr z,.cleanup_next
 .erase_and_writeback_sector:
 	ld a,(ix-4)
@@ -96,10 +94,7 @@ fs_GarbageCollect:
 	pop iy
 .rewrite_loop:
 	ld a,iyh
-	or a,a
-	jr nz,.writeback_sector
-	ld a,iyl
-	or a,a
+	or a,iyl
 	jr z,.cleanup_next
 .writeback_sector:
 	ld hl,$D40000

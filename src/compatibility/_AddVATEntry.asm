@@ -1,6 +1,6 @@
 ;@DOES Create a VAT entry
 ;@INPUT OP1 = var type and var name
-;@INPUT HL = pointer to file data in RAM, BC = file data length
+;@INPUT HL = pointer to file data, BC = file data length
 ;@OUTPUT Cf set if failed, hl = pointer to VAT entry
 ;@NOTE The only time this fails is if the VAT grows into an already allocated block of malloc memory, or if the VAT is corrupted.
 _AddVATEntry:

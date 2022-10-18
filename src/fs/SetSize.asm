@@ -23,26 +23,24 @@ fs_SetSize:
 	; or a,a
 	; sbc hl,de
 	; jq z,.success
-	ld hl,(ix+9)
+	ld hl,(ix+9) ; pointer to old file descriptor
 	lea de,ix-16
 	ld bc,fsentry_fileattr+1
 	ldir ; copy old descriptor into ram
-
-	push hl
-	call fs_AllocDescriptor.entry
-	jq c,.fail
-	ld (ix-19),hl
-	pop hl
-
-	dec hl
-	bit fd_subfile, (hl)
 	ld hl,(ix+9)
+	call fs_AllocDescriptor.entry ; allocate a new file descriptor
+	jr c,.fail
+	ld (ix-19),hl
+
+	ld iy,(ix+9)
+	bit fd_subfile, (iy+fsentry_fileattr)
+	lea hl,iy
 	call z,fs_Free.entryhl ;free the old file if not a subfile
 
 	ld hl,(ix+6)
 	push hl
 	call fs_Alloc
-	jq c,.fail
+	jr c,.fail
 	ld (ix + fsentry_filesector - 16), hl ; set new file descriptor data pointer
 	pop hl
 	ld (ix + fsentry_filelen+0 - 16),l ; set new file descriptor data length

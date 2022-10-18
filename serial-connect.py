@@ -8,15 +8,15 @@ except ImportError:
     exit(1)
 
 
-if sys.platform.startswith("win32"):
-	def is_admin():
-		try:
-			return ctypes.windll.shell32.IsUserAnAdmin()
-		except:
-			return False
-	if not is_admin():
+# if sys.platform.startswith("win32"):
+	# def is_admin():
+		# try:
+			# return ctypes.windll.shell32.IsUserAnAdmin()
+		# except:
+			# return False
+	# if not is_admin():
 		# Re-run the program with admin rights
-		exit(ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1))
+		# exit(ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1))
 
 
 ce_id = (0x0451, 0xe008)

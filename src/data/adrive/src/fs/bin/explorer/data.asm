@@ -17,7 +17,7 @@ options_item_strings:
 	dl .strings
 	jp explorer_configure_theme
 	db 12 dup $C9
-	jp run_power_app
+	jp bos.sys_TurnOff
 .strings:
 	dl .l1, .l2, .l3, .l4, .l5
 .l1:
@@ -102,8 +102,8 @@ str_CustomTheme:
 	db "Custom Theme",0
 ; str_UsbRecvExecutable:
 	; db "/bin/usbrecv",0
-str_OffExecutable:
-	db "off",0
+; str_OffExecutable:
+	; db "off",0
 ; str_UsbRunExecutable:
 	; db "/bin/usbrun",0
 ; str_UpdaterExecutable:

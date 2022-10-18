@@ -1,6 +1,8 @@
 
 ; BOS compatility routines
 include 'compatibility/_AddVATEntry.asm'
+include 'compatibility/_ResetAndBuildVAT.asm'
+include 'compatibility/_BuildVAT.asm'
 include 'compatibility/_ChkRRIs0.asm'
 include 'compatibility/_SetAToRRU.asm'
 include 'compatibility/_SetRRUTo0.asm'
@@ -51,3 +53,4 @@ include 'compatibility/_UpdateVAT.asm'
 include 'compatibility/_slow_GetCSC.asm'
 include 'compatibility/_GetVATEntryNFromPtr.asm'
 include 'compatibility/_GetVATEntryN.asm'
+include 'compatibility/_RclAns.asm'
