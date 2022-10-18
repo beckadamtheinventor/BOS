@@ -229,14 +229,21 @@ str_fg2:=$-3
 	or a,a
 	jq z,.setimagesprite ; non-compressed image
 ; compressed image
+	ld de,ti.vRam + ti.lcdHeight*ti.lcdWidth
+	cp a,'0'
+	jr z,.zx0_compressed
 	cp a,'7'
 	ret nz ; return if unsupported image format
 ; decompress into the back buffer so we can scale into safeRAM
-	ld de,ti.vRam + ti.lcdHeight*ti.lcdWidth
 	push de,hl,de
 	call bos.util_Zx7Decompress
+.pop3_setimagesprite:
 	pop bc,bc,hl
-	jq .setimagesprite
+	jr .setimagesprite
+.zx0_compressed:
+	push de,hl,de
+	call bos.util_Zx0Decompress
+	jr .pop3_setimagesprite
 .setbackgroundimagespt:
 	ex hl,de
 .setimagesprite:
@@ -261,7 +268,7 @@ str_fg2:=$-3
 	ld (hl),e
 	call gfx_ScaleSprite
 	pop bc,bc
-	jq .set_background_file
+	jr .set_background_file
 .setbackgroundimg:
 	ld a,(de)
 	cp a,'7'

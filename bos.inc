@@ -324,6 +324,7 @@ namespace bos
 ?th_CreateThread                 := $22670
 ?gfx_ZeroVRAM                    := $22674
 ?th_KillThread                   := $22678
+?util_Zx0Decompress              := $2267C
 ; end of jump table
 ;-------------------------------------------------------------------------------
 ; OS memory areas and misc defines

@@ -155,6 +155,7 @@
 	public _th_CreateThread
 	public _bosgfx_ZeroVRAM
 	public _th_KillThread
+	public _util_Zx0Decompress
 _boot_os                         := $20108
 _handle_interrupt                := $2010C
 _HandleInstruction               := $20110
@@ -310,6 +311,7 @@ _bosgfx_BlitScreen                  := $2266C
 _th_CreateThread                 := $22670
 _bosgfx_ZeroVRAM                    := $22674
 _th_KillThread                   := $22678
+_util_Zx0Decompress              := $2267C
 
 public ram_executable
 public ram_executable_at

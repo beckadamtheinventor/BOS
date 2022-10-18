@@ -1,0 +1,11 @@
+
+converts:
+    - name: images
+      palette: xlibc
+      transparent-color-index: 248
+      images:
+        - cursor.png
+      
+outputs:
+    - type: asm
+      converts: images

@@ -1,17 +1,17 @@
 # !/usr/bin/python3
 import os, sys
 
-default_dir_entry = [0xFF]*0x1F0 + [0xFE] + [0xFF]*0xF
+default_dir_entry = [0xFF]*0xF0 + [0xFE] + [0xFF]*0xF
 
 partition_default_entry = [
-	"bosfs200fs ", 0x14, 0x80, 0x00, 0x80, 0x1B
+	"bosfs040fs ", 0x14, 0x80, 0x00, 0x80, 0x1B
 ]
 
 root_dir_data = [
 	"bin        ", 0x10, 0x03, 0x00, 0x00, 0x02,
 	"lib        ", 0x10, 0x02, 0x00, 0x00, 0x02,
 	"sbin       ", 0x10, 0x01, 0x00, 0x00, 0x02,
-] + [0xFF]*0x1C0 + [0xFE] + [0xFF]*0xF
+] + [0xFF]*0xC0 + [0xFE] + [0xFF]*0xF
 
 
 def copy_data(rom, data, addr=None):
@@ -32,7 +32,7 @@ def copy_data(rom, data, addr=None):
 def get_file_data(rom, path):
 	ent = search_for_entry(rom, path)
 	if ent is not None:
-		ptr = 0x040000 + 0x200 * (rom[ent+0xC]+rom[ent+0xD]*0x100)
+		ptr = 0x040000 + 0x40 * (rom[ent+0xC]+rom[ent+0xD]*0x100)
 		L = rom[ent+0xE]+rom[ent+0xF]*0x100
 		return rom[ptr:ptr+L]
 
@@ -57,7 +57,7 @@ def search_for_entry(rom, path):
 			if dnum >= L:
 				return ptr
 			elif rom[ptr+0xB] & 0x10:
-				ptr = 0x040000 + 0x200 * (rom[ptr+0xC]+rom[ptr+0xD]*0x100)
+				ptr = 0x040000 + 0x40 * (rom[ptr+0xC]+rom[ptr+0xD]*0x100)
 				dnum+=1
 		else:
 			ptr+=16
@@ -79,10 +79,10 @@ def copy_file_name(entry):
 		return name + "." + "".join(chr(c) for c in entry[8:11]).rstrip(" ")
 
 def alloc_space_for_file(rom, length):
-	cmap_data = 0x3BE000
+	cmap_data = 0x3B2400
 	cmap_len = 7040
 	j = l = 0
-	i = 0x010000//0x200
+	i = 0x010000//0x40
 	while l<length and i<cmap_len:
 		while rom[cmap_data+i] != 0xFF and i<cmap_len:
 			i+=1
@@ -91,26 +91,26 @@ def alloc_space_for_file(rom, length):
 		l = 0
 		while rom[cmap_data+i] == 0xFF and i<cmap_len and l<length:
 			i+=1
-			l+=0x200
-	# print(f"allocated sectors {hex(j)} to {hex(i)} ({hex(0x040000+j*0x200)} to {hex(0x040000+i*0x200)})")
+			l+=0x40
+	# print(f"allocated sectors {hex(j)} to {hex(i)} ({hex(0x040000+j*0x40)} to {hex(0x040000+i*0x40)})")
 	for k in range(j, i+1):
 		rom[cmap_data+k] = 0xFE
-		if 0x040000 + k * 0x200 >= len(rom):
-			rom.extend([0xff]*0x200)
+		if 0x040000 + k * 0x40 >= len(rom):
+			rom.extend([0xff]*0x40)
 	return j
 
 def free_file_descriptor(rom, ptr):
-	cmap_data = 0x3BE000
+	cmap_data = 0x3B2400
 	cmap_len = 7040
 	i = cmap_data+rom[ptr+0xC]+rom[ptr+0xD]*0x100
-	data = 0x040000+(rom[ptr+0xC]+rom[ptr+0xD]*0x100)*0x200
+	data = 0x040000+(rom[ptr+0xC]+rom[ptr+0xD]*0x100)*0x40
 	data_len = rom[ptr+0xE]+rom[ptr+0xF]*0x100
 	j = 0
 	while j<data_len:
 		rom[i] = 0xFF
-		for k in range(0x200):
+		for k in range(0x40):
 			rom[data+j+k]=0xFF
-		j += 0x200
+		j += 0x40
 		i += 1
 
 	while rom[ptr] != 0x00 and rom[ptr] != 0xFF:
@@ -125,7 +125,7 @@ def free_file_descriptor(rom, ptr):
 def build_cluster_map(rom):
 	if len(rom)<0x3C0000:
 		rom.extend([0xFF]*(0x3C0000-len(rom)))
-	cmap_data = 0x3BE000
+	cmap_data = 0x3B2400
 	rom[cmap_data] = 0xFE
 	rom[cmap_data+1] = 0xFE
 	build_cluster_map_dir(rom, 0x040000)
@@ -133,9 +133,9 @@ def build_cluster_map(rom):
 
 def build_cluster_map_dir(rom, entry, dirprefix="/"):
 	# print(f"building cluster map at {hex(entry)}")
-	cmap = 0x3BE000
+	cmap = 0x3B2400
 	k = rom[entry+0xC] + rom[entry+0xD]*0x100
-	i = 0x040000 + k*0x200
+	i = 0x040000 + k*0x40
 	rom[cmap + k] = 0xFE
 	
 	# maxi = i+(rom[entry+0xE]+rom[entry+0xF]*0x100)-16
@@ -147,7 +147,7 @@ def build_cluster_map_dir(rom, entry, dirprefix="/"):
 			l = rom[i+0xE]+rom[i+0xF]*0x100
 			# print(copy_file_name(rom[i:i+16]), hex(l))
 			ptr = (i&0xFFFE00) + rom[i+0xC] + rom[i+0xD]*0x100
-			k = (ptr-0x040000)//0x200
+			k = (ptr-0x040000)//0x40
 			m = 0
 			# print(f"processing subfile {copy_file_name(rom[i:i+16])} at {hex(ptr)}")
 			# print(f"starting at cluster map address {hex(cmap+k)}")
@@ -156,7 +156,7 @@ def build_cluster_map_dir(rom, entry, dirprefix="/"):
 				# print("allocated sector", hex(k))
 				rom[cmap + k] = 0xFE
 				k += 1
-				m += 0x200
+				m += 0x40
 			# print(k)
 		elif rom[i+0xB] & 0x10:
 			# print(hex(i+0xB), bin(rom[i+0xB]))
@@ -165,12 +165,14 @@ def build_cluster_map_dir(rom, entry, dirprefix="/"):
 				build_cluster_map_dir(rom, i, dirprefix+copy_file_name(rom[i:i+16])+"/")
 		else:
 			flen = rom[i+0xE]+rom[i+0xF]*0x100
-			if flen % 0x200:
-				flen += flen % 0x200
-			# print(copy_file_name(rom[i:i+16]), hex(flen))
-			for j in range(flen//0x200):
-				# print("allocated sector", hex(rom[i+0xC]+rom[i+0xD]*0x100+j))
-				rom[cmap + rom[i+0xC]+rom[i+0xD]*0x100 + j] = 0xFE
+			fptr = rom[i+0xC]+rom[i+0xD]*0x100
+			if fptr < 0xDC00 and flen > 0:
+				if flen % 0x40:
+					flen += flen % 0x40
+				# print(copy_file_name(rom[i:i+16]), hex(flen))
+				for j in range(flen//0x40):
+					# print("allocated sector", hex(rom[i+0xC]+rom[i+0xD]*0x100+j))
+					rom[cmap + fptr + j] = 0xFE
 		i+=16
 	return False
 
@@ -184,30 +186,33 @@ def add_file_to_rom(rom, fout, flags, fin_data):
 			print(f"Failed to add file to rom: {fout}")
 			exit(1)
 		dptr = search_for_entry(rom, os.path.dirname(fout))
+		if dptr is None:
+			print(f"Failed to add file to rom: {os.path.dirname(fout)}")
+			exit(1)
 
 	f = search_for_entry(rom, fout)
 	if f is not None:
 		free_file_descriptor(rom, f)
 
-	ptr = 0x040000 + 0x200 * (rom[dptr+0xC]+rom[dptr+0xD]*0x100)
+	ptr = 0x040000 + 0x40 * (rom[dptr+0xC]+rom[dptr+0xD]*0x100)
 	# print("found parent directory. ptr:",hex(ptr),"len:",hex(dptr_len))
 	while rom[ptr] != 0xFF:
 		if rom[ptr] == 0xFE:
 			if rom[ptr+0xC]+rom[ptr+0xD]*0x100 == 0xFFFF:
-				nextptr = alloc_space_for_file(rom, 512)
+				nextptr = alloc_space_for_file(rom, 0x40)
 				rom[ptr+0xB] = 0x10
-				rom[ptr+0xC] = (nextptr//0x200) % 0x100
-				rom[ptr+0xD] = nextptr//0x20000
+				rom[ptr+0xC] = (nextptr//0x40) % 0x100
+				rom[ptr+0xD] = nextptr//0x4000
 				rom[ptr+0xE] = 0
 				rom[ptr+0xF] = 2
-			ptr = 0x040000 + (rom[ptr+0xC]+rom[ptr+0xD]*0x100)*0x200
+			ptr = 0x040000 + (rom[ptr+0xC]+rom[ptr+0xD]*0x100)*0x40
 		ptr += 16
 	
 
 	if ptr+16 < len(rom):
 		while rom[ptr] != 0x00 and rom[ptr] != 0xFF: ptr+=16
 	if ptr+16 >= len(rom):
-		rom.extend([0xFF]*0x200)
+		rom.extend([0xFF]*0x40)
 	if '/' in fout:
 		fn = fout.rsplit("/",maxsplit=1)[1]
 	else:
@@ -218,7 +223,7 @@ def add_file_to_rom(rom, fout, flags, fin_data):
 		name = fn
 		ext = ""
 	if flags & 0x10:
-		sector = alloc_space_for_file(rom, 0x200)
+		sector = alloc_space_for_file(rom, 0x40)
 	else:
 		sector = alloc_space_for_file(rom, len(fin_data))
 	if not sector:
@@ -234,7 +239,7 @@ def add_file_to_rom(rom, fout, flags, fin_data):
 	rom[ptr+0xC] = sector&0xFF
 	rom[ptr+0xD] = sector//0x100
 
-	sptr = 0x040000+sector*0x200
+	sptr = 0x040000+sector*0x40
 
 	if flags & 0x10:
 		rom[ptr+0xE] = 0x00
@@ -245,7 +250,7 @@ def add_file_to_rom(rom, fout, flags, fin_data):
 		rom[ptr+0xF] = len(fin_data)//0x100
 
 	while sptr+len(fin_data) > len(rom):
-		rom.extend([0xFF]*512)
+		rom.extend([0xFF]*0x40)
 
 	for i in range(len(fin_data)):
 		rom[sptr+i] = fin_data[i]

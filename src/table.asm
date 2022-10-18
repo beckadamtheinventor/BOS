@@ -168,4 +168,5 @@
 	jp th_CreateThread
 	jp gfx_ZeroVRAM
 	jp th_KillThread
+	jp util_Zx0Decompress
 ; end of jump table

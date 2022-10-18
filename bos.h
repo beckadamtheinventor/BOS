@@ -634,6 +634,14 @@ void *fs_WriteNewFile(const char *path, uint8_t properties, void *data, int len)
  */
 void *util_Zx7Decompress(void *dest, void *src);
 
+/**
+ * Decompress a block of zx0-compressed memory.
+ * @param dest Pointer to write to.
+ * @param src Pointer to compressed data.
+ * @return pointer to byte following last byte written to dest.
+ */
+void *util_Zx0Decompress(void *dest, void *src);
+
 
 /**
  * Open a file, searching in directories listed within another file.
