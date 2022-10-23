@@ -324,14 +324,12 @@ namespace bos
 ?th_CreateThread                 := $22670
 ?gfx_ZeroVRAM                    := $22674
 ?th_KillThread                   := $22678
-<<<<<<< HEAD
-?util_Zx0Decompress              := $2267C
-=======
 ?fs_GetFilePtr                   := $2267C
 ?fs_GetFDPtr                     := $22680
 ?fs_GetFDLen                     := $22684
 ?fs_ArcUnarcFD                   := $22688
->>>>>>> 01ea4980b8b8a681b87b41f1ce287c5964d0528a
+?util_Zx0Decompress              := $2268C
+?sys_WaitKeyUnpress              := $22690
 ; end of jump table
 ;-------------------------------------------------------------------------------
 ; OS memory areas and misc defines

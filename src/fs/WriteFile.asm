@@ -44,7 +44,7 @@ fs_WriteFile:
 	call sys_WriteFlashA
 	ld hl,(ix+12)
 	push hl
-	call fs_DeleteFile ; delete and free old file descriptor and data section
+	call fs_DeleteFileFD ; delete and free old file descriptor and data section
 	ld hl,(ix-9)
 	ex (sp),hl
 	call fs_GetFDPtr ; get pointer to new file data section

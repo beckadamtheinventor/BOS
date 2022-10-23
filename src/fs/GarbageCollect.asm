@@ -7,12 +7,27 @@ fs_GarbageCollect:
 	call ti._frameset
 	ld hl,str_GarbageCollecting
 	call gui_DrawConsoleWindow
-	ld hl,fs_cluster_map + 65536/fs_sector_size * 2
+	ld hl,fs_cluster_map + 65536/fs_sector_size
 	; ld bc,fs_cluster_map.len - 65536/fs_sector_size
 	ld (ix-3),hl
 	ld (ix-9),hl
 	; add hl,bc
 	; ld (ix-12),hl
+
+	; copy the flash sector where the cluster map is up until the cluster map
+	ld hl,fs_cluster_map and $FF0000
+	ld de,safeRAM
+	ld bc,fs_cluster_map and $FFFF
+	ldir
+
+	; mark the copy's sector map as clean
+	ld hl,safeRAM + (fs_cluster_map and $FFFF)
+	ld bc,fs_cluster_map.len-1
+	ld (hl),fscluster_clean
+	push hl
+	pop de
+	inc de
+	ldir
 
 	ld hl,(ti.mpLcdUpbase)
 	ld (ix-18),hl
@@ -37,7 +52,7 @@ fs_GarbageCollect:
 	call gui_PrintString
 ; clean up freed sectors
 ; cluster map pointer decrements within each 64k sector
-	ld bc,$050000
+	ld bc,$040000
 	ld (ix-6),bc
 .cleanup_freed_loop_outer:
 	ld hl,.str_cleaning_up_len*8
@@ -51,21 +66,27 @@ fs_GarbageCollect:
 .cleanup_freed_loop:
 	ld hl,(ix-3) ; current cluster map byte
 	dec hl
+	dec bc
 	ld a,(hl)
 	ld (ix-3),hl
 	inc a
-	jr z,.cleanup_freed_loop
+	jr z,.next_cleanup_freed_loop
 	dec a
-	jr z,.cleanup_freed_loop
+	jr z,.next_cleanup_freed_loop
 ; mark the sector for copying
 .copy_sector:
 	push bc
-	ld h,b
-	ld l,c
-	ld c,fs_sector_size_bits
-	call ti._sshl
-	ld b,h
-	ld c,l
+	ld de, safeRAM - (fs_cluster_map and $FF0000)
+	add hl,de
+	ld (hl),a ; mark the sector as allocated
+	ld a,b
+	ld b,fs_sector_size_bits
+.sshl_loop:
+	or a,a
+	rl c
+	rla
+	djnz .sshl_loop
+	ld b,a
 	ld (iy),bc
 	lea iy,iy+2
 	ld hl,(ix-6)
@@ -77,7 +98,7 @@ fs_GarbageCollect:
 	ld bc,fs_sector_size
 	ldir
 	pop bc
-	dec bc
+.next_cleanup_freed_loop:
 	ld a,c
 	or a,b
 	jr nz,.cleanup_freed_loop
@@ -97,8 +118,8 @@ fs_GarbageCollect:
 	or a,iyl
 	jr z,.cleanup_next
 .writeback_sector:
-	ld hl,$D40000
 	lea iy,iy-2
+	ld hl,$D40000
 	ld l,(iy)
 	ld h,(iy+1)
 	ld de,(ix-6)
@@ -119,6 +140,17 @@ fs_GarbageCollect:
 	ld (ix-4),a
 	cp a,$3B
 	jq nz,.cleanup_freed_loop_outer
+
+	; erase the cluster map sector
+	ld a,fs_cluster_map shr 16
+	call sys_EraseFlashSector
+	; write back the cluster map sector
+	ld hl,safeRAM
+	ld bc,$010000
+	ld de,fs_cluster_map and $FF0000
+	call sys_WriteFlash
+	
+
 	call sys_FlashLock
 
 ;TODO: move files around to free up space

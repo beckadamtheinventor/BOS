@@ -271,14 +271,24 @@ str_fg2:=$-3
 	jr .set_background_file
 .setbackgroundimg:
 	ld a,(de)
+	cp a,'0'
+	jr z,.goodformat
 	cp a,'7'
 	ret nz ; dont load if the image is not compressed
+.goodformat:
 	ex hl,de
 	ld de,bos.safeRAM
 	ld (explorer_background_image_full),de
 	ldi
 	push hl,de
+	cp a,'0'
+	jr z,.dzx0
+.dzx7:
 	call bos.util_Zx7Decompress
+	jr .donedecompressing
+.dzx0:
+	call bos.util_Zx0Decompress
+.donedecompressing:
 	pop bc,bc
 .set_background_file:
 	ld hl,(ix-6)

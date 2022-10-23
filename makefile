@@ -45,6 +45,7 @@ FSSRC ?= $(call NATIVEPATH,src/data/adrive/src)
 
 all: objdirs include_dirs noti filesystem bosos bosbin bos8xp bosrom
 
+
 # Rule to build OS data
 bosos: $(call rwildcard,src,*.asm) $(call rwildcard,src,*.inc)
 	fasmg $(call NATIVEPATH,src/main.asm) $(call NATIVEPATH,obj/bosos.bin)

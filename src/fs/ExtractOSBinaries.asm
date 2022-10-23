@@ -11,10 +11,18 @@ fs_ExtractOSBinaries:
 	ld de,start_of_user_archive
 	call sys_WriteFlash
 
-	ld bc,fs_drive_a_data_compressed_bin
-	push bc
+	ld hl,fs_drive_a_data_compressed_bin
+	; ld a,(hl)
+	; inc hl
+	push hl
 	ld bc,start_of_user_archive+fs_directory_size
 	push bc
+	; cp a,'0'
+	; jr z,.zx0
 	call util_Zx7DecompressToFlash
+	; jr .done
+; .zx0:
+	; call util_Zx0DecompressToFlash
+; .done:
 	pop bc,bc
 	jq sys_FlashLock

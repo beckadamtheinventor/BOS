@@ -36,7 +36,7 @@ fs_Free:
 	ex (sp),hl
 	pop bc
 	ld hl,$FF0000 ; pointer to null
-	push bc ; bc = ceil(file_len/512)
+	push bc ; bc = ceil(file_len/sector size)
 	call sys_FlashUnlock
 	call sys_WriteFlash
 	call sys_FlashLock

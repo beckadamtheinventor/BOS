@@ -173,4 +173,5 @@
 	jp fs_GetFDLen
 	jp fs_ArcUnarcFD
 	jp util_Zx0Decompress
+	jp sys_WaitKeyUnpress
 ; end of jump table

@@ -78,12 +78,13 @@ cmd_execute_next_line:
 	call bos.sys_Free
 	pop bc
 	ld hl,(ti.endPC)
-	ld bc,(ti.curPC)
+	ld de,(ti.curPC)
 	or a,a
-	sbc hl,bc
-	push bc
-	ex (sp),hl
-	pop bc ; bc = endpc-curpc, hl = curpc
+	sbc hl,de
+	ld b,h
+	ld c,l
+	ex hl,de
+; bc = endpc-curpc, hl = curpc
 	ld (ix-25),hl
 	ld a,(hl)
 	push af
@@ -92,10 +93,10 @@ cmd_execute_next_line:
 	ld (ix-13),de ; length of line
 	ld (ti.curPC),hl ; pointer to next line
 	cp a,'#'
-	jq z,.nextline ;only copy line and execute if line not commented
+	jr z,.nextline ;only copy line and execute if line not commented
 	ld a,e
 	or a,d
-	jq z,.nextline
+	jr z,.nextline
 	push de
 	call bos.sys_Malloc
 	pop bc
@@ -103,7 +104,7 @@ cmd_execute_next_line:
 	ld (ix-16),hl
 	ex hl,de
 	ld hl,(ix-25)
-	ld bc,(ix-13)
+	; ld bc,(ix-13)
 	push de
 	ldir ;copy the line from the file into a null-terminated buffer
 	xor a,a
@@ -112,7 +113,7 @@ cmd_execute_next_line:
 	call execute_program_string
 	ld a,(ix-10)
 	or a,a
-	jq nz,.nextline
+	jr nz,.nextline
 	ld hl,(ix-9)
 	add hl,bc
 	or a,a
@@ -132,22 +133,19 @@ cmd_execute_next_line:
 
 .linelen:
 	ld de,0
+.linelenloop:
 	ld a,b
 	or a,c
 	ret z
-.linelenloop:
 	ld a,(hl)
+	inc hl
+	inc de
+	dec bc
 	or a,a
 	ret z
-	inc hl
-	dec bc
 	cp a,$A
 	ret z
-	inc de
-	ld a,b
-	or a,c
-	jq nz,.linelenloop
-	ret
+	jr .linelenloop
 
 ;exit returning last executable's error code
 .returnerrorcode:
@@ -155,14 +153,14 @@ cmd_execute_next_line:
 	jq cmd_exit
 
 cmd_no_cmd_args:
-	xor a,a
-	ld (bos.lcd_text_bg),a
-	ld (bos.lcd_text_bg2),a
-	dec a
-	ld (bos.lcd_text_fg),a
-	ld a,5
-	ld (bos.lcd_text_fg2),a
-	ld (bos.cursor_color),a
+	; xor a,a
+	; ld (bos.lcd_text_bg),a
+	; ld (bos.lcd_text_bg2),a
+	; dec a
+	; ld (bos.lcd_text_fg),a
+	; ld a,5
+	; ld (bos.lcd_text_fg2),a
+	; ld (bos.cursor_color),a
 	ld hl,bos.current_working_dir
 	call bos.gui_DrawConsoleWindow
 enter_input_clear:
@@ -195,6 +193,7 @@ recall_last: ; TODO: re-implement this in a less hacky way
 	; ld de,bos.InputBuffer
 	; ldir
 enter_input:
+	call bos.sys_WaitKeyUnpress
 	ld bc,255
 	push bc
 	ld bc,bos.InputBuffer
@@ -210,15 +209,7 @@ enter_input:
 	ld a,(hl)
 	or a,a
 	jq z,enter_input ;don't execute if the input is null
-	ld bc,256
-	push hl,bc
-	call bos.sys_Malloc
-	ex hl,de
-	pop bc,hl
-	jq c,cmd_exit_retneg2
-	push de,de
-	ldir
-	pop hl
+	push hl
 	call execute_program_string
 	call bos.sys_Free
 	pop bc
@@ -238,8 +229,8 @@ execute_program_string:
 	add hl,bc
 	or a,a
 	sbc hl,bc
-	jq z,.file_not_found ;if the executing file descriptor is -1, the file could not be located
 	pop bc,bc,ix
+	jq z,.file_not_found ;if the executing file descriptor is -1, the file could not be located
 	ld a,(ix-20)
 	ld hl,(ix-29)
 	or a,a
@@ -297,7 +288,6 @@ execute_program_string:
 	call bos.gui_PrintLine
 	jp bos.gfx_BlitBuffer
 .file_not_found:
-	pop bc,bc,ix
 	ld a,(ix-10)
 	cp a,'i'
 	ret z ;return if ignoring errors
