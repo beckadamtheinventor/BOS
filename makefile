@@ -55,7 +55,7 @@ documentation:
 	python build_docs.py
 
 # Rule to build include files
-includes:
+includes: include_dirs
 	python build_bos_inc.py
 	$(CP) bos.inc $(call NATIVEPATH,$(FSSRC)/include/bos.inc)
 	fasmg $(call NATIVEPATH,src/data/adrive/osrt.asm) $(call NATIVEPATH,src/data/adrive/osrt.tmp)
@@ -69,8 +69,7 @@ objdirs:
 	$(call MKDIR,$(call NATIVEPATH,noti-ez80/bin))
 	$(call MKDIR,$(call NATIVEPATH,src/data/adrive/obj))
 
-include_dirs: includes
-	$(CP) bos.inc $(call NATIVEPATH,src/include/bos.inc)
+include_dirs:
 	$(CPDIR) $(call NATIVEPATH,src/include) $(call NATIVEPATH,$(FSSRC)/include)
 	$(CPDIR) $(call NATIVEPATH,src/include) $(call NATIVEPATH,$(FSSRC)/fs/bin/include)
 	$(CPDIR) $(call NATIVEPATH,src/include) $(call NATIVEPATH,$(FSSRC)/fs/lib/include)
