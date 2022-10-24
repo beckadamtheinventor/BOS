@@ -28,9 +28,9 @@ _InsertMem:
 	or a,a
 	sbc hl,de
 	ex hl,de
-	ld hl,(remaining_free_RAM)
-	sbc hl,de
-	ld (remaining_free_RAM),hl
+	; ld hl,(remaining_free_RAM)
+	; sbc hl,de
+	; ld (remaining_free_RAM),hl
 	push bc
 	pop hl,de
 	push de

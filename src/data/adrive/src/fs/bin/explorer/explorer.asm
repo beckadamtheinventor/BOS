@@ -86,13 +86,6 @@ explorer_init_2:
 	call bos.sys_LoadHookThreads
 .dontloadhooks:
 	
-	ld a,(explorer_foreground_color)
-	ld (bos.lcd_text_fg),a
-	ld a,(explorer_background_color)
-	ld (bos.lcd_text_bg),a
-	ld a,7
-explorer_foreground2_color:=$-1
-	ld (bos.lcd_text_fg2),a
 	xor a,a
 	ld (explorer_cursor_x),a
 	ld (explorer_cursor_y),a
@@ -219,7 +212,8 @@ explorer_max_selection:=$-3
 	; call gfx_FillRectangle
 	; pop bc,bc,bc
 
-	ld hl,(explorer_foreground2_color)
+	ld hl,7
+explorer_foreground2_color:=$-3
 	push hl
 	call gfx_SetColor
 	ld hl,display_item_height+1

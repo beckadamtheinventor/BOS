@@ -15,15 +15,18 @@ explorer_configure_theme:
 	ret z
 	ld a,(hl)
 	ld (explorer_background_color),a
+	ld (bos.lcd_text_bg),a
 	inc hl
 	ld a,(hl)
 	ld (explorer_statusbar_color),a
 	inc hl
 	ld a,(hl)
 	ld (explorer_foreground_color),a
+	ld (bos.lcd_text_fg),a
 	inc hl
 	ld a,(hl)
 	ld (explorer_foreground2_color),a
+	ld (bos.lcd_text_fg2),a
 	jq explorer_write_config
 .main:
 	ld bc,display_items_num_x*display_items_num_y*3  ; clear out the dir listing so we don't draw it

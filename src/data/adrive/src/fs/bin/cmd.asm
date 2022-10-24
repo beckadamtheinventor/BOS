@@ -70,7 +70,7 @@ cmd_execute_next_line:
 .loop:
 	ld hl,(ti.endPC)
 	ld bc,(ti.curPC)
-	scf
+	or a,a
 	sbc hl,bc
 	jq c,cmd_exit_retzero
 	ld de,(ix-16)
@@ -88,6 +88,7 @@ cmd_execute_next_line:
 	ld (ix-25),hl
 	ld a,(hl)
 	push af
+	inc bc
 	call .linelen
 	pop af
 	ld (ix-13),de ; length of line
@@ -122,7 +123,7 @@ cmd_execute_next_line:
 .nextline:
 	ld hl,(ti.endPC)
 	ld bc,(ti.curPC)
-	scf
+	or a,a
 	sbc hl,bc
 	jq nc,.loop ;execute next line if there are more characters in the file to be read
 	ld a,(ix-10)
@@ -134,17 +135,17 @@ cmd_execute_next_line:
 .linelen:
 	ld de,0
 .linelenloop:
-	ld a,b
-	or a,c
+	ld a,c
+	or a,b
 	ret z
 	ld a,(hl)
 	inc hl
 	inc de
-	dec bc
 	or a,a
 	ret z
 	cp a,$A
 	ret z
+	dec bc
 	jr .linelenloop
 
 ;exit returning last executable's error code
@@ -161,6 +162,9 @@ cmd_no_cmd_args:
 	; ld a,5
 	; ld (bos.lcd_text_fg2),a
 	; ld (bos.cursor_color),a
+	xor a,a
+	sbc hl,hl
+	ld (ix-3),hl
 	ld hl,bos.current_working_dir
 	call bos.gui_DrawConsoleWindow
 enter_input_clear:
@@ -175,23 +179,26 @@ end if
 	ld (hl),c
 	inc hl
 	djnz .clear_buffer_loop
-	; jq enter_input
-recall_last: ; TODO: re-implement this in a less hacky way
-	; ld hl,(ix-3)
-	; add hl,bc
-	; or a,a
-	; sbc hl,bc
-	; jq z,enter_input
-	; push hl
-	; call ti._strlen
-	; add hl,bc
-	; or a,a
-	; sbc hl,bc
-	; ex (sp),hl
-	; pop bc
-	; jq z,enter_input
-	; ld de,bos.InputBuffer
-	; ldir
+	jq enter_input
+recall_last:
+	ld hl,(ix-3)
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	jq z,enter_input
+	push hl
+	call ti._strlen
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	ex (sp),hl
+	pop bc
+	jr z,enter_input
+	ld de,bos.InputBuffer
+	ldir
+enter_input_dec_currow:
+	ld hl,ti.curRow
+	dec (hl)
 enter_input:
 	call bos.sys_WaitKeyUnpress
 	ld bc,255
@@ -203,16 +210,21 @@ enter_input:
 	or a,a
 	jq z,cmd_exit_retzero
 	cp a,12
-	jq z,recall_last
-	cp a,10
-	jq z,enter_input
+	jr z,recall_last
+	cp a,9
+	jr z,enter_input_dec_currow
 	ld a,(hl)
 	or a,a
-	jq z,enter_input ;don't execute if the input is null
+	jr z,enter_input ; don't execute if the input is null
 	push hl
-	call execute_program_string
-	call bos.sys_Free
+	ld hl,(ix-3)
+	push hl
+	call bos.sys_Free ; free the old malloc'd saved command if it exists
+	pop hl
+	call bos.sys_MallocDupStr ; malloc a new saved command using the contents of the input buffer
+	ld (ix-3),hl
 	pop bc
+	call execute_program_string
 	jq enter_input_clear
 
 execute_program_string:

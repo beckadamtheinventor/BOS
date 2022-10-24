@@ -180,7 +180,9 @@ str_fg2:=$-3
 	or a,a
 	sbc hl,bc
 	ret nz
+.setfg2color:
 	ld (explorer_foreground2_color),a
+	ld (bos.lcd_text_fg2),a
 	ret
 .next:
 	pop bc,hl
@@ -195,10 +197,12 @@ str_fg2:=$-3
 
 .setbgcolor:
 	ld (explorer_background_color),a
+	ld (bos.lcd_text_bg),a
 	ret
 
 .setfgcolor:
 	ld (explorer_foreground_color),a
+	ld (bos.lcd_text_fg),a
 	ret
 
 .setstatusbarcolor:

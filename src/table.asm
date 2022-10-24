@@ -174,4 +174,5 @@
 	jp fs_ArcUnarcFD
 	jp util_Zx0Decompress
 	jp sys_WaitKeyUnpress
+	jp sys_MallocDupStr
 ; end of jump table

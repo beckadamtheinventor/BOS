@@ -330,6 +330,7 @@ namespace bos
 ?fs_ArcUnarcFD                   := $22688
 ?util_Zx0Decompress              := $2268C
 ?sys_WaitKeyUnpress              := $22690
+?sys_MallocDupStr                := $22694
 ; end of jump table
 ;-------------------------------------------------------------------------------
 ; OS memory areas and misc defines

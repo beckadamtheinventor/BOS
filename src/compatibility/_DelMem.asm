@@ -29,9 +29,9 @@ _DelMem:
 	push hl    ; push dest {arghl}
 	call ti._memmove
 	pop hl,de,bc
-	ld hl,(remaining_free_RAM)
-	add hl,bc
-	ld (remaining_free_RAM),hl
+	; ld hl,(remaining_free_RAM)
+	; add hl,bc
+	; ld (remaining_free_RAM),hl
 	push bc
 	pop hl
 	call _UpdateVAT
