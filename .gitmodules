@@ -1,9 +1,6 @@
 [submodule "noti-ez80"]
 	path = noti-ez80
 	url = https://github.com/beckadamtheinventor/noti-ez80.git
-[submodule "src/data/adrive/src/fs/bin/cedit"]
-	path = src/data/adrive/src/fs/bin/cedit
-	url = https://github.com/beckadamtheinventor/cedit
 [submodule "src/data/adrive/internetce"]
 	path = src/data/adrive/internetce
 	url = https://github.com/MathisLav/internetce.git
@@ -13,3 +10,6 @@
 [submodule "src/data/adrive/src/fs/bin/bpm/src/internetce"]
 	path = src/data/adrive/src/fs/bin/bpm/src/internetce
 	url = https://github.com/MathisLav/internetce.git
+[submodule "src\\data\\adrive\\src\\fs\\bin\\cedit"]
+	path = src\\data\\adrive\\src\\fs\\bin\\cedit
+	url = https://github.com/Michael0x18/CEdit.git
