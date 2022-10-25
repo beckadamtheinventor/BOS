@@ -14,10 +14,10 @@ _UpdateVAT:
 	sbc hl,de
 	pop de
 	ret nc
-	ld hl,(iy-7) ; set hlu with upper byte of data pointer
-	ld a,(iy-5)  ; upper byte of data pointer
-	ld h,(iy-4)  ; high byte of data pointer
-	ld l,(iy-3)  ; low byte of data pointer
+	ld hl,(iy-8) ; set hlu with upper byte of data pointer
+	ld a,(iy-6)  ; upper byte of data pointer
+	ld h,(iy-5)  ; high byte of data pointer
+	ld l,(iy-4)  ; low byte of data pointer
 	or a,a
 	sbc hl,bc ; compare against address shifting started at
 	jr c,.next
@@ -29,9 +29,9 @@ _UpdateVAT:
 	inc sp
 	pop af
 	dec sp
-	ld (iy-5),a ; upper byte of new data pointer
-	ld (iy-4),h ; high byte of new data pointer
-	ld (iy-3),l ; low byte of new data pointer
+	ld (iy-6),a ; upper byte of new data pointer
+	ld (iy-5),h ; high byte of new data pointer
+	ld (iy-4),l ; low byte of new data pointer
 
 	; this routine shouldn't update the length of the variable being inserted into / deleted from, that's the user's job according to TIOS (iirc)
 	; mlt de ; set DEU to 0 and D,E to unknown
@@ -57,8 +57,8 @@ _UpdateVAT:
 	; dec hl
 ; .dont_resize:
 .next:
-	ld a,(iy-6)
-	lea iy,iy-6
+	ld a,(iy-7)
+	lea iy,iy-7
 	or a,a
 	ret z
 .skip_name_loop:

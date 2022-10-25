@@ -33,8 +33,13 @@ _DelMem:
 	; ld hl,(remaining_free_RAM)
 	; add hl,bc
 	; ld (remaining_free_RAM),hl
-	pop de,hl
+	pop hl,de
 	push hl
+	pop bc
+	push bc
+	or a,a
+	sbc hl,hl
+	sbc hl,bc
 	call _UpdateVAT
 	pop bc
 	ret

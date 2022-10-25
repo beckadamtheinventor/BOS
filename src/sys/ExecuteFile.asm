@@ -230,13 +230,19 @@ sys_ExecuteFile:
 	call sys_Free ; free argv
 	pop bc
 	call .normalize_lcd_8bpp
+	call sys_FreeRunningProcessId ; free memory allocated by the program
+	call sys_PrevProcessId
+	ld de,(asm_prgm_size)
+	ld a,(asm_prgm_size+2)
+	or a,d
+	or a,e
+	ld hl,ti.userMem
+	call nz,_DelMem ; free usermem allocated by the program
 	xor a,a
 	sbc hl,hl
 	ld (asm_prgm_size),hl
 	ld hl,bos_UserMem
 	ld (top_of_UserMem),hl
-	call sys_FreeRunningProcessId ;free memory allocated by the program
-	call sys_PrevProcessId
 	pop hl,de
 	ret
 

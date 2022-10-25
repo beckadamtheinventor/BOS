@@ -10,6 +10,7 @@ _AddVATEntry:
 	dec de
 	ld a,(hl)
 	ld (de),a
+	dec de
 	inc hl
 	push hl
 	ld bc,8
