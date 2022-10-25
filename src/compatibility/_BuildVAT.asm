@@ -1,23 +1,24 @@
-;@DOES Build the VAT from variables found in tivars.
+;@DOES Build the VAT from variables found in paths listed in /var/TIVARS.
 _BuildVAT:
-	ld hl,-3
+	ld hl,-9
 	call ti._frameset
 	ld hl,str_var_tivars
 	push hl
 	call fs_GetFilePtr
 	pop de
 	jp c,.done
-	ex hl,de
+	ld (ix-6),hl
+	ld (ix-9),bc
 .dir_loop:
-	push bc,de
-
 	ld bc,0
 .build_vat_loop:
-	push bc,de
-	call os_check_recovery_key
-	pop de
+	push bc
 	ld bc,1
-	push bc,de
+	push bc
+	ld hl,(ix-6)
+	ld bc,(ix-9)
+	call sys_MallocDupStrN.entryhlbc ; malloc a null-terminated buffer for the file name
+	push hl
 	pea ix-3
 	call fs_DirList
 	pop iy,de,bc,bc
@@ -28,6 +29,7 @@ _BuildVAT:
 	jr z,.dir_doesnt_exist
 	inc bc
 	push bc,de
+	call sys_Free ; free the temporary file name
 	ld hl,(iy)
 	push hl
 	call fs_CopyFileName
@@ -63,8 +65,6 @@ _BuildVAT:
 	add a,c
 	ld (ti.OP1),a
 .done_copying_file_name:
-	call sys_Free
-	pop hl,bc
 	ld hl,(iy)
 	call fs_GetFDPtr.entry
 	push hl
@@ -74,7 +74,6 @@ _BuildVAT:
 	ld b,h
 	pop hl
 	call _AddVATEntry
-	jr .next_file
 .file_not_a_var:
 	call sys_Free
 	pop hl,bc
@@ -82,9 +81,12 @@ _BuildVAT:
 	pop de,bc
 	jq .build_vat_loop
 .dir_doesnt_exist:
-	pop hl,bc
+	ld bc,(ix-9)
+	ld hl,(ix-6)
 	ld a,':' ; find next ':' character in /var/TIVARS. If none found, we're done looking for files.
 	cpir
+	ld (ix-6),hl
+	ld (ix-9),bc
 	ex hl,de
 	jp pe,.dir_loop
 	xor a,a

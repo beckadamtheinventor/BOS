@@ -13,6 +13,7 @@ _InsertMem:
 	pop de,hl
 	; jr c,.insert_mem
 .insert_mem:
+	push de,hl
 	; memmove(arg_de+arg_hl, arg_de, end_of_usermem - arg_de+arg_hl)
 	add hl,de ; arg_de+arg_hl
 	push hl,hl
@@ -24,18 +25,10 @@ _InsertMem:
 	push de,hl ; arg_de, arg_de+arg_hl
 	call ti._memmove
 	pop hl,de,bc
-	push de,hl
-	or a,a
-	sbc hl,de
-	ex hl,de
-	; ld hl,(remaining_free_RAM)
-	; sbc hl,de
-	; ld (remaining_free_RAM),hl
-	push bc
-	pop hl,de
-	push de
+	pop hl ; bytes to insert
+	push de ; destination passed to memmove
 	call _UpdateVAT
-	pop hl,de
+	pop hl,de ; pop destination passed to memmove, then the address inserted to
 	ld iy,ti.flags
 	ret
 ; .not_usermem:

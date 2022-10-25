@@ -69,6 +69,7 @@ poke_main:
 	ld a,(bos.fsOP6+8)
 	ld hl,(bos.fsOP6+4)
 	call osrt.set_a_at_addr
+	jr .done
 .poke_set:
 	ld a,d
 	call osrt.set_a_at_addr

@@ -57,5 +57,6 @@ include 'sys/WriteFlashA.asm'
 ; include 'sys/WriteFlashFullRam.asm'
 include 'sys/ReadSectorCache.asm'
 include 'sys/WriteSectorCache.asm'
+include 'sys/MallocDupStrN.asm'
 include 'sys/MallocDupStr.asm'
 

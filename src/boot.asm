@@ -385,6 +385,9 @@ os_return_soft:
 	call fs_SanityCheck
 
 	call os_check_recovery_key
+	call _ResetAndBuildVAT
+
+	call os_check_recovery_key
 	ld bc,str_BootConfigFile
 	push bc
 	call fs_OpenFile

@@ -170,10 +170,7 @@ assert ~start_of_user_archive and $FF
 	call fs_ExtractOSBinaries
 	call fs_ExtractRootDir
 	call fs_InitClusterMap
-	call fs_ExtractOSOptBinaries
-	ld hl,str_BuildingVAT
-	call gui_PrintLine
-	jq _ResetAndBuildVAT
+	jq fs_ExtractOSOptBinaries
 
 .check_root:
 	ld hl,fs_root_dir_address

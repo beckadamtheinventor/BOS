@@ -259,8 +259,8 @@
 	call handle_unimplemented ;CreatePVar4               := 0020524h
 	call handle_unimplemented ;CreatePVar3               := 0020528h
 	call handle_unimplemented ;CreateVar3                := 002052Ch
-	call handle_unimplemented ;CreateCplx                := 0020530h
-	call handle_unimplemented ;CreateReal                := 0020534h
+	jp _CreateCplx ;CreateCplx                := 0020530h
+	jp _CreateReal ;CreateReal                := 0020534h
 	call handle_unimplemented ;CreateTRList              := 0020538h
 	call handle_unimplemented ;CreateRList               := 002053Ch
 	call handle_unimplemented ;CreateTCList              := 0020540h
@@ -268,7 +268,7 @@
 	call handle_unimplemented ;CreateTRMat               := 0020548h
 	call handle_unimplemented ;CreateRMat                := 002054Ch
 	call handle_unimplemented ;CreateTStrng              := 0020550h
-	call handle_unimplemented ;CreateStrng               := 0020554h
+	jp _CreateStrng ;CreateStrng               := 0020554h
 	call handle_unimplemented ;Create0Equ                := 0020558h
 	call handle_unimplemented ;CreatetEqu                := 002055Ch
 	call handle_unimplemented ;CreateEqu                 := 0020560h

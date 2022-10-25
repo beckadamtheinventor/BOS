@@ -17,7 +17,7 @@ _AddVATEntry:
 	xor a,a
 	cpir
 	pop hl
-	or a,a
+	scf
 	sbc hl,bc
 	ex (sp),hl
 	pop bc
@@ -32,6 +32,7 @@ _AddVATEntry:
 	dec hl
 	pop bc
 	ld (hl),bc  ; data pointer
+	push hl
 	dec hl
 	ld (hl),a ; var name length byte
 	ex hl,de
@@ -42,8 +43,18 @@ _AddVATEntry:
 	ld (de),a
 	inc hl
 	djnz .copy_name_loop
+	pop hl
+	; reverse the endianness of the data pointer
+	ld a,(hl)
+	inc hl
+	inc hl
+	ld b,(hl)
+	ld (hl),a
+	dec hl
+	dec hl
+	ld (hl),b
 
-	ld (ti.pTemp),de
+	ld (ti.pTemp),de ; save new end of VAT
 	ex hl,de
 
 	xor a,a

@@ -75,6 +75,7 @@ fs_dir bin_dir
 	fs_sfentry mv_exe, "mv", "", f_system+f_subfile
 	fs_sfentry off_exe, "off", "", f_system+f_subfile
 	fs_entry _osrt_lib_table, "osrt", "tbl", f_system
+	fs_sfentry pause_exe, "pause", "", f_system+f_subfile
 	fs_sfentry peek_exe, "peek", "", f_system+f_subfile
 	fs_sfentry poke_exe, "poke", "", f_system+f_subfile
 	fs_sfentry rm_exe, "rm", "", f_system+f_subfile
@@ -174,6 +175,10 @@ fs_file os_internal_subfiles
 
 	fs_subfile sleep_exe, bin_dir
 		include 'fs/bin/sleep.asm'
+	end fs_subfile
+
+	fs_subfile pause_exe, bin_dir
+		include 'fs/bin/pause.asm'
 	end fs_subfile
 
 	fs_subfile peek_exe, bin_dir
