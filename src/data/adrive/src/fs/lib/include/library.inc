@@ -1,6 +1,6 @@
 include 'ez80.inc'
 include 'ti84pceg.inc'
-include 'tiformat.inc'
+; include 'tiformat.inc'
 include 'bos.inc'
 
 macro library? name*, version*, magic: <192,193>
@@ -12,13 +12,14 @@ macro library? name*, version*, magic: <192,193>
 	virtual as 'lib'
 		lib.exports.file::
 		repeat 1, string: version
-			db 'library', 9, '"', name, '", ', `string, 10
+			db 9, 'library', 9, `name, ', ', `string, 10, 10
 		end repeat
 	end virtual
 	virtual
 		lib.relocations.area::
 	end virtual
 
+;	format ti archived appvar `name
 	org 0
 	db magic,version
 	dw lib.exports
@@ -42,7 +43,7 @@ macro library? name*, version*, magic: <192,193>
 			end virtual
 			virtual lib.exports.file
 				repeat 1, string: ((offset - 2) / 2) * 3
-					db 9, `each, 9, `function, ' ; ', `string, 10
+					db 9, `each, 9, `function, 10
 				end repeat
 			end virtual
 		end macro

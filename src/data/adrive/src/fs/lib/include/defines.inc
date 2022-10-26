@@ -31,10 +31,10 @@ console_line           := currow
 
 color_primary          := ti.drawFGColor      ; 1 byte
 lcd_bg_color           := ti.drawFGColor+1    ; 1 byte
-lcd_text_fg            := ti.textFGcolor      ; 1 byte
-lcd_text_bg            := ti.textFGcolor+1    ; 1 byte
-lcd_text_fg2           := ti.textBGcolor      ; 1 byte
-lcd_text_bg2           := ti.textBGcolor+1    ; 1 byte
+lcd_text_fg            := ti.textFGColor      ; 1 byte
+lcd_text_bg            := ti.textFGColor+1    ; 1 byte
+lcd_text_fg2           := ti.textBGColor      ; 1 byte
+lcd_text_bg2           := ti.textBGColor+1    ; 1 byte
 cursor_color           := ti.statusBarBGColor ; 1 byte
 font_data              := ti.lFont_record
 font_spacing           := ti.lFont_record+3

@@ -43,7 +43,7 @@ FSSRC ?= $(call NATIVEPATH,src/data/adrive/src)
 
 #build rules
 
-all: objdirs include_dirs noti filesystem bosos bosbin bos8xp bosrom
+all: objdirs includes noti filesystem bosos bosbin bos8xp bosrom
 
 
 # Rule to build OS data
@@ -55,11 +55,17 @@ documentation:
 	python build_docs.py
 
 # Rule to build include files
-includes: include_dirs
+includes:
 	python build_bos_inc.py
-	$(CP) bos.inc $(call NATIVEPATH,$(FSSRC)/include/bos.inc)
+	$(CP) bos.inc $(call NATIVEPATH,src/include)
+	$(CPDIR) $(call NATIVEPATH,src/include) $(call NATIVEPATH,$(FSSRC)/include)
+	$(CPDIR) $(call NATIVEPATH,src/include) $(call NATIVEPATH,$(FSSRC)/fs/bin/include)
+	$(CPDIR) $(call NATIVEPATH,src/include) $(call NATIVEPATH,$(FSSRC)/fs/lib/include)
 	fasmg $(call NATIVEPATH,src/data/adrive/osrt.asm) $(call NATIVEPATH,src/data/adrive/osrt.tmp)
 	$(CP) $(call NATIVEPATH,src/data/adrive/osrt.inc) $(call NATIVEPATH,src/include/osrt.inc)
+	$(CP) $(call NATIVEPATH,src/data/adrive/osrt.inc) $(call NATIVEPATH,$(FSSRC)/include/osrt.inc)
+	$(CP) $(call NATIVEPATH,src/data/adrive/osrt.inc) $(call NATIVEPATH,$(FSSRC)/fs/bin/include/osrt.inc)
+	$(CP) $(call NATIVEPATH,src/data/adrive/osrt.inc) $(call NATIVEPATH,$(FSSRC)/fs/lib/include/osrt.inc)
 	python build_bos_src.py
 
 # Rule to create object and binary directories
@@ -68,12 +74,6 @@ objdirs:
 	$(call MKDIR,obj)
 	$(call MKDIR,$(call NATIVEPATH,noti-ez80/bin))
 	$(call MKDIR,$(call NATIVEPATH,src/data/adrive/obj))
-
-include_dirs:
-	$(CPDIR) $(call NATIVEPATH,src/include) $(call NATIVEPATH,$(FSSRC)/include)
-	$(CPDIR) $(call NATIVEPATH,src/include) $(call NATIVEPATH,$(FSSRC)/fs/bin/include)
-	$(CPDIR) $(call NATIVEPATH,src/include) $(call NATIVEPATH,$(FSSRC)/fs/lib/include)
-
 
 # LibLoad Library build rules
 

@@ -2,7 +2,7 @@
 include '../include/library.inc'
 ;-------------------------------------------------------------------------------
 
-library 'USBDRVCE', 0
+library USBDRVCE, 0
 
 DEBUG := 0
 
