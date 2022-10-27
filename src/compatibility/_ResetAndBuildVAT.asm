@@ -3,6 +3,8 @@ _ResetAndBuildVAT:
 	ld hl,ti.symTable
 	ld (ti.pTemp),hl
 	ld (ti.progPtr),hl
+	ld hl,ti.vRam
+	ld (ti.OPBase),hl
 	call _BuildVAT
 	ld hl,'A' shl 8
 	ld (ti.OP1),hl

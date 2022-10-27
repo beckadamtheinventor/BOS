@@ -7,7 +7,6 @@ _AddVATEntry:
 	ld de,(ti.pTemp)
 	push de,hl,bc
 	ld hl,ti.OP1
-	dec de
 	ld a,(hl)
 	ld (de),a
 	dec de
@@ -55,6 +54,7 @@ _AddVATEntry:
 	dec hl
 	ld (hl),b
 
+	dec de
 	ld (ti.pTemp),de ; save new end of VAT
 	ex hl,de
 
