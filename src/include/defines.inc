@@ -270,4 +270,4 @@ bReturnNotError      := 0
 bReturnHex           := 1
 bReturnLong          := 2
 bSilentReturn        := 3
-
+bReturnData          := 4

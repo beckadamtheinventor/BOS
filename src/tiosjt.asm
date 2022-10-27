@@ -389,32 +389,32 @@
 	call handle_unimplemented ;ErrNotEnoughMem           := 002072Ch
 	call handle_unimplemented ;FPSMinus9                 := 0020730h
 	call handle_unimplemented ;HLMinus9                  := 0020734h
-	call handle_unimplemented ;ErrOverflow               := 0020738h
-	call handle_unimplemented ;ErrDivBy0                 := 002073Ch
-	call handle_unimplemented ;ErrSingularMat            := 0020740h
-	call handle_unimplemented ;ErrDomain                 := 0020744h
-	call handle_unimplemented ;ErrIncrement              := 0020748h
-	call handle_unimplemented ;ErrNon_Real               := 002074Ch
-	call handle_unimplemented ;ErrSyntax                 := 0020750h
-	call handle_unimplemented ;ErrDataType               := 0020754h
-	call handle_unimplemented ;ErrArgument               := 0020758h
-	call handle_unimplemented ;ErrDimMismatch            := 002075Ch
-	call handle_unimplemented ;ErrDimension              := 0020760h
-	call handle_unimplemented ;ErrUndefined              := 0020764h
+	jp _ErrorExit ;ErrOverflow               := 0020738h
+	jp _ErrorExit ;ErrDivBy0                 := 002073Ch
+	jp _ErrorExit ;ErrSingularMat            := 0020740h
+	jp _ErrorExit ;ErrDomain                 := 0020744h
+	jp _ErrorExit ;ErrIncrement              := 0020748h
+	jp _ErrorExit ;ErrNon_Real               := 002074Ch
+	jp _ErrorExit ;ErrSyntax                 := 0020750h
+	jp _ErrDataType ;ErrDataType               := 0020754h
+	jp _ErrorExit ;ErrArgument               := 0020758h
+	jp _ErrorExit ;ErrDimMismatch            := 002075Ch
+	jp _ErrorExit ;ErrDimension              := 0020760h
+	jp _ErrorExit ;ErrUndefined              := 0020764h
 	jp _ErrMemory ;ErrMemory                 := 0020768h
-	call handle_unimplemented ;ErrInvalid                := 002076Ch
-	call handle_unimplemented ;ErrBreak                  := 0020770h
-	call handle_unimplemented ;ErrStat                   := 0020774h
-	call handle_unimplemented ;ErrSignChange             := 0020778h
-	call handle_unimplemented ;ErrIterations             := 002077Ch
-	call handle_unimplemented ;ErrBadGuess               := 0020780h
-	call handle_unimplemented ;ErrTolTooSmall            := 0020784h
-	call handle_unimplemented ;ErrStatPlot               := 0020788h
-	call handle_unimplemented ;ErrLinkXmit               := 002078Ch
+	jp _ErrorExit ;ErrInvalid                := 002076Ch
+	jp _ErrorExit ;ErrBreak                  := 0020770h
+	jp _ErrorExit ;ErrStat                   := 0020774h
+	jp _ErrorExit ;ErrSignChange             := 0020778h
+	jp _ErrorExit ;ErrIterations             := 002077Ch
+	jp _ErrorExit ;ErrBadGuess               := 0020780h
+	jp _ErrorExit ;ErrTolTooSmall            := 0020784h
+	jp _ErrorExit ;ErrStatPlot               := 0020788h
+	jp _ErrorExit ;ErrLinkXmit               := 002078Ch
 	call handle_unimplemented ;JError                    := 0020790h
 	call handle_unimplemented ;NoErrorEntry              := 0020794h
-	jp DONOTHING ;PushErrorHandler          := 0020798h
-	jp DONOTHING ;PopErrorHandler           := 002079Ch
+	jp _ErrorExit ;PushErrorHandler          := 0020798h
+	jp _ErrorExit ;PopErrorHandler           := 002079Ch
 	jp _StrCopy ;StrCopy                   := 00207A0h
 	call handle_unimplemented ;StrngCat                  := 00207A4h
 	call handle_unimplemented ;IsInSet                   := 00207A8h
@@ -483,8 +483,8 @@
 	call handle_unimplemented ;CurBlink                  := 00208A4h
 	jp DONOTHING ;CursorOff                 := 00208A8h
 	jp DONOTHING ;HideCursor                := 00208ACh
-	call handle_unimplemented ;CursorOn                  := 00208B0h
-	call handle_unimplemented ;ShowCursor                := 00208B4h
+	jp DONOTHING ;CursorOn                  := 00208B0h
+	jp DONOTHING ;ShowCursor                := 00208B4h
 	call handle_unimplemented ;KeyToString               := 00208B8h
 	call handle_unimplemented ;PullDownChk               := 00208BCh
 	call handle_unimplemented ;MenuCatCommon             := 00208C0h
@@ -674,7 +674,7 @@
 	call handle_unimplemented ;Xitof                     := 0020BA0h
 	call handle_unimplemented ;YftoI                     := 0020BA4h
 	call handle_unimplemented ;XftoI                     := 0020BA8h
-	call handle_unimplemented ;TraceOff                  := 0020BACh
+	jp DONOTHING ;TraceOff                  := 0020BACh
 	call handle_unimplemented ;GrRedisp                  := 0020BB0h
 	call handle_unimplemented ;GDispToken                := 0020BB4h
 	call handle_unimplemented ;GrdeCoda                  := 0020BB8h
@@ -881,8 +881,8 @@
 	jp DONOTHING ;                          equ 0020EDCh
 	jp DONOTHING ;                          equ 0020EE0h
 	jp DONOTHING ;                          equ 0020EE4h
-	call handle_unimplemented ;ErrNonReal_FPST_FPS1      := 0020EE8h
-	call handle_unimplemented ;ErrNonReal                := 0020EECh
+	jp _ErrorExit ;ErrNonReal_FPST_FPS1      := 0020EE8h
+	jp _ErrorExit ;ErrNonReal                := 0020EECh
 	call handle_unimplemented ;WriteText                 := 0020EF0h
 	jp DONOTHING ;                          equ 0020EF4h
 	call handle_unimplemented ;GraphPars                 := 0020EF8h
@@ -1840,8 +1840,8 @@
 	jp DONOTHING ;                          equ 0021DD8h
 	jp DONOTHING ;                          equ 0021DDCh
 	call handle_unimplemented ;os.ClearVRAMLines         := 0021DE0h
-	call handle_unimplemented ;os.DisableCursor          := 0021DE4h
-	call handle_unimplemented ;os.EnableCursor           := 0021DE8h
+	jp DONOTHING ;os.DisableCursor          := 0021DE4h
+	jp DONOTHING ;os.EnableCursor           := 0021DE8h
 	jp DONOTHING ;                          equ 0021DECh
 	jp DONOTHING ;                          equ 0021DF0h
 	jp DONOTHING ;                          equ 0021DF4h
@@ -1937,7 +1937,7 @@
 	jp DONOTHING ;                          equ 0021F5Ch
 	call handle_unimplemented ;DrawStandardEntrySepLine  := 0021F60h
 	call handle_unimplemented ;DrawHomeNewSepLine        := 0021F64h
-	call handle_unimplemented ;DrawStatusBarText         := 0021F68h
+	jp DONOTHING ;DrawStatusBarText         := 0021F68h
 	jp DONOTHING ;                          equ 0021F6Ch
 	jp DONOTHING ;                          equ 0021F70h
 	jp DONOTHING ;                          equ 0021F74h
@@ -1971,7 +1971,7 @@
 	call handle_unimplemented ;os.GetAppVersionString    := 0021FE4h
 	jp DONOTHING ;                          equ 0021FE8h
 	jp DONOTHING ;                          equ 0021FECh
-	call handle_unimplemented ;os.MemChk                 := 0021FF0h
+	jp _MemChk ;os.MemChk                 := 0021FF0h
 	jp DONOTHING ;                          equ 0021FF4h
 	jp DONOTHING ;                          equ 0021FF8h
 	jp DONOTHING ;                          equ 0021FFCh

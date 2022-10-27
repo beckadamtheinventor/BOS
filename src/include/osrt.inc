@@ -37,8 +37,11 @@ osrt.byte_to_hexstr   rb 4
 osrt.int_to_hexstr    rb 4
 osrt.long_to_hexstr   rb 4
 osrt.b_to_hexstr      rb 4
+osrt.byte_to_str      rb 4
+osrt.int_to_str       rb 4
+osrt.long_to_str      rb 4
 end virtual
-virtual at 320320
+virtual at 320512
 osrt.str_so.version rb 4
 osrt.substring        rb 4
 osrt.duplicate_string rb 4

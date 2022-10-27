@@ -1,15 +1,15 @@
 ;@DOES Search the symbol table (VAT) for a file specified in OP1
-;@INPUT Same as ti.ChkFindSym. 0xFF is treated as a wildcard.
+;@INPUT Same as ti.ChkFindSym, except that 0xFF is treated as a wildcard.
 ;@OUTPUT Same as ti.ChkFindSym.
 ;@DESTROYS af, bc, iy
 _SearchSymTable:
 	ld iy,(ti.progPtr)
 .search_vat_loop:
-	ld hl,(ti.pTemp)
-	lea de,iy
+	ld de,(ti.pTemp)
+	lea hl,iy
 	or a,a
 	sbc hl,de
-	ret nc
+	ret c
 	ld a,(ti.OP1)
 	ld b,(iy-7)
 	ld c,b
@@ -33,9 +33,10 @@ _SearchSymTable:
 	sub a,(hl)
 	jr nz,.next_vat_entry ; skip this entry if the names don't match
 .check_next_character:
-	dec de
-	inc hl
+	inc de
+	dec hl
 	djnz .check_name_loop
+	ex hl,de
 	or a,(hl)
 	jr z,.return_vat_entry ; return this entry if the name lengths match
 	ld a,c
@@ -49,6 +50,8 @@ _SearchSymTable:
 	djnz .skip_name_loop
 	jr .search_vat_loop
 .return_vat_entry:
+	ld a,(iy-1)
+	ld (ti.OP1),a ; return variable type byte in OP1 (effectively only changes the value if it was a wildcard)
 	ld de,(iy-8) ; load deu with (iy-6)
 	ld d,(iy-5)
 	ld e,(iy-4)

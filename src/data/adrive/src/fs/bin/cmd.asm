@@ -235,6 +235,65 @@ execute_program_string:
 	pop hl
 	ex (sp),hl ;store args, restore path
 	push hl ;push path
+	ld a,(hl)
+	cp a,'A' ; Check if path is uppercase alpha. If it is, check the VAT for the file first.
+	jr c,.execute_file
+	cp a,'Z'+1
+	jr nc,.execute_file
+	dec hl
+	call ti.Mov9ToOP1
+	ld a,$FF
+	ld (ti.OP1),a ; set the type byte as a wildcard
+	call bos._SearchSymTable ; just search the symbol table
+	jr c,.execute_file ; if the file wasn't found in the VAT, attempt to run it normally.
+	cp a,ti.ProgObj
+	jr z,.execute_file
+	cp a,ti.ProtProgObj
+	jr z,.execute_file
+	cp a,ti.AppVarObj
+	jr z,.parse_string
+	cp a,ti.StrngObj
+	jr z,.parse_string
+	cp a,ti.EquObj
+	jr z,.parse_string
+	cp a,ti.RealObj
+	jr nz,.unimplemented_error
+	ex hl,de
+	ld a,(hl)
+	inc hl
+	ld de,(hl)
+	inc hl
+	inc hl
+	inc hl
+	ld c,(hl)
+	ex hl,de
+	or a,a
+	jr nz,.unimplemented_error
+	ld de,11
+	push bc,hl,de
+	call bos.sys_Malloc
+	ex (sp),hl
+	call osrt.long_to_str
+	pop bc,bc,bc
+	; jr .parse_string_hl
+; .parse_float:
+	; call ti.ftoa
+	call .print_string_hl
+	db $3E
+.parse_string:
+	ex hl,de
+.parse_string_hl:
+	ld a,1 shl bos.bReturnData or 1 shl bos.bReturnNotError
+.return_value:
+	ld (bos.return_code_flags),a
+	ld (bos.LastCommandResult),hl
+.return_value_return:
+	pop bc,bc,ix
+	ret
+.unimplemented_error:
+	call ti.ErrDataType
+	jr .return_value_return
+.execute_file:
 	call bos.sys_ExecuteFile
 	ld hl,(bos.ExecutingFileFd) ;check if the currently executing file descriptor is -1
 	inc hl
@@ -297,6 +356,7 @@ execute_program_string:
 	xor a,a
 	ld (de),a
 	ld hl,bos.gfx_string_temp
+.print_string_hl:
 	call bos.gui_PrintLine
 	jp bos.gfx_BlitBuffer
 .file_not_found:
@@ -337,14 +397,14 @@ cmd_terminate_arguments:
 	or a,a
 	ret z
 	cp a,':'
-	jq z,.eol
+	jr z,.eol
 	cp a,$A
-	jq z,.eol
+	jr z,.eol
 	inc hl
 	cp a,$5C ;backslash
-	jq nz,.loop
+	jr nz,.loop
 	inc hl
-	jq .loop
+	jr .loop
 .eol:
 	ld (ix-20),a
 	ld (hl),c
@@ -365,9 +425,9 @@ cmd_get_arguments:
 	cp a,$A
 	ret z
 	cp a,$5C ;backslash
-	jq z,.inc_twice
+	jr z,.inc_twice
 	cp a,' '
-	jq nz,.loop
+	jr nz,.loop
 	ld (hl),0
 	inc hl
 	ret
@@ -376,7 +436,7 @@ cmd_help_info:
 	db " cmd cmds",$A,$9,"run command(s) but exit if one returns an error",$A
 	db " cmd -a cmds",$A,$9,"run all commands(s) regardless of error codes",$A
 	db " cmd -i cmds",$A,$9,"run commands(s), ignoring all errors",$A
-	db " cmd -x file",$A,$9,"run a file",$A,0
+	db " cmd -x file",$A,$9,"run a command file",$A,0
 
 str_system_path:
 	db "/bin/"

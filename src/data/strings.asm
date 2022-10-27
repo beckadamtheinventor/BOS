@@ -57,8 +57,14 @@ string_os_recovery_menu:
 	db $9,"Press alpha to open emergency shell",$A,0
 string_press_enter_confirm:
 	db "Press enter to confirm.",$A,0
+str_ErrorOccurred:
+	db "Error:",0
 str_ErrorMemory:
-	db $9,"Error: Not Enough Memory!",$A
+	db "Not Enough Memory",0
+str_ErrorUnimplemented:
+	db "Feature is not yet implemented",0
+str_ErrorDataType:
+	db "Data Type",0
 str_PressAnyKeyToSoftReboot:
 	db "Press any key to soft reboot.",$A,0
 

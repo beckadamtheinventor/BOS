@@ -332,6 +332,7 @@ namespace bos
 ?sys_WaitKeyUnpress              := $22690
 ?sys_MallocDupStr                := $22694
 ?sys_MallocDupStrN               := $22698
+?_SearchSymTable                 := $2269C
 ; end of jump table
 ;-------------------------------------------------------------------------------
 ; OS memory areas and misc defines
@@ -547,5 +548,6 @@ namespace bos
 ?bReturnHex           := 1
 ?bReturnLong          := 2
 ?bSilentReturn        := 3
+?bReturnData          := 4
 
 end namespace

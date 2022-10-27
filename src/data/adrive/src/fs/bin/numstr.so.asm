@@ -2,7 +2,7 @@
 ; shared str<-->num code for os executables
 
 _osrt_numstr_so:
-	dd 1
+	dd 2
 	jp osrt.str_to_int
 	jp osrt.hexstr_to_int
 	jp osrt.nibble
@@ -10,6 +10,9 @@ _osrt_numstr_so:
 	jp osrt.int_to_hexstr
 	jp osrt.long_to_hexstr
 	jp osrt.b_to_hexstr
+	jp osrt.byte_to_str
+	jp osrt.int_to_str
+	jp osrt.long_to_str
 
 virtual
 	db "osrt.str_to_int       rb 4",$A
@@ -19,6 +22,9 @@ virtual
 	db "osrt.int_to_hexstr    rb 4",$A
 	db "osrt.long_to_hexstr   rb 4",$A
 	db "osrt.b_to_hexstr      rb 4",$A
+	db "osrt.byte_to_str      rb 4",$A
+	db "osrt.int_to_str       rb 4",$A
+	db "osrt.long_to_str      rb 4",$A
 	load _routines_osrt_numstr_so: $-$$ from $$
 end virtual
 
@@ -143,8 +149,8 @@ osrt.byte_to_hexstr:
 	inc de
 	ret
 
-; input a nibble (upper 4 bits are ignored)
-; output a hex character
+; input A nibble (upper 4 bits are ignored)
+; output A hex character
 osrt.nibble:
 	and a,$F
 	cp a,10
@@ -154,3 +160,92 @@ osrt.nibble:
 osrt.nibble.over9:
 	add a,'A'-10
 	ret
+
+; input char *osrt.int_to_str(char *dest, unsigned int num);
+osrt.int_to_str:
+	pop bc,de,hl
+	push hl,de,bc
+	push de,de
+	ex (sp),iy
+	xor a,a
+	ld e,a
+	jr osrt.long_to_str_10m
+
+; input char *osrt.byte_to_str(char *dest, uint8_t num);
+osrt.byte_to_str:
+	pop bc,de,hl
+	push hl,de,bc
+	push de,de
+	ex (sp),iy
+	ld a,l
+	or a,a
+	sbc hl,hl
+	ld l,a
+	xor a,a
+	ld e,a
+	jr osrt.long_to_str_100
+
+; input char *osrt.long_to_str(char *dest, uint32_t num);
+osrt.long_to_str:
+	push iy
+	ld iy,0
+	add iy,sp
+	ld hl,(iy+9)
+	ld a,(iy+12)
+	ld iy,(iy+6)
+	pop bc
+	push iy,bc
+	ld e,1000000000 shr 24
+	ld bc,1000000000 and $FFFFFF
+	call osrt.num_to_str_aqu
+	ld e,100000000 shr 24
+	ld bc,100000000 and $FFFFFF
+	call osrt.num_to_str_aqu
+	ld e,0
+osrt.long_to_str_10m:
+	ld bc,10000000
+	call osrt.num_to_str_aqu
+	ld bc,1000000
+	call osrt.num_to_str_aqu
+	ld bc,100000
+	call osrt.num_to_str_aqu
+osrt.long_to_str_10k:
+	ld bc,10000
+	call osrt.num_to_str_aqu
+	ld bc,1000
+	call osrt.num_to_str_aqu
+osrt.long_to_str_100:
+	ld bc,100
+	call osrt.num_to_str_aqu
+	ld c,10
+	call osrt.num_to_str_aqu
+	ld c,1
+	call osrt.num_to_str_aqu
+	ld (iy),0
+	pop iy,hl
+.skip_zeroes_loop:
+	ld a,(hl)
+	or a,a
+	jr z,.return_single_zero
+	cp a,'0'
+	ret nz
+	inc hl
+	jr .skip_zeroes_loop
+.return_single_zero:
+	dec hl
+	ret
+
+osrt.num_to_str_aqu:
+	ld d,'0'-1
+osrt.num_to_str_aqu.loop:
+	inc d
+	or a,a
+	sbc hl,bc
+	sbc a,e
+	jr nc,osrt.num_to_str_aqu.loop
+	add hl,bc
+	adc a,e
+	ld (iy),d
+	inc iy
+	ret
+
