@@ -176,4 +176,5 @@
 	jp sys_WaitKeyUnpress
 	jp sys_MallocDupStr
 	jp sys_MallocDupStrN
+	jp _SearchSymTable
 ; end of jump table

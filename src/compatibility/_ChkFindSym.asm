@@ -3,8 +3,10 @@
 ;@OUTPUT HL = pointer to 2 byte file length
 ;@OUTPUT DE = pointer to file data
 ;@OUTPUT Cf set if file not found or otherwise cannot be opened.
-;@DESTROYS OP4,OP5
+;@DESTROYS iy, af, bc, OP4, OP5
 _ChkFindSym:
+	call _SearchSymTable
+	ret nc
 	call _OP1ToPath
 	ld de,str_var_tivars
 	push de,hl
