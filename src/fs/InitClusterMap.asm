@@ -33,7 +33,7 @@ end if
 	ld (hl),a
 	inc hl
 	djnz .mark_boot_sector
-	ld iy,$040000
+	ld iy,start_of_user_archive
 	call .traverse_into_jump
 	pop iy
 
@@ -41,6 +41,17 @@ end if
 	jq sys_WriteSectorCache.entry
 
 .traverse:
+	lea hl,iy
+	ld a,l
+	and a,fs_sector_size - 1
+	jr nz,.not_at_start_of_sector
+	ld de,-start_of_user_archive
+	add hl,de
+	call fs_CeilDivBySector
+	ld de,ti.vRam + (fs_cluster_map and $FFFF)
+	add hl,de
+	ld (hl),fscluster_allocated
+.not_at_start_of_sector:
 	ld a,(iy)
 	or a,a
 	jq z,.traverse_next
@@ -51,26 +62,26 @@ end if
 	cp a,'.'+2
 	jq z,.traverse_next
 	bit fd_subfile, (iy+fsentry_fileattr)
-	jq z,.regular_file
+	jr z,.regular_file
 	ld hl,(iy+fsentry_filesector)
 	ex.s hl,de
 	lea hl,iy
 	ld a,l
-	and a,fs_sector_size_bits
+	and a,fs_sector_size - 1
 	ld l,a
 	add hl,de
-	ld de,-$040000
+	ld de,-start_of_user_archive
 	add hl,de
 	call fs_CeilDivBySector
-	ld de,fs_cluster_map
+	ld de,ti.vRam + (fs_cluster_map and $FFFF)
 	add hl,de
 	push hl
 	ld de,(iy+fsentry_filelen)
 	ex.s hl,de
 	call fs_CeilDivBySector
-	pop de
 	ld c,l
 	ld b,h
+	pop hl
 	jr .mark_file_entry
 .regular_file:
 	ld de,(iy+fsentry_filelen)
@@ -82,10 +93,8 @@ end if
 	ex.s hl,de
 	ld de,ti.vRam + (fs_cluster_map and $FFFF)
 	add hl,de
-	ex hl,de
 .mark_file_entry:
 	push iy
-	ex hl,de
 .mark_file_loop:
 	ld (hl),fscluster_allocated
 	inc hl
@@ -97,15 +106,12 @@ end if
 	pop iy
 	bit fd_subdir, (iy+fsentry_fileattr)
 	jr z,.traverse_next
-	call .traverse_into
-.traverse_next:
-	lea iy,iy+fs_file_desc_size
-	jq .traverse
-.traverse_into:
 	push iy
 	call .traverse_into_jump
 	pop iy
-	ret
+.traverse_next:
+	lea iy,iy+fs_file_desc_size
+	jq .traverse
 .traverse_into_jump:
 	ld hl,(iy+fsentry_filesector)
 	push hl

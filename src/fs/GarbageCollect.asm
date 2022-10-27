@@ -14,21 +14,6 @@ fs_GarbageCollect:
 	; add hl,bc
 	; ld (ix-12),hl
 
-	; copy the flash sector where the cluster map is up until the cluster map
-	ld hl,fs_cluster_map and $FF0000
-	ld de,safeRAM
-	ld bc,fs_cluster_map and $FFFF
-	ldir
-
-	; mark the copy's sector map as clean
-	ld hl,safeRAM + (fs_cluster_map and $FFFF)
-	ld bc,fs_cluster_map.len-1
-	ld (hl),fscluster_clean
-	push hl
-	pop de
-	inc de
-	ldir
-
 	ld hl,(ti.mpLcdUpbase)
 	ld (ix-18),hl
 	ld bc,$D52C00
@@ -76,9 +61,6 @@ fs_GarbageCollect:
 ; mark the sector for copying
 .copy_sector:
 	push bc
-	ld de, safeRAM - (fs_cluster_map and $FF0000)
-	add hl,de
-	ld (hl),a ; mark the sector as allocated
 	ld a,b
 	ld b,fs_sector_size_bits
 .sshl_loop:
@@ -105,9 +87,9 @@ fs_GarbageCollect:
 .done_checking_64k_sector:
 	ld a,iyh
 	cp a,512/fs_sector_size
-	jr z,.cleanup_next
+	jr z,.cleanup_next ; don't erase and copy back the sector if it's fully written
 	or a,iyl
-	jr z,.cleanup_next
+	jr z,.cleanup_next ; don't erase and copy back the sector if none of the fs sectors require cleaning
 .erase_and_writeback_sector:
 	ld a,(ix-4)
 	push iy
@@ -140,16 +122,6 @@ fs_GarbageCollect:
 	ld (ix-4),a
 	cp a,$3B
 	jq nz,.cleanup_freed_loop_outer
-
-	; erase the cluster map sector
-	ld a,fs_cluster_map shr 16
-	call sys_EraseFlashSector
-	; write back the cluster map sector
-	ld hl,safeRAM
-	ld bc,$010000
-	ld de,fs_cluster_map and $FF0000
-	call sys_WriteFlash
-	
 
 	call sys_FlashLock
 
@@ -184,6 +156,7 @@ fs_GarbageCollect:
 	
 	; jq .shuffle_files
 ; .done_shuffling:
+	call fs_InitClusterMap.reinit
 
 	ld bc,$D52C00
 	or a,a

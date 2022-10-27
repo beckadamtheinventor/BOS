@@ -35,6 +35,7 @@ fs_Free:
 	call fs_CeilDivBySector
 	ex (sp),hl
 	pop bc
+	ex hl,de
 	ld hl,$FF0000 ; pointer to null
 	push bc ; bc = ceil(file_len/sector size)
 	call sys_FlashUnlock
