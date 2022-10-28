@@ -73,7 +73,10 @@ _BuildVAT:
 	ld c,l
 	ld b,h
 	pop hl
-	call _AddVATEntry
+	ld de,$0C0000
+	sbc hl,de
+	add hl,de
+	call nc,_AddVATEntry ; only add the VAT entry if it follows 0x0C0000... thanks CEmu
 .file_not_a_var:
 	call sys_Free
 	pop hl,bc

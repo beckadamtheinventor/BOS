@@ -77,17 +77,8 @@ str_PressAnyKeyToSoftReboot:
 	; db "Failed to reinstall TIOS, backup files are missing!",$A,0
 
 
-str_bosfs512_partition_header: ; TODO: this shouldn't be static
-	db "bosfs040fs ", $14
-	dw fs_root_dir_lba ; LBA of the root directory
-	dw (end_of_user_archive - start_of_user_archive) shr 9 ; size of partition in LBAs
-.len:=$-.
-
-fs_root_dir_data:
-	db "bin        ", $14, $0C,$00, $00,$03
-	db "lib        ", $14, $08,$00, $00,$01
-	db "sbin       ", $14, $04,$00, $00,$01
-.len:=$-.
+include 'root_partition.asm'
+include 'root_dir_data.asm'
 
 fs_root_file_initializers:
 	db $14, "dev",0
@@ -196,6 +187,8 @@ fs_file_data_tivars.zlen:=$-.
 	; db "Verification failed for file: ",0
 ; string_os_elevation_file:
 	; db "/",$F2,"OS/ELEVATED",0
+str_AutoExtractOptFile:
+	db "/EXTRACT.OPT",0
 str_sbin_dir:
 	db "sbin",0
 str_var_tivars:
