@@ -169,6 +169,7 @@ assert ~start_of_user_archive and $FF
 
 	call fs_ExtractOSBinaries
 	call fs_ExtractRootDir
+.extract_opt_binaries:
 	call fs_InitClusterMap
 	jq fs_ExtractOSOptBinaries
 

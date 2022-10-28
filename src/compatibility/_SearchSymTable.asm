@@ -5,7 +5,7 @@
 _SearchSymTable:
 	ld iy,(ti.progPtr)
 .search_vat_loop:
-	ld de,(ti.pTemp)
+	ld de,(ti.OPBase)
 	lea hl,iy
 	or a,a
 	sbc hl,de

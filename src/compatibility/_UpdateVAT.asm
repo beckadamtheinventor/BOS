@@ -57,12 +57,25 @@ _UpdateVAT:
 	; dec hl
 ; .dont_resize:
 .next:
+	ld a,(iy-1)
+	cp a,ti.AppVarObj
+	jr z,.skip_name
+	cp a,ti.TempProgObj
+	jr z,.skip_name
+	cp a,ti.EquObj
+	jr c,.skip_3_byte_name
+	cp a,ti.ProtProgObj
+	jr nc,.skip_3_byte_name
+.skip_name:
 	ld a,(iy-7)
-	lea iy,iy-7
 	or a,a
-	ret z
+	lea iy,iy-7
+	jr z,.loop
 .skip_name_loop:
 	dec iy
 	dec a
 	jr nz,.skip_name_loop
+	jr .loop
+.skip_3_byte_name:
+	lea iy,iy-10
 	jr .loop

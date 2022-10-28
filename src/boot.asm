@@ -387,18 +387,30 @@ os_return_soft:
 	call os_check_recovery_key
 	call _ResetAndBuildVAT
 
+	ld hl,str_AutoExtractOptFile
+	push hl
+	call fs_OpenFile
+	pop bc
+	jr c,.no_autoextractopt
+	ex hl,de
+	call sys_FlashUnlock
+	xor a,a
+	call sys_WriteFlashA
+	call sys_FlashLock
+	call fs_SanityCheck.extract_opt_binaries
+.no_autoextractopt:
 	call os_check_recovery_key
 	ld bc,str_BootConfigFile
 	push bc
 	call fs_OpenFile
 	pop bc
 	call c,generate_boot_configs
-	jq nc,.run_boot_cmd
+	jr nc,.run_boot_cmd
 ; if we can't find the boot config files and can't initialize them try to run the main gui
 	ld bc,$FF0000
 	push bc
 	ld hl,str_ExplorerExecutable
-	jq .exec_file_hl
+	jr .exec_file_hl
 .run_boot_cmd:
 	call os_check_recovery_key
 	ld de,str_CmdArguments
@@ -410,14 +422,13 @@ os_return_soft:
 	jq c,boot_failed_critical
 	call sys_ExecuteFile
 	pop bc,bc
-	jq os_recovery_menu
+	jr os_recovery_menu
 
 boot_failed_critical:    ; if we can't locate/create the boot configs and we can't locate the main gui or the command interpreter
-	ld hl,str_BootFailed ; then notify the user and open the recovery menu. Eventually there will be an emergency command line.
+	ld hl,str_BootFailed ; then notify the user and open the recovery menu.
 	call gui_DrawConsoleWindow
-	; todo: emergency command line
 	call sys_WaitKeyCycle
-	jq os_recovery_menu
+	jr os_recovery_menu
 
 os_check_recovery_key:
 	call sys_GetKey

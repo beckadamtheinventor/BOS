@@ -24,3 +24,12 @@ file '../noti-ez80/bin/NOTI-autoboot.rom'
 
 	db $040000-$ dup $FF
 
+	include 'src/data/root_partition.asm'
+	db $040100-$ dup $FF
+
+	file 'src/data/adrive/main.bin'
+	db $010000 - ($ and $FFFF) dup $FF
+
+	include 'src/data/root_dir_data.asm'
+	db "EXTRACT OPT", 0, 0, 0, 0, 0
+	db $40 - ($ and $40) dup $FF
