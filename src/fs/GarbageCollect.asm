@@ -156,19 +156,30 @@ fs_GarbageCollect:
 	
 	; jq .shuffle_files
 ; .done_shuffling:
+	; ld hl,(ti.mpLcdUpbase)
+	; ld bc,$D52C00
+	; or a,a
+	; sbc hl,bc
+	; jr z,.no_restore_vram
+	; add hl,bc
+	; ld de,$D40000
+	; ld bc,ti.lcdWidth*ti.lcdHeight
+	; push de
+	; ldir
+	; pop de
+	; ld (ti.mpLcdUpbase),de
+; .no_restore_vram:
 	call fs_InitClusterMap.reinit
-
+	pop hl
 	ld bc,$D52C00
 	or a,a
 	sbc hl,bc
-	jq z,.no_restore_vram
+	jr z,.no_restore_vram
 	add hl,bc
-	ld de,$D40000
-	ld bc,ti.lcdWidth*ti.lcdHeight
-	push de
+	ex hl,de
+	ld bc,ti.lcdWidth * ti.lcdHeight
+	ld hl,ti.vRam
 	ldir
-	pop de
-	ld (ti.mpLcdUpbase),de
 .no_restore_vram:
 	ld sp,ix
 	pop ix

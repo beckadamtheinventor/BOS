@@ -8,7 +8,7 @@ fs_InitClusterMap:
 .reinit:
 	ld a,fs_cluster_map shr 16
 	call sys_ReadSectorCache.entry
-	ld hl,fs_cluster_map
+	ld hl,ti.vRam + (fs_cluster_map and $FFFF)
 	push hl
 	pop de
 	inc de
