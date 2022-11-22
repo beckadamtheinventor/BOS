@@ -1,5 +1,5 @@
 
-import os, sys, ctypes
+import os, sys, time, ctypes
 
 try:
     import serial, serial.tools.list_ports
@@ -19,29 +19,32 @@ except ImportError:
 		# exit(ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1))
 
 
-ce_id = (0x0451, 0xe008)
-max_packet_size = 513
-
+ce_id = [(0x0451, 0xe008), (0x16C0, 0x05E1)]
+max_packet_size = 1024
+incoming_data_buffer_len = max_packet_size - 1
 
 def WriteSerial(serial_device, data):
 	serial_device.write(len(data).to_bytes(3, 'little'))
 	serial_device.write(data)
 
-def WaitForAck(serial_device):
-	for _ in range(1000):
-		l = serial_device.read(3)
-		if l is None or len(l) != 3:
-			return False
-		size = int.from_bytes(bytes(l), 'little')
-		data = serial_device.read(size)
-		if len(data):
-			if data[0] == 4:
-				print("Got Acknowledge packet")
-				return True
-			elif data[0] == 0:
-				print("".join([chr(c) for c in data[1:]]))
-		else:
-			return False
+# def WaitForAck(serial_device):
+	# for _ in range(1000):
+		# l = serial_device.read(3)
+		# if l is None or len(l) != 3:
+			# return False
+		# size = int.from_bytes(bytes(l), 'little')
+		# data = serial_device.read(size)
+		# if len(data):
+			# if data[0] == 4:
+				# print("Got Acknowledge packet")
+				# return True
+			# elif data[0] == 5:
+				# print("Device errored while receiving.")
+				# return False
+			# elif data[0] == 0:
+				# print("".join([chr(c) for c in data[1:]]))
+		# else:
+			# return False
 
 
 def SendFile(path, devpath, serial_device):
@@ -66,14 +69,18 @@ def SendFile(path, devpath, serial_device):
 		else:
 			fname = devpath + "/" + fname
 	WriteSerial(serial_device, bytes([1] + list(len(fdata).to_bytes(3, 'little')) + [ord(c) for c in fname] + [0]))
-	if not WaitForAck(serial_device):
-		return False
+	time.sleep(0.075)
 	i = 0
+	print("Sending File...")
 	while i < len(fdata):
-		WriteSerial(serial_device, bytes([2] + list(fdata[i:i+max_packet_size-1])))
-		i += max_packet_size-1
-		if not WaitForAck(serial_device):
-			return False
+		# print("Writing to device...")
+		WriteSerial(serial_device, bytes([2] + list(fdata[i:min(len(fdata),i+incoming_data_buffer_len)])))
+		i += incoming_data_buffer_len
+		print(f"{int(100*i/len(fdata))}%", end=" ")
+		time.sleep(0.075)
+		# WaitForAck(serial_device)
+		# return False
+	print()
 	return True
 
 def RequestFile(path, serial_device):
@@ -90,10 +97,11 @@ def DirList(path, serial_device):
 			return False
 
 	WriteSerial(serial_device, bytes([5] + [ord(c) for c in path] + [0]))
-	return WaitForAck(serial_device)
+	return True;
+	# return WaitForAck(serial_device)
 
 def ConnectCalcSerial():
-	ports = [x for x in serial.tools.list_ports.comports() if (x.vid, x.pid) == ce_id]
+	ports = [x for x in serial.tools.list_ports.comports() if (x.vid, x.pid) in ce_id]
 	if len(ports) == 0:
 		ports_manual=serial.tools.list_ports.comports()
 		ct=0

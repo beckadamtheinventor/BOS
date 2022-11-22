@@ -24,8 +24,9 @@ typedef struct {
 	size_t current_len;
 } file_header_t;
 
-#define incoming_data_buffer_len 512
+#define incoming_data_buffer_len 1023
 #define usb_process usb_HandleEvents
+#define usb_write(buf, size) srl_Write(&srl, buf, size)
 
 #define PS_STR(str) (str), 1+strlen(str)
 #define PS_VAL(val) (&val), sizeof(val)
@@ -46,7 +47,7 @@ static usb_error_t handle_usb_event(usb_event_t event, void *event_data,
 									usb_callback_data_t *callback_data);
 
 
-void usb_write(void *buf, size_t size);
+// void usb_write(void *buf, size_t size);
 bool usb_read_to_size(size_t size);
 
 #endif

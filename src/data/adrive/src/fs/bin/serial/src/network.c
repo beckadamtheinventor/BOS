@@ -1,27 +1,31 @@
-#include <stdarg.h>
+#include <tice.h>
 #include <usbdrvce.h>
 #include <srldrvce.h>
 #include "network.h"
 
+usb_device_t device;
 srl_device_t srl;
-uint8_t srl_buf[1024];
-uint8_t net_buf[513];
+uint8_t srl_buf[8192];
+uint8_t net_buf[1024];
 file_header_t incoming_file;
 file_header_t outgoing_file;
 uint8_t *incoming_data = 0;
 bool network_up = false;
 
 void ntwk_process(void) {
-	usb_process();
+	static size_t len = 0;
 
 	/* Only read if the device is connected */
-	if(network_up) {
-		size_t len;
-		if (usb_read_to_size(3)) {
-			len = *(unsigned int *)&net_buf;
-			len = usb_read_to_size(len);
-			if (len > 0){
-				conn_HandleInput(&net_buf, len);
+	usb_process();
+	if (network_up) {
+		if (len > 0) {
+				if (usb_read_to_size(len)) {
+					conn_HandleInput(&net_buf, len);
+					len = 0;
+				}
+		} else {
+			if (usb_read_to_size(3)) {
+				len = *(size_t*)&net_buf;
 			}
 		}
 	}
@@ -66,19 +70,20 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
 						goto sendError;
 					}
 				}
-				if (fs_CreateFile(incoming_file.name, 0, incoming_file.len) == -1) {
+				if ((incoming_file.fd = fs_CreateFile(incoming_file.name, 0, incoming_file.len)) == -1) {
 					goto sendError;
 				}
 			}
-			ntwk_send(4, -1, 1); // acknowledge that we've created the file
+			// ntwk_send(4, -1, 1); // acknowledge that we've created the file
 			break;
 		case 2: // incoming file data section
-			len = incoming_file.current_len + incoming_data_buffer_len > incoming_file.len ? incoming_file.len - incoming_file.current_len : incoming_data_buffer_len;
-			if (fs_WriteRaw(data, incoming_data_buffer_len, 1, incoming_file.fd, len) == -1) {
+			len = (incoming_file.current_len + incoming_data_buffer_len > incoming_file.len) ?
+				(incoming_file.len - incoming_file.current_len) : incoming_data_buffer_len;
+			if (fs_WriteDirectly(data, len, 1, incoming_file.fd, incoming_file.current_len) == -1) {
 				goto sendError;
 			}
 			incoming_file.current_len += len;
-			ntwk_send(4, -1, 1); // acknowledge that we've written the received block
+			// ntwk_send(4, -1, 1); // acknowledge that we've written the received block
 		case 3: // request file
 			sys_Free(outgoing_file.name);
 			len = strlen((file_name = data)) + 1;
@@ -115,6 +120,7 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
 	}
 	return;
 	sendError:; // respond to host with error
+	gui_PrintLine("Send Error.");
 	ntwk_send(5, -1, 1);
 }
 
@@ -126,31 +132,57 @@ void malloc_error(void) {
 
 bool init_usb(void) {
 	usb_error_t usb_error;
-	network_up = false;
-	usb_error = usb_Init(handle_usb_event, NULL, srl_GetCDCStandardDescriptors(), USB_DEFAULT_INIT_FLAGS);
-	return !usb_error;
+    srl_error_t srl_error;
+    sk_key_t key = 0;
+    network_up = false;
+    usb_error = usb_Init(handle_usb_event, NULL, srl_GetCDCStandardDescriptors(), USB_DEFAULT_INIT_FLAGS);
+    do {
+        usb_HandleEvents();
+        key = os_GetCSC();
+    } while((!device) && (key!= sk_Clear));
+    if(!device) {
+        printf("no device");
+        os_GetKey();
+        return false;
+    }
+    srl_error = srl_Open(&srl, device, srl_buf, sizeof(srl_buf), SRL_INTERFACE_ANY, 115200);
+    if(srl_error) {
+        printf("srl error");
+        os_GetKey();
+        return false;
+    }
+    network_up = true;
+	return true;
 }
 
 /* Handle USB events */
 static usb_error_t handle_usb_event(usb_event_t event, void *event_data,
-									usb_callback_data_t *callback_data) {
-	srl_error_t srl_error;
-	/* When a device is connected, or when connected to a computer */
-	if ((event == USB_DEVICE_CONNECTED_EVENT && !(usb_GetRole() & USB_ROLE_DEVICE)) || event == USB_HOST_CONFIGURE_EVENT) {
-		usb_device_t device = event_data;
-		if (!(srl_error = srl_Open(&srl, device, srl_buf, (sizeof(srl_buf)), SRL_INTERFACE_ANY, 115200))) {
-			gui_PrintLine("Serial connection initialized.");
-			network_up = true;
-		}
-	}
+                                    usb_callback_data_t *callback_data) {
+    usb_error_t err;
+    /* Delegate to srl USB callback */
+    if ((err = srl_UsbEventCallback(event, event_data, callback_data)) != USB_SUCCESS)
+        return err; 
+    /* Enable newly connected devices */
+    if(event == USB_DEVICE_CONNECTED_EVENT && !(usb_GetRole() & USB_ROLE_DEVICE)) {
+        usb_device_t device = event_data;
+        printf("device connected\n");
+        usb_ResetDevice(device);
+    }
+    if(event == USB_HOST_CONFIGURE_EVENT) {
+        usb_device_t host = usb_FindDevice(NULL, NULL, USB_SKIP_HUBS);
+        if(host) device = host;
+    }
+    /* When a device is connected, or when connected to a computer */
+    if((event == USB_DEVICE_ENABLED_EVENT && !(usb_GetRole() & USB_ROLE_DEVICE))) {
+        device = event_data;
+    }
+    if(event == USB_DEVICE_DISCONNECTED_EVENT) {
+        srl_Close(&srl);
+        network_up = false;
+        device = NULL;
+    }
 
-	/* When a device is disconnected */
-	if(event == USB_DEVICE_DISCONNECTED_EVENT) {
-		gui_PrintLine("USB disconnected.");
-		network_up = false;
-	}
-
-	return USB_SUCCESS;
+    return USB_SUCCESS;
 }
 
 bool usb_read_to_size(size_t size) {
@@ -158,8 +190,4 @@ bool usb_read_to_size(size_t size) {
 	bytes_read += srl_Read(&srl, &net_buf[bytes_read], size - bytes_read);
 	if(bytes_read >= size) {bytes_read = 0; return true;}
 	else return false;
-}
-
-void usb_write(void *buf, size_t size) {
-	srl_Write(&srl, buf, size);
 }

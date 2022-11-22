@@ -160,7 +160,7 @@ void *fs_Write(void *data, size_t len, uint8_t count, void *fd, unsigned int off
  * @note Only the amount of bytes allocated to the file can be written, this routine fails otherwise.
  *       This routine will also fail if the data can't be written correctly.
  */
-void *fs_WriteRaw(void *data, size_t len, uint8_t count, void *fd, unsigned int offset);
+void *fs_WriteDirectly(void *data, size_t len, uint8_t count, void *fd, unsigned int offset);
 
 /**
  * Scan the keypad, checking if a key was pressed.
