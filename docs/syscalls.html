@@ -103,7 +103,7 @@
 <tr><td><a href="#gui_PrintUInt">bos.gui_PrintUInt</a></td><td><a href="#gui_PrintUInt">02257C</a></td></tr>
 <tr class="no_op"></tr><td><a href="#DONOTHING ">bos.DONOTHING </a></td><td><a href="#DONOTHING ">022580</a></td></tr>
 <tr class="no_op"></tr><td><a href="#DONOTHING ">bos.DONOTHING </a></td><td><a href="#DONOTHING ">022584</a></td></tr>
-<tr><td><a href="#fs_GetFilePtr">bos.fs_GetFilePtr</a></td><td><a href="#fs_GetFilePtr">022588</a></td></tr>
+<tr><td><a href="#fs_GetFilePtrRaw">bos.fs_GetFilePtrRaw</a></td><td><a href="#fs_GetFilePtrRaw">022588</a></td></tr>
 <tr class="no_op"></tr><td><a href="#DONOTHING ">bos.DONOTHING </a></td><td><a href="#DONOTHING ">02258C</a></td></tr>
 <tr><td><a href="#sys_ExecuteFileHL">bos.sys_ExecuteFileHL</a></td><td><a href="#sys_ExecuteFileHL">022590</a></td></tr>
 <tr><td><a href="#sys_TurnOff">bos.sys_TurnOff</a></td><td><a href="#sys_TurnOff">022594</a></td></tr>
@@ -145,8 +145,8 @@
 <tr><td><a href="#sys_OpenFileInPath">bos.sys_OpenFileInPath</a></td><td><a href="#sys_OpenFileInPath">022624</a></td></tr>
 <tr><td><a href="#sys_VarString">bos.sys_VarString</a></td><td><a href="#sys_VarString">022628</a></td></tr>
 <tr><td><a href="#fs_GetFreeSpace">bos.fs_GetFreeSpace</a></td><td><a href="#fs_GetFreeSpace">02262C</a></td></tr>
-<tr><td><a href="#fs_GetFDPtr">bos.fs_GetFDPtr</a></td><td><a href="#fs_GetFDPtr">022630</a></td></tr>
-<tr><td><a href="#fs_GetFDLen">bos.fs_GetFDLen</a></td><td><a href="#fs_GetFDLen">022634</a></td></tr>
+<tr><td><a href="#fs_GetFDPtrRaw">bos.fs_GetFDPtrRaw</a></td><td><a href="#fs_GetFDPtrRaw">022630</a></td></tr>
+<tr><td><a href="#fs_GetFDLenRaw">bos.fs_GetFDLenRaw</a></td><td><a href="#fs_GetFDLenRaw">022634</a></td></tr>
 <tr><td><a href="#_OP1ToPath">bos._OP1ToPath</a></td><td><a href="#_OP1ToPath">022638</a></td></tr>
 <tr><td><a href="#th_WaitKeyCycle">bos.th_WaitKeyCycle</a></td><td><a href="#th_WaitKeyCycle">02263C</a></td></tr>
 <tr><td><a href="#fs_JoinPath">bos.fs_JoinPath</a></td><td><a href="#fs_JoinPath">022640</a></td></tr>
@@ -154,12 +154,26 @@
 <tr><td><a href="#sys_OpenFileInVar">bos.sys_OpenFileInVar</a></td><td><a href="#sys_OpenFileInVar">022648</a></td></tr>
 <tr><td><a href="#fs_BaseName">bos.fs_BaseName</a></td><td><a href="#fs_BaseName">02264C</a></td></tr>
 <tr><td><a href="#fs_MoveFile">bos.fs_MoveFile</a></td><td><a href="#fs_MoveFile">022650</a></td></tr>
-<tr><td><a href="#fs_WriteRaw">bos.fs_WriteRaw</a></td><td><a href="#fs_WriteRaw">022654</a></td></tr>
+<tr><td><a href="#fs_WriteDirectly">bos.fs_WriteDirectly</a></td><td><a href="#fs_WriteDirectly">022654</a></td></tr>
 <tr><td><a href="#_UnpackUpdates">bos._UnpackUpdates</a></td><td><a href="#_UnpackUpdates">022658</a></td></tr>
 <tr><td><a href="#sys_ReadSectorCache">bos.sys_ReadSectorCache</a></td><td><a href="#sys_ReadSectorCache">02265C</a></td></tr>
 <tr><td><a href="#sys_WriteSectorCache">bos.sys_WriteSectorCache</a></td><td><a href="#sys_WriteSectorCache">022660</a></td></tr>
 <tr><td><a href="#sys_OpenFileInLib">bos.sys_OpenFileInLib</a></td><td><a href="#sys_OpenFileInLib">022664</a></td></tr>
 <tr><td><a href="#sys_LoadHookThreads">bos.sys_LoadHookThreads</a></td><td><a href="#sys_LoadHookThreads">022668</a></td></tr>
+<tr><td><a href="#gfx_BlitScreen">bos.gfx_BlitScreen</a></td><td><a href="#gfx_BlitScreen">02266C</a></td></tr>
+<tr><td><a href="#th_CreateThread">bos.th_CreateThread</a></td><td><a href="#th_CreateThread">022670</a></td></tr>
+<tr><td><a href="#gfx_ZeroVRAM">bos.gfx_ZeroVRAM</a></td><td><a href="#gfx_ZeroVRAM">022674</a></td></tr>
+<tr><td><a href="#th_KillThread">bos.th_KillThread</a></td><td><a href="#th_KillThread">022678</a></td></tr>
+<tr><td><a href="#fs_GetFilePtr">bos.fs_GetFilePtr</a></td><td><a href="#fs_GetFilePtr">02267C</a></td></tr>
+<tr><td><a href="#fs_GetFDPtr">bos.fs_GetFDPtr</a></td><td><a href="#fs_GetFDPtr">022680</a></td></tr>
+<tr><td><a href="#fs_GetFDLen">bos.fs_GetFDLen</a></td><td><a href="#fs_GetFDLen">022684</a></td></tr>
+<tr><td><a href="#fs_ArcUnarcFD">bos.fs_ArcUnarcFD</a></td><td><a href="#fs_ArcUnarcFD">022688</a></td></tr>
+<tr><td><a href="#util_Zx0Decompress">bos.util_Zx0Decompress</a></td><td><a href="#util_Zx0Decompress">02268C</a></td></tr>
+<tr><td><a href="#sys_WaitKeyUnpress">bos.sys_WaitKeyUnpress</a></td><td><a href="#sys_WaitKeyUnpress">022690</a></td></tr>
+<tr><td><a href="#sys_MallocDupStr">bos.sys_MallocDupStr</a></td><td><a href="#sys_MallocDupStr">022694</a></td></tr>
+<tr><td><a href="#sys_MallocDupStrN">bos.sys_MallocDupStrN</a></td><td><a href="#sys_MallocDupStrN">022698</a></td></tr>
+<tr><td><a href="#_SearchSymTable">bos._SearchSymTable</a></td><td><a href="#_SearchSymTable">02269C</a></td></tr>
+<tr><td><a href="#fs_Rename">bos.fs_Rename</a></td><td><a href="#fs_Rename">0226A0</a></td></tr>
 </table><div id="boot_os"><h1>boot_os</h1>	<h3>syscall Adress 020108</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
@@ -187,7 +201,7 @@ ExecutingFileFd set to point to file descriptor. -1 if file not found, -2 if /va
 </td></tr>
 </table></div><div id="fs_GetSectorAddress"><h1>fs_GetSectorAddress</h1>	<h3>syscall Adress 02240C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>get the physical address of a given sector.</td><td>void *fs_GetSectorAddress(uint16_t sector);</td><td></td><td></td><td>
+<tr><td>get the memory address of a given sector address.</td><td>void *fs_GetSectorAddress(uint16_t sector);</td><td></td><td></td><td>
 </td></tr>
 </table></div><div id="fs_CheckDirExists"><h1>fs_CheckDirExists</h1>	<h3>syscall Adress 022410</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -195,7 +209,7 @@ ExecutingFileFd set to point to file descriptor. -1 if file not found, -2 if /va
 </td></tr>
 </table></div><div id="fs_CeilDivBySector"><h1>fs_CeilDivBySector</h1>	<h3>syscall Adress 022414</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>divide by 512, adding 1 to the result if there is a remainder. Returns 1 if HL is 0</td><td>HL = number to divide</td><td>HL = result</td><td></td><td>
+<tr><td>divide by sector size, adding 1 to the result if there is a remainder. Returns 1 if HL is 0</td><td>HL = number to divide</td><td>HL = result</td><td></td><td>
 </td></tr>
 </table></div><div id="fs_CopyFileName"><h1>fs_CopyFileName</h1>	<h3>syscall Adress 022418</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -401,11 +415,11 @@ Cf set if failed</td><td></td><td>
 </td></tr>
 </table></div><div id="fs_MultByBytesPerSector"><h1>fs_MultByBytesPerSector</h1>	<h3>syscall Adress 0224E0</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>multiply by the number of bytes per sector</td><td>HL = number</td><td>HL*=512</td><td></td><td>
+<tr><td>multiply by the number of bytes per sector</td><td>HL = number</td><td>HL*=fs_sector_size</td><td></td><td>
 </td></tr>
 </table></div><div id="_LoadLibraryOP1"><h1>_LoadLibraryOP1</h1>	<h3>syscall Adress 0224E4</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>locate and return a pointer to a library from a ".LLL" file in the "/lib/" directory</td><td>OP1 name of library</td><td>hl points to file length, de points to file data. Cf set if failed</td><td></td><td>
+<tr><td>locate and return a pointer to a library from a ".dll" file in a directory listed in "/lib"</td><td>OP1 name of library</td><td>hl points to file length, de points to file data. Cf set if failed</td><td></td><td>
 </td></tr>
 </table></div><div id="fs_OpenFileInDir"><h1>fs_OpenFileInDir</h1>	<h3>syscall Adress 0224E8</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -436,7 +450,7 @@ string stored at gfx_string_temp</td><td></td><td>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>create a ram file in the /tivars/ directory</td><td>OP1+1 = 8 byte name of var to create<br>
 A = var type<br>
-hl = length to allocate for file</td><td>hl = pointer to 2 byte file length, de = pointer to file data<br>
+hl = length to allocate for file</td><td>hl = pointer to (VAT entry) 2 byte file length, de = pointer to file data<br>
 Cf set and HL = -1 if failed</td><td></td><td>
 </td></tr>
 </table></div><div id="gui_InputNoClear"><h1>gui_InputNoClear</h1>	<h3>syscall Adress 022504</h3>
@@ -478,7 +492,7 @@ Cf set if failed</td><td></td><td>
 integer arguments "num" and "skip" must be less than 65536.</td></tr>
 </table></div><div id="sys_Free"><h1>sys_Free</h1>	<h3>syscall Adress 022528</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Free as block of memory malloc'd by sys_Malloc</td><td>void sys_Free(void *ptr);</td><td></td><td></td><td>
+<tr><td>Free as block of memory malloc'd by sys_Malloc</td><td>void sys_Free(void *ptr);</td><td>Cf set if failed.</td><td></td><td>
 </td></tr>
 </table></div><div id="sys_CallExecuteFile"><h1>sys_CallExecuteFile</h1>	<h3>syscall Adress 02252C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -493,7 +507,7 @@ de = arguments</td><td></td><td></td><td>
 </td></tr>
 </table></div><div id="sys_OpenDevice"><h1>sys_OpenDevice</h1>	<h3>syscall Adress 022534</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Initialize a device and return a device structure.</td><td>device_t *sys_OpenDevice(const char *name);</td><td>pointer to device structure. (file data)<br>
+<tr><td>Initialize a device (if needed) and return a device structure.</td><td>device_t *sys_OpenDevice(const char *name);</td><td>pointer to device structure. (file data)<br>
 hl=-1 and Cf set if failed.</td><td></td><td>
 </td></tr>
 </table></div><div id="fs_CopyFile"><h1>fs_CopyFile</h1>	<h3>syscall Adress 022538</h3>
@@ -558,9 +572,9 @@ If you need a routine callable from C, this is not the one you'll want to use.</
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Print an unsigned integer. Dos not swap buffers.</td><td>hl = integer</td><td></td><td></td><td>
 </td></tr>
-</table></div><div id="fs_GetFilePtr"><h1>fs_GetFilePtr</h1>	<h3>syscall Adress 022588</h3>
+</table></div><div id="fs_GetFilePtrRaw"><h1>fs_GetFilePtrRaw</h1>	<h3>syscall Adress 022588</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>get a pointer to a file's data section</td><td>void *fs_GetFilePtr(const char *path);</td><td>HL = file data pointer, BC = file data length, A = file flags, Cf set and HL = -1 if failed</td><td></td><td>
+<tr><td>get a pointer to a file's data section</td><td>void *fs_GetFilePtrRaw(const char *path);</td><td>HL = file data pointer, BC = file data length, A = file flags, Cf set and HL = -1 if failed</td><td></td><td>
 </td></tr>
 </table></div><div id="sys_ExecuteFileHL"><h1>sys_ExecuteFileHL</h1>	<h3>syscall Adress 022590</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -718,13 +732,13 @@ $VAR must be terminated with a space " " which is not included in the output.</t
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Return remaining free space in the filesystem</td><td>int fs_GetFreeSpace(void);</td><td>filesystem remaining space in bytes</td><td></td><td>
 </td></tr>
-</table></div><div id="fs_GetFDPtr"><h1>fs_GetFDPtr</h1>	<h3>syscall Adress 022630</h3>
+</table></div><div id="fs_GetFDPtrRaw"><h1>fs_GetFDPtrRaw</h1>	<h3>syscall Adress 022630</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Return pointer to file data given a file descriptor</td><td>void *fs_GetFDPtr(void *fd);</td><td>pointer to file data, or -1 and Cf set if file data has not been allocated yet.</td><td></td><td>
+<tr><td>Return pointer to file data given a file descriptor</td><td>void *fs_GetFDPtrRaw(void *fd);</td><td>pointer to file data, or -1 and Cf set if file data has not been allocated yet.</td><td></td><td>
 </td></tr>
-</table></div><div id="fs_GetFDLen"><h1>fs_GetFDLen</h1>	<h3>syscall Adress 022634</h3>
+</table></div><div id="fs_GetFDLenRaw"><h1>fs_GetFDLenRaw</h1>	<h3>syscall Adress 022634</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Return length of file data given a file descriptor</td><td>int fs_GetFDLen(void *fd);</td><td>length of file data. Will be 0 if data has not been initizlized yet.</td><td></td><td>
+<tr><td>Return length of file data given a file descriptor</td><td>int fs_GetFDLenRaw(void *fd);</td><td>length of file data. Will be 0 if data has not been initizlized yet.</td><td></td><td>
 </td></tr>
 </table></div><div id="_OP1ToPath"><h1>_OP1ToPath</h1>	<h3>syscall Adress 022638</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -756,9 +770,9 @@ Cf set, hl = -1 if failed</td><td></td><td>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Move a file given paths and return a file descriptor.</td><td>void *fs_MoveFile(const char *src, const char *dest);</td><td>file descriptor of new file. Returns 0 if failed.</td><td></td><td>
 </td></tr>
-</table></div><div id="fs_WriteRaw"><h1>fs_WriteRaw</h1>	<h3>syscall Adress 022654</h3>
+</table></div><div id="fs_WriteDirectly"><h1>fs_WriteDirectly</h1>	<h3>syscall Adress 022654</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Attempt to write data to a file directly, failing if the data can't be written correctly or if the file isnt large enough.</td><td>void *fs_WriteRaw(void *data, int len, uint8_t count, void *fd, int offset);</td><td>New file descriptor or -1 and Cf set if failed.</td><td></td><td>
+<tr><td>Attempt to write data to a file directly, failing if the data can't be written correctly or if the file isnt large enough.</td><td>void *fs_WriteDirectly(void *data, int len, uint8_t count, void *fd, int offset);</td><td>New file descriptor or -1 and Cf set if failed.</td><td></td><td>
 </td></tr>
 </table></div><div id="_UnpackUpdates"><h1>_UnpackUpdates</h1>	<h3>syscall Adress 022658</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -780,4 +794,60 @@ Cf set, hl = -1 if failed</td><td></td><td>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>run threads given a pointer to a file path structure</td><td>void sys_LoadHookThreads(void *ptr, size_t len);</td><td></td><td></td><td>
 data structure: type byte, entry length byte, offset of data in file (2 bytes), stack size byte, file name (null-terminated), end of entry</td></tr>
+</table></div><div id="gfx_BlitScreen"><h1>gfx_BlitScreen</h1>	<h3>syscall Adress 02266C</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>copies the lcd to the back buffer</td><td></td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="th_CreateThread"><h1>th_CreateThread</h1>	<h3>syscall Adress 022670</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>spawn a thread</td><td>uint8_t th_CreateThread(void *pc, void *sp, int argc, char **argv);</td><td>thread id. 0 if failed</td><td></td><td>
+void *sp must be allocated at least 12 bytes behind it. If void *sp is 0, it will use the sp from the caller</td></tr>
+</table></div><div id="gfx_ZeroVRAM"><h1>gfx_ZeroVRAM</h1>	<h3>syscall Adress 022674</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>clears VRAM with null bytes</td><td></td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="th_KillThread"><h1>th_KillThread</h1>	<h3>syscall Adress 022678</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Kill a thread by ID</td><td>uint8_t th_KillThread(uint8_t id);</td><td>thread ID killed if successful, 0 if failed.</td><td></td><td>
+</td></tr>
+</table></div><div id="fs_GetFilePtr"><h1>fs_GetFilePtr</h1>	<h3>syscall Adress 02267C</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>get a pointer to a file's data section</td><td>void *fs_GetFilePtr(const char *path);</td><td>HL = file data pointer, BC = file data length, A = file flags, Cf set and HL = -1 if failed</td><td></td><td>
+</td></tr>
+</table></div><div id="fs_GetFDPtr"><h1>fs_GetFDPtr</h1>	<h3>syscall Adress 022680</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Return pointer to file data given a file descriptor</td><td>void *fs_GetFDPtr(void *fd);</td><td>pointer to file data, or -1 and Cf set if file data has not been allocated yet.</td><td></td><td>
+</td></tr>
+</table></div><div id="fs_GetFDLen"><h1>fs_GetFDLen</h1>	<h3>syscall Adress 022684</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Return length of file data given a file descriptor</td><td>int fs_GetFDLen(void *fd);</td><td>length of file data. Will be 0 if data has not been initizlized yet.</td><td></td><td>
+</td></tr>
+</table></div><div id="fs_ArcUnarcFD"><h1>fs_ArcUnarcFD</h1>	<h3>syscall Adress 022688</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td></td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="util_Zx0Decompress"><h1>util_Zx0Decompress</h1>	<h3>syscall Adress 02268C</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td></td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="sys_WaitKeyUnpress"><h1>sys_WaitKeyUnpress</h1>	<h3>syscall Adress 022690</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Wait until no keys are pressed.</td><td>None</td><td>None</td><td></td><td>
+</td></tr>
+</table></div><div id="sys_MallocDupStr"><h1>sys_MallocDupStr</h1>	<h3>syscall Adress 022694</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Malloc a copy of a string.</td><td>char *sys_MallocDupStr(const char *str);</td><td>Malloc'd copy and Cf unset or zero and Cf set if failed.</td><td></td><td>
+</td></tr>
+</table></div><div id="sys_MallocDupStrN"><h1>sys_MallocDupStrN</h1>	<h3>syscall Adress 022698</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Malloc a copy of a string up to N characters.</td><td>char *sys_MallocDupStrN(const char *str, size_t len);</td><td>Malloc'd copy and Cf unset or zero and Cf set if failed.</td><td></td><td>
+</td></tr>
+</table></div><div id="_SearchSymTable"><h1>_SearchSymTable</h1>	<h3>syscall Adress 02269C</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Search the symbol table (VAT) for a file specified in OP1</td><td>Same as ti.ChkFindSym, except that 0xFF is treated as a wildcard.</td><td>Same as ti.ChkFindSym.</td><td></td><td>
+</td></tr>
+</table></div><div id="fs_Rename"><h1>fs_Rename</h1>	<h3>syscall Adress 0226A0</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>rename a file</td><td>void *fs_Rename(const char *old_name, const char *new_name);</td><td>file descriptor. returns zero if failed</td><td></td><td>
+</td></tr>
 </table></div></body></html>

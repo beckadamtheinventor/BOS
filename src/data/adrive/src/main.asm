@@ -64,6 +64,7 @@ fs_dir bin_dir
 	fs_sfentry ls_exe, "l", "", f_system+f_subfile
 	fs_sfentry ls_exe, "la", "", f_system+f_subfile
 	fs_sfentry ls_exe, "ls", "", f_system+f_subfile
+	fs_sfentry memcpy_exe, "memcpy", "", f_system+f_subfile
 	fs_entry memedit_exe, "memed", "", f_system
 	fs_entry memedit_exe, "memedit", "", f_system
 	fs_sfentry mkdir_exe, "md", "", f_system+f_subfile
@@ -143,6 +144,10 @@ fs_file os_internal_subfiles
 
 	fs_subfile mf_exe, bin_dir
 		include 'fs/bin/mf.asm'
+	end fs_subfile
+
+	fs_subfile memcpy_exe, bin_dir
+		include 'fs/bin/memcpy.asm'
 	end fs_subfile
 
 	fs_subfile ls_exe, bin_dir

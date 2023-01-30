@@ -56,59 +56,70 @@ def build_docs():
 
 	with open("docs/style.css","w") as f:
 		f.write("""
-	html{
-		background-color: #000500;
-	}
-	body{
-		margin: 0 auto;
-		width: 960px;
-		font-size: 100%;
-		line-height: 1.5;
-		color: white;
-		background-color: #121;
-		text-align: center;
-	}
-	ul{
-		text-align: left;
-	}
-	th,tr,td{
-		border-left: 1px solid #eef;
-		border-top: 1px solid #dde;
-	}
-	th,td{
-		width: 20%;
-	}
-	table{
-		border-right: 1px solid white;
-		border-bottom: 1px solid white;
-		position: relative;
-		left: 2%;
-		width: 96%;
-	}
-	a {
-		color: #aaa;
-	}
-	a:visited {
-		color: #aae;
-	}
-	a:hover {
-		color: #22e;
-	}
-	.no_op{
-		color: #C22;
-	}
-	.assembly{
-		color: #4F1;
-		background-color: #111;
-		border: 1px dotted black;
-		padding-left: 45%;
-		text-align: left;
-	}
-	.stupid_tabs{
-		color: #111;
-		font-size: 2.5;
-	}
-	""")
+html {
+	background-color: #000500;
+}
+body {
+	margin: 0 auto;
+	width: 90%;
+	font-size: 100%;
+	line-height: 1.5;
+	color: white;
+	background-color: #142;
+	text-align: center;
+}
+h1 {
+	color: #ded;
+}
+h3 {
+	color: #cdc;
+}
+ul {
+	text-align: left;
+}
+th, tr, td {
+	border-left: 1px solid #eef;
+	border-top: 1px solid #dde;
+}
+th {
+	color: #ddd;
+	width: 20%;
+}
+td {
+	color: #eee;
+	width: 20%;
+}
+table {
+	border-right: 1px solid white;
+	border-bottom: 1px solid white;
+	position: relative;
+	left: 2%;
+	width: 96%;
+}
+a {
+	color: #aaa;
+}
+a:visited {
+	color: #aae;
+}
+a:hover {
+	color: #22e;
+}
+.no_op {
+	color: #C22;
+}
+.assembly {
+	color: #4F1;
+	background-color: #111;
+	border: 1px dotted black;
+	padding-left: 45%;
+	text-align: left;
+}
+.stupid_tabs {
+	color: #111;
+	font-size: 2.5;
+}
+""")
 
 
 

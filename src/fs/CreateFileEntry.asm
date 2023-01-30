@@ -57,7 +57,6 @@ fs_CreateFileEntry:
 	jq c,.fail
 	pop bc,bc
 
-
 	ld a, (ix+9)
 	ld (ix + fsentry_fileattr - 19), a     ; setup new file descriptor flag byte
 

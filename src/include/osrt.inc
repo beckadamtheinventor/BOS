@@ -40,6 +40,7 @@ osrt.b_to_hexstr      rb 4
 osrt.byte_to_str      rb 4
 osrt.int_to_str       rb 4
 osrt.long_to_str      rb 4
+osrt.intstr_to_str    rb 4
 end virtual
 virtual at 320512
 osrt.str_so.version rb 4

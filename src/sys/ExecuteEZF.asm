@@ -54,21 +54,30 @@ sys_ExecuteEZF:
 	lea iy,iy-4
 	ld (fsOP1),iy
 .dependency_loop:
+	lea iy,iy+8
+	ld a,(iy)
+	inc a
+	jr z,.start_load_loop
+	dec a
+	jr z,.dependency_loop
+	cp a,ezsec.extern
+	jr nz,.dependency_loop
 	
+	jr .dependency_loop
 .start_load_loop:
 	ld iy,(fsOP1)
 .load_loop:
 	lea iy,iy+8
 	ld a,(iy)
 	inc a
-	jq z,.start_relocating
+	jr z,.start_relocating
 	dec a
-	jq z,.load_loop
+	jr z,.load_loop
 	sub a,ezsec.rodat
-	jq c,.load_loop
+	jr c,.load_loop
 	
 	
-	jq .load_loop
+	jr .load_loop
 .start_relocating:
 	
 

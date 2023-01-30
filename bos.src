@@ -164,6 +164,7 @@
 	public _sys_MallocDupStr
 	public _sys_MallocDupStrN
 	public __SearchSymTable
+	public _fs_Rename
 _boot_os                         := $20108
 _handle_interrupt                := $2010C
 _HandleInstruction               := $20110
@@ -328,6 +329,7 @@ _sys_WaitKeyUnpress              := $22690
 _sys_MallocDupStr                := $22694
 _sys_MallocDupStrN               := $22698
 __SearchSymTable                 := $2269C
+_fs_Rename                       := $226A0
 
 public ram_executable
 public ram_executable_at

@@ -9,6 +9,7 @@ boot_os:
 	call sys_FlashLock
 
 os_return:
+	im 1 ; set interrupt mode 1
 	ld hl,ti.userMem
 	ld (top_of_UserMem),hl
 	ld hl,end_of_usermem - ti.userMem

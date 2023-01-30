@@ -160,7 +160,7 @@ void *fs_Write(void *data, size_t len, uint8_t count, void *fd, unsigned int off
  * @note Only the amount of bytes allocated to the file can be written, this routine fails otherwise.
  *       This routine will also fail if the data can't be written correctly.
  */
-void *fs_WriteDirectly(void *data, size_t len, uint8_t count, void *fd, unsigned int offset);
+void *fs_WriteRaw(void *data, size_t len, uint8_t count, void *fd, unsigned int offset);
 
 /**
  * Scan the keypad, checking if a key was pressed.
@@ -382,16 +382,16 @@ void *fs_CreateRamFile(const char *path, uint8_t flags, void *ptr, unsigned int 
 void *fs_AllocRam(unsigned int len);
 
 /**
- * Convert OP1 into a BOS path and return it.
- * @return BOS filesystem path.
+ * Convert OP1 into a BOS file name and return it.
+ * @return BOS file name.
  */
 char *_OP1ToPath(void);
 
 /**
- * Copy into OP1 and convert into a BOS path.
+ * Copy into OP1 and convert into a BOS file name.
  * @param name Variable name.
  * @param type Variable type.
- * @return BOS filesystem path.
+ * @return BOS file name.
  */
 char *TIVarToPath(const char *name, const uint8_t type);
 
@@ -555,9 +555,17 @@ void *fs_WriteByte(uint8_t byte, void *fd, int offset);
  * @param directory Path to parent directory of file to be renamed.
  * @param old_name Old file name.
  * @param new_name New file name.
- * @return New file descriptor, or -1 if failed.
+ * @return New file descriptor, or 0 if failed.
  */
 void *fs_RenameFile(const char *directory, const char *old_name, const char *new_name);
+
+/**
+ * Rename/move a file.
+ * @param old_name Old file path.
+ * @param new_name New file path.
+ * @return New file descriptor, or 0 if failed.
+ */
+void *fs_Rename(const char *old_name, const char *new_name);
 
 /**
  * Create a directory.
@@ -672,14 +680,6 @@ void *fs_WriteNewFile(const char *path, uint8_t properties, void *data, int len)
  * @return pointer to byte following last byte written to dest.
  */
 void *util_Zx7Decompress(void *dest, void *src);
-
-/**
- * Decompress a block of zx0-compressed memory.
- * @param dest Pointer to write to.
- * @param src Pointer to compressed data.
- * @return pointer to byte following last byte written to dest.
- */
-void *util_Zx0Decompress(void *dest, void *src);
 
 
 /**

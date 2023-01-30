@@ -13,6 +13,7 @@ _osrt_numstr_so:
 	jp osrt.byte_to_str
 	jp osrt.int_to_str
 	jp osrt.long_to_str
+	jp osrt.intstr_to_int
 
 virtual
 	db "osrt.str_to_int       rb 4",$A
@@ -25,6 +26,7 @@ virtual
 	db "osrt.byte_to_str      rb 4",$A
 	db "osrt.int_to_str       rb 4",$A
 	db "osrt.long_to_str      rb 4",$A
+	db "osrt.intstr_to_str    rb 4",$A
 	load _routines_osrt_numstr_so: $-$$ from $$
 end virtual
 
@@ -57,6 +59,30 @@ osrt.str_to_int:
 	ld c,a
 	add hl,bc
 	jr .loop
+
+
+; input int osrt.intstr_to_int(const char *str);
+; output auhl / cuhl.
+; is str starts with $ or 0x, it will be processed as a hex string, otherwise a decimal string.
+osrt.intstr_to_int:
+	pop bc,hl
+	ld a,(hl)
+	inc hl
+	cp a,'$'
+	jr z,osrt.intstr_to_int.hex
+	cp a,'0'
+	jr nz,osrt.insstr_to_int.dec
+	ld a,(hl)
+	cp a,'x'
+	jr z,osrt.intstr_to_int.hex
+	dec hl
+osrt.insstr_to_int.dec:
+	dec hl
+	push hl,bc
+	jr osrt.str_to_int
+osrt.intstr_to_int.hex:
+	push hl,bc
+assert $ = osrt.hexstr_to_int
 
 ; convert a base-16 string into an integer
 ; input int osrt.hexstr_to_int(const char *str);
@@ -248,4 +274,3 @@ osrt.num_to_str_aqu.loop:
 	ld (iy),d
 	inc iy
 	ret
-

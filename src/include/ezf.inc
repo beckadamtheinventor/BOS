@@ -119,10 +119,10 @@ virtual at 0
 	?PUBLIC?    rb 1   ;mark a section as public for internal and external use.
 	?EXTERN?    rb 1   ;locate and load an external section by reference.
 	?ENTRY?     rb 1   ;mark a section as the program entry point, aka main function.
-	?RODAT?     rb 1   ;readonly data section relocated into flash.
+	?RODATA?    rb 1   ;readonly data section relocated into flash.
 	?ROEXEC?    rb 1   ;readonly executable section relocated into flash.
 	?ROTHREAD?  rb 1   ;readonly thread executable section relocated into flash.
-	?RWDAT?     rb 1   ;writable data section relocated into RAM.
+	?RWDATA?    rb 1   ;writable data section relocated into RAM.
 	?RWEXEC?    rb 1   ;writable executable section relocated into RAM.
 	?RWTHREAD?  rb 1   ;writable thread executable section relocated into RAM.
 end virtual
@@ -130,7 +130,22 @@ end namespace
 
 macro ezf?
 	local _ezf
-	_ezf.flash_jump_table := $FFFFFF
+	_ezf.numexterns = 0
+	_ezf.numpublics = 0
+	_ezf.numprivates = 0
+
+	macro @ez80.word size*, value*
+		local value, address
+		address = $-$$
+		if value >= $01000000 ; relocatable label
+			virtual _ezf.relocation_offsets
+				dw address, value and $FFFF
+			end virtual
+			@ez80.word 3, $FFFFFF
+		else
+			@ez80.word 3, value
+		end if
+	end macro
 
 	virtual at 0
 		db $7F,"EZF"
@@ -159,7 +174,7 @@ macro ezf?
 	macro entrypoint? sectionlabel
 		virtual _ezf.program_table
 			db ezsec.entry
-			dl 0
+			db 3 dup 0
 			dw sectionlabel.header
 			dw 8
 			sectionlabel._headerend:
@@ -167,17 +182,19 @@ macro ezf?
 	end macro
 
 	macro private? sectionlabel
-		sectionlabel.isprivate := 1
+		_ezf.numprivates = _ezf.numprivates + 1
+		sectionlabel := $01000000 + _ezf.numprivates
 		virtual _ezf.privates_table
 			db ezsec.private
-			dl -1
+			db 3 dup $FF
 			dw sectionlabel.header
 			dw sectionlabel.sectionsource
 		end virtual
 	end macro
 
 	macro public? sectionlabel, sectionname
-		sectionlabel.ispublic := 1
+		_ezf.numpublics = _ezf.numpublics + 1
+		sectionlabel := $02000000 + _ezf.numpublics
 		virtual _ezf.function_names
 			sectionlabel.nameloc:
 			db sectionname, 0
@@ -189,13 +206,14 @@ macro ezf?
 			assert lengthof sectionname < $100
 			db lengthof sectionname
 			dw sectionlabel.header
-			dw $FFFF
+			dw sectionlabel.sectionsource
 			sectionlabel._headerend:
 		end virtual
 	end macro
 
 	macro extern? sectionlabel, sectionname
-		sectionlabel := _ezf.flash_jump_table
+		_ezf.numexterns = _ezf.numexterns + 1
+		sectionlabel := $03000000
 		virtual _ezf.function_names
 			sectionlabel.externnameloc:
 			db sectionname, 0
@@ -206,22 +224,23 @@ macro ezf?
 			dw sectionlabel.externnameloc
 			assert lengthof sectionname < $100
 			db lengthof sectionname
-			jp _ezf.flash_jump_table
+			sectionlabel.jump:
+			jp $FFFFFF
 			sectionlabel._headerend:
 		end virtual
 	end macro
 
 	macro uninitialized?.section? sectionlabel, sectionsize
-		section sectionlabel, ezsec.bss, -1, sectionsize
+		section sectionlabel, ezsec.bss, sectionsize
 		end section
 	end macro
 
-	macro section? sectionlabel, sectiontype, sectionaddress:-1, sectionsize:0
+	macro section? sectionlabel, sectiontype, sectionsize:0
 		virtual _ezf.program_table
-			sectionlabel := -1
 			sectionlabel.header:
 			db sectiontype
-			dl sectionaddress
+			db $FF
+			dw sectionlabel.relocations_offset
 			dw sectionlabel.sectionsource_offset
 			if sectionsize = 0
 				dw sectionlabel.sectionsize
@@ -231,46 +250,23 @@ macro ezf?
 			end if
 			sectionlabel.headerend:
 		end virtual
-		macro @ez80.word? @value*
-			local value, address, hassetvalue
-			value = @value
-			address = $ - $$
-			if value eqtype sectionlabel
-				hassetvalue = 0
-				irpv usablelabel, <public, private>
-					virtual usablelabel.relocation_offsets
-						dw address
-						hassetvalue = 1
-						break
-					end virtual
-				end irpv
-				if hassetvalue = 0
-					irpv usablelabel, extern
-						virtual usablelabel.relocation_offsets
-							dw address
-							hassetvalue = 1
-							break
-						end virtual
-					end irpv
-				end if
-				if hassetvalue = 0
-					display "Label ",value, " not marked as public, private, or extern. This will almost certainly cause runtime errors.",$A
-				end if
-				@ez80.word -1
-			else
-				@ez80.word value
-			end if
-		end macro
+		virtual _ezf.relocation_offsets
+			sectionlabel.relocations_offset = $
+		end virtual
 		sectionlabel.sectionsource:
 		virtual at 0
 		macro end?.section?
 			sectionlabel.sectionsize = $-$$
 			load sectionlabel.sectiondata: $-$$ from $$
 			end virtual
-			sectionlabel.end:
+			virtual _ezf.relocation_offsets
+				dw $FFFF
+				sectionlabel.relocations_end = $
+			end virtual
 			sectionlabel.sectionsource_offset = $
 			db sectionlabel.sectiondata
-			restore @ez80.word?
+			sectionlabel.end = $
+			restore @ez80.word
 			purge end?.section?
 		end macro
 	end macro

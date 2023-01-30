@@ -34,7 +34,7 @@ osrt.argv_a:
 	jr c,osrt.argv_fail
 	push bc
 	ld b,3
-	ld c,a
+	ld c,e
 	mlt bc
 	ld hl,(ix+9)
 	add hl,bc

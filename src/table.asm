@@ -177,4 +177,5 @@
 	jp sys_MallocDupStr
 	jp sys_MallocDupStrN
 	jp _SearchSymTable
+	jp fs_Rename
 ; end of jump table
