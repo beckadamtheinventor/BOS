@@ -76,7 +76,6 @@ handle_interrupt:
 	jr z,handle_interrupt_2
 	ld c,$09
 	rla
-	jr c,check_bad_interrupt
 	rla
 	jq c,high_bit_6_int
 	rla
@@ -87,11 +86,10 @@ handle_interrupt:
 	jq c,high_bit_3_int
 	ld a,$FF
 	out (bc),a
-	jr return_from_interrupt
 handle_interrupt_2:
 	ld c,$14
 	in a,(bc)
-	jr z,check_bad_interrupt
+	jr z,handle_interrupt_3
 	ld c,$08
 	rra
 	jq c,low_bit_0_int
@@ -103,6 +101,19 @@ handle_interrupt_2:
 	jq c,low_bit_3_int
 	rra
 	jq c,low_bit_4_int
+	ld a,$FF
+	out (bc),a
+handle_interrupt_3:
+	ld c,$16
+	in a,(bc)
+	jr z,return_from_interrupt
+	ld c,$0A
+	rra
+	jq c,byte_3_bit_0_int
+	rra
+	rra
+	rra
+	jq c,byte_3_bit_3_int
 	ld a,$FF
 	out (bc),a
 	jr return_from_interrupt
@@ -193,6 +204,22 @@ high_bit_6_int:
 	ld c,5
 	in a,(bc)
 	res 6,a
+	out (bc),a
+	jq return_from_interrupt
+byte_3_bit_0_int:
+	ld a,1 shl 0
+	out (bc),a
+	ld c,6
+	in a,(bc)
+	res 0,a
+	out (bc),a
+	jq return_from_interrupt
+byte_3_bit_3_int:
+	ld a,1 shl 3
+	out (bc),a
+	ld c,6
+	in a,(bc)
+	res 3,a
 	out (bc),a
 	jq return_from_interrupt
 

@@ -152,15 +152,15 @@ macro ezf?
 		load _ezf.header: $-$$ from $$
 	end virtual
 	virtual at 4
+		_ezf.externs_table::
+	end virtual
+	virtual at _ezf.externs_table.end
 		_ezf.publics_table::
 	end virtual
 	virtual at _ezf.publics_table.end
 		_ezf.privates_table::
 	end virtual
 	virtual at _ezf.privates_table.end
-		_ezf.externs_table::
-	end virtual
-	virtual at _ezf.externs_table.end
 		_ezf.program_table::
 	end virtual
 	virtual at _ezf.sections_data.end
@@ -303,9 +303,9 @@ macro ezf?
 			load _ezf.relocation_offsets.data: $-$$ from $$
 		end virtual
 		db _ezf.header
+		db _ezf.externs_table.data
 		db _ezf.publics_table.data
 		db _ezf.privates_table.data
-		db _ezf.externs_table.data
 		db _ezf.program_table.data
 		db _ezf.sections_data
 		db _ezf.relocation_offsets.data
