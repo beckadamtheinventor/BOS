@@ -1,4 +1,7 @@
+#include <stdint.h>
+#include <stdio.h>
 #include <tice.h>
+#include <bos.h>
 #include <usbdrvce.h>
 #include <srldrvce.h>
 #include "network.h"
@@ -79,7 +82,7 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
 		case 2: // incoming file data section
 			len = (incoming_file.current_len + incoming_data_buffer_len > incoming_file.len) ?
 				(incoming_file.len - incoming_file.current_len) : incoming_data_buffer_len;
-			if (fs_WriteDirectly(data, len, 1, incoming_file.fd, incoming_file.current_len) == -1) {
+			if (fs_WriteRaw(data, len, 1, incoming_file.fd, incoming_file.current_len) == -1) {
 				goto sendError;
 			}
 			incoming_file.current_len += len;
@@ -111,6 +114,16 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
 					len = outgoing_file.current_len + incoming_data_buffer_len > outgoing_file.len ? outgoing_file.len - outgoing_file.current_len : incoming_data_buffer_len;
 					outgoing_file.current_len += len;
 				} while (outgoing_file.current_len < outgoing_file.len);
+			}
+			break;
+		case 6: // incoming directory
+			sys_Free(incoming_file.name);
+			len = strlen((file_name = data)) + 1;
+			incoming_file.current_len = 0;
+			if (!(outgoing_file.name = sys_Malloc(len))) {
+				malloc_error();
+			} else {
+				fs_CreateDir(data, 0x10);
 			}
 			break;
 		default:
@@ -186,7 +199,7 @@ static usb_error_t handle_usb_event(usb_event_t event, void *event_data,
 }
 
 bool usb_read_to_size(size_t size) {
-	static bytes_read = 0;
+	static unsigned int bytes_read = 0;
 	bytes_read += srl_Read(&srl, &net_buf[bytes_read], size - bytes_read);
 	if(bytes_read >= size) {bytes_read = 0; return true;}
 	else return false;

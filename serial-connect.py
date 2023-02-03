@@ -26,6 +26,7 @@ incoming_data_buffer_len = max_packet_size - 1
 def WriteSerial(serial_device, data):
 	serial_device.write(len(data).to_bytes(3, 'little'))
 	serial_device.write(data)
+	time.sleep(0.1)
 
 # def WaitForAck(serial_device):
 	# for _ in range(1000):
@@ -46,6 +47,51 @@ def WriteSerial(serial_device, data):
 		# else:
 			# return False
 
+def SendPackage(pack, serial_device):
+	with open(pack, "r") as f:
+		package = json.load(f)
+
+	manifest = []
+	if "directories" in package.keys():
+		for i in range(len(package["directories"])):
+			dname = package["directories"][i]
+			if type(dname) is str:
+				SendDirectory(dname)
+				manifest.append(dname)
+			elif type(dname) is list:
+				SendDirectory("/".join(dname))
+				manifest.append("/".join(dname))
+			elif type(dname) is dict:
+				print(f"Warning: directory {i} listed in package json is not a string or list. It will be ignored.")
+
+	if "files" in package.keys():
+		for i in range(len(package["files"])):
+			f = package["files"][i]
+			if type(f) is dict:
+				if "source" in f.keys():
+					source = f["source"]
+					if not os.path.exists(source):
+						print(f"Warning: file {i} listed in package json requires file \"{f['source']}\", but it is missing! Ignoring this entry.")
+						continue
+				else:
+					print(f"Warning: file {i} listed in package json is missing required key \"source\". It will be ignored.")
+					continue
+				if "dest" in f.keys():
+					dest = f["dest"]
+					if type(dest) is list:
+						dest = "/".join(dest)
+					elif type(dest) is not str:
+						print(f"Warning: file {i} listed in package json key \"dest\" is not a string or list. It will be ignored.")
+						continue
+				else:
+					print(f"Warning: file {i} listed in package json is missing required key \"dest\". It will be ignored.")
+					continue
+				SendFile(source, dest.rstrip("/").rsplit("/", maxsplit=1), serial_device)
+			else:
+				print(f"Warning: file {i} listed in package json is not an object. It will be ignored.")
+
+	
+	
 
 def SendFile(path, devpath, serial_device):
 	if serial_device is None:
@@ -69,7 +115,6 @@ def SendFile(path, devpath, serial_device):
 		else:
 			fname = devpath + "/" + fname
 	WriteSerial(serial_device, bytes([1] + list(len(fdata).to_bytes(3, 'little')) + [ord(c) for c in fname] + [0]))
-	time.sleep(0.075)
 	i = 0
 	print("Sending File...")
 	while i < len(fdata):
@@ -77,11 +122,13 @@ def SendFile(path, devpath, serial_device):
 		WriteSerial(serial_device, bytes([2] + list(fdata[i:min(len(fdata),i+incoming_data_buffer_len)])))
 		i += incoming_data_buffer_len
 		print(f"{int(100*i/len(fdata))}%", end=" ")
-		time.sleep(0.075)
 		# WaitForAck(serial_device)
 		# return False
 	print()
 	return True
+
+def SendDirectory(path, serial_device):
+	WriteSerial(serial_device, bytes([6] + [ord(c) for c in path]))
 
 def RequestFile(path, serial_device):
 	if serial_device is None:
@@ -97,7 +144,7 @@ def DirList(path, serial_device):
 			return False
 
 	WriteSerial(serial_device, bytes([5] + [ord(c) for c in path] + [0]))
-	return True;
+	return True
 	# return WaitForAck(serial_device)
 
 def ConnectCalcSerial():
@@ -180,6 +227,11 @@ try:
 						# print("Failed to recieve file.")
 				elif w == "message" or w == "msg":
 					WriteSerial(serial_device, bytes([0] + [ord(c) for c in line.split(maxsplit=1)[1]] + [0]))
+				elif w == "sendpackage":
+					if SendPackage(line.split(maxsplit=1)[1], serial_device):
+						print("Sent package successfuly")
+					else:
+						print("Failed to send package")
 except KeyboardInterrupt:
 	pass
 except Exception as e:

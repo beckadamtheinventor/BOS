@@ -5,6 +5,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <string.h>
+#include <bos.h>
 
 typedef struct {
 	uint8_t control;

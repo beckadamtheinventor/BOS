@@ -62,12 +62,12 @@ bpm_main:
 	ret
 .infostr:
 	db "BOS Package Manager v1.0",$A
-	db $9,"bpm install [-br] package",$A
-	db $9,$9,"Install a package. -b uses PC bridge to connect to server or local. -r uses remote server.",$A
-	db $9,"bpm remove package",$A
-	db $9,$9,"Uninstall a package.",$A
-	db $9,"bpm purge package",$A
-	db $9,$9,"Uninstall a package and remove all data associated with it.",$A
+	db $9,"bpm install [-bru] package",$A
+	db $9,"Install a package. -b uses PC bridge to connect to server or local.",$A
+	db "-r uses remote server. -u installs package from usb",$A
+	db $9,"bpm remove package",$9,"Uninstall a package.",$A
+	db $9,"bpm purge package",$9,"Uninstall a package and",$A
+	db "remove all data associated with it.",$A
 	db 0
 
 bpm_install:
@@ -86,6 +86,7 @@ bpm_install:
 	call bos.fs_GetFilePtr
 	pop de
 	jq bpm_process_data
+
 .network_package_install:
 	
 	ret
