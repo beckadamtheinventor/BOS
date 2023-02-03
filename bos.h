@@ -158,9 +158,11 @@ void *fs_Write(void *data, size_t len, uint8_t count, void *fd, unsigned int off
  * @param offset Offset of file to write data to.
  * @return New file descriptor, or -1 if failed.
  * @note Only the amount of bytes allocated to the file can be written, this routine fails otherwise.
- *       This routine will also fail if the data can't be written correctly.
+ *       This routine will also fail if the data can't be written correctly. (ANDed with existing data)
  */
 void *fs_WriteRaw(void *data, size_t len, uint8_t count, void *fd, unsigned int offset);
+#define fs_WriteDirectly fs_WriteRaw
+
 
 /**
  * Scan the keypad, checking if a key was pressed.
