@@ -184,8 +184,10 @@ assert ~start_of_user_archive and $FF
 	add hl,bc
 	or a,a
 	sbc hl,bc
+	ret nz
+	call fs_CheckOSOptBinaries
+	xor a,a
 	ret
-
 
 .check_ramfs:
 	ld hl,str_ram_fs_device

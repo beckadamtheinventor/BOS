@@ -86,18 +86,20 @@ fs_root_file_initializers:
 	db $10, "etc/fontlibc",0
 	db $10, "home",0
 	db $10, "opt",0
-	db $10, "opt/"
+	db $10, "opt"
 str_bin_dir:
-	db "bin",0
-	db $10, "opt/"
+	db "/bin",0
+	db $10, "opt"
 str_lib_dir:
-	db "lib",0
+	db "/lib",0
 	db $10, "tivars",0
 	db $10, "tmp",0
 	db $10, "usr",0
 	db $10, "usr/bin",0
 	db $10, "usr/lib",0
-	db $10, "var",0
+	db $10
+str_var_dir:
+	db "/var",0
 
 	db $00, "etc/fontlibc/DrMono",0
 	dw fs_file_data_drmono.len
