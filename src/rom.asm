@@ -31,5 +31,5 @@ file '../noti-ez80/bin/NOTI-autoboot.rom'
 	db $010000 - ($ and $FFFF) dup $FF
 
 	include 'src/data/root_dir_data.asm'
-	db "EXTRACT OPT", 0, 0, 0, 0, 0
+	db "EXTRACT OPT", 0, $FF, $FF, $FF, $FF
 	db $40 - ($ and $40) dup $FF

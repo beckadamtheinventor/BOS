@@ -147,10 +147,11 @@ fd_elevated   := 7
 
 ; file entry first byte
 fsentry_deleted         := $00
+fsentry_extendedsection := $24
 fsentry_dot             := $2E
 fsentry_longfilename    := $F1
 fsentry_unlisted        := $F2
-fsentry_dirextender     := $FF
+fsentry_dirextender     := $FE
 fsentry_endofdir2       := $FF
 
 ; file entry offsets

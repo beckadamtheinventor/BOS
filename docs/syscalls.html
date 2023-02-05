@@ -399,7 +399,8 @@ calls boot routine $2DC</td></tr>
 </table></div><div id="fs_CreateFile"><h1>fs_CreateFile</h1>	<h3>syscall Adress 0224D0</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Create a file given a path and return a file descriptor.</td><td>void *fs_CreateFile(const char *path, uint8_t flags, int len);</td><td>file descriptor. Returns 0 if failed to create file.</td><td></td><td>
-if len is zero, the file data section will not be initialized.</td></tr>
+if len is zero, the file data section will not be initialized.<br>
+if len is greater than 65536, this routine fails.</td></tr>
 </table></div><div id="strupper"><h1>strupper</h1>	<h3>syscall Adress 0224D4</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>convert a string to uppercase</td><td>HL pointer to string</td><td>HL HL+strlen(HL)</td><td></td><td>

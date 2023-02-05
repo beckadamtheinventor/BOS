@@ -44,7 +44,8 @@ assert ~start_of_user_archive and $FF
 .has_valid_fs_descriptor:
 	call .check_ramfs
 	call .check_root ; check if root directory begins with the right directories
-	ret z
+	jq z,fs_InitClusterMap ; if everything seems fine so far, reinitialize the cluster map.
+	                       ; (will only actually reinitialize if there are no free sectors or all sectors are free)
 .run_init:
 	call os_GetOSInfo
 	call gui_DrawConsoleWindow

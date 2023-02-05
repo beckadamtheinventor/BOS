@@ -59,4 +59,5 @@ include 'sys/ReadSectorCache.asm'
 include 'sys/WriteSectorCache.asm'
 include 'sys/MallocDupStrN.asm'
 include 'sys/MallocDupStr.asm'
-
+; include 'sys/RelocateProgram.asm'
+; include 'sys/RelocateProgramFD.asm'

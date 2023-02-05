@@ -2,9 +2,47 @@
 ;@INPUT void fs_InitClusterMap(void);
 ;@NOTE uses the first half of vRam as scrap.
 fs_InitClusterMap:
-	ld a,(fs_cluster_map)
+	ld hl,fs_cluster_map
+	ld a,(hl)
 	cp a,fscluster_allocated
-	ret z ; dont build the cluster map if its already been built
+	jr nz,.reinit
+; Check if the cluster map is all allocated, all free, or contains any invalid entries.
+; Rebuild the cluster map if needed.
+	ld bc,fs_cluster_map.len
+if fs_cluster_map.len and $FF
+	ld de,0
+else
+	ld e,c
+	mlt de
+end if
+.checkloop:
+	dec bc
+	ld a,c
+	or a,b
+	jr nz,.continuecheckloop
+	ld a,e
+	or a,d
+	ret nz
+	ld a,e
+if fs_cluster_map.len and $FF
+	ld a,e
+	cp a, fs_cluster_map.len and $FF
+else
+	or a,e
+end if
+	ret nz
+	ld a,d
+	cp a, fs_cluster_map.len shr 8
+	jr z,.reinit
+	ret
+.continuecheckloop:
+	ld a,(hl)
+	inc hl
+	inc a
+	jr z,.checkloop
+	inc de
+	inc a
+	jr z,.checkloop
 .reinit:
 	ld a,fs_cluster_map shr 16
 	call sys_ReadSectorCache.entry
@@ -38,7 +76,9 @@ end if
 	pop iy
 
 	ld a,fs_cluster_map shr 16
-	jq sys_WriteSectorCache.entry
+	call sys_WriteSectorCache.entry
+	xor a,a
+	ret
 
 .traverse:
 	lea hl,iy

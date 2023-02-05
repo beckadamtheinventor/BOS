@@ -38,8 +38,10 @@ fs_ExtractOSOptBinaries:
 	pop bc
 	add hl,bc
 	inc hl
-	ld de,(hl) ; grab file uncompressed length
+	mlt de
+	ld e,(hl) ; grab file uncompressed length
 	inc hl
+	ld d,(hl)
 	inc hl
 	push hl,de
 	ld c,(ix)

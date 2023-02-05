@@ -18,20 +18,20 @@ fs_AllocDescriptor:
 	inc a
 	ret z
 	inc a
-	jq nz,.get_end_of_dir_loop
+	jr nz,.get_end_of_dir_loop
 .seek_next_dir_section:
 	ld c,fsentry_filesector+1
 	add hl,bc
 	ld a,(hl)
 	dec hl
 	cp a,(hl)
-	jq nz,.next_section_allocated
+	jr nz,.next_section_allocated
 	inc a
 	jq z,.allocate_dir_section
 .next_section_allocated:
 	ld hl,(hl)
 	call fs_GetSectorAddress.entry
-	jq .get_end_of_dir_loop_entry
+	jr .get_end_of_dir_loop_entry
 
 .allocate_dir_section: ; allocate a new directory section and return it
 	ld bc,fs_directory_size
