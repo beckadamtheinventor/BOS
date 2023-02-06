@@ -376,6 +376,13 @@ void *fs_CreateFile(const char *path, uint8_t flags, unsigned int len);
 void *fs_CreateRamFile(const char *path, uint8_t flags, void *ptr, unsigned int len);
 
 /**
+ * Check if a given block of flash memory can be allocated.
+ * @param len number of bytes to check for.
+ * @return sector number that would be allocated, or -1 if failed.
+ */
+unsigned int fs_AllocChk(unsigned int len);
+
+/**
  * Allocate ram in usermem
  * @param len number of bytes to allocate.
  * @return pointer to memory, or -1 if failed.

@@ -1,6 +1,6 @@
 
 ;@DOES allocate space in flash
-;@INPUT int fs_Alloc(int len);
+;@INPUT unsigned int fs_Alloc(unsigned int len);
 ;@OUTPUT hl = first sector allocated, or -1 and Cf set if failed.
 fs_Alloc:
 	ld a,fscluster_allocated

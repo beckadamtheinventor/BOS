@@ -174,6 +174,7 @@
 <tr><td><a href="#sys_MallocDupStrN">bos.sys_MallocDupStrN</a></td><td><a href="#sys_MallocDupStrN">022698</a></td></tr>
 <tr><td><a href="#_SearchSymTable">bos._SearchSymTable</a></td><td><a href="#_SearchSymTable">02269C</a></td></tr>
 <tr><td><a href="#fs_Rename">bos.fs_Rename</a></td><td><a href="#fs_Rename">0226A0</a></td></tr>
+<tr><td><a href="#fs_AllocChk">bos.fs_AllocChk</a></td><td><a href="#fs_AllocChk">0226A4</a></td></tr>
 </table><div id="boot_os"><h1>boot_os</h1>	<h3>syscall Adress 020108</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
@@ -850,5 +851,9 @@ void *sp must be allocated at least 12 bytes behind it. If void *sp is 0, it wil
 </table></div><div id="fs_Rename"><h1>fs_Rename</h1>	<h3>syscall Adress 0226A0</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>rename a file</td><td>void *fs_Rename(const char *old_name, const char *new_name);</td><td>file descriptor. returns zero if failed</td><td></td><td>
+</td></tr>
+</table></div><div id="fs_AllocChk"><h1>fs_AllocChk</h1>	<h3>syscall Adress 0226A4</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Check if a memory block can be allocated in flash</td><td>unsigned int fs_AllocChk(unsigned int len);</td><td>hl = first sector that would be allocated, or -1 and Cf set if failed.</td><td></td><td>
 </td></tr>
 </table></div></body></html>

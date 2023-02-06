@@ -334,6 +334,7 @@ namespace bos
 ?sys_MallocDupStrN               := $22698
 ?_SearchSymTable                 := $2269C
 ?fs_Rename                       := $226A0
+?fs_AllocChk                     := $226A4
 ; end of jump table
 ;-------------------------------------------------------------------------------
 ; OS memory areas and misc defines
