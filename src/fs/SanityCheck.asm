@@ -184,10 +184,16 @@ assert ~start_of_user_archive and $FF
 	add hl,bc
 	or a,a
 	sbc hl,bc
-	ret nz
-	call fs_CheckOSOptBinaries
-	xor a,a
 	ret
+
+	; ld hl,str_var_dir
+	; ld e,1 shl fd_subdir
+	; push de,hl
+	; call fs_OpenFile
+	; call c,fs_CreateDir
+	; pop bc,bc
+	; ret
+
 
 .check_ramfs:
 	ld hl,str_ram_fs_device

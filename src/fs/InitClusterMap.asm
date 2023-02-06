@@ -71,6 +71,13 @@ end if
 	ld (hl),a
 	inc hl
 	djnz .mark_boot_sector
+	ld hl,ti.vRam + (fs_cluster_map and $FFFF) + fs_root_dir_lba
+	ld b,4
+.mark_root_dir:
+	ld (hl),a
+	inc hl
+	djnz .mark_root_dir
+
 	ld iy,start_of_user_archive
 	call .traverse_into_jump
 	pop iy

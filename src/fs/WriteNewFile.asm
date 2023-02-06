@@ -12,16 +12,14 @@ fs_WriteNewFile:
 	add hl,bc
 	or a,a
 	sbc hl,bc
-	jq z,.fail
-	pop bc,bc
-	ex (sp),hl
-	call fs_GetFDPtr
+	jr z,.fail
+	pop bc,bc,bc
+	call fs_GetFDPtr.entry
 	ex hl,de
-	ld bc,(ix+15)
 	ld hl,(ix+12)
+	ld bc,(ix+15)
 	call sys_FlashUnlock
 	call sys_WriteFlash
-	pop hl
 	db $01 ;ld bc,...
 .fail:
 	scf

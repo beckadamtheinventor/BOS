@@ -380,7 +380,6 @@ DONOTHING:
 	ret
 
 generate_boot_configs:
-	push bc
 	ld bc,str_EtcConfigDir
 	ld e,1 shl fd_subdir
 	push de,bc
@@ -397,9 +396,11 @@ generate_boot_configs:
 	push hl,de,bc
 	call fs_WriteNewFile
 	pop bc,bc,bc,bc
-	call sys_FreeAll
-	call fs_OpenFile
-	pop bc
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	ret nz
+	scf
 	ret
 
 os_return_soft:
@@ -415,18 +416,18 @@ os_return_soft:
 	call os_check_recovery_key
 	call _ResetAndBuildVAT
 
-	ld hl,str_AutoExtractOptFile
-	push hl
-	call fs_OpenFile
-	pop bc
-	jr c,.no_autoextractopt
-	ex hl,de
-	call sys_FlashUnlock
-	xor a,a
-	call sys_WriteFlashA
-	call sys_FlashLock
-	call fs_SanityCheck.extract_opt_binaries
-.no_autoextractopt:
+	; ld hl,str_AutoExtractOptFile
+	; push hl
+	; call fs_OpenFile
+	; pop bc
+	; jr c,.no_autoextractopt
+	; ex hl,de
+	; call sys_FlashUnlock
+	; xor a,a
+	; call sys_WriteFlashA
+	; call sys_FlashLock
+	; call fs_SanityCheck.extract_opt_binaries
+; .no_autoextractopt:
 	call os_check_recovery_key
 	ld bc,str_BootConfigFile
 	push bc

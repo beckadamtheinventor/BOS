@@ -1,7 +1,5 @@
 
 fs_ExtractOSOptBinaries:
-	ld iyl,0
-.entry:
 	ld ix,fs_root_file_initializers
 .entryix:
 	ld hl,str_ExtractingFiles
@@ -49,9 +47,7 @@ fs_ExtractOSOptBinaries:
 	ld c,(ix)
 	push bc
 	pea ix+1
-	ld a,iyl
-	or a,a
-	call z,fs_DeleteFile ; delete the old file unless we are being called from fs_CheckOSOptBinaries
+	call fs_DeleteFile ; delete the old file unless we are being called from fs_CheckOSOptBinaries
 	call fs_CreateFile ; create and allocate the file
 	jq c,.skip_file ; dont try to write if we failed to create the file
 	push hl

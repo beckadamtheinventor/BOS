@@ -35,7 +35,8 @@ fs_ParentDir:
 	jq z,.return_root_dir
 	inc hl
 	push de,hl
-	call sys_Malloc
+	inc hl
+	call sys_Malloc.entryhl
 	ex hl,de
 	pop bc,hl
 	ret c
@@ -48,13 +49,11 @@ fs_ParentDir:
 	ret
 .return_root_dir:
 	ld hl,2
-	push hl
-	call sys_Malloc
-	pop bc
+	call sys_Malloc.entryhl
 	ret c
 	ld (hl),'/'
 	inc hl
-	ld (hl),b
+	ld (hl),0
 	dec hl
 	ret
 

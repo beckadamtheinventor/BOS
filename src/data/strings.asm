@@ -189,8 +189,8 @@ fs_file_data_tivars.zlen:=$-.
 	; db "Verification failed for file: ",0
 ; string_os_elevation_file:
 	; db "/",$F2,"OS/ELEVATED",0
-str_AutoExtractOptFile:
-	db "/EXTRACT.OPT",0
+; str_AutoExtractOptFile:
+	; db "/EXTRACT.OPT",0
 str_sbin_dir:
 	db "sbin",0
 str_var_tivars:

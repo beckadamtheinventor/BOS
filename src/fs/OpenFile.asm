@@ -145,10 +145,10 @@ fs_OpenFile:
 	ret z ; reached end of directory
 	inc a
 	jr z,.search_next_section ; reached end of directory section
-	cp a,fsentry_longfilename+2
+	; cp a,fsentry_longfilename+2
 	push iy
-	ld hl,(iy+1)
-	call nz,fs_CopyFileName ;get file name string from file entry if not a long file name
+	; ld hl,(iy+1)
+	call fs_CopyFileName ;get file name string from file entry
 	ld (ix-6),hl
 	push hl
 	call ti._strlen ;get length of file name string from file entry
