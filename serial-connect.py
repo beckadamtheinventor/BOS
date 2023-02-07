@@ -1,5 +1,5 @@
 
-import os, sys, time, ctypes
+import os, sys, math, time, ctypes
 
 try:
     import serial, serial.tools.list_ports
@@ -90,9 +90,6 @@ def SendPackage(pack, serial_device):
 			else:
 				print(f"Warning: file {i} listed in package json is not an object. It will be ignored.")
 
-	
-	
-
 def SendFile(path, devpath, serial_device):
 	if serial_device is None:
 		serial_device = ConnectCalcSerial()
@@ -103,7 +100,11 @@ def SendFile(path, devpath, serial_device):
 			fdata = f.read()
 	except FileNotFoundError:
 		return False
-	name, ext = os.path.splitext(os.path.basename(path))
+	if '.' in path:
+		name, ext = os.path.splitext(os.path.basename(path))
+	else:
+		name = path
+		ext = ""
 	# fname = name[:min(len(name),8)] + "." + ext[:min(len(ext),3)]
 	while len(ext) > 4 or len(name) > 8:
 		print("File name must fit in 8.3 characters. Example: abcdefgh.jkl")
@@ -114,18 +115,37 @@ def SendFile(path, devpath, serial_device):
 			fname = devpath + fname
 		else:
 			fname = devpath + "/" + fname
-	WriteSerial(serial_device, bytes([1] + list(len(fdata).to_bytes(3, 'little')) + [ord(c) for c in fname] + [0]))
-	i = 0
-	print("Sending File...")
-	while i < len(fdata):
-		# print("Writing to device...")
-		WriteSerial(serial_device, bytes([2] + list(fdata[i:min(len(fdata),i+incoming_data_buffer_len)])))
-		i += incoming_data_buffer_len
-		print(f"{int(100*i/len(fdata))}%", end=" ")
-		# WaitForAck(serial_device)
-		# return False
-	print()
-	return True
+	if len(fdata) > 65536:
+		m = math.ceil(len(fdata)/65536)
+		WriteSerial(serial_device, bytes([7] + list(len(fdata).to_bytes(3, 'little'))))
+		for j in range(0, len(fdata), 65536):
+			fdatablock = fdata[j:min(len(fdata),j+65536)]
+			WriteSerial(serial_device, bytes([1] + list(len(fdatablock).to_bytes(3, 'little')) + [ord(c) for c in fname] + [0]))
+			fname = name[:-1]+chr(0x30+j)+ext
+			print(f"Sending File Block {j} of {m} file {fname}.")
+			i = 0
+			while i < len(fdatablock):
+				# print("Writing to device...")
+				WriteSerial(serial_device, bytes([0] + list(bytes(f"block {j}: {int(100*i/len(fdatablock))}%", 'UTF-8')) + [0]))
+				WriteSerial(serial_device, bytes([2] + list(fdatablock[i:min(len(fdatablock),i+incoming_data_buffer_len)])))
+				i += incoming_data_buffer_len
+				print(f"{int(100*i/len(fdatablock))}%")
+				# WaitForAck(serial_device)
+				# return False
+	else:
+		WriteSerial(serial_device, bytes([1] + list(len(fdata).to_bytes(3, 'little')) + [ord(c) for c in fname] + [0]))
+		i = 0
+		print(f"Sending file {fname}")
+		while i < len(fdata):
+			# print("Writing to device...")
+			WriteSerial(serial_device, bytes([0] + list(bytes(f"{int(100*i/len(fdata))}%", 'UTF-8')) + [0]))
+			WriteSerial(serial_device, bytes([2] + list(fdata[i:min(len(fdata),i+incoming_data_buffer_len)])))
+			i += incoming_data_buffer_len
+			print(f"{int(100*i/len(fdata))}%", end=" ")
+			# WaitForAck(serial_device)
+			# return False
+		print()
+		return True
 
 def SendDirectory(path, serial_device):
 	WriteSerial(serial_device, bytes([6] + [ord(c) for c in path]))

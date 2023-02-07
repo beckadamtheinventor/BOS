@@ -9,7 +9,7 @@ fs_CreateFile:
 
 	ld hl,(ix+12)
 	ld bc,$010000
-	or a,a
+	scf
 	sbc hl,bc
 	jq nc,.alloc_large_file
 
@@ -38,13 +38,13 @@ fs_CreateFile:
 	or a,a
 	sbc hl,bc
 	jr z,.done
-	ld (ix-2),l
-	ld (ix-1),h
 .alloc:
 	push hl
 	call fs_Alloc ;allocate space for file
 	jr c,.fail
 	pop bc
+	ld (ix-2),c ; if the new file size is 65536, this will write a size of 0, but if the data section is set then a size of 0 implies a size of 65536.
+	ld (ix-1),b
 	ld (ix-4),l
 	ld (ix-3),h
 .writedescriptor:

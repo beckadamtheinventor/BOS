@@ -25,21 +25,24 @@ fs_WriteDirectly:
 	or a,h
 	jq z,.return
 	push hl
+	lea hl,iy
+	call fs_GetFDLen.entry
 	ex hl,de
-	ld hl, (iy + fsentry_filelen)
-	ex.s hl,de
+	pop hl ; len*count
+	push hl
 	ld bc, (ix + 18) ; offset
 	add hl,bc ; len*count+offset
 	or a,a
 	inc de
 	sbc hl,de
 	jq nc,.fail ; fail if offset+len*count > file size
-	push iy
-	call fs_GetFDPtr ; get pointer to file data section
+	lea hl,iy
+	call fs_GetFDPtr.entry ; get pointer to file data section
+	jr c,.fail
 	ld bc, (ix + 18) ; offset
 	add hl,bc
 	ex hl,de
-	pop bc,bc ; pop file descriptor, len*count
+	pop bc ; pop len*count
 	ld hl, (ix + 6) ; data
 	push de,bc ; save dest and write len
 .write_check_loop:
@@ -55,7 +58,7 @@ fs_WriteDirectly:
 	jr nz,.write_check_loop
 	call sys_FlashUnlock
 	pop bc,de ; restore write len and dest
-	ld hl, (ix+6)
+	ld hl, (ix + 6)
 	call sys_WriteFlash ; write the data
 	call sys_FlashLock
 .return:

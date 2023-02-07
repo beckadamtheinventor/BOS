@@ -10,8 +10,13 @@ sys_GetExecType:
 	call fs_GetFilePtr.entryname
 	ret c
 .entryhlbc:
-	ld a,c
-	or a,b
+	push bc
+	ex (sp),hl
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	ex (sp),hl
+	pop bc
 	jr nz,.dontfail
 .fail_early:
 	scf
@@ -19,27 +24,24 @@ sys_GetExecType:
 	sbc hl,hl
 	ret
 .dontfail:
-	ld a,b
-	or a,a
-	jr nz,.over_min_size
-	ld a,c
-	cp a,2
+	push bc
+	ex (sp),hl
+	ld bc,2
+	scf
+	sbc hl,bc
+	ex (sp),hl
+	pop bc
 	jr c,.fail_early_cf
 .over_min_size:
 	ld a,(hl)
 	cp a,'#'
 	jr nz,.not_executable_text
-	ld a,c
-	cp a,3
-	jr c,.ret_cf
 	inc hl
 	ld a,(hl)
 	cp a,'!'
-	jr nz,.ret_cf
+	jr nz,.fail_early_cf
 	dec hl
 	ld a,$0A
-	dec bc
-	dec bc
 	push hl
 	cpir
 	ex hl,de
@@ -62,14 +64,15 @@ sys_GetExecType:
 	inc bc
 	inc bc
 .not_ef7b:
-	ld a,b
-	or a,a
-	jr nz,.check_arc_header
-	ld a,c
-	cp a,6
-	jr c,.ret_cf
-.check_arc_header:
+	push bc
+	ex (sp),hl
+	ld bc,12
+	scf
+	sbc hl,bc
+	ex (sp),hl
+	pop bc
 	push hl,bc
+	jr c,.not_arc_header
 	ld bc,9
 	add hl,bc
 	ld c,(hl)

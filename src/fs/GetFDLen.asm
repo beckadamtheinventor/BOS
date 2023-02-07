@@ -19,6 +19,7 @@ fs_GetFDLen:
 	ld a,l
 	or a,h
 	ret nz
+; file size of 0 implies size of 65536
 	dec l   ; hl = 0x0000FF
 	ld h,l  ; hl = 0x00FFFF
 	inc hl  ; hl = 0x010000

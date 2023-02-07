@@ -8,11 +8,11 @@
 
 usb_device_t device;
 srl_device_t srl;
-uint8_t srl_buf[8192];
+uint8_t srl_buf[2048];
 uint8_t net_buf[1024];
 file_header_t incoming_file;
 file_header_t outgoing_file;
-uint8_t *incoming_data = 0;
+uint8_t *incoming_data = NULL;
 bool network_up = false;
 
 void ntwk_process(void) {
@@ -52,7 +52,7 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
 	size_t data_size = buff_size-1;
 	char *file_name;
 	unsigned int len;
-	if (!incoming_data) {
+	if (incoming_data == NULL) {
 		incoming_data = sys_Malloc(incoming_data_buffer_len);
 	}
 	switch (in_buff->control) {
@@ -64,16 +64,18 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
 			len = strlen((file_name = &data[3])) + 1;
 			incoming_file.len = *(unsigned int *)data;
 			incoming_file.current_len = 0;
-			if (!(incoming_file.name = sys_Malloc(len))) {
+			if ((incoming_file.name = sys_Malloc(len)) == NULL) {
 				malloc_error();
 			} else {
 				memcpy(incoming_file.name, file_name, len);
-				if (incoming_file.fd = fs_OpenFile(incoming_file.name)) {
+				if ((incoming_file.fd = fs_OpenFile(incoming_file.name)) != -1) {
 					if (!(fs_DeleteFile(incoming_file.name))) {
 						goto sendError;
 					}
 				}
-				if ((incoming_file.fd = fs_CreateFile(incoming_file.name, 0, incoming_file.len)) == -1) {
+				gui_Print("Creating file: ");
+				gui_PrintLine(incoming_file.name);
+				if ((incoming_file.fd = fs_CreateFile(incoming_file.name, 0, incoming_file.len)) == NULL) {
 					goto sendError;
 				}
 			}
@@ -83,6 +85,11 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
 			len = (incoming_file.current_len + incoming_data_buffer_len > incoming_file.len) ?
 				(incoming_file.len - incoming_file.current_len) : incoming_data_buffer_len;
 			if (fs_WriteRaw(data, len, 1, incoming_file.fd, incoming_file.current_len) == -1) {
+				gui_Print("Failed to write data to FD: ");
+				gui_PrintInt((int)incoming_file.fd);
+				gui_Print("\nOffset: ");
+				gui_PrintInt(incoming_file.current_len);
+				_NewLine();
 				goto sendError;
 			}
 			incoming_file.current_len += len;
@@ -126,6 +133,20 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
 				fs_CreateDir(data, 0x10);
 			}
 			break;
+		case 7: // preparing for long file block
+			len = *(unsigned int*)data;
+			if (fs_AllocChk(len) == -1) {
+				fs_GarbageCollect();
+				if (fs_AllocChk(len) == -1) {
+					const char *str = "Failed to allocate long file block.";
+					gui_PrintLine(str);
+					gui_Print("Not enough space for ");
+					gui_PrintInt(len);
+					gui_PrintLine(" bytes");
+					ntwk_send(0, PS_STR(str));
+				}
+			}
+			break;
 		default:
 			gui_PrintLine("Unknown/invalid packet recieved.");
 			ntwk_send(0, PS_STR("Unknown/invalid packet recieved."));
@@ -154,13 +175,13 @@ bool init_usb(void) {
         key = os_GetCSC();
     } while((!device) && (key!= sk_Clear));
     if(!device) {
-        printf("no device");
+        gui_PrintLine("no device");
         os_GetKey();
         return false;
     }
     srl_error = srl_Open(&srl, device, srl_buf, sizeof(srl_buf), SRL_INTERFACE_ANY, 115200);
     if(srl_error) {
-        printf("srl error");
+        gui_PrintLine("srl error");
         os_GetKey();
         return false;
     }
@@ -178,7 +199,7 @@ static usb_error_t handle_usb_event(usb_event_t event, void *event_data,
     /* Enable newly connected devices */
     if(event == USB_DEVICE_CONNECTED_EVENT && !(usb_GetRole() & USB_ROLE_DEVICE)) {
         usb_device_t device = event_data;
-        printf("device connected\n");
+        gui_PrintLine("device connected\n");
         usb_ResetDevice(device);
     }
     if(event == USB_HOST_CONFIGURE_EVENT) {

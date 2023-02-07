@@ -6,7 +6,7 @@ fs_CeilDivBySector:
 	ld a,l
 	and a,fs_sector_size-1
 	push af
-	call ti._sshru
+	call ti._ishru
 	ex.s hl,de
 	ex hl,de
 	pop af
