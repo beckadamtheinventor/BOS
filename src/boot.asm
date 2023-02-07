@@ -356,8 +356,9 @@ handle_offsetinstruction:
 	add hl,de
 	inc a
 	ret z
-	dec a
+	bit 7,a
 	ret z
+	res 7,a
 	ld l,a  ; a*=3
 	add a,a ; a*2
 	add a,l ; a*2 + a

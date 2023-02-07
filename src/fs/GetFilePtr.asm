@@ -43,6 +43,11 @@ fs_GetFilePtr:
 	ld c,(hl)
 	inc hl
 	ld b,(hl)
+	ld a,c
+	or a,b
+	jr nz,.under64k
+	ld bc,$010000
+.under64k:
 	ex hl,de
 	pop af
 	ret
