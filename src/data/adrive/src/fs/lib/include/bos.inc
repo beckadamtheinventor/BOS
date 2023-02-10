@@ -335,6 +335,8 @@ namespace bos
 ?_SearchSymTable                 := $2269C
 ?fs_Rename                       := $226A0
 ?fs_AllocChk                     := $226A4
+?sys_GetExecType                 := $226A8
+?sys_GetExecTypeFD               := $226AC
 ; end of jump table
 ;-------------------------------------------------------------------------------
 ; OS memory areas and misc defines

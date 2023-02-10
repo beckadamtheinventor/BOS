@@ -179,4 +179,6 @@
 	jp _SearchSymTable
 	jp fs_Rename
 	jp fs_AllocChk
+	jp sys_GetExecType
+	jp sys_GetExecTypeFD
 ; end of jump table

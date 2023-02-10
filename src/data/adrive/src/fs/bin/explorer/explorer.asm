@@ -298,35 +298,27 @@ explorer_selected_file_desc:=$-3
 	ld a,0
 .force_editing_file:=$-1
 	or a,a
-	jq nz,.edit_file
+	jr nz,.edit_file
 	ld a,c
 	or a,b
-	jq z,.edit_file_run_cedit
-	ld a,(hl)
-	inc hl
-	cp a,$18 ;jr
-	jq z,.skip1
-	cp a,$C3 ;jp
-	jq z,.skip3
-	cp a,$EF
-	jq nz,.edit_file
-	ld a,(hl)
-	inc hl
-	cp a,$7B
-	jq z,.exec_file
+	jr z,.edit_file_run_cedit
+	push de
+	call bos.sys_GetExecType
+	pop de
+	jr nc,.exec_file
 .edit_file:
 	ld hl,(explorer_dirname_buffer)
 	push hl
 	call bos.fs_GetFilePtr
 	pop de
-	jq .checkfileloop_entry
 .checkfileloop: ; check whether the file contains only text characters (range 0x01 to 0x7F)
 	ld a,(hl)
 	or a,a
-	jq z,.edit_file_run_memedit
+	jr z,.edit_file_run_memedit
 	add a,a
-	jq c,.edit_file_run_memedit
+	jr c,.edit_file_run_memedit
 .checkfileloop_nextbyte:
+	inc hl
 	dec bc
 .checkfileloop_entry:
 	ld a,c
@@ -349,37 +341,6 @@ explorer_dirname_buffer:=$-3
 	call ti._strcpy
 	pop bc,de,hl
 	jq explorer_call_file
-.skip3:
-	inc hl
-	inc hl
-.skip1:
-	inc hl
-	ld de,(hl)
-	db $21 ;ld hl,...
-	db 'FEX' ;Flash EXecutable
-	or a,a
-	sbc hl,de
-	jq z,.exec_file
-	db $21 ;ld hl,...
-	db 'REX' ;Ram EXecutable
-	or a,a
-	sbc hl,de
-	jq z,.exec_file
-	db $21 ;ld hl,...
-	db 'CRX' ;Compressed Ram Executable
-	or a,a
-	sbc hl,de
-	jq z,.exec_file
-	db $21 ;ld hl,...
-	db 'TRX' ;Threaded Ram Executable
-	or a,a
-	sbc hl,de
-	jq z,.exec_file
-	db $21 ;ld hl,...
-	db 'TFX' ;Threaded Flash Executable
-	or a,a
-	sbc hl,de
-	jq nz,.edit_file ;if it's neither a Flash Executable nor a Ram Executable, edit it
 .exec_file:
 	ld hl,(explorer_dirname_buffer)
 	jq explorer_call_file_noargs
