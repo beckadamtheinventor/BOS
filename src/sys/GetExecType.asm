@@ -12,26 +12,18 @@ sys_GetExecType:
 .entryhlbc:
 	push bc
 	ex (sp),hl
-	add hl,bc
+	ld bc,3
 	or a,a
 	sbc hl,bc
+	add hl,bc
 	ex (sp),hl
 	pop bc
-	jr nz,.dontfail
+	jr nc,.over_min_size
 .fail_early:
 	scf
 .fail_early_cf:
 	sbc hl,hl
 	ret
-.dontfail:
-	push bc
-	ex (sp),hl
-	ld bc,2
-	scf
-	sbc hl,bc
-	ex (sp),hl
-	pop bc
-	jr c,.fail_early_cf
 .over_min_size:
 	ld a,(hl)
 	cp a,'#'
@@ -66,9 +58,10 @@ sys_GetExecType:
 .not_ef7b:
 	push bc
 	ex (sp),hl
-	ld bc,12
-	scf
+	ld bc,13
+	or a,a
 	sbc hl,bc
+	add hl,bc
 	ex (sp),hl
 	pop bc
 	push hl,bc

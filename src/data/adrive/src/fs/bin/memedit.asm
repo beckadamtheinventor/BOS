@@ -5,7 +5,7 @@ include 'include/bos.inc'
 include 'include/osrt.inc'
 
 org ti.userMem
-	jq mem_edit
+	jr mem_edit
 	db "REX",0
 mem_edit:
 	call libload_load
@@ -774,27 +774,27 @@ libload_load:
 	ret
 
 libload_relocations:
-db	$C0, "GRAPHX", $00, 11
+	db	$C0, "GRAPHX", $00, 11
 gfx_Begin:
-	jq 0
+	jp 0
 gfx_SetColor:
-	jq 6
+	jp 6
 gfx_SetDraw:
-	jq 27
+	jp 27
 gfx_Blit:
-	jq 33
+	jp 33
 gfx_PrintStringXY:
-	jq 54
+	jp 54
 gfx_SetTextBGColor:
-	jq 60
+	jp 60
 gfx_SetTextFGColor:
-	jq 63
+	jp 63
 gfx_SetTextTransparentColor:
-	jq 66
+	jp 66
 gfx_HorizLine:
-	jq 93
+	jp 93
 gfx_ZeroScreen:
-	jq 228
+	jp 228
 
 	xor a,a
 	pop hl
