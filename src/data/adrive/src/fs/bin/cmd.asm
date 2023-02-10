@@ -140,11 +140,11 @@ cmd_execute_next_line:
 	ret z
 	ld a,(hl)
 	inc hl
-	inc de
-	or a,a
-	ret z
 	cp a,$A
 	ret z
+	or a,a
+	ret z
+	inc de
 	dec bc
 	jr .linelenloop
 

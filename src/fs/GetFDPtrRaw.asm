@@ -18,11 +18,11 @@ fs_GetFDPtrRaw:
 	ret
 .hasdatasection:
 	dec hl
+	ld a,(hl)
 	ex hl,de
 	sbc hl,hl
 	ld l,c
 	ld h,b
-	ld a,(de)
 	bit fd_subfile,a
 	jr z,fs_GetSectorAddress.entry
 .subfile:
