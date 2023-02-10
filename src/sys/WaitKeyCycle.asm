@@ -5,5 +5,6 @@ sys_WaitKeyCycle:
 	call sys_GetKey
 	or a,a
 	jr z,sys_WaitKeyCycle
-
-assert $ = sys_WaitKeyUnpress
+if $ <> sys_WaitKeyUnpress
+	jq sys_WaitKeyUnpress
+end if

@@ -39,7 +39,7 @@ os_return:
 
 	ld hl,op_stack_top
 	ld (op_stack_ptr),hl
-	ld de,os_recovery_menu
+	ld de,os_return_soft
 	ld hl,on_interrupt_handler-1
 	ld (hl),$C3 ;jp opcode byte
 	inc hl
@@ -92,7 +92,7 @@ handle_interrupt_2:
 	jr z,handle_interrupt_3
 	ld c,$08
 	rra
-	jq c,low_bit_0_int
+	jq c,low_bit_0_int ; On interrupt
 	rra
 	jq c,low_bit_1_int
 	rra
@@ -100,7 +100,7 @@ handle_interrupt_2:
 	rra
 	jq c,low_bit_3_int
 	rra
-	jq c,low_bit_4_int
+	jq c,low_bit_4_int ; OS timer interrupt
 	ld a,$FF
 	out (bc),a
 handle_interrupt_3:
@@ -125,23 +125,27 @@ check_bad_interrupt:
 	inc a
 	call z,handle_bad_interrupt
 return_from_interrupt:
-	ld iy,$D00080
-	res 6,(iy+$1B)
+	; ld iy,ti.flags
+	; res 6,(iy+ti.apdFlags2)
 	pop hl
 	pop iy,ix
+.exx_reti:
 	exx
 	exaf
 	ei
 	reti
 
-low_bit_0_int:
+low_bit_0_int: ; On interrupt
 	ld a,1 shl 0
 	out (bc),a
 	ld c,4
 	in a,(bc)
 	res 0,a
 	out (bc),a
-	jq on_interrupt_handler-1
+	pop hl,iy,ix
+	ld hl,(on_interrupt_handler)
+	push hl
+	jr return_from_interrupt.exx_reti
 low_bit_1_int:
 	ld a,1 shl 1
 	out (bc),a
@@ -406,6 +410,9 @@ generate_boot_configs:
 
 os_return_soft:
 	call os_check_recovery_key
+	ld hl,ti.mpIntMask
+	set ti.bIntOn,(hl)
+	set ti.bIntOSTmr,(hl)
 	call sys_FreeAll
 	call gfx_Set8bpp
 	xor a,a
@@ -465,6 +472,7 @@ os_check_recovery_key:
 	cp a,53
 	ret nz
 os_recovery_menu:
+	di
 	ld sp,ti.stackTop
 	xor a,a
 	ld (lcd_bg_color),a
