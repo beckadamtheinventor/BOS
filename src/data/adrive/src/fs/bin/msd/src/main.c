@@ -135,8 +135,13 @@ bool transfer_file(fat_t *fat, const char *src, const char *dest, bool send, uin
 			strcpy(dest2, dest);
 			dest2[strlen(dest2)-1] = '0';
 			do {
-				unsigned int blocklen = srclen>65536?65536:srclen;
-				srclen -= 65536;
+				unsigned int blocklen = 65536;
+				if (srclen < blocklen) {
+					blocklen = srclen;
+					srclen = 0;
+				} else {
+					srclen -= blocklen;
+				}
 				for (i = 0; i < blocklen; i += FAT_BLOCK_SIZE) {
 					if (fat_Read(&srcfile, 1, &sector_buffer) != 1) {
 						goto read_error;
@@ -149,7 +154,7 @@ bool transfer_file(fat_t *fat, const char *src, const char *dest, bool send, uin
 					goto destination_file_error;
 				}
 				dest2[strlen(dest2)-1]++;
-			} while (srclen > 65536);
+			} while (srclen > 0);
 			sys_Free(dest2);
 		} else {
 			if (type == TT_8X || checkIs8xVar(src)) {

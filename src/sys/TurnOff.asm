@@ -124,8 +124,9 @@ assert ~ti.pKeyRange and $FF
 	ei
 	halt
 	nop
-	; in0 a,($02)
+	in0 a,($02)
 	; bit 3,a
+
 	ld a,$0F
 	out0 ($0D),a
 .wait4:
@@ -139,12 +140,14 @@ assert ~ti.pKeyRange and $FF
 	out0 ($06),a
 	djnz $
 
+	call ti.boot.Set48MHzMode
 	ld bc,$3114
-	inc a
+	ld a,1
 	out (bc),a
 	ld bc,$5008
 	out (bc),a
 	ld c,$04
+	in a,(bc)
 	set 0,a
 	out (bc),a
 	ld a,b
