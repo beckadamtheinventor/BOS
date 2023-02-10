@@ -1,6 +1,6 @@
 
 _tolower:
-	ld hl,6
+	ld hl,3
 	add hl,sp
 	ld a,(hl)
 	cp a,'A'
