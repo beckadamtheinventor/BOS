@@ -1860,8 +1860,8 @@
 	call handle_unimplemented ;os.FontSelect             := 0021E28h
 	jp DONOTHING ;                          equ 0021E2Ch
 	jp DONOTHING ;                          equ 0021E30h
-	call handle_unimplemented ;os.ReturnByte             := 0021E34h
-	call handle_unimplemented ;os.ReturnByteEvenBetter   := 0021E38h
+	jp _tolower  ;os.ReturnByte             := 0021E34h (wrong name in ti84pce.inc)
+	jp _toupper  ;os.ReturnByteEvenBetter   := 0021E38h (wrong name in ti84pce.inc)
 	jp DONOTHING ;                          equ 0021E3Ch
 	jp DONOTHING ;                          equ 0021E40h
 	jp DONOTHING ;                          equ 0021E44h
