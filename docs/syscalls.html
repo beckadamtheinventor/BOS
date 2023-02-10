@@ -95,7 +95,7 @@
 <tr><td><a href="#gfx_BufClear">bos.gfx_BufClear</a></td><td><a href="#gfx_BufClear">02255C</a></td></tr>
 <tr><td><a href="#gfx_LcdClear">bos.gfx_LcdClear</a></td><td><a href="#gfx_LcdClear">022560</a></td></tr>
 <tr><td><a href="#fs_SanityCheck">bos.fs_SanityCheck</a></td><td><a href="#fs_SanityCheck">022564</a></td></tr>
-<tr><td><a href="#sys_SetupOnInterruptHandler">bos.sys_SetupOnInterruptHandler</a></td><td><a href="#sys_SetupOnInterruptHandler">022568</a></td></tr>
+<tr><td><a href="#sys_SetOnInterruptHandler">bos.sys_SetOnInterruptHandler</a></td><td><a href="#sys_SetOnInterruptHandler">022568</a></td></tr>
 <tr><td><a href="#gui_PrintChar">bos.gui_PrintChar</a></td><td><a href="#gui_PrintChar">02256C</a></td></tr>
 <tr><td><a href="#gfx_SetDraw">bos.gfx_SetDraw</a></td><td><a href="#gfx_SetDraw">022570</a></td></tr>
 <tr><td><a href="#gui_PrintString">bos.gui_PrintString</a></td><td><a href="#gui_PrintString">022574</a></td></tr>
@@ -548,9 +548,9 @@ Fails if the byte can't be written without swapping</td></tr>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Sanity check the filesystem and initialize it as needed</td><td></td><td></td><td></td><td>
 </td></tr>
-</table></div><div id="sys_SetupOnInterruptHandler"><h1>sys_SetupOnInterruptHandler</h1>	<h3>syscall Adress 022568</h3>
+</table></div><div id="sys_SetOnInterruptHandler"><h1>sys_SetOnInterruptHandler</h1>	<h3>syscall Adress 022568</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Setup an error handler for an interrupt caused by the [On] key.</td><td>HL = user error handler</td><td></td><td></td><td>
+<tr><td>Set an error handler for an interrupt caused by the [On] key.</td><td>void *sys_SetOnInterruptHandler(void (*handler)(void));</td><td>Returns previous error handler.</td><td></td><td>
 user error handler is called after the interrupt is handled.</td></tr>
 </table></div><div id="gui_PrintChar"><h1>gui_PrintChar</h1>	<h3>syscall Adress 02256C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
