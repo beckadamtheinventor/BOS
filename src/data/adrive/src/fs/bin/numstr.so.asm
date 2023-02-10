@@ -117,15 +117,15 @@ osrt.hexstr_to_int.between_af:
 osrt.hexstr_to_int.add_a:
 	inc de
 	ld b,a    ;b = (de)
-	xor a,a
+	ld a,c
 	add hl,hl ;auhl * 2
-	adc a,c
+	adc a,a
 	add hl,hl ;auhl * 4
-	adc a,c
+	adc a,a
 	add hl,hl ;auhl * 8
-	adc a,c
+	adc a,a
 	add hl,hl ;auhl * 16
-	adc a,c
+	adc a,a
 	ld c,a    ;cuhl = auhl
 	ld a,l    ;l = l + b
 	add a,b
