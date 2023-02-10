@@ -220,6 +220,13 @@ uint8_t sys_WaitKey(void);
 uint8_t sys_WaitKeyCycle(void);
 
 /**
+ * Set a routine to be called when the on key is pressed.
+ * @param handler Routine to be called when the on key is pressed.
+ * @return Pointer to old routine.
+ */
+void *sys_SetOnInterruptHandler(void (*handler)(void));
+
+/**
  * Get user input.
  * @param buffer Pointer to input buffer.
  * @param len Length of input buffer - 1.

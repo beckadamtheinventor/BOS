@@ -255,7 +255,7 @@ namespace bos
 ?gfx_BufClear                    := $2255C
 ?gfx_LcdClear                    := $22560
 ?fs_SanityCheck                  := $22564
-?sys_SetupOnInterruptHandler     := $22568
+?sys_SetOnInterruptHandler       := $22568
 ?gui_PrintChar                   := $2256C
 ?gfx_SetDraw                     := $22570
 ?gui_PrintString                 := $22574

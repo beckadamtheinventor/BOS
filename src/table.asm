@@ -99,7 +99,7 @@
 	jp gfx_BufClear
 	jp gfx_LcdClear
 	jp fs_SanityCheck
-	jp sys_SetupOnInterruptHandler
+	jp sys_SetOnInterruptHandler
 	jp gui_PrintChar
 	jp gfx_SetDraw
 	jp gui_PrintString

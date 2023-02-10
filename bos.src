@@ -91,7 +91,7 @@
 	public _bosgfx_BufClear
 	public _bosgfx_LcdClear
 	public _fs_SanityCheck
-	public _sys_SetupOnInterruptHandler
+	public _sys_SetOnInterruptHandler
 	public _asm_gui_PrintChar
 	public _bosgfx_SetDraw
 	public _asm_gui_PrintString
@@ -257,7 +257,7 @@ _fs_CreateDir                    := $22558
 _bosgfx_BufClear                    := $2255C
 _bosgfx_LcdClear                    := $22560
 _fs_SanityCheck                  := $22564
-_sys_SetupOnInterruptHandler     := $22568
+_sys_SetOnInterruptHandler       := $22568
 _asm_gui_PrintChar                   := $2256C
 _bosgfx_SetDraw                     := $22570
 _asm_gui_PrintString                 := $22574
