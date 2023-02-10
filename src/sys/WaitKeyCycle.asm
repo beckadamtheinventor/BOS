@@ -2,6 +2,8 @@
 ;@OUTPUT A = keycode
 ;@DESTROYS HL,DE,BC,AF
 sys_WaitKeyCycle:
+	call sys_HandleOnInterrupt
+	HandleNextThread_IfOSThreading
 	call sys_GetKey
 	or a,a
 	jr z,sys_WaitKeyCycle
