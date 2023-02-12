@@ -14,8 +14,10 @@ sys_LoadHookThreads:
 	or a,a
 	jr z,.skip_hook
 	inc hl
-	ld de,(hl)
+	mlt de
+	ld e,(hl)
 	inc hl
+	ld d,(hl)
 	inc hl
 	ld a,(hl)
 	ld ixl,a
@@ -29,12 +31,12 @@ sys_LoadHookThreads:
 	pop af,de
 	push af
 	push hl
-	ex.s hl,de
+	ex hl,de
 	or a,a
 	sbc hl,bc
 	add hl,bc
 	pop de
-	jr c,.dont_load_file
+	jr nc,.dont_load_file
 	add hl,de
 	push hl
 	lea hl,ix

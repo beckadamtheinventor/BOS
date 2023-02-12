@@ -17,13 +17,13 @@ sys_OpenDevice:
 	ld a,(hl)
 	cp a,$C9
 	jr nz,.fail
-	push hl,bc
-	call sys_SearchDeviceTable
-	pop bc,hl
+	push bc
+	call sys_SearchDeviceTable.entryhl
+	pop bc
 	ret nz ; don't reinit an already initialized device
-	push hl,bc
-	call sys_AppendDeviceTable
-	pop bc,hl
+	push bc
+	call sys_AppendDeviceTable.entryhl
+	pop bc
 	ret z
 	push hl
 	inc hl

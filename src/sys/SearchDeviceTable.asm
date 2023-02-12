@@ -4,8 +4,9 @@
 ;@OUTPUT true if device is open, false otherwise
 ;@NOTE Each device table entry is 4 bytes. 1 byte flags, 3 byte file descriptor.
 sys_SearchDeviceTable:
-	pop bc,de
-	push de,bc
+	pop bc,hl
+	push hl,bc
+.entryhl:
 	push iy
 	ld iy,open_device_table
 .check_next:
@@ -13,8 +14,9 @@ sys_SearchDeviceTable:
 	ld a,(iy-4)
 	or a,a
 	jr z,.device_closed
-	ld hl,(iy-3)
+	ld de,(iy-3)
 	sbc hl,de
+	add hl,de
 	jr nz,.check_next
 	dec a
 	jr nz,.device_closed

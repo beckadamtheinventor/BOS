@@ -3,7 +3,7 @@
 ;@INPUT void *sys_OpenFileInVar(const char *path, const char *var);
 ;@OUTPUT pointer to file descriptor
 sys_OpenFileInVar:
-	ld hl,-15
+	ld hl,-12
 	call ti._frameset
 	ld hl,(ix+9)
 	jq sys_OpenFileInPath.entryhl
