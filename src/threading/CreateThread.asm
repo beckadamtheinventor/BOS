@@ -38,13 +38,13 @@ end if
 	add hl,bc
 	ld iy,0
 	add iy,sp
-	ld de,(iy+3) ; void *pc
+	ld de,(iy+6) ; void *pc
 	ld (hl),de
 	inc hl
 	inc hl
 	inc hl
 	push hl
-	ld hl,(iy+6) ; void *sp
+	ld hl,(iy+9) ; void *sp
 	ld a,(iy+8)
 	or a,h
 	or a,l
@@ -56,9 +56,9 @@ end if
 	ex (sp),ix ; save ix, restore sp into ix
 	ld bc,._thread_return_handler
 	ld (ix-3),bc ; set return address
-	ld bc,(iy+12) ; int argv
+	ld bc,(iy+15) ; int argv
 	ld (ix-6),bc
-	ld bc,(iy+9) ; int argc
+	ld bc,(iy+12) ; int argc
 	ld (ix-9),bc
 	lea ix,ix-9
 	ld (hl),ix ; set thread saved sp

@@ -1,81 +1,89 @@
 Section          Base   Top    High   Length
 ---------------- ------ ------ ------ -------
 .icon            D1A887 D1A887             0h
-.init.libs       D1A887 D1A8B2            2Bh
-.libs            D1A8B2 D1A8F5            43h
-.init.clock      D1A8F5 D1A8F5             0h
-.init.reruncheck D1A8F5 D1A8F5             0h
-.init            D1A8F5 D1A923            2Eh
-.fini            D1A923 D1A957            34h
-.text            D1A957 D1AE22           4CBh
-.data            D1AE22 D1AE67            45h
-.rodata          D1AE67 D1AEA4            3Dh
+.init.libs       D1A887 D1A8B4            2Dh
+.libs            D1A8B4 D1A8F7            43h
+.init.clock      D1A8F7 D1A8F7             0h
+.init.reruncheck D1A8F7 D1A8F7             0h
+.init            D1A8F7 D1A925            2Eh
+.fini            D1A925 D1A959            34h
+.text            D1A959 D1AE44           4EBh
+.data            D1AE44 D1AE89            45h
+.rodata          D1AE89 D1AEC0            37h
+.footer          D1AEC0 D1AEC0             0h
 .init_array      000000 000000             0h
 .ctors           000000 000000             0h
 .dtors           000000 000000             0h
 .fini_array      000000 000000             0h
-.bss             D052C6 D052D6 D13FD8     10h
+.bss             D031F6 D03206 D13FD8     10h
 .header          D1A881 D1A887             6h
 
 Label                      Value
 ------------------------   ------
-___low_bss               = D052C6
+___low_bss               = D031F6
 ___len_bss               = 000010
 ___heaptop               = D13FD8
-___heapbot               = D052D6
-___libs                  = D1A8B2
+___heapbot               = D03206
+___data                  = D1AE44
+___data_length           = 000045
+___libs                  = D1A8B4
+___libs_length           = 000043
 ___init_array_count      = 000000
 ___ctors_count           = 000000
 ___dtors_count           = 000000
 ___fini_array_count      = 000000
 __stack                  = D1A87E
-__frameset               = D1A957
-__frameset0              = D1A965
-__iand                   = D1A970
+___exec_base             = D1A881
+__frameset               = D1A959
+__frameset0              = D1A967
+__iand                   = D1A972
 __ftol                   = 00027C
 __ftoul                  = 00027C
 __ltof                   = 000284
 __setflag                = 000218
 __ultof                  = 000280
-_os_EnableHomeTextBuffer = D1A989
-_sys_AnyKey              = 022428
+_os_EnableHomeTextBuffer = D1A98B
 _sys_GetKey              = 022430
+_sys_Malloc              = 022438
 _sys_WaitKeyCycle        = 02244C
 _asm_gui_PrintLine       = 022578
-_fs_GetFDPtr             = 022630
+_fs_WriteDirectly        = 022654
 _sys_OpenFileInLib       = 022664
 _th_CreateThread         = 022670
-.missingappvar           = D1AE67
-.libloadname             = D1AE6F
-.webaddress              = D1AE7B
-__start                  = D1A8F5
-___exithl                = D1A923
-skip._exit               = D1A923
-skip.__Exit              = D1A923
-skip._abort              = D1A923
-_exit.sp                 = D1A924
-_exit.flash_wait_states  = D1A92E
-_guiDrawWindow           = D1A99B
-_guiDrawStringXY         = D1AB94
+_th_KillThread           = 022678
+_fs_GetFDPtr             = 022680
+.missingappvar           = D1AE89
+.libloadname             = D1AE91
+.webaddress              = D1AE9D
+__start                  = D1A8F7
+___exithl                = D1A925
+skip._exit               = D1A925
+skip.__Exit              = D1A925
+skip._abort              = D1A925
+_exit.sp                 = D1A926
+_exit.flash_wait_states  = D1A930
+_exit.flash_wait_states  = D1A930
+_guiDrawWindow           = D1A99D
+_guiDrawStringXY         = D1AB95
 _isKeyPressed_NoConsume  = D1ACB9
 _isKeyPressed            = D1ACEC
-__keythread              = D1AD20
-___main_argc_argv        = D1AD61
-_keypress_queue          = D052C6
-_.str                    = D1AE8E
-_.str.1                  = D1AE98
-_MainWindowItems         = D1AE22
-_MainWindow              = D1AE4E
-lib.LibLoad              = D1A8B2
-_#gfx_SetColor           = D1A8C5
-_#gfx_SetDraw            = D1A8C9
-_#gfx_Blit               = D1A8CD
-_#gfx_PrintChar          = D1A8D1
-_#gfx_SetTextXY          = D1A8D5
-_#gfx_SetTextBGColor     = D1A8D9
-_#gfx_SetTextFGColor     = D1A8DD
-_#gfx_GetCharWidth       = D1A8E1
-_#gfx_HorizLine          = D1A8E5
-_#gfx_Rectangle          = D1A8E9
-_#gfx_FillRectangle      = D1A8ED
-_#gfx_Sprite             = D1A8F1
+__keythread              = D1AD2C
+___main_argc_argv        = D1AD63
+_keypress_queue          = D031F6
+_.str                    = D1AEAA
+_.str.1                  = D1AEB4
+_MainWindowItems         = D1AE44
+_MainWindow              = D1AE70
+lib.LibLoad              = D1A8B4
+_#gfx_SetColor           = D1A8C7
+_#gfx_SetDraw            = D1A8CB
+_#gfx_Blit               = D1A8CF
+_#gfx_PrintChar          = D1A8D3
+_#gfx_SetTextXY          = D1A8D7
+_#gfx_SetTextBGColor     = D1A8DB
+_#gfx_SetTextFGColor     = D1A8DF
+_#gfx_GetCharWidth       = D1A8E3
+_#gfx_HorizLine          = D1A8E7
+_#gfx_Rectangle          = D1A8EB
+_#gfx_FillRectangle      = D1A8EF
+_#gfx_Sprite             = D1A8F3

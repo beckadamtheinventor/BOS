@@ -151,12 +151,11 @@ BB0_5:
 	push	bc
 	jr	BB0_9
 BB0_8:
-	ex	de, hl
-	ld	(ix - 9), hl
-	ld	a, (hl)
 	ld	(ix - 6), bc
 	ld	bc, 0
-	ld	c, a
+	ex	de, hl
+	ld	(ix - 12), hl
+	ld	c, (hl)
 	ld	hl, (ix - 3)
 	add	hl, bc
 	ld	(ix - 3), hl
@@ -164,18 +163,18 @@ BB0_8:
 	ld	hl, (iy + 4)
 	ld	de, 2
 	add	hl, de
-	ld	(ix - 12), hl
+	ld	(ix - 9), hl
 	ld	iy, (ix + 6)
 	ld	hl, (iy + 7)
 	ld	de, -4
 	add	hl, de
-	ld	iy, (ix - 9)
+	ld	iy, (ix - 12)
 	ld	c, (iy + 1)
 	add	hl, bc
 	ld	de, 9
 	push	de
 	push	hl
-	ld	hl, (ix - 12)
+	ld	hl, (ix - 9)
 	push	hl
 	ld	hl, (ix - 3)
 	push	hl
@@ -361,8 +360,7 @@ BB1_16:
 	call	_gfx_SetTextXY
 	pop	hl
 	pop	hl
-	ld	a, (ix - 7)
-	ld	l, a
+	ld	l, (ix - 7)
 	push	hl
 	call	_gfx_PrintChar
 	ld	iy, (ix - 10)
@@ -422,27 +420,33 @@ BB2_4:
 	public	_isKeyPressed
 _isKeyPressed:
 	call	__frameset0
-	ld	a, (ix + 6)
-	ld	l, a
+	ld	l, (ix + 6)
 	push	hl
 	call	_isKeyPressed_NoConsume
 	push	hl
 	pop	de
 	pop	hl
+	ld	bc, 1
+	push	de
+	pop	hl
+	or	a, a
+	sbc	hl, bc
+	call	pe, __setflag
+	jp	m, BB3_2
 	ld	iy, _keypress_queue
 	add	iy, de
 	ld	(iy - 1), 0
-	ld	bc, 1
+BB3_2:
 	ex	de, hl
 	or	a, a
 	sbc	hl, bc
 	call	pe, __setflag
-	jp	p, BB3_2
+	jp	p, BB3_4
 	ld	a, 0
-	jr	BB3_3
-BB3_2:
+	jr	BB3_5
+BB3_4:
 	ld	a, -1
-BB3_3:
+BB3_5:
 	pop	ix
 	ret
 	section	.text,"ax",@progbits
@@ -452,73 +456,84 @@ BB3_3:
 __keythread:
 	call	__frameset0
 BB4_1:
-	call	_sys_AnyKey
-	xor	a, 1
-	bit	0, a
-	jr	nz, BB4_7
 	call	_sys_GetKey
-	ld	iyl, a
-	or	a, a
-	sbc	hl, hl
-BB4_3:
-	push	hl
-	pop	bc
-	ld	de, 16
-	or	a, a
-	sbc	hl, de
-	jr	z, BB4_7
-	ld	hl, _keypress_queue
-	add	hl, bc
-	ld	a, (hl)
-	ex	de, hl
-	ld	e, iyl
-	ex	de, hl
-	cp	a, l
-	jr	z, BB4_7
-	push	bc
-	pop	hl
-	inc	hl
+	ld	e, a
 	or	a, a
 	jr	nz, BB4_3
-	ld	hl, _keypress_queue
-	add	hl, bc
-	ld	a, iyl
-	ld	(hl), a
-BB4_7:
+BB4_2:
 	;APP
 	rst $10
 pop bc
 	assume	adl = 1
 	;NO_APP
 	jr	BB4_1
+BB4_3:
+	or	a, a
+	sbc	hl, hl
+BB4_4:
+	push	hl
+	pop	bc
+	ld	a, e
+	ld	de, 16
+	or	a, a
+	sbc	hl, de
+	ld	e, a
+	jr	z, BB4_2
+	ld	hl, _keypress_queue
+	add	hl, bc
+	ld	a, (hl)
+	cp	a, e
+	jr	z, BB4_2
+	push	bc
+	pop	hl
+	inc	hl
+	or	a, a
+	jr	nz, BB4_4
+	ld	hl, _keypress_queue
+	add	hl, bc
+	ld	(hl), e
+	jr	BB4_2
 	section	.text,"ax",@progbits
 
 	section	.text,"ax",@progbits
 	public	___main_argc_argv
 ___main_argc_argv:
-	ld	hl, -97
+	ld	hl, -4
 	call	__frameset
-	ld	hl, __keythread
-	ld	bc, 0
-	ld	de, 0
-	ld	a, 1
-	ld	(ix - 97), a
-	lea	iy, ix - 96
-	push	de
-	push	bc
-	pea	iy + 96
+	ld	hl, 96
 	push	hl
+	call	_sys_Malloc
+	push	hl
+	pop	iy
+	pop	hl
+	lea	hl, iy
+	add	hl, bc
+	or	a, a
+	sbc	hl, bc
+	jr	nz, BB5_2
+	ld	hl, 1
+	jp	BB5_12
+BB5_2:
+	ld	hl, 0
+	ld	de, __keythread
+	ld	a, 1
+	ld	(ix - 1), a
+	push	hl
+	push	hl
+	pea	iy + 96
+	push	de
 	call	_th_CreateThread
+	ld	l, a
+	ld	(ix - 4), hl
 	pop	hl
 	pop	hl
 	pop	hl
 	pop	hl
-BB5_1:
-	ld	a, (ix - 97)
+BB5_3:
+	ld	a, (ix - 1)
 	and	a, 1
-	xor	a, 1
 	bit	0, a
-	jr	nz, BB5_3
+	jr	z, BB5_5
 	ld	hl, 1
 	push	hl
 	call	_gfx_SetDraw
@@ -532,8 +547,8 @@ BB5_1:
 	call	_gfx_Blit
 	pop	hl
 	xor	a, a
-	ld	(ix - 97), a
-BB5_3:
+	ld	(ix - 1), a
+BB5_5:
 	;APP
 	rst $10
 pop bc
@@ -544,25 +559,25 @@ pop bc
 	call	_isKeyPressed
 	pop	hl
 	bit	0, a
-	jr	nz, BB5_8
+	jr	nz, BB5_10
 	ld	hl, 1
 	push	hl
 	call	_isKeyPressed
 	pop	hl
 	bit	0, a
-	jr	nz, BB5_8
+	jr	nz, BB5_10
 	ld	hl, 2
 	push	hl
 	call	_isKeyPressed
 	pop	hl
 	bit	0, a
-	jr	nz, BB5_8
+	jr	nz, BB5_10
 	ld	hl, 3
 	push	hl
 	call	_isKeyPressed
 	pop	hl
 	bit	0, a
-	jr	nz, BB5_8
+	jr	nz, BB5_10
 	ld	hl, 9
 	push	hl
 	call	_isKeyPressed
@@ -572,16 +587,20 @@ pop bc
 	push	hl
 	call	z, _isKeyPressed
 	pop	hl
-BB5_8:
+BB5_10:
 	ld	hl, 15
 	push	hl
 	call	_isKeyPressed
 	pop	hl
-	xor	a, 1
 	bit	0, a
-	jp	nz, BB5_1
+	jp	z, BB5_3
+	ld	hl, (ix - 4)
+	push	hl
+	call	_th_KillThread
+	pop	hl
 	or	a, a
 	sbc	hl, hl
+BB5_12:
 	ld	sp, ix
 	pop	ix
 	ret
@@ -635,16 +654,18 @@ _MainWindow:
 	dl	0
 	dl	_MainWindowItems
 
-	ident	"clang version 14.0.0 (https://github.com/jacobly0/llvm-project 56af4f86925b7eebf23dae240e0a77c64066179e)"
-	ident	"clang version 14.0.0 (https://github.com/jacobly0/llvm-project 56af4f86925b7eebf23dae240e0a77c64066179e)"
+	ident	"clang version 15.0.0 (https://github.com/jacobly0/llvm-project 6d9aa7a16db70f3d02ae304b08d4a03011281fef)"
+	ident	"clang version 15.0.0 (https://github.com/jacobly0/llvm-project 6d9aa7a16db70f3d02ae304b08d4a03011281fef)"
 	extern	_th_CreateThread
 	extern	__Unwind_SjLj_Register
 	extern	_gfx_PrintChar
 	extern	__frameset
 	extern	_gfx_SetTextBGColor
+	extern	_th_KillThread
 	extern	_gfx_SetTextFGColor
 	extern	_sys_GetKey
 	extern	_gfx_HorizLine
+	extern	_sys_Malloc
 	extern	_gfx_SetDraw
 	extern	_gfx_GetCharWidth
 	extern	__setflag
@@ -655,6 +676,5 @@ _MainWindow:
 	extern	_gfx_SetColor
 	extern	_gfx_Rectangle
 	extern	_gfx_Sprite
-	extern	_sys_AnyKey
 	extern	__frameset0
 	extern	_gfx_SetTextXY

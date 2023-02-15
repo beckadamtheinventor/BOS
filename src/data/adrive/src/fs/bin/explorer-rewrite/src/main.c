@@ -47,15 +47,17 @@ int isKeyPressed_NoConsume(uint8_t key) {
 
 bool isKeyPressed(uint8_t key) {
 	int i = isKeyPressed_NoConsume(key);
-	keypress_queue[i-1] = 0;
-	return (i > 0);
+	if (i > 0)
+		keypress_queue[i-1] = 0;
+	else
+		return false;
+	return true;
 }
 
 void _keythread(int argc, char **argv) {
 	uint8_t key;
 	do {
-		if (sys_AnyKey()) {
-			key = sys_GetKey();
+		if ((key = sys_GetKey())) {
 			for (int i=0; i<sizeof(keypress_queue); i++) {
 				if (keypress_queue[i] == key)
 					break; // don't re-queue keys that haven't been handled yet
@@ -71,10 +73,13 @@ void _keythread(int argc, char **argv) {
 
 
 int main(int argc, char **argv) {
-	uint8_t keythreadstack[3*32];
-	uint8_t keythread = th_CreateThread(&_keythread, &keythreadstack[sizeof(keythreadstack)], 0, NULL);
-	bool redraw = true;
+	uint8_t *keythreadstack;
+	uint8_t keythread;
 	int cursor_x, cursor_y;
+	bool redraw = true;
+	if ((keythreadstack = sys_Malloc(32*sizeof(void*))) == NULL)
+		return 1;
+	keythread = th_CreateThread(&_keythread, &keythreadstack[32*sizeof(void*)], 0, NULL);
 
 	do {
 		if (redraw) {
@@ -101,6 +106,7 @@ int main(int argc, char **argv) {
 			
 		}
 	} while (!isKeyPressed(sk_Clear));
+	th_KillThread(keythread);
 	return 0;
 }
 
