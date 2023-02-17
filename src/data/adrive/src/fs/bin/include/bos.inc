@@ -337,6 +337,7 @@ namespace bos
 ?fs_AllocChk                     := $226A4
 ?sys_GetExecType                 := $226A8
 ?sys_GetExecTypeFD               := $226AC
+?util_Zx7Compress                := $226B0
 ; end of jump table
 ;-------------------------------------------------------------------------------
 ; OS memory areas and misc defines

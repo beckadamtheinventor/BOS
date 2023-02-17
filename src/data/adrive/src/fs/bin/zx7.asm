@@ -2,217 +2,189 @@
 	jr _zx7_main
 	db "FEX",0
 _zx7_main:
-	ld hl,-29
-	call ti._frameset
-	call osrt.argv_1
-	ld a,l
-	or a,a
-	jr z,.passed_int_args
-	call osrt.argv_2
-	push hl
-	call osrt.hexstr_to_int
-	ex (sp),hl
-	call osrt.argv_3
-	push hl
-	call osrt.hexstr_to_int
-	ex (sp),hl
-	call osrt.argv_4
-	push hl
-	call osrt.hexstr_to_int
-	jr .entry
-.passed_int_args:
-	call osrt.argv_2
-	push hl
-	call osrt.argv_3
-	push hl
-	call osrt.argv_4
-.entry:
-	ex (sp),hl
-	pop bc,de
-	ld (ix-3),hl
-	ld (ix-23),$80
+	call ti._frameset0
+	call osrt.argv_1 ; mode argument -> HL
 	ld a,(hl)
-	ld (de),a
-	inc de
-	ld (ix-22),de
-	inc hl
-	dec bc
-	ld (ix-26),bc
-.compressloop:
-	ld (ix-6),hl
-	call .locatepattern
-	ld hl,(ix-6)
-	cpi
-	jp pe,.compressloop
-	
-	
+	cp a,'-' ; check argument starts with a hyphen
+	jr z,.has_args
+.display_info:
+	ld hl,.info_str
+	call bos.gui_PrintLine
+.done:
+	or a,a
+	jr .return_cf
+.formaterror:
+	ld hl,.format_error_str
+	jr .error_print
+.failed_to_create_file:
+	ld hl,.failed_to_create_file_str
+	jr .error_print
+.file_not_found:
+	ld hl,.file_not_found_str
+.error_print:
+	call bos.gui_PrintLine
+	scf
+.return_cf:
+	sbc hl,hl
 	ld sp,ix
 	pop ix
 	ret
-
-.locatepattern:
+.has_args:
+	inc hl
 	ld a,(hl)
-	dec hl
-	ld (ix-9),hl
-	ld hl,$090000
-	ld (ix-12),hl
-	ld l,1
-	ld (ix-15),hl
-	ld (ix-18),hl
-
-	push bc, de
-	ld hl,(ix-9)
-	ld de,(ix-3)
-	sbc hl,de
+	cp a,'d' ; check if requesting decompression
+	jq nz,.not_decompress ; otherwise go here
+	call osrt.argv_2 ; source file argument -> HL
 	push hl
-	pop bc
-	add hl,de
-.locatepatternloop:
-	cpdr
-	jp po, .locatedliteral
-	push hl
-	pop iy
-	ld de,(ix-6)
+	call bos.fs_GetFilePtr
+	pop de
+	jr c,.file_not_found
 	push bc
-	ld hl,(ix-6)
-	ld bc,$010000
-	add hl,bc
-	ld bc,(ix-26)
-.patterncheckloop:
-	dec bc
-	ld a,b
-	or a,c
-	jr z,.donepatternloop
-	sbc hl,de
-	add hl,de
-	jr nc,.donepatternloop
-	inc de
-	inc iy
-	ld a,(de)
-	cp a,(iy)
-	jr z,.patterncheckloop
-.donepatternloop:
-	ex hl,de
-	ld de,(ix-6)
-	sbc hl,de ; hl = pattern length
-	ld (ix-29),hl
-	dec hl
-	ld a,10
-.costloop:
-	add a,2
-	rr h
-	rr l
-	jr nz,.costloop
-	lea hl,iy
-	or a,a
-	sbc hl,de ; hl = pattern offset
-	push hl
-	ld de,129
-	sbc hl,de
-	jr c,.offsetunder128
-	add a,4
-.offsetunder128:
-	; divide cost by length
-	; TODO: optimize this somehow
-	ld h,a
-	ld l,0
-	ld b,8
-.shift_up_8_loop:
-	add hl,hl
-	djnz .shift_up_8_loop
-	ld bc,(ix-29)
-	call ti._idivu
-	ld bc,(ix-12) ; pattern length
+	ex (sp),hl ; ptr -> (SP), len -> HL
+	ld bc,8
 	or a,a
 	sbc hl,bc
+	jr c,.formaterror ; fail if source file length less than 8 bytes (6 bytes of header, 2 bytes of compressed data)
 	add hl,bc
-	jr nc,.dontsetcost
-	ld (ix-12),hl ; cost
-	ld hl,(ix-29)
-	ld (ix-15),hl ; length
-	pop hl
-	ld (ix-18),hl ; offset
-	db $3e ; ld a,... dummify pop bc
-.dontsetcost:
-	pop bc,bc
-	pop de,bc
-	push bc,de
-	jp .locatepatternloop
-.locatedliteral:
-	ld hl,(ix-12)
-	ld bc,$090000
+	ex (sp),hl ; restore HL=ptr
+	pop bc ; restore BC=len
+
+	ld de,(hl)
+	ex hl,de ; file pointer HL -> DE
+	push bc ; save source length
+	db $01,"ZX7" ; ld bc,"ZX7"
 	xor a,a
 	sbc hl,bc
-	add hl,bc
-	jr nc,.writeliteral
-	ld hl,2
-	ld bc,(ix-15) ; length
-	dec bc
-	pop de
-	push de
-.writezerobitsloop:
-	call .writezerobit
-	add hl,hl
-	sbc hl,bc
-	add hl,bc
-	jr c,.writezerobitsloop
-	ex hl,de
-	ld hl,(ix-15) ; length
-	dec hl
-.writelengthbitsloop:
-	rr d
-	rr e
-	sbc hl,de
-	add hl,de
-	jr z,.donewritinglengthbits
-	jr c,.writelengthbitsloop
-	or a,1
-	call .writebit
-	jr .writelengthbitsloop
-.donewritinglengthbits:
-	ld hl,(ix-18) ; offset
-	dec hl
-	ld de,128
+	pop bc ; restore source length
+	jr z,.formatgood
+	ex hl,de ; file pointer DE -> HL
+	push bc
+	ex (sp),hl ; ptr -> (SP), len -> HL
+	ld bc,10
 	or a,a
-	sbc hl,de
-	jr nc,.write_offset_over_128
-	add hl,de
-	ld a,l
-	pop de
-	pop bc
-	ld (de),a
-	inc de
-	ret
+	sbc hl,bc
+	jr c,.formaterror ; fail if source file length less than 10 bytes (8 bytes of header, 2 bytes of compressed data)
+	add hl,bc
+	ex (sp),hl ; restore HL=ptr
+	pop bc ; restore BC=len
+	ld a,(hl)
+	cp a,$18 ; jr instruction
+	jr nz,.formaterror
+	inc hl
+	inc hl ; jr offset
+	ld de,(hl) ; grab executable magic number
+	ex hl,de
+	db $01,"CRX" ; ld bc,"CRX"
+	xor a,a
+	sbc hl,bc
+	jq nz,.formaterror
+.formatgood:
+	ex hl,de ; file pointer DE -> HL
+	inc hl
+	inc hl
+	inc hl
+	or a,(hl)
+	jr nz,.formaterror
+	inc hl
+	mlt de
+	ld e,(hl)
+	inc hl
+	ld d,(hl)
+	inc hl
+	push hl ; save pointer to compressed data
+	ld c,0
+	push de,bc ; output length, property byte
+	call osrt.argv_3 ; destination file argument -> HL
+	push hl ; file name
+	call bos.fs_OpenFile ; check if destination file exists
+	call nc,bos.fs_DeleteFile ; delete it if it exists
+	call bos.fs_CreateFile ; create destination file
+	jq c,.failed_to_create_file
+	pop bc,bc,bc ; pop file name, property byte, output length
+	pop de ; pop pointer to compressed data
 
-.write_offset_over_128:
-	ld a,l
-	and a,$7F
-	or a,$80
-.
+	push hl ; push destination file descriptor
+	push bc ; push destination file length
+	push de ; push pointer to compressed data
+	ld de,ti.pixelShadow
+	push de ; push pointer to temp memory
+	call bos.util_Zx7Decompress ; decompress into pixelShadow
+	pop de,bc,bc ; pop pixelShadow, pointer to compressed data, destination file length
+	jq .write_file_entry  ; jump here as to not duplicate code
+
+.not_decompress:
+	cp a,'c' ; check if requesting compression
+	jp nz,.display_info ; if not, display usage info
+
+	call osrt.argv_2 ; source file argument -> HL
+	push hl
+	call bos.fs_GetFilePtr ; grab source file data pointer (HL) length (BC) and properties (A)
+	jp c,.file_not_found ; fail if file was not found
+	pop de
+
+	push hl,bc ; save source file data pointer, length
+
+	call osrt.argv_3 ; destination file argument -> HL
+	ld bc,0
+	push bc,bc,hl ; push file length, property byte, file name
+	call bos.fs_OpenFile ; check if destination file exists
+	call nc,bos.fs_DeleteFile ; delete it if it exists
+	call bos.fs_CreateFile ; try to create empty file to hold output
+	jp c,.failed_to_create_file ; fail if failed to create empty file
+	pop bc,bc,bc
 	
-	pop de
-	pop bc
-	ret
-.writeliteral:
-	pop de
-	ld c,a
-	call .writezerobit
-	ld a,c
-	pop bc
-	ld (de),a
-	inc de
-	ret
+	pop bc ; restore source file length
+	ex (sp),hl ; save destination file descriptor, restore source file pointer
+	
+	ld de,.progress_callback ; this will be called during compression to update the progress bar
+	push de,bc,hl ; push callback, source length, source pointer
+	ld de,ti.pixelShadow ; compress into pixelShadow
+	push de ; push location to compress into
+	call bos.util_Zx7Compress ; returns HL = compressed length
+	pop de,bc,bc,bc ; pop compressed data pointer, source pointer, source length, callback
+	pop bc ; restore file descriptor
+	push de,bc,hl ; push compressed data pointer, file descriptor, compressed length
+	call bos.fs_SetSize ; resize the output file
+	jp c,.failed_to_create_file ; fail if failed to resize
+	pop bc,hl,de ; pop compressed length, file descriptor, compressed data pointer
+	push hl ; push file descriptor
 
-.writebit:
-	jr z,.writezerobit
-	ld a,(ix-23)
-	ld iy,(ix-22)
-	or a,(iy)
-	ld (iy),a
-.writezerobit:
-	rr (ix-23)
-	ret nc
-	ld (ix-22),de
-	ld (ix-23),$80
+.write_file_entry:
+	or a,a
+	sbc hl,hl
+	ex (sp),hl ; push 0 (file write offset), pop file descriptor
+	push hl ; push file descriptor
+	ld l,1
+	push hl ; push 8-bit value 1 (file write section count)
+	push bc ; push destination file length (file write length)
+	push de ; push compressed/decompressed data (file write data) (pixelShadow)
+	call bos.fs_Write
+	pop bc,hl ; pop data, len
+	; the other values don't need to be popped, the stack pointer gets restored in the exit routine
+.success:
+	push hl
+	call bos.gui_NewLine
+	ld hl,.success_str
+	call bos.gui_PrintString
+	ld a,':'
+	call bos.gui_PrintChar
+	pop hl
+	call bos.gui_PrintInt
+	ld hl,.bytes_str
+	call bos.gui_PrintLine
+	jp .done
+.progress_callback:
 	ret
-
+.info_str:
+	db "Usage: zx7 -[c|d] infile outfile",$A
+	db "Compress/Decompress infile to outfile.",0
+.file_not_found_str:
+	db "File not found.",0
+.format_error_str:
+	db "Input file has an invalid header.",0
+.failed_to_create_file_str:
+	db "Failed to create output file.",0
+.success_str:
+	db "Success. Output: ",0
+.bytes_str:
+	db "bytes.",0

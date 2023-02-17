@@ -81,6 +81,7 @@ fs_dir bin_dir
 	fs_sfentry poke_exe, "poke", "", f_system+f_subfile
 	fs_sfentry rm_exe, "rm", "", f_system+f_subfile
 	fs_sfentry sleep_exe, "sleep", "", f_system+f_subfile
+	fs_sfentry zx7_exe, "zx7", "", f_system+f_subfile
 	fs_entry str_so, "str", "so", f_system
 	; fs_sfentry var_exe, "var", "", f_system+f_subfile
 	fs_entry numstr_so, "numstr", "so", f_system
@@ -204,6 +205,10 @@ fs_file os_internal_subfiles
 
 	fs_subfile jump_exe, bin_dir
 		include 'fs/bin/jump.asm'
+	end fs_subfile
+
+	fs_subfile zx7_exe, bin_dir
+		include 'fs/bin/zx7.asm'
 	end fs_subfile
 
 	; fs_subfile json_exe, bin_dir

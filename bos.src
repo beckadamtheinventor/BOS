@@ -168,6 +168,7 @@
 	public _fs_AllocChk
 	public _sys_GetExecType
 	public _sys_GetExecTypeFD
+	public _util_Zx7Compress
 _boot_os                         := $20108
 _handle_interrupt                := $2010C
 _HandleInstruction               := $20110
@@ -336,6 +337,7 @@ _fs_Rename                       := $226A0
 _fs_AllocChk                     := $226A4
 _sys_GetExecType                 := $226A8
 _sys_GetExecTypeFD               := $226AC
+_util_Zx7Compress                := $226B0
 
 public ram_executable
 public ram_executable_at
