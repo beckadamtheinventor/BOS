@@ -2,7 +2,7 @@
 	jp boot_os
 	jp handle_interrupt
 	jp HandleInstruction ;thread control instructions and more
-	jp DONOTHING
+	jp HandleSysCall
 	jp DONOTHING
 	jp handle_offsetinstruction ;handle_rst28
 	jp DONOTHING ;handle_rst30

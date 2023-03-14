@@ -16,6 +16,9 @@ str_PressAnyKey:
 str_BadInterrupt:
 	db "Repeated interrupt restart",$A
 	db "called by program.",$A,0
+str_UnimplementedSysCall:
+	db "Unimplemented System routine called",$A
+	db "by program.",$A,0
 str_UnimplementedOSCall:
 	db "Unimplemented OS routine called",$A
 	db "by program.",$A,0
@@ -86,17 +89,20 @@ fs_root_file_initializers:
 	db $10, "etc/fontlibc",0
 	db $10, "home",0
 	db $10, "opt",0
+	db $10, "sys",0
 	db $10, "opt"
 str_bin_dir:
 	db "/bin",0
 	db $10, "opt"
 str_lib_dir:
 	db "/lib",0
+	db $10, "opt/sys",0
 	db $10, "tivars",0
 	db $10, "tmp",0
 	db $10, "usr",0
 	db $10, "usr/bin",0
 	db $10, "usr/lib",0
+	db $10, "usr/sys",0
 	db $10
 str_var_dir:
 	db "/var",0
@@ -177,6 +183,19 @@ end virtual
 fs_file_data_tivars:
 	file "adrive/obj/TIVARS.zx7.bin"
 fs_file_data_tivars.zlen:=$-.
+
+	db $00
+str_SysCallsVar:
+	db "/var/SYSCALLS",0
+	dw fs_file_data_syscalls.len
+	dw fs_file_data_syscalls.zlen
+virtual
+	file "adrive/obj/SYSCALLS.bin"
+	fs_file_data_syscalls.len := $-$$
+end virtual
+fs_file_data_syscalls:
+	file "adrive/obj/TIVARS.zx7.bin"
+fs_file_data_syscalls.zlen:=$-.
 	dw 0
 
 ; bosfs_filesystem_header:

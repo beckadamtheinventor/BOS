@@ -140,14 +140,18 @@ $(call NATIVEPATH,$(FSOBJ)/TIVARS.bin): $(call NATIVEPATH,$(FSSRC)/fs/var/TIVARS
 	fasmg $(call NATIVEPATH,$(FSSRC)/fs/var/TIVARS.asm) $(call NATIVEPATH,$(FSOBJ)/TIVARS.bin)
 	convbin -i $(call NATIVEPATH,$(FSOBJ)/TIVARS.bin) -o $(call NATIVEPATH,$(FSOBJ)/TIVARS.zx7.bin) -j bin -k bin -c zx7
 
+$(call NATIVEPATH,$(FSOBJ)/SYSCALLS.bin): $(call NATIVEPATH,$(FSSRC)/fs/var/SYSCALLS.asm)
+	fasmg $(call NATIVEPATH,$(FSSRC)/fs/var/SYSCALLS.asm) $(call NATIVEPATH,$(FSOBJ)/SYSCALLS.bin)
+	convbin -i $(call NATIVEPATH,$(FSOBJ)/SYSCALLS.bin) -o $(call NATIVEPATH,$(FSOBJ)/SYSCALLS.zx7.bin) -j bin -k bin -c zx7
+
 # Rule to build Filesytem and compress it
 filesystem: $(call rwildcard,$(call NATIVEPATH,$(FSSRC)),*) $(call NATIVEPATH,$(FSOBJ)/libload.bin) $(call NATIVEPATH,$(FSOBJ)/fontlibc.bin) \
 $(call NATIVEPATH,$(FSOBJ)/fatdrvce.bin) $(call NATIVEPATH,$(FSOBJ)/fileioc.bin) $(call NATIVEPATH,$(FSOBJ)/graphx.bin) \
 $(call NATIVEPATH,$(FSOBJ)/keypadc.bin) $(call NATIVEPATH,$(FSOBJ)/msddrvce.bin) $(call NATIVEPATH,$(FSOBJ)/srldrvce.bin) \
 $(call NATIVEPATH,$(FSOBJ)/usbdrvce.bin) $(call NATIVEPATH,$(FSOBJ)/memedit.bin) $(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/bosbin/CEDIT.bin) \
 $(call NATIVEPATH,$(FSOBJ)/LIB.bin) $(call NATIVEPATH,$(FSSRC)/fs/bin/msd/bosbin/MSD.bin) \
-$(call NATIVEPATH,$(FSSRC)/fs/bin/serial/bosbin/serial.bin) \
-$(call NATIVEPATH,$(FSOBJ)/PATH.bin) $(call NATIVEPATH,$(FSOBJ)/TIVARS.bin) $(call NATIVEPATH,$(FSOBJ)/explorer.bin)
+$(call NATIVEPATH,$(FSSRC)/fs/bin/serial/bosbin/serial.bin) $(call NATIVEPATH,$(FSOBJ)/PATH.bin) \
+$(call NATIVEPATH,$(FSOBJ)/TIVARS.bin) $(call NATIVEPATH,$(FSOBJ)/SYSCALLS.bin) $(call NATIVEPATH,$(FSOBJ)/explorer.bin)
 	convbin -i $(call NATIVEPATH,$(FSSRC)/fs/etc/fontlibc/DrMono.dat) -o $(call NATIVEPATH,$(FSOBJ)/DrMono.zx7.dat) -j bin -k bin -c zx7
 	fasmg $(call NATIVEPATH,$(FSSRC)/main.asm) $(call NATIVEPATH,src/data/adrive/main.bin)
 	convbin -i $(call NATIVEPATH,src/data/adrive/main.bin) -o $(call NATIVEPATH,src/data/adrive/data.bin) -j bin -k bin -c zx7

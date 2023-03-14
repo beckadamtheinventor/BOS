@@ -159,7 +159,7 @@ namespace bos
 ?boot_os                         := $20108
 ?handle_interrupt                := $2010C
 ?HandleInstruction               := $20110
-;DONOTHING                       := $20114
+?HandleSysCall                   := $20114
 ;DONOTHING                       := $20118
 ?handle_offsetinstruction        := $2011C
 ;DONOTHING                       := $20120

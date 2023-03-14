@@ -1,5 +1,5 @@
 ;@DOES Unlocks flash.
-;;@NOTE Will check permissions and re-lock flash if the caller doesn't have sufficient permissions
+;;@NOTE Resets the calc if not currently in elevated mode.
 sys_FlashUnlock:
 flash_unlock:
 	push af
@@ -32,9 +32,11 @@ flash_unlock:
 	; out0	(6),a
 	; out0	($28),c
 
+;	call sys_CheckElevated ;check if we're elevated
+;	jr z,.lock_and_reset
 	pop af
-	; call sys_CheckElevated ;check if we're elevated
-	; ret nz
-	; call sys_FlashLock
-	; jq os_return
 	ret
+
+;.lock_and_reset:
+;	call sys_FlashLock
+;	jq boot_os

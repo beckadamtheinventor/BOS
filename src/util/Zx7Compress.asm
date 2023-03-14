@@ -209,7 +209,10 @@ util_Zx7Compress:
 	ld a,(ix-23)
 	ld (ix-22),de
 	ld (de),a
+	ld de,(ix-32)
+	ld (ix-22),de
 	inc de
+	ld (ix-32),de
 	ld (ix-23),$80
 	ret
 

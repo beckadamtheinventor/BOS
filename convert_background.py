@@ -20,6 +20,7 @@ converts:
   - name: image
     palette: xlibc
     transparent-color-index: 0
+    width-and-height: false
     images:
       - image.png
 

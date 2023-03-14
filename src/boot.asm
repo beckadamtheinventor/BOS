@@ -1,14 +1,29 @@
 
 boot_os:
+	; ld a,$8C
+	; out0 ($24),a
+	; in0 a,($06)
+	; set 2,a
+	; out0 ($06),a
+	; ld a,4
+	; out0 ($28),a
 	call sys_FlashUnlock
+
 	ld a,$05 ;set privleged code end address to $050000 (up until the first non-os filesystem sector)
 	out0 ($1F),a
 	xor a,a
 	out0 ($1D),a
 	out0 ($1E),a
+	
+	; ld a,($3F0000)
+	; inc a
+	; ld a,$3F
+	; call nz,sys_EraseFlashSector ; erase this sector if it contains data
+	
 	call sys_FlashLock
 
 os_return:
+	ld sp,ti.stackTop
 	im 1 ; set interrupt mode 1
 	ld hl,ti.userMem
 	ld (top_of_UserMem),hl
