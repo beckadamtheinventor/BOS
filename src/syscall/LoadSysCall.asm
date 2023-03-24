@@ -1,11 +1,8 @@
 
 sc_LoadSysCall:
-	ld hl,-9 - str_SysCallsDir.len
+	ld hl,-9
 	call ti._frameset
-	ld hl,str_SysCallsDir
-	lea de,ix-9-str_SysCallsDir.len
-	ld bc,str_SysCallsDir.len
-	ldir
+	lea de,ix-9
 	ld hl,(ix+6)
 	ld c,8
 .copy_dir_loop:
@@ -18,17 +15,26 @@ sc_LoadSysCall:
 .done_copying_dir:
 	ld a,(hl)
 	cp a,'/'
+	inc hl
 	jr nz,.done_copying_dir
+	dec hl
 .done_passing_filename:
 	inc hl
 	ld (ix+6),hl ; advance routine name past library name
 	xor a,a
 	ld (de),a
-	lea hl,ix-9-str_SysCallsDir.len
+	lea hl,ix-9
+	ld de,str_SysCallsVar
+	push de,hl
+	call sys_OpenFileInVar
+	pop de,de
+	jp c,.fail_cf
 	push hl
-	call fs_GetFilePtr
-	pop de
-	jr c,.fail_cf
+	call fs_GetFDLen
+	ex (sp),hl
+	push hl
+	call fs_GetFDPtr
+	pop bc,bc
 	ld (ix-3),hl
 	push bc
 	ex (sp),hl
@@ -83,7 +89,7 @@ sc_LoadSysCall:
 	jr .search_loop
 .found:
 	ld (ix-6),hl
-	mlt de
+	mlt de ; zero deu
 	dec hl
 	ld d,(hl)
 	dec hl
@@ -96,8 +102,17 @@ sc_LoadSysCall:
 	dec a
 	jr z,.success ; if type==1, run routine in-place
 	dec a
+	jr z,.ram_routine ; if type==2, copy routine to ram first
+	dec a
 	jr nz,.fail ; fail if unknown routine type
-	; if type==2, copy routine to ram first
+; if type==3, return data
+	mlt bc ; zero bcu
+	ld c,(hl)
+	inc hl
+	ld b,(hl)
+	inc hl
+	jr .success
+.ram_routine:
 	mlt bc ; set bcu to 0
 	ld c,(hl) ; routine length
 	inc hl

@@ -118,6 +118,86 @@ macro syscall? lbl
 end macro
 
 ;-------------------------------------------------------------------------------
+; Syscall library macro
+;-------------------------------------------------------------------------------
+macro syscalllib?
+	local exports
+	db "SCL",0
+	virtual
+		exports.area::
+	end virtual
+	virtual at exports.codeloc
+	macro export? routine
+		virtual exports.area
+			if defined routine.ramroutine
+				db 2
+			else
+				db 1
+			end if
+			dw routine
+			db `routine, 0
+		end virtual
+	end macro
+	macro export_named? routine, name
+		virtual exports.area
+			if defined routine.ramroutine
+				db 2
+			else
+				db 1
+			end if
+			dw routine
+			db name, 0
+		end virtual
+	end macro
+	macro export_data? data, name
+		virtual exports.area
+			db 3
+			dw data
+			db name, 0
+		end virtual
+	end macro
+	macro ram_routine? routine, ramloc
+		routine.ramroutine:
+		routine.dataloc:
+		virtual at ramloc
+		macro end?.ram_routine?
+			routine.len := $-$$
+			load routine.data: $-$$ from $$
+			end virtual
+			dw routine.len
+			dl ramloc
+			db routine.data
+			purge end?.ram_routine?
+		end macro
+	end macro
+	macro data_block?
+		local data
+		virtual
+		macro end?.data_block?
+			data.len := $-$$
+			load data.data: $-$$ from $$
+			end virtual
+			dw data.len
+			db data.data
+			purge end?.data_block?
+		end macro
+	end macro
+	macro end?.syscalllib?
+		load exports.code: $-$$ from $$
+		end virtual
+		virtual exports.area
+			db 0
+			load exports.data: $-$$ from $$
+		end virtual
+		db exports.data
+		exports.codeloc := $
+		db exports.code
+		purge export?
+		purge end?.syscalllib?
+	end macro
+end macro
+
+;-------------------------------------------------------------------------------
 ; Software threading instructions
 ;-------------------------------------------------------------------------------
 macro EnableThreading?
