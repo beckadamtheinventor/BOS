@@ -1,10 +1,10 @@
 
-	jp boot_os
+	jp boot_os                  ; rst $00
 	jp handle_interrupt
-	jp HandleInstruction ;thread control instructions and more
-	jp HandleSysCall
-	jp DONOTHING
-	jp handle_offsetinstruction ;handle_rst28
+	jp HandleInstruction        ; rst $10 thread control instructions and more
+	jp sc_HandleSysCall         ; rst $18
+	jp DONOTHING                ; rst $20
+	jp handle_offsetinstruction ; rst $28
 	jp DONOTHING ;handle_rst30
 	include 'tiosjt.asm'
 	dd (($022400-$) shr 2) dup $CD or handle_unimplemented shl 8

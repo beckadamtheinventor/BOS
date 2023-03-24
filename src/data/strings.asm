@@ -70,6 +70,10 @@ str_ErrorDataType:
 	db "Data Type",0
 str_PressAnyKeyToSoftReboot:
 	db "Press any key to soft reboot.",$A,0
+str_SysCallsDir:
+	db "/sys/"
+.len:=$-.
+	db 0
 
 ; string_program_requested_flash:
 	; db "Error: Unauthorized flash unlock!",$A
@@ -194,7 +198,7 @@ virtual
 	fs_file_data_syscalls.len := $-$$
 end virtual
 fs_file_data_syscalls:
-	file "adrive/obj/TIVARS.zx7.bin"
+	file "adrive/obj/SYSCALLS.zx7.bin"
 fs_file_data_syscalls.zlen:=$-.
 	dw 0
 

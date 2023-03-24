@@ -1,33 +1,28 @@
 
-HandleSysCall:
-	push iy
+sc_HandleSysCall:
+	push ix,iy
 	ld iy,0
 	add iy,sp
-	push hl
-	ld hl,(iy+3) ; return address
-	push hl
+	ld hl,(iy+6) ; return address
 	xor a,a
 	ld bc,$FFFFFF
 	ld (fsOP6),bc
-	inc bc
-	cpir
-	ld (iy+3),hl ; advance return address
+	ld de,(hl)
+	inc hl
+	inc hl
+	inc hl
+	ld (iy+6),hl ; advance return address
 	ld hl,str_SysCallsVar
-	ex (sp),hl
-	push hl
-	call sys_OpenFileInVar
+	push hl,de
+	call sc_LoadSysCall
 	pop de,bc
+	pop iy,ix
 	jr c,.fail
-	call sys_ExecuteFileFD
-.done:
-	pop hl
-	pop iy
-	ret
+	jp (hl)
 .fail:
 	push de
 	ld hl,str_UnimplementedSysCall
 	call gui_DrawConsoleWindow
 	pop hl
 	call gui_PrintLine
-	call sys_WaitKeyCycle
-	jr .done
+	jp sys_WaitKeyCycle

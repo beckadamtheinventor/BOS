@@ -25,7 +25,7 @@ macro flash_executable?
 	end macro
 	macro ? line&
 		match opcode= args, line
-			if `opcode = "call" | `opcode = "jp" | `opcode = "jq" | `opcode = "ld"
+			if `opcode = "call" | `opcode = "jp" | `opcode = "jq" | `opcode = "ld" | `opcode = "syscall"
 				match lhs=,rhs, args
 					match (val), lhs
 						if val relativeto $$ & val >= $$
@@ -70,6 +70,20 @@ macro flash_executable?
 			line
 		end match
 	end macro
+end macro
+
+;-------------------------------------------------------------------------------
+; Syscall instruction macro
+;-------------------------------------------------------------------------------
+; lbl should point to a string containing the syscall path
+; example:
+;	syscall gfx_PrintString
+;	...
+;	gfx_PrintString:
+;		db "gfx/PrintString",0
+macro syscall? lbl
+	rst $18
+	dl lbl
 end macro
 
 ;-------------------------------------------------------------------------------
@@ -159,7 +173,7 @@ namespace bos
 ?boot_os                         := $20108
 ?handle_interrupt                := $2010C
 ?HandleInstruction               := $20110
-?HandleSysCall                   := $20114
+?sc_HandleSysCall                := $20114
 ;DONOTHING                       := $20118
 ?handle_offsetinstruction        := $2011C
 ;DONOTHING                       := $20120

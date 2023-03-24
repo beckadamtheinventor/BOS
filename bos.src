@@ -3,7 +3,7 @@
 	public _boot_os
 	public _handle_interrupt
 	public _HandleInstruction
-	public _HandleSysCall
+	public _sc_HandleSysCall
 	public _handle_offsetinstruction
 	public _sys_ExecuteFile
 	public _os_GetOSInfo
@@ -173,7 +173,7 @@
 _boot_os                         := $20108
 _handle_interrupt                := $2010C
 _HandleInstruction               := $20110
-_HandleSysCall                   := $20114
+_sc_HandleSysCall                := $20114
 _handle_offsetinstruction        := $2011C
 _sys_ExecuteFile                 := $22400
 _os_GetOSInfo                    := $22404

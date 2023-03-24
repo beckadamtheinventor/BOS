@@ -56,7 +56,7 @@ macro flash_executable?
 	end macro
 	macro ? line&
 		match opcode= args, line
-			if `opcode = "call" | `opcode = "jp" | `opcode = "jq" | `opcode = "ld"
+			if `opcode = "call" | `opcode = "jp" | `opcode = "jq" | `opcode = "ld" | `opcode = "syscall"
 				match lhs=,rhs, args
 					match (val), lhs
 						if val relativeto $$ & val >= $$
@@ -101,6 +101,20 @@ macro flash_executable?
 			line
 		end match
 	end macro
+end macro
+
+;-------------------------------------------------------------------------------
+; Syscall instruction macro
+;-------------------------------------------------------------------------------
+; lbl should point to a string containing the syscall path
+; example:
+;	syscall gfx_PrintString
+;	...
+;	gfx_PrintString:
+;		db "gfx/PrintString",0
+macro syscall? lbl
+	rst $18
+	dl lbl
 end macro
 
 ;-------------------------------------------------------------------------------
