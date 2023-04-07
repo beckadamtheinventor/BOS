@@ -302,14 +302,38 @@ execute_program_string:
 	call ti.ErrDataType
 	jr .return_value_return
 .execute_file:
+	ld iy,ti.OP3
 	ld bc,(ti.begPC)
-	ld (ti.OP3),bc
+	ld (iy),bc
 	ld bc,(ti.curPC)
-	ld (ti.OP3+3),bc
+	ld (iy+3),bc
 	ld bc,(ti.endPC)
-	ld (ti.OP3+6),bc
+	ld (iy+6),bc
+	call ti.PushOP3
+	ld bc,(bos.color_primary)
+	ld (iy),bc
+	ld bc,(bos.lcd_text_fg)
+	ld (iy+2),bc
+	ld bc,(bos.lcd_text_fg2)
+	ld (iy+4),bc
+	ld a,(bos.cursor_color)
+	ld (iy+6),a
 	call ti.PushOP3
 	call bos.sys_ExecuteFile
+	ld iy,ti.OP3
+	call ti.PopOP3
+	ld a,(iy)
+	ld (bos.color_primary),a
+	ld a,(iy+1)
+	ld (bos.color_primary+1),a
+	ld a,(iy+2)
+	ld (bos.lcd_text_fg),a
+	ld a,(iy+3)
+	ld (bos.lcd_text_fg+1),a
+	ld a,(iy+4)
+	ld (bos.lcd_text_fg2),a
+	ld a,(iy+5)
+	ld (bos.lcd_text_fg2+1),a
 	call ti.PopOP3
 	ld bc,(ti.OP3)
 	ld (ti.begPC),bc

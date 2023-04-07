@@ -1,3 +1,4 @@
-;@DOES Nothing for now. Basically just a compatibility define
+;@DOES Clear the screen and display the current working directory.
 _DrawStatusBar:
-	ret
+	ld hl,current_working_dir
+	jq gui_DrawConsoleWindow

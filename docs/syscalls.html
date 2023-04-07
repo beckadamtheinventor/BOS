@@ -1,8 +1,8 @@
-<html><head><title>bos.inc docs</title>	<link rel="stylesheet" type="text/css" href="style.css"></head>	<body>	<h1>"bos.inc" documentation</h1>	<b>"bos.DONOTHING" is a no-op and does nothing,</b><br>As the name implies.	<table><th>syscall name</th><th>syscall adress</th>	<tr><td><a href="#boot_os">bos.boot_os</a></td><td><a href="#boot_os">020108</a></td></tr>
+<html><head><title>bos.inc docs</title>	<link rel="stylesheet" type="text/css" href="style.css"></head>	<body>	<h1>"bos.inc" documentation</h1>	<b>"bos.DONOTHING" is a no-op and does nothing,</b><br>As the name implies.	<table><th>syscall name</th><th>syscall adress</th>	<tr><td><a href="#boot_os                  ">bos.boot_os                  </a></td><td><a href="#boot_os                  ">020108</a></td></tr>
 <tr><td><a href="#handle_interrupt">bos.handle_interrupt</a></td><td><a href="#handle_interrupt">02010C</a></td></tr>
-<tr><td><a href="#HandleInstruction ">bos.HandleInstruction </a></td><td><a href="#HandleInstruction ">020110</a></td></tr>
-<tr class="no_op"></tr><td><a href="#DONOTHING">bos.DONOTHING</a></td><td><a href="#DONOTHING">020114</a></td></tr>
-<tr class="no_op"></tr><td><a href="#DONOTHING">bos.DONOTHING</a></td><td><a href="#DONOTHING">020118</a></td></tr>
+<tr><td><a href="#HandleInstruction        ">bos.HandleInstruction        </a></td><td><a href="#HandleInstruction        ">020110</a></td></tr>
+<tr><td><a href="#sc_HandleSysCall         ">bos.sc_HandleSysCall         </a></td><td><a href="#sc_HandleSysCall         ">020114</a></td></tr>
+<tr class="no_op"></tr><td><a href="#DONOTHING                ">bos.DONOTHING                </a></td><td><a href="#DONOTHING                ">020118</a></td></tr>
 <tr><td><a href="#handle_offsetinstruction ">bos.handle_offsetinstruction </a></td><td><a href="#handle_offsetinstruction ">02011C</a></td></tr>
 <tr class="no_op"></tr><td><a href="#DONOTHING ">bos.DONOTHING </a></td><td><a href="#DONOTHING ">020120</a></td></tr>
 <tr><td><a href="#sys_ExecuteFile">bos.sys_ExecuteFile</a></td><td><a href="#sys_ExecuteFile">022400</a></td></tr>
@@ -175,15 +175,18 @@
 <tr><td><a href="#_SearchSymTable">bos._SearchSymTable</a></td><td><a href="#_SearchSymTable">02269C</a></td></tr>
 <tr><td><a href="#fs_Rename">bos.fs_Rename</a></td><td><a href="#fs_Rename">0226A0</a></td></tr>
 <tr><td><a href="#fs_AllocChk">bos.fs_AllocChk</a></td><td><a href="#fs_AllocChk">0226A4</a></td></tr>
-</table><div id="boot_os"><h1>boot_os</h1>	<h3>syscall Adress 020108</h3>
+<tr><td><a href="#sys_GetExecType">bos.sys_GetExecType</a></td><td><a href="#sys_GetExecType">0226A8</a></td></tr>
+<tr><td><a href="#sys_GetExecTypeFD">bos.sys_GetExecTypeFD</a></td><td><a href="#sys_GetExecTypeFD">0226AC</a></td></tr>
+<tr><td><a href="#util_Zx7Compress">bos.util_Zx7Compress</a></td><td><a href="#util_Zx7Compress">0226B0</a></td></tr>
+</table><div id="boot_os                  "><h1>boot_os                  </h1>	<h3>syscall Adress 020108</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td></td><td></td><td></td><td></td><td>
-</td></tr>
 </table></div><div id="handle_interrupt"><h1>handle_interrupt</h1>	<h3>syscall Adress 02010C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
 </td></tr>
-</table></div><div id="HandleInstruction "><h1>HandleInstruction </h1>	<h3>syscall Adress 020110</h3>
+</table></div><div id="HandleInstruction        "><h1>HandleInstruction        </h1>	<h3>syscall Adress 020110</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+</table></div><div id="sc_HandleSysCall         "><h1>sc_HandleSysCall         </h1>	<h3>syscall Adress 020114</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 </table></div><div id="handle_offsetinstruction "><h1>handle_offsetinstruction </h1>	<h3>syscall Adress 02011C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -371,7 +374,7 @@ Cf set if file not found or otherwise cannot be opened.</td><td></td><td>
 </td></tr>
 </table></div><div id="_DrawStatusBar"><h1>_DrawStatusBar</h1>	<h3>syscall Adress 0224B4</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Nothing for now. Basically just a compatibility define</td><td></td><td></td><td></td><td>
+<tr><td>Clear the screen and display the current working directory.</td><td></td><td></td><td></td><td>
 </td></tr>
 </table></div><div id="_os_GetSystemInfo"><h1>_os_GetSystemInfo</h1>	<h3>syscall Adress 0224B8</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -810,8 +813,8 @@ void *sp must be allocated at least 12 bytes behind it. If void *sp is 0, it wil
 </td></tr>
 </table></div><div id="th_KillThread"><h1>th_KillThread</h1>	<h3>syscall Adress 022678</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Kill a thread by ID</td><td>uint8_t th_KillThread(uint8_t id);</td><td>thread ID killed if successful, 0 if failed.</td><td></td><td>
-</td></tr>
+<tr><td>Kill a thread by ID.</td><td>uint8_t th_KillThread(uint8_t id);</td><td>thread ID killed if successful, 0 if failed.</td><td></td><td>
+Cannot kill thread ID 0.</td></tr>
 </table></div><div id="fs_GetFilePtr"><h1>fs_GetFilePtr</h1>	<h3>syscall Adress 02267C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>get a pointer to a file's data section</td><td>void *fs_GetFilePtr(const char *path);</td><td>HL = file data pointer, BC = file data length, A = file flags, Cf set and HL = -1 if failed</td><td></td><td>
@@ -855,5 +858,17 @@ void *sp must be allocated at least 12 bytes behind it. If void *sp is 0, it wil
 </table></div><div id="fs_AllocChk"><h1>fs_AllocChk</h1>	<h3>syscall Adress 0226A4</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Check if a memory block can be allocated in flash</td><td>unsigned int fs_AllocChk(unsigned int len);</td><td>hl = first sector that would be allocated, or -1 and Cf set if failed.</td><td></td><td>
+</td></tr>
+</table></div><div id="sys_GetExecType"><h1>sys_GetExecType</h1>	<h3>syscall Adress 0226A8</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Check the executable type of a given file</td><td>const char *sys_GetExecType(const char *path);</td><td>pointer to executable magic bytes, or -1 and Cf set if failed.</td><td></td><td>
+returns pointer to executable code in de and length of executable code in bc if hl != -1</td></tr>
+</table></div><div id="sys_GetExecTypeFD"><h1>sys_GetExecTypeFD</h1>	<h3>syscall Adress 0226AC</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Check the executable type of a given file descriptor</td><td>const char *sys_GetExecType(void *fd);</td><td>pointer to executable magic bytes, or -1 and Cf set if failed.</td><td></td><td>
+</td></tr>
+</table></div><div id="util_Zx7Compress"><h1>util_Zx7Compress</h1>	<h3>syscall Adress 0226B0</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Zx7 compress a block of memory.</td><td>int util_Zx7Compress(void *dest, void *src, int len, void (*progress_callback)(int src_offset));</td><td>length in bytes written to dest.</td><td></td><td>
 </td></tr>
 </table></div></body></html>

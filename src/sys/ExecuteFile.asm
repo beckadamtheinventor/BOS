@@ -261,16 +261,11 @@ sys_jphl := $
 	cp a,(hl)
 	ret z ; dont reinit the display if we're already in the correct lcd mode
 	ld hl,ti.vRam
-	ld l,a
-	push hl
-	call ti.boot.ClearVRAM
-	pop hl
-	ld a,l
-	ld l,h
+	push af,hl
+	call gfx_ZeroVRAM
+	pop hl,af
 	ld (ti.mpLcdUpbase),hl
 	ld (ti.mpLcdCtrl),a
-	xor a,a
-	ld (curcol),a
 	ret
 
 ; .exec_threaded_rex:

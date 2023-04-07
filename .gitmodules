@@ -1,6 +1,7 @@
 [submodule "noti-ez80"]
 	path = noti-ez80
 	url = https://github.com/beckadamtheinventor/noti-ez80.git
-[submodule "src/data/adrive/src/fs/bin/cedit"]
+[submodule "Michael0x18_CEdit"]
 	path = src/data/adrive/src/fs/bin/cedit
 	url = https://github.com/Michael0x18/CEdit.git
+	branch = master

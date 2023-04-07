@@ -64,7 +64,7 @@ explorer_init_2:
 
 	ld a,(explorer_background_color)
 	ld (bos.lcd_bg_color),a
-
+	ld (bos.lcd_text_bg),a
 
 	ld de,explorer_config_file
 	push de

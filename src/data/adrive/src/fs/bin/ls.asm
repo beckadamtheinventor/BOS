@@ -29,15 +29,15 @@ ls_main:
 .output_to_file:
 	ld (ix-12),1
 	ld a,(ix+6)
-	cp a,2
+	cp a,3
 	jr c,.show_help_info
 	call osrt.argv_2
 	ld (ix-15),hl
 	ld hl,ti.pixelShadow
 	ld (ix-18),hl
 	ld a,(ix+6)
-	cp a,3
-	jr z,.no_dir_argument
+	cp a,4
+	jr c,.no_dir_argument
 	call osrt.argv_3
 	ld a,(hl)
 .check_non_null_dir_arg:
@@ -153,6 +153,7 @@ ls_main:
 	push bc
 	ld bc,(ix-15)
 	push bc
+	call bos.fs_DeleteFile
 	call bos.fs_WriteNewFile
 	pop bc,bc,bc,bc
 	jr nc,.exit

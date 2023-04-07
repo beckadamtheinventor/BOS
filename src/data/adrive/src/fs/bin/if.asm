@@ -4,7 +4,10 @@
 if_main:
 	ld hl,-9
 	call ti._frameset
-	ld hl,(ix+6)
+	ld a,(ix+6)
+	cp a,2
+	jq c,.info
+	call osrt.argv_1
 	ld a,(hl)
 	or a,a
 	jq z,.info
