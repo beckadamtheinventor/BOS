@@ -223,16 +223,16 @@ enter_input:
 	pop hl
 	call bos.sys_MallocDupStr ; malloc a new saved command using the contents of the input buffer
 	ld (ix-3),hl
-	pop bc
+	pop hl
 	call execute_program_string
 	jq enter_input_clear
 
 execute_program_string:
 	push ix,hl
-	call cmd_get_arguments
 	push hl
-	call cmd_terminate_arguments ;check arguments string for eol characters so we can process multi-line commands
+	call cmd_terminate_line ;check arguments string for eol characters so we can process multi-line commands
 	pop hl
+	call cmd_get_arguments
 	ex (sp),hl ;store args, restore path
 	push hl ;push path
 	ld a,(hl)
@@ -294,16 +294,35 @@ execute_program_string:
 	call ti.ErrDataType
 	jr .return_value_return
 .execute_file:
+	ld bc,(ti.begPC)
+	ld (ti.OP3),bc
+	ld bc,(ti.curPC)
+	ld (ti.OP3+3),bc
+	ld bc,(ti.endPC)
+	ld (ti.OP3+6),bc
+	call ti.PushOP3
 	call bos.sys_ExecuteFile
+	call ti.PopOP3
+	ld bc,(ti.OP3)
+	ld (ti.begPC),bc
+	ld bc,(ti.OP3+3)
+	ld (ti.curPC),bc
+	ld bc,(ti.OP3+6)
+	ld (ti.endPC),bc
 	ld hl,(bos.ExecutingFileFd) ;check if the currently executing file descriptor is -1
 	inc hl
 	add hl,bc
 	or a,a
 	sbc hl,bc
 	pop bc,bc,ix
-	jq z,.file_not_found ;if the executing file descriptor is -1, the file could not be located
+	jr nz,.check_if_at_eol
+;if the executing file descriptor is -1, the file could not be located
+	ld a,(ix-10)
+	cp a,'i'
+	jq nz,.file_not_found_no_recheck ; only error if not ignoring errors
+.check_if_at_eol:
 	ld a,(ix-20)
-	ld hl,(ix-29)
+	ld hl,(ix-19)
 	or a,a
 	jq nz,execute_program_string ;continue executing if an eol character was found before the null terminator
 .at_eol:
@@ -364,6 +383,7 @@ execute_program_string:
 	cp a,'i'
 	ret z ;return if ignoring errors
 ;if we got here then we failed to locate the executable
+.file_not_found_no_recheck:
 	ld (ix-9),hl
 	ld hl,str_CouldNotLocateExecutable
 	jp bos.gui_Print
@@ -388,7 +408,7 @@ cmd_exit:
 	pop ix
 	ret
 
-cmd_terminate_arguments:
+cmd_terminate_line:
 	xor a,a
 	ld (ix-20),a
 	ld c,a

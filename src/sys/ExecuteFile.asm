@@ -195,6 +195,9 @@ sys_ExecuteFile:
 	ld hl,threadMallocStackSize
 	call sys_Malloc.entryhl
 	jr nc,.run_thread_with_stack
+
+.fail_running_thread:
+	scf
 	sbc hl,hl
 	ret
 
@@ -205,17 +208,12 @@ sys_ExecuteFile:
 	ld bc,(running_program_ptr)
 	push hl,bc
 	call th_CreateThread
-	pop bc,bc,bc,bc
+	pop bc,bc
 	or a,a
-	ret nz
-	scf
-	sbc hl,hl
-	ret
-	
-	; jq th_HandleNextThread.nosave
-	; HandleNextThread ;handle the thread we just spawned
-	; jr .ranthread
-	; call .normalize_lcd
+	jr z,.fail_running_thread
+	HandleNextThread ;handle the thread we just spawned
+	jr .done_running_program
+
 .runnothreading:
 	ld hl,(fsOP6) ; argv
 	ld bc,(fsOP5) ; argc
@@ -224,7 +222,7 @@ sys_ExecuteFile:
 	ld (LastCommandResult),hl
 	ld a,e
 	ld (LastCommandResult+3),a
-.ranthread:
+.done_running_program:
 	pop bc,bc
 	push de,hl,bc
 	call sys_Free ; free argv

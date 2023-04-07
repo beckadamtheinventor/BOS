@@ -7,7 +7,7 @@ sys_ExecuteInRAM:
 	push de
 	push bc
 	lea hl,ix
-	ld bc,0
+	mlt bc
 	ld c,(hl)
 	inc hl
 	ld b,(hl)
