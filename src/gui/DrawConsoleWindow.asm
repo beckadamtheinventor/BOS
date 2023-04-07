@@ -7,7 +7,7 @@ gui_DrawConsoleWindow:
 	xor a,a
 	ld (currow),a
 	ld (curcol),a
-	ld a,(lcd_text_bg)
+	ld a,(lcd_bg_color)
 	call gfx_BufClear
 	pop hl
 	jp gui_PrintLine

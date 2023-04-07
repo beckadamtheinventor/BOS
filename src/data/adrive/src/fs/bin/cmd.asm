@@ -4,6 +4,14 @@
 cmd_exe_main:
 	ld hl,-29
 	call ti._frameset
+	; ld hl,str_CmdConfigFile
+	; push hl
+	; call bos.fs_GetFilePtr
+	; pop de
+	; ld de,cmd_config_data_struct
+	; push de,hl,bc
+	; syscall _loadConfigData
+	; pop bc,bc,bc
 	xor a,a
 	sbc hl,hl
 	ld (ix-10),a
@@ -452,6 +460,17 @@ cmd_get_arguments:
 	inc hl
 	ret
 
+cmd_config_data_struct:
+	db "BTBG", 0
+	dl bos.lcd_text_bg
+	db "BTFG", 0
+	dl bos.lcd_text_fg
+	db "BTFG2", 0
+	dl bos.lcd_text_fg2
+	db "BBGC", 0
+	dl bos.lcd_bg_color
+	db 0
+
 cmd_help_info:
 	db " cmd cmds",$A,$9,"run command(s) but exit if one returns an error",$A
 	db " cmd -a cmds",$A,$9,"run all commands(s) regardless of error codes",$A
@@ -465,3 +484,8 @@ str_ProgramFailedWithCode:
 	db "Error Code ",0
 str_CouldNotLocateExecutable:
 	db $9,"Could not locate executable",$A,0
+; str_CmdConfigFile:
+	; db "/etc/config/cmd/cmd.cfg",0
+
+; _loadConfigData:
+	; db "cfg/loadConfigData",0

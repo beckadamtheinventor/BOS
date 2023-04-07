@@ -111,6 +111,16 @@ str_lib_dir:
 str_var_dir:
 	db "/var",0
 
+	; db $00, "sys/cfg", 0
+	; dw fs_file_data_cfg.len
+	; dw fs_file_data_cfg.zlen
+; virtual
+	; file "adrive/obj/cfg.bin"
+; fs_file_data_cfg.len := $-$$
+; end virtual
+; fs_file_data_cfg:
+	; file "adrive/obj/cfg.zx7.bin"
+; fs_file_data_cfg.zlen:=$-.
 	db $00, "etc/fontlibc/DrMono",0
 	dw fs_file_data_drmono.len
 	dw fs_file_data_drmono.zlen

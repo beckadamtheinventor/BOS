@@ -62,6 +62,10 @@ explorer_init_2:
 	call bos.fs_CreateDir
 	pop bc,bc
 
+	ld a,(explorer_background_color)
+	ld (bos.lcd_bg_color),a
+
+
 	ld de,explorer_config_file
 	push de
 	call bos.fs_GetFilePtr

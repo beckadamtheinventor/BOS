@@ -112,6 +112,10 @@ $(call NATIVEPATH,$(FSOBJ)/explorer.bin): $(call rwildcard,$(call NATIVEPATH,$(F
 $(call NATIVEPATH,$(FSOBJ)/memedit.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/memedit.asm)
 	fasmg $(call NATIVEPATH,$(FSSRC)/fs/bin/memedit.asm) $(call NATIVEPATH,$(FSOBJ)/memedit.bin)
 
+#$(call NATIVEPATH,$(FSOBJ)/cfg.bin): $(call NATIVEPATH,$(FSSRC)/fs/sys/cfg.asm)
+#	fasmg $(call NATIVEPATH,$(FSSRC)/fs/sys/cfg.asm) $(call NATIVEPATH,$(FSOBJ)/cfg.bin)
+#	convbin -i $(call NATIVEPATH,$(FSOBJ)/cfg.bin) -o $(call NATIVEPATH,$(FSOBJ)/cfg.zx7.bin) -j bin -k bin -c zx7
+
 $(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/bosbin/CEDIT.bin): $(call rwildcard,$(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/src),*)
 	$(Q)make -f bos.makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/)
 	convbin -i $(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/bosbin/CEDIT.bin) -o $(call NATIVEPATH,$(FSOBJ)/cedit.zx7.bin) -j bin -k bin -c zx7

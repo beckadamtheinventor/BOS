@@ -14,15 +14,13 @@ explorer_configure_theme:
 	inc a
 	ret z
 	ld a,(hl)
-	ld (explorer_background_color),a
-	ld (bos.lcd_text_bg),a
+	call explorer_load_config.setbgcolor
 	inc hl
 	ld a,(hl)
 	ld (explorer_statusbar_color),a
 	inc hl
 	ld a,(hl)
-	ld (explorer_foreground_color),a
-	ld (bos.lcd_text_fg),a
+	call explorer_load_config.setfgcolor
 	inc hl
 	ld a,(hl)
 	ld (explorer_foreground2_color),a

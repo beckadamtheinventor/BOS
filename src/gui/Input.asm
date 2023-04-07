@@ -173,7 +173,7 @@ gui_Input:
 	push hl
 	pop de
 	inc de
-	ld a,(lcd_text_bg)
+	ld a,(lcd_bg_color)
 	ld (hl),a
 	ld bc,320*9 - 1
 	ldir

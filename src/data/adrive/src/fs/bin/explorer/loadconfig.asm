@@ -198,6 +198,7 @@ str_fg2:=$-3
 .setbgcolor:
 	ld (explorer_background_color),a
 	ld (bos.lcd_text_bg),a
+	ld (bos.lcd_bg_color),a
 	ret
 
 .setfgcolor:
