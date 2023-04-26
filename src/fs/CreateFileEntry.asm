@@ -2,7 +2,7 @@
 ;@INPUT void *fs_CreateFileEntry(const char *path, uint8_t flags);
 ;@OUTPUT file descriptor. Returns 0 if failed to create file.
 fs_CreateFileEntry:
-	ld hl,-22
+	ld hl,-28
 	call ti._frameset
 	ld (ix-22),iy
 	xor a,a
@@ -46,14 +46,10 @@ fs_CreateFileEntry:
 	jq nz,.doesntstartwithslash
 	inc hl
 .doesntstartwithslash:
+	ld (ix-25),hl
 	push hl
 	pea ix-19
 	call fs_StrToFileEntry
-	jq c,.fail
-	ld a,(ix-19)
-	sub a,fsentry_longfilename
-	or a,a ; make sure Cf is unset
-	call z,fs_CreateLongFileName
 	jq c,.fail
 	pop bc,bc
 
@@ -66,12 +62,46 @@ fs_CreateFileEntry:
 	pop bc
 .write_descriptor:
 	call fs_AllocDescriptor.entry
+	ld (ix-28),hl
 	call sys_FlashUnlock
 	ex hl,de
 	lea hl,ix-19
 	ld bc,fsentry_fileattr + 1 ; only write up until and including attribute byte
 	push de
 	call sys_WriteFlash
+
+	ld a,(ix-19)
+	cp a,fsentry_longfilename
+	jr nz,.dont_write_long_file_name
+
+	ld a,(ix+1-19) ; first byte of first long file name entry is the number of extra entries needed to store the file name
+	or a,a
+	jr z,.dont_write_long_file_name
+	ld hl,(ix-25)
+	ld bc,9
+	add hl,bc
+	ld (ix-25),hl
+.write_long_file_name_loop:
+	push af
+	ld hl,(ix-28)
+	call fs_AllocDescriptor.entry
+	jr c,.fail
+	ld (ix-28),hl
+	ex hl,de
+	ld a,fsentry_longfilename_entry
+	call sys_WriteFlashA
+	ld bc,15
+	ld hl,(ix-25)
+	add hl,bc
+	ld (ix-25),hl
+	or a,a
+	sbc hl,bc
+	call sys_WriteFlash
+	pop af
+	dec a
+	jr nz,.write_long_file_name_loop
+
+.dont_write_long_file_name:
 	pop hl
 	db $01
 .fail:

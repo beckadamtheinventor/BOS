@@ -7,7 +7,7 @@ def error(e):
 	quit()
 
 def myhex(n):
-	return hex(n).replace("0x","").upper()
+	return hex(n)[2:].upper()
 
 try:
 	with open(path.join(path.dirname(__file__), "src", "table.asm")) as f:
@@ -153,6 +153,13 @@ macro syscalllib?
 		virtual exports.area
 			db 3
 			dw data
+			db name, 0
+		end virtual
+	end macro
+	macro export_ptr? routine, name
+		virtual exports.area
+			db 8
+			dl routine
 			db name, 0
 		end virtual
 	end macro

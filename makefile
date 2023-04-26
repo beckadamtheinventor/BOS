@@ -54,6 +54,21 @@ bosos: $(call rwildcard,src,*.asm) $(call rwildcard,src,*.inc)
 documentation:
 	python build_docs.py
 
+# Rule to build syscall libs (optional)
+syslibs: $(call rwildcard,syslib,*.asm)
+	python build_syslibs.py
+	$(call MKDIR,$(call NATIVEPATH,obj/syslib))
+	fasmg syslib/_.asm obj/syslib/_.bin
+	fasmg syslib/fs.asm obj/syslib/fs.bin
+	fasmg syslib/gfx.asm obj/syslib/gfx.bin
+	fasmg syslib/gui.asm obj/syslib/gui.bin
+	fasmg syslib/os.asm obj/syslib/os.bin
+	fasmg syslib/sc.asm obj/syslib/sc.bin
+	fasmg syslib/sys.asm obj/syslib/sys.bin
+	fasmg syslib/th.asm obj/syslib/th.bin
+	fasmg syslib/util.asm obj/syslib/util.bin
+#	python add_file_to_rom.py --rom bin/BOSOS.rom obj/syslib/_.bin /sys/_ obj/syslib/fs.bin /sys/fs obj/syslib/gfx.bin /sys/gfx obj/syslib/gui.bin /sys/gui obj/syslib/os.bin /sys/os obj/syslib/sc.bin /sys/sc obj/syslib/sys.bin /sys/sys obj/syslib/th.bin /sys/th obj/syslib/util.bin /sys/util
+
 # Rule to build include files
 includes:
 	python build_bos_inc.py

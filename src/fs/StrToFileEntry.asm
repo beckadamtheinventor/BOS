@@ -26,27 +26,52 @@ fs_StrToFileEntry:
 	jr nz,._fail
 .checkpathext:
 	ld b,3
+.checkpathextloop:
 	ld a,(hl)
 	inc hl
 	or a,a
 	jr z,.notlongfilename
-	djnz .checkpathext
+	djnz .checkpathextloop
 	ld a,(hl)
 	or a,a
 	jr z,.notlongfilename
+.definitelylongfilename:
+	pop de,hl
+	push hl
+	ld (hl),fsentry_longfilename
+	inc hl
+	inc hl
+	ex hl,de
+	ld bc,9
+.copy_long_file_name_loop:
+	ld a,(hl)
+	or a,a
+	jr z,.done_copying_long_file_name_under_10
+	ldi
+	jp pe,.copy_long_file_name_loop
+	push de
+	call ti._strlen
+	ld bc,15
+	call ti._idivu
+	pop de
+	ld a,l
+	ld bc,256 ; check if number of name sections is greater than or equal to 256, if so return Cf. (fail)
+	or a,a
+	sbc hl,bc
+	ccf
+.done_copying_long_file_name_under_10:
+	pop hl
+	inc hl
+	ld (hl),a ; set number of additional name sections
+	dec hl
+	ret
+
 ._fail:
 	pop hl,hl
 .__fail:
 	sbc hl,hl
 	scf
 	ret
-; .definitelylongfilename:
-	; pop hl,hl
-	; ld (hl),fsentry_longfilename
-	; or a,a
-	; sbc hl,hl
-	; scf
-	; ret
 .notlongfilename:
 	pop hl
 	ld b,8

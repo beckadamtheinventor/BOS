@@ -52,10 +52,13 @@ fs_CopyFileName:
 	ld de,(ix+6)
 	inc de
 	ld a,(de)
-;	or a,a ;assumes Cf unset when jumped here
+;	or a,a ; assume Cf unset when jumped here
 	sbc hl,hl
 	ld l,a
-	inc hl
+	ld bc,15
+	call ti._imulu
+	ld bc,9
+	add hl,bc
 	push hl
 	call sys_Malloc ;allocate space for file name
 	pop bc

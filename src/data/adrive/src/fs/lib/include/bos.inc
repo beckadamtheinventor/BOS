@@ -125,6 +125,13 @@ macro syscalllib?
 			db name, 0
 		end virtual
 	end macro
+	macro export_ptr? routine, name
+		virtual exports.area
+			db 8
+			dl routine
+			db name, 0
+		end virtual
+	end macro
 	macro ram_routine? routine, ramloc
 		routine.ramroutine:
 		routine.dataloc:
@@ -553,13 +560,14 @@ namespace bos
 ?fd_device     := 5
 ?fd_link       := 6
 ?fd_elevated   := 7
-?fsentry_deleted         := $00
-?fsentry_extendedsection := $24
-?fsentry_dot             := $2E
-?fsentry_longfilename    := $F1
-?fsentry_unlisted        := $F2
-?fsentry_dirextender     := $FE
-?fsentry_endofdir2       := $FF
+?fsentry_deleted            := $00
+?fsentry_extendedsection    := $24
+?fsentry_dot                := $2E
+?fsentry_longfilename       := $F1
+?fsentry_unlisted           := $F2
+?fsentry_longfilename_entry := $F3
+?fsentry_dirextender        := $FE
+?fsentry_endofdir2          := $FF
 ?fsentry_filename            := $00
 ?fsentry_filename.len        := 8
 ?fsentry_fileext             := $08

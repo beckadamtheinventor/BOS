@@ -1,6 +1,6 @@
 
 sc_LoadSysCall:
-	ld hl,-9
+	ld hl,-10
 	call ti._frameset
 	lea de,ix-9
 	ld hl,(ix+6)
@@ -43,7 +43,7 @@ sc_LoadSysCall:
 	add hl,bc
 	ex (sp),hl
 	pop bc
-	jr c,.fail_cf
+	jp c,.fail_cf
 	ld de,.fail
 	push de ; push error return so we can "ret po" instead of "jp po"
 	dec bc
@@ -68,10 +68,17 @@ sc_LoadSysCall:
 	ret nz
 .search_loop:
 	ld de,(ix+6)
+	ld a,(hl)
+	ld (ix-10),a
 	cpi
 	ret po
 	cpi
 	ret po
+	cp a,8
+	jr c,.dont_skip_extra_byte
+	cpi
+	ret po
+.dont_skip_extra_byte:
 	push bc,hl,de
 	call ti._strcmp
 	add hl,bc
@@ -89,23 +96,35 @@ sc_LoadSysCall:
 	jr .search_loop
 .found:
 	ld (ix-6),hl
+	ld a,(ix-10)
+	cp a,8
+	jr c,.found_word_entry
+	dec hl
+	dec hl
+	dec hl
+	ld hl,(hl)
+	jr .check_entry_type
+.found_word_entry:
 	mlt de ; zero deu
 	dec hl
 	ld d,(hl)
 	dec hl
 	ld e,(hl)
-	dec hl
-	ld a,(hl)
 	ld hl,(ix-3)
 	add hl,de
+.check_entry_type:
 	pop bc ; pop error return
 	dec a
 	jr z,.success ; if type==1, run routine in-place
 	dec a
 	jr z,.ram_routine ; if type==2, copy routine to ram first
 	dec a
-	jr nz,.fail ; fail if unknown routine type
-; if type==3, return data
+	jr z,.return_data ; if type==3, return data pointer in HL, length in BC
+	cp a,8-3
+	jr z,.success ; if type==8, return routine pointer
+; fail if unknown routine type
+	jr .fail
+.return_data:
 	mlt bc ; zero bcu
 	ld c,(hl)
 	inc hl
