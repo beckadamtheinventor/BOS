@@ -65,9 +65,10 @@ syslibs: $(call rwildcard,syslib,*.asm)
 	fasmg syslib/os.asm obj/syslib/os.bin
 	fasmg syslib/sc.asm obj/syslib/sc.bin
 	fasmg syslib/sys.asm obj/syslib/sys.bin
+	fasmg syslib/str.asm obj/syslib/str.bin
 	fasmg syslib/th.asm obj/syslib/th.bin
 	fasmg syslib/util.asm obj/syslib/util.bin
-#	python add_file_to_rom.py --rom bin/BOSOS.rom obj/syslib/_.bin /sys/_ obj/syslib/fs.bin /sys/fs obj/syslib/gfx.bin /sys/gfx obj/syslib/gui.bin /sys/gui obj/syslib/os.bin /sys/os obj/syslib/sc.bin /sys/sc obj/syslib/sys.bin /sys/sys obj/syslib/th.bin /sys/th obj/syslib/util.bin /sys/util
+	python add_file_to_rom.py --rom bin/BOSOSInited.rom obj/syslib/_.bin /sys/_ obj/syslib/fs.bin /sys/fs obj/syslib/gfx.bin /sys/gfx obj/syslib/gui.bin /sys/gui obj/syslib/os.bin /sys/os obj/syslib/str.bin /sys/str obj/syslib/sc.bin /sys/sc obj/syslib/sys.bin /sys/sys obj/syslib/th.bin /sys/th obj/syslib/util.bin /sys/util
 
 # Rule to build include files
 includes:

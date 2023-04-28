@@ -50,14 +50,12 @@ sc_LoadSysCall:
 	dec bc
 	dec bc
 	dec bc
-	dec bc
 ; check file header "SCL",0
 	ld de,(hl)
 	inc hl
 	inc hl
 	inc hl
 	ld a,(hl)
-	inc hl
 	inc hl
 	or a,a
 	ret nz
@@ -70,6 +68,8 @@ sc_LoadSysCall:
 	ld de,(ix+6)
 	ld a,(hl)
 	ld (ix-10),a
+	cpi
+	ret po
 	cpi
 	ret po
 	cpi
@@ -90,8 +90,7 @@ sc_LoadSysCall:
 	xor a,a
 	cpir
 	ret po
-	cpi
-	ret po
+	cp a,(hl)
 	ret z ; if next entry starts with a null byte, we've reached the end of the file
 	jr .search_loop
 .found:

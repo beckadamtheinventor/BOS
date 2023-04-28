@@ -6,7 +6,12 @@ def build_syscalls(path):
 	with open(join(path, "src", "table.asm"), "r") as f:
 		data = f.read().split("\n")
 
-	o = {}
+	o = {
+		"str": [
+			f"export_ptr bos.strupper, \"ToUpper\"",
+			f"export_ptr bos.strlower, \"ToLower\"",
+		]
+	}
 	for line in data:
 		if "jp " in line and not line.startswith(";"):
 			callname = line.split("jp ", maxsplit=1)[1].split(" ", maxsplit=1)[0]
