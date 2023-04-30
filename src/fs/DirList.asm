@@ -48,14 +48,17 @@ fs_DirList:
 .skip_loop_next_16:
 	cp a,fsentry_unlisted+2
 	jq z,.skip_loop_entry ; skip unlisted entry
-	cp a,fsentry_longfilename+2
-	jq nz,.skip_loop      ; entry is not a long file name
-	sbc hl,hl
-	ld l,(iy-15)
-	lea bc,iy
-	add hl,bc
-	push hl
-	pop iy
+	cp a,fsentry_longfilename_entry+2
+	jq z,.skip_loop_entry
+	; cp a,fsentry_longfilename+2
+	; jq nz,.skip_loop      ; entry is not a long file name
+	; ld l,(iy-15) ; number of extra directory sections containing the file name
+	; ld h,15
+	; mlt hl
+	; lea bc,iy
+	; add hl,bc
+	; push hl
+	; pop iy
 	jq .skip_loop
 .list_loop_entry:
 	ld de,0
@@ -88,13 +91,15 @@ fs_DirList:
 .list_loop_next_16:
 	cp a,fsentry_unlisted+2
 	jq z,.list_loop
-	cp a,fsentry_longfilename+2
-	jq nz,.list_loop_append
-	push bc
-	ld bc,0
-	ld c,(iy-15)
-	add iy,bc
-	pop bc
+	cp a,fsentry_longfilename_entry+2
+	jq z,.list_loop
+	; cp a,fsentry_longfilename+2
+	; jq nz,.list_loop_append
+	; push bc
+	; ld bc,0
+	; ld c,(iy-15)
+	; add iy,bc
+	; pop bc
 .list_loop_append:
 	ld (hl),iy
 	inc hl

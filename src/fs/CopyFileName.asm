@@ -52,23 +52,41 @@ fs_CopyFileName:
 	ld de,(ix+6)
 	inc de
 	ld a,(de)
-;	or a,a ; assume Cf unset when jumped here
-	sbc hl,hl
 	ld l,a
-	ld bc,15
-	call ti._imulu
-	ld bc,9
+	ld h,15
+	mlt hl
+	ld bc,10
 	add hl,bc
 	push hl
 	call sys_Malloc ;allocate space for file name
 	pop bc
 	jq c,.return_hl
 	ld (ix-3),hl
-	ld de,16
 	ld hl,(ix+6)
-	add hl,de
+	inc hl
+	ld a,(hl)
+	inc hl
 	ld de,(ix-3)
+	ld bc,10
 	ldir
+	or a,a
+	jr z,.done_copying_long_file_name
+	ld hl,(ix+6)
+	ld c,16
+	add hl,bc
+.copy_long_file_name_loop:
+	ld a,(hl)
+	cp a,fsentry_dirextender
+	jr nz,.dont_traverse_dirextender
+	call fs_GetFDPtr.entry
+	jr c,.done_copying_long_file_name
+.dont_traverse_dirextender:
+	inc hl
+	ld bc,15
+	ldir
+	dec a
+	jr nz,.copy_long_file_name_loop
+.done_copying_long_file_name:
 .return:
 	xor a,a
 	ld (de),a

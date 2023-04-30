@@ -23,8 +23,9 @@ fs_StrToFileEntry:
 	or a,a
 	jr z,.notlongfilename
 	cp a,'.'
-	jr nz,._fail
+	jr nz,.definitelylongfilename
 .checkpathext:
+	inc hl
 	ld b,3
 .checkpathextloop:
 	ld a,(hl)
