@@ -128,7 +128,7 @@ bool transfer_file(fat_t *fat, const char *src, const char *dest, bool send, uin
 				gui_PrintLine("Not enough space for file.");
 				return false;
 			}
-			if ((destfd = fs_CreateFile(dest, 0, 65536)) == -1) {
+			if ((destfd = fs_CreateFile(dest, 0, 65536)) == 0) {
 				goto destination_file_error;
 			}
 			dest2 = malloc(strlen(dest)+1);
@@ -150,7 +150,7 @@ bool transfer_file(fat_t *fat, const char *src, const char *dest, bool send, uin
 						goto write_error;
 					}
 				}
-				if ((destfd = fs_CreateFile(dest2, 0, blocklen)) == -1) {
+				if ((destfd = fs_CreateFile(dest2, 0, blocklen)) == 0) {
 					goto destination_file_error;
 				}
 				dest2[strlen(dest2)-1]++;
@@ -181,7 +181,9 @@ bool transfer_file(fat_t *fat, const char *src, const char *dest, bool send, uin
 						gui_Print("Transferring 8x var to ");
 						gui_PrintLine(varpath);
 						// Allocate space for the header length byte, header, var size word, and var data
-						destfd = fs_CreateFile(varpath, 0, (unsigned int)len + nlen + 1);
+						if ((destfd = fs_CreateFile(varpath, 0, (unsigned int)len + nlen + 1)) == 0) {
+							goto destination_file_error;
+						}
 						sys_Free(varpath);
 						// Write header data
 						if (fs_WriteRaw(&sector_buffer[O_8X_VAR_TYPE], nlen-1, 1, destfd, 0) == -1)
@@ -199,13 +201,15 @@ bool transfer_file(fat_t *fat, const char *src, const char *dest, bool send, uin
 						// Calculate remaining data to write for this sector
 						write_offset -= O_8X_VAR_TYPE + nlen + 4;
 						if (fs_WriteRaw(&sector_buffer[O_8X_VAR_TYPE + nlen + 4], write_offset, 1, destfd, nlen) == -1)
-								goto write_error;
+							goto write_error;
 						// Calculate offset in destination file to continue writing additional data
 						write_offset += nlen-1;
 					}
 				}
 			} else {
-				destfd = fs_CreateFile(dest, 0, (unsigned int)srclen);
+				if ((destfd = fs_CreateFile(dest, 0, (unsigned int)srclen)) == 0) {
+					goto destination_file_error;
+				}
 				i = write_offset = 0;
 			}
 		}
