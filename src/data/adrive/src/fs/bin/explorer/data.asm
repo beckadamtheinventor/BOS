@@ -21,9 +21,8 @@ options_item_strings:
 .strings:
 	dl .l1, .l2, .l3, .l4, .l5
 .l1:
-	db "power", 0
+	db "power"
 .l2:
-	db "recovery"
 .l3:
 .l4:
 	db 0
