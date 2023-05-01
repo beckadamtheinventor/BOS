@@ -67,7 +67,7 @@ fs_CopyFileName:
 	ld a,(hl)
 	inc hl
 	ld de,(ix-3)
-	ld bc,10
+	ld bc,9
 	ldir
 	or a,a
 	jr z,.done_copying_long_file_name

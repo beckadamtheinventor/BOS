@@ -467,7 +467,7 @@ os_return_soft:
 	call os_check_recovery_key
 	ld de,str_CmdArguments
 	push de
-	ld hl,str_CmdExecutable	
+	ld hl,str_CmdExecutable
 .exec_file_hl:
 	push hl
 	call fs_OpenFile
@@ -506,6 +506,8 @@ os_recovery_menu:
 	call gui_PrintLine
 .keywait:
 	call sys_WaitKeyCycle
+	cp a,ti.skYequ
+	jp z,0
 	cp a,ti.skMode
 	jq z,.reset_fs
 	cp a,ti.skEnter

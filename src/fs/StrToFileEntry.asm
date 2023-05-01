@@ -50,10 +50,18 @@ fs_StrToFileEntry:
 	jr z,.done_copying_long_file_name_under_10
 	ldi
 	jp pe,.copy_long_file_name_loop
-	push de
+	push de,hl
 	call ti._strlen
+	pop bc
 	ld bc,15
-	call ti._idivu
+	call ti._idvrmu
+	add hl,de
+	or a,a
+	sbc hl,de
+	jr z,.no_remainder
+	inc de
+.no_remainder:
+	ex hl,de
 	pop de
 	ld a,l
 	ld bc,256 ; check if number of name sections is greater than or equal to 256, if so return Cf. (fail)

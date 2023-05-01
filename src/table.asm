@@ -182,4 +182,5 @@
 	jp sys_GetExecType
 	jp sys_GetExecTypeFD
 	jp util_Zx7Compress
+	jp sys_OpenRecoveryMenu
 ; end of jump table

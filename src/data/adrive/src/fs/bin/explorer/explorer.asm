@@ -19,7 +19,7 @@ statusbar_y           := 0
 taskbar_height        := 18
 taskbar_y             := 240-taskbar_height
 taskbar_item_x        := 33
-taskbar_item_y        := 241-taskbar_height
+taskbar_item_y        := 244-taskbar_height
 taskbar_item_width    := 64
 
 assert taskbar_height < 231
@@ -255,7 +255,7 @@ explorer_cursor_x:=$-3
 	dec a
 	jq z,explorer_cursor_up
 	cp a,ti.skYequ - 4
-	jq z,_exit
+	jp z,bos.sys_OpenRecoveryMenu
 	cp a,ti.skClear - 4
 	jq z,explorer_main
 	cp a,ti.skDel - 4
@@ -495,7 +495,6 @@ explorer_page_up:
 	jq c,explorer_main
 	ld (explorer_files_skip),hl
 	jq explorer_dirlist
-
 
 
 ; --------------------------------------------------------------

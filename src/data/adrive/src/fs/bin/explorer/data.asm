@@ -3,7 +3,7 @@ taskbar_item_strings:
 .strings:
 	dl .l1, .l2, .l3, .l4, .l5
 .l1:
-	db "exit",0
+	db "recovery",0
 .l2:
 	db "back",0
 .l3:
@@ -21,8 +21,9 @@ options_item_strings:
 .strings:
 	dl .l1, .l2, .l3, .l4, .l5
 .l1:
-	db "power"
+	db "power", 0
 .l2:
+	db "recovery"
 .l3:
 .l4:
 	db 0

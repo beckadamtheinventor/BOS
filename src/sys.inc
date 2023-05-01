@@ -62,4 +62,4 @@ include 'sys/MallocDupStr.asm'
 ; include 'sys/RelocateProgram.asm'
 ; include 'sys/RelocateProgramFD.asm'
 include 'sys/HandleOnInterrupt.asm'
-
+include 'sys/OpenRecoveryMenu.asm'

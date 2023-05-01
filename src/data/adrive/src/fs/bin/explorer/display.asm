@@ -198,7 +198,7 @@ explorer_display_diritems:
 	pop bc
 	ld a,(hl)
 	cp a,'.'
-	jq nz,.main_draw_regular_file_name
+	jr nz,.main_draw_regular_file_name
 	push hl
 	call gfx_PrintString
 	call bos.sys_Free
@@ -227,13 +227,23 @@ explorer_display_diritems:
 	jq nz,.dont_draw_extension ; dont draw the file extension if there isn't one
 	inc hl
 	push hl
+	push hl
+	call ti._strlen
+	ld bc,8
+	or a,a
+	sbc hl,bc
+	pop hl
+	jr c,.main_draw_file_ext_under_8_chars
+; cap extension draw size to 8 characters
+	add hl,bc
+	xor a,a
+	ld (hl),a
+.main_draw_file_ext_under_8_chars:
 	ld hl,(.y_pos)
 	ld bc,9
 	add hl,bc
 	push hl
 	ld hl,(.x_pos)
-	ld c,display_item_width-30
-	add hl,bc
 	push hl
 	call gfx_SetTextXY
 	pop bc
@@ -385,13 +395,13 @@ explorer_print_icon:
 ; ** *| *  |
 ; _readonly_icon:
 	; db $00,$00,$F0,$D4,$EA,$DA,$D4
-; *** |*** |
-; *   |*   |
+; *** |* * |
+; *   |* * |
 ;  *  | *  |
-;   * |  * |
-; *** |*** |
+;   * | *  |
+; *** | *  |
 _system_icon:
-	db $00,$00,$EE,$88,$44,$22,$EE
+	db $00,$00,$EA,$8A,$44,$24,$E4
 ; **  |* * |
 ; * * |* * |
 ; * * |* * |
@@ -412,9 +422,9 @@ _subdir_icon:
 ;     |    |
 ;     |    |
 ; *  *| *  |
-; *  *| *  |
+;     |    |
 _dotdot_icon:
-	db $00,$00,$00,$00,$00,$00,$54,$54
+	db $00,$00,$00,$00,$00,$00,$54,$00
 ;    |*** |
 ;   *|* **|
 ;   *|   *|
@@ -463,7 +473,7 @@ draw_taskbar:
 	push bc
 	call gfx_GetStringWidth
 	pop bc
-	srl l ;divide by 2, hl should be less than 256 in this use case
+	srl l ;divide by 2, hl should always be less than 256 here
 	ex hl,de
 	ld hl,0
 .taskbar_item_x:=$-3
