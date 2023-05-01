@@ -113,13 +113,13 @@ sc_LoadSysCall:
 	add hl,de
 .check_entry_type:
 	pop bc ; pop error return
-	dec a
+	cp a,1
 	jr z,.success ; if type==1, run routine in-place
-	dec a
+	cp a,2
 	jr z,.ram_routine ; if type==2, copy routine to ram first
-	dec a
+	cp a,3
 	jr z,.return_data ; if type==3, return data pointer in HL, length in BC
-	cp a,8-3
+	cp a,8
 	jr z,.success ; if type==8, return routine pointer
 ; fail if unknown routine type
 	jr .fail
