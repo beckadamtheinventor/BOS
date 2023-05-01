@@ -1,27 +1,27 @@
 
 sc_HandleSysCall:
 	push hl,af,de,bc,ix,iy
-	ld iy,0
-	add iy,sp
-	ld hl,(iy+18) ; return address
+	ld ix,0
+	add ix,sp
+	ld hl,(ix+18) ; return address
 	ld de,(hl)
 	inc hl
 	inc hl
 	inc hl
-	ld (iy+18),hl ; advance return address
+	ld (ix+18),hl ; advance return address
 	push de,de
 	call sc_LoadSysCall
 	pop de
 	jr c,.fail
 	cp a,3
 	jr z,.return_data
-	ld a,(iy+18+2)
+	ld a,(ix+18+2)
 	cp a,$D0
 	jr c,.dont_smc
 	; cp a,$E4
 	; jr nc,.dont_smc
 	ex hl,de
-	ld hl,(iy+18)
+	ld hl,(ix+18)
 	dec hl
 	dec hl
 	dec hl
