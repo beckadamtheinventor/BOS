@@ -23,8 +23,8 @@
 /src/data/adrive/src/fs/bin/cedit/bosobj
 /src/data/adrive/src/fs/bin/cedit/bin
 /src/data/adrive/src/fs/bin/cedit/obj
-/src/data/adrive/src/fs/bin/explorer_rewrite/bosbin
-/src/data/adrive/src/fs/bin/explorer_rewrite/bosobj
+/src/data/adrive/src/fs/bin/explorer-rewrite/bosbin
+/src/data/adrive/src/fs/bin/explorer-rewrite/bosobj
 /src/data/buildfs.py
 /src/data/cache.json
 /src/data/fs
