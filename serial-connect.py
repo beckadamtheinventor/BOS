@@ -187,12 +187,15 @@ def ConnectCalcSerial():
 	if len(ports) > 1:
 		print("Multiple devices detected - using {}".format(serial_name))
 
-	try:
-		ser = serial.Serial(serial_name, timeout=5)
-	except Exception as e:
-		print(e)
-		return None
-	return ser
+	ex = None
+	for _ in range(50):
+		try:
+			ser = serial.Serial(serial_name, timeout=5)
+			return ser
+		except Exception as e:
+			ex = e
+	print(ex)
+	return None
 
 def DisconnectCalcSerial(serial_device):
 	try:

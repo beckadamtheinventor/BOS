@@ -171,6 +171,7 @@
 	public _sys_GetExecTypeFD
 	public _util_Zx7Compress
 	public _sys_OpenRecoveryMenu
+	public _util_Relocate
 _boot_os                         := $20108
 _handle_interrupt                := $2010C
 _HandleInstruction               := $20110
@@ -342,6 +343,7 @@ _sys_GetExecType                 := $226A8
 _sys_GetExecTypeFD               := $226AC
 _util_Zx7Compress                := $226B0
 _sys_OpenRecoveryMenu            := $226B4
+_util_Relocate                   := $226B8
 
 public ram_executable
 public ram_executable_at

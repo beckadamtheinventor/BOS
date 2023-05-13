@@ -440,6 +440,7 @@ namespace bos
 ?sys_GetExecTypeFD               := $226AC
 ?util_Zx7Compress                := $226B0
 ?sys_OpenRecoveryMenu            := $226B4
+?util_Relocate                   := $226B8
 ; end of jump table
 ;-------------------------------------------------------------------------------
 ; OS memory areas and misc defines

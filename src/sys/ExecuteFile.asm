@@ -101,7 +101,7 @@ sys_ExecuteFile:
 	or a,a
 	sbc hl,de
 	jr z,.exec_rex
-; if it's neither a Flash Executable nor a Ram Executable, return -1
+; if it's not a recognized executable, return -1
 .fail:
 	scf
 	sbc hl,hl

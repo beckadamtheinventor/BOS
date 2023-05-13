@@ -6,10 +6,12 @@
 #include <tice.h>
 #include <bos.h>
 #include <graphx.h>
+#include <keypadc.h>
 
 #include "gui.h"
+#include "gfx/gfx.h"
 
-uint8_t keypress_queue[16] = {0};
+//uint8_t keypress_queue[6*8] = {0};
 
 gui_item_t MainWindowItems[] = {
 	{
@@ -36,6 +38,7 @@ window_t MainWindow = {
 };
 
 
+/*
 int isKeyPressed_NoConsume(uint8_t key) {
 	for (int i=0; i<sizeof(keypress_queue); i++) {
 		if (keypress_queue[i] == key) {
@@ -57,56 +60,79 @@ bool isKeyPressed(uint8_t key) {
 void _keythread(int argc, char **argv) {
 	uint8_t key;
 	do {
-		if ((key = sys_GetKey())) {
-			for (int i=0; i<sizeof(keypress_queue); i++) {
-				if (keypress_queue[i] == key)
-					break; // don't re-queue keys that haven't been handled yet
-				if (keypress_queue[i] == 0) {
-					keypress_queue[i] = key; // queue a key to be handled
-					break;
-				} 
+		kb_Scan();
+		if (kb_AnyKey()) {
+			for (uint8_t y=1; y<8; y++) {
+				for (uint8_t x=0; x<8; x++) {
+					if (kb_Data[y] & (1<<x)) {
+						key = ((7 - y) << 3) + x + 1;
+						for (int i=0; i<sizeof(keypress_queue); i++) {
+							if (keypress_queue[i] == key)
+								break; // don't re-queue keys that haven't been handled yet
+							if (keypress_queue[i] == 0) {
+								keypress_queue[i] = key; // queue a key to be handled
+								break;
+							} 
+						}
+					}
+				}
 			}
 		}
 		th_HandleNextThread();
 	} while (true);
 }
+*/
 
 
 int main(int argc, char **argv) {
-	uint8_t *keythreadstack;
-	uint8_t keythread;
+//	uint8_t *keythreadstack;
+//	uint8_t keythread;
 	int cursor_x, cursor_y;
 	bool redraw = true;
-	if ((keythreadstack = sys_Malloc(32*sizeof(void*))) == NULL)
-		return 1;
-	keythread = th_CreateThread(&_keythread, &keythreadstack[32*sizeof(void*)], 0, NULL);
+//	if ((keythreadstack = sys_Malloc(32*sizeof(void*))) == NULL)
+//		return 1;
+//	keythread = th_CreateThread(&_keythread, &keythreadstack[32*sizeof(void*)], 0, NULL);
 
+	gfx_SetTransparentColor(248);
+
+	cursor_x = cursor_y = 20;
 	do {
 		if (redraw) {
 			gfx_SetDrawBuffer();
 			guiDrawWindow(&MainWindow);
-			gfx_BlitBuffer();
 			redraw = false;
+			gfx_SetDrawScreen();
+			gfx_BlitBuffer();
 		}
+		gfx_TransparentSprite(cursor, cursor_x, cursor_y);
 		th_HandleNextThread();
+		kb_Scan();
 
-		if (isKeyPressed(sk_Up)) {
+		if (kb_AnyKey()) {
+			gfx_BlitArea(1, cursor_x, cursor_y, cursor->width, cursor->height);
+		}
+
+		if (kb_IsDown(kb_KeyUp)) {
 			if (cursor_y > 0)
-				cursor_y--;
-		} else if (isKeyPressed(sk_Down)) {
-			if (cursor_y < LCD_HEIGHT - CURSOR_HEIGHT)
-				cursor_y++;
-		} else if (isKeyPressed(sk_Left)) {
+				cursor_y -= 1;
+		}
+		if (kb_IsDown(kb_KeyDown)) {
+			if (cursor_y < LCD_HEIGHT - cursor->height)
+				cursor_y += 1;
+		}
+		if (kb_IsDown(kb_KeyLeft)) {
 			if (cursor_x > 0)
-				cursor_x--;
-		} else if (isKeyPressed(sk_Right)) {
-			if (cursor_x < LCD_WIDTH - CURSOR_HEIGHT)
-				cursor_x++;
-		} else if (isKeyPressed(sk_Enter) || isKeyPressed(sk_2nd)) {
+				cursor_x -= 1;
+		}
+		if (kb_IsDown(kb_KeyRight)) {
+			if (cursor_x < LCD_WIDTH - cursor->width)
+				cursor_x += 1;
+		}
+		if (kb_IsDown(kb_KeyEnter) || kb_IsDown(kb_Key2nd)) {
 			
 		}
-	} while (!isKeyPressed(sk_Clear));
-	th_KillThread(keythread);
+	} while (!kb_IsDown(kb_KeyClear));
+	// th_KillThread(keythread);
 	return 0;
 }
 

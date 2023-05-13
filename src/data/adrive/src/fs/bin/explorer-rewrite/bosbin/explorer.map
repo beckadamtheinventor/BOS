@@ -1,0 +1,88 @@
+Section          Base   Top    High   Length
+---------------- ------ ------ ------ -------
+.icon            D1A887 D1A887             0h
+.init.libs       D1A887 D1A8B4            2Dh
+.libs            D1A8B4 D1A915            61h
+.init.clock      D1A915 D1A915             0h
+.init.reruncheck D1A915 D1A915             0h
+.init            D1A915 D1A939            24h
+.fini            D1A939 D1A96D            34h
+.text            D1A96D D1AED3           566h
+.data            D1AED3 D1AFB0            DDh
+.rodata          D1AFB0 D1AFE7            37h
+.footer          D1AFE7 D1AFE7             0h
+.init_array      000000 000000             0h
+.ctors           000000 000000             0h
+.dtors           000000 000000             0h
+.fini_array      000000 000000             0h
+.bss             D031F6 D031F6 D13FD8      0h
+.header          D1A881 D1A887             6h
+
+Label                       Value
+-------------------------   ------
+___low_bss                = D031F6
+___len_bss                = 000000
+___heaptop                = D13FD8
+___heapbot                = D031F6
+___data                   = D1AED3
+___data_length            = 0000DD
+___libs                   = D1A8B4
+___libs_length            = 000061
+___init_array_count       = 000000
+___ctors_count            = 000000
+___dtors_count            = 000000
+___fini_array_count       = 000000
+__stack                   = D1A87E
+___exec_base              = D1A881
+__frameset                = D1A96D
+__iand                    = D1A97B
+__ishl                    = D1A994
+__ftol                    = 00027C
+__ftoul                   = 00027C
+__ltof                    = 000284
+__setflag                 = 000218
+__ultof                   = 000280
+__sand                    = D1A9BA
+_os_EnableHomeTextBuffer  = D1A9C3
+_sys_WaitKeyCycle         = 02244C
+_asm_gui_PrintLine        = 022578
+_fs_WriteDirectly         = 022654
+_sys_OpenFileInLib        = 022664
+_fs_GetFDPtr              = 022680
+.missingappvar            = D1AFB0
+.libloadname              = D1AFB8
+.webaddress               = D1AFC4
+__start                   = D1A915
+___exithl                 = D1A939
+skip._exit                = D1A939
+skip.__Exit               = D1A939
+skip._abort               = D1A939
+_exit.sp                  = D1A93A
+_exit.flash_wait_states   = D1A944
+_exit.flash_wait_states   = D1A944
+_guiDrawWindow            = D1A9D5
+_guiDrawStringXY          = D1ABCD
+___main_argc_argv         = D1ACF1
+_.str                     = D1AFD1
+_.str.1                   = D1AFDB
+_MainWindowItems          = D1AED3
+_MainWindow               = D1AEFF
+_cursor_data              = D1AF18
+lib.LibLoad               = D1A8B4
+_#gfx_SetColor            = D1A8C7
+_#gfx_SetDraw             = D1A8CB
+_#gfx_Blit                = D1A8CF
+_#gfx_BlitRectangle       = D1A8D3
+_#gfx_PrintChar           = D1A8D7
+_#gfx_SetTextXY           = D1A8DB
+_#gfx_SetTextBGColor      = D1A8DF
+_#gfx_SetTextFGColor      = D1A8E3
+_#gfx_GetCharWidth        = D1A8E7
+_#gfx_HorizLine           = D1A8EB
+_#gfx_Rectangle           = D1A8EF
+_#gfx_FillRectangle       = D1A8F3
+_#gfx_Sprite              = D1A8F7
+_#gfx_TransparentSprite   = D1A8FB
+_#gfx_SetTransparentColor = D1A8FF
+_#kb_Scan                 = D1A90D
+_#kb_AnyKey               = D1A911

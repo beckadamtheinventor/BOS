@@ -726,6 +726,15 @@ uint8_t th_CreateThread(void (*pc)(int, char**), void *sp, int argc, char **argv
 uint8_t th_KillThread(uint8_t id);
 
 /**
+ * Relocate code in data offsetting 24-bit values (offsets of data) by origin_delta.
+ * @param data Code/data to be relocated.
+ * @param offsets Pointer to offsets of data needing to be offset.
+ * @param origin_delta Value to offset by.
+ * @note relocates data in place. Data MUST be stored in RAM, otherwise this will crash. @p offsets should be terminated by 0xffffff.
+ */
+void util_Relocate(void *data, unsigned int *offsets, int origin_delta);
+
+/**
  * Handle the next available thread, continuing from here if there are no other threads to handle,
  * or once all other threads have been handled.
  */

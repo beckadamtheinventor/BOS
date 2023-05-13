@@ -7,5 +7,7 @@ converts:
         - cursor.png
       
 outputs:
-    - type: asm
-      converts: images
+    - type: c
+      converts:
+        - images
+
