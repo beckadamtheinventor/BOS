@@ -1,17 +1,18 @@
-library	"FATDRVCE", 1
-	export	fat_Init ; 0
-	export	fat_Deinit ; 3
-	export	fat_DirList ; 6
-	export	fat_GetVolumeLabel ; 9
-	export	fat_Open ; 12
-	export	fat_Close ; 15
-	export	fat_SetSize ; 18
-	export	fat_GetSize ; 21
-	export	fat_SetAttrib ; 24
-	export	fat_GetAttrib ; 27
-	export	fat_SetPos ; 30
-	export	fat_GetPos ; 33
-	export	fat_Read ; 36
-	export	fat_Write ; 39
-	export	fat_Create ; 42
-	export	fat_Delete ; 45
+	library	FATDRVCE, 1
+
+	export	fat_Init
+	export	fat_Deinit
+	export	fat_DirList
+	export	fat_GetVolumeLabel
+	export	fat_Open
+	export	fat_Close
+	export	fat_SetSize
+	export	fat_GetSize
+	export	fat_SetAttrib
+	export	fat_GetAttrib
+	export	fat_SetPos
+	export	fat_GetPos
+	export	fat_Read
+	export	fat_Write
+	export	fat_Create
+	export	fat_Delete

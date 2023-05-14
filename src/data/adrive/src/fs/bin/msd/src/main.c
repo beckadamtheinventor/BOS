@@ -386,62 +386,97 @@ int main(int argc, char *argv[]) {
 			fspath = "/";
 			do {
 				if (on_internal_fs) {
-					gui_DrawConsoleWindow("/");
-					gui_PrintLine(fspath);
-					if (redraw) num_entries = fs_DirList(&fsentries, fspath, 16, skip_entries);
-					for (uint8_t i=0; i<num_entries; i++) {
-						char *name = fs_CopyFileName(fsentries[i]);
-						bosgfx_SetTextPos(2, i+2);
-						if (isDirectory(fsentries[i])) // check if entry is a directory
-							gui_PrintChar('/');
-						gui_Print(name);
-						sys_Free(name);
+					if (redraw) {
+						gui_DrawConsoleWindow("/");
+						gui_PrintLine(fspath);
+						num_entries = fs_DirList(&fsentries, fspath, 16, skip_entries);
+						for (uint8_t i=0; i<num_entries; i++) {
+							char *name = fs_CopyFileName(fsentries[i]);
+							bosgfx_SetTextPos(2, i+2);
+							if (isDirectory(fsentries[i])) // check if entry is a directory
+								gui_PrintChar('/');
+							gui_Print(name);
+							sys_Free(name);
+						}
 					}
 				} else {
-					gui_DrawConsoleWindow("MSD/");
-					gui_PrintLine(msdpath);
-					if (redraw) num_entries = fat_DirList(&fat, msdpath, FAT_LIST_ALL, &msdentries, 16, skip_entries);
-					for (uint8_t i=0; i<(16<num_entries?16:num_entries); i++) {
-						bosgfx_SetTextPos(2, i+2);
-						if (msdentries[i].attrib & FAT_DIR) // check if entry is a directory
-							gui_PrintChar('/');
-						memcpy(namebuffer, &msdentries[i].filename, 13);
-						gui_Print(namebuffer);
+					if (redraw) {
+						gui_DrawConsoleWindow("MSD/");
+						gui_PrintLine(msdpath);
+						num_entries = fat_DirList(&fat, msdpath, FAT_LIST_ALL, &msdentries, 16, skip_entries);
+						for (uint8_t i=0; i<(16<num_entries?16:num_entries); i++) {
+							bosgfx_SetTextPos(2, i+2);
+							if (msdentries[i].attrib & FAT_DIR) // check if entry is a directory
+								gui_PrintChar('/');
+							memcpy(namebuffer, &msdentries[i].filename, 13);
+							gui_Print(namebuffer);
+						}
 					}
 				}
+				redraw = false;
 				bosgfx_SetTextPos(0, cursor+2);
 				gui_PrintLine(">"); // right-facing triangle
 				keywait:;
 				key = sys_WaitKeyCycle();
 				usb_HandleEvents();
+				bosgfx_SetTextPos(0, cursor+2);
+				gui_PrintChar(' ');
 				if (key == sk_Up) {
 					if (cursor > 0) cursor--;
-					else if (skip_entries > 0) skip_entries--;
+					else if (skip_entries > 0) {
+						skip_entries--;
+						redraw = true;
+					}
 				} else if (key == sk_Down) {
 					if (cursor < 16 && cursor < num_entries) cursor++;
-					else if (skip_entries < num_entries) skip_entries++;
+					else if (skip_entries < num_entries) {
+						skip_entries++;
+						redraw = true;
+					}
 				} else if (key == sk_Enter) {
 					char *fnamebuffer;
 					if (on_internal_fs) {
 						if (isDirectory(fsentries[cursor])) {
 							char *tofree, *tofree2;
+							redraw = true;
 							tofree = fspath;
 							fspath = fs_JoinPath(fspath, (tofree2 = fs_CopyFileName(fsentries[cursor])));
 							sys_Free(tofree);
 							sys_Free(tofree2);
-							cursor = 0;
+							cursor = skip_entries = 0;
 							continue;
 						}
 					} else {
 						if (msdentries[cursor].attrib & FAT_DIR) {
 							char *tofree;
+							redraw = true;
+							if (msdentries[cursor].filename[0] == '.') {
+								if (msdentries[cursor].filename[1] == '.') {
+									int l = strlen(msdpath);
+									if (l < 2)
+										continue;
+									for (int i=l; i>=0; --i) {
+										if (msdpath[i] == '/') {
+											if (i > 0)
+												msdpath[i] = 0;
+											else
+												msdpath[1] = 0;
+											break;
+										}
+									}
+									cursor = skip_entries = 0;
+								}
+								continue;
+							}
 							tofree = msdpath;
-							msdpath = fs_JoinPath(msdpath, &msdentries[cursor].filename);
+							memcpy(namebuffer, &msdentries[cursor].filename, 13);
+							msdpath = fs_JoinPath(msdpath, namebuffer);
 							sys_Free(tofree);
-							cursor = 0;
+							cursor = skip_entries = 0;
 							continue;
 						}
 					}
+					redraw = true;
 					fnamebuffer = sys_Malloc(256);
 					gui_DrawConsoleWindow("File to write: (default -> same)");
 					if (gui_Input(fnamebuffer, 255)) {
@@ -464,10 +499,10 @@ int main(int argc, char *argv[]) {
 							memcpy((s = namebuffer), &msdentries[cursor].filename, 13);
 							s = fs_JoinPath(msdpath, s);
 						}
-						if (!transfer_file(&fat, s, d, on_internal_fs, TT_COPY)) {
-							gui_PrintLine("Failed to transfer files.");
-						} else {
+						if (transfer_file(&fat, s, d, on_internal_fs, TT_COPY)) {
 							gui_PrintLine("Transfer completed successfuly.");
+						} else {
+							gui_PrintLine("Failed to transfer files.");
 						}
 						sys_WaitKeyCycle();
 					}
