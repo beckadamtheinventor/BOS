@@ -14,26 +14,20 @@ sys_OpenDevice:
 	push hl
 	call fs_GetFDPtrRaw.entry
 	pop bc
+	ret c
 	ld a,(hl)
 	cp a,$C9
 	jr nz,.fail
-	push bc
 	call sys_SearchDeviceTable.entryhl
-	pop bc
 	ret nz ; don't reinit an already initialized device
-	push bc
 	call sys_AppendDeviceTable.entryhl
-	pop bc
 	ret z
 	push hl
 	inc hl
 	bit bDeviceNeedsInit,(hl)
-	jr z,.noneedinit
-	inc hl
-	inc hl
-	inc hl
-	call sys_jphl
-.noneedinit:
+	ld bc,6
+	add hl,bc
+	call nz,sys_jphl
 	pop hl
 	ret
 .fail:
