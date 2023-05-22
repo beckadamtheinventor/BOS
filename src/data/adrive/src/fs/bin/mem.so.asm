@@ -139,11 +139,12 @@ osrt.check_address_writable:
 	or a,a
 	sbc hl,bc
 	jr c,osrt.popbchl_return
-	ld bc,$D52C00 - $D00000
-	sbc hl,bc
-	ccf ;Cf set if address greater than or equal to $D52C00
-	jr c,osrt.popbchl_return
-	ld bc,ti.stackTop - $D52C00
+	; ld bc,$D52C00 - $D00000
+	; sbc hl,bc
+	; ccf ;Cf set if address greater than or equal to $D52C00
+	; jr c,osrt.popbchl_return
+	; ld bc,ti.stackTop - $D52C00
+	ld bc,ti.stackTop - $D00000
 	sbc hl,bc
 	scf ;only affects Cf
 	jr z,osrt.popbchl_return

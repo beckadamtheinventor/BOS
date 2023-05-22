@@ -320,8 +320,8 @@ execute_program_string:
 	ld (iy+6),a
 	call ti.PushOP3
 	call bos.sys_ExecuteFile
-	ld iy,ti.OP3
 	call ti.PopOP3
+	ld iy,ti.OP3
 	ld a,(iy)
 	ld (bos.color_primary),a
 	ld a,(iy+1)
@@ -335,11 +335,11 @@ execute_program_string:
 	ld a,(iy+5)
 	ld (bos.lcd_text_fg2+1),a
 	call ti.PopOP3
-	ld bc,(ti.OP3)
+	ld bc,(iy)
 	ld (ti.begPC),bc
-	ld bc,(ti.OP3+3)
+	ld bc,(iy+3)
 	ld (ti.curPC),bc
-	ld bc,(ti.OP3+6)
+	ld bc,(iy+6)
 	ld (ti.endPC),bc
 	ld hl,(bos.ExecutingFileFd) ;check if the currently executing file descriptor is -1
 	inc hl
