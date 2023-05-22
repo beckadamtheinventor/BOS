@@ -13,6 +13,7 @@
 
 //uint8_t keypress_queue[6*8] = {0};
 
+#define NUM_MAIN_WINDOW_ITEMS 2
 gui_item_t MainWindowItems[] = {
 	{
 		GUI_ITEM_TEXT,
@@ -34,6 +35,7 @@ window_t MainWindow = {
 	NULL,
 	NULL,
 	NULL,
+	NUM_MAIN_WINDOW_ITEMS,
 	&MainWindowItems,
 };
 

@@ -2,7 +2,6 @@
 	jr _writeinto
 	db "FEX",0
 _writeinto:
-	call ti._frameset0
 	ld hl,(bos.LastCommandResult)
 	add hl,bc
 	or a,a
@@ -33,12 +32,9 @@ _writeinto:
 	call bos.sys_Free
 	pop bc,af,bc
 	sbc hl,hl ;previous routine returns what we want to return
-.exit:
-	ld sp,ix
-	pop ix
 	ret
 .fail:
 	scf
 	sbc hl,hl
-	jr .exit
+	ret
 

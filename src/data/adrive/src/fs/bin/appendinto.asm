@@ -50,7 +50,7 @@ _appendinto_exe:
 	ld (ix-6),bc ;save length of data
 	ex (sp),hl ;save pointer to data, restore old length of file
 	add hl,bc
-	ld de,(ix+3)
+	ld de,(ix-3)
 	push de
 	ld de,$00FFFF
 	or a,a

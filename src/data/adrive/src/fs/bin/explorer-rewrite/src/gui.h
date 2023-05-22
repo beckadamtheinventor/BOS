@@ -39,6 +39,7 @@ typedef struct window_t {
 	char *title;
 	char *content;
 	gfx_sprite_t *icon;
+	unsigned int numitems;
 	gui_item_t **items;
 } window_t;
 

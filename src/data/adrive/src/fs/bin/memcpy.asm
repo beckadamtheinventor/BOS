@@ -3,6 +3,13 @@
 	db "FEX",0
 mem_cpy_exe_main:
 	call ti._frameset0
+	ld a,(ix+6)
+	cp a,4
+	jr z,.correctnumberofarguments
+	ld hl,.helpstr
+	call bos.gui_PrintLine
+	jr .return0
+.correctnumberofarguments:
 	call osrt.argv_1
 	push hl
 	call osrt.intstr_to_int
@@ -37,6 +44,7 @@ mem_cpy_exe_main:
 	call osrt.intstr_to_int
 	pop bc,de,bc
 	ldir
+.return0:
 	or a,a
 	sbc hl,hl
 	jr .done
@@ -53,6 +61,9 @@ mem_cpy_exe_main:
 	pop ix
 	ret
 
+.helpstr:
+	db "memcpy dest src len", $A
+	db "numbers decimal or $hex", 0
 .str_fail_copy_to_rom:
 	db "Cannot copy to flash.",0
 .str_fail_copy_beyond_ram:

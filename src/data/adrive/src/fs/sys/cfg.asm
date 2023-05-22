@@ -26,7 +26,7 @@ loadConfigData:
 	inc hl
 	cp a,'='
 	rst $28
-	jp nz,.next ; skip if invalid statement
+	jp nz,.next-$ ; skip if invalid statement
 	ld a,(hl)
 	inc hl
 	cp a,'x'
@@ -36,10 +36,10 @@ loadConfigData:
 	ld d,'0'
 	sub a,d
 	rst $28
-	jp c,.next
+	jp c,.next-$
 	cp a,10
 	rst $28
-	jp nc,.next
+	jp nc,.next-$
 ; decimal number argument
 	ld e,a
 ; check next two digits are valid
@@ -111,7 +111,7 @@ loadConfigData:
 	ld a,(hl)
 	inc hl
 	rst $28
-	call .nibble
+	call .nibble-$
 	inc a
 	ret z ;if a=0xff then we encountered an invalid hex character, so we should probably skip this line
 	dec a
@@ -123,7 +123,7 @@ loadConfigData:
 	ld a,(hl)
 	inc hl
 	rst $28
-	call .nibble
+	call .nibble-$
 	inc a
 	ret z ;if a=0xff then we encountered an invalid hex character, so we should probably skip this line
 	dec a
@@ -177,7 +177,7 @@ loadConfigData:
 	ld a,$A
 	cpir
 	rst $28
-	jp pe,.loop
+	jp pe,.loop-$
 .done:
 	ld sp,ix
 	pop ix
