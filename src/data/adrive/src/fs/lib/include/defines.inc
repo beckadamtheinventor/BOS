@@ -173,7 +173,7 @@ device_Flags                := 1
 device_Type                 := 2
 device_Version              := 3
 device_IntSource            := 4 ; what interrupt source this device responds to.
-device_FilesystemDevice     := 6 ; offset in file of filesystem device descriptor if this device can be used as a filesystem.
+device_FilesystemDeviceFlags:= 5 ; filesystem device flags if this device can be used as a filesystem.
 device_JumpTable            := 8 ; jump table for device functions.
 device_JumpInit             := 8
 device_JumpDeinit           := 12
@@ -181,6 +181,11 @@ device_JumpRead             := 16
 device_JumpWrite            := 20
 device_JumpGetDMA           := 24
 device_JumpInt              := 28
+device_JumpOpenFile         := 32
+device_JumpCreateFile       := 36
+device_JumpDeleteFile       := 40
+device_JumpReadFile         := 44
+device_JumpWriteFile        := 48
 device_CodeStart            := 32
 
 ; device file field lengths
@@ -217,6 +222,7 @@ devtIntHandler              := $09
 devtUSB                     := $10
 devtMSD                     := $14
 devtMTP                     := $15
+devtFS                      := $20
 
 ; device interrupt sources
 deviceIntNone               := $00
@@ -230,20 +236,14 @@ deviceIntLcd                := $0C
 deviceIntRtc                := $0D
 deviceIntUsb                := $0E
 
-; filesystem device field offsets
-deviceFs_Flags              := 0
-deviceFs_OpenFile           := 4
-deviceFs_CreateFile         := 8
-deviceFs_DeleteFile         := 12
-deviceFs_Read               := 16
-deviceFs_Write              := 20
-
 ; filesystem device flags
 bDeviceFsReadable           := 0
+bDeviceFsWritable           := 1
 bDeviceFsWriteable          := 1
 
 mDeviceFsReadable           := 1 shl bDeviceFsReadable
-mDeviceFsWriteable          := 1 shl bDeviceFsWriteable
+mDeviceFsWritable           := 1 shl bDeviceFsWritable
+mDeviceFsWriteable          := 1 shl bDeviceFsWritable
 
 ; threading defines
 threadMallocStackSize       := 512

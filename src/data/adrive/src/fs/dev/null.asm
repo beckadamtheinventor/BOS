@@ -23,4 +23,4 @@ dev_null_write: ; dummy write
 	ex hl,de
 	ld bc,0
 	ret
-
+end device_file

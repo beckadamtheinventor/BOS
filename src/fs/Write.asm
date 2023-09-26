@@ -6,7 +6,6 @@ fs_Write:
 	ld hl,-13
 	call ti._frameset
 	ld (ix-6),iy
-	call sys_FlashUnlock
 	ld iy,(ix+15) ;void *fd
 	ld a,(ix+15+2)
 	cp a,$D0
@@ -63,6 +62,7 @@ fs_Write:
 	ld bc,(ix-3) ; write length (len*count)
 	ld hl,(ix+6) ; void *data
 	push de ; save pointer to write location
+	call sys_FlashUnlock
 .check_write_loop: ; check if we can write to the file successfuly without relocating it
 	ld a,(de)
 	and a,(hl)
@@ -162,14 +162,9 @@ fs_Write:
 	call fs_GetFDPtrRaw.entry
 	push hl
 	pop iy
-	ld a,(iy+device_FilesystemDevice+2)
-	ld iy,(iy+device_FilesystemDevice)
-	or a,iyh
-	or a,iyl
-	jq z,.fail ; fail if the device filesystem doesn't exist
-	bit bDeviceFsWriteable,(iy+deviceFs_Flags)
+	bit bDeviceFsWriteable,(iy+device_FilesystemDeviceFlags)
 	jq z,.fail ; fail if the device filesystem isn't writeable
-	lea hl,iy+deviceFs_Write
+	lea hl,iy+device_JumpWrite
 	ld de,(ix+15)
 	ld c,(ix+12)
 	push de,bc

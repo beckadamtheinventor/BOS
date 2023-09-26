@@ -55,16 +55,15 @@ def build_syscalls(path):
 		if "jp " in line and not line.startswith(";"):
 			callname = line.split("jp ", maxsplit=1)[1].split(" ", maxsplit=1)[0]
 			if callname.startswith("_"):
-				lib = ""
+				lib = "os"
 				name = callname[1:]
 			elif "_" in callname:
 				lib, name = callname.split("_", maxsplit=1)
 			else:
 				continue
-			if name[0].isupper():
-				if lib not in o.keys():
-					o[lib] = []
-				o[lib].append(f"export_ptr bos.{lib}_{name}, \"{name}\"")
+			if lib not in o.keys():
+				o[lib] = []
+			o[lib].append(f"export_ptr bos.{callname}, \"{name}\"")
 
 	with open(join(path, "src", "include", "ti84pceg.inc"), "r") as f:
 		data = f.read().split("\n")

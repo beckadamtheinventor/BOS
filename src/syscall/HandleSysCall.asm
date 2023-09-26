@@ -9,7 +9,8 @@ sc_HandleSysCall:
 	inc hl
 	inc hl
 	ld (ix+18),hl ; advance return address
-	push de,de
+	add hl,de
+	push hl,hl
 	call sc_LoadSysCall
 	pop de
 	jr c,.fail
@@ -17,7 +18,7 @@ sc_HandleSysCall:
 	jr z,.return_data
 	ld a,(ix+18+2)
 	cp a,$D0
-	jr c,.dont_smc
+	jr c,.dont_smc ; don't smc the syscall if not executing from RAM
 	; cp a,$E4
 	; jr nc,.dont_smc
 	ex hl,de
@@ -40,11 +41,6 @@ sc_HandleSysCall:
 	ret
 .fail:
 	pop de
-	; pop iy,ix,bc
-	; pop hl,af,hl
-	ld hl,3*6
-	add hl,sp
-	ld sp,hl ; pop 6 unused values off the stack
 	push de
 	ld hl,str_UnimplementedSysCall
 	call gui_DrawConsoleWindow
@@ -55,7 +51,7 @@ sc_HandleSysCall:
 	call sys_WaitKeyCycle
 .waitloop:
 	cp a,ti.skClear
-	ret z
+	jr z,.return_data
 	cp a,ti.skEnter
 	jr nz,.waitloop
 	jp os_return

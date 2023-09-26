@@ -53,4 +53,4 @@ end if
 .str_bytes_dirty:
 	db " bytes dirty",0
 .str_kb_free:
-	db "KB free of 3456KB total",0
+	db "KB free of 3520KB total",0

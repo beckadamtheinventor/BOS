@@ -198,4 +198,5 @@ loadConfigData:
 .invalid:
 	sbc a,a
 	ret
+
 end syscalllib

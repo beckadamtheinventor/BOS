@@ -42,9 +42,13 @@ macro ram_executable_at? addr
 	db $18,$04,"REX",$00
 end macro
 
-macro flash_executable?
-	virtual at $01000000
-		db $18,$04,"FEX",$00
+macro flash_executable? header:1
+	local flashexecbase
+	element flashexecbase
+	virtual at flashexecbase
+		if header = 1
+			db $18,$04,"FEX",$00
+		end if
 	macro end?.flash_executable?
 		purge ?
 		purge end?.flash_executable?
@@ -59,7 +63,7 @@ macro flash_executable?
 			if `opcode = "call" | `opcode = "jp" | `opcode = "jq" | `opcode = "ld" | `opcode = "syscall"
 				match lhs=,rhs, args
 					match (val), lhs
-						if val relativeto $$ & val >= $$
+						if val relativeto flashexecbase
 							rst $28
 							opcode (0), rhs
 							store val - $ : 3 at $ - 3
@@ -67,14 +71,14 @@ macro flash_executable?
 							opcode (val), rhs
 						end if
 					else match (val), rhs
-						if val relativeto $$ & val >= $$
+						if val relativeto flashexecbase
 							rst $28
 							opcode lhs, (0)
 							store val - $ : 3 at $ - 3
 						else
 							opcode lhs, (val)
 						end if
-					else if rhs relativeto $$ & rhs >= $$
+					else if rhs relativeto flashexecbase
 						rst $28
 						opcode lhs, 0
 						store rhs - $ : 3 at $ - 3
@@ -84,7 +88,7 @@ macro flash_executable?
 				else match opcode= lhs, line
 					match (val), lhs
 						opcode lhs
-					else if lhs relativeto $$ & lhs >= $$
+					else if lhs relativeto flashexecbase
 						rst $28
 						opcode 0
 						store lhs - $ : 3 at $ - 3
@@ -114,7 +118,7 @@ end macro
 ;		db "gfx/PrintString",0
 macro syscall? lbl
 	rst $18
-	dl lbl
+	dl lbl - $+3
 end macro
 
 ;-------------------------------------------------------------------------------
@@ -126,7 +130,7 @@ macro syscalllib?
 	virtual
 		exports.area::
 	end virtual
-	virtual at exports.codeloc
+	virtual at 0
 	macro export? routine
 		virtual exports.area
 			if defined routine.ramroutine
@@ -197,11 +201,56 @@ macro syscalllib?
 			load exports.data: $-$$ from $$
 		end virtual
 		db exports.data
-		exports.codeloc := $
 		db exports.code
+		purge call?
+		purge jp?
+		purge jq?
+		purge ld?
+		purge syscall?
 		purge export?
 		purge end?.syscalllib?
 	end macro
+	iterate each, call,jp,jq,ld,syscall
+		macro each? args&
+			match lhs=,rhs, args
+				match (val), lhs
+					if val relativeto flashexecbase
+						rst $28
+						opcode (0), rhs
+						store val - $ : 3 at $ - 3
+					else
+						opcode (val), rhs
+					end if
+				else match (val), rhs
+					if val relativeto flashexecbase
+						rst $28
+						opcode lhs, (0)
+						store val - $ : 3 at $ - 3
+					else
+						opcode lhs, (val)
+					end if
+				else if rhs relativeto flashexecbase
+					rst $28
+					opcode lhs, 0
+					store rhs - $ : 3 at $ - 3
+				else
+					opcode lhs, rhs
+				end if
+			else match opcode= lhs, line
+				match (val), lhs
+					opcode lhs
+				else if lhs relativeto flashexecbase
+					rst $28
+					opcode 0
+					store lhs - $ : 3 at $ - 3
+				else
+					opcode lhs
+				end if
+			else
+				opcode args
+			end match
+		end macro
+	end iterate
 end macro
 
 ;-------------------------------------------------------------------------------
@@ -261,7 +310,7 @@ end macro
 macro device_file? flags, type, version, intsource
 	virtual
 	db $C9, flags, type, version, intsource, 0, 0, 0
-	repeat device_NumJumps
+	repeat 11
 		or a,a
 		sbc hl,hl
 		ret

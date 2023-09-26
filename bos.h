@@ -5,33 +5,15 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-typedef struct __filesystem_device_t__ {
-	uint8_t flags;
-	uint8_t unused[3];
-	// Called by the OS to open a file within this device as a filesystem.
-	uint8_t fs_OpenFileJP;
-	void *(*fs_OpenFile)(char *path);
-	// Called by the OS to create a file within this device as a filesystem.
-	uint8_t fs_CreateFileJP;
-	void *(*fs_CreateFile)(char *path, int flags);
-	// Called by the OS to delete a file within this device as a filesystem.
-	uint8_t fs_DeleteFileJP;
-	void *(*fs_DeleteFile)(char *path);
-	// Called by the OS to read from a file within this device as a filesystem. Data is a physical address where data is read into.
-	uint8_t fs_ReadJP;
-	unsigned int (*fs_Read)(void *data, unsigned int len, uint8_t count, void *fd);
-	// Called by the OS to write to a file within this device as a filesystem. Data is a physical address where data is written from.
-	uint8_t fs_WriteJP;
-	unsigned int (*fs_Write)(void *data, unsigned int len, uint8_t count, void *fd);
-} filesystem_device_t;
-
 typedef struct __device_t__ {
 	uint8_t header;
 	uint8_t flags;
 	uint8_t type;
 	uint8_t version;
 	uint8_t intSource;
-	filesystem_device_t *fs;
+	uint8_t fsdevflags;
+	uint8_t reserved[2];
+	// Generic device jump table
 	// Initialize the device.
 	uint8_t initjp;
 	uint8_t (*init)(void);
@@ -50,6 +32,24 @@ typedef struct __device_t__ {
 	// Called by the OS to handle interrupts this device responds to.
 	uint8_t interrupthandlerjp;
 	uint8_t (*interruptHandler)(void);
+
+	// Filesystem device jump table
+	// Called by the OS to open a file within this device as a filesystem.
+	uint8_t fs_OpenFileJP;
+	void *(*fs_OpenFile)(char *path);
+	// Called by the OS to create a file within this device as a filesystem.
+	uint8_t fs_CreateFileJP;
+	void *(*fs_CreateFile)(char *path, int flags);
+	// Called by the OS to delete a file within this device as a filesystem.
+	uint8_t fs_DeleteFileJP;
+	void *(*fs_DeleteFile)(char *path);
+	// Called by the OS to read from a file within this device as a filesystem. Data is a physical address where data is read into.
+	uint8_t fs_ReadJP;
+	unsigned int (*fs_Read)(void *data, unsigned int len, uint8_t count, void *fd);
+	// Called by the OS to write to a file within this device as a filesystem. Data is a physical address where data is written from.
+	uint8_t fs_WriteJP;
+	unsigned int (*fs_Write)(void *data, unsigned int len, uint8_t count, void *fd);
+
 } device_t;
 
 
@@ -244,12 +244,6 @@ void gui_DrawConsoleWindow(const char *str);
  * @param str Pointer to string to print.
  */
 void gui_Print(const char *str);
-
-/**
- * Print a character to the screen, advancing the current draw collumn.
- * @param str Pointer to string to print.
- */
-void gui_PrintChar(const char *str);
 
 /**
  * Print a string to the screen and advance the current draw line.

@@ -70,3 +70,5 @@ dev_lcd_compute:
 	ld bc,(iy+15)
 	pop iy
 	ret
+
+end device_file
