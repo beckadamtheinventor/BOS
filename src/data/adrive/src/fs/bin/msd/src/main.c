@@ -161,7 +161,7 @@ bool transfer_file(fat_t *fat, const char *src, const char *dest, bool send, uin
 				if (fat_Read(&srcfile, 1, &sector_buffer) != 1) {
 					goto read_error;
 				}
-				if (!strcmp(&sector_buffer, "**TI83F*\x1A\x0A")) {
+				if (!memcmp(&sector_buffer, "**TI83F*\x1A\x0A", 10)) {
 					char *varname = TIVarToPath(&sector_buffer[O_8X_VAR_NAME], sector_buffer[O_8X_VAR_TYPE]);
 					char *varpath = fs_JoinPath("/tivars", varname);
 					uint8_t nlen = strlen(&sector_buffer[O_8X_VAR_NAME]);

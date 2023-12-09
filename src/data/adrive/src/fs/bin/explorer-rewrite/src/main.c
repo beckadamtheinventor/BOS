@@ -96,22 +96,23 @@ int main(int argc, char **argv) {
 //	keythread = th_CreateThread(&_keythread, &keythreadstack[32*sizeof(void*)], 0, NULL);
 
 	gfx_SetTransparentColor(248);
+	gfx_SetTextTransparentColor(0);
 
 	cursor_x = cursor_y = 20;
 	do {
 		if (redraw) {
 			gfx_SetDrawBuffer();
 			guiDrawWindow(&MainWindow);
-			redraw = false;
 			gfx_SetDrawScreen();
 			gfx_BlitBuffer();
+			redraw = false;
 		}
 		gfx_TransparentSprite(cursor, cursor_x, cursor_y);
 		th_HandleNextThread();
 		kb_Scan();
 
 		if (kb_AnyKey()) {
-			gfx_BlitArea(1, cursor_x, cursor_y, cursor->width, cursor->height);
+			gfx_BlitRectangle(1, cursor_x, cursor_y, cursor->width, cursor->height);
 		}
 
 		if (kb_IsDown(kb_KeyUp)) {

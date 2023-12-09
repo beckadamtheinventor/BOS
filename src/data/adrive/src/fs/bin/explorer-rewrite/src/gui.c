@@ -28,6 +28,49 @@ void guiDrawWindow(window_t *window) {
 	if (window->content != NULL) {
 		guiDrawStringXY(window->content, window->x + 2, window->y + (window->title != NULL ? LINE_HEIGHT + 3 : 2), window->width - 4, window->height - 4);
 	}
+	for (unsigned int i=0; i<window->numitems; i++) {
+		guiDrawItem(window->items[i]);
+	}
+}
+
+void guiDrawItem(gui_item_t *item) {
+	switch (item->type) {
+		case GUI_ITEM_BUTTON:
+			gfx_SetColor(WINDOW_BUTTON_BG_COLOR);
+			gfx_FillRectangle(item->x, item->y, item->width, item->height);
+			gfx_SetColor(WINDOW_BUTTON_FG_COLOR);
+			gfx_Rectangle(item->x, item->y, item->width, item->height);
+			gfx_SetTextFGColor(WINDOW_BUTTON_TEXT_COLOR);
+			gfx_SetTextBGColor(WINDOW_BUTTON_BG_COLOR);
+			break;
+		case GUI_ITEM_TEXTFIELD:
+			gfx_SetColor(WINDOW_FIELD_BG_COLOR);
+			gfx_FillRectangle(item->x, item->y, item->width, item->height);
+			gfx_SetColor(WINDOW_FIELD_FG_COLOR);
+			gfx_Rectangle(item->x, item->y, item->width, item->height);
+			gfx_SetTextFGColor(WINDOW_FIELD_TEXT_COLOR);
+			gfx_SetTextBGColor(WINDOW_BUTTON_BG_COLOR);
+			break;
+		case GUI_ITEM_CHECKBOX:
+			gfx_SetColor(WINDOW_FIELD_BG_COLOR);
+			gfx_FillRectangle(item->x, item->y, 9, 9);
+			gfx_SetColor(WINDOW_FIELD_FG_COLOR);
+			gfx_Rectangle(item->x, item->y, 9, 9);
+			gfx_SetTextFGColor(WINDOW_FIELD_TEXT_COLOR);
+			gfx_SetTextBGColor(WINDOW_BUTTON_BG_COLOR);
+			if (item->text != NULL) {
+				guiDrawStringXY(item->text, item->x + 10, item->y, item->width, item->height);
+			}
+			return;
+		case GUI_ITEM_TEXT:
+			gfx_SetTextFGColor(WINDOW_TEXT_COLOR);
+			gfx_SetTextBGColor(WINDOW_FILL_COLOR);
+		default:
+			break;
+	}
+	if (item->text != NULL) {
+		guiDrawStringXY(item->text, item->x, item->y, item->width, item->height);
+	}
 }
 
 void guiDrawStringXY(const char *str, int minx, int miny, int w, int h) {
@@ -51,12 +94,12 @@ void guiDrawStringXY(const char *str, int minx, int miny, int w, int h) {
 			if (c == 0xA || x + cw >= maxx) {
 				x = minx;
 				y += LINE_HEIGHT;
+				gfx_SetTextXY(x, y);
 			}
 			if (y >= maxy)
 				break;
 			if (c == 0xA)
 				continue;
-			gfx_SetTextXY(x, y);
 			gfx_PrintChar(c);
 			x += cw;
 		}
