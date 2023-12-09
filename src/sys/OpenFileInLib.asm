@@ -9,17 +9,9 @@ sys_OpenFileInLib:
 	push hl
 	call fs_GetFilePtr
 	pop de
-	jq nc,sys_OpenFileInPath.entry_hlbc
-; if we failed to locate file "/var/LIB", use the default lib directory "/lib"
-	ld bc,(ix+6)
-	ld de,str_lib_dir
-	push bc,de
-	call fs_JoinPath
-	pop bc
-	ex (sp),hl
-	call fs_OpenFile
-	ex (sp),hl
-	push af
-	call sys_Free.entryhl
-	pop af,hl
-	ret
+	jr nc,.not_default
+; if we failed to locate file "/var/LIB", use the default lib data
+	ld hl,str_DefaultLibVarData
+	ld bc,str_DefaultLibVarData.len
+.not_default:
+	jq sys_OpenFileInPath.entry_hlbc

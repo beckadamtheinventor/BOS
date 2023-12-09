@@ -20,7 +20,7 @@ sys_WriteSectorCache:
 	ld hl,LCD_VRAM
 	or a,a
 	sbc hl,de
-	jr nz,.dont_writeback_vram
+	jq nz,sys_FlashLock
 	ld hl,LCD_BUFFER
 	ld bc,LCD_WIDTH*LCD_HEIGHT
 	push de

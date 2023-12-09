@@ -29,8 +29,11 @@ fs_CreateRamFile:
 	push de
 	call _GetVATEntryNFromPtr
 	pop de
-	set 7,h
-	ld (ix+17),h
+	ld a,h
+	add a,$E0
+	cp a,h
+	jr nc,.fail ; if the new value is less than the old value, the VAT entry number is higher than $1FFF, which causes an overflow
+	ld (ix+17),a
 	ld a,l
 	call sys_FlashUnlock
 	call sys_WriteFlashA

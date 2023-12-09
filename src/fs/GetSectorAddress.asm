@@ -6,8 +6,11 @@ fs_GetSectorAddress:
 .entry:
 	ex hl,de
 	ex.s hl,de
-	; bit 7,h
-	; jr nz,.ram_sector
+	ld e,a
+	ld a,h
+	cp a,$E0 ; ram descriptors start at $E000
+	ld a,e
+	jr nc,.ram_sector
 	ld b,fs_sector_size_bits
 	ld de,start_of_user_archive
 .mult_loop:
@@ -15,14 +18,15 @@ fs_GetSectorAddress:
 	djnz .mult_loop
 	add hl,de
 	ret
-; .ram_sector:
-	; res 7,h
-	; call _GetVATEntryN
-	; inc hl
-	; ld a,(hl)
-	; inc hl
-	; ld d,(hl)
-	; inc hl
-	; ld l,(hl)
-	; ld h,d
-	; jp _SetHLUToA
+.ram_sector:
+	ld de,-$E000
+	add hl,de
+	call _GetVATEntryN
+	inc hl
+	ld a,(hl)
+	inc hl
+	ld d,(hl)
+	inc hl
+	ld l,(hl)
+	ld h,d
+	jp _SetHLUToA

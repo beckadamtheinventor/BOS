@@ -10,7 +10,10 @@ sys_OpenFileInPath:
 	push hl
 	call fs_GetFilePtr
 	pop de
-	jr c,.fail ;fail if /var/PATH not found
+	jr nc,.entry_hlbc
+; use default if /var/PATH not found
+	ld hl,str_DefaultPathVarData
+	ld bc,str_DefaultPathVarData.len
 .entry_hlbc:
 	ld (ix-6),hl
 	ld (ix-9),bc
