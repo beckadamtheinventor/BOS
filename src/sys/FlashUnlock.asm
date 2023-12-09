@@ -1,5 +1,5 @@
 ;@DOES Unlocks flash.
-;;@NOTE Resets the calc if not currently in elevated mode.
+;;@NOTE (TBD) Resets the calc if not currently in elevated mode.
 sys_FlashUnlock:
 flash_unlock:
 	push af

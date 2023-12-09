@@ -408,6 +408,14 @@ str_ystem:
 str_Zero:
 	db '0',0
 
+str_DefaultPathVarData:
+	file "adrive/obj/PATH.bin"
+.len := $-.
+
+str_DefaultLibVarData:
+	file "adrive/obj/LIB.bin"
+.len := $-.
+
 str_EmergencyShellInfo:
 	db "available commands:",$A
 	db "extract.[all|os|opt|rot]",$A
