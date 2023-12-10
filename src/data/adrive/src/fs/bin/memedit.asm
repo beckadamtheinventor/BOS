@@ -15,6 +15,9 @@ mem_edit:
 	xor a,a
 	ld (ix-12),a
 mem_edit_main:
+	call gfx_ZeroScreen
+	ld hl,$D40000
+	ld (ti.mpLcdUpbase),hl
 	ld c,1
 	push bc
 	call gfx_SetDraw
