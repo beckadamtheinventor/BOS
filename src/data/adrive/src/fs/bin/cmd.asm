@@ -4,20 +4,7 @@
 cmd_exe_main:
 	ld hl,-29
 	call ti._frameset
-	; ld hl,str_CmdConfigFile
-	; push hl
-	; call bos.fs_GetFilePtr
-	; pop de
-	; ld de,cmd_config_data_struct
-	; push de,hl,bc
-	; syscall _loadConfigData
-	; pop bc,bc,bc
-	xor a,a
-	sbc hl,hl
-	ld (ix-10),a
-	ld (ix-6),hl
-	ld (ix-9),hl
-	ld (ix-16),hl
+	call cmd_exe_init
 	ld hl,(ix+6)
 	ld bc,(ix+9)
 	push bc,hl
@@ -73,7 +60,28 @@ cmd_print_help_info:
 	call bos.gui_PrintLine
 	jq cmd_exit_retzero
 
+cmd_exe_init:
+	; ld hl,str_CmdConfigFile
+	; push hl
+	; call bos.fs_GetFilePtr
+	; pop de
+	; ld de,cmd_config_data_struct
+	; push de,hl,bc
+	; syscall _loadConfigData
+	; pop bc,bc,bc
+	xor a,a
+	sbc hl,hl
+	ld (ix-10),a
+	ld (ix-6),hl
+	ld (ix-9),hl
+	ld (ix-16),hl
+	ret
+
 ;execute argument as if from command line if argument passed
+cmd_execute_next_line.entry:
+	ld hl,-29
+	call ti._frameset
+	call cmd_exe_init
 cmd_execute_next_line:
 .loop:
 	ld hl,(ti.endPC)
