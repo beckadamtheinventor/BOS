@@ -411,10 +411,12 @@ str_Zero:
 str_DefaultPathVarData:
 	file "adrive/obj/PATH.bin"
 .len := $-.
+	db 0
 
 str_DefaultLibVarData:
 	file "adrive/obj/LIB.bin"
 .len := $-.
+	db 0
 
 str_EmergencyShellInfo:
 	db "available commands:",$A
