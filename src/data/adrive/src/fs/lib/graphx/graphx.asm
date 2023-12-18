@@ -254,8 +254,8 @@ gfx_Begin:
 ;  arg0: bpp mode to start in
 ; Returns:
 ;  None
-	; call	ti.boot.ClearVRAM	; clear the screen
-	call	bos.gfx_ZeroVRAM
+	call	ti.boot.ClearVRAM	; clear the screen
+	; call	bos.gfx_ZeroVRAM
 lcdGraphxMode := ti.lcdWatermark+ti.lcdIntFront+ti.lcdPwr+ti.lcdBgr+ti.lcdBpp8
 	ld	de,lcdGraphxMode
 	ld	hl,CurrentBuffer

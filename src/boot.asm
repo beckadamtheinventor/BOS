@@ -54,7 +54,7 @@ os_return:
 
 	ld hl,op_stack_top
 	ld (op_stack_ptr),hl
-	ld de,os_return_soft
+	ld de,os_on_interrupt_handler
 	ld hl,on_interrupt_handler-1
 	ld (hl),$C3 ;jp opcode byte
 	inc hl
@@ -88,6 +88,7 @@ assert ~thread_temp_save and $FF
 handle_interrupt:
 	ld bc,$5015
 	in a,(bc)
+	or a,a
 	jr z,handle_interrupt_2
 	ld c,$09
 	rla
@@ -104,6 +105,7 @@ handle_interrupt:
 handle_interrupt_2:
 	ld c,$14
 	in a,(bc)
+	or a,a
 	jr z,handle_interrupt_3
 	ld c,$08
 	rra
@@ -157,10 +159,8 @@ low_bit_0_int: ; On interrupt
 	in a,(bc)
 	res 0,a
 	out (bc),a
-	pop hl,iy,ix
-	ld hl,(on_interrupt_handler)
-	push hl
-	jr return_from_interrupt.exx_reti
+	call on_interrupt_handler
+	jr return_from_interrupt
 low_bit_1_int:
 	ld a,1 shl 1
 	out (bc),a
@@ -275,6 +275,17 @@ handle_safeop:
 	ldi
 	pop af
 	ret
+
+os_on_interrupt_handler:
+	call sys_AnyKey
+	ret z
+	call sys_GetKey
+	cp a,ti.skYequ
+	jp z,os_recovery_menu
+	cp a,ti.skClear
+	ret nz
+	ld sp,ti.stackTop
+	jp os_return_soft
 
 handle_offsetinstruction:
 .offset_inst_temp := -20
@@ -425,9 +436,9 @@ generate_boot_configs:
 
 os_return_soft:
 	call os_check_recovery_key
-	ld hl,ti.mpIntMask
-	set ti.bIntOn,(hl)
-	set ti.bIntOSTmr,(hl)
+	; ld hl,ti.mpIntMask
+	; set ti.bIntOn,(hl)
+	; set ti.bIntOSTmr,(hl)
 	call sys_FreeAll
 	call gfx_Set8bpp
 	xor a,a

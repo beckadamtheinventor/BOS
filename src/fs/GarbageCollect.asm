@@ -33,19 +33,28 @@ fs_GarbageCollect:
 	ld (curcol),a
 	inc a
 	ld (currow),a
-	ld hl,.str_cleaning_up
+	ld hl,.str_cleaning_up_step_1
 	call gui_PrintString
+	ld hl,(lcd_x)
+	ld bc,-5*8
+	add hl,bc
+	ld (lcd_x),hl
 ; clean up freed sectors
 ; cluster map pointer decrements within each 64k sector
-	ld bc,$040000
+	ld bc,start_of_user_archive
 	ld (ix-6),bc
 .cleanup_freed_loop_outer:
-	ld hl,.str_cleaning_up_len*8
-	ld (lcd_x),hl
+	ld hl,(lcd_x)
+	push hl
 	ld a,(ix-4)
-	call gfx_PrintHexA
-	ld hl,.str_trailing_zeroes
-	call gfx_PrintString
+	sub a,3
+	ld l,a
+	ld a, 2
+	call gfx_PrintUInt
+	pop hl
+	ld (lcd_x),hl
+	; ld hl,.str_trailing_zeroes
+	; call gfx_PrintString
 	ld iy,$D50000
 	ld bc,65536/fs_sector_size
 .cleanup_freed_loop:
@@ -123,6 +132,15 @@ fs_GarbageCollect:
 	cp a,$3B
 	jq nz,.cleanup_freed_loop_outer
 
+	; xor a,a
+	; ld (curcol),a
+	; inc a
+	; ld (currow),a
+	; ld hl,.str_cleaning_dirs
+	; call gui_PrintString
+	; ld iy,start_of_user_archive
+	; call .cleanup_dirs_traverse
+
 	call sys_FlashLock
 
 ;TODO: move files around to free up space
@@ -185,9 +203,10 @@ fs_GarbageCollect:
 	pop ix
 	ret
 
-.str_trailing_zeroes:
-	db "0000",0
-.str_cleaning_up:
-	db "Cleaning up address: $"
-.str_cleaning_up_len:=$-.str_cleaning_up
-	db 0
+; .cleanup_dirs_traverse:
+	; ret
+
+; .str_trailing_zeroes:
+	; db "0000",0
+.str_cleaning_up_step_1:
+	db "Cleaning: 00/55", 0

@@ -41,8 +41,8 @@ end fs_dir
 
 ;"/bin/" directory
 fs_dir bin_dir
-	fs_sfentry writeinto_exe, ">", "", f_system+f_subfile
-	fs_sfentry appendinto_exe, ">>", "", f_system+f_subfile
+	; fs_sfentry writeinto_exe, ">", "", f_system+f_subfile
+	; fs_sfentry appendinto_exe, ">>", "", f_system+f_subfile
 	fs_sfentry continuecmd_exe, "@cmd", "", f_system+f_subfile
 	fs_entry argv_so, "argv", "so", f_system
 	fs_sfentry cat_exe, "cat", "", f_system+f_subfile
@@ -103,13 +103,13 @@ fs_file os_internal_subfiles
 		; include 'fs/bin/var.asm'
 	; end fs_subfile
 
-	fs_subfile writeinto_exe, bin_dir
-		include 'fs/bin/writeinto.asm'
-	end fs_subfile
+	; fs_subfile writeinto_exe, bin_dir
+		; include 'fs/bin/writeinto.asm'
+	; end fs_subfile
 
-	fs_subfile appendinto_exe, bin_dir
-		include 'fs/bin/appendinto.asm'
-	end fs_subfile
+	; fs_subfile appendinto_exe, bin_dir
+		; include 'fs/bin/appendinto.asm'
+	; end fs_subfile
 
 	fs_subfile cat_exe, bin_dir
 		include 'fs/bin/cat.asm'
@@ -235,6 +235,7 @@ fs_file libload_lll
 end fs_file
 
 fs_file explorer_exe
+	; file 'fs/bin/explorer-rewrite/bosbin/explorer.bin'
 	file '../obj/explorer.bin'
 end fs_file
 

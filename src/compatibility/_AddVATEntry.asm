@@ -16,7 +16,11 @@ _AddVATEntry:
 	jr c,.dont_write_length
 	cp a,ti.GDBObj
 	ccf
-	jp c,.fail ; fail on unknown variable types for now
+	jr nc,.maybe_write_length
+; fail on unknown variable types for now
+	pop hl
+	scf
+	ret
 .maybe_write_length:
 	ex hl,de
 	call ti.ChkInRam
@@ -99,19 +103,21 @@ _AddVATEntry:
 	ld bc,bottom_of_malloc_RAM
 	or a,a
 	sbc hl,bc ;ptr - bottom_of_malloc_RAM
-	jr c,.fail
+	jr nc,.ptr_is_valid
+	pop hl
+	ret
+.ptr_is_valid:
 	add hl,bc
 	ld c,5
 	call ti._ishru
 	ld bc,malloc_cache ;index the malloc cache
 	add hl,bc ;hl now points to 8-bit malloc cache entry
 	ld a,(hl)
-	or a,a
-	scf
-	jr nz,.fail
-	ccf
-.fail:
+	or a,a ; unset the carry flag
 	pop hl
+	ccf ; set the carry flag
+	ret nz
+	ccf ; unset the carry flag
 	ret
 
 

@@ -4,20 +4,7 @@
 cmd_exe_main:
 	ld hl,-29
 	call ti._frameset
-	; ld hl,str_CmdConfigFile
-	; push hl
-	; call bos.fs_GetFilePtr
-	; pop de
-	; ld de,cmd_config_data_struct
-	; push de,hl,bc
-	; syscall _loadConfigData
-	; pop bc,bc,bc
-	xor a,a
-	sbc hl,hl
-	ld (ix-10),a
-	ld (ix-6),hl
-	ld (ix-9),hl
-	ld (ix-16),hl
+	call cmd_exe_init
 	ld hl,(ix+6)
 	ld bc,(ix+9)
 	push bc,hl
@@ -73,7 +60,28 @@ cmd_print_help_info:
 	call bos.gui_PrintLine
 	jq cmd_exit_retzero
 
+cmd_exe_init:
+	; ld hl,str_CmdConfigFile
+	; push hl
+	; call bos.fs_GetFilePtr
+	; pop de
+	; ld de,cmd_config_data_struct
+	; push de,hl,bc
+	; syscall _loadConfigData
+	; pop bc,bc,bc
+	xor a,a
+	sbc hl,hl
+	ld (ix-10),a
+	ld (ix-6),hl
+	ld (ix-9),hl
+	ld (ix-16),hl
+	ret
+
 ;execute argument as if from command line if argument passed
+cmd_execute_next_line.entry:
+	ld hl,-29
+	call ti._frameset
+	call cmd_exe_init
 cmd_execute_next_line:
 .loop:
 	ld hl,(ti.endPC)
@@ -440,6 +448,8 @@ cmd_exit:
 	pop ix
 	ret
 
+; input hl pointer to line
+; output hl pointer to character following EOL, replacing the EOL with NULL
 cmd_terminate_line:
 	xor a,a
 	ld (ix-20),a
@@ -452,6 +462,8 @@ cmd_terminate_line:
 	jr z,.eol
 	cp a,$A
 	jr z,.eol
+	; cp a,'>'
+	; jr z,.eol
 	inc hl
 	cp a,$5C ;backslash
 	jr nz,.loop
@@ -468,6 +480,8 @@ cmd_get_arguments.inc_twice:
 	inc hl
 cmd_get_arguments.loop:
 	inc hl
+; input hl pointer to first char of argument string
+; output hl pointer to character following EOL, replacing spaces (outside of quotes) with NULL
 cmd_get_arguments:
 	ld a,(hl)
 	or a,a
@@ -476,24 +490,43 @@ cmd_get_arguments:
 	ret z
 	cp a,$A
 	ret z
-	cp a,$5C ;backslash
+	cp a,'"'
+	jr z,.process_quotes
+	cp a,$27 ; single quote
+	jr z,.process_quotes
+	cp a,$5C ; backslash
 	jr z,.inc_twice
 	cp a,' '
 	jr nz,.loop
 	ld (hl),0
+.done:
 	inc hl
 	ret
 
-cmd_config_data_struct:
-	db "BTBG", 0
-	dl bos.lcd_text_bg
-	db "BTFG", 0
-	dl bos.lcd_text_fg
-	db "BTFG2", 0
-	dl bos.lcd_text_fg2
-	db "BBGC", 0
-	dl bos.lcd_bg_color
-	db 0
+.process_quotes:
+	ld c,a
+	dec hl
+.process_quotes_loop:
+	inc hl
+	ld a,(hl)
+	or a,a
+	jr z,.done
+	cp a,$5C ; backslash
+	jr z,.process_quotes_loop ; handle escaped characters
+	cp a,c
+	jr nz,.process_quotes_loop
+	jr .loop
+
+; cmd_config_data_struct:
+	; db "BTBG", 0
+	; dl bos.lcd_text_bg
+	; db "BTFG", 0
+	; dl bos.lcd_text_fg
+	; db "BTFG2", 0
+	; dl bos.lcd_text_fg2
+	; db "BBGC", 0
+	; dl bos.lcd_bg_color
+	; db 0
 
 cmd_help_info:
 	db " cmd cmds",$A,$9,"run command(s) but exit if one returns an error",$A
@@ -501,9 +534,9 @@ cmd_help_info:
 	db " cmd -i cmds",$A,$9,"run commands(s), ignoring all errors",$A
 	db " cmd -x file",$A,$9,"run a command file",$A,0
 
-str_system_path:
-	db "/bin/"
-.len:=$-.
+; str_system_path:
+	; db "/bin/"
+; .len:=$-.
 str_ProgramFailedWithCode:
 	db "Error Code ",0
 str_CouldNotLocateExecutable:

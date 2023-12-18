@@ -1,17 +1,17 @@
 ; ----------------------
 ; Edited specifically for BOS and is *not* for generic use
 
-macro os_private
+macro os_private baseaddr:$020000
 	local os
 	element os.base
-	os.start = $020000
+	os.start = baseaddr
  	macro os_rom?
 		macro end?.os_rom?
 			os.end = $
 			os.size = $-$$
 			load os.full_code:$-$$ from $$
 			end virtual
-			virtual at $020000
+			virtual at os.start
 				db $80,$0F
 				dd (os.end-$20006) bswap dword
 				db $80,$12,$13,$00
@@ -37,7 +37,7 @@ macro os_private
 			end virtual
 			purge end?.os_rom?
 		end macro
-		virtual at $020108
+		virtual at os.start + $108
 	end macro
 	
 	macro os_create? final_sector
@@ -99,6 +99,7 @@ end if
 
 		assume	adl = 0
 
+if defined INSTALLER8XP
 .unlock:
 		ld	a,$8c
 		out0	($24),a
@@ -117,7 +118,7 @@ end if
 		ld	a,$88
 		out0	($24),a
 		ret.l
-
+end if
 		assume adl = 1
 ;		jp	0
 

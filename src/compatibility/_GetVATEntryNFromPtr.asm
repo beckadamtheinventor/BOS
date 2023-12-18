@@ -31,8 +31,8 @@ _GetVATEntryNFromPtr:
 	ex (sp),hl
 	inc hl
 	ex (sp),hl
-	ld a,(iy-7)
 	lea iy,iy-7
+	ld a,(iy)
 	or a,a
 	jr z,.fail
 	ld b,a
@@ -40,15 +40,15 @@ _GetVATEntryNFromPtr:
 	dec iy
 	djnz .skip_name_loop
 	jr .loop
-.fail:
-	pop hl
-	sbc hl,hl
-	jr .finished
 .return_this:
 	add hl,de
 	add hl,bc
 	ex hl,de
 	pop hl
+	db $01 ; ld bc,...
+.fail:
+	pop hl
+	sbc hl,hl
 .finished:
 	ld iy,ti.flags
 	ret

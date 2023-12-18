@@ -155,6 +155,8 @@ osrt.int_to_hexstr.incloop:
 osrt.int_to_hexstr.loop:
 	call osrt.byte_to_hexstr
 	djnz osrt.int_to_hexstr.loop
+	xor a,a
+	ld (de),a
 	ret
 
 ; input hl pointer to input

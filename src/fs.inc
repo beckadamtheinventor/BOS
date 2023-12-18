@@ -57,4 +57,5 @@ include 'fs/WriteDirectly.asm'
 include 'fs/WriteByte.asm'
 include 'fs/WriteFile.asm'
 include 'fs/WriteNewFile.asm'
+include 'fs/GetFDAttr.asm'
 

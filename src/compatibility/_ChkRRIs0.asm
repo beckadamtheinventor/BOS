@@ -1,21 +1,17 @@
 
+_ChkBCIs0:
+	push bc
+	db $3E
+_ChkDEIs0:
+	push de
+	db $3E
 _ChkHLIs0:
-	call _SetAToHLU
+	push hl
+.entry:
+	inc sp
+	pop af
+	dec sp
 	or a,l
 	or a,h
 	ret
-
-_ChkDEIs0:
-	call _SetAToDEU
-	or a,e
-	or a,d
-	ret
-
-_ChkBCIs0:
-	call _SetAToBCU
-	or a,c
-	or a,b
-	ret
-
-	
 
