@@ -2,13 +2,14 @@
 ;@INPUT int util_Zx7Compress(void *dest, void *src, int len, void (*progress_callback)(int src_offset));
 ;@OUTPUT length in bytes written to dest.
 util_Zx7Compress:
-	ld hl,-29
+	ld hl,-39
 	call ti._frameset
 	ld hl,(ix+9)
-	ld bc,(ix+6)
-	ld de,(ix+3)
+	ld bc,(ix+12)
+	ld de,(ix+6)
 	ld (ix-3),hl
-	ld (ix-23),$80
+	ld (ix-23),0
+	ld (ix-39),9
 	ld a,(hl)
 	ld (de),a
 	inc de
@@ -16,81 +17,117 @@ util_Zx7Compress:
 	inc de
 	inc hl
 	dec bc
-.compressloop:
+	ld (ix-6),hl
 	ld (ix-32),de
 	ld (ix-26),bc
-	ld (ix-6),hl
-	call .locatepattern
-	ld hl,(ix-6)
-	ld de,(ix-32)
+.compressloop:
+	call .locate_pattern
+	call .write_pattern_or_literal
 	ld bc,(ix-26)
-	cpi
-	jp pe,.compressloop
+	ld a,(ix+2-26)
+	or a,b
+	or a,c
+	jr nz,.compressloop
+
+	scf
+	call .write_bit
+	ld b,16
+.terminus_loop:
+	or a,a
+	call .write_bit
+	djnz .terminus_loop
+	scf
+	call .write_bit
+
+	ld hl,(ix-32)
+	ld bc,(ix+6)
+	or a,a
+	sbc hl,bc
 	ld sp,ix
 	pop ix
 	ret
 
-.locatepattern:
+.locate_pattern:
+	ld hl,(ix-6)
 	ld a,(hl)
 	dec hl
-	ld (ix-9),hl
+	; ld (ix-9),hl
+	push hl
 	ld hl,$090000
 	ld (ix-12),hl
-	ld l,1
+;	ld hl,1
+	mlt hl
+	inc l
 	ld (ix-15),hl
 	ld (ix-18),hl
 
-	ld hl,(ix-9)
+	; ld hl,(ix-9)
+	pop hl
 	ld de,(ix-3)
+	or a,a
 	sbc hl,de
 	push hl
-	pop bc
-	add hl,de
-.locatepatternloop:
-	cpdr
-	jp po, .locatedliteral
 	push hl
-	pop iy
-	ld de,(ix-6)
-	push bc
-	ld hl,(ix-6)
-	ld bc,$010000
+	ld bc,2176
+	or a,a
+	sbc hl,bc
+	pop hl
+	pop bc
+	inc bc
+	jr c,.under_max_offset
+	ld bc,2176
+.under_max_offset:
+	add hl,de
+.locate_pattern_loop:
+	cpdr
+	ret po
+	ld (ix-35),hl
+	ld (ix-38),bc
+	inc hl
+.located_pattern:
+	ld iy,(ix-6) ; read ptr
+	push hl
+	pop de
+	ld bc,65536 ; max offset
 	add hl,bc
 	ld bc,(ix-26)
-.patterncheckloop:
+.pattern_check_loop:
 	dec bc
 	ld a,b
 	or a,c
-	jr z,.donepatternloop
+	jr z,.done_pattern_loop
 	sbc hl,de
 	add hl,de
-	jr nc,.donepatternloop
+	jr c,.done_pattern_loop
 	inc de
 	inc iy
 	ld a,(de)
 	cp a,(iy)
-	jr z,.patterncheckloop
-.donepatternloop:
-	ex hl,de
+	jr z,.pattern_check_loop
+.done_pattern_loop:
+	lea hl,iy
 	ld de,(ix-6)
-	sbc hl,de ; hl = pattern length
+	scf
+	sbc hl,de ; hl = pattern length - 1
 	ld (ix-29),hl
-	dec hl
+	ld a,h
+	or a,l
+	ret z
 	ld a,10
-.costloop:
+.cost_loop:
 	add a,2
 	rr h
 	rr l
-	jr nz,.costloop
+	jr nz,.cost_loop
 	lea hl,iy
 	or a,a
 	sbc hl,de ; hl = pattern offset
 	push hl
 	ld de,129
 	sbc hl,de
-	jr c,.offsetunder128
+	jr c,.offset_under_128
 	add a,4
-.offsetunder128:
+.offset_under_128:
 	; divide cost by length
 	; TODO: optimize this somehow
 	ld h,a
@@ -100,52 +137,85 @@ util_Zx7Compress:
 	add hl,hl
 	djnz .shift_up_8_loop
 	ld bc,(ix-29)
-	call ti._idivu
+	inc bc
+	call ti._idvrmu
+	ex de,hl
 	ld bc,(ix-12) ; pattern length
 	or a,a
 	sbc hl,bc
 	add hl,bc
-	jr nc,.dontsetcost
+	jr nc,.dont_set_cost
 	ld (ix-12),hl ; cost
 	ld hl,(ix-29)
+	inc hl
 	ld (ix-15),hl ; length
 	pop hl
 	ld (ix-18),hl ; offset
 	db $3e ; ld a,... dummify pop bc
-.dontsetcost:
-	pop bc,bc
-	jp .locatepatternloop
+.dont_set_cost:
+	pop bc
+	ld hl,(ix-35)
+	ld bc,(ix-38)
+	jp .locate_pattern_loop
 
-.locatedliteral:
+.write_literal:
+	ld de,(ix-32)
+	call .write_zero_bit
+	ld hl,(ix-6)
+	ld a,(hl)
+	inc hl
+	ld (ix-6),hl
+	ld (de),a
+	inc de
+	ld (ix-32),de
+	ld hl,(ix-26)
+	dec hl
+	ld (ix-26),hl
+	ret
+
+.write_pattern_or_literal:
 	ld hl,(ix-12)
 	ld bc,$090000
 	xor a,a
 	sbc hl,bc
 	add hl,bc
-	jr nc,.writeliteral ; write literal if it's more efficient
+	jr nc,.write_literal ; write literal if it's more efficient
+	scf
+	call .write_bit
 	ld hl,2
 	ld bc,(ix-15) ; length
 	dec bc
-.writezerobitsloop:
-	call .writezerobit
+.write_zero_bits_loop:
+	call .write_zero_bit
 	add hl,hl
+	scf
 	sbc hl,bc
 	add hl,bc
-	jr c,.writezerobitsloop
-	ex hl,de
+	jr c,.write_zero_bits_loop
+	ld b,h
+	ld c,l
 	ld hl,(ix-15) ; length
 	dec hl
-.writelengthbitsloop:
-	rr d
-	rr e
-	sbc hl,de
-	add hl,de
-	jr z,.donewritinglengthbits
-	jr c,.writelengthbitsloop
-	or a,1
-	call .writebit
-	jr .writelengthbitsloop
-.donewritinglengthbits:
+.write_length_bits_loop:
+	or a,a
+	rr b
+	rr c
+	ld a,b
+	or a,c
+	jr z,.done_writing_length_bits
+	ld a,b
+	and a,h
+	ld e,a
+	ld a,c
+	and a,l
+	or a,e
+	scf
+	jr nz,._write_1_bit
+	ccf
+._write_1_bit:
+	call .write_bit
+	jr .write_length_bits_loop
+.done_writing_length_bits:
 	ld hl,(ix-18) ; offset
 	dec hl
 	ld de,128
@@ -158,14 +228,15 @@ util_Zx7Compress:
 	ld (de),a
 	inc de
 	ld (ix-32),de
-	ret
-
-.writeliteral:
-	ld c,a
-	call .writezerobit
-	ld a,c
-	ld (de),a
-	inc de
+.finished_writing_pattern:
+	ld bc,(ix-15)
+	ld hl,(ix-6)
+	add hl,bc
+	ld (ix-6),hl
+	ld hl,(ix-26)
+	or a,a
+	sbc hl,bc
+	ld (ix-26),hl
 	ret
 
 .write_offset_over_128:
@@ -178,10 +249,11 @@ util_Zx7Compress:
 	ld (ix-32),de
 	ld bc,1024
 .write_offset_over_128_loop:
-	or a,1
+	or a,a
 	sbc hl,bc
 	jr c,.write_offset_over_128_loop_dont_write_bit
-	call .writebit
+	scf
+	call .write_bit
 	db $3E ; dummify next instruction
 .write_offset_over_128_loop_dont_write_bit:
 	add hl,bc
@@ -189,7 +261,7 @@ util_Zx7Compress:
 	jr nz,.write_offset_over_128_loop_dontexit
 	jr c,.write_offset_over_128_loop_dontexit
 	bit 7,c
-	ret z
+	jr z,.finished_writing_pattern
 	; jr z,.write_offset_over_128_loop_exit
 .write_offset_over_128_loop_dontexit:
 	rr c
@@ -197,22 +269,19 @@ util_Zx7Compress:
 ; .write_offset_over_128_loop_exit:
 	; ret
 
-.writebit:
-	jr z,.writezerobit
+.write_zero_bit:
+	or a,a
+.write_bit:
+	sla (ix-23)
+	dec (ix-39)
+	ret nz
 	ld a,(ix-23)
-	ld iy,(ix-22)
-	or a,(iy)
-	ld (iy),a
-.writezerobit:
-	rr (ix-23)
-	ret nc
-	ld a,(ix-23)
-	ld (ix-22),de
+	ld de,(ix-22)
 	ld (de),a
+	ld (ix-39),8
 	ld de,(ix-32)
 	ld (ix-22),de
 	inc de
 	ld (ix-32),de
-	ld (ix-23),$80
 	ret
 

@@ -2,7 +2,8 @@
 	jr _zx7_main
 	db "FEX",0
 _zx7_main:
-	call ti._frameset0
+	ld hl,-9
+	call ti._frameset
 	call osrt.argv_1 ; mode argument -> HL
 	ld a,(hl)
 	cp a,'-' ; check argument starts with a hyphen
@@ -23,6 +24,7 @@ _zx7_main:
 	ld hl,.file_not_found_str
 .error_print:
 	call bos.gui_PrintLine
+.return_neg_1:
 	scf
 .return_cf:
 	sbc hl,hl
@@ -116,11 +118,30 @@ _zx7_main:
 	cp a,'c' ; check if requesting compression
 	jp nz,.display_info ; if not, display usage info
 
+; compress
 	call osrt.argv_2 ; source file argument -> HL
 	push hl
 	call bos.fs_GetFilePtr ; grab source file data pointer (HL) length (BC) and properties (A)
 	jp c,.file_not_found ; fail if file was not found
-	pop de
+	ld (ix-9),bc ; save original file length
+	ex (sp),hl
+	push bc,hl
+	call bos.sys_GetExecTypeFD ; check what kind of file we're compressing
+	ld hl,(hl)
+	ex hl,de
+	db $21, "REX"
+	or a,a
+	sbc hl,de
+	ld hl,.header_zx7
+	ld bc,.header_zx7.len
+	jr nz,.compress_generic
+	ld hl,.header_crx
+	ld bc,.header_crx.len
+.compress_generic:
+	ld (ix-3),hl
+	ld (ix-6),bc
+	pop de,bc,hl
+	
 
 	push hl,bc ; save source file data pointer, length
 
@@ -143,22 +164,61 @@ _zx7_main:
 	call bos.util_Zx7Compress ; returns HL = compressed length
 	pop de,bc,bc,bc ; pop compressed data pointer, source pointer, source length, callback
 	pop bc ; restore file descriptor
-	push de,bc,hl ; push compressed data pointer, file descriptor, compressed length
+	push de,bc ; push compressed data pointer, file descriptor
+	ld bc,(ix-6)
+	add hl,bc
+	inc hl
+	inc hl
+	push hl ; push compressed length + header length + decompressed length word
 	call bos.fs_SetSize ; resize the output file
 	jp c,.failed_to_create_file ; fail if failed to resize
-	pop bc,hl,de ; pop compressed length, file descriptor, compressed data pointer
-	push hl ; push file descriptor
+	pop bc,de,de ; pop compressed length, old file descriptor, compressed data pointer
+	push hl ; push file descriptor from fs_SetSize
 
 .write_file_entry:
-	or a,a
-	sbc hl,hl
-	ex (sp),hl ; push 0 (file write offset), pop file descriptor
+; save for later
+	push bc ; push compressed data length
+	push de ; push compressed/decompressed data (file write data) (pixelShadow)
+
+; write header
+	ld bc,0
+	push bc,hl ; push file write offset, file descriptor
+	ld c,1
+	push bc ; push 8-bit value 1 (write count)
+	ld bc,(ix-6)
+	push bc ; push header length
+	ld bc,(ix-3)
+	push bc ; push header data
+	call bos.fs_Write
+	jr c,.write_error
+	pop bc,bc,bc,bc,bc
+
+; write decompressed length
+	ld bc,(ix-6)
+	push bc,hl ; push file write offset, file descriptor
+	ld bc,1
+	push bc ; push write count
+	ld c,2
+	push bc ; push write length
+	pea ix-9 ; push write data (original file length)
+	call bos.fs_Write
+	pop bc,bc,bc,bc,bc
+
+; restore from earlier
+	pop de,bc ; pop compressed data, compressed data length
+
+; write compressed data
+	push hl ; push file descriptor
+	ld hl,(ix-6)
+	inc hl
+	inc hl
+	ex (sp),hl ; push write offset, pop file descriptor
 	push hl ; push file descriptor
 	ld l,1
-	push hl ; push 8-bit value 1 (file write section count)
-	push bc ; push destination file length (file write length)
-	push de ; push compressed/decompressed data (file write data) (pixelShadow)
+	push hl ; push write count
+	push bc,de ; push compressed data length, compressed data
 	call bos.fs_Write
+	jr c,.write_error
 	pop bc,hl ; pop data, len
 	; the other values don't need to be popped, the stack pointer gets restored in the exit routine
 .success:
@@ -173,6 +233,9 @@ _zx7_main:
 	ld hl,.bytes_str
 	call bos.gui_PrintLine
 	jp .done
+.write_error:
+	ld hl,.failed_to_write_file
+	jp .error_print
 .progress_callback:
 	ret
 .info_str:
@@ -184,7 +247,15 @@ _zx7_main:
 	db "Input file has an invalid header.",0
 .failed_to_create_file_str:
 	db "Failed to create output file.",0
+.failed_to_write_file:
+	db "Failed to write to output file.",0
 .success_str:
 	db "Success. Output: ",0
 .bytes_str:
 	db "bytes.",0
+.header_crx:
+	db $18,$06,"CRX",0
+.header_crx.len:=$-.header_crx
+.header_zx7:
+	db "ZX7",0
+.header_zx7.len:=$-.header_zx7
