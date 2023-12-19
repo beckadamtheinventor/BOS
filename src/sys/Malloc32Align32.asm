@@ -3,10 +3,6 @@
 ;@OUTPUT hl = malloc'd bytes. hl = 0 if failed to malloc
 ;@OUTPUT Cf set if failed to malloc
 ;@DESTROYS All
-;@NOTE BOS's memory allocation is already 32-byte aligned
 sys_Malloc32Align32:
-	ld bc,32
-	push bc
-	call sys_Malloc
-	pop bc
-	ret
+	ld de, (32/malloc_block_size) shl 8 or (32/malloc_block_size - 1)
+	jr sys_Malloc64Align256.entry

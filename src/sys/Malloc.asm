@@ -13,21 +13,20 @@ sys_Malloc:
 	or a,a
 	sbc hl,de
 	jq z,.fail ; can't malloc 0 bytes
-	ld bc,malloc_block_size
-	call ti._idvrmu ; size to malloc / 32
 	ld a,l
-	or a,h
-	jq z,.exact_fit
-	inc de
-.exact_fit:
+	and a,-1-(malloc_block_size-1)
+	ld l,a
+	ld c,malloc_block_size_bits
+	call ti._ishru ; size to malloc / malloc_block_size
+	inc hl
+	ex hl,de
 	ld hl,malloc_cache
 	ld bc,malloc_cache_len
-	push de
 .loop:
 	xor a,a
 	cpir
 	jq z,.checklen
-	pop hl ; fail if no 0x00 (free blocks) found
+	; fail if no 0x00 (free blocks) found
 .fail:
 	or a,a
 	sbc hl,hl
@@ -36,7 +35,6 @@ sys_Malloc:
 .checklen:
 	dec hl
 	ld (ScrapMem),hl
-	pop de
 	push de
 	dec de
 	ld a,e
@@ -55,12 +53,13 @@ sys_Malloc:
 
 .found_enough:
 	ld hl,(ScrapMem)
+.return_and_mark_cache_hl:
 	ld de,-malloc_cache
 	add hl,de ; get offset from malloc_cache
 repeat malloc_block_size_bits
 	add hl,hl ; multiply by malloc_block_size
 end repeat
-	ld de,bottom_of_malloc_ram ;index malloc ram with offset*32
+	ld de,bottom_of_malloc_ram ;index malloc ram with offset*malloc_block_size
 	add hl,de
 	ex hl,de
 	ld hl,(ScrapMem)

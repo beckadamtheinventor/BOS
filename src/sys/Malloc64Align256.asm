@@ -4,12 +4,15 @@
 ;@OUTPUT Cf set if failed to malloc
 ;@DESTROYS All
 sys_Malloc64Align256:
+	ld de, (64/malloc_block_size) shl 8 or (256/malloc_block_size - 1)
+; input e = alignment mask, d = desired block size in blocks
+.entry:
 	ld hl,malloc_cache
-	ld bc,4096
+	ld bc,malloc_cache_len
 .loop:
 	xor a,a
 	cpir
-	jq z,.checklen
+	jr z,.checklen
 	pop hl ;fail if no 0x00 (free blocks) found
 .fail:
 	or a,a
@@ -19,43 +22,12 @@ sys_Malloc64Align256:
 .checklen:
 	dec hl
 	ld a,l
-	and a,256/32 - 1
+	and a,e
 	jq nz,.loop ;continue checking if found block not aligned
 	ld (ScrapMem),hl
+	ld b,d
 	inc hl
 	ld a,(hl)
 	or a,a
-	jq nz,.loop
-
-	ld de,-1 - malloc_cache ;dec hl \ ld de,-malloc_cache \ add hl,de
-	add hl,de ; get offset from malloc_cache
-	add hl,hl ; multiply by 32
-	add hl,hl
-	add hl,hl
-	add hl,hl
-	add hl,hl
-	ld de,bottom_of_malloc_RAM ;index malloc ram with offset*32
-	add hl,de
-	ex hl,de
-	ld hl,(ScrapMem)
-	ld a,(running_process_id)
-	ld (hl),a
-	inc hl
-
-	pop bc
-	dec bc
-	ld a,b
-	or a,c
-	ex hl,de
-	ret z
-	ex hl,de
-.mark_loop:
-	ld (hl),$FF
-	inc hl
-	dec bc
-	ld a,b
-	or a,c
-	jq nz,.mark_loop
-	ex hl,de
-	ret
-
+	jr nz,.loop
+	jr sys_Malloc.return_and_mark_cache_hl
