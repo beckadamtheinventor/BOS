@@ -9,7 +9,7 @@ util_Zx7Compress:
 	ld de,(ix+6)
 	ld (ix-3),hl
 	ld (ix-23),0
-	ld (ix-39),9
+	ld (ix-39),8
 	ld a,(hl)
 	ld (de),a
 	inc de
@@ -38,6 +38,10 @@ util_Zx7Compress:
 	djnz .terminus_loop
 	scf
 	call .write_bit
+	
+.shift_final_byte:
+	call .write_zero_bit
+	jr nz,.shift_final_byte
 
 	ld hl,(ix-32)
 	ld bc,(ix+6)

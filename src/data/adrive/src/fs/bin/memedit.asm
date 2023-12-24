@@ -8,20 +8,17 @@ org ti.userMem
 	jr mem_edit
 	db "REX",0
 mem_edit:
-	call libload_load
-	ret nz
 	ld hl,-20
 	call ti._frameset
 	xor a,a
 	ld (ix-12),a
 mem_edit_main:
-	call gfx_ZeroScreen
-	ld hl,$D40000
+	ld a,(bos.lcd_bg_color)
+	call bos.gfx_BufClear
+	ld hl,bos.LCD_VRAM
 	ld (ti.mpLcdUpbase),hl
-	ld c,1
-	push bc
-	call gfx_SetDraw
-	pop bc
+	ld hl,bos.LCD_BUFFER
+	ld (bos.cur_lcd_buffer),hl
 	ld a,(ix+6)
 	dec a
 	jr z,.run_readme
@@ -144,8 +141,8 @@ mem_edit_main:
 	ld hl,$D00000
 .init_editor:
 	ld (ix-3),hl
-	call gfx_ZeroScreen
-	xor a,a
+	ld a,(bos.lcd_bg_color)
+	call bos.gfx_BufClear
 	sbc hl,hl
 	ld (ix-6),hl
 	ld (ix-7),a
@@ -184,7 +181,6 @@ mem_edit_main:
 ; main editor draw code
 .main_draw:
 	call .clearscreen
-	call _setdefaultcolors
 	ld bc,(ix-3)
 	push bc
 	or a,a
@@ -200,9 +196,9 @@ mem_edit_main:
 	call _print24h
 	pop hl
 	ld a,3
-	ld (currow),a
+	ld (bos.currow),a
 	xor a,a
-	ld (curcol),a
+	ld (bos.curcol),a
 	ld c,16
 .outer:
 ;draw hex
@@ -213,7 +209,7 @@ mem_edit_main:
 	inc hl
 	push hl,bc
 	call _print8h
-	ld hl,curcol
+	ld hl,bos.curcol
 	inc (hl)
 	pop bc,hl
 	djnz .inner
@@ -229,25 +225,23 @@ mem_edit_main:
 	call _printc
 	jq .printed_c
 .dont_print_c:
-	ld hl,curcol
+	ld hl,bos.curcol
 	inc (hl)
 .printed_c:
 	pop bc,de
 	djnz .inner2
 ;advance to next row
-	ld hl,currow
+	ld hl,bos.currow
 	inc (hl)
 	ex hl,de
 	xor a,a
-	ld (curcol),a
+	ld (bos.curcol),a
 	dec c
 	jq nz,.outer
 ;draw cursor
-	or a,a
-	sbc hl,hl
 	ld a,(ix-7) ;cursor offset
 	call .lcd_ptr_from_cursor
-	ld bc,320*9
+	ld bc,320*8 ; draw 8 rows below text coordinates
 	add hl,bc
 	ld bc,14
 	ld (hl),$37
@@ -255,6 +249,34 @@ mem_edit_main:
 	pop de
 	inc de
 	ldir
+; draw info on the currently selected byte
+	or a,a
+	sbc hl,hl
+	ld l,(ix-7)
+	ld de,(ix-3) ; edit address
+	add hl,de
+	ld e,(hl) ; value of selected byte
+	ld d,1
+	mlt de
+	ld hl,bos.currow
+	ld (hl),21 ; row
+	inc hl
+	ld (hl),1 ; column
+	ex hl,de
+	push hl
+	call bos.gui_PrintUInt
+	ld a,'|'
+	call bos.gui_PrintChar
+	pop hl
+	ld h,8
+.draw_bits_loop:
+	xor a,a
+	rlc l
+	adc a,'0'
+	call bos.gui_PrintChar
+	dec h
+	jr nz,.draw_bits_loop
+	
 ;draw end of file marker if we're editing a file and it's in view
 	ld a,(ix-12)
 	or a,a
@@ -317,7 +339,7 @@ mem_edit_main:
 	inc de
 	ldir
 .done_drawing:
-	call gfx_BlitBuffer
+	call bos.gfx_BlitBuffer
 .keys:
 	call bos.sys_WaitKey
 	ld c,(ix-7)
@@ -356,7 +378,7 @@ mem_edit_main:
 	call getnibble
 	jq nz,.keys
 	push bc
-	call gfx_BlitBuffer
+	call bos.gfx_BlitBuffer
 	call bos.sys_WaitKeyCycle
 	call getnibble
 	pop de
@@ -384,8 +406,9 @@ mem_edit_main:
 edited_file:=$-1
 	or a,a
 	call nz,.write_file
-	call gfx_ZeroScreen
-	call gfx_BlitBuffer
+	ld a,(bos.lcd_bg_color)
+	call bos.gfx_BufClear
+	call bos.gfx_BlitBuffer
 	ld sp,ix
 	pop ix
 	xor a,a
@@ -455,14 +478,14 @@ edited_file:=$-1
 	ret c
 .getaddrbyte:
 	push hl
-	call gfx_BlitBuffer
+	call bos.gfx_BlitBuffer
 	call bos.sys_WaitKeyCycle
 	call getnibble
 	jq nz,.exitaddrloop
 	ld (ix-8),c
 	ld a,c
 	call _print4h
-	call gfx_BlitBuffer
+	call bos.gfx_BlitBuffer
 	call bos.sys_WaitKeyCycle
 	call getnibble
 	jq nz,.exitaddrloop
@@ -479,7 +502,7 @@ edited_file:=$-1
 	add a,l
 	pop hl
 	ld (hl),a
-	call gfx_BlitBuffer
+	call bos.gfx_BlitBuffer
 	or a,a
 	ret
 .lcd_ptr_from_cursor:
@@ -513,14 +536,14 @@ edited_file:=$-1
 	ld a,(hl)
 	or a,a
 	ret z
-	call gfx_ZeroScreen
+	call bos.gfx_BufClear
 	ld bc,1
 	push bc,bc
 	ld hl,str_WriteFileAreYouSure
 	push hl
-	call gfx_PrintStringXY
+	call bos.gfx_PrintStringXY
 	pop bc,bc,bc
-	call gfx_BlitBuffer
+	call bos.gfx_BlitBuffer
 	call bos.sys_WaitKeyCycle
 	cp a,9
 	ret nz
@@ -549,15 +572,14 @@ edited_file:=$-1
 	ret
 .exitaddrloop:
 	pop bc
-	call gfx_BlitBuffer
+	call bos.gfx_BlitBuffer
 	scf
 	ret
 .clearscreen:
-	call gfx_ZeroScreen
 	xor a,a
-	ld (currow),a
-	ld (curcol),a
-	ret
+	ld (bos.currow),a
+	ld (bos.curcol),a
+	jp bos.gfx_BufClear
 .input_string:
 	ld hl,(ix-3)
 	ld a,(ix-7)
@@ -621,21 +643,6 @@ getnibble:
 	ld bc,16
 	cpdr
 	ret
-_setdefaultcolors:
-	ld c,0
-	push bc
-	call gfx_SetTextTransparentColor
-	call gfx_SetTextBGColor
-	pop bc
-	ld c,$FF
-	push bc
-	call gfx_SetTextFGColor
-	pop bc
-	ld c,$07
-	push bc
-	call gfx_SetColor
-	pop bc
-	ret
 
 _print8h:
 	push af
@@ -678,9 +685,8 @@ _printc:
 	ld hl,temp_byte_str
 	ld (hl),a
 _print:
-	ld (.str),hl
-	ld a,0
-currow:=$-1
+	ex hl,de
+	ld a,(bos.currow)
 	ld c,a
 	add a,a
 	add a,a
@@ -690,27 +696,27 @@ currow:=$-1
 	sbc hl,hl
 	ld l,a
 	push hl
-	ld hl,0
-curcol:=$-3
+	ld a,(bos.curcol)
+	or a,a
+	sbc hl,hl
+	ld l,a
 	push hl
 	add hl,hl
 	add hl,hl
 	add hl,hl
-	pop de
-	add hl,de
+	pop bc
+	add hl,bc
 	push hl
-	ld hl,0
-.str:=$-3
-	push hl
-	call gfx_PrintStringXY
+	push de
+	call bos.gfx_PrintStringXY
 	pop bc,bc,bc
-	ld hl,curcol
+	ld hl,bos.curcol
 	inc (hl)
 	ret
 
 mem_edit_readme:
-	call _setdefaultcolors
-	call gfx_ZeroScreen
+	ld a,(bos.lcd_bg_color)
+	call bos.gfx_BufClear
 	ld hl,readme_strings
 .loop:
 	push hl
@@ -720,8 +726,8 @@ mem_edit_readme:
 	jq z,.exit
 	call _print
 	xor a,a
-	ld (curcol),a
-	ld hl,currow
+	ld (bos.curcol),a
+	ld hl,bos.currow
 	inc (hl)
 	pop hl
 	inc hl
@@ -730,7 +736,7 @@ mem_edit_readme:
 	jq .loop
 .exit:
 	pop bc
-	call gfx_BlitBuffer
+	call bos.gfx_BlitBuffer
 	jq bos.sys_WaitKeyCycle
 
 str_WriteFileAreYouSure:
@@ -750,63 +756,3 @@ readme_strings:
 ._11: db "usage: memedit $xxxxxx : start at address",0
 ._12: db "memedit [file path] : open a file",0
 ._13: db "Press any key to continue.",0
-
-libload_load:
-	ld hl,.libload_name
-	push hl
-	call bos.fs_OpenFile
-	pop bc
-	jq c,.notfound
-	ld bc,$0C
-	add hl,bc
-	ld hl,(hl)
-	push hl
-	call bos.fs_GetSectorAddress
-	pop bc
-	ld   de,libload_relocations
-	ld   bc,.notfound
-	push   bc
-	ld   bc,$aa55aa
-	jp   (hl)
-.libload_name:
-	db "/lib/LibLoad.dll",0
-
-.notfound:
-	xor   a,a
-	inc   a
-	ret
-
-libload_relocations:
-	db	$C0, "GRAPHX", $00, 11
-gfx_Begin:
-	jp 0
-gfx_SetColor:
-	jp 6
-gfx_SetDraw:
-	jp 27
-gfx_Blit:
-	jp 33
-gfx_PrintStringXY:
-	jp 54
-gfx_SetTextBGColor:
-	jp 60
-gfx_SetTextFGColor:
-	jp 63
-gfx_SetTextTransparentColor:
-	jp 66
-gfx_HorizLine:
-	jp 93
-gfx_ZeroScreen:
-	jp 228
-
-	xor a,a
-	pop hl
-	ret
-
-gfx_BlitBuffer:
-	ld c,1
-	push bc
-	call gfx_Blit
-	pop bc
-	ret
-
