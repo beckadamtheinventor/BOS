@@ -710,7 +710,7 @@ BC X<<8 + Y</td><td></td><td></td><td>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Allocate 32 bytes of memory, 32-byte aligned.</td><td>void *sys_Malloc32Align32(void);</td><td>hl = malloc'd bytes. hl = 0 if failed to malloc<br>
 Cf set if failed to malloc</td><td></td><td>
-BOS's memory allocation is already 32-byte aligned</td></tr>
+</td></tr>
 </table></div><div id="sys_Malloc64Align256"><h1>sys_Malloc64Align256</h1>	<h3>syscall Adress 02260C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Allocate 64 bytes of memory, 256-byte aligned.</td><td>void *sys_Malloc64Align256(void);</td><td>hl = malloc'd bytes. hl = 0 if failed to malloc<br>
@@ -869,7 +869,7 @@ returns pointer to executable code in de and length of executable code in bc if 
 </table></div><div id="sys_GetExecTypeFD"><h1>sys_GetExecTypeFD</h1>	<h3>syscall Adress 0226AC</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Check the executable type of a given file descriptor</td><td>const char *sys_GetExecType(void *fd);</td><td>pointer to executable magic bytes, or -1 and Cf set if failed.</td><td></td><td>
-</td></tr>
+returns pointer to executable code in de and length of executable code in bc if hl != -1</td></tr>
 </table></div><div id="util_Zx7Compress"><h1>util_Zx7Compress</h1>	<h3>syscall Adress 0226B0</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Zx7 compress a block of memory.</td><td>int util_Zx7Compress(void *dest, void *src, int len, void (*progress_callback)(int src_offset));</td><td>length in bytes written to dest.</td><td></td><td>
