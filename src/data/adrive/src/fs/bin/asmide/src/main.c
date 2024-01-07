@@ -5,30 +5,6 @@
 
 #include <bos.h>
 
-const char *ASM_DEF_FILE = "/opt/asmide/ASMIopc.dat";
-
-/*
-const char *ASM_DEF_FILE = "ASMIopc.dat";
-const char *SHARED_VAR = "SHARE";
-*/
-
-typedef uint8_t argument_t;
-
-#define ARG_OFFSET       3 << 0 // offset of argument byte (discounting first opcode byte)
-#define ARG_BYTE         1 << 2
-#define ARG_WORD         1 << 3
-#define ARG_RELBYTE      1 << 4
-#define ARG_IXY_OFFSET   1 << 5
-
-typedef struct __AsmOpcodeData_t {
-	argument_t argument; // opcode argument length and type
-	uint8_t opcode[4]; // opcode bytes (4 bytes)
-	char opcstring[]; // null-terminated opcode string
-} AsmOpcodeData_t;
-
-
-AsmOpcodeData_t *OpcodeData[256*5];
-
 
 int main(int argc, char *argv[]) {
 	void *fd;

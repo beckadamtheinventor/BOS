@@ -45,6 +45,7 @@ fs_dir bin_dir
 	; fs_sfentry appendinto_exe, ">>", "", f_system+f_subfile
 	fs_sfentry continuecmd_exe, "@cmd", "", f_system+f_subfile
 	fs_entry argv_so, "argv", "so", f_system
+	fs_sfentry asmcomp_exe, "asmcomp", "", f_system+f_subfile
 	fs_sfentry cat_exe, "cat", "", f_system+f_subfile
 	fs_sfentry cd_exe, "cd", "", f_system+f_subfile
 	fs_sfentry cmd_exe, "cmd", "", f_system+f_subfile
@@ -209,6 +210,10 @@ fs_file os_internal_subfiles
 
 	fs_subfile zx7_exe, bin_dir
 		include 'fs/bin/zx7.asm'
+	end fs_subfile
+
+	fs_subfile asmcomp_exe, bin_dir
+		include 'fs/bin/asmcomp.asm'
 	end fs_subfile
 
 	; fs_subfile json_exe, bin_dir
