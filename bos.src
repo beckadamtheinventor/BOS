@@ -173,6 +173,11 @@
 	public _sys_OpenRecoveryMenu
 	public _util_Relocate
 	public _fs_GetFDAttr
+	public _util_InitAllocSymList
+	public _util_AppendSymList
+	public _util_RemoveFromSymList
+	public _util_SearchSymList
+	public _util_FreeSymList
 _boot_os                         := $20108
 _handle_interrupt                := $2010C
 _HandleInstruction               := $20110
@@ -346,6 +351,11 @@ _util_Zx7Compress                := $226B0
 _sys_OpenRecoveryMenu            := $226B4
 _util_Relocate                   := $226B8
 _fs_GetFDAttr                    := $226BC
+_util_InitAllocSymList           := $226C0
+_util_AppendSymList              := $226C4
+_util_RemoveFromSymList          := $226C8
+_util_SearchSymList              := $226CC
+_util_FreeSymList                := $226D0
 
 public ram_executable
 public ram_executable_at

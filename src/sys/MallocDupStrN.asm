@@ -12,4 +12,4 @@ sys_MallocDupStrN:
 	ex (sp),hl
 	pop bc
 	push de
-	jq sys_MallocDupStr.__malloc_string
+	jq sys_MallocDupStr._malloc_hl_plus_1

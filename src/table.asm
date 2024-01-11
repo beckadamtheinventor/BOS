@@ -185,4 +185,9 @@
 	jp sys_OpenRecoveryMenu
 	jp util_Relocate
 	jp fs_GetFDAttr
+	jp util_InitAllocSymList
+	jp util_AppendSymList
+	jp util_RemoveFromSymList
+	jp util_SearchSymList
+	jp util_FreeSymList
 ; end of jump table

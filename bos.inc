@@ -491,6 +491,11 @@ namespace bos
 ?sys_OpenRecoveryMenu            := $226B4
 ?util_Relocate                   := $226B8
 ?fs_GetFDAttr                    := $226BC
+?util_InitAllocSymList           := $226C0
+?util_AppendSymList              := $226C4
+?util_RemoveFromSymList          := $226C8
+?util_SearchSymList              := $226CC
+?util_FreeSymList                := $226D0
 ; end of jump table
 ;-------------------------------------------------------------------------------
 ; OS memory areas and misc defines
@@ -711,5 +716,12 @@ namespace bos
 ?bReturnLong          := 2
 ?bSilentReturn        := 3
 ?bReturnData          := 4
+?symbol.next         := 0 ; 24-bit pointer to next symbol. 0 if end of list.
+?symbol.name         := 3 ; 24-bit pointer to null terminated symbol name
+?symlist.size        := 6 ; size of first symbol in symbol list
+?symbol.flags        := 6 ; 8-bit symbol flag byte
+?symbol.value        := 7 ; 24-bit symbol value
+?symbol.entry_size   := 10
+?symbol.end          := 0
 
 end namespace

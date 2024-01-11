@@ -7,7 +7,7 @@ sys_MallocDupStr:
 .entryhl:
 	push hl
 	call ti._strlen
-.__malloc_string:
+._malloc_hl_plus_1:
 	inc hl
 	push hl
 	call sys_Malloc.entryhl; malloc the new string, accounting for the null terminator.
