@@ -2,6 +2,9 @@
 	jr _asmcomp_exe
 	db "FEX", 0
 _asmcomp_exe:
+	scf
+	sbc hl,hl
+	ld (hl),2
 	ld hl,-25
 	call ti._frameset
 	ld a,(ix+6)
@@ -68,7 +71,7 @@ _asmcomp_exe:
 	jr z,.success
 	ld a,(iy+.j_addr+2)
 	cp a,$80
-	jr z,.undefined_label
+	jq z,.undefined_label
 	ld hl,(iy+.j_sym)
 repeat .j_addr
 	inc hl
@@ -76,18 +79,63 @@ end repeat
 	ld de,(hl)
 	ld hl,(iy+.j_addr)
 	ld a,(iy+.j_size)
+	bit 7,a
+	jr z,.finalize_loop_not_offset
+	; negate value to be written
+	push hl
+	or a,a
+	sbc hl,hl
+	sbc hl,de
+	ex hl,de
+	pop hl
+	res 7,a
+.finalize_loop_not_offset:
 	cp a,3
 	jr nc,.finalize_write_long
 	ld (hl),e
 	dec a
-	jr z,.finalize_loop
+	jr z,.finalize_loop_check_range_1
 	inc hl
 	ld (hl),d
 	jr .finalize_loop
 .finalize_write_long:
 	ld (hl),de
 	jr .finalize_loop
+.finalize_loop_check_range_1:
+	push hl
+	push de
+	pop hl
+	or a,a
+	adc hl,hl
+	jr nc,.finalize_loop_check_range_1_over_0
+	ccf
+	sbc hl,hl
+	sbc hl,de
+.finalize_loop_check_range_1_over_0:
+	ld de,$100
+	or a,a
+	sbc hl,de
+	jq c,.finalize_loop
+	ld hl,.str_error_range
+	call bos.gui_PrintLine
+	ld hl,3
+	jr .exit_hl
 .success:
+	ld bc,ti.pixelShadow
+	ld hl,(ix-9)
+	or a,a
+	sbc hl,bc
+	push hl,bc
+	call osrt.argv_2
+	push hl
+	call bos.fs_WriteNewFile
+	pop bc,bc,bc
+	jr nc,.final_success
+	ld hl,.str_failed_to_write
+	call bos.gui_PrintLine
+	ld hl,-2
+	jr .exit_hl
+.final_success:
 	ld hl,.str_success
 	call bos.gui_PrintLine
 	or a,a
@@ -318,15 +366,33 @@ end repeat
 	pop de
 	ld a,(iy+.sym_addr+2)
 	cp a,$80
-	jr nz,.add_to_resolve_later
+	jr z,.add_to_resolve_later
 	ld bc,(iy+.sym_addr)
 	ld hl,(ix-9)
 	ld (hl),bc
 	ld bc,(ix-9)
-	jr .handle_not_byte.pass_label_emit
+.handle_not_byte.pass_label_emit:
+	ld a,d
+	inc bc
+	cp a,'B'
+	jr z,.handle_not_byte.pass_label_emit.done
+	cp a,'D'
+	jr z,.handle_not_byte.pass_label_emit.done
+	inc bc
+	cp a,'W'
+	jr z,.handle_not_byte.pass_label_emit.done
+	inc bc
+	cp a,'L'
+	jq nz,.error_syntax
+.handle_not_byte.pass_label_emit.done:
+	ld (ix-9),bc
+	or a,a
+	ret
 .add_to_resolve_later:
 	ld bc,(ix-9)
 	ld hl,(ix-22)
+	push hl
+	dec hl
 	dec hl
 	dec hl
 	ld (hl),iy
@@ -336,18 +402,23 @@ end repeat
 	ld (hl),bc
 	dec hl
 	ld (ix-22),hl
-.handle_not_byte.pass_label_emit:
-	ld a,d
-	inc bc
+	call .handle_not_byte.pass_label_emit
+	pop hl
 	cp a,'B'
-	jr z,.handle_not_byte.pass_label_emit.done
-	inc bc
+	jr nz,.add_to_resolve_later.not_1
+	ld (hl),1
+.add_to_resolve_later.not_1:
 	cp a,'W'
-	jr z,.handle_not_byte.pass_label_emit.done
-	inc bc
-.handle_not_byte.pass_label_emit.done:
-	ld (ix-9),bc
-	or a,a
+	jr nz,.add_to_resolve_later.not_2
+	ld (hl),2
+.add_to_resolve_later.not_2:
+	cp a,'L'
+	jr nz,.add_to_resolve_later.not_3
+	ld (hl),3
+.add_to_resolve_later.not_3:
+	cp a,'D'
+	jq nz,.error_syntax
+	ld (hl),$81
 	ret
 .not_put_label:
 	cp a,':'
@@ -404,6 +475,12 @@ end virtual
 
 .str_error_on_line:
 	db "Error on line: ", 0
+
+.str_error_range:
+	db "Displacement value out of range", 0
+
+.str_failed_to_write:
+	db "Failed to write output", 0
 
 .str_success:
 	db "Success", 0

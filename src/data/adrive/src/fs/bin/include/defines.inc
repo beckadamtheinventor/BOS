@@ -273,3 +273,12 @@ bReturnHex           := 1
 bReturnLong          := 2
 bSilentReturn        := 3
 bReturnData          := 4
+
+; symbol defines
+symbol.next         := 0 ; 24-bit pointer to next symbol. 0 if end of list.
+symbol.name         := 3 ; 24-bit pointer to null terminated symbol name
+symlist.size        := 6 ; size of first symbol in symbol list
+symbol.flags        := 6 ; 8-bit symbol flag byte
+symbol.value        := 7 ; 24-bit symbol value
+symbol.entry_size   := 10
+symbol.end          := 0
