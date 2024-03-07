@@ -19,7 +19,7 @@ sys_Malloc:
 	ld c,malloc_block_size_bits
 	call ti._ishru ; size to malloc / malloc_block_size
 	inc hl
-	ex hl,de
+	push hl
 	ld hl,malloc_cache
 	ld bc,malloc_cache_len
 .loop:
@@ -35,6 +35,7 @@ sys_Malloc:
 .checklen:
 	dec hl
 	ld (ScrapMem),hl
+	pop de ; restore number of blocks to malloc
 	push de
 	dec de
 	ld a,e
@@ -67,7 +68,7 @@ end repeat
 	ld (hl),a
 	inc hl
 
-	pop bc
+	pop bc ; pop number of blocks to malloc off the stack
 	dec bc
 	ld a,b
 	or a,c
