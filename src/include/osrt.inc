@@ -48,4 +48,8 @@ osrt.substring        rb 4
 osrt.duplicate_string rb 4
 osrt.subsection_mem   rb 4
 osrt.duplicate_mem    rb 4
+osrt.sreadline         rb 4
+osrt.sreadlineuntil    rb 4
+osrt.sreaduntil        rb 4
+osrt.sreadidentifier   rb 4
 end virtual
