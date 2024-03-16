@@ -181,6 +181,16 @@
 <tr><td><a href="#sys_OpenRecoveryMenu">bos.sys_OpenRecoveryMenu</a></td><td><a href="#sys_OpenRecoveryMenu">0226B4</a></td></tr>
 <tr><td><a href="#util_Relocate">bos.util_Relocate</a></td><td><a href="#util_Relocate">0226B8</a></td></tr>
 <tr><td><a href="#fs_GetFDAttr">bos.fs_GetFDAttr</a></td><td><a href="#fs_GetFDAttr">0226BC</a></td></tr>
+<tr><td><a href="#util_InitAllocSymList">bos.util_InitAllocSymList</a></td><td><a href="#util_InitAllocSymList">0226C0</a></td></tr>
+<tr><td><a href="#util_AppendSymList">bos.util_AppendSymList</a></td><td><a href="#util_AppendSymList">0226C4</a></td></tr>
+<tr><td><a href="#util_RemoveFromSymList">bos.util_RemoveFromSymList</a></td><td><a href="#util_RemoveFromSymList">0226C8</a></td></tr>
+<tr><td><a href="#util_SearchSymList">bos.util_SearchSymList</a></td><td><a href="#util_SearchSymList">0226CC</a></td></tr>
+<tr><td><a href="#util_FreeSymList">bos.util_FreeSymList</a></td><td><a href="#util_FreeSymList">0226D0</a></td></tr>
+<tr><td><a href="#sys_Exec">bos.sys_Exec</a></td><td><a href="#sys_Exec">0226D4</a></td></tr>
+<tr><td><a href="#sys_ExecV">bos.sys_ExecV</a></td><td><a href="#sys_ExecV">0226D8</a></td></tr>
+<tr><td><a href="#sys_ExecData">bos.sys_ExecData</a></td><td><a href="#sys_ExecData">0226DC</a></td></tr>
+<tr><td><a href="#sys_ExecBegin">bos.sys_ExecBegin</a></td><td><a href="#sys_ExecBegin">0226E0</a></td></tr>
+<tr><td><a href="#sys_ExecContinue">bos.sys_ExecContinue</a></td><td><a href="#sys_ExecContinue">0226E4</a></td></tr>
 </table><div id="boot_os                  "><h1>boot_os                  </h1>	<h3>syscall Adress 020108</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 </table></div><div id="handle_interrupt"><h1>handle_interrupt</h1>	<h3>syscall Adress 02010C</h3>
@@ -195,7 +205,7 @@
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 </table></div><div id="sys_ExecuteFile"><h1>sys_ExecuteFile</h1>	<h3>syscall Adress 022400</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Execute a file.</td><td>int sys_ExecuteFile(const char *path, char *args);</td><td>-1 and Cf set if file does not exist or is not a valid executable format, or if malloc failed somewhere.<br>
+<tr><td>Execute a file.</td><td>int32_t sys_ExecuteFile(const char *path, char *args);</td><td>-1 and Cf set if file does not exist or is not a valid executable format, or if malloc failed somewhere.<br>
 ExecutingFileFd set to point to file descriptor. -1 if file not found, -2 if /var/PATH not found.</td><td></td><td>
 </td></tr>
 </table></div><div id="os_GetOSInfo"><h1>os_GetOSInfo</h1>	<h3>syscall Adress 022404</h3>
@@ -594,12 +604,12 @@ If you need a routine callable from C, this is not the one you'll want to use.</
 </td></tr>
 </table></div><div id="sys_NextProcessId"><h1>sys_NextProcessId</h1>	<h3>syscall Adress 022598</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Increment the process ID.</td><td>void sys_NextProcessId(void);</td><td></td><td></td><td>
-Used for categorizing malloc'd memory</td></tr>
+<tr><td>Return the next unused process ID.</td><td>uint8_t sys_NextProcessId(void);</td><td>new process ID, or 0 if failed.</td><td></td><td>
+Used for categorizing malloc'd memory and threads.</td></tr>
 </table></div><div id="sys_PrevProcessId"><h1>sys_PrevProcessId</h1>	<h3>syscall Adress 02259C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Decrement the process ID.</td><td>void sys_PrevProcessId(void);</td><td></td><td></td><td>
-Used for categorizing malloc'd memory</td></tr>
+<tr><td>Return the next open process ID.</td><td>uint8_t sys_PrevProcessId(void);</td><td>process ID.</td><td></td><td>
+</td></tr>
 </table></div><div id="sys_FreeProcessId"><h1>sys_FreeProcessId</h1>	<h3>syscall Adress 0225A0</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Free all memory allocated by a given process ID</td><td>void sys_FreeProcessId(uint8_t id);</td><td></td><td></td><td>
@@ -615,7 +625,7 @@ DO NOT free process ID 1 since it is used by the OS and should be preserved.</td
 </table></div><div id="fs_WriteNewFile"><h1>fs_WriteNewFile</h1>	<h3>syscall Adress 0225AC</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Create and write a new file</td><td>void *fs_WriteNewFile(const char *name, uint8_t properties, void *data, int len);</td><td>HL = file descriptor. HL = -1 and Cf set if failed.</td><td></td><td>
-</td></tr>
+Will overwrite file if it exists.</td></tr>
 </table></div><div id="gfx_SetFont"><h1>gfx_SetFont</h1>	<h3>syscall Adress 0225B0</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>set the current font</td><td>void *gfx_SetFont(void *data)</td><td>HL = old font data</td><td></td><td>
@@ -626,8 +636,8 @@ data structure: uint8_t num_bitmaps, uint8_t spacing[], uint8_t data[]</td></tr>
 </td></tr>
 </table></div><div id="sys_FreeRunningProcessId"><h1>sys_FreeRunningProcessId</h1>	<h3>syscall Adress 0225B8</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Free all memory allocated by the current process ID</td><td>void sys_FreeProcessId(void);</td><td></td><td></td><td>
-Automatically called after program runs</td></tr>
+<tr><td>Free all memory allocated by the currently executing process ID.</td><td>void sys_FreeProcessId(void);</td><td></td><td></td><td>
+Automatically called after program exits.</td></tr>
 </table></div><div id="util_Zx7Decompress"><h1>util_Zx7Decompress</h1>	<h3>syscall Adress 0225BC</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>decompress a block of zx7-compressed data into a user-provided RAM buffer</td><td>void util_Zx7Decompress(void *dest, void *src);</td><td></td><td></td><td>
@@ -809,7 +819,7 @@ data structure: type byte, entry length byte, offset of data in file (2 bytes), 
 </table></div><div id="th_CreateThread"><h1>th_CreateThread</h1>	<h3>syscall Adress 022670</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>spawn a thread</td><td>uint8_t th_CreateThread(void *pc, void *sp, int argc, char **argv);</td><td>thread id. 0 if failed</td><td></td><td>
-void *sp must be allocated at least 12 bytes behind it. If void *sp is 0, it will use the sp from the caller</td></tr>
+void *sp must be allocated at least 12 bytes behind it. If void *sp is 0, it will use the sp from the caller, minus 48 bytes.</td></tr>
 </table></div><div id="gfx_ZeroVRAM"><h1>gfx_ZeroVRAM</h1>	<h3>syscall Adress 022674</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>clears VRAM with null bytes</td><td></td><td></td><td></td><td>
@@ -883,5 +893,49 @@ relocates data in place. (data MUST be stored in ram, otherwise this will crash)
 </table></div><div id="fs_GetFDAttr"><h1>fs_GetFDAttr</h1>	<h3>syscall Adress 0226BC</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Return file attribute byte for a given descriptor</td><td>uint8_t fs_GetFDAttr(void *fd);</td><td>attribute byte in A</td><td></td><td>
+</td></tr>
+</table></div><div id="util_InitAllocSymList"><h1>util_InitAllocSymList</h1>	<h3>syscall Adress 0226C0</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Allocate and initialize a Symbol list.</td><td>symlist *util_InitSymList(void);</td><td>Pointer to new Symbol list. 0 if failed.</td><td></td><td>
+All this does is allocate 6 bytes and set to 0. The memory location doesn't matter as long as it's in RAM and initialized to 0.</td></tr>
+</table></div><div id="util_AppendSymList"><h1>util_AppendSymList</h1>	<h3>syscall Adress 0226C4</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Allocate and add an entry to a Symbol list.</td><td>symbol *util_AppendSymList(symlist *list, const char *name, unsigned int value, uint8_t flags);</td><td>Pointer to new Symbol. 0 if failed.</td><td></td><td>
+</td></tr>
+</table></div><div id="util_RemoveFromSymList"><h1>util_RemoveFromSymList</h1>	<h3>syscall Adress 0226C8</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Remove a symbol by name from a Symbol list.</td><td>symbol *util_RemoveFromSymList(symlist *list, const char *name);</td><td>Pointer to unlinked symbol. 0 if failed.</td><td></td><td>
+Unlinked symbol should be freed manually if not needed.</td></tr>
+</table></div><div id="util_SearchSymList"><h1>util_SearchSymList</h1>	<h3>syscall Adress 0226CC</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Search a Symbol list for a given symbol.</td><td>symbol *util_SearchSymList(symlist *list, const char *name);</td><td>Pointer to Symbol. 0 if failed. Returns pointer to symbol preceeding the found symbol in de.</td><td></td><td>
+</td></tr>
+</table></div><div id="util_FreeSymList"><h1>util_FreeSymList</h1>	<h3>syscall Adress 0226D0</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Free a Symbol list.</td><td>void util_FreeSymList(symlist *list);</td><td></td><td></td><td>
+symlist pointer passed should be freed manually if it was malloc'd or initialized from util_InitAllocSymList.</td></tr>
+</table></div><div id="sys_Exec"><h1>sys_Exec</h1>	<h3>syscall Adress 0226D4</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Execute a null-terminated command string.</td><td>int32_t sys_Exec(const char *str);</td><td>process exit code.<br>
+exit code also stored in bos.LastCommandResult</td><td></td><td>
+</td></tr>
+</table></div><div id="sys_ExecV"><h1>sys_ExecV</h1>	<h3>syscall Adress 0226D8</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Execute a program with argc/argv.</td><td>int sys_ExecV(const char *program, int argc, char *const argv[]);</td><td>process exit code.</td><td></td><td>
+</td></tr>
+</table></div><div id="sys_ExecData"><h1>sys_ExecData</h1>	<h3>syscall Adress 0226DC</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Execute a command string given its length.</td><td>int32_t sys_ExecData(const char *str, size_t len);</td><td>process exit code.<br>
+exit code also stored in bos.LastCommandResult</td><td></td><td>
+</td></tr>
+</table></div><div id="sys_ExecBegin"><h1>sys_ExecBegin</h1>	<h3>syscall Adress 0226E0</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Begin execution from begPC to endPC.</td><td>int32_t sys_ExecBegin(void);</td><td>process exit code. Returns Cf set if begPC >= endPC.<br>
+exit code also stored in bos.LastCommandResult</td><td></td><td>
+exit code is undefined if begPC >= endPC.</td></tr>
+</table></div><div id="sys_ExecContinue"><h1>sys_ExecContinue</h1>	<h3>syscall Adress 0226E4</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Continue Execution from curPC.</td><td>int32_t sys_ExecContinue(void);</td><td>process exit code.<br>
+exit code also stored in bos.LastCommandResult</td><td></td><td>
 </td></tr>
 </table></div></body></html>
