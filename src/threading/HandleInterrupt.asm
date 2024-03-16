@@ -5,16 +5,16 @@ assert ~thread_map and $FF
 	ld a,(current_thread)
 	ld hl,thread_map
 	ld l,a
-	res 7,(hl) ;end the current thread
+	res bThreadAlive,(hl) ;end the current thread
 	jq th_HandleNextThread.nosave
 
 ; th_HandleInterrupt:
 	; exx
 	; exaf
 th_HandleNextThread:
-	ld a,(threading_enabled)
-	or a,a
-	ret z
+	; ld a,(threading_enabled)
+	; or a,a
+	; ret z
 	; ld a,(thread_control)
 	; or a,a
 	; ret z

@@ -21,12 +21,12 @@ _StrCmpre:
 _StrLength:
 	push af,hl
 	xor a,a
-	sbc hl,hl
 	ld c,a
 	mlt bc
 	cpir
+	scf
+	sbc hl,hl
 	sbc hl,bc
-	dec hl
 	ex (sp),hl
 	pop bc,af
 	ret

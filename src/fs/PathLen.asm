@@ -13,8 +13,8 @@ fs_PathLen:
 	ret z
 	dec a
 	ret z
-	cp a,' '
-	ret z
+	; cp a,' '
+	; ret z
 	cp a,':'
 	ret z
 	cp a,$A

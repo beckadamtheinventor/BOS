@@ -1,12 +1,10 @@
-
-;@DOES Increment the process ID.
-;@INPUT void sys_NextProcessId(void);
-;@NOTE Used for categorizing malloc'd memory
+;@DOES Return the next unused process ID.
+;@INPUT uint8_t sys_NextProcessId(void);
+;@OUTPUT new process ID, or 0 if failed.
+;@NOTE Used for categorizing malloc'd memory and threads.
+;@DESTROYS AF
 sys_NextProcessId:
-	ld hl,running_process_id
-	ld a,(hl)
-	inc a
-	bit 7,a
-	ret nz
-	ld (hl),a
+	call th_FindFreeThread
+	ret z
+	ld (running_process_id),a
 	ret

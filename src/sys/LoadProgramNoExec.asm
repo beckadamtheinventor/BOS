@@ -5,6 +5,6 @@
 ;@DESTROYS All, OP5, OP6.
 sys_LoadProgramNoExec:
 	ld a,1
-	ld (fsOP6+10),a
+	ld (fsOP5+10),a
 	jq sys_ExecuteFile.__entry
 

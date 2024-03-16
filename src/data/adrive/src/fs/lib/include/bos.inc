@@ -496,6 +496,11 @@ namespace bos
 ?util_RemoveFromSymList          := $226C8
 ?util_SearchSymList              := $226CC
 ?util_FreeSymList                := $226D0
+?sys_Exec                        := $226D4
+?sys_ExecV                       := $226D8
+?sys_ExecData                    := $226DC
+?sys_ExecBegin                   := $226E0
+?sys_ExecContinue                := $226E4
 ; end of jump table
 ;-------------------------------------------------------------------------------
 ; OS memory areas and misc defines
@@ -549,6 +554,7 @@ namespace bos
 ?saved_LcdUpbase        := ti.appData+60 ; 3 bytes, saves LcdUpbase during sector caching
 ?text_flags             := ti.appData+63 ; 1 byte. Instructs the OS character printing routines
 ?gfx_routine_temp       := ti.appData+64 ; 16 bytes, temp location for graphics routines
+?LastExitCode           := ti.appData+80 ; 4 bytes, stores the exit code of the last program that finished executing
 ?ScrapByte              := ti.flashByte
 ?ScrapWord              := ti.scrapMem
 ?ScrapMem               := ti.scrapMem

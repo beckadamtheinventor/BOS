@@ -1,10 +1,6 @@
-
-;@DOES Decrement the process ID.
-;@INPUT void sys_PrevProcessId(void);
-;@NOTE Used for categorizing malloc'd memory
-sys_PrevProcessId:
-	ld a,(running_process_id)
-	dec a
-	ret z
-	ld (running_process_id),a
-	ret
+;@DOES Return the next open process ID.
+;@INPUT uint8_t sys_PrevProcessId(void);
+;@OUTPUT process ID.
+;@DESTROYS AF
+sys_PrevProcessId:=th_FindNextThread
+	

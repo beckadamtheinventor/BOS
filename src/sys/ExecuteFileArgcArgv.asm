@@ -1,6 +1,6 @@
 
 ;@DOES execute a file given a file path, passing arguments via argc/argv.
-;@INPUT int sys_ExecuteFileFromPtr(const char *path, int argc, char *argv[]);
+;@INPUT int sys_ExecuteFileArgcArgv(const char *path, int argc, char *argv[]);
 ;@DESTROYS All, OP6.
 sys_ExecuteFileArgcArgv:
 	ld hl,9

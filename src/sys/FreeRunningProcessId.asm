@@ -1,7 +1,7 @@
 
-;@DOES Free all memory allocated by the current process ID
+;@DOES Free all memory allocated by the currently executing process ID.
 ;@INPUT void sys_FreeProcessId(void);
-;@NOTE Automatically called after program runs
+;@NOTE Automatically called after program exits.
 sys_FreeRunningProcessId:
 	ld de,(running_process_id) ;only e is used but this saves space
 .entry:

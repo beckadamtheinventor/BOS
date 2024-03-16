@@ -1,13 +1,12 @@
 
 ;@DOES Execute a file.
-;@INPUT int sys_ExecuteFile(const char *path, char *args);
+;@INPUT int32_t sys_ExecuteFile(const char *path, char *args);
 ;@OUTPUT -1 and Cf set if file does not exist or is not a valid executable format, or if malloc failed somewhere.
 ;@OUTPUT ExecutingFileFd set to point to file descriptor. -1 if file not found, -2 if /var/PATH not found.
 ;@DESTROYS All, OP5, OP6.
 sys_ExecuteFile:
 	xor a,a
 	ld (fsOP5+10),a
-	ld (fsOP6+10),a
 .__entry:
 	scf
 	sbc hl,hl
@@ -25,12 +24,13 @@ sys_ExecuteFile:
 	or a,a
 	jq z,.fail
 	ld (fsOP6+3),hl
-	ld (fsOP6),de
-	push hl
+	push de,hl
 	call fs_OpenFile ; look for the file directly
 	call c,sys_OpenFileInPath ;look for the file within dirs listed in $PATH
-	pop bc
+	pop bc,bc
+	ld (fsOP6),bc ; pop then store argument string
 	jr nc,.entryfd
+.fail_file_not_found:
 ;fail if both fs_OpenFile and sys_OpenFileInPath failed to locate the file
 	ld hl,string_path_variable
 	push hl
@@ -47,6 +47,17 @@ sys_ExecuteFile:
 ; .entry_ptr_hlbc:
 	; call sys_GetExecType.entryhlbc
 .entryfd:
+	push hl
+	ld de,(fsOP6) ;arguments string
+	call .load_argc_argv_loop
+	ld de,(fsOP6+3) ; const char *path
+	ld (hl),de ; argv[0]
+	ex hl,de
+	pop hl
+	jr c,.fail
+.entryfd_argcargv:
+	ld (fsOP6+3),de
+	ld (fsOP6+9),bc
 	ld (ExecutingFileFd),hl
 	call fs_GetFilePtr.entryfd
 	bit fd_subdir,a
@@ -174,27 +185,19 @@ sys_ExecuteFile:
 .exec_fex:
 	ld hl,(running_program_ptr)
 .exec_fex_entry_hl:
-	ld a,(fsOP6+10)
+	ld a,(fsOP5+10)
 	or a,a
 	ret nz ; return if only set to load the program
 
 	call sys_NextProcessId
 	call sys_FreeRunningProcessId ; free memory allocated by the new process ID if there is any
-
-	ld de,(fsOP6) ;arguments string
-	call .load_argc_argv_loop
 	; call .normalize_lcd
 
 	ld a,(threading_enabled)
 	cp a,threadPrograms
-	jr z,.run_threading
+	jr z,.run_thread_with_stack
 	cp a,threadAlways
 	jr nz,.runnothreading
-
-.run_threading:
-	ld hl,threadMallocStackSize
-	call sys_Malloc.entryhl
-	jr nc,.run_thread_with_stack
 
 .fail_running_thread:
 	scf
@@ -202,34 +205,76 @@ sys_ExecuteFile:
 	ret
 
 .run_thread_with_stack:
-	ld de,(fsOP6) ; argv
-	ld bc,(fsOP5) ; argc
-	push de,bc
+	call .init_thread_with_stack
+	ret c
+	HandleNextThread
+	ret
+
+.init_thread_with_stack:
+	ld hl,threadMallocStackSize
+	push hl
+	call sys_Malloc
+	pop bc
+	jr c,.fail_running_thread
+	add hl,bc
+.init_thread_stack_hl:
+	ld bc,(fsOP6+3) ; argv
+	push bc
+	ld bc,(fsOP6+9) ; argc
+	push bc
 	ld bc,(running_program_ptr)
 	push hl,bc
 	call th_CreateThread
 	pop bc,bc
+	pop bc,bc
 	or a,a
 	jr z,.fail_running_thread
-	HandleNextThread ;handle the thread we just spawned
-	jr .done_running_program
+	ret
 
 .runnothreading:
-	ld hl,(fsOP6) ; argv
-	ld bc,(fsOP5) ; argc
-	push hl,bc
-	call .jptoprogram
-	ld (LastCommandResult),hl
+	; ld de,(fsOP6+3) ; argv
+	; ld bc,(fsOP6+9) ; argc
+	; push de,bc
+	ld iy,ti.OP3
+	ld bc,(color_primary)
+	ld (iy),bc
+	ld bc,(lcd_text_fg)
+	ld (iy+2),bc
+	ld bc,(lcd_text_fg2)
+	ld (iy+4),bc
+	ld a,(cursor_color)
+	ld (iy+6),a
+	call ti.PushOP3
+	call .actuallyrunprogram
+	; save exit code
+	ld (LastExitCode),hl
 	ld a,e
-	ld (LastCommandResult+3),a
+	ld (LastExitCode+3),a
+	call ti.PopOP3
+	ld iy,ti.OP3
+	ld a,(iy)
+	ld (color_primary),a
+	ld a,(iy+1)
+	ld (color_primary+1),a
+	ld a,(iy+2)
+	ld (lcd_text_fg),a
+	ld a,(iy+3)
+	ld (lcd_text_fg+1),a
+	ld a,(iy+4)
+	ld (lcd_text_fg2),a
+	ld a,(iy+5)
+	ld (lcd_text_fg2+1),a
+	ld a,(iy+6)
+	ld (cursor_color),a
 .done_running_program:
-	pop bc,bc
-	push de,hl,bc
-	call sys_Free ; free argv
-	pop bc
+	; call .deinit
+	; pop hl,de
+	; ret
+
+.deinit:
 	call .normalize_lcd_8bpp
 	call sys_FreeRunningProcessId ; free memory allocated by the program
-	call sys_PrevProcessId
+	; call sys_PrevProcessId
 	ld de,(asm_prgm_size)
 	ld a,(asm_prgm_size+2)
 	or a,d
@@ -241,12 +286,24 @@ sys_ExecuteFile:
 	ld (asm_prgm_size),hl
 	ld hl,bos_UserMem
 	ld (top_of_UserMem),hl
-	pop hl,de
+	ret
+
+.actuallyrunprogram:
+	or a,a
+	sbc hl,hl
+	call .init_thread_stack_hl
+	ret c
+	ld iyl,a
+.trap: ; trap this thread here until the thread we spawned exits
+	HandleNextThread ; handle the thread we just spawned
+	ld a,iyl
+	call th_GetThreadStatus.entrya
+	bit bThreadAlive,a
+	jr nz,.trap
 	ret
 
 .jptoprogram:
 	ld hl,(running_program_ptr)
-
 sys_jphl := $
 	jp (hl)
 
@@ -267,105 +324,6 @@ sys_jphl := $
 	ld (ti.mpLcdUpbase),hl
 	ld (ti.mpLcdCtrl),a
 	ret
-
-; .exec_threaded_rex:
-	; ld hl,(running_program_ptr)
-	; ld a,(hl)
-	; cp a,$18
-	; jq z,.threaded_rex_skipjr
-	; inc hl
-	; inc hl
-; .threaded_rex_skipjr:
-	; ld de,7 ; length of short jump + length of magic number + length of stack frame chunks indicator
-	; add hl,de
-	; ld e,(hl) ; get size of space needed for program
-	; inc hl
-	; ld d,(hl)
-	; inc hl
-	; push hl,de
-	; ld a,(running_process_id)
-	; ld (fsOP5+9),a
-	; call sys_NextProcessId
-	; call sys_Malloc
-	; pop bc
-	; ex (sp),hl
-	; push bc
-	; ld c,(hl) ; get number of entries in relocations table
-	; inc hl
-	; ld b,(hl)
-	; inc hl
-	; ld (fsOP6+3),hl
-	; ld (fsOP6+6),bc
-	; add hl,bc
-	; add hl,bc ;each entry is 2 bytes. hl should now point to code needing relocation
-	; pop bc,de
-	; ld (fsOP5+6),de
-	; ldir
-	; ld bc,(fsOP6+6)
-	; ld a,b
-	; or a,c
-	; jq z,.no_relocations
-	; push iy
-	; ld iy,(fsOP6+3)
-; .relocations_loop:
-	; push bc
-	; ld c,(iy)
-	; ld b,(iy+1)
-	; lea iy,iy+2
-	; ld hl,(fsOP5+6)
-	; add hl,bc
-	; ld bc,(hl)
-	; ex hl,de
-	; ld hl,(fsOP5+6)
-	; add hl,bc
-	; ex hl,de
-	; ld (hl),de
-	; pop bc
-	; dec bc
-	; ld a,c
-	; or a,b
-	; jq nz,.relocations_loop
-	; pop iy
-; .no_relocations:
-	; ld hl,(running_program_ptr)
-	; ld de,(fsOP5+6)
-	; ld (running_program_ptr),de
-	; jq .exec_threaded_hl
-; .exec_threaded_fex:
-	; ld a,(running_process_id)
-	; ld (fsOP5+9),a
-	; ld a,1
-	; ld (running_process_id),a
-	; ld hl,(running_program_ptr)
-; .exec_threaded_hl:
-	; ld a,(hl)
-	; cp a,$18 ;jr
-	; jq z,.threaded_skipjr
-	; inc hl
-	; inc hl
-; .threaded_skipjr:
-	; ld de,6 ;length of short jump + length of magic number
-	; add hl,de
-	; ld l,(hl) ;the byte following the magic number should indicate how many 32-byte chunks of stack frame the program requires, minus 1.
-	; ld h,32
-	; ld e,h
-	; mlt hl
-	; add hl,de ;chunks * 32 + 32
-	; push hl
-	; call sys_Malloc
-	; pop bc
-	; ret c ;return if failed to malloc
-
-	; add hl,bc ;malloc'd pointer for the stack + length because it grows downwards
-	; ld de,(running_program_ptr)
-	; push hl,de
-	; call th_CreateThread ; queue the thread to be run on the next thread switch
-	; ld a,(fsOP5+9)
-	; ld (running_process_id),a
-	; ld hl,return_code_flags
-	; set bSilentReturn,(hl) ;return to caller silently
-	; pop hl,de
-	; ret
 
 .copy_to_op1:
 	ld de,fsOP1
@@ -389,66 +347,51 @@ sys_jphl := $
 	ret
 
 ; input de = string
+; output hl -> argv
+; output bc -> argc
 .load_argc_argv_loop:
-	ld a,(fsOP5+10)
+	ex hl,de
+	push hl
+	inc sp
+	pop af
+	dec sp
+	cp a,$D0
+	call c,sys_MallocDupStr.entryhl ; malloc a duplicate of the string in RAM if the original is stored in flash
+	ret c
+	ex hl,de
+.load_argc_argv:
+	ld bc, 1
+	push de
+	dec de
+.argc_argv_loop:
+	inc de ; increment past null byte (only after the first iteration of the loop)
+	ex hl,de ; de -> hl = current text pointer
+	ld a,(hl)
 	or a,a
-	ld	bc,1
-	jr z,.load_argc_argv_program_has_args
-	jr .doneargv
-
-.load_argc_argv_program_has_args:
-	ld	a,(de)
-	or	a,a
-	jr	z,.doneargv
-	jr	.argvappend
-.argvloop:	; loop over argument string
-	inc de
-	ld	a,(de)
-	or	a,a
-	jr	z,.doneargv
-	cp	a,' '
-	jr	nz,.argvloop
-	xor	a,a
-	ld	(de),a
-.argvspacesloop:
-	inc	de
-	ld	a,(de)
-	cp	a,' '
-	jr	z,.argvspacesloop
-	or	a,a
-	jr	z,.doneargv
-.argvappend:
-	inc	bc
-	push	de
-	jr	.argvloop
+	jr z,.doneargv
+	call .terminate_argument
+	inc bc ; increment argc
+	push hl ; push processed argument
+	; de contains new text pointer, loop if we aren't at the end of the arguments
+	jr nc,.argc_argv_loop
 .doneargv:
+	or a,a
 	sbc hl,hl
 	add hl,bc
 	add hl,bc
 	add hl,bc
 	push bc,hl
-	call sys_MallocPersistent
-	push hl
-	ld	hl,(ExecutingFileFd)
-	push	hl
-	call	fs_CopyFileName	; get file name from running file descriptor
-	push hl
-	call .copy_to_op1
-	pop de
-	pop	bc
-	pop hl ; char *argv[]
-	ld (fsOP6),hl
-	pop bc ; argc*3
-	add hl,bc
+	call sys_Malloc
+	pop de ; argc*3
 	pop bc	; int argc
-	ld (fsOP5),bc
-	ld (fsOP5+3),de
-	dec bc
-	ld a,c
-	or a,b
-	jr z,.argv_no_args
+	ld (ti.scrapMem),bc ; save argc
+	add hl,de
+	; dec bc
+	; ld a,c
+	; or a,b
+	; jr z,.argv_no_args
 .argv_copy_loop:
-	pop de
+	pop de ; pop previously processed argument off the stack
 	dec hl
 	dec hl
 	dec hl
@@ -458,11 +401,60 @@ sys_jphl := $
 	or a,b
 	jq nz,.argv_copy_loop
 .argv_no_args:
-	ld de,(fsOP5+3)
+	ld bc,(ti.scrapMem) ; restore argc
+	ret
+
+; input hl pointer to string
+; output hl pointer to null-terminated argument
+; output de pointer to argument's null terminator
+; output Cf set if found final argument
+.terminate_argument:
+	push hl
+	db $3E ; ld a,... dummify next instruction (1 byte)
+.terminate_argument_loop:
+	inc hl
+	ld a,(hl)
+	or a,a
+	scf
+	jr z,.terminate_argument_loop_done_no_terminate
+	inc hl
+	cp a,$5C ; backslash
+	jr z,.terminate_argument_loop
+	cp a,'"'
+	jr nz,.terminate_argument_not_quote
 	dec hl
+	ld (hl),0
+	inc hl
+	pop af
+	push hl
+	inc hl
+.terminate_argument_quote_loop:
 	dec hl
+.terminate_argument_quote_loop_no_dec:
+	ld a,(hl)
+	inc hl
+	inc hl
+	cp a,$5C ; backslash
+	jr z,.terminate_argument_quote_loop_no_dec
+	sub a,'"'
+	jr nz,.terminate_argument_quote_loop
 	dec hl
-	ld (hl),de
+	or a,(hl) ; check byte following quote
+	scf
+	jr z,.terminate_argument_quote_loop_final
+	xor a,a ; unset Zf and Cf
+.terminate_argument_quote_loop_final:
+	dec hl
+	jr .terminate_argument_loop_done
+.terminate_argument_not_quote:
+	dec hl
+	sub a,' '
+	jr nz,.terminate_argument_loop
+.terminate_argument_loop_done:
+	ld (hl),a
+.terminate_argument_loop_done_no_terminate:
+	ex hl,de
+	pop hl
 	ret
 
 .executable_text:

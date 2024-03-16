@@ -190,4 +190,9 @@
 	jp util_RemoveFromSymList
 	jp util_SearchSymList
 	jp util_FreeSymList
+	jp sys_Exec
+	jp sys_ExecV
+	jp sys_ExecData
+	jp sys_ExecBegin
+	jp sys_ExecContinue
 ; end of jump table

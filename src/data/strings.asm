@@ -276,9 +276,9 @@ string_EZF_header:
 .len:=$-.
 
 str_onbootconfig:
+	db "#!cmd",$A
 	db "#programs to run on boot",$A
-	db $A
-	db "#main ui",$A
+	db "#launch main gui",$A
 	db "explorer",$A
 .len:=$-.
 
