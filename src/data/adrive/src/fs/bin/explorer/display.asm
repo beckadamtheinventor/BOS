@@ -530,4 +530,3 @@ explorer_set_text_scale:
 	call gfx_SetTextScale
 	pop bc,bc
 	ret
-

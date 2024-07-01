@@ -57,7 +57,11 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
 	}
 	switch (in_buff->control) {
 		case 0: // incoming message
-			gui_PrintLine(data);
+			if (data[0] == 0x01) {
+				gui_DrawConsoleWindow(&data[1]);
+			} else {
+				gui_PrintLine(data);
+			}
 			break;
 		case 1: // incoming file header
 			sys_Free(incoming_file.name);
@@ -79,7 +83,7 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
 					goto sendError;
 				}
 			}
-			// ntwk_send(4, -1, 1); // acknowledge that we've created the file
+			ntwk_send(4, -1, 1); // acknowledge that we've created the file
 			break;
 		case 2: // incoming file data section
 			len = (incoming_file.current_len + incoming_data_buffer_len > incoming_file.len) ?
@@ -93,7 +97,8 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
 				goto sendError;
 			}
 			incoming_file.current_len += len;
-			// ntwk_send(4, -1, 1); // acknowledge that we've written the received block
+			ntwk_send(4, -1, 1); // acknowledge that we've written the received block
+			break;
 		case 3: // request file
 			sys_Free(outgoing_file.name);
 			len = strlen((file_name = data)) + 1;
@@ -113,7 +118,7 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
 					malloc_error();
 					break;
 				}
-				ntwk_send(1, PS_PTR(tmp, len));
+				ntwk_send(1, &outgoing_file.len, 3);
 				do {
 					memcpy(incoming_data, outgoing_file.ptr, incoming_data_buffer_len);
 					outgoing_file.ptr += incoming_data_buffer_len;
@@ -121,6 +126,18 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
 					len = outgoing_file.current_len + incoming_data_buffer_len > outgoing_file.len ? outgoing_file.len - outgoing_file.current_len : incoming_data_buffer_len;
 					outgoing_file.current_len += len;
 				} while (outgoing_file.current_len < outgoing_file.len);
+			}
+			break;
+		case 5: // directory list
+			{
+				void *fdbuffer;
+				unsigned int skip = 0;
+				gui_DrawConsoleWindow(data);
+				while (fs_DirList(&fdbuffer, data, 1, skip++)) {
+					char *fname = fs_CopyFileName(fdbuffer);
+					gui_PrintLine(fname);
+					sys_Free(fname);
+				}
 			}
 			break;
 		case 6: // incoming directory

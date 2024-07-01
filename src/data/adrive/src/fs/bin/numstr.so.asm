@@ -63,7 +63,7 @@ osrt.str_to_int:
 
 ; input int osrt.intstr_to_int(const char *str);
 ; output auhl / cuhl.
-; is str starts with $ or 0x, it will be processed as a hex string, otherwise a decimal string.
+; if str starts with $ or 0x, it will be processed as a hex string, otherwise a decimal string.
 osrt.intstr_to_int:
 	pop bc,hl
 	ld a,(hl)

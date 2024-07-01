@@ -27,6 +27,18 @@ explorer_create_new_file_dir:
 
 
 explorer_delete_file:
+; try not to delete root by mistake
+	ld hl,(explorer_dirname_buffer)
+	xor a,a
+	sbc hl,hl
+	ret z ; dirname is null
+	or a,(hl)
+	ret z ; dirname is empty string
+	inc hl
+	sub a,'/'
+	or a,(hl)
+	ret z ; dirname is "/"
+
 	ld hl,str_ConfirmDelete
 	ld bc,display_margin_bottom-9
 	ld de,display_margin_left+11
@@ -124,19 +136,27 @@ explorer_cut_file_indicator:=$-1
 
 explorer_input_file_name:
 	push de
-	ld de,explorer_temp_name_input_buffer
-	ld bc,14
+	push hl
+	ld bc,256
+	push bc
+	call bos.sys_Malloc
+	ex hl,de
+	pop bc,hl
+	jr c,.malloc_failed
+	ld (explorer_temp_name_input_buffer),de
 	ldir
+.malloc_failed:
 	pop hl
+	ret c
 	ld bc,188
 	push bc
 	ld c,b
 	push bc,hl
 	call gfx_PrintStringXY
 	pop bc,bc
-	ld hl,14
+	ld hl,256
 	ex (sp),hl
-	ld hl,explorer_temp_name_input_buffer
+	ld hl,(explorer_temp_name_input_buffer)
 	push hl
 	xor a,a
 	ld (ti.curCol),a
@@ -147,4 +167,5 @@ explorer_input_file_name:
 	cp a,2
 	jq nc,.paste_wait_input
 	pop hl,bc
+	or a,1
 	ret

@@ -2,9 +2,9 @@
 	jr _asmcomp_exe
 	db "FEX", 0
 _asmcomp_exe:
-	scf
-	sbc hl,hl
-	ld (hl),2
+	; scf
+	; sbc hl,hl
+	; ld (hl),2
 	ld hl,-25
 	call ti._frameset
 	ld a,(ix+6)

@@ -77,11 +77,6 @@ cmd_exe_init:
 	ld (ix-16),hl
 	ret
 
-;execute argument as if from command line if argument passed
-cmd_execute_next_line.entry:
-	ld hl,-29
-	call ti._frameset
-	call cmd_exe_init
 cmd_execute_next_line:
 	call bos.sys_ExecContinue
 	ld a,(ix-10)

@@ -59,6 +59,8 @@ string_os_recovery_menu:
 	db $9,"Press del to uninstall BOS",$A
 	db $9,"Press 2nd to try running cmd line",$A
 	db $9,"Press alpha to open emergency shell",$A,0
+string_restore_os_option:
+	db $9,"Press stat to reinstall from backup",$A,0
 string_press_enter_confirm:
 	db "Press enter to confirm.",$A,0
 str_ErrorOccurred:

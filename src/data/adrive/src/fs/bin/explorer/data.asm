@@ -3,13 +3,13 @@ taskbar_item_strings:
 .strings:
 	dl .l1, .l2, .l3, .l4, .l5
 .l1:
-	db "recovery",0
-.l2:
 	db "back",0
+.l2:
+	db "options",0
 .l3:
 	db "file",0
 .l4:
-	db "options",0
+	db "info",0
 .l5:
 	db "cmd",0
 
@@ -52,8 +52,8 @@ quickmenu_item_strings:
 new_file_option_strings:
 	dl .strings
 	db 4 dup $C9
-	jp explorer_create_new_file_image
-	jp explorer_create_new_file_link
+	db 4 dup $C9
+	db 4 dup $C9
 	jp explorer_create_new_file_dir
 	jp explorer_create_new_file_file
 .strings:
@@ -63,12 +63,11 @@ new_file_option_strings:
 .l2:
 	db "dir",0
 .l3:
-	db "link",0
+	; db "link",0
 .l4:
-	db "image"
+	; db "image"
 .l5:
 	db 0
-
 
 explorer_themes_default:
 	db "BOS Blue",0,$08,$11,$FF,$07
@@ -138,6 +137,6 @@ explorer_background_image_sprite_default:
 ; explorer_extensions_dir:
 	; db "/opt/explorer/",0
 explorer_temp_name_input_buffer:
-	db 15 dup 0
+	dl 0
 explorer_dirlist_buffer:
 	dl display_items_num_x * display_items_num_y dup 0

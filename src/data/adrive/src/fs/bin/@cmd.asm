@@ -1,2 +1,2 @@
-	jp cmd_execute_next_line.entry
+	jp bos.sys_ExecContinue
 	db "FEX",0

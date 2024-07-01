@@ -255,19 +255,19 @@ explorer_cursor_x:=$-3
 	dec a
 	jq z,explorer_cursor_up
 	cp a,ti.skYequ - 4
-	jp z,bos.sys_OpenRecoveryMenu
+	jq z,.callpathout
 	cp a,ti.skClear - 4
 	jq z,explorer_main
 	cp a,ti.skDel - 4
 	jq z,explorer_delete_file
 	cp a,ti.skWindow - 4
-	jq z,.callpathout
+	jq z,.optionsmenu
 	cp a,ti.skAlpha - 4
 	jq z,.callpathout
 	cp a,ti.skZoom - 4
 	jq z,.quickmenu
 	cp a,ti.skTrace - 4
-	jq z,.optionsmenu
+	jq z,.infomenu
 	cp a,ti.skGraph - 4
 	jq z,open_terminal
 	cp a,ti.skEnter - 4
@@ -350,11 +350,13 @@ explorer_dirname_buffer:=$-3
 	jq explorer_call_file_noargs
 .quickmenu:
 	ld hl,quickmenu_item_strings
-	jq .drawmenu
+	jr .drawmenu
 .optionsmenu:
 	ld hl,options_item_strings
 .drawmenu:
 	call explorer_taskbar_menu
+	jq explorer_dirlist
+.infomenu:
 	jq explorer_dirlist
 
 .pathout:
