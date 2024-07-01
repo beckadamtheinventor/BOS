@@ -515,6 +515,9 @@ os_recovery_menu:
 	call gui_DrawConsoleWindow
 	ld hl,string_os_recovery_menu
 	call gui_PrintLine
+	call fs_IsOSBackupPresent
+	ld hl,string_restore_os_option
+	call nz,gui_PrintLine
 .keywait:
 	call sys_WaitKeyCycle
 	cp a,ti.skYequ
@@ -536,7 +539,24 @@ os_recovery_menu:
 	cp a,ti.sk2nd
 	jr z,.tryruncmd
 	cp a,ti.sk7
+	jq z,.turn_off
+
+	cp a,ti.skStat
 	jq nz,.keywait
+	call fs_IsOSBackupPresent
+	jq z,.keywait
+
+.reinstall_from_backup:
+	call .confirm
+.reinstall_from_backup_start:
+	ld de,bos_UserMem
+	push de
+	ld hl,data_reinstall_backup_program
+	ld bc,data_reinstall_backup_program.len
+	ldir
+	xor a,a
+	jp sys_FlashUnlock
+
 
 .turn_off:
 	call sys_TurnOff
@@ -582,23 +602,6 @@ os_recovery_menu:
 	call sys_FlashUnlock
 	ld a,2
 	jq sys_EraseFlashSector ;erase first OS sector, bootcode will handle the rest
-
-; .reinstalltios:
-	; call .confirm
-	; ld a,($0401FF)
-	; inc a
-	; jq nz,.reinstalltios_start
-	; ld hl,string_failed_to_reinstall
-	; call gui_DrawConsoleWindow
-	; call sys_WaitKeyCycle
-	; jq os_recovery_menu
-; .reinstalltios_start:
-	; ld de,bos_UserMem
-	; push de
-	; ld hl,data_reinstall_tios_program
-	; ld bc,data_reinstall_tios_program.len
-	; ldir
-	; jp sys_FlashUnlock
 
 .attempt_recovery:
 	call .confirm
@@ -702,39 +705,55 @@ _UnpackUpdates:
 	; jq sys_FlashLock
 
 
-;tios reinstaller
-; virtual at ti.userMem
-	; ld a,$02
-; data_reinstall_tios_program.loop:
-	; push af
-	; call data_reinstall_tios_program.sectorerase
-	; pop af
-	; inc a
-	; cp a,$12
-	; jq nz,data_reinstall_tios_program.loop
-	; ld hl,$2B0000
-	; ld de,$020000
-	; ld bc,$120000
-	; call sys_WriteFlash
-	; ld a,$12
-; data_reinstall_tios_program.loop2:
-	; push af
-	; call data_reinstall_tios_program.sectorerase
-	; pop af
-	; inc a
-	; cp a,$3B
-	; jq nz,data_reinstall_tios_program.loop2
-	; rst 0
-; data_reinstall_tios_program.sectorerase:
-	; ld bc,$F8
-	; push bc
-	; jp $2DC
-	; load data_reinstall_tios_program.data:$-$$ from $$
-; end virtual
+; Backup reinstaller
+virtual at ti.userMem
+; reset sectors needed to store backed up OS
+data_reinstall_backup_program.begin:
+	ld a,$02
+data_reinstall_backup_program.loop:
+	push af
+	call data_reinstall_backup_program.sectorerase
+	pop af
+	inc a
+	cp a,$02+$3B-(fs_os_backup_location shr 16)
+	jq nz,data_reinstall_backup_program.loop
+; copy backup to OS area
+	ld hl,fs_os_backup_location
+	ld de,$020000
+	ld bc,$3B0000-fs_os_backup_location
+	call sys_WriteFlash ; (bootcode routine)
+; reset other sectors
+	ld a,$02+$3B-(fs_os_backup_location shr 16)
+data_reinstall_backup_program.loop2:
+	push af
+	call data_reinstall_backup_program.sectorerase
+	pop af
+	inc a
+	cp a,$3B
+	jq nz,data_reinstall_backup_program.loop2
+; clear BOS's cluster map from the certificate sector
+assert fs_cluster_map > $3B0000
+	ld hl,$3B0000
+	ld de,LCD_BUFFER
+	ld bc,fs_cluster_map-$3B0000
+	push bc,de,hl
+	ldir
+	ld a,$3B
+	call data_reinstall_backup_program.sectorerase
+	pop de,hl,bc
+	call sys_WriteFlash ; (bootcode routine)
+; full restart because TIOS *probably* wouldn't like to be jumped to without it
+	rst 0
+data_reinstall_backup_program.sectorerase:
+	ld bc,$F8
+	push bc
+	jp $2DC ; bootcode routine
+	load data_reinstall_backup_program.data:$-$$ from $$
+end virtual
 
-; data_reinstall_tios_program:
-	; db data_reinstall_tios_program.data
-; .len:=$-.
+data_reinstall_backup_program:
+	db data_reinstall_backup_program.data
+.len:=$-.
 
 handle_bad_interrupt:
 	ld hl,threading_enabled

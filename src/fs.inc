@@ -1,6 +1,7 @@
 
 ; BOS filesystem functions
 
+include 'fs/IsOSBackupPresent.asm'
 include 'fs/AllocSmall.asm'
 include 'fs/AllocRam.asm'
 include 'fs/AllocVar.asm'

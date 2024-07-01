@@ -2,7 +2,7 @@
 ;@DOES spawn a thread
 ;@INPUT uint8_t th_CreateThread(void *pc, void *sp, int argc, char **argv);
 ;@OUTPUT thread id. 0 if failed
-;@NOTE void *sp must be allocated at least 12 bytes behind it. If void *sp is 0, it will use the sp from the caller, minus 48 bytes.
+;@NOTE void *sp must be allocated at least 12 bytes behind it. If void *sp is 0, it will use the sp from the caller, minus 24 bytes.
 th_CreateThread:
 	db $3E ;ld a,...
 .noparent:
@@ -49,7 +49,7 @@ end if
 	or a,h
 	or a,l
 	jr nz,.non_zero_sp
-	ld hl,-48
+	ld hl,-24
 	add hl,sp
 .non_zero_sp:
 	ex (sp),hl ; save new sp, restore thread save area

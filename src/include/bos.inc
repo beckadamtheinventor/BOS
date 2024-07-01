@@ -501,6 +501,7 @@ namespace bos
 ?sys_ExecData                    := $226DC
 ?sys_ExecBegin                   := $226E0
 ?sys_ExecContinue                := $226E4
+?fs_IsOSBackupPresent            := $226E8
 ; end of jump table
 ;-------------------------------------------------------------------------------
 ; OS memory areas and misc defines
@@ -604,6 +605,7 @@ namespace bos
 ?fs_cluster_map.len := (end_of_user_archive - start_of_user_archive)/fs_sector_size
 ?fs_cluster_map := $3C0000 - fs_cluster_map.len
 ?fs_cmap_length := fs_cluster_map.len
+?fs_os_backup_location := $2E0000
 ?fs_sector_size                := 64
 ?fs_sector_size_bits           := 6
 ?fscluster_smallallocblocksize := 1024

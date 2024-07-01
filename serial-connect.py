@@ -26,26 +26,26 @@ incoming_data_buffer_len = max_packet_size - 1
 def WriteSerial(serial_device, data):
 	serial_device.write(len(data).to_bytes(3, 'little'))
 	serial_device.write(data)
-	time.sleep(0.1)
+	time.sleep(0.05)
 
-# def WaitForAck(serial_device):
-	# for _ in range(1000):
-		# l = serial_device.read(3)
-		# if l is None or len(l) != 3:
-			# return False
-		# size = int.from_bytes(bytes(l), 'little')
-		# data = serial_device.read(size)
-		# if len(data):
-			# if data[0] == 4:
-				# print("Got Acknowledge packet")
-				# return True
-			# elif data[0] == 5:
-				# print("Device errored while receiving.")
-				# return False
-			# elif data[0] == 0:
-				# print("".join([chr(c) for c in data[1:]]))
-		# else:
-			# return False
+def WaitForAck(serial_device):
+	for _ in range(1000):
+		l = serial_device.read(3)
+		if l is None or len(l) != 3:
+			return []
+		size = int.from_bytes(bytes(l), 'little')
+		data = serial_device.read(size)
+		if len(data):
+			if data[0] == 4:
+				print("Got Acknowledge packet")
+			elif data[0] == 5:
+				print("Device errored while receiving.")
+				return []
+			elif data[0] == 0:
+				print("".join([chr(c) for c in data[1:]]))
+			return data
+		else:
+			return []
 
 def SendPackage(pack, serial_device):
 	with open(pack, "r") as f:
@@ -86,9 +86,13 @@ def SendPackage(pack, serial_device):
 				else:
 					print(f"Warning: file {i} listed in package json is missing required key \"dest\". It will be ignored.")
 					continue
-				SendFile(source, dest.rstrip("/").rsplit("/", maxsplit=1), serial_device)
+				dest = dest.rstrip("/").rsplit("/", maxsplit=1)
+				SendFile(source, dest, serial_device)
+				manifest.append(dest)
 			else:
 				print(f"Warning: file {i} listed in package json is not an object. It will be ignored.")
+
+	return manifest
 
 def SendFile(path, devpath, serial_device):
 	if serial_device is None:
@@ -155,6 +159,23 @@ def RequestFile(path, serial_device):
 		serial_device = ConnectCalcSerial()
 		if serial_device is None:
 			return False
+	WriteSerial(serial_device, bytes([3] + [ord(c) for c in path] + [0]))
+	headerpacket = WaitForAck(serial_device)
+	if len(headerpacket) and headerpacket[0] == 1:
+		filelen = int.from_bytes(headerpacket, 'little')
+		filedata = []
+		curlen = 0
+		while True:
+			packet = WaitForAck(serial_device)
+			if not len(packet):
+				break
+			if packet[0] != 2:
+				break
+			curlen += len(packet)
+			filedata.extend(list(packet))
+		if curlen < filelen:
+			print(f"Warning: recieved only {curlen} bytes of reported {filelen}")
+		return True
 	return False
 
 def DirList(path, serial_device):
@@ -207,12 +228,14 @@ def DisconnectCalcSerial(serial_device):
 print("""
 BOS Serial File Transfer Program
 --------------------------------
-connect      | attempt to connect a calc
-send file    | sends a file to the connected calc
-request file | request a file from the connected calc
-list [dir]   | list files in a directory on the connected calc
-message      | send a message to the connected calc (useful for debugging)
-quit         | disconnect and exit the program
+connect        | attempt to connect a calc
+send file      | sends a file to the connected calc
+sendpackage pk | sends files from a json formatted package
+request file   | request a file from the connected calc
+list [dir]     | list files in a directory on the connected calc
+message [msg]  | send a message to the connected calc (useful for debugging)
+clear [msg]    | clear the console on the connected calc
+quit           | disconnect and exit the program
 --------------------------------
 """)
 devpath = "/"
@@ -241,15 +264,23 @@ try:
 						print("Sent file successfuly.")
 					else:
 						print("Failed to send file.")
-				elif w == "dirlist":
+				elif w == "list":
 					DirList(devpath, serial_device)
-				# elif w == "request":
-					# if RequestFile(line.split(maxsplit=1)[1]):
-						# print("Recieved file successfuly.")
-					# else:
-						# print("Failed to recieve file.")
+				elif w == "request":
+					if RequestFile(line.split(maxsplit=1)[1], serial_device):
+						print("Recieved file successfuly.")
+					else:
+						print("Failed to recieve file.")
 				elif w == "message" or w == "msg":
-					WriteSerial(serial_device, bytes([0] + [ord(c) for c in line.split(maxsplit=1)[1]] + [0]))
+					if " " in line:
+						WriteSerial(serial_device, bytes([0] + [ord(c) for c in line.split(maxsplit=1)[1]] + [0]))
+					else:
+						WriteSerial(serial_device, bytes([0, 0]))
+				elif w == "clear" or w == "cls":
+					if " " in line:
+						WriteSerial(serial_device, bytes([0, 1] + [ord(c) for c in line.split(maxsplit=1)[1]] + [0]))
+					else:
+						WriteSerial(serial_device, bytes([0, 1, 0]))
 				elif w == "sendpackage":
 					if SendPackage(line.split(maxsplit=1)[1], serial_device):
 						print("Sent package successfuly")

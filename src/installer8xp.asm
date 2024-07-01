@@ -6,6 +6,7 @@ format ti executable 'BOSOS'
 
 include 'include/os.inc'
 include 'include/defines.inc'
+include 'include/bos.inc'
 
 os_rom
 	file '../obj/bosos.bin'
@@ -34,67 +35,51 @@ secondary_in_ram:
 	call ti.LoadDEInd_s
 	ld (os_second_binary),hl
 	ld (os_second_binary.len),de
-	; ld hl,backup_tios_querry
-	; call _printline
-; waitkey:
-	; call ti.GetCSC
-	; cp a,ti.sk1
-	; jq z,backup_tios
-	; cp a,ti.skLog
-	; jq nz,waitkey
-	; xor a,a
-; backup_tios:
-	; ld (backup_tios_flag),a
-	; call ti.ArcChk ; get free archive space
-	; ld hl,(ti.OSSize+1)
-	; ld de,$010000 - $020000 ; get os size in bytes, add 64k to the total
-	; add hl,de
-	; ld de,(ti.tempFreeArc) ; check if we have enough space
-	; or a,a
-	; sbc hl,de
-	; jq nc,installation_fail
-	; add hl,de
-	; push hl
-
-	; ld hl,backingup_os_string
-	; call _printline
-	; ld hl,$020000
-	; ld (backup_write_counter),hl
-	; pop hl
-; backup_tios_loop:
-	; push hl
-	; ld hl,tios_backup_file
-	; call ti.Mov9ToOP1
-	; ld hl,$FE00
-	; ld a,ti.AppVarObj
-	; call ti.CreateVar
-	; inc de
-	; inc de
-	; ld hl,0
-; backup_write_counter:=$-3
-	; ld bc,$FE00
-	; ldir
-	; ld (backup_write_counter),hl
-	; ld hl,tios_backup_file
-	; call ti.Mov9ToOP1
-	; call ti.Arc_Unarc ;archive the backup file
-	; ld hl,tios_backup_file+8 ;next backup file name
-	; inc (hl)
-	; pop hl
-	; ld bc,$FE00
-	; or a,a
-	; sbc hl,bc
-	; jq nc,backup_tios_loop
-	; jq do_installation
-; installation_fail:
-	; ld hl,installation_failed_string
-	; call _printline
-	; jp ti.RunIndicOn
+	ld hl,reinstaller_2_header + reinstaller_2_header.len-2
+	ld (hl),e
+	inc hl
+	ld (hl),d
+	ld hl,backup_tios_query
+	call _printline
+.waitkey:
+	call ti.GetCSC
+	cp a,ti.skLog
+	jq z,do_installation
+	cp a,ti.sk1
+	jr nz,.waitkey
+backup_tios:
+	ld hl,($020104+1)
+	ld bc,$020000+$104-$020000 ; installer backup minus OS size computed from jump location
+	add hl,bc
+	ld bc,$3B0000-fs_os_backup_location
+	or a,a
+	sbc hl,bc
+	jr c,.continue
+	ld hl,failed_to_backup_os_string
+	call _printline
+	ld hl,continue_anyways_string
+	call _printline
+.waitkey:
+	call ti.GetCSC
+	cp a,ti.sk1
+	jq z,do_installation
+	cp a,ti.skLog
+	jr nz,.waitkey
+	ret
+.continue:
+	ld hl,backingup_os_string
+	call _printline
+	ld a,1
+	ld (backup_os_flag),a
+	ld a,bos.fs_os_backup_location shr 16
+	ld (_final_sector_smc),a
 do_installation:
 	ld hl,installing_string
 	call _printline
-	os_create $3B ;erase all user flash sectors
-	rst 0
+	; create the OS and erase user flash.
+	; user flash end location is $3B0000,
+	; unless backing up TIOS in which case the end location is $300000
+	os_create $3B
 
 fail_missing_secondary:
 	ld hl,missing_secondary_str
@@ -109,12 +94,27 @@ second_binary_appvar:
 	db ti.AppVarObj,"BOSOSpt2"
 installing_string:
 	db "Installing BOS...",0
-; backup_tios_querry:
-	; db "Back up TIOS? Y/N",0
+backup_tios_query:
+	db "Back up TIOS? Y/N",0
 missing_secondary_str:
 	db "Missing AppVar BOSOSpt2",0
-; backingup_os_string:
-	; db "Backing up TIOS...",0
+backingup_os_string:
+	db "Backing up TIOS &",0
+failed_to_backup_os_string:
+	db "OS too large to backup",0
+continue_anyways_string:
+	db "Continue anyways?",0
+
+reinstaller_header:
+	db $f0,$fc,$2c,$d9,$06,$00,$00,$01,$00,$0c,$05,$42,$4f,$53,$4f,$53
+	dw installer_size
+	db $EF,$7B
+.len := $-.
+
+reinstaller_2_header:
+	db $f0,$fc,$c1,$87,$15,$00,$00,$01,$00,$0d,$08,$42,$4f,$53,$4f,$53,$70,$74,$32,$00,$00
+.len := $-.
+
 ; installation_failed_string:
 	; db "Need more ARC. Aborting.",0
 ; install_info_string:
@@ -126,3 +126,5 @@ missing_secondary_str:
 	; db ti.AppVarObj,"TIOSbkpA",0
 
 write_os_binary
+
+installer_size := $+2-$D1A881

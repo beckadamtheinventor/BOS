@@ -123,6 +123,7 @@ char *fs_BaseName(const char *path);
  * Copy a file name from a file descriptor.
  * @param fd File descriptor to read file name from.
  * @return Pointer to file name.
+ * @note this routine allocates memory
  */
 char *fs_CopyFileName(void *fd);
 

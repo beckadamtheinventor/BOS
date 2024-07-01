@@ -43,17 +43,70 @@ macro os_private baseaddr:$020000
 	macro os_create? final_sector
 		di
 		call	.create
-		rst 0
+		jp $020108
 .create:
 if defined INSTALLER8XP
 		ld	a,$d1
 		ld	mb,a
 		ld.sis	sp,$987e
 		call.is	.unlock and $ffff
+	; smc'd to 1 if we should back up TIOS
+		ld a,0
+	backup_os_flag := $-1
+		or a,a
+		jr z,.setup
+		ld a,fs_os_backup_location shr 16
+	.backuperaseloop:
+		push af
+		call _sectorerase
+		pop af
+		inc a
+		cp a,$3B
+		jr c,.backuperaseloop
+		
+		; OSSize jump location
+		ld hl,($020104+1)
+		ld bc,$104-$020000
+		add hl,bc
+		push hl
+		pop bc
+		; bc = length of OS in bytes
+		ld hl,$020000
+		ld de,bos.fs_os_backup_location
+		; write the OS backup
+		call $2E0 ; WriteFlash
+
+		; backup the installer data
+		ld hl,$010000
+		add hl,de
+		ld l,0
+		ld h,l
+		ex hl,de
+		ld hl,reinstaller_2_header
+		ld bc,reinstaller_2_header.len
+		call $2E0
+		ld hl,(os_second_binary)
+		ld bc,(os_second_binary.len)
+		call $2E0 ; WriteFlash
+
+		; backup the installer
+		ld hl,$010000
+		add hl,de
+		ld l,0
+		ld h,l
+		ex hl,de
+		ld hl,reinstaller_header
+		ld bc,reinstaller_header.len
+		call $2E0
+		ld hl,ti.userMem
+		ld bc,(ti.asm_prgm_size)
+		call $2E0 ; WriteFlash
+
 else
 		call bos.sys_FlashUnlock
 end if
 ; setup our OS
+.setup:
 		ld a,2
 		call .sectorerase
 		ld a,3
@@ -62,7 +115,7 @@ end if
 		ld	hl,os.source
 		ld	de,$020000
 		ld	bc,os.full_binary_len
-		call	$2E0 ;WriteFlash
+		call	$2E0 ; WriteFlash
 		ld	hl,0
 	os_second_binary:=$-3
 		ld	de,$020000 + os.full_binary_len
@@ -70,7 +123,7 @@ end if
 	os_second_binary.len:=$-3
 		ld a,c
 		or a,b
-		call	nz, $2E0 ;WriteFlash
+		call	nz, $2E0 ; WriteFlash
 if defined INSTALLER8XP
 		ld	a,$04
 .erase:
@@ -79,7 +132,18 @@ if defined INSTALLER8XP
 		pop	af
 		inc	a
 		cp	a,final_sector
+	_final_sector_smc := $-1
 		jr	nz,.erase
+
+		; Write backup present marker
+		ld a,(backup_os_flag)
+		or a,a
+		ld hl,(bos.fs_IsOSBackupPresent+1) ; load jump location for the routine
+		inc hl ; get the marker byte location
+		ex hl,de
+		ld a,0 ; dont overwrite flags
+		call nz,ti.WriteFlashA ; WriteFlashA
+
 		call.is	.lock and $ffff
 		ld	a,$d0
 		ld	mb,a
@@ -118,6 +182,11 @@ if defined INSTALLER8XP
 		ld	a,$88
 		out0	($24),a
 		ret.l
+
+_unlock := .unlock
+_lock := .lock
+_sectorerase := .sectorerase
+
 end if
 		assume adl = 1
 ;		jp	0
