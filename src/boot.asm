@@ -435,14 +435,15 @@ generate_boot_configs:
 	ret
 
 os_return_soft:
-	call os_check_recovery_key
 	; ld hl,ti.mpIntMask
 	; set ti.bIntOn,(hl)
 	; set ti.bIntOSTmr,(hl)
-	call sys_FreeAll
 	call gfx_Set8bpp
 	xor a,a
 	call gfx_SetDraw
+
+	call os_check_recovery_key
+	call sys_FreeAll
 
 	call os_check_recovery_key
 	call fs_SanityCheck
