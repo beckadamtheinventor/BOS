@@ -16,13 +16,15 @@ taskbar_item_strings:
 options_item_strings:
 	dl .strings
 	jp explorer_configure_theme
-	db 12 dup $C9
+	db 8 dup $C9
+	jp bos.sys_OpenRecoveryMenu
 	jp bos.sys_TurnOff
 .strings:
 	dl .l1, .l2, .l3, .l4, .l5
 .l1:
-	db "power"
+	db "power",0
 .l2:
+	db "recovery"
 .l3:
 .l4:
 	db 0
