@@ -52,6 +52,7 @@ fs_WriteFile:
 	ex hl,de
 	ld hl,(ix+6) ; void *data
 	ld bc,(ix+9) ; int len
+	call sys_FlashUnlock
 	call sys_WriteFlash
 	call sys_FlashLock
 	ld hl,(ix-9) ; return new file descriptor

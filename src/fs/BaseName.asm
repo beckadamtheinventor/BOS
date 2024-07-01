@@ -14,7 +14,6 @@ fs_BaseName:
 	cp a,(hl)
 	ret z
 	cpdr
-	inc hl ; increment to first character of the string
 	ret po ; return if '/' not found in path string
 	inc hl
 	push hl ; otherwise return a copy of the string at hl (last path word)

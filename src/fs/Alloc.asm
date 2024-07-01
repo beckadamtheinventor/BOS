@@ -21,6 +21,11 @@ fs_AllocWithMarker:
 
 	ld hl,fs_cluster_map + fs_root_dir_lba ; only check clusters following the filesystem root directory
 	ld bc,fs_cluster_map.len - fs_root_dir_lba
+	call fs_IsOSBackupPresent
+	jr z,.search_loop
+	; if an OS backup is present, we should not allocate within its bounds.
+	; basically cluster map length minus root directory cluster minus the number of clusters reserved to the OS backup
+	ld bc, fs_cluster_map.len - (($3B0000-fs_os_backup_location) shr fs_sector_size_bits) - fs_root_dir_lba
 .search_loop:
 	ld a,(hl)
 	inc hl

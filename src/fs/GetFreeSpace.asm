@@ -4,6 +4,11 @@
 fs_GetFreeSpace:
 	ld de,fs_cluster_map
 	ld bc,fs_cluster_map.len
+	call fs_IsOSBackupPresent
+	jr z,.reentry
+	; if an OS backup is present, we should not allocate within its bounds.
+	; basically cluster map length minus root directory cluster minus the number of clusters reserved to the OS backup
+	ld bc, fs_cluster_map.len - (($3B0000-fs_os_backup_location) shr fs_sector_size_bits) - fs_root_dir_lba
 .reentry:
 	or a,a
 	sbc hl,hl
