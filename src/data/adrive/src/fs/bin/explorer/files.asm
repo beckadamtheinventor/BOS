@@ -25,9 +25,7 @@ explorer_create_new_file_dir:
 	pop bc,bc
 	ret
 
-
-explorer_delete_file:
-; try not to delete root by mistake
+explorer_is_path_root:
 	ld hl,(explorer_dirname_buffer)
 	xor a,a
 	sbc hl,hl
@@ -37,8 +35,12 @@ explorer_delete_file:
 	inc hl
 	sub a,'/'
 	or a,(hl)
-	ret z ; dirname is "/"
+	ret
 
+explorer_delete_file:
+; try not to delete root by mistake
+	call explorer_is_path_root
+	ret z
 	ld hl,str_ConfirmDelete
 	ld bc,display_margin_bottom-9
 	ld de,display_margin_left+11

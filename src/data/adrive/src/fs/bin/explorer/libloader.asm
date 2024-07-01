@@ -28,6 +28,8 @@ gfx_Blit:
 	jp 33
 gfx_PrintChar:
 	jp 42
+gfx_PrintUInt:
+	jp 48
 gfx_PrintString:
 	jp 51
 gfx_PrintStringXY:

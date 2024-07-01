@@ -357,7 +357,107 @@ explorer_dirname_buffer:=$-3
 	call explorer_taskbar_menu
 	jq explorer_dirlist
 .infomenu:
+	call explorer_is_path_root
+	jq z,.key_loop
+	ld a,(explorer_statusbar_color)
+	ld l,a
+	push hl
+	call gfx_SetColor
+	ld hl,88 ;H
+	ex (sp),hl
+	ld hl,258 ;W
+	push hl
+	ld hl,64 ;Y
+	push hl
+	ld hl,31 ;X
+	push hl
+	call gfx_FillRectangle
+	pop bc,bc,bc
+	ld a,(explorer_foreground_color)
+	ld l,a
+	ex (sp),hl
+	call gfx_SetColor
+	ld hl,90 ;H
+	ex (sp),hl
+	ld hl,260 ;W
+	push hl
+	ld hl,63 ;Y
+	push hl
+	ld hl,30 ;X
+	push hl
+	call gfx_Rectangle
+	pop bc,bc,bc
+	ld hl,65 ;Y
+	ex (sp),hl
+	ld hl,32 ;X
+	push hl
+	call gfx_SetTextXY
+	pop bc,bc
+	ld hl,(explorer_dirname_buffer)
+	push hl
+	ld bc,32
+	call explorer_display_bc_chars
+	call bos.fs_GetFilePtr
+	pop de
+
+	bit bos.fd_subdir,a
+	push af,bc
+	jr nz,.info.is_dir
+
+	ld hl,76 ;Y
+	push hl
+	ld hl,36 ;X
+	push hl
+	ld hl,str_file_size
+	push hl
+	call gfx_PrintStringXY
+	pop hl,hl
+	ld l,' '
+	ex (sp),hl
+	call gfx_PrintChar
+	pop bc
+	call gfx_PrintUInt
+	ld hl,str_bytes
+	push hl
+	call gfx_PrintString
+	pop hl
+.info.is_dir:
+	ld hl,86 ;Y
+	push hl
+	ld hl,36 ;X
+	push hl
+	call gfx_SetTextXY
+	pop hl,hl
+
+	pop bc,af
+	bit bos.fd_system,a
+	call nz,.info.system
+	bit bos.fd_device,a
+	call nz,.info.device
+	bit bos.fd_subdir,a
+	call nz,.info.subdir
+
+	call gfx_BlitBuffer
+	call bos.sys_WaitKeyCycle
 	jq explorer_dirlist
+
+.info.subdir:
+	ld hl,str_subdir
+	jr .info.sysdevdir
+.info.device:
+	ld hl,str_device
+	jr .info.sysdevdir
+.info.system:
+	ld hl,str_system
+.info.sysdevdir:
+	push af
+	push hl
+	call gfx_PrintString
+	pop bc
+	pop af
+	ret
+
+
 
 .pathout:
 	ld hl,(current_working_dir) ; path into '..' entry

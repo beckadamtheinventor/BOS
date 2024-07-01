@@ -132,6 +132,17 @@ str_ceditexe:
 	db "cedit",0
 str_MissingIconFile:
 	db "/etc/explorer/missing.ico"
+str_system:
+	db "System ",0
+str_device:
+	db "Device ",0
+str_subdir:
+	db "Directory ",0
+str_file_size:
+	db "File Size: ",0
+str_bytes:
+	db " Bytes",0
+
 explorer_background_image_sprite_default:
 	db 0
 ; explorer_extensions_dir:
