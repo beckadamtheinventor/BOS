@@ -191,6 +191,7 @@
 <tr><td><a href="#sys_ExecData">bos.sys_ExecData</a></td><td><a href="#sys_ExecData">0226DC</a></td></tr>
 <tr><td><a href="#sys_ExecBegin">bos.sys_ExecBegin</a></td><td><a href="#sys_ExecBegin">0226E0</a></td></tr>
 <tr><td><a href="#sys_ExecContinue">bos.sys_ExecContinue</a></td><td><a href="#sys_ExecContinue">0226E4</a></td></tr>
+<tr><td><a href="#fs_IsOSBackupPresent ">bos.fs_IsOSBackupPresent </a></td><td><a href="#fs_IsOSBackupPresent ">0226E8</a></td></tr>
 </table><div id="boot_os                  "><h1>boot_os                  </h1>	<h3>syscall Adress 020108</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 </table></div><div id="handle_interrupt"><h1>handle_interrupt</h1>	<h3>syscall Adress 02010C</h3>
@@ -819,7 +820,7 @@ data structure: type byte, entry length byte, offset of data in file (2 bytes), 
 </table></div><div id="th_CreateThread"><h1>th_CreateThread</h1>	<h3>syscall Adress 022670</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>spawn a thread</td><td>uint8_t th_CreateThread(void *pc, void *sp, int argc, char **argv);</td><td>thread id. 0 if failed</td><td></td><td>
-void *sp must be allocated at least 12 bytes behind it. If void *sp is 0, it will use the sp from the caller, minus 48 bytes.</td></tr>
+void *sp must be allocated at least 12 bytes behind it. If void *sp is 0, it will use the sp from the caller, minus 24 bytes.</td></tr>
 </table></div><div id="gfx_ZeroVRAM"><h1>gfx_ZeroVRAM</h1>	<h3>syscall Adress 022674</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>clears VRAM with null bytes</td><td></td><td></td><td></td><td>
@@ -938,4 +939,6 @@ exit code is undefined if begPC >= endPC.</td></tr>
 <tr><td>Continue Execution from curPC.</td><td>int32_t sys_ExecContinue(void);</td><td>process exit code.<br>
 exit code also stored in bos.LastCommandResult</td><td></td><td>
 </td></tr>
+</table></div><div id="fs_IsOSBackupPresent "><h1>fs_IsOSBackupPresent </h1>	<h3>syscall Adress 0226E8</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 </table></div></body></html>
