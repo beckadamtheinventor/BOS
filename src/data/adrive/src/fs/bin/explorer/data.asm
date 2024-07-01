@@ -144,6 +144,10 @@ str_file_size:
 	db "File Size: ",0
 str_bytes:
 	db " Bytes",0
+str_RamExecutable:
+	db "Ram Executable",0
+str_FlashExecutable:
+	db "Flash Executable",0
 
 explorer_background_image_sprite_default:
 	db 0

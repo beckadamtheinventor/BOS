@@ -27,8 +27,9 @@ explorer_create_new_file_dir:
 
 explorer_is_path_root:
 	ld hl,(explorer_dirname_buffer)
+	add hl,de
 	xor a,a
-	sbc hl,hl
+	sbc hl,de
 	ret z ; dirname is null
 	or a,(hl)
 	ret z ; dirname is empty string
@@ -170,4 +171,154 @@ explorer_input_file_name:
 	jq nc,.paste_wait_input
 	pop hl,bc
 	or a,1
+	ret
+
+
+explorer_info_menu:
+	call explorer_is_path_root
+	jq z,explorer_main.key_loop
+	ld a,(explorer_statusbar_color)
+	ld l,a
+	push hl
+	call gfx_SetColor
+	ld hl,88 ;H
+	ex (sp),hl
+	ld hl,258 ;W
+	push hl
+	ld hl,64 ;Y
+	push hl
+	ld hl,31 ;X
+	push hl
+	call gfx_FillRectangle
+	pop bc,bc,bc
+	ld a,(explorer_foreground_color)
+	ld l,a
+	ex (sp),hl
+	call gfx_SetColor
+	ld hl,90 ;H
+	ex (sp),hl
+	ld hl,260 ;W
+	push hl
+	ld hl,63 ;Y
+	push hl
+	ld hl,30 ;X
+	push hl
+	call gfx_Rectangle
+	pop bc,bc,bc
+	ld hl,65 ;Y
+	ex (sp),hl
+	ld hl,32 ;X
+	push hl
+	call gfx_SetTextXY
+	pop bc,bc
+	ld hl,(explorer_dirname_buffer)
+	push hl
+	ld bc,32
+	call explorer_display_bc_chars
+	call bos.fs_GetFilePtr
+	pop de
+
+	push hl
+	bit bos.fd_subdir,a
+	push af,bc
+	jr nz,.info.is_dir
+
+	ld hl,76 ;Y
+	push hl
+	ld hl,36 ;X
+	push hl
+	ld hl,str_file_size
+	push hl
+	call gfx_PrintStringXY
+	pop hl,hl
+	ld l,' '
+	ex (sp),hl
+	call gfx_PrintChar
+	pop bc
+	call gfx_PrintUInt
+	ld hl,str_bytes
+	push hl
+	call gfx_PrintString
+	pop hl
+.info.is_dir:
+	ld hl,86 ;Y
+	push hl
+	ld hl,36 ;X
+	push hl
+	call gfx_SetTextXY
+	pop hl,hl
+
+	pop bc,af
+	bit bos.fd_system,a
+	call nz,.info.system
+	bit bos.fd_device,a
+	call nz,.info.device
+	bit bos.fd_subdir,a
+	call nz,.info.subdir
+	
+	bit bos.fd_subdir,a
+	pop bc
+	jr nz,.not_executable_probably
+	push bc
+	call bos.sys_GetExecTypeFD
+	jr c,.not_executable_probably
+	ld de,(hl)
+
+	db $21, "FEX"
+	or a,a
+	sbc hl,de
+	jr z,.info_fex
+
+	db $21, "REX"
+	or a,a
+	sbc hl,de
+	jr z,.info_rex
+
+	db $21, "TFX"
+	or a,a
+	sbc hl,de
+	jr z,.info_fex
+
+	db $21, "TRX"
+	or a,a
+	sbc hl,de
+	jr z,.info_rex
+
+	jr .not_executable_probably
+
+.info_fex:
+	ld hl,str_FlashExecutable
+	jr .display_file_type
+
+.info_rex:
+	ld hl,str_RamExecutable
+
+.display_file_type:
+	ld bc,96 ;Y
+	push bc
+	ld bc,36 ;X
+	push bc
+	push hl
+	call gfx_PrintString
+	pop bc,bc,bc
+
+.not_executable_probably:
+	call gfx_BlitBuffer
+	call bos.sys_WaitKeyCycle
+	jq explorer_dirlist
+
+.info.subdir:
+	ld hl,str_subdir
+	jr .info.sysdevdir
+.info.device:
+	ld hl,str_device
+	jr .info.sysdevdir
+.info.system:
+	ld hl,str_system
+.info.sysdevdir:
+	push af
+	push hl
+	call gfx_PrintString
+	pop bc
+	pop af
 	ret

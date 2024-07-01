@@ -44,6 +44,7 @@ str_tivars_dir:
 str_HexChars:
 	db "0123456789ABCDEF"
 string_os_info:
+	db "BOS "
 	file 'buildno.txt'
 	db 0
 str_SplashCredit:

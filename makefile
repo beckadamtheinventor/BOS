@@ -45,6 +45,17 @@ FSSRC ?= $(call NATIVEPATH,src/data/adrive/src)
 
 all: objdirs includes noti filesystem bosos bosbin bos8xp bosrom
 
+artifact:
+	python buildutil.py artifact
+
+version:
+	python buildutil.py version add 0.0.1
+
+version-minor:
+	python buildutil.py version add 0.0.100
+
+version-major:
+	python buildutil.py version add 0.1.0
 
 # Rule to build OS data
 bosos: $(call rwildcard,src,*.asm) $(call rwildcard,src,*.inc)
