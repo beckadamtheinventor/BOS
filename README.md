@@ -20,6 +20,10 @@ Assuming only noti-ez80 bootcode and BOS are on the image, (which is the case if
 If you are getting the rom image from another author, read the author's provided LICENSE file (usually a plain text file without an extension) for further guidance on distribution of the ROM image.
 
 
+# Downloads
+Check the [releases](https://github.com/beckadamtheinventor/BOS/releases) page or [artifacts](https://github.com/beckadamtheinventor/BOS/tree/master/artifacts) for bleeding-edge builds.
+
+
 # Installing BOS to Hardware
 Before installing BOS, know that it is very much incomplete and lacks many features that TI-OS has.
 
