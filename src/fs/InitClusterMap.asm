@@ -2,10 +2,6 @@
 ;@INPUT void fs_InitClusterMap(void);
 ;@NOTE uses the first half of vRam as scrap.
 fs_InitClusterMap:
-	scf
-	sbc hl,hl
-	ld (hl),2
-
 	ld hl,fs_cluster_map
 	ld a,(hl)
 	cp a,fscluster_allocated
