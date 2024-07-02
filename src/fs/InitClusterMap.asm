@@ -2,6 +2,10 @@
 ;@INPUT void fs_InitClusterMap(void);
 ;@NOTE uses the first half of vRam as scrap.
 fs_InitClusterMap:
+	scf
+	sbc hl,hl
+	ld (hl),2
+
 	ld hl,fs_cluster_map
 	ld a,(hl)
 	cp a,fscluster_allocated
@@ -9,38 +13,41 @@ fs_InitClusterMap:
 ; Check if the cluster map is all allocated, all free, or contains any invalid entries.
 ; Rebuild the cluster map if needed.
 	ld bc,fs_cluster_map.len
-if fs_cluster_map.len and $FF
-	ld de,0
-else
-	ld e,c
-	mlt de
-end if
+; if fs_cluster_map.len and $FF
+	; ld de,0
+; else
+	; ld e,c
+	; mlt de
+; end if
 .checkloop:
 	dec bc
 	ld a,c
 	or a,b
-	jr nz,.continuecheckloop
-	ld a,e
-	or a,d
-	ret nz
-	ld a,e
-if fs_cluster_map.len and $FF
-	ld a,e
-	cp a, fs_cluster_map.len and $FF
-else
-	or a,e
-end if
-	ret nz
-	ld a,d
-	cp a, fs_cluster_map.len shr 8
-	jr z,.reinit
-	ret
-.continuecheckloop:
+	ret z
+	; jr nz,.continuecheckloop
+	; ld a,e
+	; or a,d
+	; ret nz
+	; ld a,e
+; if fs_cluster_map.len and $FF
+	; ld a,e
+	; cp a, fs_cluster_map.len and $FF
+; else
+	; or a,e
+; end if
+	; ret nz
+	; ld a,d
+	; cp a, fs_cluster_map.len shr 8
+	; jr z,.reinit
+	; ret
+; .continuecheckloop:
 	ld a,(hl)
+	or a,a
+	jr z,.checkloop
 	inc hl
 	inc a
 	jr z,.checkloop
-	inc de
+	; inc de
 	inc a
 	jr z,.checkloop
 .reinit:
@@ -51,15 +58,7 @@ end if
 	pop de
 	inc de
 	ld bc,fs_cluster_map.len - 1
-if fscluster_clean = $FF
-	if ~fs_cluster_map.len and $FF
-		ld (hl),c
-	else
-		ld (hl),fscluster_clean
-	end if
-else
 	ld (hl),fscluster_clean
-end if
 	ldir
 
 .dont_clean_up:
