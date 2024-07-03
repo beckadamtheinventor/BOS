@@ -8,19 +8,13 @@ dev_null_get_location:
 	ld hl,$FF0000
 	ret
 dev_null_read:
-	pop hl,de,bc
-	push bc,de,hl
+	pop hl,bc,de
+	push de,bc,hl
 	ld hl,$FF0000
 	ldir
 	ret
 dev_null_write: ; dummy write
-	pop hl,de,bc
-	push bc,de,hl
-	add hl,bc
-	ex hl,de
-	ld hl,$FF0000
-	add hl,bc
-	ex hl,de
-	ld bc,0
+	pop bc,de,hl
+	push hl,de,bc
 	ret
 end device_file

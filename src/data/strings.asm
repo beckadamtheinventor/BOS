@@ -228,6 +228,12 @@ fs_file_data_syscalls.zlen:=$-.
 	; db "/",$F2,"OS/ELEVATED",0
 ; str_AutoExtractOptFile:
 	; db "/EXTRACT.OPT",0
+str_DevNull:
+	db "/dev/null",0
+str_DevLcd:
+	db "/dev/lcd",0
+str_DevStdout:
+	db "/dev/stdout",0
 str_sbin_dir:
 	db "sbin",0
 str_var_tivars:
@@ -238,10 +244,10 @@ string_lib_var:
 	db "/var/LIB",0
 string_var_dir:
 	db "/var/",0
-str_var_index_name:
-	db "/tmp/cache"
-.num:
-	db "000.dat",0
+; str_var_index_name:
+	; db "/tmp/cache"
+; .num:
+	; db "000.dat",0
 str_ram_fs_device:
 	db "/dev/ramfs",0
 str_ExtractingFiles:

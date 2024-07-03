@@ -1,6 +1,6 @@
 
-; /dev/lcd device type memory, r/w + DMA r/w + Init + Deinit, version 2, handling no interrupts.
-device_file devtMemory, mDeviceReadable or mDeviceWritable or mDeviceHasDMA or mDeviceDMAReadable or mDeviceDMAWritable or mDeviceInit or mDeviceDeinit, 2, deviceIntNone
+; /dev/lcd device type memory, r/w + DMA r/w + Init, version 2, handling no interrupts.
+device_file devtMemory, mDeviceReadable or mDeviceWritable or mDeviceHasDMA or mDeviceDMAReadable or mDeviceDMAWritable or mDeviceNeedsInit, 2, deviceIntNone
 	export device_JumpInit,   dev_lcd_init
 	export device_JumpDeinit, dev_lcd_deinit
 	export device_JumpGetDMA, dev_lcd_get_address

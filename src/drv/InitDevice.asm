@@ -1,9 +1,7 @@
-
-;@DOES Initialize a device (if needed) and return a device structure.
-;@INPUT device_t *sys_OpenDevice(const char *name);
-;@OUTPUT pointer to device structure. (file data)
-;@OUTPUT hl=-1 and Cf set if failed.
-sys_OpenDevice:
+;@DOES Initialize a device (if needed)
+;@INPUT int drv_InitDevice(const char *name);
+;@OUTPUT depends on device, usually -1 and Cf set if failed.
+drv_InitDevice:
 	pop bc,hl
 	push hl,bc
 .entryhl:
@@ -22,14 +20,12 @@ sys_OpenDevice:
 	ret nz ; don't reinit an already initialized device
 	call sys_AppendDeviceTable.entryhl
 	ret z
-	push hl
+assert device_Flags = 1
 	inc hl
 	bit bDeviceNeedsInit,(hl)
-	ld bc,6
-	add hl,bc
-	call nz,sys_jphl
-	pop hl
-	ret
+	ret z
+	ld bc,device_JumpInit - 1
+	jr drv.common_no_args
 .fail:
 	scf
 	sbc hl,hl

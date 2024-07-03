@@ -91,12 +91,11 @@ explorer_paste_file:
 
 	push hl
 	call bos.fs_BaseName
-	push hl
 	ld de,str_DestinationFilePrompt
 	call explorer_input_file_name
+	push hl
 	or a,a
-	jq z,.cancel
-	ex (sp),hl
+	jr z,.cancel
 	ld hl,(explorer_dirname_buffer)
 	push hl
 	call bos.fs_ParentDir
@@ -111,18 +110,22 @@ explorer_paste_file:
 	ld hl,0
 .destfile:=$-3
 	add hl,bc
-	or a,a
+	xor a,a
 	sbc hl,bc
 	ret z ; return if failed to get destination file name
-	ld a,0
+	or a,0
 explorer_cut_file_indicator:=$-1
-	or a,a
-	jq z,.copy
+	; or a,a
+	jr z,.copy
 	push hl,bc
 	call bos.fs_MoveFile
 	scf
 	sbc hl,hl
+	ld de,(bos.copy_buffer)
 	ld (bos.copy_buffer),hl
+	push de
+	call bos.sys_Free
+	pop bc
 .cancel:
 	pop bc,bc
 	ret

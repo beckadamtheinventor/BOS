@@ -8,19 +8,19 @@ fs_MoveFile:
 	ld (ix-7),0
 	ld hl,(ix+9) ; dest file
 	push hl
-	call fs_BaseName.entryhl
-	ld a,(hl)
-	cp a,'/'
-	jr nz,.different_dest_name
-	ld hl,(ix+6) ; source file
-	call fs_BaseName.entryhl
-	ex (sp),hl ; save source file base name, restore dest file path
-	push hl
-	call fs_JoinPath
-	pop bc
-	ld (ix-9),hl ; save dest file path joined with source base name
-	ex (sp),hl ; then pass it on as the new dest file path
-.different_dest_name:
+	; call fs_BaseName.entryhl
+	; ld a,(hl)
+	; cp a,'/'
+	; jr nz,.different_dest_name
+	; ld hl,(ix+6) ; source file
+	; call fs_BaseName.entryhl
+	; ex (sp),hl ; save source file base name, restore dest file path
+	; push hl
+	; call fs_JoinPath
+	; pop bc
+	; ld (ix-9),hl ; save dest file path joined with source base name
+	; ex (sp),hl ; then pass it on as the new dest file path
+; .different_dest_name:
 	call fs_OpenFile
 	jr nc,.fail ; fail if it exists
 	ld hl,(ix+6) ; source file

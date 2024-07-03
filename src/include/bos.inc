@@ -392,7 +392,7 @@ namespace bos
 ?sys_Free                        := $22528
 ?sys_CallExecuteFile             := $2252C
 ?sys_JumpExecuteFile             := $22530
-?sys_OpenDevice                  := $22534
+?drv_InitDevice                  := $22534
 ?fs_CopyFile                     := $22538
 ;DONOTHING                       := $2253C
 ;DONOTHING                       := $22540
@@ -556,6 +556,7 @@ namespace bos
 ?text_flags             := ti.appData+63 ; 1 byte. Instructs the OS character printing routines
 ?gfx_routine_temp       := ti.appData+64 ; 16 bytes, temp location for graphics routines
 ?LastExitCode           := ti.appData+80 ; 4 bytes, stores the exit code of the last program that finished executing
+?stdout_fd_ptr          := ti.appData+84 ; 3 bytes, stores pointer to stdout device descriptor
 ?ScrapByte              := ti.flashByte
 ?ScrapWord              := ti.scrapMem
 ?ScrapMem               := ti.scrapMem
@@ -661,7 +662,7 @@ namespace bos
 ?device_JumpDeleteFile       := 40
 ?device_JumpReadFile         := 44
 ?device_JumpWriteFile        := 48
-?device_CodeStart            := 32
+?device_CodeStart            := 52
 ?device_Header.len           := 1
 ?device_Flags.len            := 1
 ?device_Type.len             := 1

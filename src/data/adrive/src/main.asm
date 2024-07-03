@@ -3,6 +3,7 @@ include 'include/ez80.inc'
 include 'include/ti84pceg.inc'
 include 'include/bosfs.inc'
 include 'include/bos.inc'
+include 'include/defines.inc'
 
 
 org $040000+bos.fs_directory_size
@@ -37,6 +38,12 @@ fs_dir lib_dir
 	fs_entry usbdrvce_lll, "USBDRVCE","dll", f_system
 	fs_entry libload_lll, "LibLoad", "dll", f_system
 	fs_entry libload_v15, "LibLoad", "v15", f_system
+end fs_dir
+
+; "/dev/" directory
+fs_dir dev_dir
+	fs_sfentry _dev_null, "null", "", f_system+f_subfile
+	fs_sfentry _dev_lcd, "lcd", "", f_system+f_subfile
 end fs_dir
 
 ;"/bin/" directory
@@ -89,6 +96,7 @@ fs_dir bin_dir
 	fs_entry mem_so, "mem", "so", f_system
 	fs_entry os_internal_subfiles, "osfiles", "dat", f_system
 end fs_dir
+
 
 fs_file os_internal_subfiles
 
@@ -214,6 +222,14 @@ fs_file os_internal_subfiles
 
 	fs_subfile asmcomp_exe, bin_dir
 		include 'fs/bin/asmcomp.asm'
+	end fs_subfile
+
+	fs_subfile _dev_null, dev_dir
+		include 'fs/dev/null.asm'
+	end fs_subfile
+
+	fs_subfile _dev_lcd, dev_dir
+		include 'fs/dev/lcd.asm'
 	end fs_subfile
 
 	; fs_subfile json_exe, bin_dir

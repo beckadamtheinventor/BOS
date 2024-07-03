@@ -451,6 +451,25 @@ os_return_soft:
 	call os_check_recovery_key
 	call _ResetAndBuildVAT
 
+	ld hl,str_DevNull
+	call drv_InitDevice.entryhl
+
+	ld hl,str_DevLcd
+	call drv_InitDevice.entryhl
+
+	ld hl,str_DevStdout
+	push hl
+	call drv_InitDevice.entryhl
+	call nc,fs_OpenFile
+	pop bc
+	jr c,.nostdout
+	call sys_SearchDeviceTable.entryhl
+	jr nz,.hasstdout
+	sbc hl,hl
+.hasstdout:
+	ld (stdout_fd_ptr),hl
+.nostdout:
+
 	; ld hl,str_AutoExtractOptFile
 	; push hl
 	; call fs_OpenFile

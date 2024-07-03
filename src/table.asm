@@ -86,7 +86,7 @@
 	jp sys_Free
 	jp sys_CallExecuteFile
 	jp sys_JumpExecuteFile
-	jp sys_OpenDevice
+	jp drv_InitDevice
 	jp fs_CopyFile
 	jp DONOTHING
 	jp DONOTHING

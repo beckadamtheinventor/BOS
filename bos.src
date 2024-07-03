@@ -82,7 +82,7 @@
 	public _sys_Free
 	public _sys_CallExecuteFile
 	public _sys_JumpExecuteFile
-	public _sys_OpenDevice
+	public _drv_InitDevice
 	public _fs_CopyFile
 	public _fs_GetSector
 	public _fs_WriteByte
@@ -266,7 +266,7 @@ _fs_DirList                      := $22524
 _sys_Free                        := $22528
 _sys_CallExecuteFile             := $2252C
 _sys_JumpExecuteFile             := $22530
-_sys_OpenDevice                  := $22534
+_drv_InitDevice                  := $22534
 _fs_CopyFile                     := $22538
 _fs_GetSector                    := $22548
 _fs_WriteByte                    := $2254C
