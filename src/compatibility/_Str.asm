@@ -8,21 +8,34 @@ _StrCopy:
 	inc de
 	jr .
 
-
+; compare B bytes from data at HL and DE
 _StrCmpre:
 	ld a,(de)
-	cp a,(hl)
+	sub a,(hl)
 	ret nz
 	inc hl
 	inc de
 	djnz .
 	ret
 
+; compare strings HL and DE
+; stop at null terminator without comparing
+_StrCmpre0:
+	ld a,(de)
+	sub a,(hl)
+	ret nz
+	or a,(hl)
+	ret z
+	inc de
+	inc hl
+	jr .
+
+; return length of string HL in BC
 _StrLength:
 	push af,hl
-	xor a,a
+	xor a,a ; A = 0
 	ld c,a
-	mlt bc
+	mlt bc  ; BC = ? * 0 --> 0
 	cpir
 	scf
 	sbc hl,hl
@@ -30,6 +43,3 @@ _StrLength:
 	ex (sp),hl
 	pop bc,af
 	ret
-	
-	
-	

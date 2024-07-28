@@ -15,8 +15,26 @@ sys_ExecContinue:
 	jr z,.done
 	ld a,(hl)
 	cp a,'#'
-	jr z,.execute_program_string
+	jr z,.execute_program_string ; don't execute comments
 	push hl
+	ld bc,(hl)
+	ex hl,de
+	db $21,"end" ; ld hl,"end"
+	or a,a
+	sbc hl,bc
+	jr nz,.not_end
+	inc de
+	inc de
+	inc de
+	ld a,(hl)
+	cp a,$A
+	jr z,.is_end
+	cp a,$9
+	jr z,.is_end
+	cp a,' '
+.is_end:
+	jq nz,.done ; branch will only be taken if A is ' ', '\x09', or '\x0A'
+.not_end:
 	ld hl,(ix-3)
 	call sys_Malloc.entryhl
 	ex hl,de
@@ -52,8 +70,8 @@ sys_ExecContinue:
 	or a,a
 	jr nz,.execute_program_string ;continue executing if an eol character was found before the null terminator
 .done:
-	xor a,a
-	ld (curcol),a
+	; xor a,a
+	; ld (curcol),a
 	ld hl,(LastCommandResult)
 	ld a,(LastCommandResult+3)
 	ld e,a
@@ -67,8 +85,10 @@ sys_ExecContinue:
 	pop ix
 	ret
 
+;; eventually allow for forwarding command output,
+;; would require me to redo how text printing works so it goes through
+;; a device file of some kind.
 ; .forward_output:
-	
 	; ld hl,(ix-3)
 	; push hl
 	; call fs_WriteNewFile

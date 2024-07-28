@@ -44,7 +44,8 @@ fs_WriteFile:
 	call sys_WriteFlashA
 	ld hl,(ix+12)
 	push hl
-	call fs_DeleteFileFD ; delete and free old file descriptor and data section
+; note that this routine locks flash so we need to re-unlock it when we need to write to flash again.
+	call fs_DeleteFileFD ; delete and free old file descriptor and data section.
 	ld hl,(ix-9)
 	ex (sp),hl
 	call fs_GetFDPtr ; get pointer to new file data section
