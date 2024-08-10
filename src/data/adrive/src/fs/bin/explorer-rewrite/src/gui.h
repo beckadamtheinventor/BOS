@@ -37,8 +37,8 @@ typedef struct _gui_item_t {
 	int x, y;
 	unsigned int width, height;
 	char *text;
-	bool (*lclickaction)(void *);
-	bool (*rclickaction)(void *);
+	bool (*lclickaction)(void*, void*);
+	bool (*rclickaction)(void*, void*);
 	void *value;
 } gui_item_t;
 
@@ -54,9 +54,8 @@ typedef struct _window_t {
 
 
 void guiDrawWindow(window_t* window);
-void guiDrawItem(gui_item_t* item);
+void guiDrawItem(window_t* window, gui_item_t* item);
 void guiDrawStringXY(const char* str, int minx, int miny, int w, int h);
-void guiDrawItem(gui_item_t* item);
 gui_item_t* guiGetItemAt(window_t* window, int x, int y);
 
 #endif

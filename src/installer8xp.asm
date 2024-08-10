@@ -97,7 +97,7 @@ backup_tios_query:
 missing_secondary_str:
 	db "Missing AppVar BOSOSpt2",0
 backingup_os_string:
-	db "Backing up TIOS &",0
+	db "Backing up TIOS...",0
 failed_to_backup_os_string:
 	db "OS too large to backup",0
 continue_anyways_string:
