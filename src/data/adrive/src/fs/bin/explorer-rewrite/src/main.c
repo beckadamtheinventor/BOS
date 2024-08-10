@@ -13,7 +13,12 @@
 
 //uint8_t keypress_queue[6*8] = {0};
 
-#define NUM_MAIN_WINDOW_ITEMS 2
+#define KEY_SCAN_ITERATIONS 10
+#define CURSOR_SPEED_COOLDOWN 4
+#define MAX_CURSOR_SPEED 4
+
+void Delay10ms(void);
+
 gui_item_t MainWindowItems[] = {
 	{
 		GUI_ITEM_TEXT,
@@ -27,6 +32,9 @@ gui_item_t MainWindowItems[] = {
 		"Test Button",
 		NULL, NULL,
 	},
+	{
+		GUI_ITEM_NONE,
+	},
 };
 
 window_t MainWindow = {
@@ -35,7 +43,6 @@ window_t MainWindow = {
 	NULL,
 	NULL,
 	NULL,
-	NUM_MAIN_WINDOW_ITEMS,
 	&MainWindowItems,
 };
 
@@ -90,10 +97,8 @@ int main(int argc, char **argv) {
 //	uint8_t *keythreadstack;
 //	uint8_t keythread;
 	int cursor_x, cursor_y;
+	char cursor_speed = 1, cursor_speed_cooldown = 0;
 	bool redraw = true;
-//	if ((keythreadstack = sys_Malloc(32*sizeof(void*))) == NULL)
-//		return 1;
-//	keythread = th_CreateThread(&_keythread, &keythreadstack[32*sizeof(void*)], 0, NULL);
 
 	gfx_SetTransparentColor(248);
 	gfx_SetTextTransparentColor(0);
@@ -109,27 +114,46 @@ int main(int argc, char **argv) {
 		}
 		gfx_TransparentSprite(cursor, cursor_x, cursor_y);
 		th_HandleNextThread();
+		for (char i=0; i<KEY_SCAN_ITERATIONS; i++) {
+			if (kb_AnyKey()) {
+				break;
+			}
+			Delay10ms();
+		}
 		kb_Scan();
 
 		if (kb_AnyKey()) {
 			gfx_BlitRectangle(1, cursor_x, cursor_y, cursor->width, cursor->height);
+		} else if (cursor_speed > 1) {
+			cursor_speed--;
 		}
 
 		if (kb_IsDown(kb_KeyUp)) {
 			if (cursor_y > 0)
-				cursor_y -= 1;
+				cursor_y -= cursor_speed;
+			goto cursor_moved;
 		}
 		if (kb_IsDown(kb_KeyDown)) {
 			if (cursor_y < LCD_HEIGHT - cursor->height)
-				cursor_y += 1;
+				cursor_y += cursor_speed;
+			goto cursor_moved;
 		}
 		if (kb_IsDown(kb_KeyLeft)) {
 			if (cursor_x > 0)
-				cursor_x -= 1;
+				cursor_x -= cursor_speed;
+			goto cursor_moved;
 		}
 		if (kb_IsDown(kb_KeyRight)) {
 			if (cursor_x < LCD_WIDTH - cursor->width)
-				cursor_x += 1;
+				cursor_x += cursor_speed;
+			cursor_moved:;
+			cursor_speed_cooldown++;
+			if (cursor_speed_cooldown >= CURSOR_SPEED_COOLDOWN) {
+				cursor_speed_cooldown = 0;
+				if (cursor_speed < MAX_CURSOR_SPEED) {
+					cursor_speed++;
+				}
+			}
 		}
 		if (kb_IsDown(kb_KeyEnter) || kb_IsDown(kb_Key2nd)) {
 			
