@@ -92,6 +92,7 @@ includes:
 	$(CP) $(call NATIVEPATH,src/data/adrive/osrt.inc) $(call NATIVEPATH,$(FSSRC)/fs/bin/include/osrt.inc)
 	$(CP) $(call NATIVEPATH,src/data/adrive/osrt.inc) $(call NATIVEPATH,$(FSSRC)/fs/lib/include/osrt.inc)
 	python build_bos_src.py
+	python build_bos_internal_inc.py
 
 # Rule to create object and binary directories
 objdirs:

@@ -45,6 +45,7 @@ th_HandleNextThread:
 .nosave:
 	call th_FindNextThread
 	ld (current_thread),a
+	or a,a
 	sbc hl,hl
 	ld l,a
 	add hl,hl

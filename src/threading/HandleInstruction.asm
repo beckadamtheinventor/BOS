@@ -7,21 +7,21 @@ HandleInstruction:
 	cp a,$C5
 	jr z,_HandleThreadSpawn
 	ld hl,threading_enabled
-	or a,a
-	jr z,_DisableThreading
 	inc a
+	jr z,_DisableThreading
+	dec a
 	jr z,_EnableThreading
-	cp a,$76 + 1
+	cp a,$76
 	jr z,_SleepThread
-	cp a,$E7 + 1
+	cp a,$E7
 	jr z,_WakeThread
-	cp a,$EF + 1
+	cp a,$EF
 	jr z,_EnableOSThreading
-	cp a,$C1 + 1
+	cp a,$C1
 	jq z,th_HandleNextThread
-	cp a,$C9 + 1
+	cp a,$C9
 	jq z,th_EndThread
-	cp a,$F7 + 1
+	cp a,$F7
 	ret nz
 	ld a,(threading_enabled)
 	cp a,threadOSRoutines

@@ -17,10 +17,10 @@ sys_GetRandomAddress:
 	call .test_byte ; run a total of 513 times
 
 	ex hl,de
-	ld bc,31*8/3 ; change the 31 if the number of tests changes
+	ld bc,31*8/4 ; change the 31 if the number of tests changes
 	xor a,a
 	sbc hl,bc
-	ret c
+	jr c,.return_default
 	add hl,bc
 
 	lea hl, iy+0
@@ -31,6 +31,10 @@ sys_GetRandomAddress:
 	sbc hl, bc  ; set the z flag if HL is 0
 	ret z
 	inc a
+	ret
+
+.return_default:
+	ld hl,$D65800
 	ret
 
 ; test byte at hl, set iy=hl if entropy is better
