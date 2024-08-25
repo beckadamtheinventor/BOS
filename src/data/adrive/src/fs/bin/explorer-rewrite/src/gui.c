@@ -20,56 +20,87 @@ void guiDrawWindow(window_t *window) {
 	}
 	if (window->title != NULL) {
 		gfx_HorizLine(window->x + 1, window->y + 10, window->width - 2);
-		if (window->icon != NULL)
+		if (window->icon != NULL) {
 			guiDrawStringXY(window->title, (window->x + 2 + window->icon->width), window->y + 2, (window->width - 4 + window->icon->height), 9);
-		else
+		} else {
 			guiDrawStringXY(window->title, window->x + 2, window->y + 2, window->width - 4, 9);
+		}
 	}
 	if (window->content != NULL) {
 		guiDrawStringXY(window->content, window->x + 2, window->y + (window->title != NULL ? LINE_HEIGHT + 3 : 2), window->width - 4, window->height - 4);
 	}
-	for (unsigned int i=0; i<window->numitems; i++) {
-		guiDrawItem(window->items[i]);
+	if (window->items) {
+		unsigned int i = 0;
+		while (window->items[i]) {
+			guiDrawItem(window, window->items[i]);
+			i++;
+		}
 	}
 }
 
-void guiDrawItem(gui_item_t *item) {
+void guiDrawItem(window_t* window, gui_item_t* item) {
+	int xx, yy;
+	if (item->x < 0) {
+		xx = window->x;
+	} else if (item->x + item->width >= window->width) {
+		xx = window->width - item->width;
+		if (xx < 0) {
+			xx = 0;
+		}
+	} else {
+		xx = window->x + item->x;
+	}
+	if (item->y < 0) {
+		yy = window->y;
+	} else if (item->y + item->height >= window->height) {
+		yy = window->height - item->height;
+		if (yy < 0) {
+			yy = 0;
+		}
+	} else {
+		yy = window->y + item->y;
+	}
 	switch (item->type) {
 		case GUI_ITEM_BUTTON:
 			gfx_SetColor(WINDOW_BUTTON_BG_COLOR);
-			gfx_FillRectangle(item->x, item->y, item->width, item->height);
+			gfx_FillRectangle(xx+1, yy+1, item->width-2, item->height-2);
 			gfx_SetColor(WINDOW_BUTTON_FG_COLOR);
-			gfx_Rectangle(item->x, item->y, item->width, item->height);
+			gfx_Rectangle(xx, yy, item->width, item->height);
 			gfx_SetTextFGColor(WINDOW_BUTTON_TEXT_COLOR);
 			gfx_SetTextBGColor(WINDOW_BUTTON_BG_COLOR);
 			break;
 		case GUI_ITEM_TEXTFIELD:
 			gfx_SetColor(WINDOW_FIELD_BG_COLOR);
-			gfx_FillRectangle(item->x, item->y, item->width, item->height);
+			gfx_FillRectangle(xx+1, yy+1, item->width-2, item->height-2);
 			gfx_SetColor(WINDOW_FIELD_FG_COLOR);
-			gfx_Rectangle(item->x, item->y, item->width, item->height);
+			gfx_Rectangle(xx, yy, item->width, item->height);
 			gfx_SetTextFGColor(WINDOW_FIELD_TEXT_COLOR);
-			gfx_SetTextBGColor(WINDOW_BUTTON_BG_COLOR);
+			gfx_SetTextBGColor(WINDOW_FIELD_BG_COLOR);
 			break;
 		case GUI_ITEM_CHECKBOX:
-			gfx_SetColor(WINDOW_FIELD_BG_COLOR);
-			gfx_FillRectangle(item->x, item->y, 9, 9);
+			if (item->value != NULL && *(uint8_t*)item->value) {
+				gfx_SetColor(WINDOW_FIELD_FG_COLOR);
+			} else {
+				gfx_SetColor(WINDOW_FIELD_BG_COLOR);
+			}
+			gfx_FillRectangle(xx+1, yy+1, 7, 7);
 			gfx_SetColor(WINDOW_FIELD_FG_COLOR);
-			gfx_Rectangle(item->x, item->y, 9, 9);
+			gfx_Rectangle(xx, yy, 9, 9);
 			gfx_SetTextFGColor(WINDOW_FIELD_TEXT_COLOR);
 			gfx_SetTextBGColor(WINDOW_BUTTON_BG_COLOR);
 			if (item->text != NULL) {
-				guiDrawStringXY(item->text, item->x + 10, item->y, item->width, item->height);
+				guiDrawStringXY(item->text, xx+11, yy, item->width, item->height);
 			}
 			return;
 		case GUI_ITEM_TEXT:
 			gfx_SetTextFGColor(WINDOW_TEXT_COLOR);
 			gfx_SetTextBGColor(WINDOW_FILL_COLOR);
+			break;
 		default:
 			break;
 	}
 	if (item->text != NULL) {
-		guiDrawStringXY(item->text, item->x, item->y, item->width, item->height);
+		guiDrawStringXY(item->text, xx+2, yy+2, item->width-4, item->height-4);
 	}
 }
 
@@ -78,14 +109,16 @@ void guiDrawStringXY(const char *str, int minx, int miny, int w, int h) {
 	int maxx, maxy;
 	int x = minx;
 	int y = miny;
-	if (w == 0)
+	if (w == 0) {
 		maxx = LCD_WIDTH;
-	else
+	} else {
 		maxx = x + w;
-	if (h == 0)
+	}
+	if (h == 0) {
 		maxy = LCD_HEIGHT;
-	else
+	} else {
 		maxy = y + h;
+	}
 
 	gfx_SetTextXY(x, y);
 	while ((c = *str++)) {
@@ -98,11 +131,36 @@ void guiDrawStringXY(const char *str, int minx, int miny, int w, int h) {
 			}
 			if (y >= maxy)
 				break;
-			if (c == 0xA)
+			if (c < 0x20)
 				continue;
 			gfx_PrintChar(c);
 			x += cw;
 		}
 	}
 	
+}
+
+bool guiCursorOnWindow(window_t* window, int x, int y) {
+	if ((unsigned)(y - window->y) < window->height) {
+		if ((unsigned)(x - window->x) < window->width) {
+			return true;
+		}
+	}
+	return false;
+}
+
+gui_item_t* guiGetItemAt(window_t* window, int x, int y) {
+	if (window->items) {
+		gui_item_t* item;
+		unsigned int i = 0;
+		while ((item = window->items[i])) {
+			if ((unsigned)(y - item->y) < item->height) {
+				if ((unsigned)(x - item->x) < item->width) {
+					return item;
+				}
+			}
+			i++;
+		}
+	}
+	return NULL;
 }

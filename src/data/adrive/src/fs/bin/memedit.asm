@@ -8,7 +8,7 @@ org ti.userMem
 	jr mem_edit
 	db "REX",0
 mem_edit:
-	ld hl,-20
+	ld hl,-21
 	call ti._frameset
 	xor a,a
 	ld (ix-12),a
@@ -369,8 +369,10 @@ mem_edit_main:
 	jq z,._write_file
 	cp a,15 ;clear key
 	jq z,.exit
-	cp a,53 ;yequ key
+	cp a,53 ;yequ / f1 key
 	jq z,.setaddress
+	cp a,52 ;window / f2 key
+	jq z,.setaddressoffset
 	cp a,10 ;"+" key
 	jq z,.forwardfullpage
 	cp a,11 ;"-" key
@@ -458,16 +460,27 @@ edited_file:=$-1
 	ld (ix-7),a
 .dontloadcursor:
 	jq .main_loop
+.setaddressoffset:
+	call .getaddress
+	jq c,.main_loop
+	ld hl,(ix-6)
+	ld de,(ix-3)
+	add hl,de
+	jr ._setaddress
 .setaddress:
 	call .getaddress
 	jq c,.main_loop
 	ld hl,(ix-6)
+._setaddress:
 	ld (ix-3),hl
 	xor a,a
 	jq .main_loop
 .getaddress:
 	call .clearscreen
-	or a,a
+	xor a,a
+	ld (ix-21),a
+	inc a
+	ld (bos.curcol),a
 	sbc hl,hl
 	ld (ix-6),hl
 	lea hl,ix-4 ;upper byte of address
@@ -478,16 +491,12 @@ edited_file:=$-1
 	ret c
 .getaddrbyte:
 	push hl
-	call bos.gfx_BlitBuffer
-	call bos.sys_WaitKeyCycle
-	call getnibble
+	call .getaddrbyte.waitkey
 	jq nz,.exitaddrloop
 	ld (ix-8),c
 	ld a,c
 	call _print4h
-	call bos.gfx_BlitBuffer
-	call bos.sys_WaitKeyCycle
-	call getnibble
+	call .getaddrbyte.waitkey
 	jq nz,.exitaddrloop
 	ld a,c
 	ld l,a
@@ -505,6 +514,25 @@ edited_file:=$-1
 	call bos.gfx_BlitBuffer
 	or a,a
 	ret
+.getaddrbyte.waitkey:
+	ld a,(bos.curcol)
+	push af
+	xor a,a
+	ld (bos.curcol),a
+	call bos.gui_PrintChar
+	pop af
+	ld (bos.curcol),a
+	call bos.gfx_BlitBuffer
+	call bos.sys_WaitKeyCycle
+	cp a,ti.skSub ; subtract
+	jr z,.getaddrbyte.invert
+	cp a,ti.skChs ; negate
+	jr nz,.getaddrbyte.notsubtract
+.getaddrbyte.invert:
+	set 0,(ix-21)
+	jr .getaddrbyte.waitkey
+.getaddrbyte.notsubtract:
+	jq getnibble
 .lcd_ptr_from_cursor:
 	ld c,a
 	rra

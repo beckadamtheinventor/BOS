@@ -183,9 +183,9 @@ if defined INSTALLER8XP
 		out0	($24),a
 		ret.l
 
-_unlock := .unlock
-_lock := .lock
-_sectorerase := .sectorerase
+	_sectorerase := .sectorerase
+	_unlock := .unlock
+	_lock := .lock
 
 end if
 		assume adl = 1

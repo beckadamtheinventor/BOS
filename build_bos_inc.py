@@ -30,6 +30,7 @@ def build_bos_inc():
 
 	with open(path.join(path.dirname(__file__), "bos.inc"),"w") as f:
 		f.write("""
+
 ;-------------------------------------------------------------------------------
 ; Executable formats
 ;-------------------------------------------------------------------------------
@@ -98,6 +99,8 @@ macro flash_executable? header:1
 				else
 					opcode lhs,rhs
 				end match
+			else if args relativeto flashexecbase
+				opcode args - flashexecbase
 			else
 				opcode args
 			end if
@@ -124,47 +127,64 @@ end macro
 ;-------------------------------------------------------------------------------
 ; Syscall library macro
 ;-------------------------------------------------------------------------------
-macro syscalllib?
+macro syscalllib? sclname
 	local exports
-	db "SCL",0
+	local flashexecbase
+	element flashexecbase
 	virtual
 		exports.area::
 	end virtual
-	virtual at 0
-	macro export? routine
+	virtual as "h"
+		header.area::
+	end virtual
+	virtual as "src"
+		symbols.area::
+	end virtual
+	virtual at flashexecbase-5
+	db "SCL",0
+	macro export? routine, name, hname, hdef&
 		virtual exports.area
 			if defined routine.ramroutine
 				db 2
 			else
 				db 1
 			end if
-			dw routine
-			db `routine, 0
-		end virtual
-	end macro
-	macro export_named? routine, name
-		virtual exports.area
-			if defined routine.ramroutine
-				db 2
-			else
-				db 1
-			end if
-			dw routine
+			dw routine-flashexecbase
 			db name, 0
 		end virtual
+		virtual header.area
+			db hdef
+			db $A
+		end virtual
+		virtual symbols.area
+			db "public _", hname,$A
+			db '_',hname,' := syscall "',sclname,'/',name,'"',$A
+		end virtual
 	end macro
-	macro export_data? data, name
+	macro export_data? data, name, hname, hdef&
 		virtual exports.area
 			db 3
-			dw data
+			dw data-flashexecbase
 			db name, 0
 		end virtual
+		virtual header.area
+			db hdef
+			db $A
+		end virtual
 	end macro
-	macro export_ptr? routine, name
+	macro export_ptr? routine, name, hname, hdef&
 		virtual exports.area
 			db 8
 			dl routine
 			db name, 0
+		end virtual
+		virtual header.area
+			db hdef
+			db $A
+		end virtual
+		virtual symbols.area
+			db "public _", hname,$A
+			db '_',hname,' := syscall "',sclname,'/',name,'"',$A
 		end virtual
 	end macro
 	macro ram_routine? routine, ramloc
@@ -210,8 +230,8 @@ macro syscalllib?
 		purge export?
 		purge end?.syscalllib?
 	end macro
-	iterate each, call,jp,jq,ld,syscall
-		macro each? args&
+	iterate opcode, call,jp,jq,ld,syscall
+		macro opcode? args&
 			match lhs=,rhs, args
 				match (val), lhs
 					if val relativeto flashexecbase
@@ -246,9 +266,11 @@ macro syscalllib?
 				else
 					opcode lhs
 				end if
+			else if args relativeto flashexecbase
+				opcode args - flashexecbase
 			else
 				opcode args
-			end match
+			end if
 		end macro
 	end iterate
 end macro

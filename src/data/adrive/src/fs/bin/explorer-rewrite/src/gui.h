@@ -26,6 +26,7 @@
 #define WIN_DEFAULT         0
 #define WIN_BORDERLESS      1
 
+#define GUI_ITEM_NONE       0
 #define GUI_ITEM_TEXT       1
 #define GUI_ITEM_BUTTON     2
 #define GUI_ITEM_TEXTFIELD  3
@@ -33,26 +34,28 @@
 
 typedef struct _gui_item_t {
 	uint8_t type;
-	int x, y, width, height;
+	int x, y;
+	unsigned int width, height;
 	char *text;
-	bool (*lclickaction)(void *);
-	bool (*rclickaction)(void *);
+	bool (*lclickaction)(void*, void*);
+	bool (*rclickaction)(void*, void*);
+	void *value;
 } gui_item_t;
 
 typedef struct _window_t {
 	uint8_t type;
-	int x, y, width, height;
+	int x, y;
+	unsigned int width, height;
 	char *title;
 	char *content;
 	gfx_sprite_t *icon;
-	unsigned int numitems;
 	gui_item_t **items;
 } window_t;
 
 
-void guiDrawWindow(window_t *window);
-void guiDrawItem(gui_item_t *item);
-void guiDrawStringXY(const char *str, int minx, int miny, int w, int h);
-void guiDrawItem(gui_item_t *item);
+void guiDrawWindow(window_t* window);
+void guiDrawItem(window_t* window, gui_item_t* item);
+void guiDrawStringXY(const char* str, int minx, int miny, int w, int h);
+gui_item_t* guiGetItemAt(window_t* window, int x, int y);
 
 #endif
