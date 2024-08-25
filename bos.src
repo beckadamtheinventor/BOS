@@ -84,6 +84,9 @@
 	public _sys_JumpExecuteFile
 	public _drv_InitDevice
 	public _fs_CopyFile
+	public _sys_GetRandomAddress
+	public _sys_Random8
+	public _sys_Random32
 	public _fs_GetSector
 	public _fs_WriteByte
 	public _fs_RenameFile
@@ -268,6 +271,9 @@ _sys_CallExecuteFile             := $2252C
 _sys_JumpExecuteFile             := $22530
 _drv_InitDevice                  := $22534
 _fs_CopyFile                     := $22538
+_sys_GetRandomAddress            := $2253C
+_sys_Random8                     := $22540
+_sys_Random32                    := $22544
 _fs_GetSector                    := $22548
 _fs_WriteByte                    := $2254C
 _fs_RenameFile                   := $22550

@@ -371,4 +371,8 @@ if __name__=='__main__':
 		print("""Usage:
 python add_file_to_rom.py file1source file1dest file2source +file2dest
 raw binary data from file1source is written to file1dest on rom image
+
+--rom      input rom file, should be exported from the emulator after first boot
+--append   append target file
+--output   output rom file
 """)

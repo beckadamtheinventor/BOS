@@ -44,6 +44,7 @@ end fs_dir
 fs_dir dev_dir
 	fs_sfentry _dev_null, "null", "", f_system+f_subfile
 	fs_sfentry _dev_lcd, "lcd", "", f_system+f_subfile
+	fs_sfentry _dev_random, "random", "", f_system+f_subfile
 end fs_dir
 
 ;"/bin/" directory
@@ -87,6 +88,7 @@ fs_dir bin_dir
 	fs_sfentry pause_exe, "pause", "", f_system+f_subfile
 	fs_sfentry peek_exe, "peek", "", f_system+f_subfile
 	fs_sfentry poke_exe, "poke", "", f_system+f_subfile
+	fs_sfentry random_exe, "random", "", f_system+f_subfile
 	fs_sfentry rm_exe, "rm", "", f_system+f_subfile
 	fs_sfentry sleep_exe, "sleep", "", f_system+f_subfile
 	fs_sfentry zx7_exe, "zx7", "", f_system+f_subfile
@@ -168,6 +170,10 @@ fs_file os_internal_subfiles
 		include 'fs/bin/info.asm'
 	end fs_subfile
 
+	fs_subfile random_exe, bin_dir
+		include 'fs/bin/random.asm'
+	end fs_subfile
+
 	fs_subfile rm_exe, bin_dir
 		include 'fs/bin/rm.asm'
 	end fs_subfile
@@ -230,6 +236,10 @@ fs_file os_internal_subfiles
 
 	fs_subfile _dev_lcd, dev_dir
 		include 'fs/dev/lcd.asm'
+	end fs_subfile
+
+	fs_subfile _dev_random, dev_dir
+		include 'fs/dev/random.asm'
 	end fs_subfile
 
 	; fs_subfile json_exe, bin_dir

@@ -65,6 +65,7 @@ text_flags             := ti.appData+63 ; 1 byte. Instructs the OS character pri
 gfx_routine_temp       := ti.appData+64 ; 16 bytes, temp location for graphics routines
 LastExitCode           := ti.appData+80 ; 4 bytes, stores the exit code of the last program that finished executing
 stdout_fd_ptr          := ti.appData+84 ; 3 bytes, stores pointer to stdout device descriptor
+random_source_ptr      := ti.appData+87 ; 3 bytes, stores pointer to random source address
 
 ScrapByte              := ti.flashByte
 ScrapWord              := ti.scrapMem
@@ -277,6 +278,11 @@ bReturnHex           := 1
 bReturnLong          := 2
 bSilentReturn        := 3
 bReturnData          := 4
+mReturnNotError      := 1 shl bReturnNotError
+mReturnHex           := 1 shl bReturnHex
+mReturnLong          := 1 shl bReturnLong
+mSilentReturn        := 1 shl bSilentReturn
+mReturnData          := 1 shl bReturnData
 
 ; symbol defines
 symbol.next         := 0 ; 24-bit pointer to next symbol. 0 if end of list.

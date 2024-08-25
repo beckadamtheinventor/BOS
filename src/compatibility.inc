@@ -1,5 +1,6 @@
 
 ; BOS compatility routines
+include 'compatibility/_FindFreeArcSpot.asm'
 include 'compatibility/_AddVATEntry.asm'
 include 'compatibility/_ResetAndBuildVAT.asm'
 include 'compatibility/_BuildVAT.asm'

@@ -246,10 +246,10 @@ sys_ExecuteFile:
 	ld (iy+6),a
 	call ti.PushOP3
 	call .actuallyrunprogram
-	; save exit code
-	ld (LastExitCode),hl
-	ld a,e
-	ld (LastExitCode+3),a
+	; save exit code (handled in th_CreateThread thread return handler now)
+	; ld (LastExitCode),hl
+	; ld a,e
+	; ld (LastExitCode+3),a
 	call ti.PopOP3
 	ld iy,ti.OP3
 	ld a,(iy)

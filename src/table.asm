@@ -88,9 +88,9 @@
 	jp sys_JumpExecuteFile
 	jp drv_InitDevice
 	jp fs_CopyFile
-	jp DONOTHING
-	jp DONOTHING
-	jp DONOTHING
+	jp sys_GetRandomAddress
+	jp sys_Random8
+	jp sys_Random32
 	jp fs_GetSector
 	jp fs_WriteByte
 	jp fs_RenameFile

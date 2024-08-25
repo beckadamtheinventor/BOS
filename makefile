@@ -224,6 +224,16 @@ clean-serial:
 	$(Q)make clean -f makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/serial/)
 	$(Q)echo Removed serial objects and binaries.
 
+clean-libs:
+	$(RM) $(call NATIVEPATH,$(FSOBJ)/libload.bin)
+	$(RM) $(call NATIVEPATH,$(FSOBJ)/fontlibc.bin)
+	$(RM) $(call NATIVEPATH,$(FSOBJ)/fatdrvce.bin)
+	$(RM) $(call NATIVEPATH,$(FSOBJ)/fileioc.bin)
+	$(RM) $(call NATIVEPATH,$(FSOBJ)/graphx.bin)
+	$(RM) $(call NATIVEPATH,$(FSOBJ)/keypadc.bin)
+	$(RM) $(call NATIVEPATH,$(FSOBJ)/msddrvce.bin)
+	$(RM) $(call NATIVEPATH,$(FSOBJ)/srldrvce.bin)
+	$(RM) $(call NATIVEPATH,$(FSOBJ)/usbdrvce.bin)
 
 #make clean
 clean:

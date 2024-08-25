@@ -5,18 +5,18 @@ HandleInstruction:
 	inc hl
 	push hl
 	cp a,$C5
-	jq z,_HandleThreadSpawn
+	jr z,_HandleThreadSpawn
 	ld hl,threading_enabled
 	or a,a
-	jq z,_DisableThreading
+	jr z,_DisableThreading
 	inc a
-	jq z,_EnableThreading
+	jr z,_EnableThreading
 	cp a,$76 + 1
-	jq z,_SleepThread
+	jr z,_SleepThread
 	cp a,$E7 + 1
-	jq z,_WakeThread
+	jr z,_WakeThread
 	cp a,$EF + 1
-	jq z,_EnableOSThreading
+	jr z,_EnableOSThreading
 	cp a,$C1 + 1
 	jq z,th_HandleNextThread
 	cp a,$C9 + 1

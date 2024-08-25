@@ -22,6 +22,9 @@ boot_os:
 	
 	call sys_FlashLock
 
+	call sys_GetRandomAddress
+	ld (random_source_ptr),hl
+
 os_return:
 	ld sp,ti.stackTop
 	im 1 ; set interrupt mode 1
@@ -780,7 +783,9 @@ handle_bad_interrupt:
 	ld a,(hl)
 	push af
 	ld (hl),0
-	; call gfx_Set8bpp
+	ld a,(ti.mpLcdCtrl)
+	push af
+	call gfx_Set8bpp
 	ld hl,str_BadInterrupt
 	call gui_DrawConsoleWindow
 	jr handle_unimplemented.terminateorcontinue
@@ -790,17 +795,21 @@ handle_unimplemented:
 	ld a,(hl)
 	push af
 	ld (hl),0
-	; call gfx_Set8bpp
+	ld a,(ti.mpLcdCtrl)
+	push af
+	call gfx_Set8bpp
 	ld hl,str_UnimplementedOSCall
 	call gui_DrawConsoleWindow
 	ld hl,str_Address0x
 	call gui_PrintString
+	pop af
 	pop hl ; af->hl
 	ex (sp),hl ; hl->af, (sp)->hl
 	dec hl ; account for pc increment by the address that called us
 	dec hl
 	dec hl
 	dec hl
+	push af
 	call gui_PrintHexInt
 .terminateorcontinue:
 	call gui_NewLine
@@ -809,10 +818,16 @@ handle_unimplemented:
 .keywait:
 	call sys_WaitKeyCycle
 	cp a,15
-	jr z,.pop_threading_state
+	jr z,.pop_lcd_state_threading_state
 	cp a,9
 	jr nz,.keywait
 	jq os_return
+.pop_lcd_state_threading_state:
+	pop af
+	cp a,ti.lcdBpp8
+	jr z,.pop_threading_state
+	ld (ti.mpLcdCtrl),a
+	call ti.boot.ClearVRAM
 .pop_threading_state:
 	pop af
 	ld (threading_enabled),a

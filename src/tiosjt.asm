@@ -1749,8 +1749,8 @@
 	call handle_unimplemented ;BitGrfFuncM               := 0021C6Ch
 	jp DONOTHING ;nop_ret                     equ 0021C70h
 	call handle_unimplemented ;GetScrollPxlAmount        := 0021C74h
-	call handle_unimplemented ;os.PushErrorHandler       := 0021C78h
-	call handle_unimplemented ;os.PopErrorHandler        := 0021C7Ch
+	jp DONOTHING ;os.PushErrorHandler       := 0021C78h
+	jp DONOTHING ;os.PopErrorHandler        := 0021C7Ch
 	call handle_unimplemented ;os.ThrowError             := 0021C80h
 	call handle_unimplemented ;os.RealCopy               := 0021C84h
 	call handle_unimplemented ;os.RealAsinRad            := 0021C88h
@@ -2005,7 +2005,7 @@
 	jp DONOTHING ;                          equ 002206Ch
 	jp DONOTHING ;                          equ 0022070h
 	jp _Mov11ToOP1
-	call handle_unimplemented ;FindFreeArcSpot           := 0022078h
+	jp _FindFreeArcSpot ;FindFreeArcSpot           := 0022078h
 	jp DONOTHING ;                          equ 002207Ch
 	call handle_unimplemented ;os.SetTimer2              := 0022080h
 	call handle_unimplemented ;os.DisableTimer2          := 0022084h

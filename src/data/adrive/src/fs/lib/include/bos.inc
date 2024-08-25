@@ -394,9 +394,9 @@ namespace bos
 ?sys_JumpExecuteFile             := $22530
 ?drv_InitDevice                  := $22534
 ?fs_CopyFile                     := $22538
-;DONOTHING                       := $2253C
-;DONOTHING                       := $22540
-;DONOTHING                       := $22544
+?sys_GetRandomAddress            := $2253C
+?sys_Random8                     := $22540
+?sys_Random32                    := $22544
 ?fs_GetSector                    := $22548
 ?fs_WriteByte                    := $2254C
 ?fs_RenameFile                   := $22550
@@ -557,6 +557,7 @@ namespace bos
 ?gfx_routine_temp       := ti.appData+64 ; 16 bytes, temp location for graphics routines
 ?LastExitCode           := ti.appData+80 ; 4 bytes, stores the exit code of the last program that finished executing
 ?stdout_fd_ptr          := ti.appData+84 ; 3 bytes, stores pointer to stdout device descriptor
+?random_source_ptr      := ti.appData+87 ; 3 bytes, stores pointer to random source address
 ?ScrapByte              := ti.flashByte
 ?ScrapWord              := ti.scrapMem
 ?ScrapMem               := ti.scrapMem
@@ -725,6 +726,11 @@ namespace bos
 ?bReturnLong          := 2
 ?bSilentReturn        := 3
 ?bReturnData          := 4
+?mReturnNotError      := 1 shl bReturnNotError
+?mReturnHex           := 1 shl bReturnHex
+?mReturnLong          := 1 shl bReturnLong
+?mSilentReturn        := 1 shl bSilentReturn
+?mReturnData          := 1 shl bReturnData
 ?symbol.next         := 0 ; 24-bit pointer to next symbol. 0 if end of list.
 ?symbol.name         := 3 ; 24-bit pointer to null terminated symbol name
 ?symlist.size        := 6 ; size of first symbol in symbol list

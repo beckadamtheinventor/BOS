@@ -12,9 +12,9 @@ assert ~thread_map and $FF
 	; exx
 	; exaf
 th_HandleNextThread:
-	; ld a,(threading_enabled)
-	; or a,a
-	; ret z
+	ld a,(threading_enabled)
+	or a,a
+	ret z
 	; ld a,(thread_control)
 	; or a,a
 	; ret z

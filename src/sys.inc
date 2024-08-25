@@ -67,3 +67,7 @@ include 'sys/MallocDupStr.asm'
 ; include 'sys/RelocateProgramFD.asm'
 include 'sys/HandleOnInterrupt.asm'
 include 'sys/OpenRecoveryMenu.asm'
+
+include 'sys/GetRandomAddress.asm'
+include 'sys/Random8.asm'
+include 'sys/Random32.asm'

@@ -75,6 +75,9 @@ end if
 	ret
 
 ._thread_return_handler:
+	ld (LastExitCode),hl
+	ld a,e
+	ld (LastExitCode+3),a
 	ld hl,thread_map
 	ld a,(current_thread)
 	ld l,a
