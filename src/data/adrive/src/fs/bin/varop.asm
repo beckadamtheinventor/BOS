@@ -37,7 +37,7 @@ var_main:
 	jr z,.grab_hex
 	dec hl
 
-.grab_dec
+.grab_dec:
 	push hl
 	call osrt.str_to_int
 	jr .define_var_with_value_set_value
@@ -59,12 +59,11 @@ var_main:
 
 	push hl
 	call osrt.argv_1
-	ld de,.getvarptrexe
-	push hl,de
-	call bos.sys_ExecuteFile
+	push hl
+	call varptr_main
 	ld (ix-14),hl
 	ld hl,(hl)
-	pop bc,bc
+	pop bc
 	pop de
 
 	ld a,(de)
@@ -179,10 +178,6 @@ var_main:
 	pop ix
 	ret
 
-.getvarptrexe:
-	db "varptr",0
-.newvarexe:
-	db "var",0
 .helpstr:
 	db "varop name [+-*//%] [val|var]",$A,$9,"set var to var [+ - * / // %] value/var",$A
 ; TODO: and, bit#, equal, greater, less, or, xor

@@ -2,7 +2,7 @@
 include '../include/library.inc'
 ;-------------------------------------------------------------------------------
 
-library 'FILEIOC', 7
+library FILEIOC, 8
 
 ;-------------------------------------------------------------------------------
 ; no dependencies
@@ -58,19 +58,20 @@ library 'FILEIOC', 7
 ; v5 functions
 ;-------------------------------------------------------------------------------
 	export ti_ArchiveHasRoom
-
 ;-------------------------------------------------------------------------------
 ; v6 functions
 ;-------------------------------------------------------------------------------
 	export ti_SetGCBehavior
-
 ;-------------------------------------------------------------------------------
 ; v7 functions
 ;-------------------------------------------------------------------------------
 ; No new functions, but a change was made to slot openness managemnent such that
 ; it is no longer necessary to call `ti_CloseAll` in initialization. New
 ; programs omitting this initialization require this change.
-
+;-------------------------------------------------------------------------------
+; v8 functions
+;-------------------------------------------------------------------------------
+	export ti_ArchiveHasRoomVar
 
 ;-------------------------------------------------------------------------------
 vat_ptr0 := $d0244e
@@ -262,7 +263,9 @@ ti_IsArchived:
 	push	bc
 	push	de
 	call	util_is_slot_open
-	jp	nz, util_ret_null
+	jr	z, util_is_in_ram
+	xor	a, a
+	ret
 util_is_in_ram:
 	call	util_get_vat_ptr
 	ld	hl, (hl)
@@ -356,11 +359,11 @@ ti_Open:
 	ld	a,(hl)
 	cp	a,'+'
 	jr	nz,.no_append
-.archive_var:
-	call	ti.PushOP1
+.unarchive_var:
 	call	ti.ChkFindSym
+	jr	c, .not_found
 	call	ti.ChkInRam
-	jr	z, .in_ram
+	jr	z, .save_ptrs
 	or	a, a
 	sbc	hl, hl
 	ex	de, hl
@@ -369,16 +372,9 @@ ti_Open:
 	ld	d, (hl)
 	ex	de, hl
 	call	ti.EnoughMem
-	push	af
-	call	ti.PopOP1
-	pop	af
 	jp	c, util_ret_null_pop_ix
-	call	ti.PushOP1
-	call	ti.Arc_Unarc
-	call	ti.PopOP1
-	jr	.archive_var
-.in_ram:
-	call	ti.PopOP1
+	call	util_unarchive
+	jr	.unarchive_var
 .no_append:
 	call	ti.ChkFindSym
 	jr	c, .not_found
@@ -458,26 +454,15 @@ ti_SetArchiveStatus:
 	djnz	.copy_name
 	xor	a, a
 	ld	(de), a
-	call	ti.PushOP1
-	ld	iy, ti.flags
-	call	ti.ChkFindSym
-	call	ti.ChkInRam
-	push	af
-	pop	bc
 	pop	af
 	or	a, a
-	jr	z, .set_not_archived
+	jr	z, .set_unarchived
 .set_archived:
-	push	bc
-	pop	af
-	call	z, util_Arc_Unarc
+	call	util_archive
 	jr	.relocate_var
-.set_not_archived:
-	push	bc
-	pop	af
-	call	nz, ti.Arc_Unarc
+.set_unarchived:
+	call	util_unarchive
 .relocate_var:
-	call	ti.PopOP1
 	call	ti.ChkFindSym
 	jp	c, util_ret_neg_one
 	call	ti.ChkInRam
@@ -638,14 +623,14 @@ ti_GetC:
 	push	bc
 	push	de
 	call	util_is_slot_open
-	jp	nz, util_ret_neg_one
+	jr	nz, .ret_neg_one
 	call	util_get_slot_size
 	push	bc
 	call	util_get_offset
 	pop	hl
 	scf
 	sbc	hl, bc			; size-offset
-	jp	c, util_ret_neg_one
+	jr	c, .ret_neg_one
 	push	bc
 	call	util_get_data_ptr
 	ld	hl, (hl)
@@ -659,6 +644,11 @@ ti_GetC:
 	or	a, a
 	sbc	hl, hl
 	ld	l, a
+	ret
+.ret_neg_one:
+	scf
+	sbc	hl, hl
+	ld	a, l
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -678,17 +668,16 @@ ti_PutC:
 	ld	a, e
 	ld	(char_in), a
 	call	util_is_slot_open
-	jp	nz, util_ret_neg_one
+	jr	nz, .ret_neg_one
 	call	util_is_in_ram
-	jp	c, util_ret_neg_one
-_PutChar:
+	jr	c, .ret_neg_one
 	call	util_get_slot_size
 	push	bc
 	call	util_get_offset
 	pop	hl
 	or	a, a
 	sbc	hl, bc
-	jp	c, util_ret_neg_one
+	jr	c, .ret_neg_one
 	jr	nz, .no_increment
 .increment:
 	push	bc
@@ -696,13 +685,13 @@ _PutChar:
 	ld	(resize_amount), hl
 	call	ti.EnoughMem
 	pop	bc
-	jp	c, util_ret_neg_one
+	jr	c, .ret_neg_one
 	push	bc
 	ex	de, hl
 	call	util_insert_mem
 	pop	bc
 	or	a, a
-	jp	z, util_ret_neg_one
+	jr	z, .ret_neg_one
 .no_increment:
 	call	util_get_data_ptr
 	ld	hl, (hl)
@@ -720,6 +709,11 @@ char_in := $-1
 	sbc	hl, hl
 	ld	l, a
 	ret
+.ret_neg_one:
+	scf
+	sbc	hl, hl
+	ld	a, l
+	ret
 
 ;-------------------------------------------------------------------------------
 ti_Seek:
@@ -735,14 +729,14 @@ ti_Seek:
 	ld	de, (iy + 3)
 	ld	c, (iy + 9)
 	call	util_is_slot_open
-	jp	nz, util_ret_neg_one
+	jr	nz, .ret_neg_one
 	ld	a, (iy + 6)		; origin location
 	or	a, a
 	jr	z, .seek_set
 	dec	a
 	jr	z, .seek_curr
 	dec	a
-	jp	nz, util_ret_neg_one
+	jr	nz, .ret_neg_one
 .seek_end:
 	push	de
 	call	util_get_slot_size
@@ -758,12 +752,16 @@ ti_Seek:
 	sbc	hl, de
 	push	de
 	pop	bc
-	jp	c, util_ret_neg_one
+	jr	c, .ret_neg_one
 	jp	util_set_offset
 .seek_curr:
 	push	de
 	call	util_get_offset
 	jr	.seek_set_asm
+.ret_neg_one:
+	scf
+	sbc	hl, hl
+	ret
 
 ;-------------------------------------------------------------------------------
 ti_DeleteVar:
@@ -822,11 +820,15 @@ ti_Rewind:
 	push	bc
 	push	hl
 	call	util_is_slot_open
-	jp	nz, util_ret_neg_one
+	jr	nz, .ret_neg_one
 .rewind:
 	ld	bc, 0
 	call	util_set_offset
 	or	a, a
+	sbc	hl, hl
+	ret
+	scf
+.ret_neg_one:
 	sbc	hl, hl
 	ret
 
@@ -842,10 +844,13 @@ ti_Tell:
 	push	bc
 	push	hl
 	call	util_is_slot_open
-	jp	nz, util_ret_neg_one
+	jr	nz, .ret_neg_one
 	call	util_get_offset
 	push	bc
 	pop	hl
+	ret
+.ret_neg_one:
+	sbc	hl, hl
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -860,10 +865,13 @@ ti_GetSize:
 	push	bc
 	push	hl
 	call	util_is_slot_open
-	jp	nz, util_ret_neg_one
+	jr	nz, .ret_neg_one
 	call	util_get_slot_size
 	push	bc
 	pop	hl
+	ret
+.ret_neg_one:
+	sbc	hl, hl
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -1105,13 +1113,17 @@ ti_GetDataPtr:
 	push	bc
 	push	de
 	call	util_is_slot_open
-	jp	nz, util_ret_null
+	jr	nz, .ret_null
 	call	util_get_slot_size
 	inc	hl
 	push	hl
 	call	util_get_offset
 	pop	hl
 	add	hl, bc
+	ret
+.ret_null:
+	xor	a, a
+	sbc	hl, hl
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -1126,9 +1138,13 @@ ti_GetVATPtr:
 	push	bc
 	push	de
 	call	util_is_slot_open
-	jp	nz, util_ret_null
+	jr	nz, .ret_null
 	call	util_get_vat_ptr
 	ld	hl, (hl)
+	ret
+.ret_null:
+	xor	a, a
+	sbc	hl, hl
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -1208,7 +1224,7 @@ ti_Rename:
 	inc	de
 	call	ti.Mov8b
 	call	ti.PushOP1		; save old name
-	ld	hl, util_Arc_Unarc
+	ld	hl, util_archive
 	ld	(.smc_archive), hl
 	pop	hl			; new name
 	ld	de, ti.OP1 + 1
@@ -1223,10 +1239,10 @@ ti_Rename:
 	jr	c, .return_2
 	call	ti.ChkInRam
 	jr	nz, .in_archive
-	ld	hl, util_no_op			; no-op routine instead of assuming $F8 points to a ret instruction lol
+	ld	hl, util_no_op		; no-op routine
 	ld	(.smc_archive), hl
 	call	ti.PushOP1
-	call	util_Arc_Unarc
+	call	util_archive
 	call	ti.PopOP1
 	jr	.locate_program
 .in_archive:
@@ -1259,7 +1275,7 @@ ti_Rename:
 	ldir
 .is_zero:
 	call	ti.PopOP1
-	call	util_Arc_Unarc
+	call	0
 .smc_archive := $-3
 	call	ti.PopOP1
 	call	ti.ChkFindSym
@@ -1362,38 +1378,80 @@ ti_RclVar:
 	ld	iy,ti.flags
 	call	util_set_var_str
 	call	ti.FindSym
-	jp	c, util_ret_neg_one_byte
+	jr	c, .ret_neg_one
 	push	af
 	call	ti.ChkInRam
 	pop	bc
 	ld	a, b
-	jp	nz, util_ret_neg_one_byte
+	jr	nz, .ret_neg_one
 	ld	iy, 0
 	add	iy, sp
 	and	a, $3f
-	cp	a, (iy + 3)		; var type
-	jp	nz, util_ret_neg_one_byte
+	sub	a, (iy + 3)		; var type
+	jr	nz, .ret_neg_one
 	ld	hl, (iy + 9)
 	ld	(hl), de
+	ret
+.ret_neg_one:
+	ld	a,-1
 	ret
 
 ;-------------------------------------------------------------------------------
 ti_ArchiveHasRoom:
-; checks if there is room in the archive before a garbage collect
+; checks if there is room in the archive without triggering a garbage collect.
 ; args:
 ;  sp + 3 : number of bytes to store into the archive
 ; return:
 ;  true if there is room, false if not
 	pop	de
-	ex	(sp),hl
+	pop	bc
+	push	bc
 	push	de
-util_ArchiveHasRoom:
-	ld	bc,12
+	cp	a, a			; set z flag
+	ld	hl, $FF0000
+	add	hl, bc
+	call	nc, ti.FindFreeArcSpot
+	ld	a, 1
+	ret	nz
+	xor	a, a
+	ret
+
+;-------------------------------------------------------------------------------
+ti_ArchiveHasRoomVar:
+; checks if there is room in the archive without triggering a garbage collect.
+; args:
+;  sp + 3 : handle to variable
+; return:
+;  true if there is room, false if not
+	pop	de
+	pop	bc
+	push	bc
+	push	de
+	call	util_is_slot_open
+	jr	nz,.fail
+	call	util_get_vat_ptr
+	ld	hl,(hl)
+	ld	bc,-6
 	add	hl,bc
+	ld	c,(hl)			; get var name length
+	call	util_get_data_ptr
+	ld	de,(hl)
+.entry_sym:
+	ld	a,c
+	ex	de,hl
+	ld	hl,(hl)
+	ld	bc,12
+	add	a,c
+	ld	c,a
+	add.s	hl,bc
+	jr	c,.fail
+	ld	c,l
+	ld	b,h
 	call	ti.FindFreeArcSpot
 	ld	a,1
 	ret	nz
-	dec	a
+.fail:
+	xor	a,a
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -1453,11 +1511,11 @@ util_set_var_str:
 ;  a = type
 ; out:
 ;  OP1 = variable combo
-	ld	de, ti.OP1 + 1
-	call	ti.Mov8b
+	ld	de, ti.OP1
 	and	a, $3f
-	ld	(ti.OP1), a
-	ret
+	ld	(de), a
+	inc	de
+	jp	ti.Mov8b
 
 ;-------------------------------------------------------------------------------
 util_insert_mem:
@@ -1477,7 +1535,11 @@ util_insert_mem:
 	call	ti.EnoughMem
 	pop	de
 	pop	hl
-	jr	c, util_ret_null_byte
+	jr	nc, .enough_mem
+	pop	hl
+	xor	a, a
+	ret
+.enough_mem:
 	call	ti.InsertMem
 	pop	hl
 	ld	hl, (hl)
@@ -1521,9 +1583,6 @@ util_save_size:
 	ld	(hl), d			; write new size
 util_ret_neg_one_byte:
 	ld	a, 255
-	ret
-util_ret_null_byte:
-	xor	a, a
 	ret
 
 util_ret_null_pop_ix:
@@ -1621,19 +1680,35 @@ util_set_offset:
 	ld	(hl), bc
 	ret
 
-util_Arc_Unarc:				; properly handle garbage collects
+util_archive:				; properly handle garbage collects
+	ld	iy, ti.flags
+	call	ti.ChkFindSym
 	call	ti.ChkInRam
-	jp	nz,ti.Arc_Unarc		; if the file is already in archive, we won't trigger a gc
-	ex	hl,de
-	call	ti.LoadDEInd_s
-	ex	hl,de
-	call	util_ArchiveHasRoom
-	jp	nz,ti.Arc_Unarc		; gc will not be triggered
+	ret	nz
+	call	ti.PushOP1
+	call	ti_ArchiveHasRoomVar.entry_sym
+	jr	z,.handle_gc
+	call	ti.Arc_Unarc
+	jp	ti.PopOP1
+.handle_gc:
 	call	util_pre_gc_default_handler
 util_pre_gc_handler := $-3
+	ld	iy, ti.flags
+	call	ti.PopOP1
+	call	ti.PushOP1
 	call	ti.Arc_Unarc
-	jp	util_post_gc_default_handler
+	call	util_post_gc_default_handler
 util_post_gc_handler := $-3
+	ld	iy, ti.flags
+	jp	ti.PopOP1
+
+util_unarchive:
+	ld	iy, ti.flags
+	call	ti.PushOP1
+	call	ti.ChkFindSym
+	call	ti.ChkInRam
+	call	nz,ti.Arc_Unarc
+	jp	ti.PopOP1
 
 ;-------------------------------------------------------------------------------
 ; Internal library data

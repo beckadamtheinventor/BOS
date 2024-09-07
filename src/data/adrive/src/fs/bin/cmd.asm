@@ -158,7 +158,73 @@ enter_input:
 	call bos.sys_Exec
 	pop bc
 	; print the return code here
+	call cmd_print_return_value
 	jq enter_input_clear
+
+cmd_print_return_value:
+	ld hl,(bos.ExecutingFileFd)
+	inc hl
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	jr z,.file_did_not_run
+	inc hl
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	jr nz,.file_actually_ran
+	ld hl,str_CouldNotLocatePath
+	call bos.gui_PrintLine
+.file_did_not_run:
+	ld hl,str_CouldNotLocateExecutable
+	jp bos.gui_PrintLine
+.file_actually_ran:
+	ld a,(bos.return_code_flags)
+	bit bos.bSilentReturn,a
+	ret nz
+	bit bos.bReturnNotError,a
+	jr nz,.print_number_result
+.non_zero_is_error:
+	ld hl,(LastCommandResult)
+	ld a,(LastCommandResult+3)
+	add hl,bc
+	or a,a
+	jr nz,.print_error_code
+	sbc hl,bc
+	ret z
+.print_error_code:
+	ld hl,str_ProgramFailedWithCode
+	call bos.gui_Print
+.print_number_result:
+	ld hl,(LastCommandResult)
+	ld a,(LastCommandResult+3)
+.print_number_auhl:
+	ld e,a
+.print_number_euhl:
+	push de,hl
+	ld hl,bos.gfx_string_temp
+	push hl
+	ld a,(bos.return_code_flags)
+	bit bos.bReturnHex,a
+	jr nz,._print_hex
+	bit bos.bReturnLong,a
+	jr nz,._print_long
+	call osrt.int_to_str
+	jr ._done_printing
+._print_long:
+	call nc,osrt.long_to_str
+	jr ._done_printing
+._print_hex:
+	bit bos.bReturnLong,a
+	jr nz,._print_long_hex
+	call osrt.int_to_hexstr
+	jr ._done_printing
+._print_long_hex:
+	call osrt.long_to_hexstr
+._done_printing:
+	pop bc,bc,bc
+	jp bos.gui_PrintLine
+
 
 cmd_exit_retneg1:
 	scf
@@ -205,6 +271,8 @@ str_ProgramFailedWithCode:
 	db "Error Code ",0
 str_CouldNotLocateExecutable:
 	db $9,"Could not locate executable",0
+str_CouldNotLocatePath:
+	db $9,"Missing /var/PATH",0
 ; str_CmdConfigFile:
 	; db "/etc/config/cmd/cmd.cfg",0
 

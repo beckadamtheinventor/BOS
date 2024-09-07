@@ -42,7 +42,7 @@ osrt.int_to_str       rb 4
 osrt.long_to_str      rb 4
 osrt.intstr_to_str    rb 4
 end virtual
-virtual at 320512
+virtual at 320640
 osrt.str_so.version rb 4
 osrt.substring        rb 4
 osrt.duplicate_string rb 4

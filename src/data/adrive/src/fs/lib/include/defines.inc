@@ -66,6 +66,7 @@ gfx_routine_temp       := ti.appData+64 ; 16 bytes, temp location for graphics r
 LastExitCode           := ti.appData+80 ; 4 bytes, stores the exit code of the last program that finished executing
 stdout_fd_ptr          := ti.appData+84 ; 3 bytes, stores pointer to stdout device descriptor
 random_source_ptr      := ti.appData+87 ; 3 bytes, stores pointer to random source address
+variable_sym_list_ptr  := ti.appData+90 ; 3 bytes, stores pointer to symbol list containing variables for command processing
 
 ScrapByte              := ti.flashByte
 ScrapWord              := ti.scrapMem

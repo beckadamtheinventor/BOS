@@ -1,5 +1,5 @@
 ;@DOES Return a random 32-bit number.
-;@INPUT uint32_t sys_GetRandomAddress();
+;@INPUT uint32_t sys_Random32();
 ;@OUTPUT EUHL = number
 ;@DESTROYS AF, DE, HL, BC
 sys_Random32:

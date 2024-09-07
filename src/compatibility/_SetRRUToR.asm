@@ -5,15 +5,18 @@ _SetBCUToA:
 	push hl
 	ld h,b
 	ld l,c
-	jr _SetDEUToA._SetHLUToA_popHL
+	call _SetHLUToA
+	ex (sp),hl
+	pop bc
+	ret
 
 _SetDEUToB:
 	ld a,b
 _SetDEUToA:
 	push hl
 	ex hl,de
-._SetHLUToA_popHL:
 	call _SetHLUToA
+	ex hl,de
 	pop hl
 	ret
 

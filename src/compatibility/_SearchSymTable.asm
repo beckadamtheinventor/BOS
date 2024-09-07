@@ -1,6 +1,6 @@
 ;@DOES Search the symbol table (VAT) for a file specified in OP1
 ;@INPUT Same as ti.ChkFindSym, except that 0xFF is treated as a wildcard.
-;@OUTPUT Same as ti.ChkFindSym.
+;@OUTPUT Same as ti.ChkFindSym. DE = data pointer, HL = VAT pointer.
 ;@DESTROYS af, bc, iy
 _SearchSymTable:
 	ld iy,(ti.progPtr)

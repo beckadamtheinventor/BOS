@@ -64,10 +64,13 @@ osrt.str_to_int:
 ; input int osrt.intstr_to_int(const char *str);
 ; output auhl / cuhl.
 ; if str starts with $ or 0x, it will be processed as a hex string, otherwise a decimal string.
+; if str starts with %, the value will be read from a variable (or zero if the variable doesn't exist)
 osrt.intstr_to_int:
 	pop bc,hl
 	ld a,(hl)
 	inc hl
+	cp a,'%'
+	jr z,osrt.intstr_to_int.var
 	cp a,'$'
 	jr z,osrt.intstr_to_int.hex
 	cp a,'0'
@@ -95,6 +98,54 @@ osrt.hexstr_to_int:
 	ld c,l
 	call osrt.hexstr_to_int.loop
 	ld a,c
+	ret
+
+osrt.intstr_to_int.var:
+	push hl
+osrt.intstr_to_int.var.loop:
+	ld a,(hl)
+	or a,a
+	jr z,osrt.intstr_to_int.var.found_end
+	cp a,'%'
+	jr nz,osrt.intstr_to_int.var.loop
+osrt.intstr_to_int.var.found_end:
+	pop de
+	or a,a
+	sbc hl,de
+	inc hl
+	push de,hl
+	call bos.sys_Malloc
+	ex hl,de
+	pop bc,hl
+	dec hl
+	push de
+	ldir
+	xor a,a
+	ld (de),a
+	ld hl,(bos.variable_sym_list_ptr)
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	jr z,osrt.intstr_to_int.var.return_zero
+	push hl
+	call bos.util_SearchSymList
+	add hl,bc
+	xor a,a
+	sbc hl,bc
+	jr z,osrt.intstr_to_int.var.dont_load_value
+	ld bc,bos.symbol.flags
+	add hl,bc
+	ld a,(hl)
+	inc hl
+	ld hl,(hl)
+osrt.intstr_to_int.var.dont_load_value:
+	pop bc
+osrt.intstr_to_int.var.return_zero:
+	pop bc
+	push af,hl,bc
+	call bos.sys_Free
+	pop bc,hl,af
+	ld c,a
 	ret
 
 osrt.hexstr_to_int.loop:

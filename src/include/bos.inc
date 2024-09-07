@@ -524,6 +524,7 @@ namespace bos
 ?sys_ExecBegin                   := $226E0
 ?sys_ExecContinue                := $226E4
 ?fs_IsOSBackupPresent            := $226E8
+?util_SHA256                     := $226EC
 ; end of jump table
 ;-------------------------------------------------------------------------------
 ; OS memory areas and misc defines
@@ -580,6 +581,7 @@ namespace bos
 ?LastExitCode           := ti.appData+80 ; 4 bytes, stores the exit code of the last program that finished executing
 ?stdout_fd_ptr          := ti.appData+84 ; 3 bytes, stores pointer to stdout device descriptor
 ?random_source_ptr      := ti.appData+87 ; 3 bytes, stores pointer to random source address
+?variable_sym_list_ptr  := ti.appData+90 ; 3 bytes, stores pointer to symbol list containing variables for command processing
 ?ScrapByte              := ti.flashByte
 ?ScrapWord              := ti.scrapMem
 ?ScrapMem               := ti.scrapMem

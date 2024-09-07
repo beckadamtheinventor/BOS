@@ -38,6 +38,8 @@ sys_ExecuteFile:
 	pop bc
 	ccf
 	sbc hl,hl
+	ld (LastExitCode),hl
+	ld (ExecutingFileFd),hl
 	ret c ; return -1 and ExecutingFileFD = -1 if file not found but /var/PATH was found
 	ld a,$FE
 	ld (ExecutingFileFd),a ; return -1 and ExecutingFileFD = -2 if /var/PATH not found
@@ -224,6 +226,8 @@ sys_ExecuteFile:
 	push bc
 	ld bc,(running_program_ptr)
 	push hl,bc
+	xor a,a
+	ld (return_code_flags),a
 	call th_CreateThread
 	pop bc,bc
 	pop bc,bc

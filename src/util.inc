@@ -12,6 +12,8 @@ include 'util/Zx0Decompress.asm'
 include 'util/Zx0DecompressToFlash.asm'
 include 'util/Relocate.asm'
 
+include 'util/SHA256.asm'
+
 include 'util/InitAllocSymList.asm'
 include 'util/AppendSymList.asm'
 include 'util/RemoveFromSymList.asm'

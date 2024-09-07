@@ -82,11 +82,11 @@
 <tr><td><a href="#sys_Free">bos.sys_Free</a></td><td><a href="#sys_Free">022528</a></td></tr>
 <tr><td><a href="#sys_CallExecuteFile">bos.sys_CallExecuteFile</a></td><td><a href="#sys_CallExecuteFile">02252C</a></td></tr>
 <tr><td><a href="#sys_JumpExecuteFile">bos.sys_JumpExecuteFile</a></td><td><a href="#sys_JumpExecuteFile">022530</a></td></tr>
-<tr><td><a href="#sys_OpenDevice">bos.sys_OpenDevice</a></td><td><a href="#sys_OpenDevice">022534</a></td></tr>
+<tr><td><a href="#drv_InitDevice">bos.drv_InitDevice</a></td><td><a href="#drv_InitDevice">022534</a></td></tr>
 <tr><td><a href="#fs_CopyFile">bos.fs_CopyFile</a></td><td><a href="#fs_CopyFile">022538</a></td></tr>
-<tr class="no_op"></tr><td><a href="#DONOTHING">bos.DONOTHING</a></td><td><a href="#DONOTHING">02253C</a></td></tr>
-<tr class="no_op"></tr><td><a href="#DONOTHING">bos.DONOTHING</a></td><td><a href="#DONOTHING">022540</a></td></tr>
-<tr class="no_op"></tr><td><a href="#DONOTHING">bos.DONOTHING</a></td><td><a href="#DONOTHING">022544</a></td></tr>
+<tr><td><a href="#sys_GetRandomAddress">bos.sys_GetRandomAddress</a></td><td><a href="#sys_GetRandomAddress">02253C</a></td></tr>
+<tr><td><a href="#sys_Random8">bos.sys_Random8</a></td><td><a href="#sys_Random8">022540</a></td></tr>
+<tr><td><a href="#sys_Random32">bos.sys_Random32</a></td><td><a href="#sys_Random32">022544</a></td></tr>
 <tr><td><a href="#fs_GetSector">bos.fs_GetSector</a></td><td><a href="#fs_GetSector">022548</a></td></tr>
 <tr><td><a href="#fs_WriteByte">bos.fs_WriteByte</a></td><td><a href="#fs_WriteByte">02254C</a></td></tr>
 <tr><td><a href="#fs_RenameFile">bos.fs_RenameFile</a></td><td><a href="#fs_RenameFile">022550</a></td></tr>
@@ -192,6 +192,7 @@
 <tr><td><a href="#sys_ExecBegin">bos.sys_ExecBegin</a></td><td><a href="#sys_ExecBegin">0226E0</a></td></tr>
 <tr><td><a href="#sys_ExecContinue">bos.sys_ExecContinue</a></td><td><a href="#sys_ExecContinue">0226E4</a></td></tr>
 <tr><td><a href="#fs_IsOSBackupPresent ">bos.fs_IsOSBackupPresent </a></td><td><a href="#fs_IsOSBackupPresent ">0226E8</a></td></tr>
+<tr><td><a href="#util_SHA256">bos.util_SHA256</a></td><td><a href="#util_SHA256">0226EC</a></td></tr>
 </table><div id="boot_os                  "><h1>boot_os                  </h1>	<h3>syscall Adress 020108</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 </table></div><div id="handle_interrupt"><h1>handle_interrupt</h1>	<h3>syscall Adress 02010C</h3>
@@ -463,7 +464,7 @@ string stored at gfx_string_temp</td><td></td><td>
 </td></tr>
 </table></div><div id="_DelVar"><h1>_DelVar</h1>	<h3>syscall Adress 0224FC</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>delete a file in the /usr/tivars/ directory</td><td>OP1 = type byte, 8 byte name of var to delete</td><td>Cf set if failed</td><td></td><td>
+<tr><td>delete a variable in ram from the VAT</td><td>OP1 = type byte, 8 byte name of var to delete</td><td>Cf set if failed</td><td></td><td>
 </td></tr>
 </table></div><div id="_CreateVar"><h1>_CreateVar</h1>	<h3>syscall Adress 022500</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -524,14 +525,25 @@ bc = program file to return to</td><td></td><td></td><td>
 <tr><td>Jump execution to an executable file</td><td>hl = file to execute<br>
 de = arguments</td><td></td><td></td><td>
 </td></tr>
-</table></div><div id="sys_OpenDevice"><h1>sys_OpenDevice</h1>	<h3>syscall Adress 022534</h3>
+</table></div><div id="drv_InitDevice"><h1>drv_InitDevice</h1>	<h3>syscall Adress 022534</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Initialize a device (if needed) and return a device structure.</td><td>device_t *sys_OpenDevice(const char *name);</td><td>pointer to device structure. (file data)<br>
-hl=-1 and Cf set if failed.</td><td></td><td>
+<tr><td>Initialize a device (if needed)</td><td>int drv_InitDevice(const char *name);</td><td>depends on device, usually -1 and Cf set if failed.</td><td></td><td>
 </td></tr>
 </table></div><div id="fs_CopyFile"><h1>fs_CopyFile</h1>	<h3>syscall Adress 022538</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Copy a file given paths and return a file descriptor.</td><td>void *fs_CopyFile(const char *src, const char *dest);</td><td>file descriptor of new file. Returns 0 if failed.</td><td></td><td>
+</td></tr>
+</table></div><div id="sys_GetRandomAddress"><h1>sys_GetRandomAddress</h1>	<h3>syscall Adress 02253C</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Find the best unmapped address to sample random numbers from.</td><td>void* sys_GetRandomAddress();</td><td>HL = address</td><td></td><td>
+</td></tr>
+</table></div><div id="sys_Random8"><h1>sys_Random8</h1>	<h3>syscall Adress 022540</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Return a random 8-bit number.</td><td>uint8_t sys_Random8();</td><td>A = number</td><td></td><td>
+</td></tr>
+</table></div><div id="sys_Random32"><h1>sys_Random32</h1>	<h3>syscall Adress 022544</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Return a random 32-bit number.</td><td>uint32_t sys_Random32();</td><td>EUHL = number</td><td></td><td>
 </td></tr>
 </table></div><div id="fs_GetSector"><h1>fs_GetSector</h1>	<h3>syscall Adress 022548</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -863,7 +875,7 @@ Cannot kill thread ID 0.</td></tr>
 </td></tr>
 </table></div><div id="_SearchSymTable"><h1>_SearchSymTable</h1>	<h3>syscall Adress 02269C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Search the symbol table (VAT) for a file specified in OP1</td><td>Same as ti.ChkFindSym, except that 0xFF is treated as a wildcard.</td><td>Same as ti.ChkFindSym.</td><td></td><td>
+<tr><td>Search the symbol table (VAT) for a file specified in OP1</td><td>Same as ti.ChkFindSym, except that 0xFF is treated as a wildcard.</td><td>Same as ti.ChkFindSym. DE = data pointer, HL = VAT pointer.</td><td></td><td>
 </td></tr>
 </table></div><div id="fs_Rename"><h1>fs_Rename</h1>	<h3>syscall Adress 0226A0</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -897,7 +909,7 @@ relocates data in place. (data MUST be stored in ram, otherwise this will crash)
 </td></tr>
 </table></div><div id="util_InitAllocSymList"><h1>util_InitAllocSymList</h1>	<h3>syscall Adress 0226C0</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Allocate and initialize a Symbol list.</td><td>symlist *util_InitSymList(void);</td><td>Pointer to new Symbol list. 0 if failed.</td><td></td><td>
+<tr><td>Allocate and initialize a Symbol list.</td><td>symlist *util_InitAllocSymList(void);</td><td>Pointer to new Symbol list. 0 if failed.</td><td></td><td>
 All this does is allocate 6 bytes and set to 0. The memory location doesn't matter as long as it's in RAM and initialized to 0.</td></tr>
 </table></div><div id="util_AppendSymList"><h1>util_AppendSymList</h1>	<h3>syscall Adress 0226C4</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -941,4 +953,8 @@ exit code also stored in bos.LastCommandResult</td><td></td><td>
 </td></tr>
 </table></div><div id="fs_IsOSBackupPresent "><h1>fs_IsOSBackupPresent </h1>	<h3>syscall Adress 0226E8</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+</table></div><div id="util_SHA256"><h1>util_SHA256</h1>	<h3>syscall Adress 0226EC</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Compute a SHA256 hash for some data, writing the 32-byte result to a buffer.</td><td>void util_SHA256(void* buffer, void* data, unsigned int len);</td><td>Nothing.</td><td></td><td>
+</td></tr>
 </table></div></body></html>

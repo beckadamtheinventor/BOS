@@ -3,7 +3,7 @@
 poke_main:
 	call ti._frameset0
 	ld a,(ix+6)
-	cp a,4
+	cp a,5
 	jr nz,.info
 	call osrt.argv_1
 	ld a,(hl)
@@ -23,19 +23,20 @@ poke_main:
 .poke:
 	ld a,c
 	ld (bos.fsOP6+8),a
+	call osrt.argv_2
 	push hl
 	call osrt.hexstr_to_int ; address
 	pop bc
 	jr c,.done
 	ld (bos.fsOP6),hl
 	ld (bos.fsOP6+3),a
-	call osrt.argv_3
+	call osrt.argv_4
 	push hl
 	call osrt.hexstr_to_int ; value to write
 	pop bc
 	ld (bos.fsOP6+4),hl
 	ld (bos.fsOP6+7),a
-	call osrt.argv_2
+	call osrt.argv_3
 	ld a,(hl)
 	ld hl,(bos.fsOP6)
 	ld bc,(bos.fsOP6+4)
@@ -82,7 +83,7 @@ poke_main:
 
 .infostr:
 	db "usage:",$A
-	db "poke [l|i|s|b][addr] [=^|&] [val]",$A
+	db "poke [l|i|s|b] [addr] [=^|&] [val]",$A
 	db "Writes 4|3|2|1 bytes to address from val.",$A
 	db "operators [=^|&] are set|xor|or|and.",$A
 	db "addr and val are read in hex.",$A

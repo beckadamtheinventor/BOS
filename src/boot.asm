@@ -447,6 +447,8 @@ os_return_soft:
 
 	call os_check_recovery_key
 	call sys_FreeAll
+	call util_InitAllocSymList
+	ld (variable_sym_list_ptr),hl
 
 	call os_check_recovery_key
 	call fs_SanityCheck

@@ -1,5 +1,5 @@
 ;@DOES Allocate and initialize a Symbol list.
-;@INPUT symlist *util_InitSymList(void);
+;@INPUT symlist *util_InitAllocSymList(void);
 ;@OUTPUT Pointer to new Symbol list. 0 if failed.
 ;@NOTE All this does is allocate 6 bytes and set to 0. The memory location doesn't matter as long as it's in RAM and initialized to 0.
 util_InitAllocSymList:

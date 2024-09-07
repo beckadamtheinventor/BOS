@@ -196,4 +196,5 @@
 	jp sys_ExecBegin
 	jp sys_ExecContinue
 	jp fs_IsOSBackupPresent ; this has to be in the jump table so the installer can find it
+	jp util_SHA256
 ; end of jump table

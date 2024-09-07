@@ -11,7 +11,7 @@ peek_main:
 	set bos.bReturnLong,a
 	ld (hl),a
 	ld a,(ix+6)
-	cp a,2
+	cp a,3
 	jr nz,.info
 	call osrt.argv_1
 	ex hl,de
@@ -33,7 +33,8 @@ peek_main:
 	jr nz,.info
 .peek:
 	push bc
-	push de
+	call osrt.argv_2
+	push hl
 	call osrt.hexstr_to_int
 	pop bc,bc
 	ld a,c
@@ -53,7 +54,7 @@ peek_main:
 	ret
 
 .infostr:
-	db "usage: peek [l|i|s|b][addr]",$A
+	db "usage: peek [l|i|s|b] [addr]",$A
 	db "read 32|24|16|8 bits from address.",0
 	db "addr is interpreted in hexadecimal.",$A
 

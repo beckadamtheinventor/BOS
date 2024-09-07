@@ -29,11 +29,11 @@ _AddVATEntry:
 	ld (hl),c
 	inc hl
 	ld (hl),b
-	dec hl
+	inc hl
 	inc iyl
 .dont_write_length:
 	ld de,(ti.pTemp)
-	push de,hl,bc
+	push de,hl
 	ld hl,ti.OP1
 	ld a,(hl)
 	ld (de),a
@@ -43,29 +43,16 @@ _AddVATEntry:
 	dec de
 	ld (de),a
 	inc hl
-	push hl
-	ld bc,8
-	push bc
-	cpir
-	pop hl
-	scf
-	sbc hl,bc
-	ex (sp),hl
-	pop bc
-	ld a,c
-	pop bc
 	ex hl,de
-	; ld (hl),c ; data length low byte
-	; dec hl
-	; ld (hl),b ; data length high byte
-	; dec hl
+	pop bc ; data pointer
 	dec hl
+	ld (hl),c
 	dec hl
+	ld (hl),b
 	dec hl
-	pop bc
-	ld (hl),bc  ; data pointer
-	push hl
-	ld c,a
+	call _SetAToBCU
+	ld (hl),a
+	ld b,a
 	ld a,iyl ; check if we need to write a name length byte
 	or a,a
 	jr nz,.write_name_length
@@ -73,26 +60,15 @@ _AddVATEntry:
 	ld b,3
 	jr .copy_name_loop
 .write_name_length:
-	ld (hl),c ; var name length byte
+	ld (hl),b ; var name length byte
 	dec hl
 	ex hl,de
-	ld b,c
 .copy_name_loop:
 	dec de
 	ld a,(hl)
 	ld (de),a
 	inc hl
 	djnz .copy_name_loop
-	pop hl
-	; reverse the endianness of the data pointer
-	ld a,(hl)
-	inc hl
-	inc hl
-	ld b,(hl)
-	ld (hl),a
-	dec hl
-	dec hl
-	ld (hl),b
 
 	dec de
 	ld (ti.pTemp),de ; save new end of VAT
@@ -116,7 +92,7 @@ _AddVATEntry:
 	or a,a ; unset the carry flag
 	pop hl
 	ccf ; set the carry flag
-	ret nz
+	ret nz ; return with carry flag set if malloc cache indicates the block is allocated
 	ccf ; unset the carry flag
 	ret
 
