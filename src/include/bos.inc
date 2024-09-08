@@ -525,6 +525,10 @@ namespace bos
 ?sys_ExecContinue                := $226E4
 ?fs_IsOSBackupPresent            := $226E8
 ?util_SHA256                     := $226EC
+?str_FromByte                    := $226F0
+?str_FromInt                     := $226F4
+?str_FromLong                    := $226F8
+?str_ToInt                       := $226FC
 ; end of jump table
 ;-------------------------------------------------------------------------------
 ; OS memory areas and misc defines

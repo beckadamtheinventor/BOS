@@ -188,6 +188,10 @@
 	public _sys_ExecContinue
 	public _fs_IsOSBackupPresent
 	public _util_SHA256
+	public _str_FromByte
+	public _str_FromInt
+	public _str_FromLong
+	public _str_ToInt
 _boot_os                         := $20108
 _handle_interrupt                := $2010C
 _HandleInstruction               := $20110
@@ -376,6 +380,10 @@ _sys_ExecBegin                   := $226E0
 _sys_ExecContinue                := $226E4
 _fs_IsOSBackupPresent            := $226E8
 _util_SHA256                     := $226EC
+_str_FromByte                    := $226F0
+_str_FromInt                     := $226F4
+_str_FromLong                    := $226F8
+_str_ToInt                       := $226FC
 
 public ram_executable
 public ram_executable_at

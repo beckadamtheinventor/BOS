@@ -197,4 +197,8 @@
 	jp sys_ExecContinue
 	jp fs_IsOSBackupPresent ; this has to be in the jump table so the installer can find it
 	jp util_SHA256
+	jp str_FromByte
+	jp str_FromInt
+	jp str_FromLong
+	jp str_ToInt
 ; end of jump table
