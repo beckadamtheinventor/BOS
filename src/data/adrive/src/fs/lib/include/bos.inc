@@ -569,7 +569,7 @@ namespace bos
 ?return_code_flags      := ti.appData+30 ; flag byte that determines how to interpret the return value of the last run program. Is to be set within the program for non-default return interpretation.
 ?flashStatusByte        := ti.appData+31 ; 1 byte
 ?filesystem_driver      := ti.appData+32 ; 1 byte
-?copy_buffer            := ti.appData+33 ; 3 bytes, points to first copy buffer entry, or -1 if nothing is stored.
+?copy_buffer            := ti.appData+33 ; 3 bytes, points to first copy buffer entry, or 0 if nothing is stored.
 ?threading_enabled      := ti.appData+36 ; 1 byte, determines if software threading is enabled and whether it should be used in OS routines
 ?current_thread         := ti.appData+37 ; 1 byte, currently running thread ID
 ?gfx_string_temp        := ti.appData+38 ; 16 bytes, temp location for integer printing

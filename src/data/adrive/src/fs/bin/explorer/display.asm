@@ -205,7 +205,7 @@ explorer_display_diritems:
 	pop hl
 	jq .dont_draw_extension
 .main_draw_regular_file_name:
-	ld b,8
+	ld b,10
 .main_draw_file_name_loop:
 	ld a,(hl)
 	or a,a

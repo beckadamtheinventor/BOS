@@ -9,7 +9,9 @@ explorer_load_config:
 	jq z,.nextline
 .check:
 	push hl,bc
-	ld bc,.next ; push this so we can conditionally "return" to .next instead of using many conditional jumps
+; push this so we can conditionally "return" to .next instead of using many conditional jumps.
+; also so that we can call some of the subroutines (namely .setbackgroundimage) externally.
+	ld bc,.next
 	push bc
 	ld bc,(hl)
 	ld (ix-3),bc
@@ -212,6 +214,7 @@ str_fg2:=$-3
 
 .setbackgroundimage:
 	ld hl,(ix-6)
+.setbackgroundimage_entryhl:
 	push hl
 	call bos.fs_GetFilePtr
 	pop de

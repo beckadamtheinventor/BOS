@@ -63,11 +63,29 @@ new_file_option_strings:
 .l1:
 	db "file",0
 .l2:
-	db "dir",0
+	db "dir"
 .l3:
 	; db "link",0
 .l4:
 	; db "image"
+.l5:
+	db 0
+
+themes_option_strings:
+	dl .strings
+	db 4 dup $C9
+	db 4 dup $C9
+	db 4 dup $C9
+	db 4 dup $C9
+	db 4 dup $C9
+.strings:
+	dl .l1, .l2, .l3, .l4, .l5
+.l1:
+	db "Custom",0
+.l2:
+	db "Image"
+.l3:
+.l4:
 .l5:
 	db 0
 
@@ -95,12 +113,14 @@ str_NewFileNamePrompt:
 	db "File name? ",0
 str_NewDirNamePrompt:
 	db "Directory name? ",0
+str_ImageFilePrompt:
+	db "Image file? ",0
 ; str_NewLinkPrompt:
 	; db "Link file name? ",0
 ; str_NewImagePrompt:
 	; db "Image file name? ",0
 str_CustomTheme:
-	db "Custom Theme",0
+	db "Custom",0
 ; str_UsbRecvExecutable:
 	; db "/bin/usbrecv",0
 ; str_OffExecutable:

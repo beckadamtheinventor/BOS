@@ -14,7 +14,7 @@ def convert(fnamein, fnameout, mode=None):
 	with Image.open(fnamein) as img:
 		img = img.resize((320, (img.height*320)//img.width))
 		if img.height > 220:
-			img = img.crop((0, 110-img.height//2, 320, 110+img.height//2))
+			img = img.crop((0, 0, 320, 220))
 		# img = img.convert("RGB").quantize(palette=Image.open(os.path.join(os.path.dirname(__file__), "xlibc_palette.png")).convert("P"))
 		img = img.convert("RGB").convert("P", palette=xlibc_palette)
 		img.save(os.path.join(tmp, "image.png"))

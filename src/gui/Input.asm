@@ -60,6 +60,10 @@ gui_Input:
 	jq z,.exit
 	cp a,54
 	jq z,.nextmap
+	cp a,ti.skGraph
+	jq z,.paste
+	cp a,ti.skTrace
+	jq z,.copy
 	cp a,9
 	jq z,.enter
 	jq c,.keys
@@ -265,6 +269,48 @@ gui_Input:
 	call .clear_line
 	pop hl
 	jq ._printlines
+
+.paste:
+	ld hl,(ix+9)
+	ld bc,(ix-11)
+	or a,a
+	sbc hl,bc
+	jr z,.dontpaste ; no room in buffer
+	push hl
+	ld hl,(ix+6)
+	add hl,bc ; buffer write offset
+	ex hl,de
+	pop bc ; characters remaining in buffer
+	ld hl,(copy_buffer)
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	jr z,.dontpaste ; nothing to paste
+	push bc,hl,de
+	call ti._strncpy
+	pop bc,bc,bc
+.dontpaste:
+	jq .draw
+
+.copy:
+	ld hl,(ix+6)
+	push hl
+	call ti._strlen
+	inc hl
+	push hl
+	call sys_Malloc.entryhl
+	pop bc
+	ex hl,de
+	pop hl
+	jr c,.dontcopy
+	push de
+	ldir
+	ld hl,(copy_buffer)
+	call sys_Free.entryhl
+	pop hl
+	ld (copy_buffer),hl
+.dontcopy:
+	jq .draw
 
 .keymaps:
 	dl .keymap_A,.keymap_a,.keymap_1,.keymap_x

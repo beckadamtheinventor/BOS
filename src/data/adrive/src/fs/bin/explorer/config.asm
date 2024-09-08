@@ -79,6 +79,10 @@ explorer_configure_theme:
 	jq nz,.display_theme_loop_skip_4b_loop
 	jq .display_themes_loop
 .done_displaying_themes:
+	ld hl,themes_option_strings
+	push hl
+	call draw_taskbar
+	pop bc
 	; ld hl,(.smc_y)
 	; ld de,display_margin_left+11
 	; ld bc,str_CustomTheme
@@ -118,6 +122,10 @@ explorer_configure_theme:
 	call bos.sys_WaitKeyCycle
 	cp a,ti.skClear
 	ret z
+	cp a,ti.skYequ
+	jq z,.custom
+	cp a,ti.skWindow
+	jq z,.background_image
 	cp a,ti.skEnter
 	jq z,.select
 	cp a,ti.skUp
@@ -178,123 +186,129 @@ explorer_configure_theme:
 	pop bc,bc,bc,bc
 	ret
 
-; .colors:
-	; db 4 dup 0
-; .exit:
-	; ld c,1
-	; push bc
-	; call gfx_SetDraw
-	; pop bc,bc ; pop caller of explorer_configure_theme.main
-	; ret
-; .custom:
-	; ld a,(explorer_background_color)
-	; ld (.colors+0),a
-	; ld a,(explorer_statusbar_color)
-	; ld (.colors+1),a
-	; ld a,(explorer_foreground_color)
-	; ld (.colors+2),a
-	; ld a,(explorer_foreground2_color)
-	; ld (.colors+3),a
-	; ld hl,.colors
-; .customloop:
-	; push hl
-	; ld c,1
-	; push bc
-	; call gfx_SetDraw
-	; pop bc
-	; ld bc,10
-	; ld (.drawbox_x_smc),bc
-	; ld a,(.colors+0)
-	; ld (explorer_background_color),a
-	; ld a,(.colors+1)
-	; ld (explorer_statusbar_color),a
-	; ld a,(.colors+2)
-	; ld (explorer_foreground_color),a
-	; ld a,(.colors+3)
-	; ld (explorer_foreground2_color),a
+.background_image:
+	ld hl,$FF0000
+	ld de,str_ImageFilePrompt
+	call explorer_input_file_name
+	jp explorer_load_config.setbackgroundimage_entryhl
 
-	; call draw_background
-	; ld a,(explorer_background_color)
-	; call .drawbox
-	; ld a,(explorer_statusbar_color)
-	; call .drawbox
-	; ld a,(explorer_foreground_color)
-	; call .drawbox
-	; ld a,(explorer_foreground2_color)
-	; call .drawbox
-	; ld c,0
-	; push bc
-	; call gfx_SetColor
-	; pop bc
-	; ld bc,16
-	; push bc
-	; ld c,60
-	; push bc
-	; ld bc,0
-; .custom_selected_x:=$-3
-	; push bc
-	; call gfx_HorizLine
-	; pop bc,bc,bc
-	; call gfx_BlitBuffer
-	; ld a,20
-	; call ti.DelayTenTimesAms
-	; call bos.sys_WaitKey
-	; pop hl
-	; cp a,ti.skRight
-	; jq nz,.dontprevcolor
-	; dec hl
-; .dontprevcolor:
-	; cp a,ti.skLeft
-	; jq nz,.dontnextcolor
-	; inc hl
-; .dontnextcolor:
-	; ld c,a
-	; ld a,l
-	; cp a, (.colors-1) and $FF
-	; jq nz,.notunder
-	; ld l, (.colors+3) and $FF
-; .notunder:
-	; cp a, (.colors+4) and $FF
-	; jq nz,.notover
-	; ld l, .colors and $FF
-; .notover:
-	; ld a,c
-	; cp a,ti.skUp
-	; jq nz,.dontdecrementcolor
-	; dec (hl)
-; .dontdecrementcolor:
-	; cp a,ti.skDown
-	; jq nz,.dontincrementcolor
-	; inc (hl)
-; .dontincrementcolor:
-	; cp a,ti.skClear
-	; jq z,.exit
-	; cp a,ti.skEnter
-	; jq nz,.customloop
-	; call explorer_write_config
-	; pop hl
-	; ret c ; return to caller of explorer_configure_theme if malloc failed
-	; jp (hl) ; otherwise return to caller of explorer_configure_theme.main
+.colors:
+	db 4 dup 0
+.exit:
+	ld c,1
+	push bc
+	call gfx_SetDraw
+	pop bc,bc ; pop caller of explorer_configure_theme.main
+	ret
+.custom:
+	ld a,(explorer_background_color)
+	ld (.colors+0),a
+	ld a,(explorer_statusbar_color)
+	ld (.colors+1),a
+	ld a,(explorer_foreground_color)
+	ld (.colors+2),a
+	ld a,(explorer_foreground2_color)
+	ld (.colors+3),a
+	ld hl,.colors
+.customloop:
+	push hl
+	ld c,1
+	push bc
+	call gfx_SetDraw
+	pop bc
+	ld bc,10
+	ld (.drawbox_x_smc),bc
+	ld a,(.colors+0)
+	ld (explorer_background_color),a
+	ld a,(.colors+1)
+	ld (explorer_statusbar_color),a
+	ld a,(.colors+2)
+	ld (explorer_foreground_color),a
+	ld a,(.colors+3)
+	ld (explorer_foreground2_color),a
 
-; .drawbox:
-	; ld c,a
-	; push bc
-	; call gfx_SetColor
-	; pop bc
-	; ld bc,16
-	; push bc,bc
-	; ld bc,40
-	; push bc
-	; ld bc,0
-; .drawbox_x_smc:=$-3
-	; push bc
-	; call gfx_FillRectangle
-	; pop bc,bc,bc,de
-	; ld hl,(.drawbox_x_smc)
-	; add hl,bc
-	; inc hl
-	; ld (.drawbox_x_smc),hl
-	; ret
+	call draw_background
+	ld a,(explorer_background_color)
+	call .drawbox
+	ld a,(explorer_statusbar_color)
+	call .drawbox
+	ld a,(explorer_foreground_color)
+	call .drawbox
+	ld a,(explorer_foreground2_color)
+	call .drawbox
+	ld c,0
+	push bc
+	call gfx_SetColor
+	pop bc
+	ld bc,16
+	push bc
+	ld c,60
+	push bc
+	ld bc,0
+.custom_selected_x:=$-3
+	push bc
+	call gfx_HorizLine
+	pop bc,bc,bc
+	call gfx_BlitBuffer
+	ld a,20
+	call ti.DelayTenTimesAms
+	call bos.sys_WaitKey
+	pop hl
+	cp a,ti.skRight
+	jq nz,.dontprevcolor
+	dec hl
+.dontprevcolor:
+	cp a,ti.skLeft
+	jq nz,.dontnextcolor
+	inc hl
+.dontnextcolor:
+	ld c,a
+	ld a,l
+	cp a, (.colors-1) and $FF
+	jq nz,.notunder
+	ld l, (.colors+3) and $FF
+.notunder:
+	cp a, (.colors+4) and $FF
+	jq nz,.notover
+	ld l, .colors and $FF
+.notover:
+	ld a,c
+	cp a,ti.skUp
+	jq nz,.dontdecrementcolor
+	dec (hl)
+.dontdecrementcolor:
+	cp a,ti.skDown
+	jq nz,.dontincrementcolor
+	inc (hl)
+.dontincrementcolor:
+	cp a,ti.skClear
+	jq z,.exit
+	cp a,ti.skEnter
+	jq nz,.customloop
+	call explorer_write_config
+	pop hl
+	ret c ; return to caller of explorer_configure_theme if malloc failed
+	jp (hl) ; otherwise return to caller of explorer_configure_theme.main
+
+.drawbox:
+	ld c,a
+	push bc
+	call gfx_SetColor
+	pop bc
+	ld bc,16
+	push bc,bc
+	ld bc,40
+	push bc
+	ld bc,0
+.drawbox_x_smc:=$-3
+	push bc
+	call gfx_FillRectangle
+	pop bc,bc,bc,de
+	ld hl,(.drawbox_x_smc)
+	add hl,bc
+	inc hl
+	ld (.drawbox_x_smc),hl
+	ret
 
 
 explorer_write_config:

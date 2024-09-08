@@ -443,6 +443,8 @@ os_return_soft:
 	; set ti.bIntOSTmr,(hl)
 	call gfx_Set8bpp
 	xor a,a
+	sbc hl,hl
+	ld (copy_buffer),hl
 	call gfx_SetDraw
 
 	call os_check_recovery_key
