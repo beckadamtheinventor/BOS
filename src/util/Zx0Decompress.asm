@@ -20,7 +20,6 @@ util_Zx0Decompress:
 ; -----------------------------------------------------------------------------
 ; ZX0 decoder by Einar Saukas & introspec
 ; "Turbo" version
-; edited by Adam Beckingham to run from flash memory
 ; -----------------------------------------------------------------------------
 
 ._turbo:

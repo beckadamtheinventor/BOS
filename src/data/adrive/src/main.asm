@@ -69,6 +69,7 @@ fs_dir bin_dir
 	fs_sfentry mf_exe, "mf", "", f_system+f_subfile
 	; fs_sfentry if_exe, "if", "", f_system+f_subfile
 	fs_sfentry info_exe, "info", "", f_system+f_subfile
+	fs_sfentry imgview_exe, "imgview", "", f_system+f_subfile
 	fs_sfentry jump_exe, "jump", "", f_system+f_subfile
 	; fs_sfentry json_exe, "json", "", f_system+f_subfile
 	fs_sfentry ls_exe, "l", "", f_system+f_subfile
@@ -173,6 +174,10 @@ fs_file os_internal_subfiles
 
 	fs_subfile info_exe, bin_dir
 		include 'fs/bin/info.asm'
+	end fs_subfile
+
+	fs_subfile imgview_exe, bin_dir
+		include 'fs/bin/imgview.asm'
 	end fs_subfile
 
 	fs_subfile random_exe, bin_dir

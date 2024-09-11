@@ -8,8 +8,8 @@ gui_Input:
 	call ti._frameset
 	xor a,a
 	sbc hl,hl
-	ld (ix-3),hl
-	ld (ix-11),hl
+	ld (ix-3),hl ; input current length
+	ld (ix-11),hl ; cursor position
 	ld hl,(ix+6)
 	ld (hl),a
 	inc a
@@ -277,8 +277,8 @@ gui_Input:
 	sbc hl,bc
 	jr z,.dontpaste ; no room in buffer
 	push hl
-	ld hl,(ix+6)
-	add hl,bc ; buffer write offset
+	ld hl,(ix+6) ; buffer pointer
+	add hl,bc ; buffer write pointer
 	ex hl,de
 	pop bc ; characters remaining in buffer
 	ld hl,(copy_buffer)
@@ -286,9 +286,17 @@ gui_Input:
 	or a,a
 	sbc hl,bc
 	jr z,.dontpaste ; nothing to paste
-	push bc,hl,de
+	push de,bc,hl,de
 	call ti._strncpy
 	pop bc,bc,bc
+	call ti._strlen
+	ex hl,de
+	ld hl,(ix-11)
+	add hl,de
+	ld (ix-11),hl ; advance cursor
+	ld hl,(ix-3)
+	add hl,de
+	ld (ix-3),hl ; advance buffer length
 .dontpaste:
 	jq .draw
 

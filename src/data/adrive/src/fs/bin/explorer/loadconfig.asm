@@ -224,7 +224,7 @@ str_fg2:=$-3
 	inc hl
 	inc hl
 	ex hl,de
-	db $21,"IMG"
+	db $21,"FSI"
 	or a,a
 	sbc hl,bc
 	jq z,.setbackgroundimg

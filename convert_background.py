@@ -37,7 +37,7 @@ outputs:
 	subprocess.run(["convimg"],cwd=tmp)
 	imgbin = os.path.join(tmp, "image.bin")
 	with open(imgbin,'rb') as f:
-		f.seek(2, 0)
+		# f.seek(2, 0)
 		data = f.read()
 	with open(imgbin,'wb') as f:
 		f.write(data)
@@ -47,11 +47,11 @@ outputs:
 			data = f.read()
 	with open(fnameout, 'wb') as f:
 		if mode is None:
-			f.write(b'IMG\0')
+			f.write(b'FSI\0')
 		elif mode == "zx7":
-			f.write(b'IMG7')
+			f.write(b'FSI7')
 		elif mode == "zx0":
-			f.write(b'IMG0')
+			f.write(b'FSI0')
 		f.write(data)
 		size = f.tell()
 	print(f"Finished. Output size: {size} bytes")
