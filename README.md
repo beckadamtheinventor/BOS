@@ -12,6 +12,9 @@ An Operating system (WIP) for the TI-84+CE family (eZ80) graphing calculators, w
 ![](https://raw.githubusercontent.com/beckadamtheinventor/BOS/master/cap/cap4.gif)
 ![](https://raw.githubusercontent.com/beckadamtheinventor/BOS/master/cap/cap5.gif)
 
+![](https://raw.githubusercontent.com/beckadamtheinventor/BOS/master/cap/cap8.gif)
+![](https://raw.githubusercontent.com/beckadamtheinventor/BOS/master/cap/cap9.gif)
+
 
 
 # A note on ".rom" Files
