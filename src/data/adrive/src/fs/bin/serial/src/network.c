@@ -8,8 +8,8 @@
 
 usb_device_t device;
 srl_device_t srl;
-uint8_t srl_buf[2048];
-uint8_t net_buf[1024];
+uint8_t srl_buf[8192];
+uint8_t net_buf[4096];
 file_header_t incoming_file;
 file_header_t outgoing_file;
 uint8_t *incoming_data = NULL;
@@ -136,6 +136,7 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
 				while (fs_DirList(&fdbuffer, data, 1, skip++)) {
 					char *fname = fs_CopyFileName(fdbuffer);
 					gui_PrintLine(fname);
+					ntwk_send(0, PS_STR(fname));
 					sys_Free(fname);
 				}
 			}
@@ -162,6 +163,19 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
 					gui_PrintLine(" bytes");
 					ntwk_send(0, PS_STR(str));
 				}
+			}
+			break;
+		case 10: // requested ROM dump
+			{
+				uintptr_t ptr = 0;
+				len = 0x400000;
+				ntwk_send(1, &len, 3);
+				do {
+					memcpy(incoming_data, ptr, incoming_data_buffer_len);
+					ntwk_send(2, incoming_data, incoming_data_buffer_len);
+					ptr += incoming_data_buffer_len;
+					
+				} while (ptr < len);
 			}
 			break;
 		default:

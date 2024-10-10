@@ -1,6 +1,6 @@
 ;@DOES Return current keypress
-;@OUTPUT A keypress
-;@OUTPUT z if no key pressed
+;@OUTPUT A = keycode
+;@OUTPUT zf set if no key pressed
 ;@DESTROYS HL,BC,AF
 sys_GetKey:
 	call kb_Scan
@@ -28,6 +28,7 @@ sys_GetKey:
 	djnz .keybitloop
 .this:
 	ld a,c
+	or a,a
 .done:
 	ld (last_keypress),a
 	ret

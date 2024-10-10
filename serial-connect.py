@@ -232,6 +232,7 @@ connect        | attempt to connect a calc
 send file      | sends a file to the connected calc
 sendpackage pk | sends files from a json formatted package
 request file   | request a file from the connected calc
+dump file      | request a rom dump from the connected calc
 list [dir]     | list files in a directory on the connected calc
 message [msg]  | send a message to the connected calc (useful for debugging)
 clear [msg]    | clear the console on the connected calc

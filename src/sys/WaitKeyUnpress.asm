@@ -1,12 +1,17 @@
-;@DOES Wait until no keys are pressed.
+;@DOES Wait until the last pressed keycode changes.
 ;@INPUT None
 ;@OUTPUT None
 ;@DESTROYS BC, DE, HL
 sys_WaitKeyUnpress:
-	push af
+	ld a,(last_keypress)
+	ld c,a
 .loop:
+	push bc
 	HandleNextThread_IfOSThreading
-	call kb_AnyKey
-	jr nz,.loop
-	pop af
+	call sys_GetKey
+	pop bc
+	cp a,c
+	jr z,.loop
+	ld a,c
+	or a,a
 	ret

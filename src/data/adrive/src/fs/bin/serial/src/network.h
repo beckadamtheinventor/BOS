@@ -25,7 +25,7 @@ typedef struct {
 	size_t current_len;
 } file_header_t;
 
-#define incoming_data_buffer_len 1023
+#define incoming_data_buffer_len 8192
 #define usb_process usb_HandleEvents
 #define usb_write(buf, size) srl_Write(&srl, buf, size)
 
