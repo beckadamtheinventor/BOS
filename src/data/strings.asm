@@ -147,16 +147,16 @@ fs_file_data_cedit:
 	file "adrive/obj/cedit.zx7.bin"
 fs_file_data_cedit.zlen:=$-.
 
-	db $00, "opt/bin/edit",0
-	dw fs_file_data_edit.len
-	dw fs_file_data_edit.zlen
-virtual
-	file "adrive/src/fs/bin/edit/bosbin/edit.bin"
-	fs_file_data_edit.len := $-$$
-end virtual
-fs_file_data_edit:
-	file "adrive/obj/edit.zx7.bin"
-fs_file_data_edit.zlen:=$-.
+	; db $00, "opt/bin/edit",0
+	; dw fs_file_data_edit.len
+	; dw fs_file_data_edit.zlen
+; virtual
+	; file "adrive/src/fs/bin/edit/bosbin/edit.bin"
+	; fs_file_data_edit.len := $-$$
+; end virtual
+; fs_file_data_edit:
+	; file "adrive/obj/edit.zx7.bin"
+; fs_file_data_edit.zlen:=$-.
 
 
 	db $00, "opt/bin/msd",0

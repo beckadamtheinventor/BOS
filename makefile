@@ -146,9 +146,9 @@ $(call NATIVEPATH,$(FSOBJ)/cedit.zx7.bin): $(call rwildcard,$(call NATIVEPATH,$(
 	$(Q)make -f bos.makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/)
 	convbin -i $(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/bosbin/CEDIT.bin) -o $(call NATIVEPATH,$(FSOBJ)/cedit.zx7.bin) -j bin -k bin -c zx7
 
-$(call NATIVEPATH,$(FSOBJ)/edit.zx7.bin): $(call rwildcard,$(call NATIVEPATH,$(FSSRC)/fs/bin/edit/src),*)
-	$(Q)make -f makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/edit/)
-	convbin -i $(call NATIVEPATH,$(FSSRC)/fs/bin/edit/bosbin/edit.bin) -o $(call NATIVEPATH,$(FSOBJ)/edit.zx7.bin) -j bin -k bin -c zx7
+#$(call NATIVEPATH,$(FSOBJ)/edit.zx7.bin): $(call rwildcard,$(call NATIVEPATH,$(FSSRC)/fs/bin/edit/src),*)
+#	$(Q)make -f makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/edit/)
+#	convbin -i $(call NATIVEPATH,$(FSSRC)/fs/bin/edit/bosbin/edit.bin) -o $(call NATIVEPATH,$(FSOBJ)/edit.zx7.bin) -j bin -k bin -c zx7
 
 $(call NATIVEPATH,$(FSOBJ)/msd.zx7.bin): $(call rwildcard,$(call NATIVEPATH,$(FSSRC)/fs/bin/msd/src),*)
 	$(Q)make -f makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/msd/)
@@ -180,7 +180,7 @@ filesystem: $(call rwildcard,$(call NATIVEPATH,$(FSSRC)),*) $(call NATIVEPATH,$(
 $(call NATIVEPATH,$(FSOBJ)/fatdrvce.bin) $(call NATIVEPATH,$(FSOBJ)/fileioc.bin) $(call NATIVEPATH,$(FSOBJ)/graphx.bin) \
 $(call NATIVEPATH,$(FSOBJ)/keypadc.bin) $(call NATIVEPATH,$(FSOBJ)/msddrvce.bin) $(call NATIVEPATH,$(FSOBJ)/srldrvce.bin) \
 $(call NATIVEPATH,$(FSOBJ)/usbdrvce.bin) $(call NATIVEPATH,$(FSOBJ)/memedit.bin) $(call NATIVEPATH,$(FSOBJ)/cedit.zx7.bin) \
-$(call NATIVEPATH,$(FSOBJ)/LIB.bin) $(call NATIVEPATH,$(FSOBJ)/msd.zx7.bin) $(call NATIVEPATH,$(FSOBJ)/edit.zx7.bin) \
+$(call NATIVEPATH,$(FSOBJ)/LIB.bin) $(call NATIVEPATH,$(FSOBJ)/msd.zx7.bin) \
 $(call NATIVEPATH,$(FSOBJ)/serial.zx7.bin) $(call NATIVEPATH,$(FSOBJ)/PATH.bin) \
 $(call NATIVEPATH,$(FSOBJ)/TIVARS.bin) $(call NATIVEPATH,$(FSOBJ)/SYSCALLS.bin) $(call NATIVEPATH,$(FSOBJ)/explorer.bin)
 	convbin -i $(call NATIVEPATH,$(FSSRC)/fs/etc/fontlibc/DrMono.dat) -o $(call NATIVEPATH,$(FSOBJ)/DrMono.zx7.dat) -j bin -k bin -c zx7

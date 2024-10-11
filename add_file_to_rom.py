@@ -50,7 +50,7 @@ def search_for_entry(rom, path):
 
 	ptr = 0x050000
 	dnum = 0
-	while rom[ptr] != 0x00 and rom[ptr] != 0xFF:
+	while rom[ptr] != 0xFF:
 		fn = copy_file_name(rom[ptr:ptr+16])
 		# print("ptr:",hex(ptr),"entry:","".join([chr(c) if c in range(0x20,0x80) else "\\x"+hex(c) for c in rom[ptr:ptr+16]]),"file name",fn)
 		if fn == path[dnum]:
@@ -113,7 +113,7 @@ def free_file_descriptor(rom, ptr):
 		j += 0x40
 		i += 1
 
-	while rom[ptr] != 0x00 and rom[ptr] != 0xFF:
+	while rom[ptr] != 0xFF:
 		for k in range(0x10):
 			rom[ptr+k] = rom[ptr+0x10+k]
 		ptr+=0x10
