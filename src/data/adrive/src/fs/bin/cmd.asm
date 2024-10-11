@@ -144,7 +144,7 @@ enter_input_dec_currow:
 	ld hl,ti.curRow
 	dec (hl)
 enter_input:
-	call bos.sys_WaitKeyUnpress
+	; call bos.sys_WaitKeyUnpress
 	ld bc,255
 	push bc
 	ld bc,bos.InputBuffer
