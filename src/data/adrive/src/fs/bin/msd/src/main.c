@@ -1,6 +1,6 @@
 typedef struct global global_t;
 #define usb_callback_data_t global_t
-#define fat_callback_data_t msd_t
+#define fat_callback_usr_t msd_t
 
 #include <usbdrvce.h>
 #include <msddrvce.h>
@@ -19,6 +19,7 @@ typedef struct global global_t;
 #define O_8X_VAR_NAME 60
 
 #define MAX_PARTITIONS 10
+#define GUI_LIST_LEN 24
 
 struct global
 {
@@ -34,25 +35,29 @@ enum {
 	TT_8X,
 };
 
-/* Handle USB events */
 static usb_error_t handleUsbEvent(usb_event_t event, void *event_data,
-                                    usb_callback_data_t *callback_data) {
-    /* Enable newly connected devices */
-    if(event == USB_DEVICE_CONNECTED_EVENT && !(usb_GetRole() & USB_ROLE_DEVICE)) {
-        usb_device_t device = event_data;
-        gui_PrintLine("device connected\n");
-        usb_ResetDevice(device);
-    }
-    if(event == USB_HOST_CONFIGURE_EVENT) {
-        usb_device_t host = usb_FindDevice(NULL, NULL, USB_SKIP_HUBS);
-        if(host) callback_data->usb = host;
-    }
-    /* When a device is connected, or when connected to a computer */
-    if((event == USB_DEVICE_ENABLED_EVENT && !(usb_GetRole() & USB_ROLE_DEVICE))) {
-        callback_data->usb = event_data;
-    }
-    if(event == USB_DEVICE_DISCONNECTED_EVENT) {
-        callback_data->usb = NULL;
+                                  usb_callback_data_t *global)
+{
+    switch (event)
+    {
+        case USB_DEVICE_DISCONNECTED_EVENT:
+            gui_PrintLine("usb device disconnected");
+            if (global->usb)
+                msd_Close(&global->msd);
+            global->usb = NULL;
+            break;
+        case USB_DEVICE_CONNECTED_EVENT:
+            gui_PrintLine("usb device connected");
+            return usb_ResetDevice(event_data);
+        case USB_DEVICE_ENABLED_EVENT:
+            gui_PrintLine("usb device enabled");
+            global->usb = event_data;
+            break;
+        case USB_DEVICE_DISABLED_EVENT:
+            gui_PrintLine("usb device disabled");
+            return USB_RETRY_INIT;
+        default:
+            break;
     }
 
     return USB_SUCCESS;
@@ -98,15 +103,15 @@ bool transfer_file(fat_t *fat, const char *src, const char *dest, bool send, uin
 			return 0;
 		}
 		fat_Delete(fat, dest);
-		faterr = fat_Create(fat, path, base, FAT_FILE);
+		faterr = fat_Create(fat, path, base, 0);
 		if (faterr != FAT_SUCCESS) {
 			goto destination_file_error;
 		}
-		faterr = fat_Open(&destfile, fat, dest);
+		faterr = fat_OpenFile(fat, dest, 0, &destfile);
 		if (faterr != FAT_SUCCESS) {
 			goto destination_file_error;
 		}
-		if (fat_Write(&destfile, sectors, srcptr) != sectors) {
+		if (fat_WriteFile(&destfile, sectors, srcptr) != sectors) {
 			fat_Close(&destfile);
 			goto write_error;
 		}
@@ -117,11 +122,11 @@ bool transfer_file(fat_t *fat, const char *src, const char *dest, bool send, uin
 		for (char *ptr = src; *ptr; ptr++) {
 			if ((unsigned)(*ptr - 'a') < 26) *ptr ^= 0x20;
 		}
-		faterr = fat_Open(&srcfile, fat, src);
+		faterr = fat_OpenFile(fat, src, 0, &srcfile);
 		if (faterr != FAT_SUCCESS) {
 			goto source_file_missing;
 		}
-		srclen = fat_GetSize(&srcfile);
+		srclen = fat_GetFileSize(&srcfile);
 		if (srclen > 65536) {
 			char *dest2;
 			if (fs_AllocChk(srclen) == -1) {
@@ -143,7 +148,7 @@ bool transfer_file(fat_t *fat, const char *src, const char *dest, bool send, uin
 					srclen -= blocklen;
 				}
 				for (i = 0; i < blocklen; i += FAT_BLOCK_SIZE) {
-					if (fat_Read(&srcfile, 1, &sector_buffer) != 1) {
+					if (fat_ReadFile(&srcfile, 1, &sector_buffer) != 1) {
 						goto read_error;
 					}
 					if (fs_WriteRaw(&sector_buffer, ((i+512<blocklen)?512:(blocklen-i)), 1, destfd, i) == -1) {
@@ -158,7 +163,7 @@ bool transfer_file(fat_t *fat, const char *src, const char *dest, bool send, uin
 			sys_Free(dest2);
 		} else {
 			if (type == TT_8X || checkIs8xVar(src)) {
-				if (fat_Read(&srcfile, 1, &sector_buffer) != 1) {
+				if (fat_ReadFile(&srcfile, 1, &sector_buffer) != 1) {
 					goto read_error;
 				}
 				if (!memcmp(&sector_buffer, "**TI83F*\x1A\x0A", 10)) {
@@ -221,7 +226,7 @@ bool transfer_file(fat_t *fat, const char *src, const char *dest, bool send, uin
 		// Copy remaining sectors if there are any
 		if (i != 0xffffffff) {
 			for (; i < (int)srclen; i += FAT_BLOCK_SIZE) {
-				if (fat_Read(&srcfile, 1, &sector_buffer) != 1) {
+				if (fat_ReadFile(&srcfile, 1, &sector_buffer) != 1) {
 					read_error:;
 					fat_Close(&srcfile);
 					gui_PrintLine("Read error");
@@ -242,15 +247,41 @@ bool transfer_file(fat_t *fat, const char *src, const char *dest, bool send, uin
 	return true;
 }
 
+unsigned int fat_DirList(fat_t* fat, const char* path, fat_dir_entry_t* entries, unsigned int count, unsigned int offset) {
+	fat_dir_t dir;
+	if (fat_OpenDir(fat, path, &dir) != FAT_SUCCESS) {
+		return 0;
+	}
+	unsigned int i;
+	for (i = 0; i < offset; i++) {
+		if (fat_ReadDir(&dir, &entries[0]) != FAT_SUCCESS) {
+			i = 0;
+			goto end;
+		}
+	}
+	for (i = 0; i < count; i++) {
+		if (fat_ReadDir(&dir, &entries[i]) != FAT_SUCCESS) {
+			break;
+		}
+		if (entries[i].name[0] == 0) {
+			break;
+		}
+	}
+	end:;
+	fat_CloseDir(&dir);
+	return i;
+}
+
 int main(int argc, char *argv[]) {
     static msd_partition_t partitions[MAX_PARTITIONS];
     static global_t global;
     static fat_t fat;
-    uint8_t num_partitions, key;
+    uint8_t num_partitions;
     msd_info_t msdinfo;
     usb_error_t usberr;
     msd_error_t msderr;
     fat_error_t faterr;
+	uint8_t key;
 	bool errored = false;
 
 	if (argc > 1 && !strcmp(argv[1], "-h")) {
@@ -264,22 +295,40 @@ int main(int argc, char *argv[]) {
     // usb initialization loop; waits for something to be plugged in
 	global.usb = NULL;
 
-	usberr = usb_Init(handleUsbEvent, &global, NULL, USB_DEFAULT_INIT_FLAGS & ~(USB_USE_C_HEAP | USB_USE_OS_HEAP));
-	if (usberr != USB_SUCCESS)
-	{
-		gui_PrintLine("usb init error.");
-		goto usb_error;
-	}
+    // usb initialization loop; waits for something to be plugged in
+    do
+    {
+        global.usb = NULL;
 
-	do {
-		usb_HandleEvents();
-		key = os_GetCSC();
-	} while ((!global.usb) && key != sk_Clear);
+        usberr = usb_Init(handleUsbEvent, &global, NULL, USB_DEFAULT_INIT_FLAGS);
+        if (usberr != USB_SUCCESS)
+        {
+            gui_PrintLine("usb init error.");
+            goto usb_error;
+        }
 
-	if (!global.usb) {
-		goto usb_error;
-	}
-   
+        while (usberr == USB_SUCCESS)
+        {
+            if (global.usb != NULL)
+                break;
+
+            // break out if a key is pressed
+            if (os_GetCSC())
+            {
+                gui_PrintLine("abort.");
+                goto usb_error;
+            }
+
+            usberr = usb_WaitForInterrupt();
+        }
+    } while (usberr == USB_RETRY_INIT);
+
+    if (usberr != USB_SUCCESS)
+    {
+        gui_PrintLine("usb enable error.");
+        goto usb_error;
+    }
+
     // initialize the msd device
     msderr = msd_Open(&global.msd, global.usb);
     if (msderr != MSD_SUCCESS)
@@ -299,7 +348,7 @@ int main(int argc, char *argv[]) {
     }
 
     // locate the first fat partition available
-    num_partitions = msd_FindPartitions(&global.msd, &partitions, MAX_PARTITIONS);
+    num_partitions = msd_FindPartitions(&global.msd, partitions, MAX_PARTITIONS);
     if (num_partitions < 1)
     {
         gui_PrintLine("no paritions found");
@@ -309,29 +358,28 @@ int main(int argc, char *argv[]) {
     // attempt to open the first found fat partition
     // it is not required to use a MSD to access a FAT filesystem if the
     // appropriate callbacks are configured.
-    fat.read = &msd_Read;
-    fat.write = &msd_Write;
-    fat.usr = &global.msd;
     for (uint8_t p = 0;;)
     {
-        fat.first_lba = partitions[p].first_lba;
-        fat.last_lba = partitions[p].last_lba;
-        faterr = fat_Init(&fat);
+        uint32_t base_lba = partitions[p].first_lba;
+        fat_callback_usr_t *usr = &global.msd;
+        fat_read_callback_t read = &msd_Read;
+        fat_write_callback_t write = &msd_Write;
+
+        faterr = fat_Open(&fat, read, write, usr, base_lba);
         if (faterr == FAT_SUCCESS)
         {
-			gui_Print("opened fat partition");
-			gui_PrintInt(p);
-			_NewLine();
+            gui_PrintLine("opened fat partition");
             break;
         }
+
         p++;
         if (p >= num_partitions)
         {
-            gui_PrintLine("no fat32 paritions found");
-			errored = true;
-            break;
+            gui_PrintLine("no suitable patitions");
+            goto msd_error;
         }
-    }
+    
+	}
 
 	if (!errored) {
 		if (argc > 1) {
@@ -370,8 +418,8 @@ int main(int argc, char *argv[]) {
 			}
 		} else {
 			// otherwise open the GUI
-			fat_dir_entry_t msdentries[16];
-			void *fsentries[16];
+			fat_dir_entry_t msdentries[GUI_LIST_LEN];
+			void *fsentries[GUI_LIST_LEN];
 			char *namebuffer = sys_Malloc(14);
 			char *msdpath;
 			char *fspath;
@@ -389,7 +437,7 @@ int main(int argc, char *argv[]) {
 					if (redraw) {
 						gui_DrawConsoleWindow("/");
 						gui_PrintLine(fspath);
-						num_entries = fs_DirList(&fsentries, fspath, 16, skip_entries);
+						num_entries = fs_DirList(&fsentries, fspath, GUI_LIST_LEN, skip_entries);
 						for (uint8_t i=0; i<num_entries; i++) {
 							char *name = fs_CopyFileName(fsentries[i]);
 							bosgfx_SetTextPos(2, i+2);
@@ -403,12 +451,12 @@ int main(int argc, char *argv[]) {
 					if (redraw) {
 						gui_DrawConsoleWindow("MSD/");
 						gui_PrintLine(msdpath);
-						num_entries = fat_DirList(&fat, msdpath, FAT_LIST_ALL, &msdentries, 16, skip_entries);
-						for (uint8_t i=0; i<(16<num_entries?16:num_entries); i++) {
+						num_entries = fat_DirList(&fat, msdpath, &msdentries, GUI_LIST_LEN, skip_entries);
+						for (uint8_t i=0; i<(GUI_LIST_LEN<num_entries?GUI_LIST_LEN:num_entries); i++) {
 							bosgfx_SetTextPos(2, i+2);
 							if (msdentries[i].attrib & FAT_DIR) // check if entry is a directory
 								gui_PrintChar('/');
-							memcpy(namebuffer, &msdentries[i].filename, 13);
+							memcpy(namebuffer, &msdentries[i].name, 13);
 							gui_Print(namebuffer);
 						}
 					}
@@ -428,7 +476,7 @@ int main(int argc, char *argv[]) {
 						redraw = true;
 					}
 				} else if (key == sk_Down) {
-					if (cursor < 16 && cursor < num_entries) cursor++;
+					if (cursor < GUI_LIST_LEN && cursor < num_entries) cursor++;
 					else if (skip_entries < num_entries) {
 						skip_entries++;
 						redraw = true;
@@ -450,8 +498,8 @@ int main(int argc, char *argv[]) {
 						if (msdentries[cursor].attrib & FAT_DIR) {
 							char *tofree;
 							redraw = true;
-							if (msdentries[cursor].filename[0] == '.') {
-								if (msdentries[cursor].filename[1] == '.') {
+							if (msdentries[cursor].name[0] == '.') {
+								if (msdentries[cursor].name[1] == '.') {
 									int l = strlen(msdpath);
 									if (l < 2)
 										continue;
@@ -469,7 +517,7 @@ int main(int argc, char *argv[]) {
 								continue;
 							}
 							tofree = msdpath;
-							memcpy(namebuffer, &msdentries[cursor].filename, 13);
+							memcpy(namebuffer, &msdentries[cursor].name, 13);
 							msdpath = fs_JoinPath(msdpath, namebuffer);
 							sys_Free(tofree);
 							cursor = skip_entries = 0;
@@ -487,16 +535,16 @@ int main(int argc, char *argv[]) {
 							} else {
 								s = fs_CopyFileName(fsentries[cursor]);
 							}
-							memcpy((d = namebuffer), &msdentries[cursor].filename, 13);
+							memcpy((d = namebuffer), &msdentries[cursor].name, 13);
 							d = fs_JoinPath(msdpath, d);
 							sys_Free(tofree);
 						} else {
 							if (*fnamebuffer) {
 								d = fnamebuffer;
 							} else {
-								d = &msdentries[cursor].filename;
+								d = (char*)&msdentries[cursor].name;
 							}
-							memcpy((s = namebuffer), &msdentries[cursor].filename, 13);
+							memcpy((s = namebuffer), &msdentries[cursor].name, 13);
 							s = fs_JoinPath(msdpath, s);
 						}
 						if (transfer_file(&fat, s, d, on_internal_fs, TT_COPY)) {
@@ -529,7 +577,7 @@ int main(int argc, char *argv[]) {
 	}
 fat_error:
     // close the filesystem
-    fat_Deinit(&fat);
+    fat_Close(&fat);
 
 msd_error:
     // close the msd device

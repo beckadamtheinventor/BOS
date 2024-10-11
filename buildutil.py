@@ -21,6 +21,12 @@ def MakeVersion(add="0.0.1", no=None):
 		add = [int(s) for s in add.split(".")]
 		for i in range(len(add)):
 			ver[i] += add[i]
+		shouldzero = False
+		for i in range(len(add)):
+			if shouldzero:
+				ver[i] = 0
+			if add[i] > 0:
+				shouldzero = True
 		ver = ".".join([str(s) for s in ver])
 	else:
 		ver = no

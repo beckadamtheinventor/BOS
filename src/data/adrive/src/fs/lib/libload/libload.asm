@@ -24,7 +24,7 @@
 include '../include/library.inc'
 
 define VERSION_MAJOR       4
-define VERSION_MINOR       0
+define VERSION_MINOR       1
 
 buf := ti.cursorImage
 

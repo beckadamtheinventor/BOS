@@ -147,19 +147,19 @@ ls_main:
 	ld de,ti.pixelShadow
 	ld hl,(ix-18)
 	sbc hl,de
-	jr z,.exit
-	push hl,de
-	ld c,0
-	push bc
-	ld bc,(ix-15)
-	push bc
-	call bos.fs_DeleteFile
-	call bos.fs_WriteNewFile
-	pop bc,bc,bc,bc
-	jr nc,.exit
-	ld hl,.str_FailedToWrite
-	call bos.gui_PrintLine
-	jr .fail
+	jr .exit
+	; push hl,de
+	; ld c,0
+	; push bc
+	; ld bc,(ix-15)
+	; push bc
+	; call bos.fs_DeleteFile
+	; call bos.fs_WriteNewFile
+	; pop bc,bc,bc,bc
+	; jr nc,.exit
+	; ld hl,.str_FailedToWrite
+	; call bos.gui_PrintLine
+	; jr .fail
 .exit:
 .exit_nopop:
 	xor a,a
@@ -191,7 +191,7 @@ ls_main:
 	ld (ix-18),de
 	ret
 
-.str_FailedToWrite:
-	db "Failed to write output file.", 0
+; .str_FailedToWrite:
+	; db "Failed to write output file.", 0
 .str_HelpInfo:
-	db "ls [-o file] [dir]", 0
+	db "ls [dir]", 0

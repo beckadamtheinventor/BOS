@@ -306,6 +306,9 @@ msd_Open:
 	jq	z,.parseendpoint
 	jq	.parsenext
 .parseinterface:
+	ld	de,(.configlengthend)
+	ld	(.interface_len_rem),de
+	ld	(.interface_ptr),iy	; store for later set of interface
 	ld	a,(yinterfaceDescriptor.bInterfaceClass)
 	cp	a,$08
 	jr	nz,.parsenext
@@ -320,7 +323,7 @@ msd_Open:
 	ld	(.interface),a
 	jq	.parsenext
 .parseendpoint:
-	ld	a,0			; mark as valid
+	ld	a,0			; check if interface set
 .interface := $ - 1
 	or	a,a
 	jq	z,.parsenext
@@ -334,9 +337,15 @@ msd_Open:
 	jr	z,.parseoutendpointout
 .parseoutendpointin:
 	ld	(.bulkin),a
-	jq	.parsenext
+	ld	a,(.bulkout)
+	or	a,a
+	jr	nz,.parsedone
+	jr	.parsenext
 .parseoutendpointout:
 	ld	(.bulkout),a
+	ld	a,(.bulkin)
+	or	a,a
+	jr	nz,.parsedone
 .parsenext:
 	ld	de,0
 	ld	e,(ydescriptor.bLength)
@@ -377,9 +386,24 @@ msd_Open:
 	dec	a
 	ld	(ymsd.interface),a
 
+	push	iy
 	push	bc			; holds the usbdrvce device
 	call	usb_RefDevice		; prevent random crashes if the user messes up
 	pop	bc
+	pop	iy
+
+	push	iy
+	ld	bc,0
+.interface_len_rem := $-3
+	push	bc
+	ld	bc,0
+.interface_ptr := $-3
+	push	bc
+	ld	bc,(ymsd.dev)		; usb device
+	push	bc
+	call	usb_SetInterface
+	pop	bc,bc,bc
+	pop	iy
 
 	; successfully found bulk endpoints for msd
 	; now reset the msd device
@@ -677,7 +701,7 @@ msd_Write:
 
 ;-------------------------------------------------------------------------------
 msd_FindPartitions:
-; Locates MBR partitions on the MSD
+; Locates MBR/EBR/GPT partitions on the MSD
 ; Arguments:
 ;  sp + 3 : msd device structure
 ;  sp + 6 : storage for found partitions
@@ -685,111 +709,252 @@ msd_FindPartitions:
 ; Returns:
 ;  Number of found partitions
 	call	$130			; frameset0
-	ld	a, (ix + 9 + 3)
-	ld	(.smc.max_partitions), a
-	ld	hl, (ix + 6 + 3)
-	ld	(.smc.partitions), hl
-	ld	hl, (ix + 3 + 3)
-	ld	(.smc.msd), hl
-	xor	a, a
-	ld	(.smc.num_partitions), a
-	sbc	hl, hl			; start at partition 0
+	xor	a,a
+	ld	(.smc.num_partitions),a
+	ld	a,(ix + 9 + 3)
+	or	a,a
+	jr	z,.done
+	ld	(.smc.max_partitions),a
+	ld	(.smc.max_gpt_partitions),a
+	ld	hl,(ix + 6 + 3)
+	ld	(.smc.partitions),hl
+	ld	hl,(ix + 3 + 3)
+	ld	(.smc.msd),hl
+	sbc	hl,hl			; start at partition 0
 	push	hl
 	push	hl
 	call	.recursive_loop
-	ld	sp, ix
+.done:
+	ld	sp,ix
 	pop	ix
 	ld	a,0
 .smc.num_partitions := $-1
-	ret
+	cp	a,1			; protective MBR, maybe GPT
+	ret	nz
+	jp	.check_for_gpt
 .recursive_loop:
-	ld	hl, -74
+	ld	hl,-74
 	call	$12C			; frameset
-	ld	iy, 0
+	ld	iy,0
 .smc.msd := $-3
-	lea	hl, ix + 6
+	lea	hl,ix + 6
 	call	scsi_read_block
-	jr	nz, .return
+	jr	nz,.return
 	call	util_check_mbr_magic
-	jr	nz, .return
-	lea	hl, ymsd.buffer
-	ld	de, 446
-	add	hl, de
-	lea	de, ix - 64
-	ld	bc, 64
+	jr	nz,.return
+	lea	hl,ymsd.buffer
+	ld	de,446
+	add	hl,de
+	lea	de,ix - 64
+	ld	bc,64
 	ldir
-	ld	iy, 0
+	ld	iy,0
 .for_each_entry:
-	ld	de, 64
-	lea	hl, iy
-	or	a, a
-	sbc	hl, de
-	jr	nz, .no_return
+	ld	de,64
+	lea	hl,iy
+	or	a,a
+	sbc	hl,de
+	jr	nz,.no_return
 .return:
-	ld	sp, ix
+	ld	sp,ix
 	pop	ix
 	ret
 .no_return:
-	ld	a, (.smc.num_partitions)
-	cp	a, 0
+	ld	a,(.smc.num_partitions)
+	cp	a,0
 .smc.max_partitions := $-1
-	jr	z, .return
-	ld	(ix - 70), iy
-	lea	iy, ix - 64
-	ld	hl, (iy + 8)
-	ld	e, (iy + 11)
+	jr	z,.return
+	ld	(ix - 70),iy
+	lea	iy,ix - 64
+	ld	hl,(iy + 8)
+	ld	e,(iy + 11)
 	call	$1B0			; check zero
-	jq	z, .continue
-	ld	de, (ix - 70)
-	lea	iy, ix - 64
-	add	iy, de
-	ld	hl, (iy + 12)
-	ld	e, (iy + 15)
-	ld	(ix - 73), hl
-	ld	(ix - 74), e
+	jq	z,.continue
+	ld	de,(ix - 70)
+	lea	iy,ix - 64
+	add	iy,de
+	ld	hl,(iy + 12)
+	ld	e,(iy + 15)
+	ld	(ix - 73),hl
+	ld	(ix - 74),e
 	call	$1B0			; check zero
-	jq	z, .continue
-	ld	hl, (iy + 8)
-	ld	e, (iy + 11)
-	ld	bc, (ix + 6)
-	ld	a, (ix + 9)
-	add	hl, bc
-	adc	a, e
-	ld	e, a
-	ld	bc, (ix - 70)
-	lea	iy, ix - 64
-	add	iy, bc
-	ld	a, (iy + 4)
-	cp	a, $05
-	jr	z, .ebr
-	cp	a, $0F
-	jr	nz, .not_ebr
+	jq	z,.continue
+	ld	hl,(iy + 8)
+	ld	e,(iy + 11)
+	ld	bc,(ix + 6)
+	ld	a,(ix + 9)
+	add	hl,bc
+	adc	a,e
+	ld	e,a
+	ld	bc,(ix - 70)
+	lea	iy,ix - 64
+	add	iy,bc
+	ld	a,(iy + 4)
+	cp	a,$05
+	jr	z,.ebr
+	cp	a,$0F
+	jr	nz,.not_ebr
 .ebr:
-	push	de, hl
+	push	de,hl
 	call	.recursive_loop
-	pop	hl, hl
+	pop	hl,hl
 	jr	.continue
 .not_ebr:
-	ld	iy, 0
+	ld	iy,0
 .smc.partitions := $-3
-	ld	(iy + 0), hl
-	ld	(iy + 3), e
-	ld	bc, -1
-	add	hl, bc
-	adc	a, c
-	ld	bc, (ix - 73)
-	add	hl, bc
-	adc	a, (ix - 74)
-	ld	(iy + 4), hl
-	ld	(iy + 7), a
-	lea	hl, iy + 8
-	ld	(.smc.partitions), hl
-	ld	hl, .smc.num_partitions
+	ld	(iy + 0),hl
+	ld	(iy + 3),e
+	ld	bc,-1
+	add	hl,bc
+	adc	a,c
+	ld	bc,(ix - 73)
+	add	hl,bc
+	adc	a,(ix - 74)
+	ld	(iy + 4),hl
+	ld	(iy + 7),a
+	lea	hl,iy + 8
+	ld	(.smc.partitions),hl
+	ld	hl,.smc.num_partitions
 	inc	(hl)
 .continue:
-	ld	iy, (ix - 70)
-	lea	iy, iy + 16
+	ld	iy,(ix - 70)
+	lea	iy,iy + 16
 	jq	.for_each_entry
+.check_for_gpt:
+	ld	hl,.gpt_lba
+	ld	iy,(.smc.msd)
+	call	scsi_read_block		; read lba 1
+	lea	hl,ymsd.buffer
+	ld	de,.gpt_signature
+	ld	b,8
+.check_gpt_signature:
+	ld	a,(de)
+	cp	a,(hl)
+	jr	z,.maybe_gpt
+	ld	a,1			; just return the mbr
+	ret
+.maybe_gpt:
+	inc	hl
+	inc	de
+	djnz	.check_gpt_signature
+	ld	a,(ymsd.buffer + $50)	; number of entries
+	ld	hl,(ymsd.buffer + $51)	; only try to get the first 63 lbas
+	compare_hl_zero
+	jr	z,.reasonable_gpt
+	ld	a,255
+.reasonable_gpt:
+	srl	a
+	srl	a			; divide by 4
+	ld	(.smc.num_gpt_loops),a
+	xor	a,a
+	ld	(.smc.num_partitions),a
+	ld	hl,(ymsd.buffer + $54)
+	ld	de,128
+	compare_hl_de
+	ret	nz			; only support 128 byte entry sizes
+	lea	hl,ymsd.buffer + $48	; parition table lba
+	ld	de,.gpt_entry_lba
+	ldi
+	ldi
+	ldi
+	ldi
+	ld	iy,(.smc.partitions)
+	lea	hl,iy - 8
+	ld	(.smc.partitions),hl	; remove the first partition
+	ex	de,hl
+.gpt_loop:
+	push	de
+	ld	hl,.gpt_entry_lba
+	ld	iy,(.smc.msd)
+	call	scsi_read_block
+	ld	hl,(.gpt_entry_lba)
+	ld	a,(.gpt_entry_lba + 3)
+	ld	bc,1
+	add	hl,bc
+	adc	a,b
+	ld	(.gpt_entry_lba),hl
+	ld	(.gpt_entry_lba + 3),a
+	pop	de
+	lea	hl,ymsd.buffer + $20	; first lba
+	ld	c,4
+.get_gpt_entries:
+	push	hl
+	ld	b,8
+.check_gpt_end:
+	ld	a,(hl)
+	or	a,a
+	jr	nz,.not_gpt_end
+	inc	hl
+	djnz	.check_gpt_end
+	pop	hl			; reached end of list if slba = 0
+	ld	a,(.smc.num_partitions)
+	ret
+.not_gpt_end:
+	pop	hl
+	push	hl
+	push	de
+	push	bc
+	ldi
+	ldi
+	ldi
+	ldi				; only support 32-bit lba :(
+	ld	b,4
+.check_slba:
+	ld	a,(hl)
+	or	a,a
+	jr	nz,.skip_entry
+	inc	hl
+	djnz	.check_slba
+	ldi
+	ldi
+	ldi
+	ldi				; only support 32-bit lba :(
+	ld	b,4
+.check_elba:
+	ld	a,(hl)
+	or	a,a
+	jr	nz,.skip_entry
+	inc	hl
+	djnz	.check_elba
+	pop	bc
+	ld	a,(.smc.num_partitions)
+	inc	a
+	ld	(.smc.num_partitions),a
+	cp	a,0
+.smc.max_gpt_partitions := $-1
+	jr	nz,.not_gpt_max
+	pop	de
+	pop	hl
+	ld	a,(.smc.num_partitions)
+	ret
+.not_gpt_max:
+	push	bc
+.skip_entry:
+	pop	bc
+	pop	hl
+	ld	de,8
+	add	hl,de
+	ex	de,hl
+	pop	hl			; entry pointer
+	push	de
+	ld	de,128
+	add	hl,de
+	pop	de
+	dec	c
+	jr	nz,.get_gpt_entries
+	ld	a,0
+.smc.num_gpt_loops := $-1
+	dec	a
+	ld	(.smc.num_gpt_loops),a
+	ld	a,(.smc.num_partitions)
+	ret	z
+	jp	.gpt_loop
+.gpt_signature:
+	db	$45,$46,$49,$20,$50,$41,$52,$54
+.gpt_lba:
+	db	1,0,0,0
+.gpt_entry_lba:
+	db	0,0,0,0
 
 ;-------------------------------------------------------------------------------
 ; utility functions
@@ -857,9 +1022,13 @@ scsi_sync_command_callback:
 	ld	hl,scsi_sync_command.done
 	jq	nz,.fail
 	set	0,(hl)			; success
+	or	a,a
+	sbc	hl,hl
 	ret
 .fail:
 	set	1,(hl)
+	or	a,a
+	sbc	hl,hl
 	ret
 
 ; inputs:

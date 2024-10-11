@@ -1,0 +1,820 @@
+	section	.text,"ax",@progbits
+	assume	adl = 1
+	section	.text,"ax",@progbits
+	public	___main_argc_argv
+___main_argc_argv:
+	call	__frameset0
+	call	_gfx_Begin
+	call	_init_editor
+	ld	de, 2
+	ld	hl, (ix + 6)
+	or	a, a
+	sbc	hl, de
+	call	pe, __setflag
+	jp	m, BB0_2
+	ld	iy, (ix + 9)
+	ld	hl, (iy + 3)
+	push	hl
+	call	_load_file
+	pop	hl
+	jr	BB0_3
+BB0_2:
+	ld	hl, (_ed+5)
+	ld	de, (_ed+8)
+	push	de
+	ld	de, 0
+	push	de
+	push	hl
+	call	_memset
+	pop	hl
+	pop	hl
+	pop	hl
+	ld	hl, 0
+	ld	(_ed+2), hl
+BB0_3:
+	ld	hl, _ed
+	set	2, (hl)
+	ld	l, (hl)
+BB0_4:
+	ld	a, l
+	and	a, 12
+	or	a, a
+	jr	z, BB0_8
+	bit	2, l
+	ld	hl, -1
+	jr	z, BB0_7
+	ld	hl, 0
+BB0_7:
+	push	hl
+	call	_draw_text
+	pop	hl
+BB0_8:
+	call	_sys_WaitKeyCycle
+	cp	a, 9
+	jr	nz, BB0_10
+	ld	hl, 10
+	push	hl
+	call	_type_char
+	pop	hl
+	jr	BB0_11
+BB0_10:
+	cp	a, 15
+	jr	z, BB0_12
+BB0_11:
+	ld	a, (_ed)
+	ld	l, a
+	jr	BB0_4
+BB0_12:
+	call	_gfx_End
+	or	a, a
+	sbc	hl, hl
+	pop	ix
+	ret
+	section	.text,"ax",@progbits
+
+	section	.text,"ax",@progbits
+	public	_init_editor
+_init_editor:
+	ld	de, -3131914
+	ld	iy, 65536
+	or	a, a
+	sbc	hl, hl
+	ld	bc, _ed+11
+	xor	a, a
+	ld	(_ed+5), de
+	ld	(_ed+8), iy
+	ld	(_ed+32), hl
+	ld	(_ed+11), a
+	push	bc
+	pop	de
+	inc	de
+	ld	iy, 14
+	push	bc
+	pop	hl
+	lea	bc, iy
+	ldir
+	ld	hl, 65535
+	ld	(_ed+35), hl
+	ld	hl, 3072
+	push	hl
+	ld	hl, 1
+	push	hl
+	call	_calloc
+	pop	de
+	pop	de
+	ld	(_ed+29), hl
+	or	a, a
+	sbc	hl, hl
+	ld	(_ed+38), hl
+	ld	hl, 1023
+	ld	(_ed+41), hl
+	ret
+	section	.text,"ax",@progbits
+
+	section	.text,"ax",@progbits
+	public	_load_file
+_load_file:
+	ld	hl, -6
+	call	__frameset
+	ld	hl, (ix + 6)
+	push	hl
+	call	_fs_OpenFile
+	ld	(ix - 3), hl
+	pop	hl
+	ld	hl, (ix + 6)
+	ld	(_ed+2), hl
+	ld	hl, (_ed+5)
+	ld	de, (_ed+8)
+	push	de
+	ld	de, 0
+	push	de
+	push	hl
+	call	_memset
+	pop	hl
+	pop	hl
+	pop	hl
+	ld	a, (_ed)
+	ld	de, -1
+	ld	hl, (ix - 3)
+	push	hl
+	pop	bc
+	or	a, a
+	sbc	hl, de
+	jr	nz, BB2_2
+	or	a, 1
+	ld	(_ed), a
+	jr	BB2_3
+BB2_2:
+	and	a, -2
+	ld	(_ed), a
+	ld	hl, (_ed+5)
+	ld	(ix - 6), hl
+	push	bc
+	call	_fs_GetFDLen
+	pop	de
+	ld	de, 0
+	push	de
+	ld	de, (ix - 3)
+	push	de
+	ld	de, 1
+	push	de
+	push	hl
+	ld	hl, (ix - 6)
+	push	hl
+	call	_fs_Read
+	pop	hl
+	pop	hl
+	pop	hl
+	pop	hl
+	pop	hl
+BB2_3:
+	ld	sp, ix
+	pop	ix
+	ret
+	section	.text,"ax",@progbits
+
+	section	.text,"ax",@progbits
+	public	_draw_text
+_draw_text:
+	ld	hl, -24
+	call	__frameset
+	ld	hl, (_ed+11)
+	ld	(ix - 3), hl
+	push	hl
+	call	_get_line_offset_ptr
+	pop	de
+	ld	de, (hl)
+	ld	hl, (_ed+17)
+	add	hl, de
+	bit	0, (ix + 6)
+	jr	z, BB3_2
+	ld	de, (_ed+14)
+	ld	(ix - 3), de
+BB3_2:
+	ld	de, 20
+	ld	(ix - 6), de
+	ld	de, 23
+	push	hl
+	pop	bc
+	or	a, a
+	sbc	hl, hl
+BB3_3:
+	ld	(ix - 12), hl
+	or	a, a
+	sbc	hl, de
+	jp	z, BB3_20
+	push	bc
+	pop	iy
+	ld	de, (_ed+14)
+	ld	bc, (ix - 3)
+	push	bc
+	pop	hl
+	or	a, a
+	sbc	hl, de
+	jr	z, BB3_6
+	or	a, a
+	sbc	hl, hl
+	jr	BB3_7
+BB3_6:
+	ld	hl, (_ed+17)
+BB3_7:
+	inc	bc
+	ld	(ix - 3), bc
+	lea	de, iy
+	add	hl, de
+	ld	(ix - 9), hl
+	ld	hl, (ix - 6)
+	push	hl
+	ld	hl, 1
+	push	hl
+	ld	hl, _.str.1
+	push	hl
+	call	_gfx_PrintStringXY
+	pop	hl
+	pop	hl
+	pop	hl
+	ld	hl, 10
+	ld	(ix - 24), hl
+BB3_8:
+	ld	bc, (_ed+26)
+	ld	de, (_ed+32)
+	ld	hl, (_ed+5)
+	ld	(ix - 18), hl
+	ld	hl, (_ed+35)
+	ld	(ix - 15), de
+	or	a, a
+	sbc	hl, de
+	ld	(ix - 21), hl
+	push	bc
+	pop	hl
+	ld	de, (ix - 9)
+	or	a, a
+	sbc	hl, de
+	push	de
+	pop	hl
+	push	de
+	pop	iy
+	jr	c, BB3_10
+	push	bc
+	pop	iy
+BB3_10:
+	ex	de, hl
+BB3_11:
+	lea	hl, iy
+	or	a, a
+	sbc	hl, de
+	jr	z, BB3_20
+	ld	hl, (ix - 15)
+	or	a, a
+	sbc	hl, de
+	ld	bc, (ix - 21)
+	jr	c, BB3_14
+	ld	bc, 0
+BB3_14:
+	ld	hl, (ix - 18)
+	add	hl, bc
+	add	hl, de
+	ld	a, (hl)
+	cp	a, 9
+	push	de
+	pop	bc
+	jr	nz, BB3_16
+	push	bc
+	pop	de
+	ld	bc, 32
+	ld	hl, (ix - 24)
+	add	hl, bc
+	ld	(ix - 24), hl
+	inc	de
+	jr	BB3_11
+BB3_16:
+	cp	a, 10
+	jr	z, BB3_18
+	inc	bc
+	ld	(ix - 9), bc
+	ld	(ix - 15), a
+	ld	hl, (ix - 6)
+	push	hl
+	ld	hl, (ix - 24)
+	push	hl
+	call	_gfx_SetTextXY
+	pop	hl
+	pop	hl
+	ld	l, (ix - 15)
+	push	hl
+	call	_gfx_PrintChar
+	pop	hl
+	jp	BB3_8
+BB3_18:
+	bit	0, (ix + 6)
+	jr	nz, BB3_20
+	inc	bc
+	ld	de, 9
+	ld	hl, (ix - 6)
+	add	hl, de
+	ld	(ix - 6), hl
+	ld	hl, (ix - 12)
+	inc	hl
+	ld	de, 23
+	jp	BB3_3
+BB3_20:
+	ld	sp, ix
+	pop	ix
+	ret
+	section	.text,"ax",@progbits
+
+	section	.text,"ax",@progbits
+	public	_type_char
+_type_char:
+	call	__frameset0
+	ld	d, (ix + 6)
+	ld	hl, _ed
+	set	0, (hl)
+	ld	bc, (_ed+32)
+	ld	hl, (_ed+5)
+	add	hl, bc
+	ld	(hl), d
+	ld	hl, (_ed+32)
+	inc	hl
+	ld	(_ed+32), hl
+	ld	a, (_ed)
+	ld	c, a
+	or	a, 4
+	ld	e, a
+	ld	a, d
+	cp	a, 10
+	jr	z, BB4_2
+	ld	e, c
+BB4_2:
+	ld	a, e
+	or	a, 8
+	ld	(_ed), a
+	bit	1, e
+	jr	nz, BB4_5
+	ld	de, (_ed+35)
+	ld	bc, (_ed+8)
+	push	de
+	pop	hl
+	or	a, a
+	sbc	hl, bc
+	jr	nc, BB4_5
+	inc	de
+	ld	(_ed+35), de
+BB4_5:
+	pop	ix
+	ret
+	section	.text,"ax",@progbits
+
+	section	.text,"ax",@progbits
+	public	_get_line_offset_ptr
+_get_line_offset_ptr:
+	ld	hl, -3
+	call	__frameset
+	ld	iy, (ix + 6)
+	ld	bc, (_ed+38)
+	ld	hl, (_ed+29)
+	ld	(ix - 3), hl
+	ld	de, (_ed+41)
+	lea	hl, iy
+	or	a, a
+	sbc	hl, bc
+	push	hl
+	pop	iy
+	add	iy, de
+	ld	de, (ix + 6)
+	push	bc
+	pop	hl
+	or	a, a
+	sbc	hl, de
+	jr	c, BB5_2
+	push	de
+	pop	iy
+BB5_2:
+	ld	bc, 3
+	lea	hl, iy
+	call	__imulu
+	push	hl
+	pop	de
+	ld	hl, (ix - 3)
+	add	hl, de
+	ld	sp, ix
+	pop	ix
+	ret
+	section	.text,"ax",@progbits
+
+	section	.text,"ax",@progbits
+	public	_load_empty
+_load_empty:
+	ld	hl, (_ed+5)
+	ld	de, (_ed+8)
+	push	de
+	ld	de, 0
+	push	de
+	push	hl
+	call	_memset
+	pop	hl
+	pop	hl
+	pop	hl
+	ret
+	section	.text,"ax",@progbits
+
+	section	.text,"ax",@progbits
+	public	_get_buffer_ptr
+_get_buffer_ptr:
+	ld	hl, -3
+	call	__frameset
+	ld	iy, (ix + 6)
+	ld	bc, (_ed+32)
+	ld	hl, (_ed+5)
+	ld	(ix - 3), hl
+	ld	de, (_ed+35)
+	lea	hl, iy
+	or	a, a
+	sbc	hl, bc
+	push	hl
+	pop	iy
+	add	iy, de
+	ld	de, (ix + 6)
+	push	bc
+	pop	hl
+	or	a, a
+	sbc	hl, de
+	lea	bc, iy
+	jr	c, BB7_2
+	push	de
+	pop	bc
+BB7_2:
+	ld	hl, (ix - 3)
+	add	hl, bc
+	ld	sp, ix
+	pop	ix
+	ret
+	section	.text,"ax",@progbits
+
+	section	.text,"ax",@progbits
+	public	_dec_buffer_offsets
+_dec_buffer_offsets:
+	ld	iy, (_ed+5)
+	ld	de, (_ed+32)
+	push	de
+	pop	bc
+	dec	bc
+	ld	(_ed+32), bc
+	lea	hl, iy
+	add	hl, de
+	ld	a, (hl)
+	ld	de, (_ed+35)
+	push	de
+	pop	bc
+	dec	bc
+	ld	(_ed+35), bc
+	add	iy, de
+	ld	(iy - 1), a
+	ret
+	section	.text,"ax",@progbits
+
+	section	.text,"ax",@progbits
+	public	_inc_buffer_offsets
+_inc_buffer_offsets:
+	ld	hl, (_ed+5)
+	ld	de, (_ed+32)
+	push	de
+	pop	bc
+	inc	bc
+	ld	(_ed+32), bc
+	push	hl
+	pop	iy
+	add	iy, de
+	ld	a, (iy + 1)
+	ld	de, (_ed+35)
+	push	de
+	pop	bc
+	inc	bc
+	ld	(_ed+35), bc
+	add	hl, de
+	ld	(hl), a
+	ret
+	section	.text,"ax",@progbits
+
+	section	.text,"ax",@progbits
+	public	_del_char
+_del_char:
+	ld	hl, _ed
+	ld	iy, -1
+	ld	a, (_ed)
+	set	0, (hl)
+	bit	1, a
+	jr	z, BB10_2
+	ld	a, 0
+	jr	BB10_3
+BB10_2:
+	ld	a, -1
+BB10_3:
+	bit	0, a
+	jr	nz, BB10_5
+	ld	de, 35
+	jr	BB10_6
+BB10_5:
+	ld	de, 32
+BB10_6:
+	bit	0, a
+	jr	nz, BB10_8
+	ld	iy, 1
+BB10_8:
+	add	hl, de
+	ld	de, (hl)
+	add	iy, de
+	ld	(hl), iy
+	ret
+	section	.text,"ax",@progbits
+
+	section	.text,"ax",@progbits
+	public	_cur_line_len
+_cur_line_len:
+	ld	hl, -15
+	call	__frameset
+	ld	hl, (_ed+14)
+	push	hl
+	call	_get_line_offset_ptr
+	pop	de
+	ld	de, (hl)
+	ld	bc, (_ed+32)
+	ld	hl, (_ed+5)
+	ld	(ix - 3), hl
+	ld	hl, (_ed+35)
+	ld	(ix - 9), bc
+	or	a, a
+	sbc	hl, bc
+	push	hl
+	pop	bc
+	push	de
+	pop	hl
+	ld	iy, (ix - 3)
+	add	iy, de
+	ld	(ix - 3), iy
+	ld	de, 0
+	ld	(ix - 12), hl
+	ld	(ix - 15), bc
+BB11_1:
+	ld	(ix - 6), de
+	add	hl, de
+	ex	de, hl
+	ld	hl, (ix - 9)
+	or	a, a
+	sbc	hl, de
+	jr	c, BB11_3
+	ld	bc, 0
+BB11_3:
+	ld	hl, (ix - 3)
+	add	hl, bc
+	ld	de, (ix - 6)
+	add	hl, de
+	ld	a, (hl)
+	cp	a, 10
+	jr	z, BB11_5
+	inc	de
+	ld	hl, (ix - 12)
+	ld	bc, (ix - 15)
+	jr	BB11_1
+BB11_5:
+	ex	de, hl
+	ld	sp, ix
+	pop	ix
+	ret
+	section	.text,"ax",@progbits
+
+	section	.text,"ax",@progbits
+	public	_move_cursor_to_eol
+_move_cursor_to_eol:
+	ret
+	section	.text,"ax",@progbits
+
+	section	.text,"ax",@progbits
+	public	_zero_cursor_offset
+_zero_cursor_offset:
+	or	a, a
+	sbc	hl, hl
+	ld	(_ed+20), hl
+	ld	(_ed+17), hl
+	ret
+	section	.text,"ax",@progbits
+
+	section	.text,"ax",@progbits
+	public	_move_cursor_up
+_move_cursor_up:
+	call	__frameset0
+	ld	bc, (_ed+14)
+	push	bc
+	pop	hl
+	add	hl, bc
+	or	a, a
+	sbc	hl, bc
+	jr	z, BB14_8
+	ld	iy, _ed
+	ld	de, (_ed+11)
+	push	de
+	pop	hl
+	bit	0, (ix + 6)
+	jr	z, BB14_4
+	add	hl, bc
+	or	a, a
+	sbc	hl, bc
+	jr	z, BB14_8
+	dec	de
+	ld	(_ed+11), de
+	set	2, (iy)
+	jr	BB14_8
+BB14_4:
+	or	a, a
+	sbc	hl, bc
+	jr	c, BB14_6
+	dec	de
+	ld	(_ed+11), de
+	set	2, (iy)
+BB14_6:
+	dec	bc
+	ld	(_ed+14), bc
+	call	_cur_line_len
+	push	hl
+	pop	de
+	ld	hl, (_ed+20)
+	or	a, a
+	sbc	hl, de
+	ld	hl, 0
+	jr	c, BB14_8
+	dec	de
+	ld	(_ed+20), de
+	ld	(_ed+17), hl
+BB14_8:
+	pop	ix
+	ret
+	section	.text,"ax",@progbits
+
+	section	.text,"ax",@progbits
+	public	_move_cursor_down
+_move_cursor_down:
+	call	__frameset0
+	bit	0, (ix + 6)
+	jr	z, BB15_3
+	ld	de, (_ed+11)
+	ld	bc, (_ed+23)
+	push	de
+	pop	hl
+	or	a, a
+	sbc	hl, bc
+	jr	nc, BB15_6
+	inc	de
+	ld	(_ed+11), de
+	jr	BB15_6
+BB15_3:
+	ld	de, (_ed+14)
+	ld	bc, (_ed+23)
+	push	de
+	pop	hl
+	or	a, a
+	sbc	hl, bc
+	jr	nc, BB15_6
+	ld	bc, 23
+	ld	iy, (_ed+11)
+	lea	hl, iy
+	add	hl, bc
+	push	hl
+	pop	bc
+	ex	de, hl
+	or	a, a
+	sbc	hl, bc
+	jr	c, BB15_6
+	ld	hl, _ed
+	inc	iy
+	ld	(_ed+11), iy
+	set	2, (hl)
+BB15_6:
+	pop	ix
+	ret
+	section	.text,"ax",@progbits
+
+	section	.text,"ax",@progbits
+	public	_move_cursor_left
+_move_cursor_left:
+	ld	bc, (_ed+20)
+	push	bc
+	pop	hl
+	add	hl, bc
+	or	a, a
+	sbc	hl, bc
+	jr	nz, BB16_2
+	or	a, a
+	sbc	hl, hl
+	push	hl
+	call	_move_cursor_up
+	pop	hl
+	ret
+BB16_2:
+	ld	de, (_ed+17)
+	push	de
+	pop	hl
+	or	a, a
+	sbc	hl, bc
+	jr	c, BB16_4
+	ld	hl, _ed
+	dec	de
+	ld	(_ed+17), de
+	set	2, (hl)
+BB16_4:
+	dec	bc
+	ld	(_ed+20), bc
+	ret
+	section	.text,"ax",@progbits
+
+	section	.text,"ax",@progbits
+	public	_move_cursor_right
+_move_cursor_right:
+	ld	hl, -9
+	call	__frameset
+	ld	hl, (_ed+14)
+	push	hl
+	call	_get_line_offset_ptr
+	pop	de
+	ld	de, (hl)
+	ld	hl, (_ed+20)
+	add	hl, de
+	ex	de, hl
+	ld	(ix - 9), de
+	ld	bc, (_ed+32)
+	ld	hl, (_ed+5)
+	ld	(ix - 3), hl
+	ld	hl, (_ed+35)
+	ld	(ix - 6), hl
+	ex	de, hl
+	or	a, a
+	sbc	hl, bc
+	push	hl
+	pop	iy
+	ld	de, (ix - 6)
+	add	iy, de
+	ld	de, (ix - 9)
+	push	bc
+	pop	hl
+	or	a, a
+	sbc	hl, de
+	lea	bc, iy
+	jr	c, BB17_2
+	push	de
+	pop	bc
+BB17_2:
+	ld	hl, (ix - 3)
+	add	hl, bc
+	ld	a, (hl)
+	cp	a, 10
+	jr	nz, BB17_4
+	or	a, a
+	sbc	hl, hl
+	ld	(_ed+20), hl
+	ld	(_ed+17), hl
+	push	hl
+	call	_move_cursor_down
+	pop	hl
+BB17_4:
+	ld	sp, ix
+	pop	ix
+	ret
+	section	.text,"ax",@progbits
+
+	section	.rodata,"a",@progbits
+	private	_.str
+_.str:
+	db	"aA1x", 0
+
+	section	.data,"aw",@progbits
+	public	_overtypes
+_overtypes:
+	dl	_.str
+
+	section	.bss,"aw",@nobits
+	public	_ed
+_ed:
+	rb	44
+
+	section	.rodata,"a",@progbits
+	private	_.str.1
+_.str.1:
+	db	":", 0
+
+	ident	"clang version 15.0.0 (https://github.com/CE-Programming/llvm-project 23b78267b5d376b232475d0805a937e54b61e0d0)"
+	extern	_memset
+	extern	__Unwind_SjLj_Register
+	extern	_gfx_PrintChar
+	extern	__frameset
+	extern	_gfx_Begin
+	extern	_fs_Read
+	extern	_fs_GetFDLen
+	extern	_fs_OpenFile
+	extern	__setflag
+	extern	__Unwind_SjLj_Unregister
+	extern	_sys_WaitKeyCycle
+	extern	__imulu
+	extern	_calloc
+	extern	_gfx_End
+	extern	_gfx_PrintStringXY
+	extern	__frameset0
+	extern	_gfx_SetTextXY

@@ -79,24 +79,20 @@ cmd_exe_init:
 
 cmd_execute_next_line:
 	call bos.sys_ExecContinue
+	ld a,(bos.return_code_flags)
+	bit bos.bReturnFromFullScreen,a
+	call nz,cmd_redraw_console
 	ld a,(ix-10)
 	cp a,'i'
 	jq nz,cmd_exit ; return the process exit code if not set to ignore
 	sbc hl,hl
 	jq cmd_exit
 
-cmd_no_cmd_args:
-	; xor a,a
-	; ld (bos.lcd_text_bg),a
-	; ld (bos.lcd_text_bg2),a
-	; dec a
-	; ld (bos.lcd_text_fg),a
-	; ld a,5
-	; ld (bos.lcd_text_fg2),a
-	; ld (bos.cursor_color),a
-	xor a,a
-	sbc hl,hl
-	ld (ix-3),hl
+cmd_redraw_console:
+	ld a,1
+	call bos.gfx_SetDraw
+	ld hl,bos.LCD_VRAM
+	ld (ti.mpLcdUpbase),hl
 	ld hl,bos.current_working_dir
 	call bos.gui_DrawConsoleWindow
 enter_input_clear:
@@ -111,6 +107,22 @@ end if
 	ld (hl),c
 	inc hl
 	djnz .clear_buffer_loop
+	ret
+
+
+cmd_no_cmd_args:
+	; xor a,a
+	; ld (bos.lcd_text_bg),a
+	; ld (bos.lcd_text_bg2),a
+	; dec a
+	; ld (bos.lcd_text_fg),a
+	; ld a,5
+	; ld (bos.lcd_text_fg2),a
+	; ld (bos.cursor_color),a
+	xor a,a
+	sbc hl,hl
+	ld (ix-3),hl
+	call cmd_redraw_console
 	jq enter_input
 recall_last:
 	ld hl,(ix-3)
@@ -159,7 +171,8 @@ enter_input:
 	pop bc
 	; print the return code here
 	call cmd_print_return_value
-	jq enter_input_clear
+	call enter_input_clear
+	jr enter_input
 
 cmd_print_return_value:
 	ld hl,(bos.ExecutingFileFd)

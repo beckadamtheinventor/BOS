@@ -142,20 +142,21 @@ $(call NATIVEPATH,$(FSOBJ)/memedit.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/memed
 #	fasmg $(call NATIVEPATH,$(FSSRC)/fs/sys/cfg.asm) $(call NATIVEPATH,$(FSOBJ)/cfg.bin)
 #	convbin -i $(call NATIVEPATH,$(FSOBJ)/cfg.bin) -o $(call NATIVEPATH,$(FSOBJ)/cfg.zx7.bin) -j bin -k bin -c zx7
 
-$(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/bosbin/CEDIT.bin): $(call rwildcard,$(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/src),*)
+$(call NATIVEPATH,$(FSOBJ)/cedit.zx7.bin): $(call rwildcard,$(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/src),*)
 	$(Q)make -f bos.makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/)
 	convbin -i $(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/bosbin/CEDIT.bin) -o $(call NATIVEPATH,$(FSOBJ)/cedit.zx7.bin) -j bin -k bin -c zx7
 
-$(call NATIVEPATH,$(FSSRC)/fs/bin/msd/bosbin/MSD.bin): $(call rwildcard,$(call NATIVEPATH,$(FSSRC)/fs/bin/msd/src),*)
+$(call NATIVEPATH,$(FSOBJ)/edit.zx7.bin): $(call rwildcard,$(call NATIVEPATH,$(FSSRC)/fs/bin/edit/src),*)
+	$(Q)make -f makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/edit/)
+	convbin -i $(call NATIVEPATH,$(FSSRC)/fs/bin/edit/bosbin/edit.bin) -o $(call NATIVEPATH,$(FSOBJ)/edit.zx7.bin) -j bin -k bin -c zx7
+
+$(call NATIVEPATH,$(FSOBJ)/msd.zx7.bin): $(call rwildcard,$(call NATIVEPATH,$(FSSRC)/fs/bin/msd/src),*)
 	$(Q)make -f makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/msd/)
 	convbin -i $(call NATIVEPATH,$(FSSRC)/fs/bin/msd/bosbin/MSD.bin) -o $(call NATIVEPATH,$(FSOBJ)/msd.zx7.bin) -j bin -k bin -c zx7
 
-$(call NATIVEPATH,$(FSSRC)/fs/bin/serial/bosbin/serial.bin): $(call rwildcard,$(call NATIVEPATH,$(FSSRC)/fs/bin/serial/src),*)
+$(call NATIVEPATH,$(FSOBJ)/serial.zx7.bin): $(call rwildcard,$(call NATIVEPATH,$(FSSRC)/fs/bin/serial/src),*)
 	$(Q)make -f makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/serial/)
 	convbin -i $(call NATIVEPATH,$(FSSRC)/fs/bin/serial/bosbin/serial.bin) -o $(call NATIVEPATH,$(FSOBJ)/serial.zx7.bin) -j bin -k bin -c zx7
-
-# $(call NATIVEPATH,$(FSSRC)/fs/bin/serial/bosbin/serial.bin): $(call rwildcard,$(call NATIVEPATH,$(FSSRC)/fs/bin/serial/src),*)
-#	$(Q)make -f makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/serial/)
 
 # filesystem var build rules
 $(call NATIVEPATH,$(FSOBJ)/LIB.bin): $(call NATIVEPATH,$(FSSRC)/fs/var/LIB.asm)
@@ -178,9 +179,9 @@ $(call NATIVEPATH,$(FSOBJ)/SYSCALLS.bin): $(call NATIVEPATH,$(FSSRC)/fs/var/SYSC
 filesystem: $(call rwildcard,$(call NATIVEPATH,$(FSSRC)),*) $(call NATIVEPATH,$(FSOBJ)/libload.bin) $(call NATIVEPATH,$(FSOBJ)/fontlibc.bin) \
 $(call NATIVEPATH,$(FSOBJ)/fatdrvce.bin) $(call NATIVEPATH,$(FSOBJ)/fileioc.bin) $(call NATIVEPATH,$(FSOBJ)/graphx.bin) \
 $(call NATIVEPATH,$(FSOBJ)/keypadc.bin) $(call NATIVEPATH,$(FSOBJ)/msddrvce.bin) $(call NATIVEPATH,$(FSOBJ)/srldrvce.bin) \
-$(call NATIVEPATH,$(FSOBJ)/usbdrvce.bin) $(call NATIVEPATH,$(FSOBJ)/memedit.bin) $(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/bosbin/CEDIT.bin) \
-$(call NATIVEPATH,$(FSOBJ)/LIB.bin) $(call NATIVEPATH,$(FSSRC)/fs/bin/msd/bosbin/MSD.bin) \
-$(call NATIVEPATH,$(FSSRC)/fs/bin/serial/bosbin/serial.bin) $(call NATIVEPATH,$(FSOBJ)/PATH.bin) \
+$(call NATIVEPATH,$(FSOBJ)/usbdrvce.bin) $(call NATIVEPATH,$(FSOBJ)/memedit.bin) $(call NATIVEPATH,$(FSOBJ)/cedit.zx7.bin) \
+$(call NATIVEPATH,$(FSOBJ)/LIB.bin) $(call NATIVEPATH,$(FSOBJ)/msd.zx7.bin) $(call NATIVEPATH,$(FSOBJ)/edit.zx7.bin) \
+$(call NATIVEPATH,$(FSOBJ)/serial.zx7.bin) $(call NATIVEPATH,$(FSOBJ)/PATH.bin) \
 $(call NATIVEPATH,$(FSOBJ)/TIVARS.bin) $(call NATIVEPATH,$(FSOBJ)/SYSCALLS.bin) $(call NATIVEPATH,$(FSOBJ)/explorer.bin)
 	convbin -i $(call NATIVEPATH,$(FSSRC)/fs/etc/fontlibc/DrMono.dat) -o $(call NATIVEPATH,$(FSOBJ)/DrMono.zx7.dat) -j bin -k bin -c zx7
 	fasmg $(call NATIVEPATH,$(FSSRC)/main.asm) $(call NATIVEPATH,src/data/adrive/main.bin)
@@ -215,6 +216,11 @@ clean-cedit:
 	$(Q)make clean -f bos.makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/)
 	$(Q)echo Removed CEdit objects and binaries.
 
+# Rule to clean edit submodule
+clean-edit:
+	$(Q)make clean -f makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/edit/)
+	$(Q)echo Removed Edit objects and binaries.
+
 # Rule to clean msd program
 clean-msd:
 	$(Q)make clean -f makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/msd/)
@@ -245,6 +251,7 @@ clean:
 	$(RM) $(call NATIVEPATH,src/data/adrive/main.bin)
 	$(Q)make clean -f makefile -C $(call NATIVEPATH,noti-ez80/)
 	$(Q)make clean -f bos.makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/)
+	$(Q)make clean -f bos.makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/edit/)
 	$(Q)make clean -f makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/msd/)
 	$(Q)make clean -f makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/serial/)
 	$(Q)echo Removed objects and binaries.

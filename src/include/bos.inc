@@ -529,6 +529,7 @@ namespace bos
 ?str_FromInt                     := $226F4
 ?str_FromLong                    := $226F8
 ?str_ToInt                       := $226FC
+?gui_CharFromCode                := $22700
 ; end of jump table
 ;-------------------------------------------------------------------------------
 ; OS memory areas and misc defines
@@ -755,11 +756,13 @@ namespace bos
 ?bReturnLong          := 2
 ?bSilentReturn        := 3
 ?bReturnData          := 4
+?bReturnFromFullScreen:= 5
 ?mReturnNotError      := 1 shl bReturnNotError
 ?mReturnHex           := 1 shl bReturnHex
 ?mReturnLong          := 1 shl bReturnLong
 ?mSilentReturn        := 1 shl bSilentReturn
 ?mReturnData          := 1 shl bReturnData
+?mReturnFromFullScreen:= 1 shl bReturnFromFullScreen
 ?symbol.next         := 0 ; 24-bit pointer to next symbol. 0 if end of list.
 ?symbol.name         := 3 ; 24-bit pointer to null terminated symbol name
 ?symlist.size        := 6 ; size of first symbol in symbol list

@@ -201,4 +201,5 @@
 	jp str_FromInt
 	jp str_FromLong
 	jp str_ToInt
+	jp gui_CharFromCode
 ; end of jump table

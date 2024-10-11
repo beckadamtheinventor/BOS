@@ -236,6 +236,15 @@ void *sys_SetOnInterruptHandler(void (*handler)(void));
 uint8_t gui_Input(char *buffer, unsigned int len);
 
 /**
+ * Convert a keycode from sys_GetKey to a text character.
+ * @param charset character set number to pick from.
+ * @param keycode keycode from sys_GetKey or similar.
+ * @return character corresponding to the given charset and keycode; 0 if out of bounds or N/A.
+ */
+char gui_CharFromCode(uint8_t charset, uint8_t keycode);
+
+
+/**
  * Clear the screen and print a line.
  */
 void gui_DrawConsoleWindow(const char *str);
@@ -245,6 +254,12 @@ void gui_DrawConsoleWindow(const char *str);
  * @param str Pointer to string to print.
  */
 void gui_Print(const char *str);
+
+/**
+ * Print a character to the screen advancing the current draw position.
+ * @param c character to print.
+ */
+void gui_PrintChar(char c);
 
 /**
  * Print a string to the screen and advance the current draw line.

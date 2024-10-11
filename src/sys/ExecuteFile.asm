@@ -300,7 +300,7 @@ sys_ExecuteFile:
 	ld iyl,a
 .trap: ; trap this thread here until the thread we spawned exits
 	HandleNextThread ; handle the thread we just spawned
-	ld a,iyl
+	ld a,iyl ; handling next thread preserves ix, iy, pc, sp
 	call th_GetThreadStatus.entrya
 	bit bThreadAlive,a
 	jr nz,.trap
@@ -320,7 +320,13 @@ sys_jphl := $
 .setlcdmode:
 	ld hl,ti.mpLcdCtrl
 	cp a,(hl)
-	ret z ; dont reinit the display if we're already in the correct lcd mode
+	jr nz,.reinit_display
+; dont reinit the display if we're already in the correct lcd mode
+; unless we're returning from a fullscreen program (turns on when gfx_Begin is called, unless the program says otherwise)
+	ld hl,return_code_flags
+	bit bReturnFromFullScreen, (hl)
+	ret z
+.reinit_display:
 	ld hl,ti.vRam
 	push af,hl
 	call gfx_ZeroVRAM

@@ -254,6 +254,11 @@ gfx_Begin:
 ;  arg0: bpp mode to start in
 ; Returns:
 ;  None
+
+; ensure that BOS knows the display needs to be reinitialized
+	ld hl,bos.return_code_flags
+	set bos.bReturnFromFullScreen, (hl)
+
 	call	ti.boot.ClearVRAM	; clear the screen
 	; call	bos.gfx_ZeroVRAM
 lcdGraphxMode := ti.lcdWatermark+ti.lcdIntFront+ti.lcdPwr+ti.lcdBgr+ti.lcdBpp8

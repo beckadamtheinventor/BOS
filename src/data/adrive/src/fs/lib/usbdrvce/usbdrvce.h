@@ -1,7 +1,6 @@
 /**
  * @file
  * @author Jacob "jacobly" Young
- * @brief USB driver
  *
  * This is a library for interfacing with the calculator's USB port.  It is very
  * low-level, similar to libusb, with the intention that higher-level libraries
@@ -70,6 +69,14 @@ typedef enum usb_event {
   USB_DEVICE_DISABLED_EVENT,
   /// \p event_data The usb_device_t that was enabled.
   USB_DEVICE_ENABLED_EVENT,
+  /// \p event_data The usb_device_t for the hub that stopped using bus power.
+  USB_HUB_LOCAL_POWER_GOOD_EVENT,
+  /// \p event_data The usb_device_t for the hub that started using bus power.
+  USB_HUB_LOCAL_POWER_LOST_EVENT,
+  /// \p event_data The usb_device_t that was resumed.
+  USB_DEVICE_RESUMED_EVENT,
+  /// \p event_data The usb_device_t that was suspended.
+  USB_DEVICE_SUSPENDED_EVENT,
   /// \p event_data The usb_device_t that deactivated overcurrent condition.
   USB_DEVICE_OVERCURRENT_DEACTIVATED_EVENT,
   /// \p event_data The usb_device_t that activated overcurrent condition.
@@ -96,8 +103,6 @@ typedef enum usb_event {
   USB_FIFO1_SHORT_PACKET_INTERRUPT,
   USB_FIFO2_SHORT_PACKET_INTERRUPT,
   USB_FIFO3_SHORT_PACKET_INTERRUPT,
-  USB_DEVICE_SUSPEND_INTERRUPT,
-  USB_DEVICE_RESUME_INTERRUPT,
   USB_DEVICE_ISOCHRONOUS_ERROR_INTERRUPT,
   USB_DEVICE_ISOCHRONOUS_ABORT_INTERRUPT,
   USB_DEVICE_DMA_FINISH_INTERRUPT,
@@ -190,8 +195,8 @@ typedef enum usb_transfer_status {
 typedef enum usb_device_flags {
   USB_IS_DISABLED = 1 << 0, /**< Device is disabled.                          */
   USB_IS_ENABLED  = 1 << 1, /**< Device is enabled.                           */
-  USB_IS_DEVICES  = 1 << 2, /**< Device is not a hub.                         */
-  USB_IS_HUBS     = 1 << 3, /**< Device is a hub.                             */
+  USB_IS_DEVICE   = 1 << 2, /**< Device is not a hub.                         */
+  USB_IS_HUB      = 1 << 3, /**< Device is a hub.                             */
 } usb_device_flags_t;
 
 typedef enum usb_find_device_flags {
@@ -442,14 +447,14 @@ typedef struct usb_standard_descriptors {
   const usb_device_descriptor_t *device;
   /// Pointer to array of device->bNumConfigurations pointers to complete
   /// configuration descriptors. Each one should point to
-  /// \c{(*configurations)[i]->wTotalLength} bytes of RAM.
+  /// \c {(*configurations)[i]->wTotalLength} bytes of RAM.
   const usb_configuration_descriptor_t *const *configurations;
   /// Pointer to array of langids, formatted like a string descriptor, with each
   /// wchar_t containing a langid, and which must be in RAM.
   const usb_string_descriptor_t *langids;
   /// Number of strings per langid.
   uint8_t numStrings;
-  /// Pointer to array of \c{numStrings * (langids->bLength / 2 - 1)} pointers
+  /// Pointer to array of \c {numStrings * (langids->bLength / 2 - 1)} pointers
   /// to string descriptors, each of which must be in RAM, starting with
   /// numStrings pointers for the first langid, then for the next langid, etc.
   const usb_string_descriptor_t *const *strings;
@@ -510,6 +515,7 @@ enum { USB_RETRY_FOREVER = 0xFFFFFFu };
 
 /**
  * Type of the function to be called when a usb device event occurs.
+ * @param event Event type.
  * @param event_data Event specific data.
  * @param callback_data Opaque pointer passed to usb_Init().  By default is of
  * type void *, but that can be changed by doing:
@@ -534,7 +540,6 @@ typedef usb_error_t (*usb_event_callback_t)(usb_event_t event, void *event_data,
  * #define usb_transfer_callback_data_t struct mystruct
  * #include <usbdrvce.h>
  * \endcode
- * @param data Opaque pointer passed to usb_ScheduleTransfer().
  * @param transferred The number of bytes transferred.
  * Only valid if \p status was USB_TRANSFER_COMPLETED.
  * @return Return USB_SUCCESS to free the transfer.  Return USB_IGNORE to
@@ -558,7 +563,7 @@ typedef struct usb_timer usb_timer_t;
 
 /**
  * Type of the function to be called when a timer expires.
- * @param
+ * @param timer Timer pointer.
  * @return Return USB_SUCCESS or any other value to abort and return from
  * usb_ProcessEvents() with that error.
  */
@@ -655,6 +660,7 @@ usb_device_t usb_GetDeviceHub(usb_device_t device);
 /**
  * Sets the user data associated with \p device.
  * @param device Device to set the user data of.
+ * @param data Data to set.
  */
 void usb_SetDeviceData(usb_device_t device, usb_device_data_t *data);
 
@@ -753,7 +759,7 @@ usb_error_t usb_DisableDevice(usb_device_t device);
 uint8_t usb_GetDeviceAddress(usb_device_t device);
 
 /**
- * Gets the speed of a \device, or USB_SPEED_UNKNOWN if unknown.
+ * Gets the speed of a device, or USB_SPEED_UNKNOWN if unknown.
  * @param device The device to communicate with.
  * @return The \c usb_speed_t.
  */
@@ -780,18 +786,26 @@ size_t usb_GetConfigurationDescriptorTotalLength(usb_device_t device,
  * @param descriptor Returns the fetched descriptor.
  * @param length The maximum number of bytes to receive.
  * The \p descriptor buffer must be at least this large.
- * @param transferred Returns the number of bytes actually received.
+ * @param transferred NULL or returns the number of bytes actually received.
  * @return USB_SUCCESS if the transfer succeeded or an error.
  */
 usb_error_t usb_GetDescriptor(usb_device_t device, usb_descriptor_type_t type,
                               uint8_t index, void *descriptor, size_t length,
                               size_t *transferred);
+/**
+ * Macro of usb_GetDescriptor() using USB_DEVICE_DESCRIPTOR for the type.
+ * @see usb_GetDescriptor()
+ */
 #define /*usb_error_t */                                                       \
 usb_GetDeviceDescriptor(/*usb_device_t */device,                               \
                         /*usb_device_descriptor_t **/descriptor,               \
                         /*size_t */length, /*size_t **/transferred)            \
     usb_GetDescriptor(device, USB_DEVICE_DESCRIPTOR, 0, descriptor, length,    \
                       transferred)
+/**
+ * Macro of usb_GetDescriptor() using USB_CONFIGURATION_DESCRIPTOR for the type.
+ * @see usb_GetDescriptor()
+ */
 #define /*usb_error_t */                                                       \
 usb_GetConfigurationDescriptor(/*usb_device_t */device, /*uint8_t */index,     \
                                /*usb_configuration_descriptor_t **/descriptor, \
@@ -814,11 +828,19 @@ usb_GetConfigurationDescriptor(/*usb_device_t */device, /*uint8_t */index,     \
 usb_error_t usb_SetDescriptor(usb_device_t device, usb_descriptor_type_t type,
                               uint8_t index, const void *descriptor,
                               size_t length);
+/**
+ * Macro of usb_SetDescriptor() using USB_DEVICE_DESCRIPTOR for the type.
+ * @see usb_SetDescriptor()
+ */
 #define /*usb_error_t */                                                       \
 usb_SetDeviceDescriptor(/*usb_device_t */device,                               \
                         /*usb_device_descriptor_t **/descriptor,               \
                         /*size_t */length)                                     \
     usb_SetDescriptor(device, USB_DEVICE_DESCRIPTOR, 0, descriptor, length)
+/**
+ * Macro of usb_SetDescriptor() using USB_CONFIGURATION_DESCRIPTOR for the type.
+ * @see usb_SetDescriptor()
+ */
 #define /*usb_error_t */                                                       \
 usb_SetConfigurationDescriptor(/*usb_device_t */device, /*uint8_t */index,     \
                                /*usb_configuration_descriptor_t **/descriptor, \
@@ -835,7 +857,7 @@ usb_SetConfigurationDescriptor(/*usb_device_t */device, /*uint8_t */index,     \
  * @param descriptor Returns the fetched descriptor.
  * @param length The number of bytes to transfer.
  * The \p descriptor buffer must be at least this large.
- * @param transferred Returns the number of bytes actually received.
+ * @param transferred NULL or returns the number of bytes actually received.
  * @return USB_SUCCESS if the transfer succeeded or an error.
  */
 usb_error_t usb_GetStringDescriptor(usb_device_t device, uint8_t index,
@@ -900,7 +922,7 @@ usb_error_t usb_GetInterface(usb_device_t device, uint8_t interface,
  * this function invalidates any \p usb_endpoint_t pointers corresponding with
  * the endpoints that were part of the previously selected alternate setting.
  * @param device The device to communicate with.
- * @param interface_descriptor The interface descriptor describing the alternate
+ * @param descriptor The interface descriptor describing the alternate
  * setting to select within a configuration descriptor.
  * @param length The remaining length of the configuration descriptor after
  * the beginning of the \p interface_descriptor.
@@ -951,12 +973,13 @@ usb_device_t usb_GetEndpointDevice(usb_endpoint_t endpoint);
 /**
  * Sets the user data associated with \p endpoint.
  * @param endpoint Endpoint to set the user data of.
+ * @param data Data to set.
  */
 void usb_SetEndpointData(usb_endpoint_t endpoint, usb_endpoint_data_t *data);
 
 /**
  * Gets the user data associated with \p endpoint.
- * @param device Endpoint to get the user data of.
+ * @param endpoint Endpoint to get the user data of.
  * @return The user data last set with \c usb_SetEndpointData.
  */
 usb_endpoint_data_t *usb_GetEndpointData(usb_endpoint_t endpoint);
@@ -1038,8 +1061,7 @@ unsigned usb_GetFrameNumber(void);
  * least \p setup->wLength bytes.
  * @param retries How many times to retry the transfer before timing out.
  * If retries is USB_RETRY_FOREVER, the transfer never times out.
- * @param transferred Returns the number of bytes actually transferred.
- * If \p transferred is NULL then nothing is returned.
+ * @param transferred NULL or returns the number of bytes actually received.
  * @return USB_SUCCESS if the transfer succeeded or an error.
  */
 usb_error_t
@@ -1059,8 +1081,7 @@ usb_ControlTransfer(usb_endpoint_t endpoint, const usb_control_setup_t *setup,
  * setup->wLength bytes.
  * @param retries How many times to retry the transfer before timing out.
  * If retries is USB_RETRY_FOREVER, the transfer never times out.
- * @param transferred Returns the number of bytes actually transferred.
- * NULL means don't return anything.
+ * @param transferred NULL or returns the number of bytes actually received.
  * @return USB_SUCCESS if the transfer succeeded or an error.
  */
 #define /*usb_error_t */                                                 \
@@ -1087,14 +1108,26 @@ usb_DefaultControlTransfer(/*usb_device_t */device,                      \
  * usb host where the \c wLength of the setup packet is used instead.
  * @param retries How many times to retry the transfer before timing out.
  * If retries is USB_RETRY_FOREVER, the transfer never times out.
- * @param transferred Returns the number of bytes actually transferred.
+ * @param transferred NULL or returns the number of bytes actually received.
  * NULL means don't return anything.
  * @return USB_SUCCESS if the transfer succeeded or an error.
  */
 usb_error_t usb_Transfer(usb_endpoint_t endpoint, void *buffer, size_t length,
                          unsigned retries, size_t *transferred);
+/**
+ * Macro duplicate of the usb_Transfer() function with the same arguments.
+ * @see usb_Transfer()
+ */
 #define usb_BulkTransfer usb_Transfer
+/**
+ * Macro duplicate of the usb_Transfer() function with the same arguments.
+ * @see usb_Transfer()
+ */
 #define usb_InterruptTransfer usb_Transfer
+/**
+ * Macro duplicate of the usb_Transfer() function with the same arguments.
+ * @see usb_Transfer()
+ */
 #define usb_IsochronousTransfer usb_Transfer
 
 /**
@@ -1112,7 +1145,6 @@ usb_error_t usb_Transfer(usb_endpoint_t endpoint, void *buffer, size_t length,
  * freed.
  * @param handler Function to be called when the transfer finishes.
  * @param data Opaque pointer to be passed to the \p handler.
- * @param transfer Returns a handle to the transfer.
  * @return USB_SUCCESS if the transfer was scheduled or an error.
  */
 usb_error_t
@@ -1160,7 +1192,6 @@ usb_ScheduleDefaultControlTransfer(/*usb_device_t */device,                    \
  * @param length Number of bytes to transfer.  The \p buffer must be at least
  * this large.  However, this is ignored for control transfers when acting as
  * usb host where the \c wLength of the setup packet is used instead.
- * @param transferred Returns the number of bytes actually transferred.
  * @param handler Function to be called when the transfer finishes.
  * @param data Opaque pointer to be passed to the \p handler.
  * @return USB_SUCCESS if the transfer was scheduled or an error.
@@ -1169,8 +1200,20 @@ usb_error_t
 usb_ScheduleTransfer(usb_endpoint_t endpoint, void *buffer, size_t length,
                      usb_transfer_callback_t handler,
                      usb_transfer_data_t *data);
+/**
+ * Macro duplicate of the usb_ScheduleTransfer() function with the same arguments.
+ * @see usb_ScheduleTransfer()
+ */
 #define usb_ScheduleBulkTransfer usb_ScheduleTransfer
+/**
+ * Macro duplicate of the usb_ScheduleTransfer() function with the same arguments.
+ * @see usb_ScheduleTransfer()
+ */
 #define usb_ScheduleInterruptTransfer usb_ScheduleTransfer
+/**
+ * Macro duplicate of the usb_ScheduleTransfer() function with the same arguments.
+ * @see usb_ScheduleTransfer()
+ */
 #define usb_ScheduleIsochronousTransfer usb_ScheduleTransfer
 
 /* Timer Functions */
@@ -1180,8 +1223,10 @@ usb_ScheduleTransfer(usb_endpoint_t endpoint, void *buffer, size_t length,
  * @return ms * 48000
  */
 uint32_t usb_MsToCycles(uint16_t ms);
+/* @cond */
 #define /*uint32_t */usb_MsToCycles(/*uint16_t */ms)                    \
     (__builtin_constant_p(ms) ? (ms) * UINT32_C(48000) : usb_MsToCycles(ms))
+/* @endcond */
 
 /**
  * Stops a timer.
@@ -1200,10 +1245,10 @@ void usb_StopTimer(usb_timer_t *timer);
     usb_StartTimerCycles(timer, usb_MsToCycles(timeout_ms))
 
 /**
- * Starts a timer that expires \p interval_ms after it last expired.
+ * Starts a timer that expires \p timeout_ms after it last expired.
  * @note May be called from within \c timer->handler itself.
  * @param timer A user allocated struct with \c timer->handler already initialized.
- * @param interval_ms Repeat interval in milliseconds.
+ * @param timeout_ms Repeat interval in milliseconds.
  */
 #define /*void */usb_RepeatTimerMs(/*usb_timer_t **/timer,       \
                                    /*uint16_t */timeout_ms)/*;*/ \
@@ -1238,7 +1283,7 @@ uint32_t usb_GetCycleCounter(void);
  * by usb_GetCycleCounter().
  * @return Cpu cycle counter >> 8.
  */
-uint24_t usb_GetCycleCounterHigh(void);
+uint24_t usb_GetCounter(void);
 
 #ifdef __cplusplus
 }

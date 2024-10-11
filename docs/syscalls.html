@@ -193,6 +193,11 @@
 <tr><td><a href="#sys_ExecContinue">bos.sys_ExecContinue</a></td><td><a href="#sys_ExecContinue">0226E4</a></td></tr>
 <tr><td><a href="#fs_IsOSBackupPresent ">bos.fs_IsOSBackupPresent </a></td><td><a href="#fs_IsOSBackupPresent ">0226E8</a></td></tr>
 <tr><td><a href="#util_SHA256">bos.util_SHA256</a></td><td><a href="#util_SHA256">0226EC</a></td></tr>
+<tr><td><a href="#str_FromByte">bos.str_FromByte</a></td><td><a href="#str_FromByte">0226F0</a></td></tr>
+<tr><td><a href="#str_FromInt">bos.str_FromInt</a></td><td><a href="#str_FromInt">0226F4</a></td></tr>
+<tr><td><a href="#str_FromLong">bos.str_FromLong</a></td><td><a href="#str_FromLong">0226F8</a></td></tr>
+<tr><td><a href="#str_ToInt">bos.str_ToInt</a></td><td><a href="#str_ToInt">0226FC</a></td></tr>
+<tr><td><a href="#gui_CharFromCode">bos.gui_CharFromCode</a></td><td><a href="#gui_CharFromCode">022700</a></td></tr>
 </table><div id="boot_os                  "><h1>boot_os                  </h1>	<h3>syscall Adress 020108</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 </table></div><div id="handle_interrupt"><h1>handle_interrupt</h1>	<h3>syscall Adress 02010C</h3>
@@ -257,8 +262,8 @@ A increment</td><td>HL number+increment</td><td></td><td>
 </td></tr>
 </table></div><div id="sys_GetKey"><h1>sys_GetKey</h1>	<h3>syscall Adress 022430</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Return current keypress</td><td></td><td>A keypress<br>
-z if no key pressed</td><td></td><td>
+<tr><td>Return current keypress</td><td></td><td>A = keycode<br>
+zf set if no key pressed</td><td></td><td>
 </td></tr>
 </table></div><div id="sys_KbScan"><h1>sys_KbScan</h1>	<h3>syscall Adress 022434</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -289,15 +294,15 @@ BC line length</td><td></td><td></td><td>
 </td></tr>
 </table></div><div id="sys_WaitKeyCycle"><h1>sys_WaitKeyCycle</h1>	<h3>syscall Adress 02244C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Wait until a key is pressed, then wait until it's released, then return the keycode</td><td></td><td>A = keycode</td><td></td><td>
+<tr><td>Wait until a key is pressed, wait until it is released or another is pressed, returning the original keycode.</td><td></td><td>A = keycode</td><td></td><td>
 </td></tr>
 </table></div><div id="gui_DrawConsoleWindow"><h1>gui_DrawConsoleWindow</h1>	<h3>syscall Adress 022450</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>clear the screen and display a string</td><td>hl = string</td><td></td><td></td><td>
-</td></tr>
+<tr><td>clear the screen and display a string.</td><td>hl = string</td><td></td><td></td><td>
+Sets draw to buffer and display to vram.</td></tr>
 </table></div><div id="gui_Input"><h1>gui_Input</h1>	<h3>syscall Adress 022454</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>get user input</td><td>uint8_t gui_Input(char *buffer, int max_len);</td><td>0 if user exit, 1 if user enter, 9/12 if user presses down/up arrow key</td><td></td><td>
+<tr><td>get user input</td><td>uint8_t gui_Input(char *buffer, int max_len);</td><td>0 if user exit, 1 if user enter, 9|12 if user presses down|up arrow key</td><td></td><td>
 </td></tr>
 </table></div><div id="gui_NewLine"><h1>gui_NewLine</h1>	<h3>syscall Adress 022458</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -863,7 +868,7 @@ Cannot kill thread ID 0.</td></tr>
 </td></tr>
 </table></div><div id="sys_WaitKeyUnpress"><h1>sys_WaitKeyUnpress</h1>	<h3>syscall Adress 022690</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Wait until no keys are pressed.</td><td>None</td><td>None</td><td></td><td>
+<tr><td>Wait until the last pressed keycode changes.</td><td>None</td><td>None</td><td></td><td>
 </td></tr>
 </table></div><div id="sys_MallocDupStr"><h1>sys_MallocDupStr</h1>	<h3>syscall Adress 022694</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -956,5 +961,27 @@ exit code also stored in bos.LastCommandResult</td><td></td><td>
 </table></div><div id="util_SHA256"><h1>util_SHA256</h1>	<h3>syscall Adress 0226EC</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Compute a SHA256 hash for some data, writing the 32-byte result to a buffer.</td><td>void util_SHA256(void* buffer, void* data, unsigned int len);</td><td>Nothing.</td><td></td><td>
+</td></tr>
+</table></div><div id="str_FromByte"><h1>str_FromByte</h1>	<h3>syscall Adress 0226F0</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Convert num to a base-10 string.</td><td>char *str_FromByte(char *dest, uint8_t num);</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="str_FromInt"><h1>str_FromInt</h1>	<h3>syscall Adress 0226F4</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Convert num to a base-10 string.</td><td>char *str_FromInt(char *dest, unsigned int num);</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="str_FromLong"><h1>str_FromLong</h1>	<h3>syscall Adress 0226F8</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Convert num to a base-10 string.</td><td>char *str_FromLong(char *dest, uint32_t num);</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="str_ToInt"><h1>str_ToInt</h1>	<h3>syscall Adress 0226FC</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td></td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="gui_CharFromCode"><h1>gui_CharFromCode</h1>	<h3>syscall Adress 022700</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Convert a keycode from sys_GetKey to a text character.</td><td>char gui_CharFromCode(uint8_t charset, uint8_t keycode);<br>
+charset = character set number to pick from.<br>
+keycode = keycode from sys_GetKey.</td><td>character corresponding to the given charset and keycode; 0 if out of bounds or N/A.</td><td></td><td>
 </td></tr>
 </table></div></body></html>

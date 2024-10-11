@@ -2,27 +2,29 @@
 include '../include/library.inc'
 ;-------------------------------------------------------------------------------
 
-library FATDRVCE, 1
+library FATDRVCE, 3
 
 ;-------------------------------------------------------------------------------
 ; v1 functions
 ;-------------------------------------------------------------------------------
-	export fat_Init
-	export fat_Deinit
-	export fat_DirList
-	export fat_GetVolumeLabel
 	export fat_Open
 	export fat_Close
-	export fat_SetSize
-	export fat_GetSize
+	export fat_OpenDir
+	export fat_ReadDir
+	export fat_CloseDir
+	export fat_OpenFile
+	export fat_CloseFile
+	export fat_SetFileSize
+	export fat_GetFileSize
 	export fat_SetAttrib
 	export fat_GetAttrib
-	export fat_SetPos
-	export fat_GetPos
-	export fat_Read
-	export fat_Write
+	export fat_SetFileBlockOffset
+	export fat_GetFileBlockOffset
+	export fat_ReadFile
+	export fat_WriteFile
 	export fat_Create
 	export fat_Delete
+	export fat_GetVolumeLabel
 ;-------------------------------------------------------------------------------
 
 include 'macros.inc'
@@ -36,7 +38,6 @@ include 'macros.inc'
 virtual at 0
 	FAT_SUCCESS rb 1
 	FAT_ERROR_INVALID_PARAM rb 1
-	FAT_ERROR_NOT_SUPPORTED rb 1
 	FAT_ERROR_INVALID_CLUSTER rb 1
 	FAT_ERROR_INVALID_POSITION rb 1
 	FAT_ERROR_NOT_FOUND rb 1
@@ -49,6 +50,11 @@ virtual at 0
 	FAT_ERROR_RDONLY rb 1
 	FAT_ERROR_RW_FAILED rb 1
 	FAT_ERROR_INVALID_FILESYSTEM rb 1
+	FAT_ERROR_INVALID_SIZE rb 1
+	FAT_ERROR_INVALID_MAGIC rb 1
+	FAT_ERROR_INVALID_SIGNATURE rb 1
+	FAT_ERROR_NO_MORE_ENTRIES rb 1
+	FAT_ERROR_INVALID_NAME rb 1
 end virtual
 virtual at 0
 	FAT_LIST_FILEONLY rb 1
@@ -65,14 +71,25 @@ struct fatFile
 	current_cluster rd 1
 	file_size rd 1
 	block_count rl 1
-	block_pos rl 1
-	starting_block_pos rl 1			; only for read/write
+	block_index rl 1
+	starting_block_index rl 1		; only for read/write
 	blocks_per_cluster rb 1			; copied from fat struct
 	block_func rl 1				; internally selected
-	cluster_block rb 1			; really only 1 byte
 	current_block rd 1
 	working_buffer rl 1
 	entry_pointer rl 1
+	size := $-.
+end struct
+struct fatDir
+	local size
+	label .: size
+	fat rl 1
+	open rb 1
+	block_offset rl 1
+	blocks_per_cluster rb 1
+	cluster_block rb 1
+	working_block rd 1
+	working_cluster rd 1
 	size := $-.
 end struct
 struct fat
@@ -81,8 +98,7 @@ struct fat
     	read rl 1
     	write rl 1
 	user rl 1
-	first_lba rd 1
-	last_lba rd 1
+	base_lba rd 1
 	blocks_per_cluster rb 1
 	clusters rd 1
 	fat_size rd 1
@@ -111,37 +127,73 @@ struct fatDirEntry
 	size := $-.
 end struct
 
+
+repeat 1, size: sizeof fat
+	display 'fat size: ', `size, 10
+end repeat
+
+repeat 1, size: sizeof fatFile
+	display 'fat file size: ', `size, 10
+end repeat
+
+repeat 1, size: sizeof fatDir
+	display 'fat dir size: ', `size, 10
+end repeat
+
+repeat 1, size: sizeof fatDirEntry
+	display 'fat dir entry size: ', `size
+end repeat
+
 ;-------------------------------------------------------------------------------
 
 ;-------------------------------------------------------------------------------
-fat_Init:
+fat_Open:
 ; Initializes a FAT filesystem from a particular LBA
 ; Arguments:
-;  sp + 3 : configured fat struct
+;  sp + 3 : uninitialized fat struct
+;  sp + 6 : read callback
+;  sp + 9 : write callback
+;  sp + 12 : user data for callbacks
+;  sp + 15 : lower 24 bits of base lba
+;  sp + 18 : upper 8 bits of base lba
 ; Returns:
 ;  FAT_SUCCESS on success
 	ld	iy,0
 	add	iy,sp
-	ld	iy,(iy + 3)
 	push	ix
+	ld	ix,(iy + 3)
+	ld	hl,(iy + 6)
+	ld	(xfat.read),hl
+	ld	hl,(iy + 9)
+	ld	(xfat.write),hl
+	ld	hl,(iy + 12)
+	ld	(xfat.user),hl
+	ld	a,hl,(iy + 15)
+	ld	(xfat.base_lba),a,hl		; configure struct
+	lea	iy,ix
 	xor	a,a
 	sbc	hl,hl
 	call	util_read_fat_block		; read fat zero block
+	jr	z,.read_zero_block
 	ld	hl,FAT_ERROR_RW_FAILED
-	jq	nz,.error
+	pop	ix
+	ret
+.read_zero_block:
 	lea	ix,yfat.buffer
 	ld	a,(ix + 12)
 	cp	a,(ix + 16)			; ensure 512 byte blocks and 2 FATs
-	jq	nz,.error
+	jr	z,.goodfat
+	ld	hl,FAT_ERROR_INVALID_FILESYSTEM
+	pop	ix
+	ret
+.goodfat:
 	ld	a,(ix + 39)
 	or	a,a				; can't support reallllly big drives (BPB_FAT32_FATSz32 high)
-	jq	nz,.error
-	ld	a,(ix + 66)
-	cp	a,$28				; check fat32 signature
-	jr	z,.goodsig
-	cp	a,$29
-	jq	nz,.error
-.goodsig:
+	jr	z,.goodsize
+	ld	hl,FAT_ERROR_INVALID_SIZE
+	pop	ix
+	ret
+.goodsize:
 	xor	a,a
 	ld	b,a
 	ld	hl,(ix + 14)
@@ -181,14 +233,26 @@ fat_Init:
 	ld	(yfat.fs_info),hl
 	xor	a,a
 	call	util_read_fat_block
-	jr	nz,.error
+	jr	z,.check_magic
+	ld	hl,FAT_ERROR_RW_FAILED
+	pop	ix
+	ret
+.check_magic:
 	call	util_checkmagic
-	jr	nz,.error			; uh oh!
+	jr	z,.goodmagic
+	ld	hl,FAT_ERROR_INVALID_MAGIC
+	pop	ix
+	ret
+.goodmagic:
 	ld	hl,(ix + 0)			; ix should still point to the temp block...
 	ld	bc,$615252			; don't bother comparing $41 byte...
 	xor	a,a
 	sbc	hl,bc
-	jr	nz,.error
+	jr	z,.goodsig
+	ld	hl,FAT_ERROR_INVALID_SIGNATURE
+	pop	ix
+	ret
+.goodsig:
 	scf
 	sbc	hl,hl
 	ex	de,hl
@@ -208,13 +272,9 @@ fat_Init:
 	xor	a,a
 	sbc	hl,hl				; return success
 	ret
-.error:
-	ld	hl,FAT_ERROR_INVALID_FILESYSTEM
-	pop	ix
-	ret
 
 ;-------------------------------------------------------------------------------
-fat_Deinit:
+fat_Close:
 ; Deinitialize the FAT partition
 ; Arguments:
 ;  sp + 3 : fat struct
@@ -242,42 +302,23 @@ fat_Deinit:
 	ret
 
 ;-------------------------------------------------------------------------------
-fat_DirList:
-; Parses directory entires for files and subdirectories
+fat_OpenDir:
+; Opens a directory for reading contents
 ; Arguments:
 ;  sp + 3 : fat struct
 ;  sp + 6 : directory path
-;  sp + 9 : entry filter
-;  sp + 12 : entry storage
-;  sp + 15 : number of entries storage
-;  sp + 18 : number of entries to skip
+;  sp + 9 : dir struct
 ; Returns:
-;  Number of found entries, otherwise -1
+;  FAT_SUCCESS on success
 	ld	iy,0
-	ld	(.foundnum),iy
 	add	iy,sp
-	ld	de,(iy + 18)
-	ld	(.skipnum),de
-	ld	de,(iy + 15)
-	ld	(.maxnum),de
-	ld	de,(iy + 12)
-	ld	(.storage),de
-	ld	a,(iy + 9)
-	ld	b,$CC
-	or	a,a;FAT_LIST_FILEONLY
-	jq	z,.gotjump
-	ld	b,$C4
-	dec	a;FAT_LIST_DIRONLY
-	jq	z,.gotjump
-	ld	b,$CD
-.gotjump:
-	ld	a,b
-	ld	(.change_jump),a
-	ld	de,(iy + 6)
-	ld	iy,(iy + 3)
+	ld	hl,(iy + 9)	; dir struct
+	ld	(.fatdir),hl
+	ld	de,(iy + 6)	; dir path
+	ld	iy,(iy + 3)	; fat struct
 	ld	a,(de)
 	cp	a,'/'
-	jq	nz,.error
+	jq	nz,.path_error
 	inc	de
 	ld	a,(de)
 	dec	de
@@ -287,76 +328,190 @@ fat_DirList:
 	call	util_block_to_cluster
 	jq	.gotcluster
 .notroot:
-	push	iy
 	call	util_locate_entry
-	jq	z,.error
+	jq	z,.path_error
+	push	iy
 	push	de
 	pop	iy
 	call	util_get_entry_first_cluster
 	pop	iy
 .gotcluster:
 	compare_auhl_zero
-	jq	z,.nomoreentries
+	jr	nz,.findcluster
+	ld	hl,FAT_ERROR_INVALID_CLUSTER
+	ret
 .findcluster:
 	ld	(yfat.working_cluster),a,hl
 	call	util_cluster_to_block
 	ld	(yfat.working_block),a,hl
-	ld	b,(yfat.blocks_per_cluster)
-.findblock:
-	push	bc
-	ld	(yfat.working_block),a,hl
-	call	util_read_fat_block
-	jq	nz,.rw_error
-	push	iy
-	lea	iy,yfat.buffer - 32
-	ld	b,16
-.findentry:
-	push	bc
-	lea	iy,iy + 32
-	ld	a,(iy)
-	or	a,a
-	jq	z,.endofentriesmaybe
-	cp	a,$e5
-	jq	z,.skip
-	or	a,a
-	jq	z,.skip
-	cp	a,' '
-	ld	a,(iy + 11)
-	tst	a,8
-	jq	nz,.skip
-	bit	4,a
-	call	z,.foundentry
-.change_jump := $-4
-.skip:
-	pop	bc
-	djnz	.findentry
-	pop	iy
-	ld	a,hl,(yfat.working_block)
-	call	util_increment_auhl
-	pop	bc
-	djnz	.findblock
-	ld	a,hl,(yfat.working_cluster)
-	call	util_next_cluster
-	compare_auhl_zero
-	jq	nz,.findcluster
-	ld	hl,(.foundnum)
+	call	util_read_fat_block		; read the first block for cache
+	jr	z,.success
+	ld	hl,FAT_ERROR_RW_FAILED
 	ret
-.endofentriesmaybe:
-	pop	bc,bc,bc
-	ld	hl,(.foundnum)
-	ret
-.foundentry:
-	ld	hl,0
-.skipnum := $-3
-	compare_hl_zero
-	jq	z,.skipgood
-	dec	hl
-	ld	(.skipnum),hl
-	ret
-.skipgood:
+.success:
 	push	ix
 	ld	ix,0
-.storage := $-3
+.fatdir := $-3
+	ld	(xfatDir.fat),iy
+	ld	a,(yfat.blocks_per_cluster)
+	ld	(xfatDir.blocks_per_cluster),a
+	ld	(xfatDir.cluster_block),a
+	ld	a,hl,(yfat.working_cluster)
+	ld	(xfatDir.working_cluster),a,hl
+	ld	a,hl,(yfat.working_block)
+	ld	(xfatDir.working_block),a,hl
+	ld	a,$aa
+	ld	(xfatDir.open),a		; magic number
+	xor	a,a
+	sbc	hl,hl				; return success
+	ld	(xfatDir.block_offset),hl
+	pop	ix
+	ret
+.path_error:
+	ld	hl,FAT_ERROR_INVALID_PATH
+	ret
+
+;-------------------------------------------------------------------------------
+fat_ReadDir:
+; Opens a directory for reading contents
+; Arguments:
+;  sp + 3 : dir struct
+;  sp + 6 : entry struct
+; Returns:
+;  FAT_SUCCESS on success
+	ld	iy,0
+	add	iy,sp
+	ld	hl,(iy + 6)	; entry struct
+	ld	(.entry),hl
+	ld	iy,(iy + 3)	; dir struct
+	ld	a,(yfatDir.open)
+	cp	a,$aa		; check for magic open byte
+	jr	z,.open
+	ld	hl,FAT_ERROR_NO_MORE_ENTRIES
+	cp	a,$bb
+	ret	z
+	ld	hl,FAT_ERROR_INVALID_PARAM
+	ret
+.open:
+
+	; for speed, check if the currently cached block is available
+
+	ld	a,(yfatDir.block_offset)
+	push	ix
+	ld	ix,(yfatDir.fat)
+	lea	hl,xfat.working_block
+	cp	a,16				; get next cluster if at end
+	pop	ix
+	jq	z,.next_block
+	lea	de,yfatDir.working_block
+	ld	b,4
+.check_cache:
+	ld	a,(de)
+	cp	a,(hl)
+	jr	nz,.read_block
+	inc	hl
+	inc	de
+	djnz	.check_cache
+	jr	.skip_read
+.read_block:
+	push	iy
+	ld	a,hl,(yfatDir.working_block)
+	ld	iy,(yfatDir.fat)
+	ld	(yfat.working_block),a,hl
+	call	util_read_fat_block		; read the block for cache
+	pop	iy
+	jq	z,.skip_read
+	ld	hl,FAT_ERROR_RW_FAILED
+	ret
+.skip_read:
+	ld	de,(yfatDir.block_offset)
+	ld	hl,16
+	or	a,a
+	sbc	hl,de
+	ld	b,l				; num entries left in the block
+	ex	de,hl
+	add	hl,hl
+	add	hl,hl
+	add	hl,hl
+	add	hl,hl
+	add	hl,hl				; shift by 32 multiple
+	push	ix
+	lea	ix,iy
+	ld	iy,(yfatDir.fat)
+	lea	de,yfat.buffer
+	add	hl,de				; pointer to entry
+	push	hl
+	pop	iy
+
+.findentry:
+	ld	a,(iy)
+	or	a,a
+	jr	nz,.continue
+	ld	(xfatDir.open),$bb		; done marker
+	ld	hl,(.entry)
+	ld	bc,sizeof fatDirEntry
+	xor	a,a
+	call	ti.MemSet
+	xor	a,a
+	sbc	hl,hl				; success, zeroed entry at end
+	pop	ix
+	ret
+.continue:
+	inc	(xfatDir.block_offset)
+	cp	a,$e5
+	jr	z,.skip
+	cp	a,' '
+	jr	z,.skip
+	ld	a,(iy + 11)
+	tst	a,8
+	jr	z,.foundentry
+.skip:
+	lea	iy,iy + 32
+	djnz	.findentry
+
+	lea	iy,ix
+	pop	ix
+
+	; handle the next block in the cluster
+.next_block:
+	ld	a,hl,(yfatDir.working_block)
+	ld	bc,1				; increment auhl
+	add	hl,bc
+	adc	a,b
+	ld	(yfatDir.working_block),a,hl
+	xor	a,a
+	ld	(yfatDir.block_offset),a
+	dec	(yfatDir.cluster_block)
+	jp	nz,.read_block
+
+	; find the next cluster if at end of current cluster
+
+	ld	a,hl,(yfatDir.working_cluster)
+	push	iy
+	ld	iy,(yfatDir.fat)
+	call	util_next_cluster
+	pop	iy
+	compare_auhl_zero
+	jr	nz,.foundcluster
+	ld	(yfatDir.open),$bb		; done marker
+	ld	hl,FAT_ERROR_NO_MORE_ENTRIES
+	ret
+.foundcluster:
+	ld	(yfatDir.working_cluster),a,hl
+	push	iy
+	ld	iy,(yfatDir.fat)
+	call	util_cluster_to_block
+	pop	iy
+	ld	(yfatDir.working_block),a,hl
+	ld	a,(yfatDir.blocks_per_cluster)
+	ld	(yfatDir.cluster_block),a
+	jp	.read_block
+
+.foundentry:
+	pop	hl				; pop ix
+	push	hl
+	ld	ix,0
+.entry := $-3
 	lea	de,ix + 0
 	lea	hl,iy + 0
 	call	util_get_name
@@ -364,29 +519,24 @@ fat_DirList:
 	ld	(xfatDirEntry.attrib),a
 	ld	a,hl,(iy + 28)
 	ld	(xfatDirEntry.entrysize),a,hl
-	lea	ix,ix + sizeof fatDirEntry
-	ld	(.storage),ix
 	pop	ix
-	ld	hl,0
-.foundnum := $-3
-	inc	hl
-	ld	(.foundnum),hl
-	ld	de,0
-.maxnum := $-3
-	compare_hl_de
-	ret	nz
-.foundmax:
-	pop	bc,bc,bc,bc			; remove call, iy, bc, bc from stack
-	ret
-.nomoreentries:
 	xor	a,a
-	sbc	hl,hl
+	sbc	hl,hl				; return success
 	ret
-.rw_error:
-	pop	hl
-.error:
-	scf
-	sbc	hl,hl
+
+;-------------------------------------------------------------------------------
+fat_CloseDir:
+; Closes an open directory handle
+; Arguments:
+;  sp + 3 : dir struct
+; Returns:
+;  FAT_SUCCESS on success
+	ld	iy,0
+	add	iy,sp
+	ld	iy,(iy + 3)
+	xor	a,a
+	ld	(yfatDir.open),a
+	sbc	hl,hl				; return success
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -407,10 +557,14 @@ fat_GetVolumeLabel:
 	ld	(yfat.working_block),a,hl
 	ld	b,(yfat.blocks_per_cluster)
 .findblock:
-	push	bc
 	ld	(yfat.working_block),a,hl
+	push	bc
 	call	util_read_fat_block
-	jq	nz,.rw_error
+	jr	z,.rd_success
+	pop	bc
+	ld	hl,FAT_ERROR_RW_FAILED
+	ret
+.rd_success:
 	lea	hl,yfat.buffer + 11
 	ld	b,16
 	ld	de,32
@@ -421,7 +575,9 @@ fat_GetVolumeLabel:
 	add	hl,de
 	djnz	.findentry
 	ld	a,hl,(yfat.working_block)
-	call	util_increment_auhl
+	ld	bc,1				; increment auhl
+	add	hl,bc
+	adc	a,b
 	pop	bc
 	djnz	.findblock
 	ld	a,hl,(yfat.working_cluster)
@@ -451,32 +607,32 @@ fat_GetVolumeLabel:
 	jq	.removetrailingspaces
 .done:
 	xor	a,a
-	sbc	hl,hl
-	ret
-.rw_error:
-	pop	bc
-	ld	hl,FAT_ERROR_RW_FAILED
+	sbc	hl,hl				; return success
 	ret
 
 ;-------------------------------------------------------------------------------
-fat_Open:
+fat_OpenFile:
 ; Attempts to open a file for reading and/or writing
 ; Arguments:
-;  sp + 3 : fat file struct
-;  sp + 6 : fat struct
-;  sp + 9 : filename (8.3 format)
+;  sp + 3 : fat struct
+;  sp + 6 : filename (8.3 format)
+;  sp + 9 : flags (currently unused)
+;  sp + 12 : fat file struct
 ; Returns:
 ;  FAT_SUCCESS on success
 	ld	iy,0
 	add	iy,sp
-	ld	de,(iy + 9)
+	ld	de,(iy + 6)
 	push	iy
-	ld	iy,(iy + 6)
+	ld	iy,(iy + 3)
 	call	util_locate_entry
 	pop	iy
-	jq	z,.error
-	ld	bc,(iy + 6)
-	ld	iy,(iy + 3)
+	jr	nz,.found
+	ld	hl,FAT_ERROR_NOT_FOUND
+	ret
+.found:
+	ld	bc,(iy + 3)
+	ld	iy,(iy + 12)
 	ld	(yfatFile.fat),bc
 	ld	(yfatFile.entry_pointer),de
 	ld	(yfatFile.entry_block),a,hl
@@ -497,8 +653,15 @@ fat_Open:
 	ld	(yfatFile.first_cluster),a,hl
 	ld	(yfatFile.current_cluster),a,hl
 	compare_auhl_zero
-	call	nz,util_get_file_size
-	call	util_set_file_size
+	jr	z,.notallocated
+	push	iy
+	ld	iy,(yfatFile.entry_pointer)	; get file size
+	ld	a,hl,(iy + 28)
+	pop	iy
+.notallocated:
+	ld	(yfatFile.file_size),a,hl
+	call	util_ceil_byte_size_to_block_size
+	ld	(yfatFile.block_count),a,hl
 	ld	a,hl,(yfatFile.current_cluster)
 	push	iy
 	ld	iy,(yfatFile.fat)
@@ -507,15 +670,11 @@ fat_Open:
 	ld	(yfatFile.current_block),a,hl
 	xor	a,a
 	sbc	hl,hl
-	ld	(yfatFile.cluster_block),a
-	ld	(yfatFile.block_pos),hl		; return success
-	ret
-.error:
-	ld	hl,FAT_ERROR_NOT_FOUND
+	ld	(yfatFile.block_index),hl		; return success
 	ret
 
 ;-------------------------------------------------------------------------------
-fat_SetSize:
+fat_SetFileSize:
 ; Sets the size of the file
 ; Arguments:
 ;  sp + 3 : fat file struct
@@ -584,7 +743,10 @@ fat_SetSize:
 	call	util_next_cluster
 	compare_auhl_zero
 	pop	bc
-	jq	z,.failedchain			; the filesystem is screwed up
+	jr	nz,.goodchain			; the filesystem is screwed up
+	ld	hl,FAT_ERROR_CLUSTER_CHAIN
+	ret
+.goodchain:
 	dec	bc
 .entertraverseclusters:
 	compare_bc_zero
@@ -614,11 +776,14 @@ fat_SetSize:
 	compare_auhl_zero
 	pop	iy
 	pop	hl
-	jq	z,.failedalloc
+	jr	nz,.goodalloc
+	ld	hl,FAT_ERROR_FAILED_ALLOC
+	ret
+.goodalloc:
 	dec	hl
 	compare_hl_zero
 	jq	nz,.allocateclusters
-	jq	.success
+	;jq	.success
 .success:
 	ld	iy,(iy + 3)
 	ld	a,hl,(yfatFile.entry_block)	; read the entry again for open
@@ -627,7 +792,7 @@ fat_SetSize:
 	call	util_read_fat_block
 	pop	iy
 	jr	nz,.write_error
-	jq	fat_Open.enter			; reopen the file
+	jq	fat_OpenFile.enter			; reopen the file
 .writeentry:
 	push	iy
 	ld	iy,(iy + 3)
@@ -656,20 +821,12 @@ fat_SetSize:
 	call	util_ceil_byte_size_to_blocks_per_cluster
 	pop	iy
 	ret
-.failedchain:
-	ld	hl,FAT_ERROR_CLUSTER_CHAIN
-	ret
-.invalidpath:
-	ld	hl,FAT_ERROR_INVALID_PATH
-	ret
-.failedalloc:
-	ld	hl,FAT_ERROR_FAILED_ALLOC
-	ret
+
 .currentcluster:
 	dd	0
 
 ;-------------------------------------------------------------------------------
-fat_GetSize:
+fat_GetFileSize:
 ; Gets the size of the file
 ; Arguments:
 ;  sp + 3 : fat file struct
@@ -682,57 +839,112 @@ fat_GetSize:
 	ret
 
 ;-------------------------------------------------------------------------------
-fat_SetPos:
+fat_SetFileBlockOffset:
 ; Sets the offset block position in the file
 ; Arguments:
 ;  sp + 3 : fat file struct
 ;  sp + 6 : block offset
 ; Returns:
 ;  FAT_SUCCESS on success
-	pop	hl,iy,de
-	push	de,iy,hl
-	ld	hl,(yfatFile.block_count)
-	compare_hl_de
-	jq	c,.invalid
-	ld	(yfatFile.block_pos),de
-	ex	de,hl				; determine cluster offset
-	ld	bc,0
-	ld	c,(yfatFile.blocks_per_cluster)
-	xor	a,a
-	ld	e,a
-	push	bc,hl
-	call	ti._lremu			; get block offset in cluster
-	ld	(yfatFile.cluster_block),l
-	pop	hl,bc
-	xor	a,a
-	ld	e,a
-	call	ti._ldivu
-	push	hl
 	pop	bc
+	pop	iy
+	pop	hl
+	push	hl
+	push	iy
+	push	bc
+	ld	de,(yfatFile.block_count)
+	or	a,a
+	sbc	hl,de
+	add	hl,de
+	jq	nc,.invalid
+	ld	de,(yfatFile.block_index)
+	or	a,a
+	sbc	hl,de
+	ret	z				; if at the same block position, done (return 0)
+	add	hl,de				; hl = new block_index, de = current block_index
+
+	; check if block is within current cluster
+	; we can optimize by just changing the block position
+	ld	(yfatFile.block_index),hl
+	ld	a,(yfatFile.blocks_per_cluster)
+	dec	a
+	cpl
+	ld	c,a				; mask for number of blocks
+	and	a,l
+	ld	l,a
+	ld	a,c
+	and	a,e
+	ld	b,e
+	ld	e,a
+	or	a,a
+	sbc	hl,de				; hl - de = number of cluster blocks to advance by
+	jr	c,.restartchain			; requires a previous cluster, restart the chain
+	jr	nz,.nextclusters
+.withincluster:
+	ld	e,b
+	ld	hl,(yfatFile.block_index)
+	or	a,a
+	sbc	hl,de
+	ld	a,de,(yfatFile.current_block)	; need to move the current block up or down
+	ld	bc,$800000
+	add	hl,bc
+	sbc	a,c
+	add	hl,bc
+	add	hl,de
+	adc	a,c
+	ld	(yfatFile.current_block),a,hl
+	xor	a,a
+	sbc	hl,hl
+	ret					; just changed block position, no need to move clusters (return 0)
+
+.nextclusters:
+	ld	a,(yfatFile.blocks_per_cluster)
+	dec	a
+	and	a,(yfatFile.block_index)
+	ld	bc,0
+	ld	c,a				; bc = offset of block in last cluster
+	add	hl,bc
+	jr	.followchain
+.restartchain:
 	ld	a,hl,(yfatFile.first_cluster)
 	ld	(yfatFile.current_cluster),a,hl
-	jq	.entergetpos
-.getclusterpos:
-	push	bc
+	ld	hl,(yfatFile.block_index)
+.followchain:
+	ld	c,(yfatFile.blocks_per_cluster)
+	xor	a,a
+	ld	b,24
+.divloop:
+	add	hl,hl
+	rla
+	cp	a,c
+	jr	c,.divskip
+	sub	a,c
+	inc	l
+.divskip:
+	djnz	.divloop
+	ld	(.cluster_block),a
+	push	hl
+	pop	bc
 	ld	a,hl,(yfatFile.current_cluster)
-	push	iy
+	jr	.entergetpos
+.getclusterpos:
+	push	bc,iy
 	ld	iy,(yfatFile.fat)
 	call	util_next_cluster
-	pop	iy
-	ld	(yfatFile.current_cluster),a,hl
-	pop	bc
+	pop	iy,bc
 	compare_hl_zero
-	jq	z,.chainfailed
+	jr	z,.chainfailed
 	dec	bc
 .entergetpos:
 	compare_bc_zero
 	jr	nz,.getclusterpos
+	ld	(yfatFile.current_cluster),a,hl
 	push	iy
 	ld	iy,(yfatFile.fat)
 	call	util_cluster_to_block
 	pop	iy
 	ld	de,0
-	ld	e,(yfatFile.cluster_block)
+.cluster_block := $-3
 	add	hl,de
 	adc	a,d
 	ld	(yfatFile.current_block),a,hl
@@ -748,7 +960,7 @@ fat_SetPos:
 	ret
 
 ;-------------------------------------------------------------------------------
-fat_GetPos:
+fat_GetFileBlockOffset:
 ; Gets the file's block position
 ; Arguments:
 ;  sp + 3 : FAT File structure type
@@ -761,7 +973,7 @@ fat_GetPos:
 	ret	z
 	push	hl
 	pop	iy
-	ld	hl,(yfatFile.block_pos)
+	ld	hl,(yfatFile.block_index)
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -820,7 +1032,7 @@ fat_GetAttrib:
 	ret
 
 ;-------------------------------------------------------------------------------
-fat_Close:
+fat_CloseFile:
 ; Closes an open file handle
 ; Arguments:
 ;  sp + 3 : fat struct
@@ -831,7 +1043,7 @@ fat_Close:
 	ret
 
 ;-------------------------------------------------------------------------------
-fat_Read:
+fat_ReadFile:
 ; Reads blocks from an open file handle
 ; Arguments:
 ;  sp + 3 : FAT File structure type
@@ -844,7 +1056,7 @@ fat_Read:
 	jq	util_fat_read_write
 
 ;-------------------------------------------------------------------------------
-fat_Write:
+fat_WriteFile:
 ; Writes a blocks to an open file handle
 ; Arguments:
 ;  sp + 3 : FAT File structure type
@@ -890,7 +1102,9 @@ util_zerocluster:
 	pop	hl
 	jq	nz,.error
 	pop	af
-	call	util_increment_auhl
+	ld	bc,1				; increment auhl
+	add	hl,bc
+	adc	a,b
 	pop	bc
 	djnz	.zerome
 	xor	a,a
@@ -913,6 +1127,10 @@ fat_Create:
 ;  FAT_SUCCESS on success
 	ld	iy,0
 	add	iy,sp
+	ld	hl,(iy + 9)
+	call	util_validate_fat_name
+	ld	hl,FAT_ERROR_INVALID_NAME
+	ret	z
 	ld	hl,-512
 	add	hl,sp
 	ld	sp,hl				; temporary space for concat
@@ -921,13 +1139,13 @@ fat_Create:
 	ld	hl,(iy + 6)
 	compare_hl_zero
 	jq	z,.rootdirpath
-	call	_StrCopy
+	call	ti.StrCopy
 .rootdirpath:
 	ld	a,'/'
 	ld	(de),a
 	inc	de
 	ld	hl,(iy + 9)
-	call	_StrCopy
+	call	ti.StrCopy
 	pop	de
 	push	iy
 	ld	iy,(iy + 3)
@@ -1012,7 +1230,7 @@ fat_Create:
 	xor	a,a
 	sbc	hl,hl
 	ld	(yfat.working_cluster),a,hl
-	call	util_alloc_entry
+	call	util_alloc_entry.enter
 	ld	(yfat.working_next_entry),de
 	ld	(yfat.working_block),a,hl
 	call	util_block_to_cluster
@@ -1331,7 +1549,7 @@ util_alloc_cluster:
 	djnz	.traverseclusterchain
 	pop	ix
 	pop	af,hl
-	ld	bc,1
+	ld	bc,1				; increment auhl
 	add	hl,bc
 	adc	a,b
 	jq	.traversefat
@@ -1348,9 +1566,22 @@ util_alloc_cluster:
 	ld	(ix),a,hl
 	pop	ix,af,hl
 	push	af,hl
-	call	util_auhl_shl7
+	add	hl,hl				; shift auhl by 7 left
+	adc	a,a
+	add	hl,hl
+	adc	a,a
+	add	hl,hl
+	adc	a,a
+	add	hl,hl
+	adc	a,a
+	add	hl,hl
+	adc	a,a
+	add	hl,hl
+	adc	a,a
+	add	hl,hl
+	adc	a,a
 	add	hl,bc
-	adc	a,b			; new cluster
+	adc	a,b				; new cluster
 	ld	(yfat.working_next_cluster),a,hl
 	pop	hl,af
 	ld	bc,(yfat.fat_pos)
@@ -1464,27 +1695,19 @@ util_do_alloc_entry:
 
 ;-------------------------------------------------------------------------------
 ; inputs:
-;   iy : fat struct
+;   iy: fat struct
 ;   iy + working_cluster: first cluster
 ;   iy + working_block: parent entry block
 ;   iy + working_entry: parent entry in block
 ; outputs:
-;   auhl : new entry block
-;   de : offset in entry block
+;   auhl: new entry block
+;   de: fat.buffer address for entry block
 util_alloc_entry:
 	ld	a,hl,(yfat.working_cluster)
-	call	util_cluster_to_block
-	ld	(.blockhigh),a
-	ld	(.blocklow),hl
 .enter:
-	ld	a,hl,(yfat.working_cluster)
 	call	util_cluster_to_block
 	compare_auhl_zero
-	jq	nz,.validcluster
-	call	util_do_alloc_entry
-	lea	de,yfat.buffer
-	ret
-.validcluster:
+	jr	z,.alloccluster
 	ld	b,(yfat.blocks_per_cluster)
 .loop:
 	push	bc,hl,af
@@ -1498,48 +1721,31 @@ util_alloc_entry:
 	cp	a,$e5				; deleted entry, let's use it!
 	jr	z,.foundavailentry
 	or	a,a
-	jq	z,.foundendoflist		; end of list, let's allocate here
+	jr	z,.foundavailentry		; end of list, let's allocate here
 	djnz	.findavailentry
 	pop	iy,af,hl
-	call	util_increment_auhl
+	ld	bc,1				; increment auhl
+	add	hl,bc
+	adc	a,b
 	pop	bc
 	djnz	.loop
 .movetonextcluster:
 	ld	a,hl,(yfat.working_cluster)
 	call	util_next_cluster
 	compare_auhl_zero
-	jq	nz,.nextclusterisvalid
+	jr	nz,.nextclusterisvalid
 	push	af,hl
+.alloccluster:
 	ld	a,hl,(yfat.working_cluster)
 	call	util_do_alloc_entry
-	ld	de,0
+	lea	de,yfat.buffer
 	ret
 .nextclusterisvalid:
 	ld	(yfat.working_cluster),a,hl
-	jq	.enter
+	jr	.enter
 .foundavailentry:
 	lea	de,iy				; pointer to new entry
 	pop	iy,af,hl,bc			; auhl = block with entry
-	ret
-.foundendoflist:
-	dec	b
-	jq	z,.movetonextcluster
-	lea	de,iy				; pointer to new entry
-	pop	iy,af,hl,bc
-	push	af,hl,de
-	ld	a,0
-.blockhigh := $-1
-	ld	hl,0
-.blocklow := $-3
-	call	util_write_fat_block
-	pop	de,hl
-	jq	nz,.error
-	pop	af
-	ret
-.error:
-	pop	hl
-	xor	a,a
-	sbc	hl,hl
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -1557,22 +1763,7 @@ util_alloc_entry_root:
 	ld	a,hl,(yfat.root_dir_pos)
 	call	util_block_to_cluster
 	ld	(yfat.working_cluster),a,hl
-	jq	util_alloc_entry
-
-;-------------------------------------------------------------------------------
-util_get_file_size:
-	push	iy
-	ld	iy,(yfatFile.entry_pointer)
-	ld	a,hl,(iy + 28)
-	pop	iy
-	ret
-
-;-------------------------------------------------------------------------------
-util_set_file_size:
-	ld	(yfatFile.file_size),a,hl
-	call	util_ceil_byte_size_to_block_size
-	ld	(yfatFile.block_count),a,hl
-	ret
+	jq	util_alloc_entry.enter
 
 ;-------------------------------------------------------------------------------
 util_get_name:
@@ -1641,6 +1832,7 @@ util_get_fat_name:
 	jr	z,.done1
 	or	a,a
 	jr	z,.done1
+	call	util_toupper
 	ld	(hl),a
 	inc	de
 	inc	hl
@@ -1676,6 +1868,7 @@ util_get_fat_name:
 	jr	z,.other
 	inc	de
 .store:
+	call	util_toupper
 	ld	(hl),a
 	inc	hl
 	inc	b
@@ -1702,6 +1895,64 @@ util_get_fat_name:
 	jq	.spacefillloop
 .return:
 	pop	de
+	ret
+
+;-------------------------------------------------------------------------------
+util_validate_fat_name:
+; ensure none of the following characters: * ? . , ; : / \ | + = < > [ ] " \t
+; inputs:
+;   hl: pointer to null terminated string
+; outputs:
+;   z set if invalid name
+.loop:
+	ld	a,(hl)
+	or	a,a
+	jr	z,.done
+	cp	a,'*'
+	ret	z
+	cp	a,'?'
+	ret	z
+	cp	a,','
+	ret	z
+	cp	a,';'
+	ret	z
+	cp	a,':'
+	ret	z
+	cp	a,'/'
+	ret	z
+	cp	a,'\'
+	ret	z
+	cp	a,'|'
+	ret	z
+	cp	a,'+'
+	ret	z
+	cp	a,'='
+	ret	z
+	cp	a,'<'
+	ret	z
+	cp	a,'>'
+	ret	z
+	cp	a,'['
+	ret	z
+	cp	a,']'
+	ret	z
+	cp	a,'"'
+	ret	z
+	cp	a,'	'
+	ret	z
+	inc	hl
+	jr	.loop
+.done:
+	inc	a
+	ret
+
+;-------------------------------------------------------------------------------
+util_toupper:
+	cp	a,'a'
+	ret	c
+	cp	a,'z'+1
+	ret	nc
+	res	5,a
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -1764,7 +2015,9 @@ util_is_directory_empty:
 .next:
 	djnz	.loop
 	ld	a,hl,(yfat.working_block)
-	call	util_increment_auhl
+	ld	bc,1				; increment auhl
+	add	hl,bc
+	adc	a,b
 	ld	(yfat.working_block),a,hl
 	pop	bc
 	djnz	.next_block
@@ -1867,7 +2120,7 @@ util_locate_entry:
 	call	util_block_to_cluster
 	push	hl,af
 	ld	a,hl,(yfat.working_block)
-	ld	bc,1
+	ld	bc,1				; increment auhl
 	add	hl,bc
 	add	a,b
 	call	util_block_to_cluster
@@ -1877,7 +2130,7 @@ util_locate_entry:
 	cp	a,b
 	jr	nz,.movetonextcluster
 	ld	a,hl,(yfat.working_block)
-	ld	bc,1
+	ld	bc,1				; increment auhl
 	add	hl,bc
 	adc	a,b
 	jq	.storeblockandloop
@@ -2017,17 +2270,18 @@ util_next_cluster:
 	sbc	hl,hl
 	ret
 
-; inputs:
-;   same as fat_Read / fat_Write
-; outputs:
-;   same as fat_Read / fat_Write
+;-------------------------------------------------------------------------------
 util_fat_read_write:
+; inputs:
+;   same as fat_ReadFile / fat_WriteFile
+; outputs:
+;   same as fat_ReadFile / fat_WriteFile
 	ld	iy,0
 	add	iy,sp
 	push	ix
 	ld	ix,(iy + 3)
-	ld	hl,(xfatFile.block_pos)
-	ld	(xfatFile.starting_block_pos),hl
+	ld	hl,(xfatFile.block_index)
+	ld	(xfatFile.starting_block_index),hl
 	ld	de,(xfatFile.block_count)
 	compare_hl_de
 	jq	nc,.return
@@ -2039,62 +2293,84 @@ util_fat_read_write:
 	jq	nc,.loop
 	ld	(iy + 6),hl			; only read to eof
 .loop:
-	ld	hl,(iy + 6)
-	compare_hl_zero
+	ld	hl,(iy + 6)			; number of blocks left to transfer
+	compare_hl_zero				; no more blocks left, exit
 	jq	z,.return
-	ex	de,hl
-	ld	a,(xfatFile.blocks_per_cluster)
-	sub	a,(xfatFile.cluster_block)
-	or	a,a
-	sbc	hl,hl
-	ld	l,a
+
+	ld	d,(xfatFile.blocks_per_cluster)
+	ld	a,d
+	dec	a
+	and	a,(xfatFile.block_index)	; mask off the number of blocks remaining in this cluster
+	ld	e,a
+	ld	a,d
+	sub	a,e
+	ld	de,0
+	ld	e,a
+	ex	de,hl				; de = total remaining, hl = remaining in cluster
 	compare_hl_de
-	jq	nc,.alternateflow
-	ex	de,hl
+	jr	nc,.singleclusterread
+.multicluster:
+	ex	de,hl				; de = number of blocks remaining in cluster
 	ld	a,hl,(xfatFile.current_block)
 	compare_auhl_zero
-	jq	z,.return			; invalid cluster block
+	jr	z,.return
 	push	de
 	call	.do_xfer
-	pop	hl
-	jq	nz,.return
-	push	hl
-	ld	h,l
-	ld	l,0
-	add	hl,hl
-	ld	de,(iy + 9)
-	add	hl,de
-	ld	(iy + 9),hl
 	pop	de
-	ld	hl,(xfatFile.block_pos)
-	add	hl,de
-	ld	(xfatFile.block_pos),hl
+	jq	nz,.return
 	ld	hl,(iy + 6)
 	or	a,a
 	sbc	hl,de
-	ld	(iy + 6),hl
-	jq	.getnextcluster
-.alternateflow:
-	ld	de,(iy + 6)
+	ld	(iy + 6),hl			; subtract remaining from total
+	ld	hl,(xfatFile.block_index)
+	add	hl,de
+	ld	(xfatFile.block_index),hl
+	call	.getnextcluster
+	jr	.loop
+.singleclusterread:
 	ld	a,hl,(xfatFile.current_block)
 	compare_auhl_zero
-	jq	z,.return
+	jr	z,.return			; invalid block
 	push	de
 	call	.do_xfer
 	pop	de
-	jq	nz,.return
-	or	a,a
-	sbc	hl,hl
-	ld	(iy + 6),hl
-	ld	a,(xfatFile.cluster_block)
-	add	a,e
-	ld	(xfatFile.cluster_block),a
-	ld	hl,(xfatFile.block_pos)
+	jr	nz,.return
+	ld	a,hl,(xfatFile.current_block)
 	add	hl,de
-	ld	(xfatFile.block_pos),hl
-	cp	a,(xfatFile.blocks_per_cluster)
-	jq	nz,.loop
+	adc	a,d
+	ld	(xfatFile.current_block),a,hl
+	ld	hl,(xfatFile.block_index)
+	add	hl,de
+	ld	(xfatFile.block_index),hl
+	ld	h,(xfatFile.blocks_per_cluster)
+	ld	a,h
+	dec	a
+	and	a,l
+	or	a,a				; if at end of cluster, get the next one
+	call	z,.getnextcluster
+.return:
+	ld	hl,(xfatFile.block_index)
+	ld	de,(xfatFile.starting_block_index)
+	or	a,a
+	sbc	hl,de				; return number of blocks transferred
+	pop	ix
+	ret
+.do_xfer:
+	push	de
+	pop	bc
+	ld	de,(iy + 9)
+	push	iy
+	ld	iy,(xfatFile.fat)
+	call	util_read_fat_multiple_blocks
+.block_func := $-3
+	pop	iy
+	ret
 .getnextcluster:
+	ld	hl,(xfatFile.block_index)
+	ld	de,(xfatFile.block_count)
+	or	a,a
+	sbc	hl,de
+	ret	nc				; don't try to go too far
 	ld	a,hl,(xfatFile.current_cluster)
 	push	iy
 	ld	iy,(xfatFile.fat)
@@ -2106,29 +2382,6 @@ util_fat_read_write:
 	call	util_cluster_to_block
 	pop	iy
 	ld	(xfatFile.current_block),a,hl
-	xor	a,a
-	ld	(xfatFile.cluster_block),a
-	jq	.loop
-.return:
-	ld	hl,(xfatFile.block_pos)
-	ld	de,(xfatFile.starting_block_pos)
-	or	a,a
-	sbc	hl,de				; return number of blocks transferred
-	pop	ix
-	ret
-.do_xfer:
-	ld	bc,0
-	ld	c,(xfatFile.cluster_block)	; 3 bytes to allow for zero
-	add	hl,bc
-	adc	a,b
-	push	de
-	pop	bc
-	ld	de,(iy + 9)
-	push	iy
-	ld	iy,(xfatFile.fat)
-	call	util_read_fat_multiple_blocks
-.block_func := $-3
-	pop	iy
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -2153,9 +2406,9 @@ util_read_fat_multiple_blocks:
 	push	bc				; store count for checking
 	push	de
 	push	bc
-	ld	e,bc,(yfat.first_lba)
+	ld	bc,(yfat.base_lba)
 	add	hl,bc
-	adc	a,e
+	adc	a,(yfat.base_lba + 3)
 	ld	c,a
 	push	bc
 	push	hl
@@ -2192,9 +2445,9 @@ util_write_fat_multiple_blocks:
 	push	bc				; store count for checking
 	push	de
 	push	bc
-	ld	e,bc,(yfat.first_lba)
+	ld	bc,(yfat.base_lba)
 	add	hl,bc
-	adc	a,e
+	adc	a,(yfat.base_lba + 3)
 	ld	c,a
 	push	bc
 	push	hl
@@ -2217,31 +2470,6 @@ util_checkmagic:
 	ex.s	de,hl
 	compare_hl_de
 	pop	de,hl
-	ret
-
-;-------------------------------------------------------------------------------
-util_increment_auhl:
-	ld	bc,1
-	add	hl,bc
-	adc	a,b
-	ret
-
-;-------------------------------------------------------------------------------
-util_auhl_shl7:
-	add	hl,hl
-	adc	a,a
-	add	hl,hl
-	adc	a,a
-	add	hl,hl
-	adc	a,a
-	add	hl,hl
-	adc	a,a
-	add	hl,hl
-	adc	a,a
-	add	hl,hl
-	adc	a,a
-	add	hl,hl
-	adc	a,a
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -2288,6 +2516,7 @@ util_ceil_byte_size_to_block_size:
 	inc	hl
 	ret
 
+;-------------------------------------------------------------------------------
 util_ceil_byte_size_to_blocks_per_cluster:
 	compare_auhl_zero
 	ret	z
@@ -2311,18 +2540,3 @@ util_ceil_byte_size_to_blocks_per_cluster:
 	ret	z
 	inc	hl
 	ret
-
-util_compare_auhl_zero:
-	compare_hl_zero
-	ret	nz
-	or	a,a
-	ret
-
-_StrCopy:
-	ld a,(hl)
-	ld (de),a
-	or a,a
-	ret z
-	inc hl
-	inc de
-	jq _StrCopy

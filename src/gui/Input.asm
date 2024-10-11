@@ -1,10 +1,10 @@
 
 ;@DOES get user input
 ;@INPUT uint8_t gui_Input(char *buffer, int max_len);
-;@OUTPUT 0 if user exit, 1 if user enter, 9/12 if user presses down/up arrow key
+;@OUTPUT 0 if user exit, 1 if user enter, 9|12 if user presses down|up arrow key
 ;@DESTROYS All
 gui_Input:
-	ld hl,-11
+	ld hl,-12
 	call ti._frameset
 	xor a,a
 	sbc hl,hl
@@ -12,8 +12,6 @@ gui_Input:
 	ld (ix-11),hl ; cursor position
 	ld hl,(ix+6)
 	ld (hl),a
-	inc a
-	ld (ix-4),a
 	push hl
 	pop de
 	inc de
@@ -21,6 +19,10 @@ gui_Input:
 	dec bc
 	ldir
 .enter_no_clear_buffer:
+	xor a,a
+	ld (ix-12),a ; character for character wheel
+	inc a
+	ld (ix-4),a
 	ld a,(currow)
 	ld (ix-5),a
 	jr .entry
@@ -47,7 +49,7 @@ gui_Input:
 	or a,a
 	sbc hl,bc
 	add hl,bc
-	call c,.draw_underline
+	call .draw_underline
 	call gfx_SwapTextColors
 	call gfx_BlitBuffer
 .keys:
@@ -64,6 +66,8 @@ gui_Input:
 	jq z,.paste
 	cp a,ti.skTrace
 	jq z,.copy
+	cp a,ti.skMode
+	jq z,.char_wheel
 	cp a,9
 	jq z,.enter
 	jq c,.keys
@@ -84,6 +88,7 @@ gui_Input:
 .inserta:
 	or a,a
 	jq z,.keys ;don't insert a character if the character is null
+	ld (ix-12),a ; save last input character for character wheel
 	ld hl,(ix-3)
 	ld bc,(ix+9)
 	inc hl
@@ -201,9 +206,12 @@ gui_Input:
 	jr .setmap
 
 .draw_underline:
+	push af
+	; compute row offset from input current length
 	ld hl,(ix-11)
 	ld bc,40
 	call ti._idvrmu
+; hl = remainder, de = result
 	push hl
 	ld a,(currow)
 	add a,e
@@ -229,12 +237,16 @@ gui_Input:
 	add hl,hl
 	add hl,hl
 	call gfx_Compute
+	pop af
 	ld a,(lcd_text_fg)
+	jr c,.draw_horiz_8_a_hl
+	ld a,(lcd_text_bg)
+.draw_horiz_8_a_hl:
 	ld b,8
-.horiz_loop:
+.draw_underline.horiz_loop:
 	ld (hl),a
 	inc hl
-	djnz .horiz_loop
+	djnz .draw_underline.horiz_loop
 	ret
 
 ._printlines_scroll:
@@ -275,7 +287,7 @@ gui_Input:
 	ld bc,(ix-11)
 	or a,a
 	sbc hl,bc
-	jr z,.dontpaste ; no room in buffer
+	jq z,.keys ; no room in buffer
 	push hl
 	ld hl,(ix+6) ; buffer pointer
 	add hl,bc ; buffer write pointer
@@ -285,7 +297,7 @@ gui_Input:
 	add hl,bc
 	or a,a
 	sbc hl,bc
-	jr z,.dontpaste ; nothing to paste
+	jq z,.keys ; nothing to paste
 	push de,bc,hl,de
 	call ti._strncpy
 	pop bc,bc,bc
@@ -297,7 +309,6 @@ gui_Input:
 	ld hl,(ix-3)
 	add hl,de
 	ld (ix-3),hl ; advance buffer length
-.dontpaste:
 	jq .draw
 
 .copy:
@@ -310,18 +321,115 @@ gui_Input:
 	pop bc
 	ex hl,de
 	pop hl
-	jr c,.dontcopy
+	jq c,.keys
 	push de
 	ldir
 	ld hl,(copy_buffer)
 	call sys_Free.entryhl
 	pop hl
 	ld (copy_buffer),hl
-.dontcopy:
 	jq .draw
+
+; character selection by arrow keys
+.char_wheel:
+assert currow+1 = curcol
+; save currow/curcol
+	ld bc,(currow)
+	push bc
+; draw underline and overline
+	ld hl,(ix-11)
+	ld bc,40
+	call ti._idvrmu
+	ld a,l
+	ld (curcol),a
+	push hl
+	add hl,hl
+	add hl,hl
+	add hl,hl
+	pop bc
+	add hl,bc
+	push hl ; hl = col*9 (character column -> pixel column)
+	ld a,(currow)
+	add a,e
+	ld (currow),a
+	ld e,a
+	add a,a
+	add a,a
+	add a,a
+	add a,e
+	add a,9
+	ld e,a ; e = row*9+9 (character row -> pixel row)
+	pop hl
+	call gfx_Compute
+	; draw overline
+	ld a,(lcd_text_fg)
+	call .draw_horiz_8_a_hl
+	; ld de,320*10-8 ; seek 10 rows down, 8 columns back
+	; add hl,de
+	; call .draw_horiz_8_a_hl
+
+.char_wheel_loop:
+	ld a,(ix-12)
+	call gui_PrintChar
+	call gfx_BlitBuffer
+	ld a,(curcol)
+	dec a
+	ld (curcol),a
+.char_wheel_key_loop:
+	call sys_WaitKeyCycle
+	cp a,ti.skUp
+	jr z,.char_wheel_next_char
+	cp a,ti.skDown
+	jr z,.char_wheel_prev_char
+	cp a,ti.skRight
+	jr z,.char_wheel_next_char_8
+	cp a,ti.skLeft
+	jr z,.char_wheel_prev_char_8
+	cp a,ti.skClear
+	jq z,.draw
+	cp a,ti.skEnter
+	jr nz,.char_wheel_key_loop
+	ld a,(ix-12)
+	jr .char_wheel_return_nonzero
+.char_wheel_return_nonzero:
+	; restore currow/curcol
+	pop bc
+	ld e,a
+	ld a,c
+	ld (currow),a
+	ld a,b
+	ld (curcol),a
+	ld a,e
+	jq .inserta
+
+.char_wheel_next_char:
+	ld a,(ix-12)
+	inc a
+	jr .char_wheel_set_char
+
+.char_wheel_next_char_8:
+	ld a,(ix-12)
+	add a,8
+	jr .char_wheel_set_char
+
+.char_wheel_prev_char:
+	ld a,(ix-12)
+	dec a
+	jr .char_wheel_set_char
+
+.char_wheel_prev_char_8:
+	ld a,(ix-12)
+	sub a,8
+.char_wheel_set_char:
+	dec a
+	and a,$7F
+	inc a
+	ld (ix-12),a
+	jq .char_wheel_loop
 
 .keymaps:
 	dl .keymap_A,.keymap_a,.keymap_1,.keymap_x
+.keymap_len := 38
 .keymap_A:
 	db '"',"WRMH",0,0,"?!VQLG",0,0,":ZUPKFC",0," YTOJEB",0,0,"XSNIDA"
 .keymap_a:
