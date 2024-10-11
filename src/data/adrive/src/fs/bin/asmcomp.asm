@@ -123,13 +123,15 @@ end repeat
 .success:
 	ld bc,ti.pixelShadow
 	ld hl,(ix-9)
-	or a,a
+	xor a,a
 	sbc hl,bc
 	push hl,bc
+	ld c,a
+	push bc
 	call osrt.argv_2
 	push hl
 	call bos.fs_WriteNewFile
-	pop bc,bc,bc
+	pop bc,bc,bc,bc
 	jr nc,.final_success
 	ld hl,.str_failed_to_write
 	call bos.gui_PrintLine
