@@ -547,7 +547,7 @@ os_recovery_menu:
 	call nz,gui_PrintLine
 .keywait:
 	call sys_WaitKeyCycle
-	cp a,ti.skYequ
+	cp a,ti.skGraph
 	jp z,0
 	cp a,ti.skMode
 	jq z,.reset_fs

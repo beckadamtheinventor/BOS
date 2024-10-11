@@ -307,10 +307,7 @@ int main(int argc, char *argv[]) {
             goto usb_error;
         }
 
-        while (usberr == USB_SUCCESS)
-        {
-            if (global.usb != NULL)
-                break;
+        do {
 
             // break out if a key is pressed
             if (os_GetCSC())
@@ -318,9 +315,8 @@ int main(int argc, char *argv[]) {
                 gui_PrintLine("abort.");
                 goto usb_error;
             }
-
-            usberr = usb_WaitForInterrupt();
-        }
+			usb_HandleEvents();
+        } while (global.usb == NULL);
     } while (usberr == USB_RETRY_INIT);
 
     if (usberr != USB_SUCCESS)

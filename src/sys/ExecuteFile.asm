@@ -189,7 +189,7 @@ sys_ExecuteFile:
 .exec_fex_entry_hl:
 	ld a,(fsOP5+10)
 	or a,a
-	ret nz ; return if only set to load the program
+	ret nz ; return if only loading the program
 
 	call sys_NextProcessId
 	call sys_FreeRunningProcessId ; free memory allocated by the new process ID if there is any
@@ -249,11 +249,18 @@ sys_ExecuteFile:
 	ld a,(cursor_color)
 	ld (iy+6),a
 	call ti.PushOP3
-	call .actuallyrunprogram
-	; save exit code (handled in th_CreateThread thread return handler now)
-	; ld (LastExitCode),hl
-	; ld a,e
-	; ld (LastExitCode+3),a
+	ld a,(threading_enabled)
+	or a,a
+	jr z,.runnothreading_actually
+	call .actuallyrunprogram_thread
+	; save exit code handled in th_CreateThread thread return handler when running as thread
+	jr .restore_colors
+.runnothreading_actually:
+	call .actuallyrunprogram_nothread
+	ld (LastExitCode),hl
+	ld a,e
+	ld (LastExitCode+3),a
+.restore_colors:
 	call ti.PopOP3
 	ld iy,ti.OP3
 	ld a,(iy)
@@ -292,7 +299,16 @@ sys_ExecuteFile:
 	ld (top_of_UserMem),hl
 	ret
 
-.actuallyrunprogram:
+.actuallyrunprogram_nothread:
+	ld hl,(fsOP6+3) ; argv
+	push hl
+	ld hl,(fsOP6+9) ; argc
+	push hl
+	ld hl,(running_program_ptr)
+	jp (hl)
+
+
+.actuallyrunprogram_thread:
 	or a,a
 	sbc hl,hl
 	call .init_thread_stack_hl

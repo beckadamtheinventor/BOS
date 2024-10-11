@@ -52,7 +52,7 @@ str_SplashCredit:
 string_os_recovery_menu:
 	db "--OS Recovery/Reset--",$A
 	db $9,"Press clear to reboot",$A
-	db $9,"Press F1/Y= to reset",$A
+	db $9,"Press F5/Graph to reset",$A
 	db $9,"Press O/7 to turn off calculator",$A
 	db $9,"Press enter to attempt recovery",$A
 	; db $9,"Press 6/V to verify system files",$A
@@ -471,6 +471,7 @@ fs_subfile emergency_shell_files, emergency_shell_fs
 	fs_sfentry emergency_extractos, "extract", "os", 1 shl fd_subfile
 	fs_sfentry emergency_extractopt, "extract", "opt", 1 shl fd_subfile
 	fs_sfentry emergency_extractroot, "extract", "rot", 1 shl fd_subfile
+	fs_sfentry emergency_format, "format", "", 1 shl fd_subfile
 	; fs_sfentry emergency_flashlock, "flock", "", 1 shl fd_subfile
 	; fs_sfentry emergency_flashunlock, "funlock", "", 1 shl fd_subfile
 	; fs_sfentry emergency_eraseflashsector, "secclear", "", 1 shl fd_subfile
@@ -498,6 +499,11 @@ end fs_subfile
 
 fs_subfile emergency_extractroot, emergency_shell_fs
 	jp fs_ExtractRootDir
+	db "FEX",0
+end fs_subfile
+
+fs_subfile emergency_format, emergency_shell_fs
+	jp fs_Format
 	db "FEX",0
 end fs_subfile
 
