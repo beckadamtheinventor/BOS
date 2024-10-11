@@ -40,7 +40,7 @@ If you do not get a formatting screen, but get an "invalid OS" error or the like
 
 
 # Building
-BOS requires the CE C toolchain version 9.2 or higher and the BOS toolchain extension.
+BOS requires the CE C toolchain version 12.0 or higher and the BOS toolchain extension.
 Python 3.7 or higher is required to build includes and documentation.
 
 Link to CE C toolchain:
@@ -50,11 +50,30 @@ https://github.com/beckadamtheinventor/toolchain-bos
 
 Once both toolchains are installed, run `make` from your system's command line while in the repo's root directory.
 
+# Transferring programs
+There are a few ways that programs can be transferred.
+Programs can be packaged with the ROM image for use with CEmu, [https://ce-programming.github.io/CEmu/], transferred from a FAT32 formatted USB drive, or sent via serial-connect.
+If the program is written for BOS, read the README file that came with the program, (chances are the author has provided one) and look for install instructions.
+
+
+## FAT32 USB drive
+
+You will need a USB-mini male to USB female OTG adapter (or equivalent) to connect a USB drive to the calc.
+Once you have the drive, run the program titled "msd" (path on-calc: `/opt/bin/msd`), plug it in, and use enter to select files.
+
+
+## serial-connect
+
+You will need the cable that came with the calculator (or equivalent) to use serial-connect, as well as the PySerial Python module on your PC.
+Run the program titled "srl" (path on-calc: `/opt/bin/srl`), plug the cable into your PC and calc, then run (with python) the file titled `serial-connect.py` in the BOS source folder.
+From there, you should get an interactive prompt PC-side, with instructions.
+
 
 # Updating BOS
-In order to update BOS at this time you will need to either reinstall TIOS, or install the update via a FAT32 formatted USB flash drive.
+In order to update BOS, you will need to either reinstall TIOS, transfer the updater via a FAT32 formatted USB flash drive, or using the serial-connect.
 Updating by USB is over 3x faster than doing a fresh install however, and should be preferred if possible.
-To uninstall, press the reset button found on the back of the calculator, open the recovery menu by pressing F1/y= and press del.
+To uninstall, press the reset button found on the back of the calculator, (quickly) open the recovery menu by pressing F1/y= and press del.
+The update files are BOSUPDTR.BIN and BOSOSPT2.BIN, the install files are BOSOS.8xp and BOSOSpt2.8xv.
 
 
 # BOS Recovery Options
@@ -74,12 +93,6 @@ If that still doesn't work, hold on+2nd+del and press reset, then reinstall TIOS
 If there's a feature you want to see in BOS, you found a bug, or have any questions or concerns, feel free to make an [issue](https://github.com/beckadamtheinventor/BOS/issues).
 Additionally, if you make a program for BOS that you feel should be included in the OS binaries, open an issue or make a pull request.
 Made an enhancement? Optimized some code? Fixed a clerical error? Improved the UI? Make a pull request and I'll take a look.
-
-
-# Installing programs on BOS
-There are a few ways that BOS programs can be installed.
-Programs written for BOS can be packaged with the ROM image for use with CEmu, [https://ce-programming.github.io/CEmu/], via BOS Package manager, (COMING SOON) or transferred from a FAT32 formatted USB drive.
-In any case, read the README file that came with the program, (chances are the author has provided one) and look for install instructions.
 
 
 # Documentation for developers
