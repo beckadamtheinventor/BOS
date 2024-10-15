@@ -410,6 +410,9 @@ open_terminal:
 explorer_call_file_noargs:
 	ld de,$FF0000
 explorer_call_file:
+	push de,hl
+	call bos.sys_FreeRunningProcessId ; clean up after ourselves
+	pop hl,de
 	ld sp,(_SaveSP)
 	ld ix,(_SaveIX)
 	push de,hl
