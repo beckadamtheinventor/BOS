@@ -77,7 +77,7 @@ th_FindFreeThread:
 	ld hl,thread_map
 	set bThreadAlive,(hl) ;thread 0 is always active
 	xor a,a
-	ld b,a
+	ld b,max_num_threads
 .search_loop:
 	bit bThreadAlive,(hl)
 	jr z,.found_thread
@@ -90,17 +90,19 @@ th_FindFreeThread:
 
 th_FindNextThread:
 	ld a,(current_thread)
-assert ~thread_map and $FF
-assert ~thread_parents and $FF
+assert ~thread_map and $3F
+assert ~thread_parents and $3F
+assert thread_parents and $40
 	ld hl,thread_map
 	set bThreadAlive,(hl) ;thread 0 is always alive
-	ld b,l
-	ld l,a
+	ld b,max_num_threads
 ; if (thread_map shr 8) + 1 <> (thread_parents shr 8)
 	; ld d,h
 ; end if
 .search_loop:
-	inc l
+	inc a
+	and a,$3F
+	ld l,a
 	bit bThreadSleeping,(hl) ;check if thread is sleeping
 	jr nz,.search_next
 ; assert thread_parents shr 16 = thread_map shr 16
@@ -119,31 +121,24 @@ assert ~thread_parents and $FF
 	; bit bThreadSleeping,(hl) ;check if parent thread is sleeping
 	; jq nz,.search_next
 	bit bThreadAlive,(hl)
-	jr nz,.found_thread
+	ret nz
 .search_next:
-	; ld l,a
 	djnz .search_loop
-; we will only get here after 256 search iterations, which will end up being the same thread ID as the running thread.
 	bit bThreadAlive,(hl) ;check if currently running thread is actually running, if it isn't then run thread ID 0
-	ld a,l
-	ret nz ; continue the currently running thread I suppose
+	ret nz ; continue the currently running thread if it's alive
 	xor a,a ; run thread ID 0
-	ret
-.found_thread:
-	ld a,l
 	ret
 
 th_ResetThreadMemory:
 	ld hl,thread_map
 	xor a,a
-	ld b,a
+	ld b,max_num_threads
 .loop:
 	ld (hl),a
 	inc l
 	djnz .loop
-if ~(thread_map shr 8) + 1 = (thread_parents shr 8)
-	ld h,$FF and (thread_parents shr 8)
-end if
+	ld b,max_num_threads
+	ld l,thread_parents and $FF
 .loop2:
 	ld (hl),a
 	inc l

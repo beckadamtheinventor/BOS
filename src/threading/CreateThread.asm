@@ -15,11 +15,8 @@ th_CreateThread:
 	ld a,e
 	or a,a
 	jr z,._dontsetparent
-if (thread_map shr 8) + 1 = (thread_parents shr 8)
-	inc h
-else
-	ld h,$FF and (thread_parents shr 8)
-end if
+assert thread_parents and $FF
+	set 6,l
 	ld a,(current_thread)
 	ld (hl),a
 ._dontsetparent:
@@ -86,11 +83,8 @@ if thread_map and $FF00
 else
 	ld (hl),h
 end if
-if (thread_map shr 8) + 1 = (thread_parents shr 8)
-	inc h
-else
-	ld h,$FF and (thread_parents shr 8)
-end if
+assert thread_parents and $40
+	set 6,l
 	ld a,(hl)
 	or a,a
 	jq z,._ranthread

@@ -251,7 +251,7 @@ clean:
 	$(RM) $(call NATIVEPATH,src/data/adrive/main.bin)
 	$(Q)make clean -f makefile -C $(call NATIVEPATH,noti-ez80/)
 	$(Q)make clean -f bos.makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/cedit/)
-	$(Q)make clean -f bos.makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/edit/)
+	$(Q)make clean -f makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/edit/)
 	$(Q)make clean -f makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/msd/)
 	$(Q)make clean -f makefile -C $(call NATIVEPATH,$(FSSRC)/fs/bin/serial/)
 	$(Q)echo Removed objects and binaries.

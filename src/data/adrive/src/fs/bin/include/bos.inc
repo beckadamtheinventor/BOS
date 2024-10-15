@@ -607,23 +607,22 @@ namespace bos
 ?heapBot                := ti.heapBot
 ?ramCodeTop             := ti.ramCodeTop
 ?reservedRAM            := ti.ramCodeTop
-?bos_UserMem            := $D1A881
-?ram_fs_start           := end_of_usermem-$10
-?end_of_usermem         := malloc_cache-$400
-?bos_basic_vars         := malloc_cache-$400
-?open_device_table      := malloc_cache-$380
+?bos_UserMem            := ti.userMem
+?end_of_usermem         := $D3F000
+?op_stack_bot           := $D0017C ; 256 bytes OP stack
+?op_stack_top           := $D0027C ; 256 bytes downward
+?current_working_dir    := $D00B00 ; 256 bytes current working directory
+?InputBuffer            := $D00C00 ; 256 bytes input buffer
+?open_device_table      := $D02380
 ?open_device_table.len  := $80
-?op_stack_bot           := malloc_cache-$300
-?op_stack_top           := malloc_cache-$200 ;256 bytes downward
-?current_working_dir    := malloc_cache-$200
-?InputBuffer            := malloc_cache-$100
-?malloc_cache           := thread_temp_save-$1000 ; 4064 ($FE0) bytes
-?malloc_cache_len       := 4064    ; ($010000-$200)/16 (each cache entry byte marks 16 bytes of memory)
-?thread_temp_save       := $D2F000 ; temporary save location for registers when a thread switch is triggered. 16 bytes per thread, 255 threads = 4080 bytes.
-?thread_map             := $D30000 ; thread map. 256 threads. Active threads have bit 7 set.
-?thread_parents         := $D30100 ; 256 bytes, one per thread. Saves ID of thread that spawned a given thread. A thread will only be run if it's parent thread is awake
-?bottom_of_malloc_ram   := $D30200 ; malloc memory needs to start 256 byte aligned
+?thread_map             := $D02400 ; thread map. 64 threads. Active threads have bit 7 set.
+?thread_parents         := $D02440 ; 64 bytes, one per thread. Saves ID of thread that spawned a given thread. A thread will only be run if it's parent thread is awake
+?max_num_threads        := 64
+?malloc_cache           := $D01200 ; $1100 (4352) bytes
+?malloc_cache_len       := $100     ; (each cache entry byte marks 16 bytes of memory)
+?bottom_of_malloc_ram   := malloc_cache+malloc_cache_len ; note: malloc memory needs to start 256 byte aligned
 ?bottom_of_malloc_RAM   := bottom_of_malloc_ram
+?thread_temp_save       := $D00700 ; temporary save location for registers when a thread switch is triggered. 16 bytes per thread, 63 threads = 1008 bytes.
 ?top_of_malloc_ram      := top_of_ram
 ?malloc_block_size      := 16
 ?malloc_block_size_bits := 4
