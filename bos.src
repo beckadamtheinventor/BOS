@@ -193,6 +193,7 @@
 	public _str_FromLong
 	public _str_ToInt
 	public _gui_CharFromCode
+	public _sys_ExecuteFileArgcArgv
 _boot_os                         := $20108
 _handle_interrupt                := $2010C
 _HandleInstruction               := $20110
@@ -386,6 +387,7 @@ _str_FromInt                     := $226F4
 _str_FromLong                    := $226F8
 _str_ToInt                       := $226FC
 _gui_CharFromCode                := $22700
+_sys_ExecuteFileArgcArgv         := $22704
 
 public ram_executable
 public ram_executable_at

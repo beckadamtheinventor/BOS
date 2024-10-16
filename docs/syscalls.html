@@ -198,6 +198,7 @@
 <tr><td><a href="#str_FromLong">bos.str_FromLong</a></td><td><a href="#str_FromLong">0226F8</a></td></tr>
 <tr><td><a href="#str_ToInt">bos.str_ToInt</a></td><td><a href="#str_ToInt">0226FC</a></td></tr>
 <tr><td><a href="#gui_CharFromCode">bos.gui_CharFromCode</a></td><td><a href="#gui_CharFromCode">022700</a></td></tr>
+<tr><td><a href="#sys_ExecuteFileArgcArgv">bos.sys_ExecuteFileArgcArgv</a></td><td><a href="#sys_ExecuteFileArgcArgv">022704</a></td></tr>
 </table><div id="boot_os                  "><h1>boot_os                  </h1>	<h3>syscall Adress 020108</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 </table></div><div id="handle_interrupt"><h1>handle_interrupt</h1>	<h3>syscall Adress 02010C</h3>
@@ -844,7 +845,7 @@ void *sp must be allocated at least 12 bytes behind it. If void *sp is 0, it wil
 </td></tr>
 </table></div><div id="th_KillThread"><h1>th_KillThread</h1>	<h3>syscall Adress 022678</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Kill a thread by ID, including child threads.</td><td>uint8_t th_KillThread(uint8_t id);</td><td>thread ID killed if successful, 0 if failed.</td><td></td><td>
+<tr><td>Kill a thread by ID, not including child threads.</td><td>uint8_t th_KillThread(uint8_t id);</td><td>thread ID killed if successful, 0 if failed.</td><td></td><td>
 Cannot kill thread ID 0.</td></tr>
 </table></div><div id="fs_GetFilePtr"><h1>fs_GetFilePtr</h1>	<h3>syscall Adress 02267C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -983,5 +984,9 @@ exit code also stored in bos.LastCommandResult</td><td></td><td>
 <tr><td>Convert a keycode from sys_GetKey to a text character.</td><td>char gui_CharFromCode(uint8_t charset, uint8_t keycode);<br>
 charset = character set number to pick from.<br>
 keycode = keycode from sys_GetKey.</td><td>character corresponding to the given charset and keycode; 0 if out of bounds or N/A.</td><td></td><td>
+</td></tr>
+</table></div><div id="sys_ExecuteFileArgcArgv"><h1>sys_ExecuteFileArgcArgv</h1>	<h3>syscall Adress 022704</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>execute a file given a file path, passing arguments via argc/argv.</td><td>int sys_ExecuteFileArgcArgv(const char *path, int argc, char *argv[]);</td><td></td><td></td><td>
 </td></tr>
 </table></div></body></html>

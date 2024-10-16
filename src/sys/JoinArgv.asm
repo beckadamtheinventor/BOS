@@ -7,7 +7,13 @@ sys_JoinArgv:
 	ld (ix-3),iy
 	ld bc,(ix+6)
 	ld iy,(ix+9)
-	or a,a
+	xor a,a
+	ld hl,(iy)
+	or a,(hl)
+	jr z,.no_args
+	ld hl,(iy+3)
+	or a,(hl)
+	jr z,.no_args
 	sbc hl,hl
 	lea iy,iy+3
 	dec bc

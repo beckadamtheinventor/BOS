@@ -202,4 +202,5 @@
 	jp str_FromLong
 	jp str_ToInt
 	jp gui_CharFromCode
+	jp sys_ExecuteFileArgcArgv
 ; end of jump table

@@ -4,8 +4,8 @@
 ;@DESTROYS All, OP6.
 sys_ExecuteFileArgcArgv:
 	ld hl,9
-	ld a,l
 	add hl,sp
+	xor a,a
 	ld (fsOP5+10),a
 	ld de,(hl)
 	ld (fsOP5),de

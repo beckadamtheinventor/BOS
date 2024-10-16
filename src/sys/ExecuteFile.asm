@@ -304,8 +304,9 @@ sys_ExecuteFile:
 	push hl
 	ld hl,(fsOP6+9) ; argc
 	push hl
-	ld hl,(running_program_ptr)
-	jp (hl)
+	call .jptoprogram
+	pop bc,bc
+	ret
 
 
 .actuallyrunprogram_thread:

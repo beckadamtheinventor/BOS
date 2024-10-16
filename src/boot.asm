@@ -590,9 +590,16 @@ os_recovery_menu:
 	jq os_recovery_menu
 
 .tryruncmd:
-	ld hl,str_CmdExecutable
-	ld de,$FF0000
-	push de,hl
+	; ld de,str_CmdExecutable
+	; ld hl,-9
+	; add hl,sp
+	; push hl ; pointer to str_CmdExecutable on the stack
+	; ld hl,1
+	; push hl,de
+	; call sys_ExecuteFileArgcArgv
+	ld de,str_CmdExecutable
+	ld hl,$FF0000
+	push hl,de
 	call sys_ExecuteFile
 	ld hl,(ExecutingFileFd)
 	inc hl

@@ -5,8 +5,17 @@ cmd_exe_main:
 	ld hl,-29
 	call ti._frameset
 	call cmd_exe_init
-	ld hl,(ix+6)
-	ld bc,(ix+9)
+	ld hl,(ix+6) ; argc
+	ld bc,(ix+9) ; argv
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	jq z,cmd_no_cmd_args ; don't join argv if there's no arguments
+	add hl,bc
+	scf
+	sbc hl,bc
+	jq z,cmd_no_cmd_args ; don't join argv if there's only one argument
+	inc hl
 	push bc,hl
 	call bos.sys_JoinArgv
 	pop bc

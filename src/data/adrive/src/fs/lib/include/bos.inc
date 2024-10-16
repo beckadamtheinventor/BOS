@@ -530,6 +530,7 @@ namespace bos
 ?str_FromLong                    := $226F8
 ?str_ToInt                       := $226FC
 ?gui_CharFromCode                := $22700
+?sys_ExecuteFileArgcArgv         := $22704
 ; end of jump table
 ;-------------------------------------------------------------------------------
 ; OS memory areas and misc defines
