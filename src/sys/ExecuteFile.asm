@@ -257,9 +257,6 @@ sys_ExecuteFile:
 	jr .restore_colors
 .runnothreading_actually:
 	call .actuallyrunprogram_nothread
-	ld (LastExitCode),hl
-	ld a,e
-	ld (LastExitCode+3),a
 .restore_colors:
 	call ti.PopOP3
 	ld iy,ti.OP3
@@ -305,8 +302,11 @@ sys_ExecuteFile:
 	ld hl,(fsOP6+9) ; argc
 	push hl
 	call .jptoprogram
-	pop bc,bc
-	ret
+	ld (LastExitCode),hl ; save exit code
+	ld a,e
+	ld (LastExitCode+3),a
+	pop bc,hl ; argc, argv
+	jp sys_Free.entryhl ; free argv
 
 
 .actuallyrunprogram_thread:
@@ -377,6 +377,18 @@ sys_jphl := $
 ; output hl -> argv
 ; output bc -> argc
 .load_argc_argv_loop:
+	ld bc,(running_process_id)
+	push bc
+	ld a,1 ; make sure to malloc as PID 1 so it doesn't get freed until the program exits
+	ld (running_process_id),a
+	call .load_argc_argv_loop_entry
+	ex (sp),hl
+	ld a,l
+	ld (running_process_id),a
+	pop hl
+	ret
+
+.load_argc_argv_loop_entry:
 	ex hl,de
 	push hl
 	inc sp
