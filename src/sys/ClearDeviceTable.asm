@@ -5,19 +5,24 @@
 ;@NOTE Each device table entry is 4 bytes. 1 byte flags, 3 byte file descriptor.
 sys_ClearDeviceTable:
 	push iy
-	ld iy,open_device_table
-	ld b,open_device_table.len / 4 - 1
+	ld iy,open_device_table-4
+	ld b,open_device_table.len / 4
 .loop:
+	lea iy,iy+4
 	ld a,(iy)
 	or a,a
 	jr nz,.close_dev
-	lea iy,iy+4
+.next:
 	djnz .loop
 	pop iy
 	ret
 .close_dev:
-	push iy
-	ld hl,(iy+1)
+	push iy,bc
+	ld de,(iy+1)
+	sbc hl,hl
+	ld (iy),l
+	ld (iy+1),hl
+	ex hl,de
 	call drv_DeinitDevice.entryhl
-	pop iy
-	jr .loop
+	pop bc,iy
+	jr .next

@@ -9,7 +9,7 @@ sys_SearchDeviceTable:
 .entryhl:
 	push iy
 	ld iy,open_device_table
-	ld b,open_device_table.len / 4 - 1
+	ld b,open_device_table.len / 4
 .check_loop:
 	ld a,(iy)
 	ld de,(iy+1)

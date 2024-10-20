@@ -339,7 +339,7 @@ macro device_file? flags, type, version, intsource
 	end repeat
 	macro export? jumpno, function
 		if function > 0
-			store $C9: byte at $$+jumpno
+			store $C3: byte at $$+jumpno
 			store function: 3 at $$+jumpno+1
 		end if
 	end macro

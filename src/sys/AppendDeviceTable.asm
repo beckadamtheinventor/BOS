@@ -10,7 +10,7 @@ sys_AppendDeviceTable:
 .entryhl:
 	push iy
 	ld iy,open_device_table
-	ld b,open_device_table.len / 4 - 1
+	ld b,open_device_table.len / 4
 .check_next:
 	ld a,(iy)
 	or a,a
