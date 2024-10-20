@@ -1000,7 +1000,7 @@ keycode = keycode from sys_GetKey.</td><td>character corresponding to the given 
 </table></div><div id="drv_OpenDevice"><h1>drv_OpenDevice</h1>	<h3>syscall Adress 022708</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Return a pointer to a device structure (if valid)</td><td>device_t* drv_OpenDevice(const char *path);<br>
-path Path of device file to open.</td><td>pointer to device structure, -1 if failed.</td><td></td><td>
+path Path of device file to open.</td><td>pointer to device structure, -1 and Cf set if failed.</td><td></td><td>
 </td></tr>
 </table></div><div id="drv_OpenDeviceFD"><h1>drv_OpenDeviceFD</h1>	<h3>syscall Adress 02270C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
