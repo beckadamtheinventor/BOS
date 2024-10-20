@@ -12,25 +12,25 @@ typedef struct __device_t__ {
 	uint8_t version;
 	uint8_t intSource;
 	uint8_t fsdevflags;
-	uint8_t reserved[2];
+	uint16_t version_minor;
 	// Generic device jump table
 	// Initialize the device.
-	uint8_t initjp;
+	uint8_t initJP;
 	uint8_t (*init)(void);
 	// De-initialize the device.
-	uint8_t deinitjp;
+	uint8_t deinitJP;
 	uint8_t (*deinit)(void);
 	// Read from the device. Dest is a physical address, src is a device-side address.
-	uint8_t readjp;
+	uint8_t readJP;
 	unsigned int (*read)(void *dest, void *src, unsigned int len);
 	// Write to the device. Dest is a device-side address, src is a physical address.
-	uint8_t writejp;
+	uint8_t writeJP;
 	unsigned int (*write)(void *dest, void *src, unsigned int len);
 	// Return a physical address (DMA) for a given device-side address.
-	uint8_t dmajp;
+	uint8_t dmaJP;
 	void *(*getdma)(void *src);
 	// Called by the OS to handle interrupts this device responds to.
-	uint8_t interrupthandlerjp;
+	uint8_t interrupthandlerJP;
 	uint8_t (*interruptHandler)(void);
 
 	// Filesystem device jump table
@@ -52,13 +52,76 @@ typedef struct __device_t__ {
 
 } device_t;
 
+/**
+ * Return a pointer to a device structure.
+ * @param path Path to device file.
+ * @return Device structure, or -1 if failed. (or if file is not a valid device file)
+ */
+device_t* drv_OpenDevice(const char* path);
 
 /**
- * Initialize a device and return its device_t structure.
- * @param path Path to device file.
- * @return Device structure, or -1 if failed.
+ * Return a pointer to a device structure given a file descriptor.
+ * @param fd File Descriptor.
+ * @return Device structure, or -1 if failed. (or if file is not a valid device file)
  */
-device_t sys_OpenDevice(const char *path);
+device_t* drv_OpenDeviceFD(void* fd);
+
+/**
+ * Initialize a device given a device structure.
+ * @param ptr Device file data / device structure.
+ * @return Depends on device, usually non-zero if failed.
+ */
+int drv_InitDevice(device_t* ptr);
+
+/**
+ * Return a pointer to a device's physical memory address, if applicable.
+ * @param ptr Device file data / device structure.
+ * @return Pointer to physical memory address, 0 if N/A.
+ */
+void* drv_GetDMA(device_t* ptr);
+
+/**
+ * Read a character from a device.
+ * @param ptr Device file data / device structure.
+ * @return Character read.
+ */
+int drv_GetChar(device_t* ptr);
+
+/**
+ * Write a character to a device.
+ * @param ptr Device file data / device structure.
+ * @param c Character to write.
+ * @return Depends on device, usually number of bytes written.
+ */
+int drv_GetChar(device_t* ptr, int c);
+
+/**
+ * Read some data from a device.
+ * @param ptr Device file data / device structure.
+ * @param buffer Pointer to buffer to read data into.
+ * @param len Number of bytes to read.
+ * @param offset Offset to read data from.
+ * @return Depends on device, usually number of bytes read.
+ */
+int drv_Read(device_t* ptr, void* buffer, size_t len, size_t offset);
+
+/**
+ * Write some data to a device.
+ * @param ptr Device file data / device structure.
+ * @param buffer Pointer to data to write.
+ * @param len Number of bytes to write.
+ * @param offset Offset to write data to.
+ * @return Depends on device, usually number of bytes written.
+ */
+int drv_Write(device_t* ptr, void* buffer, size_t len, size_t offset);
+
+/**
+ * Uninitialize a device.
+ * @param ptr Device file data / device structure.
+ * @return Depends on device, usually non-zero if failed.
+ */
+int drv_Deinit(device_t* ptr);
+
 
 /**
  * Execute a given file, not preserving current program state.

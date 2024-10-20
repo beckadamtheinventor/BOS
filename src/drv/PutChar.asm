@@ -1,5 +1,7 @@
 ;@DOES Write a character to a device file given a descriptor
-;@INPUT int drv_PutChar(void* fd, int c);
+;@INPUT int drv_PutChar(device_t* ptr, int c);
+;@INPUT ptr Pointer to device file data.
+;@INPUT c Character to write.
 ;@OUTPUT Depends on device, usually number of bytes written.
 drv_PutChar:
 	pop bc,hl,de

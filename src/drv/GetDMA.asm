@@ -1,5 +1,6 @@
-;@DOES Return a pointer to a device's physical memory address
-;@INPUT void *drv_GetDMA(void* fd);
+;@DOES Return a pointer to a device's physical memory address, if applicable.
+;@INPUT void *drv_GetDMA(device_t* ptr);
+;@INPUT ptr Pointer to device file data.
 ;@OUTPUT pointer to address, 0 if not applicable.
 drv_GetDMA:
 	pop bc,hl

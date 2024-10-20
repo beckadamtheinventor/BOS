@@ -199,6 +199,13 @@
 <tr><td><a href="#str_ToInt">bos.str_ToInt</a></td><td><a href="#str_ToInt">0226FC</a></td></tr>
 <tr><td><a href="#gui_CharFromCode">bos.gui_CharFromCode</a></td><td><a href="#gui_CharFromCode">022700</a></td></tr>
 <tr><td><a href="#sys_ExecuteFileArgcArgv">bos.sys_ExecuteFileArgcArgv</a></td><td><a href="#sys_ExecuteFileArgcArgv">022704</a></td></tr>
+<tr><td><a href="#drv_OpenDevice">bos.drv_OpenDevice</a></td><td><a href="#drv_OpenDevice">022708</a></td></tr>
+<tr><td><a href="#drv_OpenDeviceFD">bos.drv_OpenDeviceFD</a></td><td><a href="#drv_OpenDeviceFD">02270C</a></td></tr>
+<tr><td><a href="#drv_GetDMA">bos.drv_GetDMA</a></td><td><a href="#drv_GetDMA">022710</a></td></tr>
+<tr><td><a href="#drv_GetChar">bos.drv_GetChar</a></td><td><a href="#drv_GetChar">022714</a></td></tr>
+<tr><td><a href="#drv_PutChar">bos.drv_PutChar</a></td><td><a href="#drv_PutChar">022718</a></td></tr>
+<tr><td><a href="#drv_Read">bos.drv_Read</a></td><td><a href="#drv_Read">02271C</a></td></tr>
+<tr><td><a href="#drv_Write">bos.drv_Write</a></td><td><a href="#drv_Write">022720</a></td></tr>
 </table><div id="boot_os                  "><h1>boot_os                  </h1>	<h3>syscall Adress 020108</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 </table></div><div id="handle_interrupt"><h1>handle_interrupt</h1>	<h3>syscall Adress 02010C</h3>
@@ -533,7 +540,8 @@ de = arguments</td><td></td><td></td><td>
 </td></tr>
 </table></div><div id="drv_InitDevice"><h1>drv_InitDevice</h1>	<h3>syscall Adress 022534</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Initialize a device (if needed)</td><td>int drv_InitDevice(const char *name);</td><td>depends on device, usually -1 and Cf set if failed.</td><td></td><td>
+<tr><td>Initialize a device (if needed)</td><td>int drv_InitDevice(device_t* ptr);<br>
+ptr Pointer to device file.</td><td>depends on device, usually -1 and Cf set if failed.</td><td></td><td>
 </td></tr>
 </table></div><div id="fs_CopyFile"><h1>fs_CopyFile</h1>	<h3>syscall Adress 022538</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -988,5 +996,47 @@ keycode = keycode from sys_GetKey.</td><td>character corresponding to the given 
 </table></div><div id="sys_ExecuteFileArgcArgv"><h1>sys_ExecuteFileArgcArgv</h1>	<h3>syscall Adress 022704</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>execute a file given a file path, passing arguments via argc/argv.</td><td>int sys_ExecuteFileArgcArgv(const char *path, int argc, char *argv[]);</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="drv_OpenDevice"><h1>drv_OpenDevice</h1>	<h3>syscall Adress 022708</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Return a pointer to a device structure (if valid)</td><td>device_t* drv_OpenDevice(const char *path);<br>
+path Path of device file to open.</td><td>pointer to device structure, -1 if failed.</td><td></td><td>
+</td></tr>
+</table></div><div id="drv_OpenDeviceFD"><h1>drv_OpenDeviceFD</h1>	<h3>syscall Adress 02270C</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Return a pointer to a device structure (if valid)</td><td>device_t* drv_OpenDeviceFD(void* fd);<br>
+fd File descriptor to open as device.</td><td>pointer to device structure, -1 if failed.</td><td></td><td>
+</td></tr>
+</table></div><div id="drv_GetDMA"><h1>drv_GetDMA</h1>	<h3>syscall Adress 022710</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Return a pointer to a device's physical memory address, if applicable.</td><td>void *drv_GetDMA(device_t* ptr);<br>
+ptr Pointer to device file data.</td><td>pointer to address, 0 if not applicable.</td><td></td><td>
+</td></tr>
+</table></div><div id="drv_GetChar"><h1>drv_GetChar</h1>	<h3>syscall Adress 022714</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Read a character from a device file given a descriptor</td><td>int drv_GetChar(device_t* ptr);<br>
+ptr Pointer to device file data.</td><td>Data (usually a character) read from device.</td><td></td><td>
+</td></tr>
+</table></div><div id="drv_PutChar"><h1>drv_PutChar</h1>	<h3>syscall Adress 022718</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Write a character to a device file given a descriptor</td><td>int drv_PutChar(device_t* ptr, int c);<br>
+ptr Pointer to device file data.<br>
+c Character to write.</td><td>Depends on device, usually number of bytes written.</td><td></td><td>
+</td></tr>
+</table></div><div id="drv_Read"><h1>drv_Read</h1>	<h3>syscall Adress 02271C</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Read from a device file given a descriptor</td><td>int drv_Read(device_t* ptr, void *buffer, size_t len, size_t offset);<br>
+ptr Pointer to device file data.<br>
+buffer Pointer to read data into.<br>
+len Length of data to read, in bytes.<br>
+offset Offset to read data from.</td><td>Number of bytes read.</td><td></td><td>
+</td></tr>
+</table></div><div id="drv_Write"><h1>drv_Write</h1>	<h3>syscall Adress 022720</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Write to a device file given a descriptor</td><td>int drv_Write(device_t* ptr, void *buffer, size_t len, size_t offset);<br>
+ptr Pointer to device file data.<br>
+buffer Pointer to data to write.<br>
+len Length of data to write, in bytes.<br>
+offset Offset in file to write data.</td><td>Number of bytes written.</td><td></td><td>
 </td></tr>
 </table></div></body></html>

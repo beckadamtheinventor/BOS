@@ -1,5 +1,9 @@
 ;@DOES Read from a device file given a descriptor
-;@INPUT int drv_Read(void* fd, void *buffer, size_t len, size_t offset);
+;@INPUT int drv_Read(device_t* ptr, void *buffer, size_t len, size_t offset);
+;@INPUT ptr Pointer to device file data.
+;@INPUT buffer Pointer to read data into.
+;@INPUT len Length of data to read, in bytes.
+;@INPUT offset Offset to read data from.
 ;@OUTPUT Number of bytes read.
 drv_Read:
 	call ti._frameset0

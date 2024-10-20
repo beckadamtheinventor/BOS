@@ -13,19 +13,28 @@ _InsertMem:
 	pop de,hl
 	; jr c,.insert_mem
 .insert_mem:
+; copy bytes up
 	push de,hl
-	; memmove(arg_de+arg_hl, arg_de, end_of_usermem - arg_de+arg_hl)
+	; memmove(arg_de+arg_hl, arg_de, top_of_UserMem - arg_de)
 	add hl,de ; arg_de+arg_hl
-	push hl,hl
-	pop bc
-	ld hl,end_of_usermem
+	push hl
+	ld hl,(top_of_UserMem)
 	or a,a
-	sbc hl,bc ; end_of_usermem - arg_de+arg_hl
+	sbc hl,de ; end_of_usermem - arg_de
 	ex (sp),hl
 	push de,hl ; arg_de, arg_de+arg_hl
-	call ti._memmove
+	call nz,ti._memmove ; only call memmove if amount to move > 0
 	pop hl,de,bc
 	pop hl ; bytes to insert
+
+; upate top of usermem
+	push hl
+	ld bc,(top_of_UserMem)
+	add hl,bc
+	ld (top_of_UserMem),hl
+	pop hl
+
+; update VAT
 	push de ; destination passed to memmove
 	call _UpdateVAT
 	pop hl,de ; pop destination passed to memmove, then the address inserted to

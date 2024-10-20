@@ -2,6 +2,7 @@
 ;@INPUT void* sys_GetRandomAddress();
 ;@OUTPUT HL = address
 sys_GetRandomAddress:
+.num_tests := NUM_RANDOM_ADDRESS_TESTS
 	ld hl, $D65800
 	ld iy, 0
 	lea de,iy
@@ -17,7 +18,7 @@ sys_GetRandomAddress:
 	call .test_byte ; run a total of 513 times
 
 	ex hl,de
-	ld bc,15*8/4 ; change the 31 if the number of tests changes
+	ld bc,.num_tests*8/4 ; try to get at a score of at least num_tests*8/4
 	xor a,a
 	sbc hl,bc
 	jr c,.return_default
@@ -41,7 +42,7 @@ sys_GetRandomAddress:
 .test_byte:
 	push de
 	ld de,0
-	ld b,15 ; number of tests
+	ld b,.num_tests ; number of tests
 .test_byte_outer_loop:
 ; sample byte twice and bitwise-xor
 	ld a,(hl) ; sample 1

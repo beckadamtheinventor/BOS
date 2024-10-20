@@ -531,6 +531,13 @@ namespace bos
 ?str_ToInt                       := $226FC
 ?gui_CharFromCode                := $22700
 ?sys_ExecuteFileArgcArgv         := $22704
+?drv_OpenDevice                  := $22708
+?drv_OpenDeviceFD                := $2270C
+?drv_GetDMA                      := $22710
+?drv_GetChar                     := $22714
+?drv_PutChar                     := $22718
+?drv_Read                        := $2271C
+?drv_Write                       := $22720
 ; end of jump table
 ;-------------------------------------------------------------------------------
 ; OS memory areas and misc defines
@@ -585,7 +592,7 @@ namespace bos
 ?text_flags             := ti.appData+63 ; 1 byte. Instructs the OS character printing routines
 ?gfx_routine_temp       := ti.appData+64 ; 16 bytes, temp location for graphics routines
 ?LastExitCode           := ti.appData+80 ; 4 bytes, stores the exit code of the last program that finished executing
-?stdout_fd_ptr          := ti.appData+84 ; 3 bytes, stores pointer to stdout device descriptor
+?stdout_device_ptr      := ti.appData+84 ; 3 bytes, stores pointer to stdout device structure
 ?random_source_ptr      := ti.appData+87 ; 3 bytes, stores pointer to random source address
 ?variable_sym_list_ptr  := ti.appData+90 ; 3 bytes, stores pointer to symbol list containing variables for command processing
 ?ScrapByte              := ti.flashByte

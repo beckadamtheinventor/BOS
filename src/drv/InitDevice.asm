@@ -1,25 +1,22 @@
 ;@DOES Initialize a device (if needed)
-;@INPUT int drv_InitDevice(const char *name);
+;@INPUT int drv_InitDevice(device_t* ptr);
+;@INPUT ptr Pointer to device file.
 ;@OUTPUT depends on device, usually -1 and Cf set if failed.
 drv_InitDevice:
 	pop bc,hl
 	push hl,bc
 .entryhl:
-	push hl
-	call fs_OpenFile
-	pop bc
-	ret c
-	push hl
-	call fs_GetFDPtrRaw.entry
-	pop bc
-	ret c
 	ld a,(hl)
 	cp a,$C9
 	jr nz,.fail
+	push hl
 	call sys_SearchDeviceTable.entryhl
+	pop de
 	ret nz ; don't reinit an already initialized device
+	ex hl,de
 	call sys_AppendDeviceTable.entryhl
 	ret z
+	ld hl,(hl)
 assert device_Flags = 1
 	inc hl
 	bit bDeviceNeedsInit,(hl)

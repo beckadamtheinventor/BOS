@@ -1,5 +1,6 @@
 
 boot_os:
+	ld sp,ti.stackTop
 	; ld a,$8C
 	; out0 ($24),a
 	; in0 a,($06)
@@ -21,6 +22,8 @@ boot_os:
 	; call nz,sys_EraseFlashSector ; erase this sector if it contains data
 	
 	call sys_FlashLock
+	
+	DisableThreading
 
 	call sys_GetRandomAddress
 	ld (random_source_ptr),hl
@@ -73,6 +76,7 @@ os_return:
 	ld (hl),0
 
 	DisableThreading
+if defined ENABLE_THREADING_ON_BOOT
 	call th_ResetThreadMemory
 assert ~thread_temp_save and $FF
 	ld hl,thread_temp_save
@@ -87,6 +91,10 @@ assert ~thread_temp_save and $FF
 	ld (hl),2
 	EnableThreading
 	jq th_HandleNextThread.nosave
+else
+	jp os_return_soft
+end if
+
 
 handle_interrupt:
 	ld bc,$5015
@@ -458,24 +466,27 @@ os_return_soft:
 	call os_check_recovery_key
 	call _ResetAndBuildVAT
 
+	call sys_ClearDeviceTable
+
 	ld hl,str_DevNull
-	call drv_InitDevice.entryhl
+	call drv_OpenDevice.entryhl
+	call nc,drv_InitDevice.entryhl
 
 	ld hl,str_DevLcd
-	call drv_InitDevice.entryhl
+	call drv_OpenDevice.entryhl
+	call nc,drv_InitDevice.entryhl
 
 	ld hl,str_DevStdout
+	call drv_OpenDevice.entryhl
 	push hl
-	call drv_InitDevice.entryhl
-	call nc,fs_OpenFile
-	pop bc
-	jr c,.nostdout
-	call sys_SearchDeviceTable.entryhl
-	jr nz,.hasstdout
+	call nc,drv_InitDevice.entryhl
+	pop hl
+	jr nc,.hasstdout
+; no stdout
+	or a,a
 	sbc hl,hl
 .hasstdout:
-	ld (stdout_fd_ptr),hl
-.nostdout:
+	ld (stdout_device_ptr),hl
 
 	; ld hl,str_AutoExtractOptFile
 	; push hl

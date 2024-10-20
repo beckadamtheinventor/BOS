@@ -194,6 +194,13 @@
 	public _str_ToInt
 	public _gui_CharFromCode
 	public _sys_ExecuteFileArgcArgv
+	public _drv_OpenDevice
+	public _drv_OpenDeviceFD
+	public _drv_GetDMA
+	public _drv_GetChar
+	public _drv_PutChar
+	public _drv_Read
+	public _drv_Write
 _boot_os                         := $20108
 _handle_interrupt                := $2010C
 _HandleInstruction               := $20110
@@ -388,6 +395,13 @@ _str_FromLong                    := $226F8
 _str_ToInt                       := $226FC
 _gui_CharFromCode                := $22700
 _sys_ExecuteFileArgcArgv         := $22704
+_drv_OpenDevice                  := $22708
+_drv_OpenDeviceFD                := $2270C
+_drv_GetDMA                      := $22710
+_drv_GetChar                     := $22714
+_drv_PutChar                     := $22718
+_drv_Read                        := $2271C
+_drv_Write                       := $22720
 
 public ram_executable
 public ram_executable_at

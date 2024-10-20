@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-import os
+import os, sys
 
 def error(e):
 	print("Something went wrong!")
@@ -17,7 +17,7 @@ def fwalk(d, ext=None):
 					continue
 			yield root.replace("\\","/")+"/"+file
 
-def build_internal_inc():
+def build_internal_inc(args=[]):
 	print("Building bos_internal.inc")
 
 	o = []
@@ -63,9 +63,12 @@ calminstruction (var) strcalc? val
 end calminstruction
 """+"\n".join(o))
 
-	os.system("fasmg obj/gen_internal.inc bin/bos_internal.inc")
+	os.system(f"fasmg obj/gen_internal.inc bin/bos_internal.inc {' '.join(args)}")
 
 
 if __name__=='__main__':
-	build_internal_inc()
+	if len(sys.argv) < 2:
+		print(f"Usage: {sys.argv[0]} build_args")
+	else:
+		build_internal_inc(sys.argv[1:])
 

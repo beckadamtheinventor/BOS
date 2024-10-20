@@ -1,5 +1,6 @@
 ;@DOES Read a character from a device file given a descriptor
-;@INPUT int drv_GetChar(void* fd);
+;@INPUT int drv_GetChar(device_t* ptr);
+;@INPUT ptr Pointer to device file data.
 ;@OUTPUT Data (usually a character) read from device.
 drv_GetChar:
 	pop bc,hl

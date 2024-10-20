@@ -1,3 +1,10 @@
+include build_options.mk
+
+BOSOS_BUILD_FLAGS += -i $(call QUOTE_ARG,NUM_RANDOM_ADDRESS_TESTS:=$(NUM_RANDOM_ADDRESS_TESTS))
+
+ifeq ($(ENABLE_THREADING_ON_BOOT),YES)
+BOSOS_BUILD_FLAGS += -i $(call QUOTE_ARG,ENABLE_THREADING_ON_BOOT:=1)
+endif
 
 # common/os specific things copied from CE toolchain /meta/makefile.mk
 ifeq ($(OS),Windows_NT)
@@ -59,7 +66,7 @@ version-major:
 
 # Rule to build OS data
 bosos: $(call rwildcard,src,*.asm) $(call rwildcard,src,*.inc)
-	fasmg $(call NATIVEPATH,src/main.asm) $(call NATIVEPATH,obj/bosos.bin)
+	fasmg $(call NATIVEPATH,src/main.asm) $(call NATIVEPATH,obj/bosos.bin) $(BOSOS_BUILD_FLAGS)
 
 # Rule to build documentation
 documentation:
@@ -92,7 +99,7 @@ includes:
 	$(CP) $(call NATIVEPATH,src/data/adrive/osrt.inc) $(call NATIVEPATH,$(FSSRC)/fs/bin/include/osrt.inc)
 	$(CP) $(call NATIVEPATH,src/data/adrive/osrt.inc) $(call NATIVEPATH,$(FSSRC)/fs/lib/include/osrt.inc)
 	python build_bos_src.py
-	python build_bos_internal_inc.py
+	python build_bos_internal_inc.py $(BOSOS_BUILD_FLAGS)
 
 # Rule to create object and binary directories
 objdirs:

@@ -203,4 +203,11 @@
 	jp str_ToInt
 	jp gui_CharFromCode
 	jp sys_ExecuteFileArgcArgv
+	jp drv_OpenDevice
+	jp drv_OpenDeviceFD
+	jp drv_GetDMA
+	jp drv_GetChar
+	jp drv_PutChar
+	jp drv_Read
+	jp drv_Write
 ; end of jump table
