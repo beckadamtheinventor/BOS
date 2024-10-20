@@ -50,47 +50,52 @@ macro ram_executable_at? addr
 end macro
 
 macro flash_executable?
-	local prgm, prgmdata, prgmlen, prgmend
-	virtual at $01000000
-		prgm:
+	local fex_prog
+	element fex_prog
+	virtual at fex_prog+0
+		fex_prog:
 		db $18,$04,"FEX",$00
 
 		macro call? addr
-			if addr >= prgm & addr < prgmend
+			if addr relativeto fex_prog
 				rst $28
 			end if
-			call addr and $FFFFFF
+			call addr-fex_prog
 		end macro
 		macro jp? addr
-			if addr >= prgm & addr < prgmend
+			if addr relativeto fex_prog
 				rst $28
 			end if
-			jp addr and $FFFFFF
+			jp addr-fex_prog
 		end macro
 		macro ld? lhs, rhs
 			match (addr), lhs
-				if addr >= prgm & addr < prgmend
+				if addr relativeto fex_prog
 					rst $28
+					ld (addr-fex_prog), rhs
+				else
+					ld (addr), rhs
 				end if
-				ld (addr and $FFFFFF), rhs
 			else match (addr), rhs
-				if addr >= prgm & addr < prgmend
+				if addr relativeto fex_prog
 					rst $28
+					ld lhs, (addr-fex_prog)
+				else
+					ld lhs, (addr)
 				end if
-				ld lhs, (addr and $FFFFFF)
 			else
-				if rhs >= prgm & rhs < prgmend
+				if rhs relativeto fex_prog
 					rst $28
+					ld lhs, rhs-fex_prog
+				else
+					ld lhs, rhs
 				end if
-				ld lhs, rhs and $FFFFFF
 			end match
 		end macro
 	postpone
-		prgmend:
-		prgmlen := $-$$
-		load prgmdata: $-$$ from $$
+		load fex_prog.data: $-$$ from $$
 		end virtual
-		db prgmdata
+		db fex_prog.data
 	end postpone
 end macro
 """)
