@@ -50,7 +50,7 @@ FSSRC ?= $(call NATIVEPATH,src/data/adrive/src)
 
 #build rules
 
-all: objdirs includes noti filesystem bosos bosbin bos8xp bosrom
+all: objdirs includes noti filesystem internal_includes bosos bosbin bos8xp bosrom
 
 artifact:
 	python buildutil.py artifact
@@ -99,6 +99,8 @@ includes:
 	$(CP) $(call NATIVEPATH,src/data/adrive/osrt.inc) $(call NATIVEPATH,$(FSSRC)/fs/bin/include/osrt.inc)
 	$(CP) $(call NATIVEPATH,src/data/adrive/osrt.inc) $(call NATIVEPATH,$(FSSRC)/fs/lib/include/osrt.inc)
 	python build_bos_src.py
+
+internal_includes:
 	python build_bos_internal_inc.py $(BOSOS_BUILD_FLAGS)
 
 # Rule to create object and binary directories

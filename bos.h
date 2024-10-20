@@ -93,7 +93,7 @@ int drv_GetChar(device_t* ptr);
  * @param c Character to write.
  * @return Depends on device, usually number of bytes written.
  */
-int drv_GetChar(device_t* ptr, int c);
+int drv_PutChar(device_t* ptr, int c);
 
 /**
  * Read some data from a device.
