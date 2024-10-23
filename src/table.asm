@@ -210,4 +210,5 @@
 	jp drv_PutChar
 	jp drv_Read
 	jp drv_Write
+	jp gui_PrintStdout
 ; end of jump table

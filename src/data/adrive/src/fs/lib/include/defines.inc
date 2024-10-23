@@ -67,6 +67,7 @@ LastExitCode           := ti.appData+80 ; 4 bytes, stores the exit code of the l
 stdout_device_ptr      := ti.appData+84 ; 3 bytes, stores pointer to stdout device structure
 random_source_ptr      := ti.appData+87 ; 3 bytes, stores pointer to random source address
 variable_sym_list_ptr  := ti.appData+90 ; 3 bytes, stores pointer to symbol list containing variables for command processing
+stdout_fd_ptr          := ti.appData+93 ; 3 bytes, stores pointer to stdout (or other) file descriptor
 
 ScrapByte              := ti.flashByte
 ScrapWord              := ti.scrapMem
@@ -96,7 +97,10 @@ op_stack_top           := $D0027C ; 256 bytes downward
 current_working_dir    := $D00B00 ; 256 bytes current working directory
 InputBuffer            := $D00C00 ; 256 bytes input buffer
 open_device_table      := $D02380
-open_device_table.len  := $80
+open_device_table.len  := $18
+open_file_table        := $D02398
+open_file_table.len    := $68
+open_file_table.max_open := 8
 thread_map             := $D02400 ; thread map. 64 threads. Active threads have bit 7 set.
 thread_parents         := $D02440 ; 64 bytes, one per thread. Saves ID of thread that spawned a given thread. A thread will only be run if it's parent thread is awake
 max_num_threads        := 64
@@ -295,3 +299,13 @@ symbol.flags        := 6 ; 8-bit symbol flag byte
 symbol.value        := 7 ; 24-bit symbol value
 symbol.entry_size   := 10
 symbol.end          := 0
+
+; fsd open file descriptor flags (internal use)
+fsd_bWrite           := 1
+fsd_bRead            := 2
+fsd_bOverwrite       := 3
+fsd_bNeedsFlush      := 7
+fsd_mWrite           := 1 shl fsd_bWrite
+fsd_mRead            := 1 shl fsd_bRead
+fsd_mOverwrite       := 1 shl fsd_bOverwrite
+fsd_mNeedsFlush      := 1 shl fsd_bNeedsFlush

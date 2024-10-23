@@ -206,6 +206,7 @@
 <tr><td><a href="#drv_PutChar">bos.drv_PutChar</a></td><td><a href="#drv_PutChar">022718</a></td></tr>
 <tr><td><a href="#drv_Read">bos.drv_Read</a></td><td><a href="#drv_Read">02271C</a></td></tr>
 <tr><td><a href="#drv_Write">bos.drv_Write</a></td><td><a href="#drv_Write">022720</a></td></tr>
+<tr><td><a href="#gui_PrintStdout">bos.gui_PrintStdout</a></td><td><a href="#gui_PrintStdout">022724</a></td></tr>
 </table><div id="boot_os                  "><h1>boot_os                  </h1>	<h3>syscall Adress 020108</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 </table></div><div id="handle_interrupt"><h1>handle_interrupt</h1>	<h3>syscall Adress 02010C</h3>
@@ -294,7 +295,7 @@ BC line length</td><td></td><td></td><td>
 </td></tr>
 </table></div><div id="fs_AllocRam"><h1>fs_AllocRam</h1>	<h3>syscall Adress 022444</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td></td><td></td><td></td><td></td><td>
+<tr><td>Insert ram following asm_prgm_size, returning a pointer to it.</td><td>void* fs_AllocRam(size_t len);</td><td></td><td></td><td>
 </td></tr>
 </table></div><div id="sys_WaitKey"><h1>sys_WaitKey</h1>	<h3>syscall Adress 022448</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -372,7 +373,7 @@ Cf set if file not found or otherwise cannot be opened.</td><td></td><td>
 </td></tr>
 </table></div><div id="_InsertMem"><h1>_InsertMem</h1>	<h3>syscall Adress 022494</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>insert HL bytes into a ram file at address DE</td><td>hl = bytes to insert, de = address to insert at</td><td>hl = new end of file, de = pointer to the space inserted</td><td></td><td>
+<tr><td>insert HL bytes into usermem at address DE</td><td>hl = bytes to insert, de = address to insert at</td><td>hl = new end of file, de = pointer to the space inserted</td><td></td><td>
 </td></tr>
 </table></div><div id="_SetHLUTo0"><h1>_SetHLUTo0</h1>	<h3>syscall Adress 022498</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -1039,4 +1040,8 @@ buffer Pointer to data to write.<br>
 len Length of data to write, in bytes.<br>
 offset Offset in file to write data.</td><td>Number of bytes written.</td><td></td><td>
 </td></tr>
+</table></div><div id="gui_PrintStdout"><h1>gui_PrintStdout</h1>	<h3>syscall Adress 022724</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Print a string to stdout</td><td>void gui_PrintStdout(const char* str);</td><td></td><td></td><td>
+Writes to stdout, which can be the default text printer or a file.</td></tr>
 </table></div></body></html>

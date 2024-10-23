@@ -1,4 +1,4 @@
-;@DOES insert HL bytes into a ram file at address DE
+;@DOES insert HL bytes into usermem at address DE
 ;@INPUT hl = bytes to insert, de = address to insert at
 ;@OUTPUT hl = new end of file, de = pointer to the space inserted
 _InsertMem:

@@ -17,12 +17,12 @@ cat_main:
 	ld a,(hl)
 	or a,a
 	jp z,.help
-	cp a,'-'
-	jr nz,.print_file
-	inc hl
-	ld a,(hl)
-	cp a,'c'
-	jr z,.copy_file
+	; cp a,'-'
+	; jr nz,.print_file
+	; inc hl
+	; ld a,(hl)
+	; cp a,'c'
+	; jr z,.copy_file
 .print_file:
 	push hl
 	call bos.gui_NewLine
@@ -40,7 +40,7 @@ cat_main:
 	ld (ix-2),a
 	push hl,bc
 	lea hl,ix-2
-	call bos.gui_Print
+	call bos.gui_PrintStdout
 	pop bc,hl
 .print_next:
 	dec bc
@@ -50,44 +50,44 @@ cat_main:
 	call bos.gui_NewLine
 	call bos.gui_NewLine
 	jq .done
-.copy_file:
-	inc hl
-	inc hl
-	push hl
-	call bos.fs_GetFilePtr
-	pop de
-	jq c,.fail
-	bit bos.fd_subdir,a
-	jq nz,.fail_dir
-	ld a,c
-	or a,b
-	jq nz,.read_file_into_buffer
-	ld hl,$FF0000
-	jq .return
-.read_file_into_buffer:
-	inc bc
-	inc bc
-	ld a,(bos.running_process_id)
-	ld (ix-3),a
-	push hl,bc
-	ld a,1
-	ld (bos.running_process_id),a
-	call bos.sys_Malloc
-	pop bc,de
-	ld a,(ix-3)
-	ld (bos.running_process_id),a
-	jq c,.fail
-	dec bc
-	dec bc
-	push hl
-	ld (hl),c
-	inc hl
-	ld (hl),b
-	inc hl
-	ex hl,de
-	ldir
-	pop hl
-	jq .return
+; .copy_file:
+	; inc hl
+	; inc hl
+	; push hl
+	; call bos.fs_GetFilePtr
+	; pop de
+	; jq c,.fail
+	; bit bos.fd_subdir,a
+	; jq nz,.fail_dir
+	; ld a,c
+	; or a,b
+	; jq nz,.read_file_into_buffer
+	; ld hl,$FF0000
+	; jq .return
+; .read_file_into_buffer:
+	; inc bc
+	; inc bc
+	; ld a,(bos.running_process_id)
+	; ld (ix-3),a
+	; push hl,bc
+	; ld a,1
+	; ld (bos.running_process_id),a
+	; call bos.sys_Malloc
+	; pop bc,de
+	; ld a,(ix-3)
+	; ld (bos.running_process_id),a
+	; jq c,.fail
+	; dec bc
+	; dec bc
+	; push hl
+	; ld (hl),c
+	; inc hl
+	; ld (hl),b
+	; inc hl
+	; ex hl,de
+	; ldir
+	; pop hl
+	; jq .return
 .fail_dir:
 	ld hl,str_FailSubdir
 	jq .print
@@ -107,8 +107,7 @@ cat_main:
 	ret
 str_CatHelp:
 	db "Usage:",$A
-	db $9,"cat file     print file contents",$A
-	db $9,"cat -c file  copy file into malloc'd buffer",$A,0
+	db $9,"cat file     print file contents",$A,0
 str_FailSubdir:
 	db $9,"Cannot display directory as text.",$A,0
 

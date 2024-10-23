@@ -4,6 +4,7 @@
 include 'fs/IsOSBackupPresent.asm'
 include 'fs/AllocSmall.asm'
 include 'fs/AllocRam.asm'
+include 'fs/ChkFreeRam.asm'
 include 'fs/AllocVar.asm'
 include 'fs/ArcUnarcFD.asm'
 include 'fs/PathLen.asm'

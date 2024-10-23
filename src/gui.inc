@@ -13,3 +13,5 @@ include 'gui/PrintChar.asm'
 include 'gui/PrintInt.asm'
 include 'gui/Scroll.asm'
 include 'gui/CharFromCode.asm'
+
+include 'gui/PrintStdout.asm'
