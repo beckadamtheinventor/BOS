@@ -4,6 +4,7 @@
 include 'sys/LoadHookThreads.asm'
 include 'sys/AddHLAndA.asm'
 include 'sys/AnyKey.asm'
+include 'sys/CallExecuteFileHere.asm'
 include 'sys/CallExecuteFile.asm'
 include 'sys/CallProgramOffset.asm'
 include 'sys/CheckMallocRAM.asm'

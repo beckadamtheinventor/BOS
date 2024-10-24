@@ -1,4 +1,4 @@
-;@DOES Insert ram following asm_prgm_size, returning a pointer to it.
+;@DOES Insert ram following &usermem[asm_prgm_size], returning a pointer to it.
 ;@INPUT void* fs_AllocRam(size_t len);
 fs_AllocRam:
 	pop bc,hl

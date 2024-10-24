@@ -22,6 +22,9 @@ _BuildVAT:
 	pea ix-3
 	call fs_DirList
 	pop iy,de,bc,bc
+	push af,de
+	call sys_Free ; free the temporary file name
+	pop de,af
 	jr c,.dir_doesnt_exist
 	add hl,bc
 	or a,a
@@ -29,7 +32,6 @@ _BuildVAT:
 	jr z,.dir_doesnt_exist
 	inc bc
 	push bc,de
-	call sys_Free ; free the temporary file name
 	ld hl,(iy)
 	push hl
 	call fs_CopyFileName

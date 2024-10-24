@@ -23,10 +23,10 @@ HandleInstruction:
 	jq z,th_EndThread
 	cp a,$F7
 	ret nz
-	ld a,(threading_enabled)
+	ld a,(hl)
 	cp a,threadOSRoutines
-	jq z,th_HandleNextThread ;handles next thread if OS threading is enabled
-	ret
+	ret nz
+	jq th_HandleNextThread ;handles next thread if OS threading is enabled
 
 _EnableThreading:
 	ld (hl),1

@@ -1,9 +1,9 @@
-;@DOES Jump execution to an executable file and return to caller start afterwards.
+;@DOES Jump execution to an executable file and return to caller afterwards.
 ;@INPUT hl = program file to execute
 ;@INPUT de = arguments
 ;@INPUT bc = program file to return to
-;@NOTE Returns to start of program returned to.
-sys_CallExecuteFile:
+;@NOTE Returns to caller instead of jumping to return program start.
+sys_CallExecuteFileHere:
 	push hl,de,bc
 	call ti._strlen
 	inc hl
@@ -28,9 +28,9 @@ sys_CallExecuteFile:
 	call sys_LoadProgramNoExec
 	jp c,os_return_soft ; soft reboot if loading the caller failed
 	pop bc,af
-	push hl,bc
+	push bc
 	or a,a
 	call nz,sys_Free ; free malloc'd caller name if it was malloc'd
 	pop bc
-	ret ; return to program address returned from sys_LoadProgramNoExec
+	ret
 

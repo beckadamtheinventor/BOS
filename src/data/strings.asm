@@ -92,7 +92,7 @@ include 'root_partition.asm'
 include 'root_dir_data.asm'
 
 fs_root_file_initializers:
-	db $14, "dev",0
+	; db $14, "dev",0
 	db $10, "etc",0
 	db $10, "etc/fontlibc",0
 	db $10, "home",0
@@ -106,7 +106,7 @@ str_lib_dir:
 	db "/lib",0
 	db $10, "opt/sys",0
 	db $10, "tivars",0
-	db $10, "tmp",0
+	; db $10, "tmp",0
 	db $10, "usr",0
 	db $10, "usr/bin",0
 	db $10, "usr/lib",0

@@ -172,7 +172,8 @@ assert ~start_of_user_archive and $FF
 	call fs_ExtractRootDir
 .extract_opt_binaries:
 	call fs_InitClusterMap
-	jq fs_ExtractOSOptBinaries
+	call fs_ExtractOSOptBinaries
+	jp sys_FreeAll
 
 .check_root:
 	ld hl,fs_root_dir_address

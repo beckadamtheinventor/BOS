@@ -11,8 +11,6 @@ sys_ExecuteFile:
 	scf
 	sbc hl,hl
 	ld (ExecutingFileFd),hl
-	xor a,a
-	ld (return_code_flags),a
 	pop bc
 	pop hl
 	pop de
@@ -191,8 +189,11 @@ sys_ExecuteFile:
 	or a,a
 	ret nz ; return if only loading the program
 
+	; xor a,a
+	ld (return_code_flags),a
+
 	call sys_NextProcessId
-	call sys_FreeRunningProcessId ; free memory allocated by the new process ID if there is any
+	; call sys_FreeRunningProcessId
 	; call .normalize_lcd
 
 	ld a,(threading_enabled)
@@ -282,7 +283,7 @@ sys_ExecuteFile:
 .deinit:
 	call .normalize_lcd_8bpp
 	call sys_FreeRunningProcessId ; free memory allocated by the program
-	; call sys_PrevProcessId
+	call sys_PrevProcessId
 	ld de,(asm_prgm_size)
 	ld a,(asm_prgm_size+2)
 	or a,d
@@ -306,7 +307,8 @@ sys_ExecuteFile:
 	ld a,e
 	ld (LastExitCode+3),a
 	pop bc,hl ; argc, argv
-	jp sys_Free.entryhl ; free argv
+	ret
+	; jp sys_Free.entryhl ; free argv
 
 
 .actuallyrunprogram_thread:
@@ -379,7 +381,8 @@ sys_jphl := $
 .load_argc_argv_loop:
 	ld bc,(running_process_id)
 	push bc
-	ld a,1 ; make sure to malloc as PID 1 so it doesn't get freed until the program exits
+	; malloc as the next process ID so argc/argv get freed when it exits
+	call sys_NextProcessId
 	ld (running_process_id),a
 	call .load_argc_argv_loop_entry
 	ex (sp),hl

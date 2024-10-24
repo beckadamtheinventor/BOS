@@ -202,6 +202,7 @@
 	public _drv_Read
 	public _drv_Write
 	public _asm_gui_PrintStdout
+	public _sys_CallExecuteFileHere
 _boot_os                         := $20108
 _handle_interrupt                := $2010C
 _HandleInstruction               := $20110
@@ -404,6 +405,7 @@ _drv_PutChar                     := $22718
 _drv_Read                        := $2271C
 _drv_Write                       := $22720
 _asm_gui_PrintStdout                 := $22724
+_sys_CallExecuteFileHere         := $22728
 
 public ram_executable
 public ram_executable_at

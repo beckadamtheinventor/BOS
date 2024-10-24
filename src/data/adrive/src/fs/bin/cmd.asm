@@ -265,6 +265,8 @@ cmd_exit:
 	; call bos.sys_Free
 	; pop bc
 	; pop hl,af
+	ld a,bos.mReturnNotError or bos.mReturnFromFullscreen
+	ld (bos.return_code_flags),a
 	ld sp,ix
 	pop ix
 	ret

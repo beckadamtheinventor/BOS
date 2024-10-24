@@ -47,7 +47,7 @@ fs_ExtractOSOptBinaries:
 	ld c,(ix)
 	push bc
 	pea ix+1
-	call fs_DeleteFile ; delete the old file unless we are being called from fs_CheckOSOptBinaries
+	call fs_DeleteFile ; delete the old file if it exists
 	call fs_CreateFile ; create and allocate the file
 	jq c,.skip_file ; dont try to write if we failed to create the file
 	push hl

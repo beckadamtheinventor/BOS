@@ -539,6 +539,7 @@ namespace bos
 ?drv_Read                        := $2271C
 ?drv_Write                       := $22720
 ?gui_PrintStdout                 := $22724
+?sys_CallExecuteFileHere         := $22728
 ; end of jump table
 ;-------------------------------------------------------------------------------
 ; OS memory areas and misc defines
@@ -768,13 +769,15 @@ namespace bos
 ?bReturnLong          := 2
 ?bSilentReturn        := 3
 ?bReturnData          := 4
-?bReturnFromFullScreen:= 5
+?bReturnFromFullscreen:= 5
 ?mReturnNotError      := 1 shl bReturnNotError
 ?mReturnHex           := 1 shl bReturnHex
 ?mReturnLong          := 1 shl bReturnLong
 ?mSilentReturn        := 1 shl bSilentReturn
 ?mReturnData          := 1 shl bReturnData
-?mReturnFromFullScreen:= 1 shl bReturnFromFullScreen
+?mReturnFromFullscreen:= 1 shl bReturnFromFullScreen
+?bReturnFromFullScreen:=bReturnFromFullscreen
+?mReturnFromFullScreen:=mReturnFromFullscreen
 ?symbol.next         := 0 ; 24-bit pointer to next symbol. 0 if end of list.
 ?symbol.name         := 3 ; 24-bit pointer to null terminated symbol name
 ?symlist.size        := 6 ; size of first symbol in symbol list

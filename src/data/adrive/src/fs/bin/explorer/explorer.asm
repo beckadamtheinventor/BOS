@@ -241,7 +241,7 @@ explorer_cursor_x:=$-3
 	call gfx_Rectangle
 	pop bc,bc,bc,bc
 	call gfx_BlitBuffer
-	EnableOSThreading
+	; EnableOSThreading
 .key_loop:
 	ei
 	call bos.sys_WaitKeyCycle
@@ -336,14 +336,14 @@ explorer_selected_file_desc:=$-3
 .edit_file_run_hl:
 	ld de,$FF0000
 explorer_dirname_buffer:=$-3
-	ld a,(de)
-	or a,a
-	jq z,explorer_call_file
-	push hl,de
-	ld hl,bos.reservedRAM
-	push hl
-	call ti._strcpy
-	pop bc,de,hl
+	; ld a,(de)
+	; or a,a
+	; jq z,explorer_call_file
+	; push hl,de
+	; ld hl,bos.reservedRAM
+	; push hl
+	; call ti._strcpy
+	; pop bc,de,hl
 	jq explorer_call_file
 .exec_file:
 	ld hl,(explorer_dirname_buffer)
@@ -413,13 +413,73 @@ explorer_call_file:
 	push de,hl
 	call bos.sys_FreeRunningProcessId ; clean up after ourselves
 	pop hl,de
+; malloc a copy of the arguments after cleaning everything else if there are arguments
+	push hl,de
+	ld a,(bos.running_process_id)
+	push af
+	ld a,1 ; malloc as system
+	ld (bos.running_process_id),a
+	ex hl,de
+	ld a,(hl)
+	or a,a
+	jr z,.dont_malloc_dup
+	push hl
+	call bos.sys_MallocDupStr
+	ld (.return_handler_free),hl
+	pop af
+.dont_malloc_dup:
+	ex hl,de
+	pop af
+	ld (bos.running_process_id),a
+	pop hl,hl
 	ld sp,(_SaveSP)
 	ld ix,(_SaveIX)
 	push de,hl
 	call bos.gfx_SetDefaultFont
+	ld hl,$FF0000
+	call bos.gui_DrawConsoleWindow
 	pop hl,de
 	ld bc,str_ExplorerExecutable
-	jp bos.sys_CallExecuteFile
+; save arguments in space that's getting clobbered anyways
+	ld (explorer_dirlist_buffer+0),hl
+	ld (explorer_dirlist_buffer+3),de
+	ld (explorer_dirlist_buffer+6),bc
+	ld (ti.scrapMem),iy ; save iy
+; copy return handler
+	ld hl,-.return_handler_len
+	add hl,sp
+	push hl
+	pop iy
+	ex hl,de
+	ld bc,.return_handler_len
+	ld hl,.return_handler
+	ldir
+	; iy = return handler
+	ld sp,iy ; adjust the stack
+	push iy ; return to the return handler
+	ld iy,(ti.scrapMem) ; restore iy
+; restore arguments
+	ld hl,(explorer_dirlist_buffer+0)
+	ld de,(explorer_dirlist_buffer+3)
+	ld bc,(explorer_dirlist_buffer+6)
+; jump to execute file, returning to the return handler copied into stack memory
+	jp bos.sys_CallExecuteFileHere
+
+.return_handler:
+	ld hl,bos.return_code_flags
+	bit bos.bReturnFromFullscreen,(hl)
+	call z,bos.sys_WaitKeyCycle
+	ld hl,$FF0000
+.return_handler_free:=$-3
+	push hl
+	call bos.sys_Free
+	pop hl
+; adjust stack to unload return handler
+	ld hl,.return_handler_len
+	add hl,sp
+	ld sp,hl
+	jp ti.userMem ; restart the program
+.return_handler_len := $-.return_handler
 
 ;gfx_PrintStrings:
 ;	ld bc,30

@@ -47,8 +47,6 @@ os_return:
 	ld (ti.DI_Mode),hl
 	ld hl,$08080f		; (nb of columns,nb of row) to scan/Wait 15 APB cycles before each scan
 	ld (ti.DI_Mode+3),hl
-	; ld a,2
-	; ld (running_process_id),a
 	xor a,a
 	ld (lcd_bg_color),a
 	ld (lcd_text_bg),a
@@ -76,8 +74,8 @@ os_return:
 	ld (hl),0
 
 	DisableThreading
-if defined ENABLE_THREADING_ON_BOOT
 	call th_ResetThreadMemory
+if defined ENABLE_THREADING_ON_BOOT
 assert ~thread_temp_save and $FF
 	ld hl,thread_temp_save
 	ld de,os_return_soft
@@ -92,6 +90,10 @@ assert ~thread_temp_save and $FF
 	EnableThreading
 	jq th_HandleNextThread.nosave
 else
+	; ld hl,thread_map
+	; set bThreadAlive,(hl)
+	; inc hl
+	; set bThreadAlive,(hl)
 	jp os_return_soft
 end if
 
@@ -457,8 +459,15 @@ os_return_soft:
 
 	call os_check_recovery_key
 	call sys_FreeAll
-	call util_InitAllocSymList
+
+
+	ld a,1
+	ld (running_process_id),a
+	call util_InitAllocSymList ; malloc symlist as the system
 	ld (variable_sym_list_ptr),hl
+
+	ld a,2
+	ld (running_process_id),a ; set running PID so malloc works properly
 
 	call os_check_recovery_key
 	call fs_SanityCheck

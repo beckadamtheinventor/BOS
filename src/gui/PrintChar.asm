@@ -21,12 +21,7 @@ assert curcol = currow+1
 	cp a,$20
 	jr c,.controlcode
 	call gfx_PrintChar
-
-.done:
-	call gfx_BlitBuffer
-.done_no_blit:
-	pop hl
-	ret
+	jr .advance
 
 .controlcode:
 	or a,a
@@ -78,7 +73,12 @@ assert curcol = currow+1
 	jr nc,.advance_new_line
 	inc a
 	ld (curcol),a
-	jr .done
+
+.done:
+	call gfx_BlitBuffer
+.done_no_blit:
+	pop hl
+	ret
 
 .advance_new_line:
 	xor a,a

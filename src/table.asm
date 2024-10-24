@@ -211,4 +211,5 @@
 	jp drv_Read
 	jp drv_Write
 	jp gui_PrintStdout
+	jp sys_CallExecuteFileHere
 ; end of jump table

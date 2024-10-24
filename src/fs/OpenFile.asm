@@ -13,8 +13,9 @@ fs_OpenFile:
 	or a,a
 	jq nz,.pathnonzero
 .pathzero:
-	ld hl,start_of_user_archive
-	ret ;return root directory descriptor
+	scf
+	sbc hl,hl
+	ret
 .pathnonzero:
 	ld hl,-18
 	call ti._frameset
