@@ -7,16 +7,18 @@ fsd_Resize:
 	call ti._frameset
 	ld (ix-3),iy
 	ld iy,(ix+9)
-	bit fsd_bWrite, (iy-1) ; check if writeable
+	bit fsd_bWrite, (iy+fsd_OpenFlags) ; check if writeable
 	jr z,.fail
-	ld hl,(iy+6) ; data current length
+	bit fsd_bIsDevice, (iy+fsd_OpenFlags) ; check if device
+	jr z,.fail ; can't resize device
+	ld hl,(iy+fsd_DataLen) ; data current length
 	ld de,(ix+6) ; new length
 	or a,a
 	sbc hl,de
 	jr z,.done ; new == current
 	jr c,.increase_size ; new > current
 	ex hl,de ; de = current - new
-	ld hl,(iy+3) ; data pointer
+	ld hl,(iy+fsd_DataPtr) ; data pointer
 	ld bc,(ix+6) ; data new length
 	add hl,bc
 	push iy ; save iy
@@ -24,11 +26,11 @@ fsd_Resize:
 	pop iy
 	or a,a
 	sbc hl,hl
-	ld (iy+9),hl ; reset offset
+	ld (iy+fsd_DataOffset),hl ; reset offset
 	jr .done
 .increase_size:
-	ld hl,(iy+3) ; data pointer
-	ld de,(iy+6) ; data current length
+	ld hl,(iy+fsd_DataPtr) ; data pointer
+	ld de,(iy+fsd_DataLen) ; data current length
 	add hl,de
 	push hl
 	ld hl,(ix+6) ; new length
@@ -37,13 +39,13 @@ fsd_Resize:
 	pop de
 	call _InsertMem ; insert new_len - current_len bytes at the current end of file
 	ld hl,(ix+6)
-	ld (iy+6),hl
+	ld (iy+fsd_DataLen),hl
 	db $01 ; ld bc,... dummify or a / sbc hl
 .fail:
 	or a,a
 	sbc hl,hl
 .done:
-	ld hl,(iy+6)
+	ld hl,(iy+fsd_DataLen)
 	ld iy,(ix-3)
 	ld sp,ix
 	pop ix

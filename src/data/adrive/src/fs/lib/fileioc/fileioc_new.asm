@@ -185,15 +185,7 @@ ti_CloseAll:
 ;  n/a
 ; return:
 ;  n/a
-	ld	hl, variable_offsets + 3 - 1
-	push	hl
-	pop	de
-	inc	de
-	ld	bc, 4 * 3
-; upper byte of offset = 12
-	ld	(hl), c
-	ldir
-	ret
+	jp bos.fsd_CloseAll
 
 ;-------------------------------------------------------------------------------
 ti_Resize:
@@ -203,53 +195,21 @@ ti_Resize:
 ;  sp + 6 : slot index
 ; return:
 ;  hl = new size if no failure
-	pop	hl
-	pop	de			; de = new size
-	pop	bc			; c = slot
-	push	bc
-	push	de
-	push	hl
-	call	util_is_slot_open
-	jp	nz, util_ret_neg_one
-	push	de
-	call	util_is_in_ram
-	pop	hl
-	jp	c, util_ret_null
-	ld	de, TI_MAX_SIZE
-	or	a,a
-	sbc	hl,de
-	add	hl,de
-	push	af
-	push	hl
-	call	ti_Rewind.rewind	; rewind file offset
-	pop	hl
-	pop	af
-	jp	nc,util_ret_null	; return if too big
-	push	hl
-	call	util_get_slot_size
-	pop	hl
-	or	a,a
-	sbc	hl,bc
-	ld	(resize_amount), hl
-	jr	z, .no_resize
-	jr	c, .decrease
-.increase:
-	call	ti.EnoughMem
-	jp	c, util_ret_null
-	ex	de, hl
-	call	util_insert_mem
-	jr	.no_resize
-.decrease:
-	push	hl
-	pop	bc
-	or	a, a
-	sbc	hl, hl
-	sbc	hl, bc
-	ld	(resize_amount), hl
-	call	util_delete_mem
-.no_resize:
-	ld	hl, (resize_amount)
+	ld hl,6
+	add hl,sp
+	ld a,(hl)
+	dec hl
+	dec hl
+	dec hl
+	ld de,(hl)
+	ld hl,file_descriptor_table
+	call ti.AddHLAndA
+	ld hl,(hl)
+	push hl,de
+	call bos.fsd_Resize
+	pop bc,bc
 	ret
+
 
 ;-------------------------------------------------------------------------------
 ti_IsArchived:
@@ -267,19 +227,11 @@ ti_IsArchived:
 	xor	a, a
 	ret
 util_is_in_ram:
-	call	util_get_vat_ptr
-	ld	hl, (hl)
-	dec	hl
-	dec	hl
-	dec	hl
-	dec	hl
-	dec	hl
-	ld	a, (hl)
-	or	a, a
-	sbc	hl, hl
-	cp	a, $d0
-	ret	nc
-	inc	hl
+	ld hl,(hl)
+	push hl
+	call bos.fsd_InRam
+	pop bc
+	xor a,1
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -310,7 +262,6 @@ ti_Open:
 .start:
 	ld	(.smc_type), a
 	ld	(ti.OP1), a
-	ld	iy, ti.flags
 
 	ld	hl, variable_offsets + (5 * 3) - 1
 	ld	a, 5
@@ -327,96 +278,29 @@ ti_Open:
 	ret
 
 .slot:
-	ld	(curr_slot), a
-	push	ix
-	ld	ix, 0
-	add	ix, sp
-	ld	hl, (ix + 6)
-	ld	de, ti.OP1 + 1
-	call	ti.Mov8b
-	xor	a, a
-	ld	(de), a
-	ld	hl, (ix + 9)
-	ld	a, (hl)
-	cp	a, 'w'
-	ld	iy, ti.flags
-	jr	nz, .no_overwite
-	call	ti.PushOP1
-	call	ti.ChkFindSym
-	call	nc, ti.DelVarArc
-	call	ti.PopOP1
-.no_overwite:
-	ld	hl,(ix + 9)
-	ld	a,(hl)
-	cp	a,'r'
-	jr	z,.mode
-	cp	a,'a'
-	jr	z,.mode
-	cp	a,'w'
-	jp	nz,util_ret_null_pop_ix
-.mode:
-	inc	hl
-	ld	a,(hl)
-	cp	a,'+'
-	jr	nz,.no_append
-.unarchive_var:
-	call	ti.ChkFindSym
-	jr	c, .not_found
-	call	ti.ChkInRam
-	jr	z, .save_ptrs
-	or	a, a
-	sbc	hl, hl
-	ex	de, hl
-	ld	e, (hl)
-	inc	hl
-	ld	d, (hl)
-	ex	de, hl
-	call	ti.EnoughMem
-	jp	c, util_ret_null_pop_ix
-	call	util_unarchive
-	jr	.unarchive_var
-.no_append:
-	call	ti.ChkFindSym
-	jr	c, .not_found
-	call	ti.ChkInRam
-	jr	z, .save_ptrs
-	push	hl
-	ld	hl, (ix + 9)
-	ld	a, (hl)
-	cp	a, 'r'
-	pop	hl
-	jp	nz, util_ret_null_pop_ix
-	call	util_skip_archive_header
-	jr	.save_ptrs
-.not_found:
-	ld	hl, (ix + 9)
-	ld	a, (hl)
-	cp	a, 'r'
-	jp	z, util_ret_null_pop_ix
-	or	a, a
-	sbc	hl, hl
-	ld	a, 0
-.smc_type := $-1
-	ld	iy, ti.flags
-	call	ti.CreateVar
-.save_ptrs:
-	push	hl
-	call	util_get_vat_ptr
-	pop	bc
-	ld	(hl), bc
-	call	util_get_data_ptr
-	ld	(hl), de
-	ld	bc, 0
-	ld	hl, (ix + 9)
-	ld	a, 'a'
-	cp	a, (hl)
-	call	z, util_get_slot_size
-	call	util_set_offset
-	pop	ix
-	xor	a, a
-	sbc	hl, hl
+	ld (curr_slot),a
+	push hl
+	call bos._OP1ToAbsPath
+	ld iy,0
+	add iy,sp
+	ld de,(iy+6)
+	push de,hl
+	call bos.fsd_Open
+	pop bc,bc
+	add hl,de
+	or a,a
+	sbc hl,de
+	pop de
+	ret z
+	ex hl,de
+	ld (hl),0
 	ld	a, (curr_slot)
-	ld	l, a
+	ld	c, a
+	ld	b, 3
+	mlt	bc
+	ld	hl, file_descriptor_table - 3
+	add	hl, bc
+	ld	(hl), de
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -434,47 +318,19 @@ ti_SetArchiveStatus:
 	push	de
 	push	hl
 	call	util_is_slot_open
-	jp	nz, util_ret_null
-	ld	a, e
-	push	af
-	call	util_get_vat_ptr
-	ld	hl, (hl)
-	ld	a, (hl)
-	ld	(ti.OP1), a
-	ld	bc, -6
-	add	hl, bc
-	ld	b, (hl)
-	ld	de, ti.OP1 + 1
-	dec	hl
-.copy_name:
-	ld	a, (hl)
-	ld	(de), a
-	inc	de
-	dec	hl
-	djnz	.copy_name
-	xor	a, a
-	ld	(de), a
-	pop	af
-	or	a, a
-	jr	z, .set_unarchived
-.set_archived:
-	call	util_archive
-	jr	.relocate_var
-.set_unarchived:
-	call	util_unarchive
-.relocate_var:
-	call	ti.ChkFindSym
-	jp	c, util_ret_neg_one
-	call	ti.ChkInRam
-	jr	z, .save_ptrs
-	call	util_skip_archive_header
-.save_ptrs:
-	push	hl
-	call	util_get_vat_ptr
-	pop	bc
-	ld	(hl), bc
-	call	util_get_data_ptr
-	ld	(hl), de
+	jr	nz,ti_Read.return_zero
+	ld	a,e
+	or	a,a
+	ld hl,(hl)
+	push hl
+	jr	z,.unarc
+.arc:
+	call bos.fsd_Archive
+	pop bc
+	ret
+.unarc:
+	call bos.fsd_UnArchive
+	pop bc
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -487,67 +343,21 @@ ti_Write:
 ;  sp + 12 : slot index
 ; return:
 ;  hl = number of chunks written if success
-	ld	iy, 0
-	add	iy, sp
-	ld	c,(iy + 12)
-	call	util_is_slot_open
-	jr	nz, .ret0
-	call	util_is_in_ram
-	jr	z, .ret0
-	ld	bc, (iy + 6)
-	ld	hl, (iy + 9)
-	call	ti._smulu
-	add	hl, de
-	xor	a, a
-	sbc	hl, de
-	ret	z
-	ld	(.smc_copy_size), hl
-	push	hl
-	call	util_get_offset
-	pop	hl
-	add	hl, bc
-	push	hl
-	call	util_get_slot_size	; bc = size of file
-	pop	hl			; hl = needed size
-	or	a, a
-	inc	bc
-	sbc	hl, bc
-	jr	c, .no_core_needed
-	inc	hl
-	ld	(resize_amount), hl
-	call	util_insert_mem
-	or	a, a
-	jr	z, .ret0
-.no_core_needed:
-	call	util_get_data_offset
-	ex	de, hl
-	ld	hl, (iy + 3)
-	ld	bc, 0
-.smc_copy_size := $-3
-	push	bc
-	ldir
-	call	util_get_offset
-	pop	hl
-	add	hl,bc
-	ex	de,hl
-	call	util_get_offset_ptr
-	ld	(hl), de
-	ld	hl, (iy + 9)
-	ret
-.ret0:
-	xor	a, a
-	sbc	hl, hl
-	ret
-
-util_get_data_offset:
-	call	util_get_data_ptr
-	ld	hl, (hl)
-	push	hl
-	call	util_get_offset
-	pop	hl
-	add	hl, bc
-	inc	hl
-	inc	hl
+	ld iy,0
+	add iy,sp
+	ld c,(iy+12)
+	call util_is_slot_open
+	jr nz,ti_Read.return_zero
+	ld hl,(hl)
+	push hl
+	ld hl,(iy+9)
+	push hl
+	ld hl,(iy+6)
+	push hl
+	ld hl,(iy+3)
+	push hl
+	call bos.fsd_Write
+	pop bc,bc,bc,bc
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -560,55 +370,25 @@ ti_Read:
 ;  sp + 12 : slot index
 ; return:
 ;  hl = number of chunks read if success
-	ld	iy, 0
-	add	iy, sp
-	ld	c, (iy + 12)
-	call	util_is_slot_open
-	jr	nz, .ret0
-	call	util_get_slot_size
-	push	bc
-	call	util_get_offset
-	pop	hl
-	or	a, a
-	sbc	hl, bc			; size - offset = bytes left to read
-	jr	z, .ret0
-	jr	c, .ret0
-	ld	bc, (iy + 6)
-	call	ti._sdivu			; (size - offset) / chunk_size
-	ld	de, (iy + 9)		; number of chunks to read, hl = number of chunks left
-	or	a, a
-	sbc	hl, de
-	add	hl, de			; check if left <= read
-	jr	nc, .copy
-	ex	de, hl
-.copy:
-	ex	de, hl
-	ld	bc, (iy + 6)
-	push	hl
-	call	ti._smulu
-	add	hl, de
-	or	a, a
-	sbc	hl, de
-	jr	z, .ret0.pop
-	push	hl
-	call	util_get_data_offset
-	ld	de, (iy + 3)
-	pop	bc
-	push	bc
-	ldir
-	call	util_get_offset
-	pop	hl
-	add	hl, bc
-	ex	de, hl
-	call	util_get_offset_ptr
-	ld	(hl), de
-	pop	hl
-	ret				; return actual chunks read
-.ret0.pop:
-	pop	hl
-.ret0:
-	xor	a, a
-	sbc	hl, hl
+	ld iy,0
+	add iy,sp
+	ld c,(iy+12)
+	call util_is_slot_open
+	jr nz,.return_zero
+	ld hl,(hl)
+	push hl
+	ld hl,(iy+9)
+	push hl
+	ld hl,(iy+6)
+	push hl
+	ld hl,(iy+3)
+	push hl
+	call bos.fsd_Read
+	pop bc,bc,bc,bc
+	ret
+.return_zero:
+	xor a,a
+	sbc hl,hl
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -618,38 +398,20 @@ ti_GetC:
 ;  sp + 3 : slot index
 ; return:
 ;  a = character read if success
-	pop	de
-	pop	bc
-	push	bc
-	push	de
-	call	util_is_slot_open
-	jr	nz, .ret_neg_one
-	call	util_get_slot_size
-	push	bc
-	call	util_get_offset
-	pop	hl
-	scf
-	sbc	hl, bc			; size-offset
-	jr	c, .ret_neg_one
-	push	bc
-	call	util_get_data_ptr
-	ld	hl, (hl)
-	add	hl, bc
-	inc	hl
-	inc	hl			; bypass size bytes
-	pop	bc
-	inc	bc
-	ld	a, (hl)
-	call	util_set_offset
-	or	a, a
-	sbc	hl, hl
-	ld	l, a
-	ret
-.ret_neg_one:
-	scf
-	sbc	hl, hl
-	ld	a, l
-	ret
+	pop hl,bc
+	push bc,hl
+	call util_is_slot_open
+	jr nz,ti_Read.return_zero
+	ld hl,(hl)
+	push hl
+	ld hl,1
+	push hl,hl
+	dec hl
+	add hl,sp
+	push hl ; read the character into the stack in the same spot as the buffer
+	call bos.fsd_Read
+	pop hl,bc,bc,bc
+	jr ti_PutC.common_return_int_l
 
 ;-------------------------------------------------------------------------------
 ti_PutC:
@@ -665,54 +427,24 @@ ti_PutC:
 	push	bc
 	push	de
 	push	hl
-	ld	a, e
-	ld	(char_in), a
+	push de
 	call	util_is_slot_open
+	pop de
 	jr	nz, .ret_neg_one
-	call	util_is_in_ram
-	jr	c, .ret_neg_one
-	call	util_get_slot_size
-	push	bc
-	call	util_get_offset
-	pop	hl
-	or	a, a
-	sbc	hl, bc
-	jr	c, .ret_neg_one
-	jr	nz, .no_increment
-.increment:
-	push	bc
-	inc	hl
-	ld	(resize_amount), hl
-	call	ti.EnoughMem
-	pop	bc
-	jr	c, .ret_neg_one
-	push	bc
-	ex	de, hl
-	call	util_insert_mem
-	pop	bc
-	or	a, a
-	jr	z, .ret_neg_one
-.no_increment:
-	call	util_get_data_ptr
-	ld	hl, (hl)
-	add	hl, bc
-	inc	hl
-	inc	hl
-	ld	a, 0
-char_in := $-1
-	ld	(hl), a
-	inc	bc
-	push	af
-	call	util_set_offset
-	pop	af
-	or	a, a
-	sbc	hl, hl
-	ld	l, a
-	ret
-.ret_neg_one:
-	scf
-	sbc	hl, hl
-	ld	a, l
+	ld bc,(hl)
+	sbc hl,hl
+	add hl,sp
+	push hl
+	ld (hl),e ; put the character to be written on the stack behind the file descriptor
+	push bc
+	ld de,1
+	push de,de
+	push hl
+	call bos.fsd_Write
+	pop bc,bc,bc,bc,hl
+.common_return_int_l:
+	ld h,1
+	mlt hl
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -730,34 +462,15 @@ ti_Seek:
 	ld	c, (iy + 9)
 	call	util_is_slot_open
 	jr	nz, .ret_neg_one
-	ld	a, (iy + 6)		; origin location
-	or	a, a
-	jr	z, .seek_set
-	dec	a
-	jr	z, .seek_curr
-	dec	a
-	jr	nz, .ret_neg_one
-.seek_end:
-	push	de
-	call	util_get_slot_size
-.seek_set_asm:
-	pop	hl
-	add	hl, bc
-	ex	de, hl
-.seek_set:
-	call	util_get_slot_size
-	push	bc
-	pop	hl
-	or	a, a
-	sbc	hl, de
-	push	de
-	pop	bc
-	jr	c, .ret_neg_one
-	jp	util_set_offset
-.seek_curr:
-	push	de
-	call	util_get_offset
-	jr	.seek_set_asm
+	ld hl,(hl)
+	push hl
+	ld hl, (iy + 6) ; origin location
+	push hl
+	ld hl, (iy + 3) ; origin position
+	push hl
+	call bos.fsd_Seek
+	ld sp,iy
+	ret
 .ret_neg_one:
 	scf
 	sbc	hl, hl
@@ -800,12 +513,17 @@ ti_Delete:
 	call	ti.Mov9ToOP1
 	pop	af
 	ld	(ti.OP1), a
-	call	ti.ChkFindSym
-	jp	c, util_ret_null
-	ld	iy, ti.flags
-	call	ti.DelVarArc
-	scf
-	sbc	hl, hl
+	call bos._OP1ToAbsPath
+	push hl
+	call bos.fsd_CheckOpen
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	push hl
+	call nz,bos.fsd_ForceClose
+	pop hl
+	call bos.fs_DeleteFile
+	pop bc
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -820,16 +538,13 @@ ti_Rewind:
 	push	bc
 	push	hl
 	call	util_is_slot_open
-	jr	nz, .ret_neg_one
-.rewind:
-	ld	bc, 0
-	call	util_set_offset
-	or	a, a
-	sbc	hl, hl
-	ret
-	scf
-.ret_neg_one:
-	sbc	hl, hl
+	jr	nz, ti_Tell.ret_neg_one
+	ld hl,(hl)
+	push hl
+	sbc hl,hl
+	push hl,hl
+	call bos.fsd_Seek
+	pop bc,bc,bc
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -845,11 +560,13 @@ ti_Tell:
 	push	hl
 	call	util_is_slot_open
 	jr	nz, .ret_neg_one
-	call	util_get_offset
-	push	bc
-	pop	hl
+	ld hl,(hl)
+	push hl
+	call bos.fsd_Tell
+	pop bc
 	ret
 .ret_neg_one:
+	scf
 	sbc	hl, hl
 	ret
 
@@ -865,13 +582,11 @@ ti_GetSize:
 	push	bc
 	push	hl
 	call	util_is_slot_open
-	jr	nz, .ret_neg_one
-	call	util_get_slot_size
-	push	bc
-	pop	hl
-	ret
-.ret_neg_one:
-	sbc	hl, hl
+	jr	nz, ti_Tell.ret_neg_one
+	ld hl,(hl)
+	push hl
+	call bos.fsd_GetSize
+	pop bc
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -887,7 +602,13 @@ ti_Close:
 	push	de
 	call	util_is_slot_open
 	jq	nz, util_ret_null
+	ld hl,(hl)
+	push hl
+	ld hl,variable_offsets-1
+	add hl,bc
 	ld	(hl), 255
+	call bos.fsd_Close
+	pop bc
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -1113,17 +834,11 @@ ti_GetDataPtr:
 	push	bc
 	push	de
 	call	util_is_slot_open
-	jr	nz, .ret_null
-	call	util_get_slot_size
-	inc	hl
-	push	hl
-	call	util_get_offset
-	pop	hl
-	add	hl, bc
-	ret
-.ret_null:
-	xor	a, a
-	sbc	hl, hl
+	jr	nz, ti_GetVATPtr.ret_null
+	ld hl,(hl)
+	push hl
+	call bos.fsd_GetDataPtr
+	pop bc
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -1133,15 +848,6 @@ ti_GetVATPtr:
 ;  sp + 3 : slot index
 ; return:
 ;  hl -> vat location of variable
-	pop	de
-	pop	bc
-	push	bc
-	push	de
-	call	util_is_slot_open
-	jr	nz, .ret_null
-	call	util_get_vat_ptr
-	ld	hl, (hl)
-	ret
 .ret_null:
 	xor	a, a
 	sbc	hl, hl
@@ -1161,20 +867,6 @@ ti_GetName:
 	push	bc
 	push	de
 	push	hl
-	call	util_is_slot_open
-	ret	nz
-	call	util_get_vat_ptr
-	ld	hl, (hl)
-	ld	bc, -6
-	add	hl, bc
-	ld	b, (hl)			; length of name
-	dec	hl
-.copy:
-	ld	a, (hl)
-	ld	(de), a
-	inc	de
-	dec	hl
-	djnz	.copy
 	xor	a, a
 	ld	(de), a			; terminate the string
 	ret
@@ -1210,85 +902,7 @@ ti_Rename:
 ;  a = 2 if old file does not exist
 ;  a = 3 if other error
 	ld	a,ti.AppVarObj		; file type
-.start:
-	pop	bc
-	pop	hl
-	pop	de
-	push	de			; de -> new name
-	push	hl			; hl -> old name
-	push	bc
-	push	de			; new
-	push	de			; new
-	ld	de, ti.OP1
-	ld	(de), a
-	inc	de
-	call	ti.Mov8b
-	call	ti.PushOP1		; save old name
-	ld	hl, util_archive
-	ld	(.smc_archive), hl
-	pop	hl			; new name
-	ld	de, ti.OP1 + 1
-	call	ti.Mov8b
-	call	ti.ChkFindSym
-	push	af
-	call	ti.PopOP1
-	pop	af
-	jr	nc, .return_1		; check if name already exists
-.locate_program:
-	call	ti.ChkFindSym		; find old name
-	jr	c, .return_2
-	call	ti.ChkInRam
-	jr	nz, .in_archive
-	ld	hl, util_no_op		; no-op routine
-	ld	(.smc_archive), hl
-	call	ti.PushOP1
-	call	util_archive
-	call	ti.PopOP1
-	jr	.locate_program
-.in_archive:
-	ex	de, hl
-	ld	de, 9
-	add	hl, de			; skip vat stuff
-	ld	e, (hl)
-	add	hl, de
-	inc	hl			; size of name
-	call	ti.LoadDEInd_s
-	pop	bc			; bc -> new name
-	push	hl
-	push	de
-	push	bc
-	call	ti.PushOP1		; old name
-	pop	hl
-	ld	de, ti.OP1 + 1
-	call	ti.Mov8b
-	call	ti.PushOP1		; new name
-	pop	hl
-	push	hl
-	ld	a, (ti.OP1)
-	call	ti.CreateVar
-	inc	de
-	inc	de
-	pop	bc
-	pop	hl
-	call	ti.ChkBCIs0
-	jr	z, .is_zero
-	ldir
-.is_zero:
-	call	ti.PopOP1
-	call	0
-.smc_archive := $-3
-	call	ti.PopOP1
-	call	ti.ChkFindSym
-	call	ti.DelVarArc
-	xor	a, a
-	ret
-.return_1:
-	pop	de			; new name
-	ld	a, 1
-	ret
-.return_2:
-	pop	de			; new name
-	ld	a, 2
+	ld	a, 3
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -1300,30 +914,6 @@ ti_SetVar:
 ;  sp + 9 : pointer to data to set
 ; return:
 ;  a = any error code, 0 if success
-	push	ix
-	ld	ix, 0
-	add	ix, sp
-	ld	hl, (ix + 9)		; pointer to data
-	ld	a, (ix + 6)
-	call	util_set_var_str
-	call	ti.ChkFindSym
-	call	nc, ti.DelVarArc
-	ld	a, (ix + 6)
-	ld	hl, (ix + 12)
-	and	a, $3f
-	call	ti.DataSize
-	pop	ix
-	push	hl
-	ex	de, hl
-	dec	hl
-	dec	hl
-	call	ti.CreateVar
-	inc	bc
-	inc	bc
-	pop	hl
-	ldir
-	xor	a, a
-	ret
 
 ;-------------------------------------------------------------------------------
 ti_StoVar:
@@ -1335,32 +925,8 @@ ti_StoVar:
 ;  sp + 12 : pointer to data to get from
 ; return:
 ;  a = any error code, 0 if success
-	ld	iy, 0
-	add	iy, sp
-	ld	hl, (iy + 12)		; pointer to data
-	call	util_set_var_str
-	ld	a, (iy + 9)
-	or	a, a			; if real look up the variable
-	jr	z, .iscr
-	cp	a, $0c			; if cplx look up the variable
-	jr	nz, .notcr
-.iscr:
-	call	ti.FindSym
-	jp	c, .notcr		; fill it with zeros
-	and	a, $3f
-	ex	de, hl
-	call	ti.Mov9OP1OP2
-.notcr:
-	call	ti.PushOP1
-	ld	hl, (iy + 6)		; pointer to var string
-	ld	a, (iy + 3)
-	call	util_set_var_str
-	ld	iy, ti.flags
-	ld	hl, util_ret_neg_one_byte
-	call	ti.PushErrorHandler
-	call	ti.StoOther
-	call	ti.PopErrorHandler
-	xor	a, a
+	scf
+	sbc a,a
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -1371,29 +937,7 @@ ti_RclVar:
 ;  sp + 6 : pointer to data structure pointer
 ; return:
 ;  a = type of variable
-	ld	iy, 0
-	add	iy, sp
-	ld	hl, (iy + 6)		; pointer to data
-	ld	a, (iy + 3)		; var type
-	ld	iy,ti.flags
-	call	util_set_var_str
-	call	ti.FindSym
-	jr	c, .ret_neg_one
-	push	af
-	call	ti.ChkInRam
-	pop	bc
-	ld	a, b
-	jr	nz, .ret_neg_one
-	ld	iy, 0
-	add	iy, sp
-	and	a, $3f
-	sub	a, (iy + 3)		; var type
-	jr	nz, .ret_neg_one
-	ld	hl, (iy + 9)
-	ld	(hl), de
-	ret
-.ret_neg_one:
-	ld	a,-1
+	xor a,a
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -1403,17 +947,15 @@ ti_ArchiveHasRoom:
 ;  sp + 3 : number of bytes to store into the archive
 ; return:
 ;  true if there is room, false if not
+	call ti._ArcChk
 	pop	de
 	pop	bc
 	push	bc
 	push	de
-	cp	a, a			; set z flag
-	ld	hl, $FF0000
-	add	hl, bc
-	call	nc, ti.FindFreeArcSpot
-	ld	a, 1
-	ret	nz
-	xor	a, a
+	or a,a
+	sbc hl,bc
+	sbc a,a
+	inc a
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -1429,27 +971,16 @@ ti_ArchiveHasRoomVar:
 	push	de
 	call	util_is_slot_open
 	jr	nz,.fail
-	call	util_get_vat_ptr
-	ld	hl,(hl)
-	ld	bc,-6
-	add	hl,bc
-	ld	c,(hl)			; get var name length
-	call	util_get_data_ptr
-	ld	de,(hl)
-.entry_sym:
-	ld	a,c
-	ex	de,hl
-	ld	hl,(hl)
-	ld	bc,12
-	add	a,c
-	ld	c,a
-	add.s	hl,bc
-	jr	c,.fail
-	ld	c,l
-	ld	b,h
-	call	ti.FindFreeArcSpot
+	ld hl,(hl)
+	push hl
+	call bos.fsd_GetSize
+	ex (sp),hl
+	call ti._ArcChk
+	pop bc
+	or a,a
+	sbc hl,bc
 	ld	a,1
-	ret	nz
+	ret	nc
 .fail:
 	xor	a,a
 	ret
@@ -1462,47 +993,10 @@ ti_SetGCBehavior:
 ;	sp + 6 : pointer to routine to be run after. Set to 0 to use default handler.
 ; return:
 ;   None
-	pop	de
-	pop	bc
-	ex	(sp),hl
-	push	bc
-	push	de
-	add	hl,de
-	or	a,a
-	sbc	hl,de
-	jr	nz,.notdefault1
-	ld	hl,util_post_gc_default_handler
-.notdefault1:
-	ld	(util_post_gc_handler),hl
-	sbc	hl,hl
-	adc	hl,bc
-	jr	nz,.notdefault2
-	ld	hl,util_pre_gc_default_handler
-.notdefault2:
-	ld	(util_pre_gc_handler),hl
 	ret
-util_post_gc_default_handler := util_no_op
-util_pre_gc_default_handler := util_no_op
-
 ;-------------------------------------------------------------------------------
 ; internal library routines
 ;-------------------------------------------------------------------------------
-
-;-------------------------------------------------------------------------------
-util_skip_archive_header:
-; in:
-;  hl -> start of archived vat entry
-; out:
-;  hl -> actual variable data
-	ex	de, hl
-	ld	bc, 9
-	add	hl, bc
-	ld	c, (hl)
-	inc	hl
-	add	hl, bc
-	ex	de, hl
-util_no_op:
-	ret
 
 ;-------------------------------------------------------------------------------
 util_set_var_str:
@@ -1516,74 +1010,6 @@ util_set_var_str:
 	ld	(de), a
 	inc	de
 	jp	ti.Mov8b
-
-;-------------------------------------------------------------------------------
-util_insert_mem:
-	call	util_get_data_ptr
-	push	hl
-	ld	hl, (hl)
-	push	hl
-	call	util_get_offset
-	pop	hl
-	add	hl, bc
-	inc	hl			; bypass size bytes
-	inc	hl
-	ex	de, hl
-	ld	hl, (resize_amount)
-	push	hl
-	push	de
-	call	ti.EnoughMem
-	pop	de
-	pop	hl
-	jr	nc, .enough_mem
-	pop	hl
-	xor	a, a
-	ret
-.enough_mem:
-	call	ti.InsertMem
-	pop	hl
-	ld	hl, (hl)
-	push	hl
-	ld	de, 0
-	ld	e, (hl)
-	inc	hl
-	ld	d, (hl)
-	ex	de, hl
-	ld	bc, (resize_amount)
-	add	hl, bc			; increase by 5
-	jr	util_save_size
-util_delete_mem:
-	call	util_get_data_ptr
-	push	hl
-	ld	hl, (hl)
-	push	hl
-	call	util_get_offset
-	pop	hl
-	add	hl, bc
-	inc	hl
-	inc	hl
-	ld	de, (resize_amount)
-	call	ti.DelMem
-	pop	hl
-	ld	hl, (hl)
-	push	hl
-	ld	de, 0
-	ld	e, (hl)
-	inc	hl
-	ld	d, (hl)
-	ex	de, hl
-	ld	bc, (resize_amount)
-	or	a, a
-	sbc	hl, bc			; decrease amount
-util_save_size:
-	ex	de, hl
-	pop	hl			; pointer to size bytes location
-	ld	(hl), e
-	inc	hl
-	ld	(hl), d			; write new size
-util_ret_neg_one_byte:
-	ld	a, 255
-	ret
 
 util_ret_null_pop_ix:
 	pop	ix
@@ -1602,7 +1028,7 @@ util_is_slot_open:
 ; out:
 ;  a = 0
 ;  ubc = slot * 3
-;  uhl = pointer to upper byte of slot offset
+;  uhl = pointer to file descriptor
 ;  zf = open
 ;  (curr_slot) = slot
 	ld	a, c
@@ -1611,104 +1037,17 @@ util_is_slot_open:
 	ld	(curr_slot), a
 	ld	b, 3
 	mlt	bc
-	ld	hl, variable_offsets - 1
+	ld	hl, file_descriptor_table - 1
 	add	hl, bc
 	ld	a, b
 	cp	a, (hl)
+	dec hl
+	dec hl
 	ret
 .not_open:
 	xor	a, a
 	inc	a
 	ret
-
-util_get_vat_ptr:
-	ld	a, (curr_slot)
-	ld	hl, vat_ptr0 		; vat_ptr0 = $d0244e
-	dec	a
-	ret	z
-	inc	h
-	ld	l, $7b			; vat_ptr1 = $d0257b
-	dec	a
-	ret	z
-	ld	l, $7e			; vat_ptr2 = $d0257e
-	dec	a
-	ret	z
-	ld	l, $81			; vat_ptr3 = $d02581
-	dec	a
-	ret	z
-	ld	l, $84			; vat_ptr4 = $d02584
-	ret
-util_get_data_ptr:
-	ld	a, (curr_slot)
-	ld	hl, data_ptr0		; data_ptr0 = $d0067e
-	dec	a
-	ret	z
-	ld	l, $81			; data_ptr1 = $d00681
-	dec	a
-	ret	z
-	ld	hl, data_ptr2		; data_ptr2 = $d01fed
-	dec	a
-	ret	z
-	ld	l, $f3			; data_ptr3 = $d01ff3
-	dec	a
-	ret	z
-	ld	l, $f9			; data_ptr4 = $d01ff9
-	ret
-util_get_offset_ptr:
-	push	bc
-	ld	hl, (curr_slot)
-	ld	h, 3
-	mlt	hl
-	ld	bc, variable_offsets - 3
-	add	hl, bc
-	pop	bc
-	ret
-util_get_slot_size:
-	call	util_get_data_ptr
-	ld	hl, (hl)
-	ld	bc, 0
-	ld	c, (hl)
-	inc	hl
-	ld	b, (hl)
-	ret
-util_get_offset:
-	call	util_get_offset_ptr
-	ld	bc, (hl)
-	ret
-util_set_offset:
-	call	util_get_offset_ptr
-	ld	(hl), bc
-	ret
-
-util_archive:				; properly handle garbage collects
-	ld	iy, ti.flags
-	call	ti.ChkFindSym
-	call	ti.ChkInRam
-	ret	nz
-	call	ti.PushOP1
-	call	ti_ArchiveHasRoomVar.entry_sym
-	jr	z,.handle_gc
-	call	ti.Arc_Unarc
-	jp	ti.PopOP1
-.handle_gc:
-	call	util_pre_gc_default_handler
-util_pre_gc_handler := $-3
-	ld	iy, ti.flags
-	call	ti.PopOP1
-	call	ti.PushOP1
-	call	ti.Arc_Unarc
-	call	util_post_gc_default_handler
-util_post_gc_handler := $-3
-	ld	iy, ti.flags
-	jp	ti.PopOP1
-
-util_unarchive:
-	ld	iy, ti.flags
-	call	ti.PushOP1
-	call	ti.ChkFindSym
-	call	ti.ChkInRam
-	call	nz,ti.Arc_Unarc
-	jp	ti.PopOP1
 
 ;-------------------------------------------------------------------------------
 ; Internal library data
@@ -1717,3 +1056,6 @@ util_unarchive:
 	db	255			; handle edge case of 0 for slot
 variable_offsets:
 	dl	-1, -1, -1, -1, -1
+
+file_descriptor_table:
+	dl	0, 0, 0, 0, 0

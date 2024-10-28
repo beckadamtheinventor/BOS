@@ -1,5 +1,5 @@
 
-; /dev/stdout device type memory, r, version 2, handling no interrupts.
+; /dev/stdout device type memory, writable, version 2, handling no interrupts.
 device_file devtMemory, mDeviceWritable, 2, deviceIntNone
 	export device_JumpWrite,      dev_stdout_write
 dev_stdout_write:

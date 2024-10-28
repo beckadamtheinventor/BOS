@@ -45,7 +45,7 @@ fs_dir dev_dir
 	fs_sfentry _dev_null, "null", "", f_system+f_subfile
 	fs_sfentry _dev_lcd, "lcd", "", f_system+f_subfile
 	fs_sfentry _dev_random, "random", "", f_system+f_subfile
-	; fs_sfentry _dev_stdout, "stdout", "", f_system+f_subfile
+	fs_sfentry _dev_stdout, "stdout", "", f_system+f_subfile
 end fs_dir
 
 ;"/bin/" directory
@@ -253,9 +253,9 @@ fs_file os_internal_subfiles
 		include 'fs/dev/random.asm'
 	end fs_subfile
 
-	; fs_subfile _dev_stdout, dev_dir
-		; include 'fs/dev/stdout.asm'
-	; end fs_subfile
+	fs_subfile _dev_stdout, dev_dir
+		include 'fs/dev/stdout.asm'
+	end fs_subfile
 
 	; fs_subfile json_exe, bin_dir
 		; include 'fs/bin/json.asm'

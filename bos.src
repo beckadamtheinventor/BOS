@@ -203,6 +203,22 @@
 	public _drv_Write
 	public _asm_gui_PrintStdout
 	public _sys_CallExecuteFileHere
+	public _fsd_Open
+	public _fsd_Close
+	public _fsd_CloseAll
+	public _fsd_Read
+	public _fsd_Write
+	public _fsd_Resize
+	public _fsd_WriteStr
+	public _fsd_InRam
+	public _fsd_IsOpen
+	public _fsd_Archive
+	public _fsd_UnArchive
+	public _fsd_Seek
+	public _fsd_Tell
+	public _fsd_ForceClose
+	public _fsd_GetSize
+	public _fsd_GetDataPtr
 _boot_os                         := $20108
 _handle_interrupt                := $2010C
 _HandleInstruction               := $20110
@@ -406,6 +422,22 @@ _drv_Read                        := $2271C
 _drv_Write                       := $22720
 _asm_gui_PrintStdout                 := $22724
 _sys_CallExecuteFileHere         := $22728
+_fsd_Open                        := $2272C
+_fsd_Close                       := $22730
+_fsd_CloseAll                    := $22734
+_fsd_Read                        := $22738
+_fsd_Write                       := $2273C
+_fsd_Resize                      := $22740
+_fsd_WriteStr                    := $22744
+_fsd_InRam                       := $22748
+_fsd_IsOpen                      := $2274C
+_fsd_Archive                     := $22750
+_fsd_UnArchive                   := $22754
+_fsd_Seek                        := $22758
+_fsd_Tell                        := $2275C
+_fsd_ForceClose                  := $22760
+_fsd_GetSize                     := $22764
+_fsd_GetDataPtr                  := $22768
 
 public ram_executable
 public ram_executable_at

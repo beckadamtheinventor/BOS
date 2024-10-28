@@ -540,6 +540,23 @@ namespace bos
 ?drv_Write                       := $22720
 ?gui_PrintStdout                 := $22724
 ?sys_CallExecuteFileHere         := $22728
+?fsd_Open                        := $2272C
+?fsd_Close                       := $22730
+?fsd_CloseAll                    := $22734
+?fsd_Read                        := $22738
+?fsd_Write                       := $2273C
+?fsd_Resize                      := $22740
+?fsd_WriteStr                    := $22744
+?fsd_InRam                       := $22748
+?fsd_IsOpen                      := $2274C
+?fsd_Archive                     := $22750
+?fsd_UnArchive                   := $22754
+?fsd_Seek                        := $22758
+?fsd_Tell                        := $2275C
+?fsd_ForceClose                  := $22760
+?fsd_GetSize                     := $22764
+?fsd_GetDataPtr                  := $22768
+;	
 ; end of jump table
 ;-------------------------------------------------------------------------------
 ; OS memory areas and misc defines
@@ -785,13 +802,5 @@ namespace bos
 ?symbol.value        := 7 ; 24-bit symbol value
 ?symbol.entry_size   := 10
 ?symbol.end          := 0
-?fsd_bWrite           := 1
-?fsd_bRead            := 2
-?fsd_bOverwrite       := 3
-?fsd_bNeedsFlush      := 7
-?fsd_mWrite           := 1 shl fsd_bWrite
-?fsd_mRead            := 1 shl fsd_bRead
-?fsd_mOverwrite       := 1 shl fsd_bOverwrite
-?fsd_mNeedsFlush      := 1 shl fsd_bNeedsFlush
 
 end namespace

@@ -212,4 +212,21 @@
 	jp drv_Write
 	jp gui_PrintStdout
 	jp sys_CallExecuteFileHere
+	jp fsd_Open
+	jp fsd_Close
+	jp fsd_CloseAll
+	jp fsd_Read
+	jp fsd_Write
+	jp fsd_Resize
+	jp fsd_WriteStr
+	jp fsd_InRam
+	jp fsd_IsOpen
+	jp fsd_Archive
+	jp fsd_UnArchive
+	jp fsd_Seek
+	jp fsd_Tell
+	jp fsd_ForceClose
+	jp fsd_GetSize
+	jp fsd_GetDataPtr
+	
 ; end of jump table

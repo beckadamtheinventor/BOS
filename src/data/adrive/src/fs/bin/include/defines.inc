@@ -303,12 +303,3 @@ symbol.value        := 7 ; 24-bit symbol value
 symbol.entry_size   := 10
 symbol.end          := 0
 
-; fsd open file descriptor flags (internal use)
-fsd_bWrite           := 1
-fsd_bRead            := 2
-fsd_bOverwrite       := 3
-fsd_bNeedsFlush      := 7
-fsd_mWrite           := 1 shl fsd_bWrite
-fsd_mRead            := 1 shl fsd_bRead
-fsd_mOverwrite       := 1 shl fsd_bOverwrite
-fsd_mNeedsFlush      := 1 shl fsd_bNeedsFlush

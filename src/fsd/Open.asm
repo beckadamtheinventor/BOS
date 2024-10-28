@@ -2,7 +2,7 @@
 ;@INPUT void** fsd_Open(const char* path, const char* mode);
 ;@OUTPUT file descriptor, or 0 if failed.
 fsd_Open:
-	ld hl,-6
+	ld hl,-7
 	call ti._frameset
 	ld (ix-3),iy
 
@@ -10,8 +10,11 @@ fsd_Open:
 	ld hl,(ix+6)
 	push hl
 	call fs_OpenFile
-	pop bc
 	ld (ix-6),hl
+	ex (sp),hl
+	call fs_GetFDAttr
+	ld (ix-7),a
+	pop bc
 
 	ld hl,(ix+9)
 	inc hl
@@ -75,33 +78,26 @@ fsd_Open:
 	jr z,.fail
 	push hl
 	pop iy
+
 	ld hl,(ix-6)
 	push hl
 	call fs_GetFDPtr
-	ld (iy+3),hl ; file data pointer
+	ld (iy+fsd_DataPtr),hl ; file data pointer
 	call fs_GetFDLen
-	ld (iy+6),hl ; file data length
+	ld (iy+fsd_DataLen),hl ; file data length
 	pop bc
-	bit fsd_bWrite,(iy-1)
+
+	bit fd_device,(ix-7)
+	jr z,.dont_set_device_flag
+	set fsd_bIsDevice,(iy+fsd_OpenFlags)
+	jr z,.done ; don't move data to ram if reading/writing to a device file
+.dont_set_device_flag:
+
+	bit fsd_bWrite,(iy+fsd_OpenFlags)
 	jr z,.done ; don't move data to ram if writing not needed
-	call fs_ChkFreeRam
-	ld de,(iy+6)
-	or a,a
-	sbc hl,de
+; copy data to ram
+	call .unarc
 	jr c,.fail_ensure_closed
-	ld hl,(iy+6)
-	add hl,bc
-	or a,a
-	sbc hl,bc
-	jr nz,.alloc_over_zero_size
-	inc hl
-	ld (iy+6),hl
-.alloc_over_zero_size:
-	call fs_AllocRam.entryhl
-	ex hl,de
-	ld hl,(iy+3)
-	ld bc,(iy+6)
-	ldir
 	lea hl,iy
 	db $01 ; ld bc,... dummify or a / sbc hl
 .fail:
@@ -114,15 +110,8 @@ fsd_Open:
 	ret
 
 .fail_ensure_closed:
-	ld hl,(ix-6)
-	call fsd_CheckOpenFD.entryhl
-	add hl,de
-	or a,a
-	sbc hl,de
-	ret z
-	dec hl
-	ld (hl),0
-	ret
+	ld (iy+fsd_OpenFlags),0
+	jr .fail
 
 .create:
 	ld hl,(ix+6)
@@ -131,4 +120,33 @@ fsd_Open:
 	call fs_CreateFile
 	pop bc,bc,bc
 	ld (ix-6),hl
+	ret
+
+.unarc:
+	call fs_ChkFreeRam
+	ld de,(iy+fsd_DataLen)
+	or a,a
+	sbc hl,de
+	ret c
+	ld hl,(iy+fsd_DataLen)
+	; add hl,bc
+	; or a,a
+	; sbc hl,bc
+	; jr nz,.alloc_over_zero_size
+	; inc hl
+	; ld (iy+fsd_DataLen),hl
+; .alloc_over_zero_size:
+	call fs_AllocRam.entryhl
+	ex hl,de
+	ld hl,(iy+fsd_DataPtr)
+	ld bc,(iy+fsd_DataLen)
+	ld a,c
+	or a,b
+	or a,(iy+fsd_DataLen+1)
+	push de
+	jr z,.no_data_to_copy
+	ldir
+.no_data_to_copy:
+	pop hl
+	ld (iy+fsd_DataPtr),hl ; override the data pointer if copying to ram
 	ret

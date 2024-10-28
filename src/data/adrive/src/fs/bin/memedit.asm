@@ -10,6 +10,8 @@ org ti.userMem
 mem_edit:
 	ld hl,-21
 	call ti._frameset
+	ld a,bos.mReturnFromFullscreen or bos.mReturnNotError
+	ld (bos.return_code_flags),a
 	xor a,a
 	ld (ix-12),a
 mem_edit_main:

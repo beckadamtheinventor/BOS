@@ -9,6 +9,9 @@ fs_AllocRam:
 	ld de,(ti.asm_prgm_size)
 	add hl,de
 	ex hl,de ; hl = len, de = pointer
-	call _InsertMem
+	add hl,de
+	or a,a
+	sbc hl,de
+	call nz,_InsertMem
 	ex hl,de
 	ret
