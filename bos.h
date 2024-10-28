@@ -465,10 +465,9 @@ unsigned int fs_AllocChk(unsigned int len);
 /**
  * Allocate ram in usermem
  * @param len number of bytes to allocate.
- * @return pointer to memory, or -1 if failed.
- * @note If success, the returned data will be 32-bit aligned.
+ * @return pointer to memory, or 0 if failed.
  */
-void *fs_AllocRam(unsigned int len);
+void* fs_AllocRam(size_t len);
 
 /**
  * Convert OP1 into a BOS file name and return it.
