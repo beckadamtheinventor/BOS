@@ -219,6 +219,7 @@
 	public _fsd_ForceClose
 	public _fsd_GetSize
 	public _fsd_GetDataPtr
+	public _sys_AllocHeap
 _boot_os                         := $20108
 _handle_interrupt                := $2010C
 _HandleInstruction               := $20110
@@ -438,6 +439,7 @@ _fsd_Tell                        := $2275C
 _fsd_ForceClose                  := $22760
 _fsd_GetSize                     := $22764
 _fsd_GetDataPtr                  := $22768
+_sys_AllocHeap                   := $2276C
 
 public ram_executable
 public ram_executable_at

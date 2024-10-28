@@ -463,11 +463,20 @@ void *fs_CreateRamFile(const char *path, uint8_t flags, void *ptr, unsigned int 
 unsigned int fs_AllocChk(unsigned int len);
 
 /**
- * Allocate ram in usermem
+ * Allocate ram in usermem following the executing program.
+ * @param len number of bytes to allocate.
+ * @return pointer to memory, or 0 if failed.
+ * @note Use sys_AllocHeap instead.
+ */
+void* fs_AllocRam(size_t len);
+
+/**
+ * Allocate ram in usermem following the executing program, updating asm_prgm_size.
  * @param len number of bytes to allocate.
  * @return pointer to memory, or 0 if failed.
  */
-void* fs_AllocRam(size_t len);
+void* sys_AllocHeap(size_t len);
+
 
 /**
  * Convert OP1 into a BOS file name and return it.

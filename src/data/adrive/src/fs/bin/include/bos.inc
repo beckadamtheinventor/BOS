@@ -556,6 +556,7 @@ namespace bos
 ?fsd_ForceClose                  := $22760
 ?fsd_GetSize                     := $22764
 ?fsd_GetDataPtr                  := $22768
+?sys_AllocHeap                   := $2276C
 ;	
 ; end of jump table
 ;-------------------------------------------------------------------------------

@@ -228,5 +228,6 @@
 	jp fsd_ForceClose
 	jp fsd_GetSize
 	jp fsd_GetDataPtr
+	jp sys_AllocHeap
 	
 ; end of jump table

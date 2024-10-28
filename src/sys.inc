@@ -2,6 +2,7 @@
 ; BOS system routines
 
 include 'sys/LoadHookThreads.asm'
+include 'sys/AllocHeap.asm'
 include 'sys/AddHLAndA.asm'
 include 'sys/AnyKey.asm'
 include 'sys/CallExecuteFileHere.asm'
