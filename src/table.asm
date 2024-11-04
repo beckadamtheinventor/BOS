@@ -229,5 +229,8 @@
 	jp fsd_GetSize
 	jp fsd_GetDataPtr
 	jp sys_AllocHeap
+    jp fs_ExtractRootDir
+    jp fs_ExtractOSBinaries
+    jp fs_ExtractOSOptBinaries
 	
 ; end of jump table

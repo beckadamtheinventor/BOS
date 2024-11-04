@@ -557,6 +557,9 @@ namespace bos
 ?fsd_GetSize                     := $22764
 ?fsd_GetDataPtr                  := $22768
 ?sys_AllocHeap                   := $2276C
+?fs_ExtractRootDir               := $22770
+?fs_ExtractOSBinaries            := $22774
+?fs_ExtractOSOptBinaries         := $22778
 ;	
 ; end of jump table
 ;-------------------------------------------------------------------------------

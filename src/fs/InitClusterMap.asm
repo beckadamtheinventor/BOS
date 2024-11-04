@@ -61,11 +61,12 @@ fs_InitClusterMap:
 	push iy
 	ld hl,ti.vRam + (fs_cluster_map and $FFFF)
 	ld a,fscluster_allocated
-	ld b,fs_directory_size/fs_sector_size
-.mark_boot_sector:
+	ld bc, fs_root_dir_lba
+	push hl
+	pop de
+	inc de
 	ld (hl),a
-	inc hl
-	djnz .mark_boot_sector
+	ldir
 	ld hl,ti.vRam + (fs_cluster_map and $FFFF) + fs_root_dir_lba
 	ld b,fs_directory_size*2/fs_sector_size
 .mark_root_dir:

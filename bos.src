@@ -220,6 +220,9 @@
 	public _fsd_GetSize
 	public _fsd_GetDataPtr
 	public _sys_AllocHeap
+	public _fs_ExtractRootDir
+	public _fs_ExtractOSBinaries
+	public _fs_ExtractOSOptBinaries
 _boot_os                         := $20108
 _handle_interrupt                := $2010C
 _HandleInstruction               := $20110
@@ -440,6 +443,9 @@ _fsd_ForceClose                  := $22760
 _fsd_GetSize                     := $22764
 _fsd_GetDataPtr                  := $22768
 _sys_AllocHeap                   := $2276C
+_fs_ExtractRootDir               := $22770
+_fs_ExtractOSBinaries            := $22774
+_fs_ExtractOSOptBinaries         := $22778
 
 public ram_executable
 public ram_executable_at
