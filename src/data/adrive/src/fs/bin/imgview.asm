@@ -21,7 +21,7 @@ imgview_main:
 	call bos.fs_GetFilePtr
 	jr nc,.file_found
 	push hl
-	ld hl,.str_file_not_found
+	ld hl,str_FileNotFound
 	call bos.gui_PrintLine
 	pop hl
 	jr .exit_no_clear
@@ -164,5 +164,5 @@ imgview_main:
 .str_formaterror:
 	db "Invalid image file format",0
 
-.str_file_not_found:
+str_FileNotFound:
 	db "File not found",0

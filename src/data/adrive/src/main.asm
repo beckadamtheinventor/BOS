@@ -65,6 +65,7 @@ fs_dir bin_dir
 	fs_sfentry df_exe, "df", "", f_system+f_subfile
 	fs_sfentry echo_exe, "echo", "", f_system+f_subfile
 	fs_entry explorer_exe, "explorer", "", f_system
+	fs_sfentry hexdump_exe, "hexdump", "", f_system+f_subfile
 	fs_entry memedit_exe, "hexed", "", f_system
 	fs_entry memedit_exe, "hexedit", "", f_system
 	fs_sfentry mf_exe, "mf", "", f_system+f_subfile
@@ -155,6 +156,10 @@ fs_file os_internal_subfiles
 
 	fs_subfile df_exe, bin_dir
 		include 'fs/bin/df.asm'
+	end fs_subfile
+
+	fs_subfile hexdump_exe, bin_dir
+		include 'fs/bin/hexdump.asm'
 	end fs_subfile
 
 	fs_subfile mf_exe, bin_dir

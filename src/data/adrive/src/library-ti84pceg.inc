@@ -1,0 +1,6 @@
+include 'commands.alm'
+include 'ez80.alm'
+include 'ti84pceg.inc'
+include 'tiformat.inc'
+include 'bos.inc'
+include '_library.inc'

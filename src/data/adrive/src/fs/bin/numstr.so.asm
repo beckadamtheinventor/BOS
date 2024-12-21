@@ -210,7 +210,7 @@ osrt.int_to_hexstr.loop:
 	ld (de),a
 	ret
 
-; input hl pointer to input
+; input hl pointer to input byte + 1
 ; input de pointer to output
 osrt.byte_to_hexstr:
 	dec hl
