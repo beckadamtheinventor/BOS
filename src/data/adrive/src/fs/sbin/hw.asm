@@ -2,6 +2,7 @@
     jr hw_config_start
     db "FEX", 0
 hw_config_start:
+    breakpoint
     ld hl,-3
     call ti._frameset
     ld a,(ix+6)
@@ -69,6 +70,7 @@ hw_config_start:
     ld (ix-1),a
     call .search
     ret c
+    ld a,(ix-1)
     jr .jump
 
 ; input hl = search string
@@ -85,10 +87,15 @@ hw_config_start:
     ex hl,de ; de -> hl
     ld c,a
     mlt bc
+    push af
     cpir
-    inc hl
+    pop af
     pop bc
     ret z
+    inc hl
+    inc hl
+    inc hl
+    inc hl
     ld a,(hl)
     or a,a
     scf
@@ -121,10 +128,12 @@ hw_config_start:
     in0 a,($01)
     and a,$FC
     or a,c
+    out0 ($01),a
     ret
 
 .get_cpu_speed:
     in0 a,($01)
+    and a,3
     ret
 
 .infostr:
