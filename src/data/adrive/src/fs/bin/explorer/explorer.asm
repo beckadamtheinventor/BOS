@@ -468,7 +468,7 @@ explorer_call_file:
 .return_handler:
 	ld hl,bos.return_code_flags
 	bit bos.bReturnFromFullscreen,(hl)
-	call z,bos.sys_WaitKeyCycle
+	call z,bos.sys_IndicateProgramDone
 	ld hl,$FF0000
 .return_handler_free:=$-3
 	push hl

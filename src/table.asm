@@ -232,5 +232,6 @@
     jp fs_ExtractRootDir
     jp fs_ExtractOSBinaries
     jp fs_ExtractOSOptBinaries
+    jp sys_IndicateProgramDone
 	
 ; end of jump table

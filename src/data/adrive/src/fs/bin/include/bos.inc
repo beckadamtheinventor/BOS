@@ -560,6 +560,7 @@ namespace bos
 ?fs_ExtractRootDir               := $22770
 ?fs_ExtractOSBinaries            := $22774
 ?fs_ExtractOSOptBinaries         := $22778
+?sys_IndicateProgramDone         := $2277C
 ;	
 ; end of jump table
 ;-------------------------------------------------------------------------------

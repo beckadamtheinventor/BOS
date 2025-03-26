@@ -178,6 +178,10 @@ enter_input:
 	ld (ix-3),hl
 	call bos.sys_Exec
 	pop bc
+    ; redraw console if returning from a fullscreen application
+    ld a,(bos.return_code_flags)
+    bit bos.bReturnFromFullscreen, a
+    call nz, cmd_redraw_console
 	; print the return code here
 	call cmd_print_return_value
 	call enter_input_clear
@@ -207,11 +211,16 @@ cmd_print_return_value:
 	bit bos.bReturnNotError,a
 	jr nz,.print_number_result
 .non_zero_is_error:
+    ld c,a
 	ld hl,(LastCommandResult)
 	ld a,(LastCommandResult+3)
-	add hl,bc
+    bit bos.bReturnLong, c
+    jr z,.non_zero_is_error_non_long
 	or a,a
 	jr nz,.print_error_code
+.non_zero_is_error_non_long:
+    or a,a
+	add hl,bc
 	sbc hl,bc
 	ret z
 .print_error_code:

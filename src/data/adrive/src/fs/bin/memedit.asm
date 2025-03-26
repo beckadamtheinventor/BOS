@@ -609,6 +609,7 @@ edited_file:=$-1
 	xor a,a
 	ld (bos.currow),a
 	ld (bos.curcol),a
+    ld a,(bos.lcd_bg_color)
 	jp bos.gfx_BufClear
 .input_string:
 	ld hl,(ix-3)
