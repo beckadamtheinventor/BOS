@@ -86,7 +86,7 @@ assert ~ti.pKeyRange and $FF
 	out (bc),a
 	
 	in0 a,($09)
-	res 0,a
+	and a,$01
 	or a,$E6
 	out0 ($09),a
 	ld a,$FF
