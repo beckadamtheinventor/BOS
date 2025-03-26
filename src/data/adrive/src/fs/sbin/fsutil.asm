@@ -48,7 +48,6 @@ fsutil_start:
 	pop ix
 	ret
 .infostr:
-	db "-h  show this info",$A
 	db "-s  run sanity check",$A
 	db "-c  cleanup the filesystem",$A
 	db "-m  rebuild cluster map",$A

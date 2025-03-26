@@ -21,6 +21,7 @@ fs_dir sbin_dir
 	fs_sfentry gc_cmd, "gc", "", f_system+f_subfile
 	fs_sfentry gc_cmd, "cleanup", "", f_system+f_subfile
 	fs_sfentry fsutil_exe, "fsutil", "", f_system+f_subfile
+    fs_sfentry hw_exe, "hw", "", f_system+f_subfile
 	fs_sfentry uninstaller_exe, "uninstlr", "", f_system+f_subfile
 	; fs_entry updater_exe, "updater", "", f_system
 end fs_dir
@@ -113,6 +114,10 @@ fs_file os_internal_subfiles
 	fs_subfile fsutil_exe, sbin_dir
 		include 'fs/sbin/fsutil.asm'
 	end fs_subfile
+
+    fs_subfile hw_exe, sbin_dir
+        include 'fs/sbin/hw.asm'
+    end fs_subfile
 
 	; fs_subfile var_exe, bin_dir
 		; include 'fs/bin/var.asm'
