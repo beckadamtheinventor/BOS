@@ -12,7 +12,7 @@ str_ErasedUserMemory:
 str_WritingFilesystem:
 	db "Writing filesystem...",0
 str_ProgramDoneIndicatorMessage:
-    db "Done.",$A ; runs into the next string for size efficiency
+    db $A,"Done.",$A ; runs into the next string for size efficiency
 str_PressAnyKey:
 	db "Press any key to continue...",0
 str_BadInterrupt:
