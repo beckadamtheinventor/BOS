@@ -2,7 +2,6 @@
     jr hw_config_start
     db "FEX", 0
 hw_config_start:
-    breakpoint
     ld hl,-3
     call ti._frameset
     ld a,(ix+6)
