@@ -44,7 +44,7 @@ sys_WriteFlashFullRam:
 	ld de,$010000
 	or a,a
 	sbc hl,de
-	jq nc,.two_writes
+	jq nc,.two_writes ; write crosses sector boundary
 
 	ld de,(ix+6)
 	ld hl,(ix+9)
@@ -58,25 +58,13 @@ sys_WriteFlashFullRam:
 .write_flash_full:
 	call ti._frameset0
 
-	ld hl,(ti.mpLcdUpbase)
-	push hl
-	ld de,LCD_BUFFER
-	or a,a
-	sbc hl,de
-	add hl,de
-	jq z,.no_blit_screen
-	ld bc,ti.lcdWidth*ti.lcdHeight ;blit lcd to buffer
-	ld (ti.mpLcdUpbase),de
-	ldir
-.no_blit_screen:
-
 	ld a,(ix+8) ;high byte of destination
-	cp a,4
+	cp a,$04
 	jq c,.fail
 	cp a,$40
 	jq nc,.fail
 
-	call sys_FlashUnlock
+    call sys_ReadSectorCache.only_handle_vram
 .main:
 	ld hl,(ix+6)
 	ex.s hl,de
@@ -117,30 +105,10 @@ sys_WriteFlashFullRam:
 .zero_len_write_3:
 
 	ld a,(ix+8)
-	call sys_EraseFlashSector
-	ld de,(ix+6)
-	ld e,0
-	ld d,e
-	ld hl,ti.vRam
-.write_dest_sector_and_finish:
-	ld bc,$010000
-	call sys_WriteFlash
-	call sys_FlashLock
+    call sys_WriteSectorCache.entry
 
-	pop hl
-	ld de,LCD_BUFFER
-	or a,a
-	sbc hl,de
-	add hl,de
-	jq z,.success
-	ex hl,de
-	ld bc,ti.lcdWidth*ti.lcdHeight ;blit buffer back to lcd
-	push de
-	ldir
-	pop de
-	ld (ti.mpLcdUpbase),de
 .success:
-	db $3E ;ld a,... ;a will be non-zero because "xor a,a" is not zero
+	db $3E ;ld a,... ;a will be non-zero because the opcode for "xor a,a" is not zero
 .fail:
 	xor a,a
 	or a,a
@@ -187,11 +155,12 @@ sys_WriteFlashFullRam:
 
 ;write an entire sector
 .full_sector:
-	call flash_unlock
-	ld a,(ix+8) ;upper byte of destination
-	call sys_EraseFlashSector
-	ld hl,(ix+9)
-	ld de,(ix+6)
-	jq .write_dest_sector_and_finish
+    ld bc,(ix+12)
+    ld hl,(ix+9)
+    ld de,(ix+6)
+    push bc,hl,de
+    call .write_flash_full
+    pop bc,bc,bc
+    jq .success
 
 

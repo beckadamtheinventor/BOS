@@ -1,8 +1,7 @@
 ;@DOES Write the currently cached sector back to flash sector A
 sys_WriteSectorCache:
-	pop bc
-	ex (sp),hl
-	push bc
+	pop bc,hl
+	push hl,bc
 	ld a,l
 .entry:
 	push af

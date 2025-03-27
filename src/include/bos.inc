@@ -680,7 +680,8 @@ namespace bos
 ?fscluster_smallallocblocksize := 1024
 ?fs_partition_desc_size        := 16
 ?fs_file_desc_size             := 16
-?fs_directory_size             := 256
+?fs_directory_size_bits        := 10
+?fs_directory_size             := 1 shl fs_directory_size_bits
 ?fscluster_freed             := $00
 ?fscluster_allocated         := $FE
 ?fscluster_clean             := $FF
@@ -701,7 +702,8 @@ namespace bos
 ?fsentry_unlisted           := $F2
 ?fsentry_longfilename_entry := $F3
 ?fsentry_dirextender        := $FE
-?fsentry_endofdir2          := $FF
+?fsentry_endofdir           := $FF
+?fsentry_endofdir2          := fsentry_endofdir
 ?fsentry_filename            := $00
 ?fsentry_filename.len        := 8
 ?fsentry_fileext             := $08

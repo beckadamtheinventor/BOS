@@ -29,16 +29,16 @@ fs_GarbageCollect:
 	ld (ti.mpLcdUpbase),de
 .no_buffer_swap:
 	call sys_FlashUnlock
-	xor a,a
-	ld (curcol),a
-	inc a
-	ld (currow),a
+
+; clean root directory
+    ld hl,.str_cleaning_dirs
+    call .print_cleaning_str
+
+    ld hl,fs_root_dir_address
+    call .cleanup_dirs
+
 	ld hl,.str_cleaning_up_step_1
-	call gui_PrintString
-	ld hl,(lcd_x)
-	ld bc,-5*8
-	add hl,bc
-	ld (lcd_x),hl
+    call .print_cleaning_str
 ; clean up freed sectors
 ; cluster map pointer decrements within each 64k sector
 	ld bc,start_of_user_archive
@@ -208,5 +208,56 @@ fs_GarbageCollect:
 
 ; .str_trailing_zeroes:
 	; db "0000",0
+
+.cleanup_directory:
+    ld a,(hl) ; ensure we're pathing into a valid entry
+    or a,a
+    ret z
+    inc a
+    ret z
+    inc a
+    ret z
+    call fs_GetFDPtr.entry
+.cleanup_dirs:
+    push hl
+    call fs_DirCleanup.entryptr
+    pop hl
+.cleanup_dirs_loop:
+    push hl
+    call fs_GetFDAttr.entry
+    bit fd_subdir,a
+    pop hl
+    push hl
+    call nz,.cleanup_directory
+    pop hl
+    ld bc,fs_file_desc_size
+    add hl,bc
+    ld a,(hl)
+    inc a
+    ret z
+    inc a
+    jr nz,.cleanup_dirs_loop
+    call fs_GetFDPtr.entry
+    ret c
+    jr .cleanup_dirs_loop
+
+
+; input hl = string to print
+; sets lcd_x to the end of the string minus 5 characters
+.print_cleaning_str:
+	xor a,a
+	ld (curcol),a
+	inc a
+	ld (currow),a
+	call gui_PrintString
+	ld hl,(lcd_x)
+	ld bc,-5*8
+	add hl,bc
+	ld (lcd_x),hl
+    ret
+
+.str_cleaning_dirs:
+    db "Cleaning dirs",0
+
 .str_cleaning_up_step_1:
 	db "Cleaning: 00/55", 0

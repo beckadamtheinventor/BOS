@@ -1,9 +1,9 @@
 
 ;@DOES end all running threads and wait for there to be no more thread IDs above 1.
 ;@NOTE will kill all remaining threads if recovery key pressed
-;@DESTROYS All, IX
+;@DESTROYS All, IY
 th_EndAllThreads:
-	ld ix,(last_keypress)
+	ld iy,(last_keypress)
 	xor a,a
 	ld (last_keypress),a
 	ld hl,thread_map+2
@@ -27,6 +27,6 @@ th_EndAllThreads:
 	jq nz,.wait_for_threads
 	inc l
 	djnz .check_threads_loop
-	ld a,ixl
+	ld a,iyl
 	ld (last_keypress),a
 	ret

@@ -2,38 +2,22 @@
 ;@INPUT void *fs_AllocDescriptor(void *fd);
 ;@OUTPUT pointer to new empty file descriptor. returns -1 and Cf set if failed
 fs_AllocDescriptor:
-    breakpoint
 	pop bc,hl
 	push hl,bc
 .entryfd:
-	push hl
-	call fs_GetFDPtr
-	pop bc
+	call fs_GetFDPtr.entry
 .entry:
-.get_end_of_dir_loop_entry:
-	ld bc,fs_file_desc_size
-	db $3E ; dummify next instruction
-.get_end_of_dir_loop:
-	add hl,bc
-	ld a,(hl)
-	inc a
-	ret z
-	inc a
-	jr nz,.get_end_of_dir_loop
-.seek_next_dir_section:
-	ld c,fsentry_filesector+1
-	add hl,bc
-	ld a,(hl)
-	dec hl
-	and a,(hl)
-	inc a
-	jq z,.allocate_dir_section
-.next_section_allocated:
-	ld hl,(hl)
-	call fs_GetSectorAddress.entry
-	jr .get_end_of_dir_loop_entry
+    call fs_GetDirSize.entryptr ; returns pointer to empty entry or non-allocated dirextender in de
+    ex hl,de
+    ld a,(hl)
+    cp a,fsentry_dirextender
+    jr z,.allocate_dir_section
+    or a,a
+    ret
 
 .allocate_dir_section: ; allocate a new directory section and return it
+    ld bc,fsentry_filesector
+    add hl,bc
 	ld bc,fs_directory_size
 	push hl,bc ; push pointer to sector address word, directory size
 	call fs_Alloc ; allocate another directory section

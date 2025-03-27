@@ -173,6 +173,7 @@ low_bit_0_int: ; On interrupt
 	res 0,a
 	out (bc),a
 	call try_on_interrupt_handler
+; re-enable ON interrupt
     ld hl,ti.mpIntMask
     set ti.bIntOn,(hl)
 	jr return_from_interrupt
@@ -207,6 +208,9 @@ low_bit_4_int: ;OS timer interrupt
 	in a,(bc)
 	res 4,a
 	out (bc),a
+; re-enable OS timer interrupt
+    ld hl,ti.mpIntMask
+    set ti.bIntOSTmr,(hl)
 	jq return_from_interrupt
 high_bit_3_int:
 	ld a,1 shl 3
@@ -468,7 +472,7 @@ generate_boot_configs:
 os_return_soft:
 	ld hl,ti.mpIntMask
 	set ti.bIntOn,(hl)
-	; set ti.bIntOSTmr,(hl)
+	set ti.bIntOSTmr,(hl)
 	call gfx_Set8bpp
 	xor a,a
 	sbc hl,hl

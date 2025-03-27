@@ -133,7 +133,8 @@ fs_sector_size_bits           := 6
 fscluster_smallallocblocksize := 1024
 fs_partition_desc_size        := 16
 fs_file_desc_size             := 16
-fs_directory_size             := 256
+fs_directory_size_bits        := 10
+fs_directory_size             := 1 shl fs_directory_size_bits
 
 ; Filesystem cluster map allocation markers
 fscluster_freed             := $00
@@ -163,7 +164,8 @@ fsentry_longfilename       := $F1
 fsentry_unlisted           := $F2
 fsentry_longfilename_entry := $F3
 fsentry_dirextender        := $FE
-fsentry_endofdir2          := $FF
+fsentry_endofdir           := $FF
+fsentry_endofdir2          := fsentry_endofdir
 
 ; file entry offsets
 fsentry_filename            := $00

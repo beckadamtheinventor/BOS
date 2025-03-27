@@ -43,7 +43,7 @@ explorer_delete_file:
 	call explorer_is_path_root
 	ret z
 	ld hl,str_ConfirmDelete
-	ld bc,display_margin_bottom-9
+	ld bc,display_margin_bottom
 	ld de,display_margin_left+11
 	push bc,de,hl
 	call gfx_PrintStringXY

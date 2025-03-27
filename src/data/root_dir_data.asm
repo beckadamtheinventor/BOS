@@ -1,6 +1,10 @@
 fs_root_dir_data:
-	db "bin        ", $14, $10,$00, $00,$01
-	db "dev        ", $14, $0C,$00, $00,$01
-	db "lib        ", $14, $08,$00, $00,$01
-	db "sbin       ", $14, $04,$00, $00,$01
+	db "bin        ", $14
+    dw ($300+fs_directory_size)/$40, fs_directory_size
+	db "dev        ", $14
+    dw ($200+fs_directory_size)/$40, fs_directory_size
+	db "lib        ", $14
+    dw ($100+fs_directory_size)/$40, fs_directory_size
+	db "sbin       ", $14
+    dw ($000+fs_directory_size)/$40, fs_directory_size
 .len:=$-.
