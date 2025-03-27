@@ -66,7 +66,9 @@ fs_SetSize:
     call sys_WriteFlash
     ; delete old file descriptor
     ld hl,(ix+9)
+    push hl
     call fs_DeleteFileFD
+    pop hl
     ld hl,(ix-6)
 .success:
 	db $01
