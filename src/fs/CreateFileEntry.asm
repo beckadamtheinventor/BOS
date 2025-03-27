@@ -2,21 +2,33 @@
 ;@INPUT void *fs_CreateFileEntry(const char *path, uint8_t flags);
 ;@OUTPUT file descriptor. Returns 0 if failed to create file.
 fs_CreateFileEntry:
-	ld hl,-28
-	call ti._frameset
-	ld (ix-22),iy
-	xor a,a
-	sbc hl,hl
-	ld (ix-3),hl
-	ld hl,(ix+6)
+	;ld hl,-28
+	;call ti._frameset
+	;ld (ix-22),iy
+	;xor a,a
+	;sbc hl,hl
+	;ld (ix-3),hl
+	;ld hl,(ix+6)
 	; or a,(hl)
 	; jq z,.fail
 	; cp a,' '
 	; jq z,.fail
-	push hl
-	call fs_OpenFile
+	;push hl
+    pop bc,hl
+    push hl,bc
+	call fs_OpenFile.entryhl
 	jq nc,.fail ; fail if file exists
+    ;jr .main_continue
 .dontfail:
+    ld hl,-28
+    call ti._frameset
+    ld (ix-22),iy
+    xor a,a
+    sbc hl,hl
+    ld (ix-3),hl
+    ld hl,(ix+6)
+    push hl
+.main_continue:
 	call fs_ParentDir
 	ld (ix-3),hl
 	ex (sp),hl

@@ -6,7 +6,7 @@
 fs_SetSize:
 	ld hl,-22
 	call ti._frameset
-	ld (ix-22),iy
+	ld (ix-3),iy
 	ld iy,(ix+9) ;void *fd
 	bit fd_link,(iy+fsentry_fileattr)
 	jq nz,.fail
@@ -23,46 +23,59 @@ fs_SetSize:
 	; or a,a
 	; sbc hl,de
 	; jq z,.success
-	ld hl,(ix+9) ; pointer to old file descriptor
-	lea de,ix-16
-	ld bc,fsentry_fileattr+1
-	ldir ; copy old descriptor into ram
-	ld hl,(ix+9)
-	call fs_AllocDescriptor.entry ; allocate a new file descriptor
-	jr c,.fail
-	ld (ix-19),hl
+    push iy ; pointer to old file descriptor
 
-	ld iy,(ix+9)
-	bit fd_subfile, (iy+fsentry_fileattr)
-	lea hl,iy
-	call z,fs_Free.entryhl ;free the old file if not a subfile
+    ld hl,(ix+6) ; int len
+    add hl,bc
+    or a,a
+    sbc hl,bc
+    ld bc,$FFFF
+    ld (ix-9),hl ; new file length
+    ld (ix-12),bc ; new file sector
+    jr z,.alloc_zero_space
+    ld (ix-12),hl
+    push hl
+    call fs_Alloc ; allocate space for new file
+    pop bc
+    jr c,.fail
+    ld (ix-12),hl ; new file sector
+.alloc_zero_space:
 
-	ld hl,(ix+6)
-	push hl
-	call fs_Alloc
-	jr c,.fail
-	ld (ix + fsentry_filesector - 16), hl ; set new file descriptor data pointer
-	pop hl
-	ld (ix + fsentry_filelen+0 - 16),l ; set new file descriptor data length
-	ld (ix + fsentry_filelen+1 - 16),h
-	call sys_FlashUnlock
-	ld de,(ix+9)
-	xor a,a
-	call sys_WriteFlashA ; delete the old file descriptor
-
-	ld de,(ix-19)
-	push de
-	lea hl,ix-16
-	ld bc,fs_file_desc_size
-	call sys_WriteFlash ; write the new file descriptor
-	pop hl
+    call fs_CopyFileName
+    pop iy
+    ld c,(iy+fsentry_fileattr)
+    push bc
+    push hl
+    call fs_CreateFileEntry.dontfail ; create new file descriptor
+    ex (sp),hl
+    call sys_Free.entryhl ; free copied file name
+    pop hl ; new file descriptor
+    pop bc
+    ld (ix-6),hl ; new file descriptor
+    ld a,c
+    ld de,fsentry_fileattr
+    add hl,de
+    ex hl,de
+    call sys_FlashUnlock
+    call sys_WriteFlashA ; increments de
+    ; move file length back 2 bytes so we can make this only one flash write call
+    ld hl,(ix-9)
+    ld (ix-10),hl
+    lea hl,ix-12
+    ld bc,4
+    call sys_WriteFlash
+    ; delete old file descriptor
+    ld de,(ix+9)
+    xor a,a
+    call sys_WriteFlashA
+    ld hl,(ix-6)
 .success:
 	db $01
 .fail:
 	scf
 	sbc hl,hl
 	call sys_FlashLock
-	ld iy,(ix-22)
+	ld iy,(ix-3)
 	ld sp,ix
 	pop ix
 	ret

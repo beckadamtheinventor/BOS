@@ -40,18 +40,31 @@ fs_GetFilePtr:
 	pop hl
 .located_file:
 	pop hl
+    mlt bc
 	ld c,(hl)
 	inc hl
 	ld b,(hl)
+    ld a,c
+    and a,b
+    inc a
+    jr z,.zero_size
 	ld a,c
 	or a,b
 	jr nz,.under64k
 	ld bc,$010000
+    jr .under64k
+.zero_size:
+    ld c,a
+    ld b,a
 .under64k:
 	ex hl,de
 	pop af
 	ret
 .fail:
+; note: expects that A=0
+    ld c,a
+    ld b,a
+    mlt bc
 	pop af
 	scf
 	sbc hl,hl

@@ -85,8 +85,25 @@ end if
 	pop bc,bc
 
 	ld hl,(current_working_dir)
-	ld bc,20
+	ld bc,40
 	call explorer_display_bc_chars
+
+	ld bc,10
+	push bc
+    ld c,1
+    push bc
+	call gfx_SetTextXY
+	pop bc,bc
+
+    ld hl,(explorer_selected_file_desc)
+    push hl
+    call bos.fs_CopyFileName
+    pop bc
+    ld bc,40
+    push hl
+    call explorer_display_bc_chars
+    call bos.sys_Free
+    pop bc
 
 	call ti.usb_IsBusPowered
 	push af
@@ -152,7 +169,7 @@ explorer_display_diritems:
 	ld c,display_items_num_y
 .outer_loop:
 	ld b,display_items_num_x
-	ld hl,display_margin_left+1
+	ld hl,display_margin_left
 	ld (.x_pos),hl
 .inner_loop:
 	push bc
@@ -205,7 +222,7 @@ explorer_display_diritems:
 	pop hl
 	jq .dont_draw_extension
 .main_draw_regular_file_name:
-	ld b,10
+	ld b,11
 .main_draw_file_name_loop:
 	ld a,(hl)
 	or a,a
