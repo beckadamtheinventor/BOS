@@ -299,13 +299,13 @@ explorer_selected_file_desc:=$-3
 	push hl
 	call bos.fs_GetFilePtr
 	pop de
+	ld a,c
+	or a,b
+	jr z,.edit_file_run_cedit
 	ld a,0
 .force_editing_file:=$-1
 	or a,a
 	jr nz,.edit_file
-	ld a,c
-	or a,b
-	jr z,.edit_file_run_cedit
 	push de
 	call bos.sys_GetExecType
 	pop de

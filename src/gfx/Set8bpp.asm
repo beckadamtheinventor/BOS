@@ -1,8 +1,7 @@
 ;@DOES set the lcd to 8bpp mode
 ;@DESTROYS HL,DE,BC,AF
 gfx_Set8bpp:
-	xor	a,a
-	call	gfx_FillScreen
+	call ti.boot.ClearVRAM
 .setup:
 	; ld	hl,LCD_VRAM
 	; ld	(ti.mpLcdUpbase),hl

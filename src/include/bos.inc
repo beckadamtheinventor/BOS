@@ -561,6 +561,8 @@ namespace bos
 ?fs_ExtractOSBinaries            := $22774
 ?fs_ExtractOSOptBinaries         := $22778
 ?sys_IndicateProgramDone         := $2277C
+?gfx_Ensure8bpp                  := $22780
+?gfx_Ensure16bpp                 := $22784
 ;	
 ; end of jump table
 ;-------------------------------------------------------------------------------

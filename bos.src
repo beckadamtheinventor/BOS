@@ -224,6 +224,8 @@
 	public _fs_ExtractOSBinaries
 	public _fs_ExtractOSOptBinaries
 	public _sys_IndicateProgramDone
+	public _bosgfx_Ensure8bpp
+	public _bosgfx_Ensure16bpp
 _boot_os                         := $20108
 _handle_interrupt                := $2010C
 _HandleInstruction               := $20110
@@ -448,6 +450,8 @@ _fs_ExtractRootDir               := $22770
 _fs_ExtractOSBinaries            := $22774
 _fs_ExtractOSOptBinaries         := $22778
 _sys_IndicateProgramDone         := $2277C
+_bosgfx_Ensure8bpp                  := $22780
+_bosgfx_Ensure16bpp                 := $22784
 
 public ram_executable
 public ram_executable_at
