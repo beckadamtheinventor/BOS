@@ -563,6 +563,8 @@ namespace bos
 ?sys_IndicateProgramDone         := $2277C
 ?gfx_Ensure8bpp                  := $22780
 ?gfx_Ensure16bpp                 := $22784
+?fs_GetDirSize                   := $22788
+?fs_GetDirSizeFD                 := $2278C
 ;	
 ; end of jump table
 ;-------------------------------------------------------------------------------

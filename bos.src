@@ -226,6 +226,8 @@
 	public _sys_IndicateProgramDone
 	public _bosgfx_Ensure8bpp
 	public _bosgfx_Ensure16bpp
+	public _fs_GetDirSize
+	public _fs_GetDirSizeFD
 _boot_os                         := $20108
 _handle_interrupt                := $2010C
 _HandleInstruction               := $20110
@@ -452,6 +454,8 @@ _fs_ExtractOSOptBinaries         := $22778
 _sys_IndicateProgramDone         := $2277C
 _bosgfx_Ensure8bpp                  := $22780
 _bosgfx_Ensure16bpp                 := $22784
+_fs_GetDirSize                   := $22788
+_fs_GetDirSizeFD                 := $2278C
 
 public ram_executable
 public ram_executable_at

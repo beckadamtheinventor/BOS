@@ -235,5 +235,7 @@
     jp sys_IndicateProgramDone
     jp gfx_Ensure8bpp
     jp gfx_Ensure16bpp
+    jp fs_GetDirSize
+    jp fs_GetDirSizeFD
 	
 ; end of jump table
