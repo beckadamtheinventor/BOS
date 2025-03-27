@@ -25,6 +25,10 @@ fs_Free:
 	ld a,c
 	or a,b
 	jr z,.zero ; dont free it if it hasnt been allocated
+    ld a,c
+    and a,b
+    inc a
+    jr z,.zero ; dont free it if it hasn't been allocated
 .entrydebc: ; free bc bytes starting at sector de
 	ex.s hl,de
 	ld de,fs_cluster_map

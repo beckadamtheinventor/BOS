@@ -87,6 +87,12 @@ fs_CopyFileName:
 	dec a
 	jr nz,.copy_long_file_name_loop
 .done_copying_long_file_name:
+; rewind any 0xff characters we copied
+    dec de
+    ld a,(de)
+    inc a
+    jr z,.done_copying_long_file_name
+    inc de
 .return:
 	xor a,a
 	ld (de),a

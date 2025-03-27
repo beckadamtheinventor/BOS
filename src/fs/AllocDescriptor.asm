@@ -2,6 +2,7 @@
 ;@INPUT void *fs_AllocDescriptor(void *fd);
 ;@OUTPUT pointer to new empty file descriptor. returns -1 and Cf set if failed
 fs_AllocDescriptor:
+    breakpoint
 	pop bc,hl
 	push hl,bc
 .entryfd:
@@ -24,8 +25,7 @@ fs_AllocDescriptor:
 	add hl,bc
 	ld a,(hl)
 	dec hl
-	cp a,(hl)
-	jr nz,.next_section_allocated
+	and a,(hl)
 	inc a
 	jq z,.allocate_dir_section
 .next_section_allocated:
@@ -35,25 +35,24 @@ fs_AllocDescriptor:
 
 .allocate_dir_section: ; allocate a new directory section and return it
 	ld bc,fs_directory_size
-	push hl,bc
+	push hl,bc ; push pointer to sector address word, directory size
 	call fs_Alloc ; allocate another directory section
-	push hl
 	call sys_FlashUnlock
-	pop hl
 	pop bc,de
 	ret c
-	push hl
-	ld a,l
+	push hl ; push allocated sector address
+	ld a,l ; write low byte
 	call sys_WriteFlashA
 	pop hl
-	push hl
-	ld a,h
+    push hl
+	ld a,h ; write high byte
 	call sys_WriteFlashA
-	pop hl
-	push hl
-	ld bc,fs_directory_size-fs_file_desc_size
-	add hl,bc
-	ex hl,de
+    pop hl
+    call fs_GetSectorAddress.entry
+    push hl ; push pointer to new directory section
+    ld de,fs_directory_size-fs_file_desc_size
+    add hl,de
+    ex hl,de ; last entry of directory
 	ld a,$FE ; directory extender byte
 	call sys_WriteFlashA
 	call sys_FlashLock
