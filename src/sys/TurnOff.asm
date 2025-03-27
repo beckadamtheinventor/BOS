@@ -5,6 +5,9 @@ sys_TurnOff:
 	ld a,(ti.mpLcdCtrl)
 	cp a,ti.lcdBpp16
 	push af
+    ; save interrupt mask
+	ld hl,(ti.mpIntMask)
+    push hl
 	di
 	call ti.boot.TurnOffHardware
 	di
@@ -157,6 +160,14 @@ assert ~ti.pKeyRange and $FF
 	pop af
 	ld bc,$5005
 	out (bc),a
+    ; restore interrupt mask
+    pop de
+    ld hl,ti.mpIntMask
+    ld (hl),e
+    inc hl
+    ld (hl),d
+
+    ; restore lcd mode
 	pop af
 	jp z,gfx_Set16bpp
 	jp gfx_Set8bpp

@@ -59,7 +59,7 @@ os_return:
 	ld hl,op_stack_top
 	ld (op_stack_ptr),hl
 	ld de,os_on_interrupt_handler
-	ld hl,on_interrupt_handler-1
+	ld hl,on_interrupt_jump
 	ld (hl),$C3 ;jp opcode byte
 	inc hl
 	ld (hl),de
@@ -172,7 +172,9 @@ low_bit_0_int: ; On interrupt
 	in a,(bc)
 	res 0,a
 	out (bc),a
-	call on_interrupt_handler
+	call try_on_interrupt_handler
+    ld hl,ti.mpIntMask
+    set ti.bIntOn,(hl)
 	jr return_from_interrupt
 low_bit_1_int:
 	ld a,1 shl 1
@@ -289,15 +291,31 @@ handle_safeop:
 	pop af
 	ret
 
+try_on_interrupt_handler:
+    ld a,(on_interrupt_jump)
+    cp a,$C3
+    ret nz
+    ld hl,(on_interrupt_handler)
+    add hl,bc
+    or a,a
+    sbc hl,bc
+    ret z
+    jp on_interrupt_jump
+
 os_on_interrupt_handler:
-	call sys_AnyKey
-	ret z
+;	call sys_AnyKey
+;	ret z
+;   breakpoint
 	call sys_GetKey
 	cp a,ti.skYequ
 	jp z,os_recovery_menu
 	cp a,ti.skClear
-	ret nz
-	ld sp,ti.stackTop
+	jr z,.soft_reboot
+    cp a,ti.sk2nd
+    ret nz
+    call sys_TurnOff
+.soft_reboot:
+    ld sp,ti.stackTop
 	jp os_return_soft
 
 handle_offsetinstruction:
@@ -448,8 +466,8 @@ generate_boot_configs:
 	ret
 
 os_return_soft:
-	; ld hl,ti.mpIntMask
-	; set ti.bIntOn,(hl)
+	ld hl,ti.mpIntMask
+	set ti.bIntOn,(hl)
 	; set ti.bIntOSTmr,(hl)
 	call gfx_Set8bpp
 	xor a,a

@@ -1,15 +1,20 @@
-;@DOES Handle an on interrupt if they are enabled and one happens.
+;@DOES Temporarily enable handling of on interrupts.
 ;@NOTE Preserves interrupt state.
 sys_HandleOnInterrupt:
-	ld a,(ti.mpIntMask)
-	bit ti.bIntOn,a
-	ret z
-	ld a,r
-	push af
+    push hl,bc
+	ld hl,ti.mpIntMask
+    bit ti.bIntOn,(hl)
+    push af
+    set ti.bIntOn,(hl)
 	ei
 	ld b,0
 	djnz $
-	pop af
-	ret pe
-	di
+    di
+    pop af
+    jr nz,.dont_redisable
+	ld hl,ti.mpIntMask
+    res ti.bIntOn,(hl)
+.dont_redisable:
+    pop bc,hl
 	ret
+
