@@ -78,7 +78,7 @@ fs_DirList:
 	jq z,.endofdir
 	inc a
 	jq nz,.list_loop_next_16
-	ld hl,(iy+fsentry_filesector-fs_file_desc_size)
+	ld hl,(iy+fsentry_filesector)
 	ld a,l
 	and a,h
 	inc a
