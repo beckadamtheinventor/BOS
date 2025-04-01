@@ -10,6 +10,8 @@ _hexdump_main:
 	ld (ix-3),hl
 	ld (ix-6),hl
 	ld a,(ix+6)
+    cp a,2
+    jp c,.display_info
 	cp a,3
 	jr c,.no_offset_len
 	call osrt.argv_2
@@ -27,10 +29,6 @@ _hexdump_main:
 	ld (ix-6),hl
 .no_offset_len:
 	call osrt.argv_1
-	ld a,(hl)
-	or a,a
-	jp z,.display_info
-
 	push hl
 	call bos.fs_GetFilePtr
 	pop de
