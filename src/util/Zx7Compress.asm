@@ -192,9 +192,9 @@ util_Zx7Compress:
 .write_zero_bits_loop:
 	call .write_zero_bit
 	add hl,hl
-	scf
+    scf
 	sbc hl,bc
-	add hl,bc
+	adc hl,bc
 	jr c,.write_zero_bits_loop
 	ld b,h
 	ld c,l
@@ -224,10 +224,10 @@ util_Zx7Compress:
 	dec hl
 	ld de,128
 	or a,a
+	ld a,l
 	sbc hl,de
 	jr nc,.write_offset_over_128
-	add hl,de
-	ld a,l
+;	add hl,de
 	ld de,(ix-32)
 	ld (de),a
 	inc de
@@ -244,8 +244,8 @@ util_Zx7Compress:
 	ret
 
 .write_offset_over_128:
-	ld a,l
-	and a,$7F
+;	ld a,l
+;	and a,$7F
 	or a,$80
 	ld de,(ix-32)
 	ld (de),a
@@ -276,7 +276,7 @@ util_Zx7Compress:
 .write_zero_bit:
 	or a,a
 .write_bit:
-	sla (ix-23)
+	rl (ix-23)
 	dec (ix-39)
 	ret nz
 	ld a,(ix-23)

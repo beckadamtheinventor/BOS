@@ -97,6 +97,9 @@ _zx7_main:
 	ld c,0
 	push de,bc ; output length, property byte
 	call osrt.argv_3 ; destination file argument -> HL
+    ld a,(hl)
+    or a,a
+    jq z,.failed_to_create_file
 	push hl ; file name
 	call bos.fs_OpenFile ; check if destination file exists
 	call nc,bos.fs_DeleteFile ; delete it if it exists
@@ -111,8 +114,22 @@ _zx7_main:
 	ld de,ti.pixelShadow
 	push de ; push pointer to temp memory
 	call bos.util_Zx7Decompress ; decompress into pixelShadow
-	pop de,bc,bc ; pop pixelShadow, pointer to compressed data, destination file length
-	jq .write_file_entry  ; jump here as to not duplicate code
+	pop bc,bc,de ; pop pixelShadow, pointer to compressed data, destination file length
+    pop hl ; pop file descriptor
+
+	ld bc,0
+	push bc,hl ; push file write offset, file descriptor
+	ld c,1
+	push bc ; push 8-bit value 1 (write count)
+	push de ; push file length
+	ld bc,ti.pixelShadow
+	push bc ; push file data
+	call bos.fs_Write
+	jq c,.write_error
+    pop bc,hl ; pop data pointer, file length
+; the others don't need to be popped, the stack pointer gets restored in the exit routine
+    jq .success
+
 
 .not_decompress:
 	cp a,'c' ; check if requesting compression
