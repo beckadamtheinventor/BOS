@@ -2,7 +2,7 @@
 ;@INPUT int util_Zx7Compress(void *dest, void *src, int len, void (*progress_callback)(int src_offset));
 ;@OUTPUT length in bytes written to dest.
 util_Zx7Compress:
-virtual at 0
+virtual at 1
     .zx7_bits_byte              rb 1
     .zx7_bits_byte_remaining    rb 1
     .zx7_bits_byte_ptr          rb 3
@@ -302,7 +302,7 @@ end virtual
 	ret
 
 .do_callback:
-    ld hl,(ix+12) ; callback
+    ld hl,(ix+15) ; callback
     add hl,bc
     or a,a
     sbc hl,bc
@@ -317,3 +317,5 @@ end virtual
     call sys_jphl
     pop bc
     ret
+
+
