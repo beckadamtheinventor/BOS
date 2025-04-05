@@ -17,31 +17,31 @@ util_Zx7Compress:
     .tmp_pattern_length         := -33
     .stack_depth                := -33
 .callback_cooldown_amount := 32
-	ld hl,-.stack_depth
+	ld hl,.stack_depth
 	call ti._frameset
 	ld hl,(ix+9)
 	ld bc,(ix+12)
 	ld de,(ix+6)
-    ld (ix-.callback_cooldown),.callback_cooldown_amount
-	ld (ix-.zx7_bits_byte),0 ; zx7 bit byte
-	ld (ix-.zx7_bits_byte_remaining),8 ; zx7 bit byte bits remaining
+    ld (ix+.callback_cooldown),.callback_cooldown_amount
+	ld (ix+.zx7_bits_byte),0 ; zx7 bit byte
+	ld (ix+.zx7_bits_byte_remaining),8 ; zx7 bit byte bits remaining
 	ld a,(hl)
 	ld (de),a
 	inc de
-	ld (ix-.zx7_bits_byte_ptr),de ; pointer to zx7 bit byte
+	ld (ix+.zx7_bits_byte_ptr),de ; pointer to zx7 bit byte
 	inc de
 	inc hl
 	dec bc
-	ld (ix-.source_ptr),hl ; current source pointer
-	ld (ix-.dest_ptr),de ; current output pointer
-	ld (ix-.source_remaining),bc ; remaining source bytes
+	ld (ix+.source_ptr),hl ; current source pointer
+	ld (ix+.dest_ptr),de ; current output pointer
+	ld (ix+.source_remaining),bc ; remaining source bytes
 .compressloop:
-    dec (ix-.callback_cooldown)
+    dec (ix+.callback_cooldown)
     call z,.do_callback
 	call .locate_pattern
 	call .write_pattern_or_literal
-	ld bc,(ix-.source_remaining)
-	ld a,(ix+2-.source_remaining)
+	ld bc,(ix+.source_remaining)
+	ld a,(ix+.source_remaining+2)
 	or a,b
 	or a,c
 	jr nz,.compressloop
@@ -60,7 +60,7 @@ util_Zx7Compress:
 	call .write_zero_bit
 	jr nz,.shift_final_byte
 
-	ld hl,(ix-.dest_ptr)
+	ld hl,(ix+.dest_ptr)
 	ld bc,(ix+6)
 	or a,a
 	sbc hl,bc
@@ -69,16 +69,16 @@ util_Zx7Compress:
 	ret
 
 .locate_pattern:
-	ld hl,(ix-.source_ptr)
+	ld hl,(ix+.source_ptr)
 	ld a,(hl)
 	dec hl
 	push hl
 	ld hl,$090000
-	ld (ix-.current_pattern_cost),hl
+	ld (ix+.current_pattern_cost),hl
 	mlt hl
 	inc l
-	ld (ix-.current_pattern_length),hl
-	ld (ix-.current_pattern_offset),hl
+	ld (ix+.current_pattern_length),hl
+	ld (ix+.current_pattern_offset),hl
 
 	pop hl
 	ld de,(ix+9)
@@ -99,16 +99,16 @@ util_Zx7Compress:
 .locate_pattern_loop:
 	cpdr
 	ret po
-	ld (ix-.current_search_ptr),hl
-	ld (ix-.current_search_remaining),bc
+	ld (ix+.current_search_ptr),hl
+	ld (ix+.current_search_remaining),bc
 	inc hl
 .located_pattern:
-	ld iy,(ix-.source_ptr) ; read ptr
+	ld iy,(ix+.source_ptr) ; read ptr
 	push hl
 	pop de
 	ld bc,65536 ; max offset
 	add hl,bc
-	ld bc,(ix-.source_remaining)
+	ld bc,(ix+.source_remaining)
 .pattern_check_loop:
 	dec bc
 	ld a,b
@@ -124,10 +124,10 @@ util_Zx7Compress:
 	jr z,.pattern_check_loop
 .done_pattern_loop:
 	lea hl,iy
-	ld de,(ix-.source_ptr)
+	ld de,(ix+.source_ptr)
 	scf
 	sbc hl,de ; hl = pattern length - 1
-	ld (ix-.tmp_pattern_length),hl
+	ld (ix+.tmp_pattern_length),hl
 	ld a,h
 	or a,l
 	ret z
@@ -154,42 +154,42 @@ util_Zx7Compress:
 .shift_up_8_loop:
 	add hl,hl
 	djnz .shift_up_8_loop
-	ld bc,(ix-.tmp_pattern_length)
+	ld bc,(ix+.tmp_pattern_length)
 	inc bc
 	call ti._idvrmu
 	ex de,hl
-	ld bc,(ix-.current_pattern_cost) ; pattern length
+	ld bc,(ix+.current_pattern_cost) ; pattern length
 	or a,a
 	sbc hl,bc
 	add hl,bc
 	jr nc,.dont_set_cost
-	ld (ix-.current_pattern_cost),hl ; cost
-	ld hl,(ix-.tmp_pattern_length)
+	ld (ix+.current_pattern_cost),hl ; cost
+	ld hl,(ix+.tmp_pattern_length)
 	inc hl
-	ld (ix-.current_pattern_length),hl ; length
+	ld (ix+.current_pattern_length),hl ; length
 	pop hl
-	ld (ix-.current_pattern_offset),hl ; offset
+	ld (ix+.current_pattern_offset),hl ; offset
 	db $3e ; ld a,... dummify pop bc
 .dont_set_cost:
 	pop bc
-	ld hl,(ix-.current_search_ptr)
-	ld bc,(ix-.current_search_remaining)
+	ld hl,(ix+.current_search_ptr)
+	ld bc,(ix+.current_search_remaining)
 	jp .locate_pattern_loop
 
 .write_literal:
 	call .write_zero_bit
-	ld hl,(ix-.source_ptr)
+	ld hl,(ix+.source_ptr)
 	ld a,(hl)
 	inc hl
-	ld (ix-.source_ptr),hl
+	ld (ix+.source_ptr),hl
     call .write_byte
-	ld hl,(ix-.source_remaining)
+	ld hl,(ix+.source_remaining)
 	dec hl
-	ld (ix-.source_remaining),hl
+	ld (ix+.source_remaining),hl
 	ret
 
 .write_pattern_or_literal:
-	ld hl,(ix-.current_pattern_cost)
+	ld hl,(ix+.current_pattern_cost)
 	ld bc,$090000
 	xor a,a
 	sbc hl,bc
@@ -198,7 +198,7 @@ util_Zx7Compress:
 	scf
 	call .write_bit
 	ld hl,2
-	ld bc,(ix-.current_pattern_length) ; length
+	ld bc,(ix+.current_pattern_length) ; length
 	dec bc
 .write_zero_bits_loop:
 	call .write_zero_bit
@@ -209,7 +209,7 @@ util_Zx7Compress:
 	jr c,.write_zero_bits_loop
 	ld b,h
 	ld c,l
-	ld hl,(ix-.current_pattern_length) ; length
+	ld hl,(ix+.current_pattern_length) ; length
 	dec hl
 .write_length_bits_loop:
 	or a,a
@@ -231,7 +231,7 @@ util_Zx7Compress:
 	call .write_bit
 	jr .write_length_bits_loop
 .done_writing_length_bits:
-	ld hl,(ix-.current_pattern_offset) ; offset
+	ld hl,(ix+.current_pattern_offset) ; offset
 	dec hl
 	ld de,128
 	or a,a
@@ -240,14 +240,14 @@ util_Zx7Compress:
 	jr nc,.write_offset_over_128
     call .write_byte
 .finished_writing_pattern:
-	ld bc,(ix-.current_pattern_length)
-	ld hl,(ix-.source_ptr)
+	ld bc,(ix+.current_pattern_length)
+	ld hl,(ix+.source_ptr)
 	add hl,bc
-	ld (ix-.source_ptr),hl
-	ld hl,(ix-.source_remaining)
+	ld (ix+.source_ptr),hl
+	ld hl,(ix+.source_remaining)
 	or a,a
 	sbc hl,bc
-	ld (ix-.source_remaining),hl
+	ld (ix+.source_remaining),hl
 	ret
 
 .write_offset_over_128:
@@ -278,24 +278,24 @@ util_Zx7Compress:
 .write_zero_bit:
 	or a,a
 .write_bit:
-	rl (ix-.zx7_bits_byte)
-	dec (ix-.zx7_bits_byte_remaining)
+	rl (ix+.zx7_bits_byte)
+	dec (ix+.zx7_bits_byte_remaining)
 	ret nz
-	ld a,(ix-.zx7_bits_byte)
-	ld de,(ix-.zx7_bits_byte_ptr)
+	ld a,(ix+.zx7_bits_byte)
+	ld de,(ix+.zx7_bits_byte_ptr)
 	ld (de),a
-	ld (ix-.zx7_bits_byte_remaining),8
-	ld de,(ix-.dest_ptr)
-	ld (ix-.zx7_bits_byte_ptr),de
+	ld (ix+.zx7_bits_byte_remaining),8
+	ld de,(ix+.dest_ptr)
+	ld (ix+.zx7_bits_byte_ptr),de
 	inc de
-	ld (ix-.dest_ptr),de
+	ld (ix+.dest_ptr),de
 	ret
 
 .write_byte:
-	ld de,(ix-.dest_ptr)
+	ld de,(ix+.dest_ptr)
 	ld (de),a
 	inc de
-	ld (ix-.dest_ptr),de
+	ld (ix+.dest_ptr),de
     ret
 
 
@@ -308,9 +308,9 @@ util_Zx7Compress:
 ; only need to reset the cooldown if the callback is set
 ; if the callback is null, the cooldown will be 256 instead of .callback_cooldown_amount
 ; leading to fewer checks
-    ld (ix-.callback_cooldown),.callback_cooldown_amount
+    ld (ix+.callback_cooldown),.callback_cooldown_amount
     ex hl,de
-    ld hl,(ix-.source_ptr) ; current source pointer
+    ld hl,(ix+.source_ptr) ; current source pointer
     ld bc,(ix+9) ; void* src
     or a,a
     sbc hl,bc
