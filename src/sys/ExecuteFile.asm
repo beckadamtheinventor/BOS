@@ -459,6 +459,8 @@ sys_jphl := $
 	or a,a
 	scf
 	jr z,.terminate_argument_loop_done_no_terminate
+    cp a,$A
+    jr z,.terminate_argument_loop_done
 	inc hl
 	cp a,$5C ; backslash
 	jr z,.terminate_argument_loop
@@ -490,10 +492,10 @@ sys_jphl := $
 	jr .terminate_argument_loop_done
 .terminate_argument_not_quote:
 	dec hl
-	sub a,' '
+	cp a,' '
 	jr nz,.terminate_argument_loop
 .terminate_argument_loop_done:
-	ld (hl),a
+	ld (hl),0
 .terminate_argument_loop_done_no_terminate:
 	ex hl,de
 	pop hl
