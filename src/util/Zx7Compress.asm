@@ -2,22 +2,20 @@
 ;@INPUT int util_Zx7Compress(void *dest, void *src, int len, void (*progress_callback)(int src_offset));
 ;@OUTPUT length in bytes written to dest.
 util_Zx7Compress:
-virtual at 1
-    .zx7_bits_byte              rb 1
-    .zx7_bits_byte_remaining    rb 1
-    .callback_cooldown          rb 1
-    .zx7_bits_byte_ptr          rb 3
-    .source_ptr                 rb 3
-    .dest_ptr                   rb 3
-    .source_remaining           rb 3
-    .current_pattern_cost       rb 3
-    .current_pattern_length     rb 3
-    .current_pattern_offset     rb 3
-    .current_search_ptr         rb 3
-    .current_search_remaining   rb 3
-    .tmp_pattern_length         rb 3
-    .stack_depth:
-end virtual
+    .zx7_bits_byte              := -1
+    .zx7_bits_byte_remaining    := -2
+    .callback_cooldown          := -3
+    .zx7_bits_byte_ptr          := -6
+    .source_ptr                 := -9
+    .dest_ptr                   := -12
+    .source_remaining           := -15
+    .current_pattern_cost       := -18
+    .current_pattern_length     := -21
+    .current_pattern_offset     := -24
+    .current_search_ptr         := -27
+    .current_search_remaining   := -30
+    .tmp_pattern_length         := -33
+    .stack_depth                := -33
 .callback_cooldown_amount := 32
 	ld hl,-.stack_depth
 	call ti._frameset
