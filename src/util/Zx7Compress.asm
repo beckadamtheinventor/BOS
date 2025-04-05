@@ -5,6 +5,7 @@ util_Zx7Compress:
 virtual at 1
     .zx7_bits_byte              rb 1
     .zx7_bits_byte_remaining    rb 1
+    .callback_cooldown          rb 1
     .zx7_bits_byte_ptr          rb 3
     .source_ptr                 rb 3
     .dest_ptr                   rb 3
@@ -17,11 +18,13 @@ virtual at 1
     .tmp_pattern_length         rb 3
     .stack_depth:
 end virtual
+.callback_cooldown_amount := 32
 	ld hl,-.stack_depth
 	call ti._frameset
 	ld hl,(ix+9)
 	ld bc,(ix+12)
 	ld de,(ix+6)
+    ld (ix-.callback_cooldown),.callback_cooldown_amount
 	ld (ix-.zx7_bits_byte),0 ; zx7 bit byte
 	ld (ix-.zx7_bits_byte_remaining),8 ; zx7 bit byte bits remaining
 	ld a,(hl)
@@ -35,7 +38,8 @@ end virtual
 	ld (ix-.dest_ptr),de ; current output pointer
 	ld (ix-.source_remaining),bc ; remaining source bytes
 .compressloop:
-    call .do_callback
+    dec (ix-.callback_cooldown)
+    call z,.do_callback
 	call .locate_pattern
 	call .write_pattern_or_literal
 	ld bc,(ix-.source_remaining)
@@ -175,15 +179,12 @@ end virtual
 	jp .locate_pattern_loop
 
 .write_literal:
-	ld de,(ix-.dest_ptr)
 	call .write_zero_bit
 	ld hl,(ix-.source_ptr)
 	ld a,(hl)
 	inc hl
 	ld (ix-.source_ptr),hl
-	ld (de),a
-	inc de
-	ld (ix-.dest_ptr),de
+    call .write_byte
 	ld hl,(ix-.source_remaining)
 	dec hl
 	ld (ix-.source_remaining),hl
@@ -239,11 +240,7 @@ end virtual
 	ld a,l
 	sbc hl,de
 	jr nc,.write_offset_over_128
-;	add hl,de
-	ld de,(ix-.dest_ptr)
-	ld (de),a
-	inc de
-	ld (ix-.dest_ptr),de
+    call .write_byte
 .finished_writing_pattern:
 	ld bc,(ix-.current_pattern_length)
 	ld hl,(ix-.source_ptr)
@@ -256,13 +253,8 @@ end virtual
 	ret
 
 .write_offset_over_128:
-;	ld a,l
-;	and a,$7F
 	or a,$80
-	ld de,(ix-.dest_ptr)
-	ld (de),a
-	inc de
-	ld (ix-.dest_ptr),de
+    call .write_byte
 	ld bc,1024
 .write_offset_over_128_loop:
 	or a,a
@@ -301,12 +293,24 @@ end virtual
 	ld (ix-.dest_ptr),de
 	ret
 
+.write_byte:
+	ld de,(ix-.dest_ptr)
+	ld (de),a
+	inc de
+	ld (ix-.dest_ptr),de
+    ret
+
+
 .do_callback:
     ld hl,(ix+15) ; callback
     add hl,bc
     or a,a
     sbc hl,bc
     ret z
+; only need to reset the cooldown if the callback is set
+; if the callback is null, the cooldown will be 256 instead of .callback_cooldown_amount
+; leading to fewer checks
+    ld (ix-.callback_cooldown),.callback_cooldown_amount
     ex hl,de
     ld hl,(ix-.source_ptr) ; current source pointer
     ld bc,(ix+9) ; void* src
