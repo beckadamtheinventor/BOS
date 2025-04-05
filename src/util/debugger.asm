@@ -10,12 +10,13 @@ util_OpenDebugger:
 	call sys_WaitKeyCycle
 	cp a,9
 	jr nz,.loop
-	jp util_RestoreRegisters
+    jr .restore
 .cemu:
 	scf
 	sbc hl,hl
 	ld (hl),2
-	ret
+.restore:
+	jp util_RestoreRegisters
 .check_emu:
 	xor	a,a
 	ld	hl,$FD0000 ;CEmu dbgext

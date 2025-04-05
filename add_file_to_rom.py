@@ -8,9 +8,9 @@ partition_default_entry = [
 ]
 
 root_dir_data = [
-	"bin        ", 0x10, 0x03, 0x00, 0x00, 0x02,
-	"lib        ", 0x10, 0x02, 0x00, 0x00, 0x02,
-	"sbin       ", 0x10, 0x01, 0x00, 0x00, 0x02,
+	"bin		", 0x10, 0x03, 0x00, 0x00, 0x02,
+	"lib		", 0x10, 0x02, 0x00, 0x00, 0x02,
+	"sbin	   ", 0x10, 0x01, 0x00, 0x00, 0x02,
 ] + [0xFF]*0xC0 + [0xFE] + [0xFF]*0xF
 
 
@@ -195,22 +195,22 @@ def add_file_to_rom(rom, fout, flags, fin_data):
 		free_file_descriptor(rom, f)
 
 	ptr = 0x040000 + 0x40 * (rom[dptr+0xC]+rom[dptr+0xD]*0x100)
-	# print("found parent directory. ptr:",hex(ptr),"len:",hex(dptr_len))
+	#print("found parent directory. ptr:",hex(ptr))
 	while rom[ptr] != 0xFF:
 		if rom[ptr] == 0xFE:
 			if rom[ptr+0xC]+rom[ptr+0xD]*0x100 == 0xFFFF:
-				nextptr = alloc_space_for_file(rom, 0x40)
+				nextptr = alloc_space_for_file(rom, 0x400)
 				rom[ptr+0xB] = 0x10
 				rom[ptr+0xC] = (nextptr//0x40) % 0x100
 				rom[ptr+0xD] = nextptr//0x4000
 				rom[ptr+0xE] = 0
-				rom[ptr+0xF] = 2
+				rom[ptr+0xF] = 0x10
 			ptr = 0x040000 + (rom[ptr+0xC]+rom[ptr+0xD]*0x100)*0x40
 		ptr += 16
 	
 
 	if ptr+16 < len(rom):
-		while rom[ptr] != 0x00 and rom[ptr] != 0xFF: ptr+=16
+		while rom[ptr] != 0xFF: ptr+=16
 	if ptr+16 >= len(rom):
 		rom.extend([0xFF]*0x40)
 	if '/' in fout:
@@ -223,27 +223,30 @@ def add_file_to_rom(rom, fout, flags, fin_data):
 		name = fn
 		ext = ""
 	if flags & 0x10:
-		sector = alloc_space_for_file(rom, 0x40)
+		sector = alloc_space_for_file(rom, 0x400)
 	else:
 		sector = alloc_space_for_file(rom, len(fin_data))
 	if not sector:
 		print(f"Failed to allocate space for file on rom: {fout}\nAborting.")
 		exit(1)
+	#print(f"Writing file name to address {hex(ptr)}")
 	for i in range(8):
 		if i<len(name): rom[ptr+i] = ord(name[i])
 		else: rom[ptr+i] = 0x20
 	for i in range(3):
 		if i<len(ext): rom[ptr+8+i] = ord(ext[i])
 		else: rom[ptr+8+i] = 0x20
+	#print(str(bytes(rom[ptr:ptr+11]), 'UTF-8'))
 	rom[ptr+0xB] = flags
 	rom[ptr+0xC] = sector&0xFF
 	rom[ptr+0xD] = sector//0x100
 
 	sptr = 0x040000+sector*0x40
 
+	#print(f"Writing file data to address {hex(sptr)}")
 	if flags & 0x10:
 		rom[ptr+0xE] = 0x00
-		rom[ptr+0xF] = 0x01
+		rom[ptr+0xF] = 0x10
 		rom[sptr+0x1F0] = 0xFE
 	else:
 		rom[ptr+0xE] = len(fin_data)&0xFF
@@ -371,8 +374,9 @@ if __name__=='__main__':
 		print("""Usage:
 python add_file_to_rom.py file1source file1dest file2source +file2dest
 raw binary data from file1source is written to file1dest on rom image
+note: arguments are applied in the order they appear.
 
---rom      input rom file, should be exported from the emulator after first boot
+--rom	  input rom file, should be exported from the emulator after first boot
 --append   append target file
 --output   output rom file
 """)

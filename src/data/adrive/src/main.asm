@@ -53,6 +53,7 @@ end fs_dir
 fs_dir bin_dir
 	; fs_sfentry writeinto_exe, ">", "", f_system+f_subfile
 	; fs_sfentry appendinto_exe, ">>", "", f_system+f_subfile
+    fs_entry bin_fs_dir, "fs", "", f_system+f_subdir
 	fs_sfentry continuecmd_exe, "@cmd", "", f_system+f_subfile
 	fs_entry argv_so, "argv", "so", f_system
 	fs_sfentry asmcomp_exe, "asmcomp", "", f_system+f_subfile
@@ -104,6 +105,10 @@ fs_dir bin_dir
 	fs_entry os_internal_subfiles, "osfiles", "dat", f_system
 end fs_dir
 
+; "/bin/fs" dir
+fs_dir bin_fs_dir
+    fs_sfentry fputs_exe, "fputs", "", f_system+f_subfile
+end fs_dir
 
 fs_file os_internal_subfiles
 
@@ -270,6 +275,10 @@ fs_file os_internal_subfiles
 	; fs_subfile json_exe, bin_dir
 		; include 'fs/bin/json.asm'
 	; end fs_subfile
+
+    fs_subfile fputs_exe, bin_fs_dir
+        include 'fs/bin/fs/fputs.asm'
+    end fs_subfile
 end fs_file
 
 

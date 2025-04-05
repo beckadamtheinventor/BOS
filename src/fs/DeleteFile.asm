@@ -29,23 +29,20 @@ fs_DeleteFile:
 	pop de
 .delete_descriptor:
 	call sys_FlashUnlock
-.delete_descriptor_loop:
     ld a,(de)
-    push af
+    cp a,fsentry_longfilename
+    jr z,.delete_long_file_name
+.delete_descriptor_loop:
+.delete_long_file_name:
 ; mark the file descriptor as deleted
 	xor a,a
 	call sys_WriteFlashA
-	dec de
-    pop af
-    cp a,fsentry_longfilename_entry
-    jr z,.delete_next_long_file_name_entry
-    cp a,fsentry_longfilename
-    jr nz,.not_long_file_name
-.delete_next_long_file_name_entry:
     ld hl,fs_file_desc_size
     add hl,de
     ex hl,de
-    jr .delete_descriptor_loop
+    ld a,(de)
+    cp a,fsentry_longfilename_entry
+    jr z,.delete_descriptor_loop
 .not_long_file_name:
 	call sys_FlashLock
 

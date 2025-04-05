@@ -2,29 +2,44 @@
 ;@INPUT int util_Zx7Compress(void *dest, void *src, int len, void (*progress_callback)(int src_offset));
 ;@OUTPUT length in bytes written to dest.
 util_Zx7Compress:
-	ld hl,-39
+virtual at 0
+    .zx7_bits_byte              rb 1
+    .zx7_bits_byte_remaining    rb 1
+    .zx7_bits_byte_ptr          rb 3
+    .source_ptr                 rb 3
+    .dest_ptr                   rb 3
+    .source_remaining           rb 3
+    .current_pattern_cost       rb 3
+    .current_pattern_length     rb 3
+    .current_pattern_offset     rb 3
+    .current_search_ptr         rb 3
+    .current_search_remaining   rb 3
+    .tmp_pattern_length         rb 3
+    .stack_depth:
+end virtual
+	ld hl,-.stack_depth
 	call ti._frameset
 	ld hl,(ix+9)
 	ld bc,(ix+12)
 	ld de,(ix+6)
-	ld (ix-3),hl
-	ld (ix-23),0
-	ld (ix-39),8
+	ld (ix-.zx7_bits_byte),0 ; zx7 bit byte
+	ld (ix-.zx7_bits_byte_remaining),8 ; zx7 bit byte bits remaining
 	ld a,(hl)
 	ld (de),a
 	inc de
-	ld (ix-22),de
+	ld (ix-.zx7_bits_byte_ptr),de ; pointer to zx7 bit byte
 	inc de
 	inc hl
 	dec bc
-	ld (ix-6),hl
-	ld (ix-32),de
-	ld (ix-26),bc
+	ld (ix-.source_ptr),hl ; current source pointer
+	ld (ix-.dest_ptr),de ; current output pointer
+	ld (ix-.source_remaining),bc ; remaining source bytes
 .compressloop:
+    call .do_callback
 	call .locate_pattern
 	call .write_pattern_or_literal
-	ld bc,(ix-26)
-	ld a,(ix+2-26)
+	ld bc,(ix-.source_remaining)
+	ld a,(ix+2-.source_remaining)
 	or a,b
 	or a,c
 	jr nz,.compressloop
@@ -43,7 +58,7 @@ util_Zx7Compress:
 	call .write_zero_bit
 	jr nz,.shift_final_byte
 
-	ld hl,(ix-32)
+	ld hl,(ix-.dest_ptr)
 	ld bc,(ix+6)
 	or a,a
 	sbc hl,bc
@@ -52,22 +67,19 @@ util_Zx7Compress:
 	ret
 
 .locate_pattern:
-	ld hl,(ix-6)
+	ld hl,(ix-.source_ptr)
 	ld a,(hl)
 	dec hl
-	; ld (ix-9),hl
 	push hl
 	ld hl,$090000
-	ld (ix-12),hl
-;	ld hl,1
+	ld (ix-.current_pattern_cost),hl
 	mlt hl
 	inc l
-	ld (ix-15),hl
-	ld (ix-18),hl
+	ld (ix-.current_pattern_length),hl
+	ld (ix-.current_pattern_offset),hl
 
-	; ld hl,(ix-9)
 	pop hl
-	ld de,(ix-3)
+	ld de,(ix+9)
 	or a,a
 	sbc hl,de
 	push hl
@@ -85,16 +97,16 @@ util_Zx7Compress:
 .locate_pattern_loop:
 	cpdr
 	ret po
-	ld (ix-35),hl
-	ld (ix-38),bc
+	ld (ix-.current_search_ptr),hl
+	ld (ix-.current_search_remaining),bc
 	inc hl
 .located_pattern:
-	ld iy,(ix-6) ; read ptr
+	ld iy,(ix-.source_ptr) ; read ptr
 	push hl
 	pop de
 	ld bc,65536 ; max offset
 	add hl,bc
-	ld bc,(ix-26)
+	ld bc,(ix-.source_remaining)
 .pattern_check_loop:
 	dec bc
 	ld a,b
@@ -110,10 +122,10 @@ util_Zx7Compress:
 	jr z,.pattern_check_loop
 .done_pattern_loop:
 	lea hl,iy
-	ld de,(ix-6)
+	ld de,(ix-.source_ptr)
 	scf
 	sbc hl,de ; hl = pattern length - 1
-	ld (ix-29),hl
+	ld (ix-.tmp_pattern_length),hl
 	ld a,h
 	or a,l
 	ret z
@@ -133,52 +145,52 @@ util_Zx7Compress:
 	add a,4
 .offset_under_128:
 	; divide cost by length
-	; TODO: optimize this somehow
+	; TODO: optimize out call to ti._idvrmu
 	ld h,a
 	ld l,0
 	ld b,8
 .shift_up_8_loop:
 	add hl,hl
 	djnz .shift_up_8_loop
-	ld bc,(ix-29)
+	ld bc,(ix-.tmp_pattern_length)
 	inc bc
 	call ti._idvrmu
 	ex de,hl
-	ld bc,(ix-12) ; pattern length
+	ld bc,(ix-.current_pattern_cost) ; pattern length
 	or a,a
 	sbc hl,bc
 	add hl,bc
 	jr nc,.dont_set_cost
-	ld (ix-12),hl ; cost
-	ld hl,(ix-29)
+	ld (ix-.current_pattern_cost),hl ; cost
+	ld hl,(ix-.tmp_pattern_length)
 	inc hl
-	ld (ix-15),hl ; length
+	ld (ix-.current_pattern_length),hl ; length
 	pop hl
-	ld (ix-18),hl ; offset
+	ld (ix-.current_pattern_offset),hl ; offset
 	db $3e ; ld a,... dummify pop bc
 .dont_set_cost:
 	pop bc
-	ld hl,(ix-35)
-	ld bc,(ix-38)
+	ld hl,(ix-.current_search_ptr)
+	ld bc,(ix-.current_search_remaining)
 	jp .locate_pattern_loop
 
 .write_literal:
-	ld de,(ix-32)
+	ld de,(ix-.dest_ptr)
 	call .write_zero_bit
-	ld hl,(ix-6)
+	ld hl,(ix-.source_ptr)
 	ld a,(hl)
 	inc hl
-	ld (ix-6),hl
+	ld (ix-.source_ptr),hl
 	ld (de),a
 	inc de
-	ld (ix-32),de
-	ld hl,(ix-26)
+	ld (ix-.dest_ptr),de
+	ld hl,(ix-.source_remaining)
 	dec hl
-	ld (ix-26),hl
+	ld (ix-.source_remaining),hl
 	ret
 
 .write_pattern_or_literal:
-	ld hl,(ix-12)
+	ld hl,(ix-.current_pattern_cost)
 	ld bc,$090000
 	xor a,a
 	sbc hl,bc
@@ -187,7 +199,7 @@ util_Zx7Compress:
 	scf
 	call .write_bit
 	ld hl,2
-	ld bc,(ix-15) ; length
+	ld bc,(ix-.current_pattern_length) ; length
 	dec bc
 .write_zero_bits_loop:
 	call .write_zero_bit
@@ -198,7 +210,7 @@ util_Zx7Compress:
 	jr c,.write_zero_bits_loop
 	ld b,h
 	ld c,l
-	ld hl,(ix-15) ; length
+	ld hl,(ix-.current_pattern_length) ; length
 	dec hl
 .write_length_bits_loop:
 	or a,a
@@ -220,7 +232,7 @@ util_Zx7Compress:
 	call .write_bit
 	jr .write_length_bits_loop
 .done_writing_length_bits:
-	ld hl,(ix-18) ; offset
+	ld hl,(ix-.current_pattern_offset) ; offset
 	dec hl
 	ld de,128
 	or a,a
@@ -228,29 +240,29 @@ util_Zx7Compress:
 	sbc hl,de
 	jr nc,.write_offset_over_128
 ;	add hl,de
-	ld de,(ix-32)
+	ld de,(ix-.dest_ptr)
 	ld (de),a
 	inc de
-	ld (ix-32),de
+	ld (ix-.dest_ptr),de
 .finished_writing_pattern:
-	ld bc,(ix-15)
-	ld hl,(ix-6)
+	ld bc,(ix-.current_pattern_length)
+	ld hl,(ix-.source_ptr)
 	add hl,bc
-	ld (ix-6),hl
-	ld hl,(ix-26)
+	ld (ix-.source_ptr),hl
+	ld hl,(ix-.source_remaining)
 	or a,a
 	sbc hl,bc
-	ld (ix-26),hl
+	ld (ix-.source_remaining),hl
 	ret
 
 .write_offset_over_128:
 ;	ld a,l
 ;	and a,$7F
 	or a,$80
-	ld de,(ix-32)
+	ld de,(ix-.dest_ptr)
 	ld (de),a
 	inc de
-	ld (ix-32),de
+	ld (ix-.dest_ptr),de
 	ld bc,1024
 .write_offset_over_128_loop:
 	or a,a
@@ -276,16 +288,32 @@ util_Zx7Compress:
 .write_zero_bit:
 	or a,a
 .write_bit:
-	rl (ix-23)
-	dec (ix-39)
+	rl (ix-.zx7_bits_byte)
+	dec (ix-.zx7_bits_byte_remaining)
 	ret nz
-	ld a,(ix-23)
-	ld de,(ix-22)
+	ld a,(ix-.zx7_bits_byte)
+	ld de,(ix-.zx7_bits_byte_ptr)
 	ld (de),a
-	ld (ix-39),8
-	ld de,(ix-32)
-	ld (ix-22),de
+	ld (ix-.zx7_bits_byte_remaining),8
+	ld de,(ix-.dest_ptr)
+	ld (ix-.zx7_bits_byte_ptr),de
 	inc de
-	ld (ix-32),de
+	ld (ix-.dest_ptr),de
 	ret
 
+.do_callback:
+    ld hl,(ix+12) ; callback
+    add hl,bc
+    or a,a
+    sbc hl,bc
+    ret z
+    ex hl,de
+    ld hl,(ix-.source_ptr) ; current source pointer
+    ld bc,(ix+9) ; void* src
+    or a,a
+    sbc hl,bc
+    push hl
+    ex hl,de
+    call sys_jphl
+    pop bc
+    ret
