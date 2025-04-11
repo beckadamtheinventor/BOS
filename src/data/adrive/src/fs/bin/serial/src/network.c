@@ -148,7 +148,7 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
 			if (!(outgoing_file.name = sys_Malloc(len))) {
 				malloc_error();
 			} else {
-				fs_CreateDir(data, 0x10);
+			    fs_CreateDir(data, 0x10);
 			}
 			break;
 		case 7: // preparing for long file block

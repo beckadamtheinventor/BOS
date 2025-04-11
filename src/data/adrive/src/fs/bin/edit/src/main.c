@@ -23,9 +23,10 @@
 #define CHAR_WIDTH 8
 #define TAB_WIDTH 4
 
-#define SAFE_RAM_BUFFER (0xD031F6+0x400)
-#define SAFE_RAM_BUFFER_LEN 65536
+#define LINES_BUFFER (unsigned int*)(0xD031F6+0x200)
 #define MAX_LINES 1024
+#define SAFE_RAM_BUFFER (uint8_t*)(0xD031F6+0x200+MAX_LINES*3)
+#define SAFE_RAM_BUFFER_LEN 65536
 
 typedef struct _estate {
 	struct {
@@ -35,6 +36,13 @@ typedef struct _estate {
 		bool redraw_line : 1;
 	};
 	uint8_t charset;
+    struct {
+        uint8_t bg;
+        uint8_t fg;
+        uint8_t highlight_bg;
+        uint8_t highlight_fg;
+        uint8_t fg2;
+    } colors;
 	char* fname;
 	char* buffer;
 	unsigned int buffer_len;
@@ -60,6 +68,16 @@ void load_empty();
 void load_file(char* fname);
 void draw_text(bool one_line);
 void type_char(char c);
+void del_char();
+void dec_buffer_offsets();
+void inc_buffer_offsets();
+unsigned int cur_line_len();
+void move_cursor_to_eol();
+void zero_cursor_offset();
+void move_cursor_up(bool only_move_draw);
+void move_cursor_down(bool only_move_draw);
+void move_cursor_left();
+void move_cursor_right();
 
 
 int main(int argc, char** argv) {
@@ -75,16 +93,36 @@ int main(int argc, char** argv) {
 	ed.redraw = true;
 	do {
 		if (ed.redraw) {
+            gfx_FillScreen(ed.colors.bg);
 			draw_text(false);
+            ed.redraw = ed.redraw_line = false;
 		} else if (ed.redraw_line) {
 			draw_text(true);
+            ed.redraw_line = false;
 		}
+        gfx_SetColor(ed.colors.bg);
+        gfx_FillRectangle(310, 1, 10, 10);
+        gfx_SetTextXY(310, 1);
+        gfx_SetTextFGColor(ed.colors.fg2);
+        gfx_PrintChar(overtypes[ed.charset]);
 		key = sys_WaitKeyCycle();
 		if (key == sk_Enter) {
 			type_char(LINE_FEED);
-		} else if (key == sk_2nd) {
-			;
-		}
+		} else if (key == sk_Del) {
+			del_char();
+		} else if (key == sk_Left) {
+            move_cursor_left();
+        } else if (key == sk_Right) {
+            move_cursor_right();
+        } else if (key == sk_Up) {
+            move_cursor_up(false);
+        } else if (key == sk_Down) {
+            move_cursor_down(false);
+        } else if (key == sk_2nd) {
+            ed.charset = (ed.charset + 1) & 3;
+        } else if (key == sk_Alpha) {
+            ed.charset = (ed.charset - 1) & 3;
+        }
 		
 	} while (key != sk_Clear);
 	gfx_End();
@@ -101,10 +139,19 @@ void init_editor() {
 	ed.last_line_no = 0;
 	ed.offset_left = 0;
 	ed.offset_right = ed.buffer_len - 1;
-	ed.line_offsets = malloc(sizeof(unsigned int)*MAX_LINES);
-	memset(ed.line_offsets, 0, sizeof(unsigned int)*MAX_LINES);
+	ed.line_offsets = LINES_BUFFER;
+	memset(ed.line_offsets, 0, MAX_LINES*3);
 	ed.line_offset_left = 0;
 	ed.line_offset_right = MAX_LINES - 1;
+    ed.file_len = 0;
+    ed.charset = 0;
+    ed.inserting = true;
+
+    ed.colors.bg = 0x00;
+    ed.colors.fg = 0xFF;
+    ed.colors.fg2 = 0x07;
+    ed.colors.highlight_bg = 0x1D;
+    ed.colors.highlight_bg = 0xDF;
 }
 
 void load_empty() {
@@ -119,7 +166,8 @@ void load_file(char* fname) {
 		ed.needs_save = true;
 	} else {
 		ed.needs_save = false;
-		fs_Read(ed.buffer, fs_GetFDLen(fd), 1, fd, 0);
+        ed.file_len = fs_GetFDLen(fd);
+		fs_Read(ed.buffer, ed.file_len, 1, fd, 0);
 	}
 }
 
@@ -147,6 +195,11 @@ void draw_text(bool one_line) {
 	int y = MARGIN_TOP;
 	unsigned int lno = ed.draw_start_line;
 	unsigned int offset = get_line_offset(lno) + ed.cursor_line_offset_start;
+
+    gfx_SetTextTransparentColor(ed.colors.bg);
+    gfx_SetTextBGColor(ed.colors.bg);
+    gfx_SetTextFGColor(ed.colors.fg);
+
 	if (one_line) {
 		lno = ed.cursor_line_no;
 	}
@@ -195,21 +248,38 @@ void type_char(char c) {
 		ed.redraw = true;
 	}
 	ed.redraw_line = true;
-	if (!ed.inserting) {
+	if (ed.inserting) {
+        ed.file_len++;
+    } else {
 		if (ed.offset_right >= ed.buffer_len) {
 			return;
 		}
 		ed.offset_right++;
 	}
+    if (c == LINE_FEED) {
+        move_cursor_down(false);
+    } else {
+        move_cursor_right();
+    }
 }
 
 void del_char() {
 	ed.needs_save = true;
 	if (ed.inserting) {
-		ed.offset_right++;
+        if (ed.offset_left > 0) {
+		    ed.offset_left--;
+        }
 	} else {
-		ed.offset_left--;
+        if (ed.offset_right < ed.buffer_len) {
+		    ed.offset_right++;
+        }
 	}
+    if (ed.cursor_line_offset > 0) {
+    	ed.redraw_line = true;
+    } else {
+        ed.redraw = true;
+    }
+    move_cursor_left();
 }
 
 unsigned int cur_line_len() {

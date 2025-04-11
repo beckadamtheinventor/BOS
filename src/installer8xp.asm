@@ -77,7 +77,6 @@ do_installation:
 	ld hl,installing_string
 	call _printline
 	os_create $30 ;erase all user flash sectors
-	jp $020108 ; boot OS
 
 fail_missing_secondary:
 	ld hl,missing_secondary_str

@@ -20,10 +20,12 @@ except ImportError:
 
 
 ce_id = [(0x0451, 0xe008), (0x16C0, 0x05E1)]
-max_packet_size = 1024
+max_packet_size = 4096
 incoming_data_buffer_len = max_packet_size - 1
 
 def WriteSerial(serial_device, data):
+	if serial_device is None:
+		return
 	serial_device.write(len(data).to_bytes(3, 'little'))
 	serial_device.write(data)
 	time.sleep(0.05)
@@ -94,31 +96,24 @@ def SendPackage(pack, serial_device):
 
 	return manifest
 
-def SendFile(path, devpath, serial_device):
+def SendFile(path, devpath, serial_device, send_file=True):
 	if serial_device is None:
-		serial_device = ConnectCalcSerial()
-		if serial_device is None:
-			return False
-	try:
-		with open(path, 'rb') as f:
-			fdata = f.read()
-	except FileNotFoundError:
 		return False
-	if '.' in path:
-		name, ext = os.path.splitext(os.path.basename(path))
+	if send_file:
+		try:
+			with open(path, 'rb') as f:
+				fdata = f.read()
+		except FileNotFoundError:
+			return False
+		fname = "/" + os.path.basename(path)
+		if len(devpath):
+			if devpath.endswith("/"):
+				fname = devpath + fname
+			else:
+				fname = devpath + "/" + fname
 	else:
-		name = path
-		ext = ""
-	# fname = name[:min(len(name),8)] + "." + ext[:min(len(ext),3)]
-	while len(ext) > 4 or len(name) > 8:
-		print("File name must fit in 8.3 characters. Example: abcdefgh.jkl")
-		name, ext = os.path.splitext(os.path.basename(input("File name on calc?")))
-	fname = name + ext
-	if len(devpath):
-		if devpath.endswith("/"):
-			fname = devpath + fname
-		else:
-			fname = devpath + "/" + fname
+		fdata = path
+		fname = devpath
 	if len(fdata) > 65536:
 		m = math.ceil(len(fdata)/65536)
 		WriteSerial(serial_device, bytes([7] + list(len(fdata).to_bytes(3, 'little'))))
@@ -148,17 +143,19 @@ def SendFile(path, devpath, serial_device):
 			print(f"{int(100*i/len(fdata))}%", end=" ")
 			# WaitForAck(serial_device)
 			# return False
-		print()
-		return True
+	print("\nDone.")
+	return True
 
 def SendDirectory(path, serial_device):
 	WriteSerial(serial_device, bytes([6] + [ord(c) for c in path]))
 
+def SendMessage(msg, dev):
+	print(msg)
+	WriteSerial(dev, bytes([0] + [ord(c) for c in msg] + [0]))
+
 def RequestFile(path, serial_device):
 	if serial_device is None:
-		serial_device = ConnectCalcSerial()
-		if serial_device is None:
-			return False
+		return False
 	WriteSerial(serial_device, bytes([3] + [ord(c) for c in path] + [0]))
 	headerpacket = WaitForAck(serial_device)
 	if len(headerpacket) and headerpacket[0] == 1:
@@ -180,10 +177,8 @@ def RequestFile(path, serial_device):
 
 def DirList(path, serial_device):
 	if serial_device is None:
-		serial_device = ConnectCalcSerial()
-		if serial_device is None:
-			return False
-
+		return False
+	while "//" in path: path = path.replace("//", "/")
 	WriteSerial(serial_device, bytes([5] + [ord(c) for c in path] + [0]))
 	return True
 	# return WaitForAck(serial_device)
@@ -231,12 +226,16 @@ BOS Serial File Transfer Program
 connect        | attempt to connect a calc
 send file      | sends a file to the connected calc
 sendpackage pk | sends files from a json formatted package
+update         | send update package to the connected calc
 request file   | request a file from the connected calc
 dump file      | request a rom dump from the connected calc
 list [dir]     | list files in a directory on the connected calc
 message [msg]  | send a message to the connected calc (useful for debugging)
 clear [msg]    | clear the console on the connected calc
 quit           | disconnect and exit the program
+--------------------------------
+Note: on Linux systems, this program needs to be run with sudo
+(or given raw usb access)
 --------------------------------
 """)
 devpath = "/"
@@ -260,23 +259,52 @@ try:
 				else:
 					print("Failed to connect.")
 			elif connected:
-				if w == "send":
+				if w == "cd":
+					if " " in line:
+						p = line.split(maxsplit=1)[1]
+						if p.startswith("/"):
+							devpath = p
+						else:
+							while p.startswith(".."):
+								p = p[2:].rstrip("/")
+								if devpath != "/":
+									devpath = "/" + "/".join(devpath.split("/")[:-1])
+							devpath = devpath + "/" + p
+				elif w == "update":
+					part_1 = "/bin/BOSUPDTR.BIN"
+					part_2 = "/bin/BOSOSPT2.BIN"
+					if os.path.exists(part_1) and os.path.exists(part_2):
+						SendDirectory("/tmp", serial_device)
+						SendFile(part_1, "/tmp", serial_device)
+						SendFile(part_2, "/tmp", serial_device)
+						SendMessage(f"Run {part_1} to update BOS.", serial_device)
+				elif w == "send":
 					if SendFile(line.split(maxsplit=1)[1], devpath, serial_device):
 						print("Sent file successfuly.")
 					else:
 						print("Failed to send file.")
 				elif w == "list":
-					DirList(devpath, serial_device)
+					if " " in line:
+						p = line.split(maxsplit=1)[1]
+						if p.startswith("/"):
+							DirList(p, serial_device)
+						else:
+							DirList(devpath + "/" + p)
+					else:
+						DirList(devpath, serial_device)
 				elif w == "request":
-					if RequestFile(line.split(maxsplit=1)[1], serial_device):
+					p = line.split(maxsplit=1)[1]
+					if not p.startswith("/"):
+						p = devpath + "/" + p
+					if RequestFile(p, serial_device):
 						print("Recieved file successfuly.")
 					else:
 						print("Failed to recieve file.")
 				elif w == "message" or w == "msg":
 					if " " in line:
-						WriteSerial(serial_device, bytes([0] + [ord(c) for c in line.split(maxsplit=1)[1]] + [0]))
+						SendMessage(line.split(maxsplit=1)[1], serial_device)
 					else:
-						WriteSerial(serial_device, bytes([0, 0]))
+						SendMessage("", serial_device)
 				elif w == "clear" or w == "cls":
 					if " " in line:
 						WriteSerial(serial_device, bytes([0, 1] + [ord(c) for c in line.split(maxsplit=1)[1]] + [0]))
