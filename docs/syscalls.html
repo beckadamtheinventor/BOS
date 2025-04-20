@@ -207,6 +207,32 @@
 <tr><td><a href="#drv_Read">bos.drv_Read</a></td><td><a href="#drv_Read">02271C</a></td></tr>
 <tr><td><a href="#drv_Write">bos.drv_Write</a></td><td><a href="#drv_Write">022720</a></td></tr>
 <tr><td><a href="#gui_PrintStdout">bos.gui_PrintStdout</a></td><td><a href="#gui_PrintStdout">022724</a></td></tr>
+<tr><td><a href="#sys_CallExecuteFileHere">bos.sys_CallExecuteFileHere</a></td><td><a href="#sys_CallExecuteFileHere">022728</a></td></tr>
+<tr><td><a href="#fsd_Open">bos.fsd_Open</a></td><td><a href="#fsd_Open">02272C</a></td></tr>
+<tr><td><a href="#fsd_Close">bos.fsd_Close</a></td><td><a href="#fsd_Close">022730</a></td></tr>
+<tr><td><a href="#fsd_CloseAll">bos.fsd_CloseAll</a></td><td><a href="#fsd_CloseAll">022734</a></td></tr>
+<tr><td><a href="#fsd_Read">bos.fsd_Read</a></td><td><a href="#fsd_Read">022738</a></td></tr>
+<tr><td><a href="#fsd_Write">bos.fsd_Write</a></td><td><a href="#fsd_Write">02273C</a></td></tr>
+<tr><td><a href="#fsd_Resize">bos.fsd_Resize</a></td><td><a href="#fsd_Resize">022740</a></td></tr>
+<tr><td><a href="#fsd_WriteStr">bos.fsd_WriteStr</a></td><td><a href="#fsd_WriteStr">022744</a></td></tr>
+<tr><td><a href="#fsd_InRam">bos.fsd_InRam</a></td><td><a href="#fsd_InRam">022748</a></td></tr>
+<tr><td><a href="#fsd_IsOpen">bos.fsd_IsOpen</a></td><td><a href="#fsd_IsOpen">02274C</a></td></tr>
+<tr><td><a href="#fsd_Archive">bos.fsd_Archive</a></td><td><a href="#fsd_Archive">022750</a></td></tr>
+<tr><td><a href="#fsd_UnArchive">bos.fsd_UnArchive</a></td><td><a href="#fsd_UnArchive">022754</a></td></tr>
+<tr><td><a href="#fsd_Seek">bos.fsd_Seek</a></td><td><a href="#fsd_Seek">022758</a></td></tr>
+<tr><td><a href="#fsd_Tell">bos.fsd_Tell</a></td><td><a href="#fsd_Tell">02275C</a></td></tr>
+<tr><td><a href="#fsd_ForceClose">bos.fsd_ForceClose</a></td><td><a href="#fsd_ForceClose">022760</a></td></tr>
+<tr><td><a href="#fsd_GetSize">bos.fsd_GetSize</a></td><td><a href="#fsd_GetSize">022764</a></td></tr>
+<tr><td><a href="#fsd_GetDataPtr">bos.fsd_GetDataPtr</a></td><td><a href="#fsd_GetDataPtr">022768</a></td></tr>
+<tr><td><a href="#sys_AllocHeap">bos.sys_AllocHeap</a></td><td><a href="#sys_AllocHeap">02276C</a></td></tr>
+<tr><td><a href="#fs_ExtractRootDir">bos.fs_ExtractRootDir</a></td><td><a href="#fs_ExtractRootDir">022770</a></td></tr>
+<tr><td><a href="#fs_ExtractOSBinaries">bos.fs_ExtractOSBinaries</a></td><td><a href="#fs_ExtractOSBinaries">022774</a></td></tr>
+<tr><td><a href="#fs_ExtractOSOptBinaries">bos.fs_ExtractOSOptBinaries</a></td><td><a href="#fs_ExtractOSOptBinaries">022778</a></td></tr>
+<tr><td><a href="#sys_IndicateProgramDone">bos.sys_IndicateProgramDone</a></td><td><a href="#sys_IndicateProgramDone">02277C</a></td></tr>
+<tr><td><a href="#gfx_Ensure8bpp">bos.gfx_Ensure8bpp</a></td><td><a href="#gfx_Ensure8bpp">022780</a></td></tr>
+<tr><td><a href="#gfx_Ensure16bpp">bos.gfx_Ensure16bpp</a></td><td><a href="#gfx_Ensure16bpp">022784</a></td></tr>
+<tr><td><a href="#fs_GetDirSize">bos.fs_GetDirSize</a></td><td><a href="#fs_GetDirSize">022788</a></td></tr>
+<tr><td><a href="#fs_GetDirSizeFD">bos.fs_GetDirSizeFD</a></td><td><a href="#fs_GetDirSizeFD">02278C</a></td></tr>
 </table><div id="boot_os                  "><h1>boot_os                  </h1>	<h3>syscall Adress 020108</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 </table></div><div id="handle_interrupt"><h1>handle_interrupt</h1>	<h3>syscall Adress 02010C</h3>
@@ -295,7 +321,7 @@ BC line length</td><td></td><td></td><td>
 </td></tr>
 </table></div><div id="fs_AllocRam"><h1>fs_AllocRam</h1>	<h3>syscall Adress 022444</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Insert ram following asm_prgm_size, returning a pointer to it.</td><td>void* fs_AllocRam(size_t len);</td><td></td><td></td><td>
+<tr><td>Insert ram following &usermem[asm_prgm_size], returning a pointer to it.</td><td>void* fs_AllocRam(size_t len);</td><td>pointer to allocated memory, or 0 if not enough space.</td><td></td><td>
 </td></tr>
 </table></div><div id="sys_WaitKey"><h1>sys_WaitKey</h1>	<h3>syscall Adress 022448</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -530,10 +556,10 @@ integer arguments "num" and "skip" must be less than 65536.</td></tr>
 </td></tr>
 </table></div><div id="sys_CallExecuteFile"><h1>sys_CallExecuteFile</h1>	<h3>syscall Adress 02252C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Jump execution to an executable file and return to caller afterwards</td><td>hl = program file to execute<br>
+<tr><td>Jump execution to an executable file and return to caller start afterwards.</td><td>hl = program file to execute<br>
 de = arguments<br>
 bc = program file to return to</td><td></td><td></td><td>
-</td></tr>
+Returns to start of program returned to.</td></tr>
 </table></div><div id="sys_JumpExecuteFile"><h1>sys_JumpExecuteFile</h1>	<h3>syscall Adress 022530</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Jump execution to an executable file</td><td>hl = file to execute<br>
@@ -632,11 +658,11 @@ If you need a routine callable from C, this is not the one you'll want to use.</
 </td></tr>
 </table></div><div id="sys_NextProcessId"><h1>sys_NextProcessId</h1>	<h3>syscall Adress 022598</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Return the next unused process ID.</td><td>uint8_t sys_NextProcessId(void);</td><td>new process ID, or 0 if failed.</td><td></td><td>
+<tr><td>Return the next unused process ID, setting the malloc ID.</td><td>uint8_t sys_NextProcessId(void);</td><td>new process ID, or 0 if failed.</td><td></td><td>
 Used for categorizing malloc'd memory and threads.</td></tr>
 </table></div><div id="sys_PrevProcessId"><h1>sys_PrevProcessId</h1>	<h3>syscall Adress 02259C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Return the next open process ID.</td><td>uint8_t sys_PrevProcessId(void);</td><td>process ID.</td><td></td><td>
+<tr><td>Decrement PID and return it if threading disabled. Does nothing if threading enabled.</td><td>uint8_t sys_PrevProcessId(void);</td><td>process ID.</td><td></td><td>
 </td></tr>
 </table></div><div id="sys_FreeProcessId"><h1>sys_FreeProcessId</h1>	<h3>syscall Adress 0225A0</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -878,7 +904,7 @@ Cannot kill thread ID 0.</td></tr>
 </td></tr>
 </table></div><div id="sys_WaitKeyUnpress"><h1>sys_WaitKeyUnpress</h1>	<h3>syscall Adress 022690</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Wait until the last pressed keycode changes.</td><td>None</td><td>None</td><td></td><td>
+<tr><td>Wait until the last pressed keycode changes or there is no key pressed.</td><td>None</td><td>None</td><td></td><td>
 </td></tr>
 </table></div><div id="sys_MallocDupStr"><h1>sys_MallocDupStr</h1>	<h3>syscall Adress 022694</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -1044,4 +1070,110 @@ offset Offset in file to write data.</td><td>Number of bytes written.</td><td></
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Print a string to stdout</td><td>void gui_PrintStdout(const char* str);</td><td></td><td></td><td>
 Writes to stdout, which can be the default text printer or a file.</td></tr>
+</table></div><div id="sys_CallExecuteFileHere"><h1>sys_CallExecuteFileHere</h1>	<h3>syscall Adress 022728</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Jump execution to an executable file and return to caller afterwards.</td><td>hl = program file to execute<br>
+de = arguments<br>
+bc = program file to return to</td><td></td><td></td><td>
+Returns to caller instead of jumping to return program start.</td></tr>
+</table></div><div id="fsd_Open"><h1>fsd_Open</h1>	<h3>syscall Adress 02272C</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Open a file given a file name and mode.</td><td>void** fsd_Open(const char* path, const char* mode);</td><td>file descriptor, or 0 if failed.</td><td></td><td>
+</td></tr>
+</table></div><div id="fsd_Close"><h1>fsd_Close</h1>	<h3>syscall Adress 022730</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Close an open file descriptor, writing changes if needed.</td><td>void fsd_Close(void** fd);</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="fsd_CloseAll"><h1>fsd_CloseAll</h1>	<h3>syscall Adress 022734</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Close all open files.</td><td>void fsd_CloseAll();</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="fsd_Read"><h1>fsd_Read</h1>	<h3>syscall Adress 022738</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Read some data from an open file descriptor, advancing the file offset</td><td>int fsd_Read(void* buffer, size_t len, size_t count, void** fd);</td><td>count if success.</td><td></td><td>
+</td></tr>
+</table></div><div id="fsd_Write"><h1>fsd_Write</h1>	<h3>syscall Adress 02273C</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Write some data to an open file descriptor, advancing the file offset.</td><td>int fsd_Write(void* buffer, size_t len, size_t count, void** fd);</td><td>count if success.</td><td></td><td>
+</td></tr>
+</table></div><div id="fsd_Resize"><h1>fsd_Resize</h1>	<h3>syscall Adress 022740</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Resize a file in ram.</td><td>int fsd_Resize(size_t len, void** fd);</td><td>new file size, 0 if failed.</td><td></td><td>
+resets file offset if decreasing size.</td></tr>
+</table></div><div id="fsd_WriteStr"><h1>fsd_WriteStr</h1>	<h3>syscall Adress 022744</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Write a string to an open file descriptor, advancing the file offset.</td><td>int fsd_WriteStr(const char* str, void** fd);</td><td>number of bytes written.</td><td></td><td>
+</td></tr>
+</table></div><div id="fsd_InRam"><h1>fsd_InRam</h1>	<h3>syscall Adress 022748</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Check if a file is currently being stored in RAM</td><td>bool fsd_InRam(void** fd);</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="fsd_IsOpen"><h1>fsd_IsOpen</h1>	<h3>syscall Adress 02274C</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Check if a file is open</td><td>bool fsd_IsOpen(void** fd);</td><td>true if open.</td><td></td><td>
+</td></tr>
+</table></div><div id="fsd_Archive"><h1>fsd_Archive</h1>	<h3>syscall Adress 022750</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Write a file to archive, unloading from RAM.</td><td>bool fsd_Archive(void** fd);</td><td>true if success.</td><td></td><td>
+</td></tr>
+</table></div><div id="fsd_UnArchive"><h1>fsd_UnArchive</h1>	<h3>syscall Adress 022754</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Read a file from archive into RAM.</td><td>bool fsd_UnArchive(void** fd);</td><td>true if success.</td><td></td><td>
+</td></tr>
+</table></div><div id="fsd_Seek"><h1>fsd_Seek</h1>	<h3>syscall Adress 022758</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Seek the read/write offset of a file descriptor.</td><td>int fsd_Seek(int pos, int origin, void** fd);</td><td>-1 if failed.</td><td></td><td>
+</td></tr>
+</table></div><div id="fsd_Tell"><h1>fsd_Tell</h1>	<h3>syscall Adress 02275C</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Return the read/write offset of a file descriptor.</td><td>int fsd_Tell(void** fd);</td><td>-1 if failed.</td><td></td><td>
+</td></tr>
+</table></div><div id="fsd_ForceClose"><h1>fsd_ForceClose</h1>	<h3>syscall Adress 022760</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Forcefully closes an open file descriptor. Does not write changes or call device deinit.</td><td>void fsd_ForceClose(void** fd);</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="fsd_GetSize"><h1>fsd_GetSize</h1>	<h3>syscall Adress 022764</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Return the data size of a file descriptor.</td><td>int fsd_GetSize(void** fd);</td><td>-1 if failed.</td><td></td><td>
+</td></tr>
+</table></div><div id="fsd_GetDataPtr"><h1>fsd_GetDataPtr</h1>	<h3>syscall Adress 022768</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Return a pointer to a file descriptor's data at the current offset.</td><td>void* fsd_GetDataPtr(void** fd);</td><td>0 if failed.</td><td></td><td>
+</td></tr>
+</table></div><div id="sys_AllocHeap"><h1>sys_AllocHeap</h1>	<h3>syscall Adress 02276C</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Allocates memory in usermem at asm_prgm_size, advancing asm_prgm_size.</td><td>void* sys_AllocHeap(size_t len);</td><td>pointer to memory or 0 if failed.</td><td></td><td>
+</td></tr>
+</table></div><div id="fs_ExtractRootDir"><h1>fs_ExtractRootDir</h1>	<h3>syscall Adress 022770</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td></td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="fs_ExtractOSBinaries"><h1>fs_ExtractOSBinaries</h1>	<h3>syscall Adress 022774</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td></td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="fs_ExtractOSOptBinaries"><h1>fs_ExtractOSOptBinaries</h1>	<h3>syscall Adress 022778</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td></td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="sys_IndicateProgramDone"><h1>sys_IndicateProgramDone</h1>	<h3>syscall Adress 02277C</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Shows a done message and waits for the user to press a key.</td><td></td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="gfx_Ensure8bpp"><h1>gfx_Ensure8bpp</h1>	<h3>syscall Adress 022780</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Ensure that the lcd to 8bpp mode. If not in 8bpp mode, clears vram.</td><td></td><td></td><td></td><td>
+Also overwrites ti.mpLcdUpbase to match the current draw buffer. </td></tr>
+</table></div><div id="gfx_Ensure16bpp"><h1>gfx_Ensure16bpp</h1>	<h3>syscall Adress 022784</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Ensure that the lcd to 8bpp mode. If not in 16bpp mode, clears vram.</td><td></td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="fs_GetDirSize"><h1>fs_GetDirSize</h1>	<h3>syscall Adress 022788</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Get the actual size of a directory.</td><td>int fs_GetDirSize(const char* path);</td><td></td><td></td><td>
+returns pointer to first empty entry or non-allocated dirextender in de</td></tr>
+</table></div><div id="fs_GetDirSizeFD"><h1>fs_GetDirSizeFD</h1>	<h3>syscall Adress 02278C</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Get the actual size used by a directory.</td><td>int fs_GetDirSizeFD(void* fd);</td><td></td><td></td><td>
+</td></tr>
 </table></div></body></html>
