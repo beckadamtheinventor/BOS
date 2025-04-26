@@ -4,7 +4,9 @@
 _SetCursorPos:
 	pop bc,de,hl
 	push hl,de,bc
-	ld (currow),hl
-	ld (curcol),de
+	ld a,l
+	ld (currow),a
+	ld a,e
+	ld (curcol),e
 	ret
 

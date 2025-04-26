@@ -1,6 +1,7 @@
 ;@DOES Zx7 compress a block of memory.
 ;@INPUT int util_Zx7Compress(void *dest, void *src, int len, void (*progress_callback)(int src_offset));
 ;@OUTPUT length in bytes written to dest.
+;@NOTE currently doesn't work correctly
 util_Zx7Compress:
     .zx7_bits_byte              := -1
     .zx7_bits_byte_remaining    := -2

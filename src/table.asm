@@ -229,13 +229,13 @@
 	jp fsd_GetSize
 	jp fsd_GetDataPtr
 	jp sys_AllocHeap
-    jp fs_ExtractRootDir
-    jp fs_ExtractOSBinaries
-    jp fs_ExtractOSOptBinaries
-    jp sys_IndicateProgramDone
-    jp gfx_Ensure8bpp
-    jp gfx_Ensure16bpp
-    jp fs_GetDirSize
-    jp fs_GetDirSizeFD
-	
+	jp fs_ExtractRootDir
+	jp fs_ExtractOSBinaries
+	jp fs_ExtractOSOptBinaries
+	jp sys_IndicateProgramDone
+	jp gfx_Ensure8bpp
+	jp gfx_Ensure16bpp
+	jp fs_GetDirSize
+	jp fs_GetDirSizeFD
+
 ; end of jump table
