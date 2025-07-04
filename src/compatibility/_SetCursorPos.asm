@@ -7,6 +7,6 @@ _SetCursorPos:
 	ld a,l
 	ld (currow),a
 	ld a,e
-	ld (curcol),e
+	ld (curcol),a
 	ret
 
