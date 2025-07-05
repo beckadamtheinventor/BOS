@@ -10,7 +10,7 @@ fsd_Resize:
 	bit fsd_bWrite, (iy+fsd_OpenFlags) ; check if writeable
 	jr z,.fail
 	bit fsd_bIsDevice, (iy+fsd_OpenFlags) ; check if device
-	jr z,.fail ; can't resize device
+	jr nz,.fail ; can't resize device
 	ld hl,(iy+fsd_DataLen) ; data current length
 	ld de,(ix+6) ; new length
 	or a,a
@@ -37,7 +37,9 @@ fsd_Resize:
 	or a,a
 	sbc hl,de ; new - current
 	pop de
+	push iy
 	call _InsertMem ; insert new_len - current_len bytes at the current end of file
+	pop iy
 	ld hl,(ix+6)
 	ld (iy+fsd_DataLen),hl
 	db $01 ; ld bc,... dummify or a / sbc hl

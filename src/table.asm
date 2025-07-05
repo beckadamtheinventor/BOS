@@ -237,5 +237,6 @@
 	jp gfx_Ensure16bpp
 	jp fs_GetDirSize
 	jp fs_GetDirSizeFD
+	jp _OP1ToAbsPath
 
 ; end of jump table

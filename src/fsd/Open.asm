@@ -11,10 +11,9 @@ fsd_Open:
 	push hl
 	call fs_OpenFile
 	ld (ix-6),hl
-	ex (sp),hl
-	call fs_GetFDAttr
-	ld (ix-7),a
 	pop bc
+	call fs_GetFDAttr.entry
+	ld (ix-7),a ; this will be garbage when the file doesn't exist, so overwrite in .create
 
 	ld hl,(ix+9)
 	inc hl
@@ -36,7 +35,7 @@ fsd_Open:
 	or a,a
 	sbc hl,bc
 	dec hl
-	call nz,.create
+	call z,.create
 	ld b,fsd_bNeedsFlush or fsd_bWrite
 	jr .append_table
 
@@ -47,7 +46,8 @@ fsd_Open:
 	or a,a
 	sbc hl,bc
 	dec hl
-	jq nz,.fail
+	jq z,.fail
+	ld b,fsd_mRead
 	jr .append_table
 
 .open_write:
@@ -57,16 +57,16 @@ fsd_Open:
 	or a,a
 	sbc hl,bc
 	dec hl
-	call nz,.create
+	call z,.create
 	ld b,fsd_bNeedsFlush or fsd_bWrite or fsd_bOverwrite
 
 .append_table:
 	xor a,a
 	or a,c
-	jr z,.not_both_rw
-	ld a,fsd_mWrite or fsd_mRead or fsd_mNeedsFlush
+	jr nz,.not_both_rw
+	ld b,fsd_mWrite or fsd_mRead or fsd_mNeedsFlush
 .not_both_rw:
-	or a,b
+	ld a,b
 	ld c,a
 	push bc
 	ld hl,(ix-6)
@@ -81,11 +81,11 @@ fsd_Open:
 
 	ld hl,(ix-6)
 	push hl
-	call fs_GetFDPtr
+	call fs_GetFDPtr.entry
 	ld (iy+fsd_DataPtr),hl ; file data pointer
-	call fs_GetFDLen
+	pop hl
+	call fs_GetFDLen.entry
 	ld (iy+fsd_DataLen),hl ; file data length
-	pop bc
 
 	bit fd_device,(ix-7)
 	jr z,.dont_set_device_flag
@@ -116,6 +116,7 @@ fsd_Open:
 .create:
 	ld hl,(ix+6)
 	ld bc,0
+	ld (ix-7),c ; ensure the file attribute byte matches
 	push bc,bc,hl
 	call fs_CreateFile
 	pop bc,bc,bc

@@ -16,6 +16,10 @@ fs_AllocWithMarker:
 	ld (ix-6),hl
 .entry:
 	ld hl,(ix+6)
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	jq z,.fail ; fail if trying to allocate zero bytes
 	call fs_CeilDivBySector
 	ld (ix-6),hl
 

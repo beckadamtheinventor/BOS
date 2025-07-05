@@ -260,7 +260,6 @@ ti_Open:
 ;  a = slot index if no error
 	ld	a, ti.AppVarObj
 .start:
-	ld	(.smc_type), a
 	ld	(ti.OP1), a
 
 	ld	hl, variable_offsets + (5 * 3) - 1
@@ -281,14 +280,14 @@ ti_Open:
 	ld (curr_slot),a
 	push hl
 	call bos._OP1ToAbsPath
-	ld iy,0
+	ld iy,3
 	add iy,sp
 	ld de,(iy+6)
 	push de,hl
 	call bos.fsd_Open
 	pop bc,bc
+	xor a,a
 	add hl,de
-	or a,a
 	sbc hl,de
 	pop de
 	ret z
@@ -430,7 +429,7 @@ ti_PutC:
 	push de
 	call	util_is_slot_open
 	pop de
-	jr	nz, .ret_neg_one
+	jr	nz, ti_Seek.ret_neg_one
 	ld bc,(hl)
 	sbc hl,hl
 	add hl,sp
@@ -515,10 +514,8 @@ ti_Delete:
 	ld	(ti.OP1), a
 	call bos._OP1ToAbsPath
 	push hl
-	call bos.fsd_CheckOpen
-	add hl,bc
+	call bos.fsd_IsOpen
 	or a,a
-	sbc hl,bc
 	push hl
 	call nz,bos.fsd_ForceClose
 	pop hl
@@ -947,7 +944,7 @@ ti_ArchiveHasRoom:
 ;  sp + 3 : number of bytes to store into the archive
 ; return:
 ;  true if there is room, false if not
-	call ti._ArcChk
+	call ti.ArcChk
 	pop	de
 	pop	bc
 	push	bc
@@ -975,7 +972,7 @@ ti_ArchiveHasRoomVar:
 	push hl
 	call bos.fsd_GetSize
 	ex (sp),hl
-	call ti._ArcChk
+	call ti.ArcChk
 	pop bc
 	or a,a
 	sbc hl,bc

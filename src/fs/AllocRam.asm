@@ -22,7 +22,9 @@ fs_AllocRam:
 	sbc hl,bc ; pointer + len - end_of_usermem
 	pop hl
 	jr nc,.fail ; fail if pointer + len >= end_of_usermem
+	push iy
 	call _InsertMem
+	pop iy
 .done:
 	ex hl,de
 	ret

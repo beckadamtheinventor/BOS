@@ -21,5 +21,5 @@ assert fsd_DataPtr = 3
 	ld hl,(iy+fsd_DataPtr)
 	ld de,(iy+fsd_DataLen)
 	pop iy
-	ret c
-	jp _DelMem ; unload from ram
+	ret c ; don't unload if in flash
+	jp _DelMem ; unload from ram if in ram

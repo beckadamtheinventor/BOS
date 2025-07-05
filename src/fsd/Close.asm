@@ -20,7 +20,7 @@ assert fsd_OpenFlags = -1
 	ret z ; dont flush if not needed
 .entryflushhl:
 	push hl
-	ex (sp),iy ; iy = pointer-to-pointer
+	ex (sp),iy ; save iy, iy = pointer-to-pointer
 	ld hl,(iy+fsd_FileDesc) ; file descriptor
 	push hl
 	ld hl,(iy+fsd_DataLen) ; data length
@@ -29,14 +29,14 @@ assert fsd_OpenFlags = -1
 	push hl
 	call fs_WriteFile ; overwrite file with new data
 	pop bc,bc,bc
-	push hl
+	push iy,hl
 	ld hl,(iy+fsd_DataPtr)
 	ld de,(iy+fsd_DataLen)
 	call _DelMem ; unload from ram
 	call fs_GetFDPtr
+	pop bc,iy
 	ld (iy+fsd_DataPtr),hl ; overwrite data pointer
-	pop bc
-	ex (sp),iy
+	ex (sp),iy ; restore iy
 	pop hl
 	ret
 

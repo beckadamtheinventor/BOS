@@ -565,7 +565,8 @@ namespace bos
 ?gfx_Ensure16bpp                 := $22784
 ?fs_GetDirSize                   := $22788
 ?fs_GetDirSizeFD                 := $2278C
-;	
+?_OP1ToAbsPath                   := $22790
+;
 ; end of jump table
 ;-------------------------------------------------------------------------------
 ; OS memory areas and misc defines

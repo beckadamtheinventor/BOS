@@ -90,15 +90,9 @@ syslibs: $(call rwildcard,syslib,*.asm)
 includes:
 	python build_bos_inc.py
 	$(CP) bos.inc $(call NATIVEPATH,src/include)
-ifeq ($(OS),Windows_NT)
 	$(CPDIR) $(call NATIVEPATH,src/include) $(call NATIVEPATH,$(FSSRC)/)
 	$(CPDIR) $(call NATIVEPATH,src/include) $(call NATIVEPATH,$(FSSRC)/fs/bin/)
 	$(CPDIR) $(call NATIVEPATH,src/include) $(call NATIVEPATH,$(FSSRC)/fs/lib/)
-else
-	$(CPDIR) $(call NATIVEPATH,src/include) $(call NATIVEPATH,$(FSSRC)/include)
-	$(CPDIR) $(call NATIVEPATH,src/include) $(call NATIVEPATH,$(FSSRC)/fs/bin/include)
-	$(CPDIR) $(call NATIVEPATH,src/include) $(call NATIVEPATH,$(FSSRC)/fs/lib/include)
-endif
 	fasmg $(call NATIVEPATH,src/data/adrive/osrt.asm) $(call NATIVEPATH,src/data/adrive/osrt.tmp)
 	$(CP) $(call NATIVEPATH,src/data/adrive/osrt.inc) $(call NATIVEPATH,src/include/osrt.inc)
 	$(CP) $(call NATIVEPATH,src/data/adrive/osrt.inc) $(call NATIVEPATH,$(FSSRC)/include/osrt.inc)
@@ -124,8 +118,8 @@ $(call NATIVEPATH,$(FSOBJ)/libload.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/liblo
 $(call NATIVEPATH,$(FSOBJ)/fatdrvce.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/fatdrvce/fatdrvce.asm)
 	fasmg $(call NATIVEPATH,$(FSSRC)/fs/lib/fatdrvce/fatdrvce.asm) $(call NATIVEPATH,$(FSOBJ)/fatdrvce.bin)
 
-$(call NATIVEPATH,$(FSOBJ)/fileioc.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/fileioc/fileioc.asm)
-	fasmg $(call NATIVEPATH,$(FSSRC)/fs/lib/fileioc/fileioc.asm) $(call NATIVEPATH,$(FSOBJ)/fileioc.bin)
+$(call NATIVEPATH,$(FSOBJ)/fileioc.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/fileioc/fileioc_new.asm)
+	fasmg $(call NATIVEPATH,$(FSSRC)/fs/lib/fileioc/fileioc_new.asm) $(call NATIVEPATH,$(FSOBJ)/fileioc.bin)
 
 $(call NATIVEPATH,$(FSOBJ)/fontlibc.bin): $(call NATIVEPATH,$(FSSRC)/fs/lib/fontlibc/fontlibc.asm)
 	fasmg $(call NATIVEPATH,$(FSSRC)/fs/lib/fontlibc/fontlibc.asm) $(call NATIVEPATH,$(FSOBJ)/fontlibc.bin)

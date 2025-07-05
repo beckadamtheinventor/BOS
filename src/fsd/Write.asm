@@ -17,7 +17,7 @@ fsd_Write:
 	bit fsd_bWrite, (iy+fsd_OpenFlags) ; check if writeable
 	jr z,.fail
 	bit fsd_bIsDevice, (iy+fsd_OpenFlags) ; check if device
-	jr z,.device
+	jr nz,.device
 
 	call .unarc_if_arc
 

@@ -153,7 +153,8 @@ else
 		ld a,(bos._UnpackUpdates)
 		cp a,$C3
 		jp z,bos._UnpackUpdates ; jump to update extractor (updated earlier)
-		rst 0
+        ret
+;		rst 0
 end if
 
 .sectorerase:
