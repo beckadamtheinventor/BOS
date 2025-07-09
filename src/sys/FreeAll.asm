@@ -3,7 +3,9 @@
 ;@DESTROYS hl, de
 sys_FreeAll:
 	ld hl,malloc_cache   ;clear out the malloc cache
-	ld de,malloc_cache+1
+	push hl
+	pop de
+	inc de
 	ld bc,malloc_cache_len-1
 if ~malloc_cache and $FF
 	ld (hl),l

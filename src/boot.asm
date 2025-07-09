@@ -580,6 +580,8 @@ os_recovery_menu:
 
 	DisableThreading
 
+	call gfx_Set8bpp
+
 	ld hl,string_os_info
 	call gui_DrawConsoleWindow
 	ld hl,string_os_recovery_menu
@@ -737,11 +739,13 @@ os_recovery_menu:
 	ret
 
 .emergencyshell:
+	call sys_FreeAll
 	ld hl,str_EmergencyShellInfo
 	call gui_DrawConsoleWindow
 	ld bc,256
-	ld hl,InputBuffer
-	push bc,hl
+	push bc
+	call sys_Malloc
+	push hl
 	call gui_Input
 	pop hl,bc
 	or a,a

@@ -2,7 +2,7 @@
 	jq cmd_exe_main
 	db "FEX",0
 cmd_exe_main:
-	ld hl,-29
+	ld hl,-32
 	call ti._frameset
 	call cmd_exe_init
 	ld hl,(ix+6) ; argc
@@ -103,14 +103,14 @@ cmd_redraw_console:
 	ld hl,bos.LCD_VRAM
 	ld (ti.mpLcdUpbase),hl
 	ld hl,bos.current_working_dir
-	call bos.gui_DrawConsoleWindow
+	jp bos.gui_DrawConsoleWindow
 enter_input_clear:
-	ld hl,bos.InputBuffer
-if bos.InputBuffer and $FF
+	ld hl,(ix-32)
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	ret z
 	ld b,0
-else
-	ld b,l
-end if
 	ld c,b
 .clear_buffer_loop:
 	ld (hl),c
@@ -131,7 +131,14 @@ cmd_no_cmd_args:
 	xor a,a
 	sbc hl,hl
 	ld (ix-3),hl
+	inc h ; hl+256 -> 256
+	push hl
+	call bos.sys_Malloc
+	ld (ix-32),hl
+	pop hl
+	jp c,ti.ErrMemory
 	call cmd_redraw_console
+	call enter_input_clear
 	jq enter_input
 recall_last:
 	ld hl,(ix-3)
@@ -147,7 +154,7 @@ recall_last:
 	ex (sp),hl
 	pop bc
 	jr z,enter_input
-	ld de,bos.InputBuffer
+	ld de,(ix-32)
 	ldir
 enter_input_dec_currow:
 	ld hl,ti.curRow
@@ -156,7 +163,7 @@ enter_input:
 	; call bos.sys_WaitKeyUnpress
 	ld bc,255
 	push bc
-	ld bc,bos.InputBuffer
+	ld bc,(ix-32)
 	push bc
 	call bos.gui_InputNoClear
 	pop hl,bc

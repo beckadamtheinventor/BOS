@@ -647,10 +647,9 @@ namespace bos
 ?reservedRAM            := ti.ramCodeTop
 ?bos_UserMem            := ti.userMem
 ?end_of_usermem         := $D3F000
-?op_stack_bot           := $D0017C ; 256 bytes OP stack
-?op_stack_top           := $D0027C ; 256 bytes downward
-?current_working_dir    := $D00B00 ; 256 bytes current working directory
-?InputBuffer            := $D00C00 ; 256 bytes input buffer
+?op_stack_bot           := $D00B00 ; 256 bytes OP stack
+?op_stack_top           := $D00D00 ; 256 bytes downward
+?current_working_dir    := $D0017C ; 256 bytes current working directory
 ?open_device_table      := $D02380
 ?open_device_table.len  := $18
 ?open_file_table        := $D02398
