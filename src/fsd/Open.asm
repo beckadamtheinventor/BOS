@@ -77,6 +77,7 @@ fsd_Open:
 	sbc hl,de
 	jr z,.fail
 	push hl
+	push hl
 	pop iy
 
 	ld hl,(ix-6)
@@ -86,6 +87,8 @@ fsd_Open:
 	pop hl
 	call fs_GetFDLen.entry
 	ld (iy+fsd_DataLen),hl ; file data length
+
+	pop hl
 
 	bit fd_device,(ix-7)
 	jr z,.dont_set_device_flag

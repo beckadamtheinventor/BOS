@@ -29,6 +29,7 @@ assert fsd_OpenFlags = -1
 	push hl
 	call fs_WriteFile ; overwrite file with new data
 	pop bc,bc,bc
+	ld (iy+fsd_FileDesc),hl ; update file descriptor
 	push iy,hl
 	ld hl,(iy+fsd_DataPtr)
 	ld de,(iy+fsd_DataLen)

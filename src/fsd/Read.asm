@@ -17,11 +17,11 @@ fsd_Read:
 	bit fsd_bRead, (iy+fsd_OpenFlags) ; check if readable
 	jr z,.fail
 	bit fsd_bIsDevice, (iy+fsd_OpenFlags) ; check if device
-	jr z,.device
+	jr nz,.device
 	ld bc,(iy+fsd_DataOffset) ; offset
 	add hl,bc ; offset + len
 	ld bc,(iy+fsd_DataLen) ; file_length
-	or a,a
+	scf
 	sbc hl,bc
 	add hl,bc
 	jr c,.within_size ; jump if offset + len < file_length

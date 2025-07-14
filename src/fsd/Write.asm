@@ -21,12 +21,15 @@ fsd_Write:
 
 	call .unarc_if_arc
 
+	ld hl,(ix-6) ; len*count
 	ld bc,(iy+fsd_DataOffset) ; offset
 	add hl,bc ; offset + len
+	push hl
 	ld bc,(iy+fsd_DataLen) ; file_length
 	or a,a
 	sbc hl,bc
 	add hl,bc
+	pop hl
 	jr c,.no_resize ; jump if offset + len < file_length
 	push iy,hl
 	call fsd_Resize
