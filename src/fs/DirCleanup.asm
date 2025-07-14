@@ -44,14 +44,17 @@ fs_DirCleanup:
     ld a,(hl)
     or a,a
     jr z,.skip_entry
-    cp a,fsentry_dirextender
+    inc a
+    jr z,.done
+    cp a,fsentry_dirextender+1
     jr nz,.copy_entry
     push de
     ld (ti.scrapMem),hl ; save current read pointer
     call fs_GetFDPtr.entry
     pop de
-    jr c,.finalize
-    jr .loop
+    jr nc,.loop
+    call .flush
+    jr .done
 .skip_entry:
     add hl,bc
     jr .loop
@@ -77,10 +80,6 @@ fs_DirCleanup:
 .done:
     pop iy,ix
     ret
-
-.finalize:
-    call .flush
-    jr .done
 
 .flush:
     push hl ; save read pointer

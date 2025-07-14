@@ -143,6 +143,14 @@ current_working_dir:=$-3
 	ld hl,explorer_dirlist_buffer
 	push hl
 	call bos.fs_DirList
+	jr nc,.dir_exists
+	; reset current working directory if it doesn't exist
+	ld hl,(current_working_dir)
+	ld (hl),'/'
+	inc hl
+	ld (hl),0
+	call bos.fs_DirList
+.dir_exists:
 	pop bc,bc,bc,bc
 	ld (explorer_max_selection),hl
 explorer_main:

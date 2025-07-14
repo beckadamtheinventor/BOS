@@ -519,6 +519,12 @@ os_return_soft:
 .hasstdout:
 	ld (stdout_device_ptr),hl
 
+	; ensure this is set up correctly after first boot
+	ld hl,current_working_dir
+	ld (hl),'/'
+	inc hl
+	ld (hl),0
+
 	; ld hl,str_AutoExtractOptFile
 	; push hl
 	; call fs_OpenFile

@@ -78,6 +78,7 @@ def copy_file_name(entry):
 		name = name[:name.find(" ")]
 		return name + "." + "".join(chr(c) for c in entry[8:11]).rstrip(" ")
 
+# note: returns sector number, not pointer
 def alloc_space_for_file(rom, length):
 	cmap_data = 0x3B2400
 	cmap_len = 7040
@@ -97,6 +98,7 @@ def alloc_space_for_file(rom, length):
 		rom[cmap_data+k] = 0xFE
 		if 0x040000 + k * 0x40 >= len(rom):
 			rom.extend([0xff]*0x40)
+	# print(f"Allocated space in ROM at {hex(0x040000+j*0x40)}")
 	return j
 
 def free_file_descriptor(rom, ptr):
@@ -143,7 +145,12 @@ def build_cluster_map_dir(rom, entry, dirprefix="/"):
 		# print(hex(rom[i]),hex(rom[i+0xB]))
 		if rom[i] == 0xFF:
 			return True
-		if rom[i+0xB] & 8:
+		if rom[i] == 0xFE:
+			fptr = rom[i+0xE]+rom[i+0xF]*0x100
+			if fptr == 0xFFFF:
+				return True
+			return build_cluster_map_dir(rom, fptr, dirprefix)
+		elif rom[i+0xB] & 8:
 			l = rom[i+0xE]+rom[i+0xF]*0x100
 			# print(copy_file_name(rom[i:i+16]), hex(l))
 			ptr = (i&0xFFFE00) + rom[i+0xC] + rom[i+0xD]*0x100
@@ -160,9 +167,10 @@ def build_cluster_map_dir(rom, entry, dirprefix="/"):
 			# print(k)
 		elif rom[i+0xB] & 0x10:
 			# print(hex(i+0xB), bin(rom[i+0xB]))
-			if copy_file_name(rom[i:i+16]) not in [".", ".."]: #check if a directory and not '.' or '..'
+			cfname = copy_file_name(rom[i:i+16])
+			if not (cfname.startswith(". ") or cfname.startswith(".. ")): #check if a directory and not '.' or '..'
 				# print(f"pathing into {dirprefix}{copy_file_name(rom[i:i+16])}")
-				build_cluster_map_dir(rom, i, dirprefix+copy_file_name(rom[i:i+16])+"/")
+				build_cluster_map_dir(rom, i, dirprefix+cfname+"/")
 		else:
 			flen = rom[i+0xE]+rom[i+0xF]*0x100
 			fptr = rom[i+0xC]+rom[i+0xD]*0x100
@@ -200,13 +208,15 @@ def add_file_to_rom(rom, fout, flags, fin_data):
 		if rom[ptr] == 0xFE:
 			if rom[ptr+0xC]+rom[ptr+0xD]*0x100 == 0xFFFF:
 				nextptr = alloc_space_for_file(rom, 0x400)
-				rom[ptr+0xB] = 0x10
-				rom[ptr+0xC] = (nextptr//0x40) % 0x100
-				rom[ptr+0xD] = nextptr//0x4000
+				# rom[ptr+0xB] = 0x10
+				rom[ptr+0xC] = nextptr %  0x100
+				rom[ptr+0xD] = nextptr // 0x100
 				rom[ptr+0xE] = 0
-				rom[ptr+0xF] = 0x10
+				rom[ptr+0xF] = 0x04
+				rom[0x040000 + nextptr*0x40 + 0x3F0] = 0xFE
 			ptr = 0x040000 + (rom[ptr+0xC]+rom[ptr+0xD]*0x100)*0x40
-		ptr += 16
+		else:
+			ptr += 16
 	
 
 	if ptr+16 < len(rom):
@@ -271,7 +281,7 @@ if __name__=='__main__':
 	if len(_argv)>1:
 		written_rom = False
 		while len(_argv):
-			appending = compress_file = False
+			un8x = appending = compress_file = False
 			fin = _argv.pop(0)
 			if fin == "--rom":
 				rom_in = _argv.pop(0)
@@ -279,6 +289,9 @@ if __name__=='__main__':
 			elif fin == "--append":
 				fin = _argv.pop(0)
 				appending = True
+			elif fin == "--8x":
+				fin = _argv.pop(0)
+				un8x = True
 			elif fin == "--output":
 				fin = _argv.pop(0)
 				if not os.path.isabs(fin):
@@ -323,18 +336,30 @@ if __name__=='__main__':
 
 			fout = _argv.pop(0)
 			print(f"writing file to rom image: {fin} --> {fout}")
+			if un8x:
+				print("\tExtracting data from .8x file.")
 			if compress_file:
 				print("\tCompressing file as zx7-compressed RAM Executable.")
+			if un8x:
+				try:
+					os.mkdir(os.path.join(os.path.dirname(fin), "temp"))
+				except:
+					pass
+				fintmp = os.path.join(os.path.dirname(fin), "temp", os.path.basename(fin)+".bin")
+				os.system(f"convbin -i {fin} -o {fintmp} -j 8x -k bin")
+				with open(fintmp, "rb") as f:
+					file_data = f.read()
+			else:
+				with open(fin, "rb") as f:
+					file_data = f.read()
 			try:
 				if compress_file:
-					with open(fin, "rb") as f:
-						f.seek(0, 2)
-						original_len = f.tell()
+					original_len = len(file_data)
 					if appending:
 						existingdata = get_file_data(rom, fout)
 						if existingdata is None:
 							appending = False
-					if original_len >= 0xD2F800 - 0xD1A881:
+					if original_len >= 0xD3E000 - 0xD1A881:
 						print(f"File to be compressed would overflow usermem if executed: {fin} ({len(original_len)} bytes)\nAborting.")
 						exit(1)
 					os.system(f"convbin -i {fin} -o {fin}.zx7 -j bin -k bin -c zx7")
@@ -343,10 +368,9 @@ if __name__=='__main__':
 					else:
 						fin_data = []
 					fin_data.extend([0x18,0x0C,0x43,0x52,0x58,0x00,0x7A,0x78,0x37,0x00]+\
-						list(original_len.to_bytes(3, 'little')))
-					with open(f"{fin}.zx7","rb") as f:
-						fin_data.extend(list(f.read()))
-					if len(fin_data) > 65535:
+							list(original_len.to_bytes(3, 'little')))
+					fin_data.extend(list(file_data))
+					if len(fin_data) > 65536:
 						print(f"Compressed file is too large to write to filesystem: {fin} ({len(fin_data)} bytes)\nAborting.")
 						exit(1)
 				else:
@@ -354,11 +378,11 @@ if __name__=='__main__':
 						existingdata = get_file_data(rom, fout)
 						if existingdata is None:
 							appending = False
-					with open(fin, "rb") as f:
-						fin_data = list(f.read())
 					if appending:
-						fin_data = existingdata + fin_data
-					if len(fin_data) > 65535:
+						fin_data = existingdata + file_data
+					else:
+						fin_data = file_data
+					if len(fin_data) > 65536:
 						print(f"File is too large to write to filesystem: {fin} ({len(fin_data)} bytes)\nAborting.")
 						exit(1)
 				add_file_to_rom(rom, fout, 0x00, fin_data)
@@ -376,7 +400,9 @@ python add_file_to_rom.py file1source file1dest file2source +file2dest
 raw binary data from file1source is written to file1dest on rom image
 note: arguments are applied in the order they appear.
 
---rom	  input rom file, should be exported from the emulator after first boot
---append   append target file
---output   output rom file
+--rom	          input rom file, should be exported from the emulator after first boot
+--append          append target file
+--8x              extract data from .8x file using convbin
+--compressed-rex  create a compressed RAM executable from file
+--output          output rom file
 """)
