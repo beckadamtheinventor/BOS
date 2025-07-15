@@ -240,6 +240,7 @@ sys_ExecuteFile:
 	; ld de,(fsOP6+3) ; argv
 	; ld bc,(fsOP6+9) ; argc
 	; push de,bc
+	; save text colors
 	ld iy,ti.OP3
 	ld bc,(color_primary)
 	ld (iy),bc
@@ -259,6 +260,7 @@ sys_ExecuteFile:
 .runnothreading_actually:
 	call .actuallyrunprogram_nothread
 .restore_colors:
+	; restore text colors
 	call ti.PopOP3
 	ld iy,ti.OP3
 	ld a,(iy)
