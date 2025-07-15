@@ -383,7 +383,6 @@ sys_jphl := $
 	push bc
 	; malloc as the next process ID so argc/argv get freed when it exits
 	call sys_NextProcessId
-	ld (running_process_id),a
 	call .load_argc_argv_loop_entry
 	ex (sp),hl
 	ld a,l
