@@ -13,7 +13,7 @@ cat_main:
 	or a,a
 	sbc hl,bc
 	jp c,.help
-	call osrt.argv_1
+	syscall _argv_1
 	ld a,(hl)
 	or a,a
 	jp z,.help

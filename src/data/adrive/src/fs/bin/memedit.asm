@@ -2,7 +2,6 @@
 include 'include/ez80.inc'
 include 'include/ti84pceg.inc'
 include 'include/bos.inc'
-include 'include/osrt.inc'
 
 org ti.userMem
 	jr mem_edit
@@ -27,7 +26,7 @@ mem_edit_main:
 	scf
 	sbc hl,hl
 	ld (ix-20),hl
-	call osrt.argv_1
+	syscall _argv_1
 	ld a,(hl)
 	or a,a
 	jr nz,.dont_run_readme
@@ -65,7 +64,7 @@ mem_edit_main:
 	ld (ix-17),hl
 	ld (ix-11),bc
 	push bc,hl,bc
-	call osrt.argv_1
+	syscall _argv_1
 	ld (ix-20),hl
 	ld hl,bos.safeRAM
 	ld bc,65536
@@ -772,6 +771,8 @@ mem_edit_readme:
 
 str_WriteFileAreYouSure:
 	db "Write buffer to file? Press enter to confirm.",0
+_argv_1:
+	db "argv/1",0
 readme_strings:
 	dl ._1, ._2, ._3, ._4, ._5, ._6, ._7, ._8, ._9, ._10, ._11, ._12, ._13, $FF0000
 ._1: db "--MEMEDIT v1.2 by BeckATI--",0

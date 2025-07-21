@@ -7,7 +7,7 @@ fsutil_start:
 	ld a,(ix+6)
 	cp a,2
 	jr nz,.info
-	call osrt.argv_1
+	syscall _argv_1
 	ld a,(hl)
 	inc hl
 	or a,a

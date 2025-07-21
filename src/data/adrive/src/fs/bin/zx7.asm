@@ -4,7 +4,7 @@
 _zx7_main:
 	ld hl,-9
 	call ti._frameset
-	call osrt.argv_1 ; mode argument -> HL
+	syscall _argv_1 ; mode argument -> HL
 	ld a,(hl)
 	cp a,'-' ; check argument starts with a hyphen
 	jr z,.has_args
@@ -36,7 +36,7 @@ _zx7_main:
 	ld a,(hl)
 	cp a,'d' ; check if requesting decompression
 	jq nz,.not_decompress ; otherwise go here
-	call osrt.argv_2 ; source file argument -> HL
+	syscall _argv_2 ; source file argument -> HL
 	push hl
 	call bos.fs_GetFilePtr
 	pop de
@@ -96,7 +96,7 @@ _zx7_main:
 	push hl ; save pointer to compressed data
 	ld c,0
 	push de,bc ; output length, property byte
-	call osrt.argv_3 ; destination file argument -> HL
+	syscall _argv_3 ; destination file argument -> HL
     ld a,(hl)
     or a,a
     jq z,.failed_to_create_file
@@ -136,7 +136,7 @@ _zx7_main:
 	jp nz,.display_info ; if not, display usage info
 
 ; compress
-	call osrt.argv_2 ; source file argument -> HL
+	syscall _argv_2 ; source file argument -> HL
 	push hl
 	call bos.fs_GetFilePtr ; grab source file data pointer (HL) length (BC) and properties (A)
 	jp c,.file_not_found ; fail if file was not found
@@ -162,7 +162,7 @@ _zx7_main:
 
 	push hl,bc ; save source file data pointer, length
 
-	call osrt.argv_3 ; destination file argument -> HL
+	syscall _argv_3 ; destination file argument -> HL
 	ld bc,0
 	push bc,bc,hl ; push file length, property byte, file name
 	call bos.fs_OpenFile ; check if destination file exists

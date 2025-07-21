@@ -15,7 +15,7 @@ imgview_main:
 	call bos.gui_PrintLine
 	jq .exit
 .has_enough_args:
-	call osrt.argv_1
+	syscall _argv_1
 	ld (ix-12),hl ; file name
 	push hl
 	call bos.fs_GetFilePtr

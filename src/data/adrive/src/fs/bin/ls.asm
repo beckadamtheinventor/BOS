@@ -14,7 +14,7 @@ ls_main:
 	ld a,(ix+6)
 	dec a
 	jr z,.no_dir_argument
-	call osrt.argv_1
+	syscall _argv_1
 	ld a,(hl)
 	cp a,'-'
 	jr nz,.check_non_null_dir_arg
@@ -31,14 +31,14 @@ ls_main:
 	ld a,(ix+6)
 	cp a,3
 	jr c,.show_help_info
-	call osrt.argv_2
+	syscall _argv_2
 	ld (ix-15),hl
 	ld hl,ti.pixelShadow
 	ld (ix-18),hl
 	ld a,(ix+6)
 	cp a,4
 	jr c,.no_dir_argument
-	call osrt.argv_3
+	syscall _argv_3
 	ld a,(hl)
 .check_non_null_dir_arg:
 	or a,a

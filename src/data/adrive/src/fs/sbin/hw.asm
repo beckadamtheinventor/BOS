@@ -7,7 +7,7 @@ hw_config_start:
     ld a,(ix+6)
     cp a,2
     jr c,.info
-    call osrt.argv_1
+    syscall _argv_1
     ld a,(hl)
     cp a,'-'
     jr nz,.is_set_operation
@@ -17,16 +17,16 @@ hw_config_start:
     jr z,.is_get_operation
 .is_set_operation:
     ld (ix-3),hl
-    call osrt.argv_2
+    syscall _argv_2
     push hl
-    call osrt.intstr_to_int
+    syscall _intstr_to_int
     pop bc
     ld a,l
     ld hl,(ix-3)
     call .set_hardware_config
     jr .return_zero
 .is_get_operation:
-    call osrt.argv_2
+    syscall _argv_2
     call .get_hardware_config
 	ld hl,bos.return_code_flags
 	set bos.bReturnNotError,(hl)

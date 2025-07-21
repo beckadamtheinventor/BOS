@@ -247,18 +247,19 @@ cmd_print_return_value:
 	jr nz,._print_hex
 	bit bos.bReturnLong,a
 	jr nz,._print_long
-	call osrt.int_to_str
+	syscall _int_to_str
 	jr ._done_printing
 ._print_long:
-	call nc,osrt.long_to_str
+	jr nc,._done_printing
+	syscall _long_to_str
 	jr ._done_printing
 ._print_hex:
 	bit bos.bReturnLong,a
 	jr nz,._print_long_hex
-	call osrt.int_to_hexstr
+	syscall _int_to_hexstr
 	jr ._done_printing
 ._print_long_hex:
-	call osrt.long_to_hexstr
+	syscall _long_to_hexstr
 ._done_printing:
 	pop bc,bc,bc
 	jp bos.gui_PrintLine

@@ -6,13 +6,13 @@ pause_main:
 	ld a,(ix+6)
 	cp a,2
 	jr c,.no_args
-	call osrt.argv_1
+	syscall _argv_1
 	ld a,(hl)
 	cp a,'-'
 	jr z,.help
 .not_a_flag:
 	push hl
-	call osrt.str_to_int
+	syscall _str_to_int
 	pop bc
 	jr .wait_for_key
 .no_args:

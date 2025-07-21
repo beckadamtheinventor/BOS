@@ -6,7 +6,7 @@ rm_main:
 	ld a,(ix+6)
 	cp a,2
 	jr c,.info
-	call osrt.argv_1
+	syscall _argv_1
 	ld a,(hl)
 	cp a,'-'
 	ld c,0
@@ -15,7 +15,7 @@ rm_main:
 	ld a,(hl)
 	cp a,'r'
 	jr nz,.info
-	call osrt.argv_2
+	syscall _argv_2
 	ld c,$FF
 .rm_file:
 	push bc,hl

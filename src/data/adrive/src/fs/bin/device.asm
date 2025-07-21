@@ -5,7 +5,7 @@ initdev_exe_main:
 	ld a,(ix+6)
 	dec a
 	jr z,.info
-	call osrt.argv_1
+	syscall _argv_1
 	ld a,(hl)
 	cp a,'-'
 	jr nz,.info

@@ -16,12 +16,12 @@ random_main:
 	dec a
 	jr nz,.info
 .two_args:
-	call osrt.argv_1
+	syscall _argv_1
 	push hl
 	call bos.str_ToInt
 	pop bc
 	ld (ix-8),hl
-	call osrt.argv_2
+	syscall _argv_2
 	push hl
 	call bos.str_ToInt
 	pop bc
@@ -38,7 +38,7 @@ random_main:
 	ld e,a
 	jr .no_args
 .one_arg:
-	call osrt.argv_1
+	syscall _argv_1
 	push hl
 	call bos.str_ToInt
 	ex (sp),hl

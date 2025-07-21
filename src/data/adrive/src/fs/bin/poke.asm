@@ -5,7 +5,7 @@ poke_main:
 	ld a,(ix+6)
 	cp a,5
 	jr nz,.info
-	call osrt.argv_1
+	syscall _argv_1
 	ld a,(hl)
 	inc hl
 	ld c,4
@@ -23,20 +23,20 @@ poke_main:
 .poke:
 	ld a,c
 	ld (bos.fsOP6+8),a
-	call osrt.argv_2
+	syscall _argv_2
 	push hl
-	call osrt.hexstr_to_int ; address
+	syscall _hexstr_to_int ; address
 	pop bc
 	jr c,.done
 	ld (bos.fsOP6),hl
 	ld (bos.fsOP6+3),a
-	call osrt.argv_4
+	syscall _argv_4
 	push hl
-	call osrt.hexstr_to_int ; value to write
+	syscall _hexstr_to_int ; value to write
 	pop bc
 	ld (bos.fsOP6+4),hl
 	ld (bos.fsOP6+7),a
-	call osrt.argv_3
+	syscall _argv_3
 	ld a,(hl)
 	ld hl,(bos.fsOP6)
 	ld bc,(bos.fsOP6+4)
@@ -57,23 +57,23 @@ poke_main:
 	jr .exit
 .poke_xor:
 	ld a,d
-	call osrt.xor_val_addr
+	syscall _xor_val_addr
 	jr .poke_set_from_eubc
 .poke_or:
 	ld a,d
-	call osrt.or_val_addr
+	syscall _or_val_addr
 	jr .poke_set_from_eubc
 .poke_and:
 	ld a,d
-	call osrt.and_val_addr
+	syscall _and_val_addr
 .poke_set_from_eubc:
 	ld a,(bos.fsOP6+8)
 	ld hl,(bos.fsOP6+4)
-	call osrt.set_a_at_addr
+	syscall _set_a_at_addr
 	jr .done
 .poke_set:
 	ld a,d
-	call osrt.set_a_at_addr
+	syscall _set_a_at_addr
 .done:
 	sbc hl,hl
 .exit:

@@ -2,7 +2,7 @@
 	db "FEX",0
 mkfile_main:
 	call ti._frameset0
-	call osrt.argv_1
+	syscall _argv_1
 	ld a,(hl)
 	or a,a
 	jq z,.info

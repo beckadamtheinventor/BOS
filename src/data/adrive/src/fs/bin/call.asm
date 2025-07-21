@@ -4,7 +4,7 @@
 	db "FEX",0
 call_main:
 	call ti._frameset0
-	call osrt.argv_1
+	syscall _argv_1
 	ld bc,2
 	push hl,bc
 	call jump_main

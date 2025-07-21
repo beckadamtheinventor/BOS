@@ -13,7 +13,7 @@ _writeinto:
 	or a,a
 	sbc hl,bc
 	jr z,.fail ;fail if -1
-	call osrt.argv_1
+	syscall _argv_1
 	push hl
 	call bos.fs_OpenFile
 	call nc,bos.fs_DeleteFile

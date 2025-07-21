@@ -12,7 +12,7 @@ _bomasm_main:
 	pop ix
 	ret
 .has_enough_args:
-	call osrt.argv_1
+	syscall _argv_1
 
 .exit0:
 	or a,a
@@ -260,7 +260,7 @@ assert bos.symbol.flags < 256
 	ld bc,(ix-9) ; src offset
 	add hl,bc
 	push hl
-	call osrt.intstr_to_int
+	syscallcall _intstr_to_int
 	ex (sp),hl
 	ex hl,de
 	or a,a
@@ -280,7 +280,7 @@ assert bos.symbol.flags < 256
 	push hl
 	ld hl,(ix-12) ; src
 	push hl
-	call osrt.sreadidentifier
+	syscall _sreadidentifier
 	pop bc,bc,bc
 	add hl,bc
 	xor a,a

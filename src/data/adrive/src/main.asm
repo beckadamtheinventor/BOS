@@ -5,6 +5,7 @@ include 'include/bosfs.inc'
 include 'include/bos.inc'
 include 'include/defines.inc'
 
+NO_SYSCALL_HEADERS := 1 ; don't generate C headers for bos syslibs for now
 
 org $040000+bos.fs_directory_size
 fs_fs $040000
@@ -54,8 +55,8 @@ fs_dir bin_dir
 	; fs_sfentry writeinto_exe, ">", "", f_system+f_subfile
 	; fs_sfentry appendinto_exe, ">>", "", f_system+f_subfile
     fs_entry bin_fs_dir, "fs", "", f_system+f_subdir
+	fs_entry bin_sys_dir, "sys", "", f_system+f_subdir
 	fs_sfentry continuecmd_exe, "@cmd", "", f_system+f_subfile
-	fs_entry argv_so, "argv", "so", f_system
 	fs_sfentry asmcomp_exe, "asmcomp", "", f_system+f_subfile
 	fs_sfentry cat_exe, "cat", "", f_system+f_subfile
 	fs_sfentry cd_exe, "cd", "", f_system+f_subfile
@@ -90,7 +91,6 @@ fs_dir bin_dir
 	fs_sfentry mkfile_exe, "mkfile", "", f_system+f_subfile
 	fs_sfentry mv_exe, "mv", "", f_system+f_subfile
 	fs_sfentry off_exe, "off", "", f_system+f_subfile
-	fs_entry _osrt_lib_table, "osrt", "tbl", f_system
 	fs_sfentry pause_exe, "pause", "", f_system+f_subfile
 	fs_sfentry peek_exe, "peek", "", f_system+f_subfile
 	fs_sfentry poke_exe, "poke", "", f_system+f_subfile
@@ -98,10 +98,7 @@ fs_dir bin_dir
 	fs_sfentry rm_exe, "rm", "", f_system+f_subfile
 	fs_sfentry sleep_exe, "sleep", "", f_system+f_subfile
 	fs_sfentry zx7_exe, "zx7", "", f_system+f_subfile
-	fs_entry str_so, "str", "so", f_system
 	; fs_sfentry var_exe, "var", "", f_system+f_subfile
-	fs_entry numstr_so, "numstr", "so", f_system
-	fs_entry mem_so, "mem", "so", f_system
 	fs_entry os_internal_subfiles, "osfiles", "dat", f_system
 end fs_dir
 
@@ -279,8 +276,68 @@ fs_file os_internal_subfiles
     fs_subfile fputs_exe, bin_fs_dir
         include 'fs/bin/fs/fputs.asm'
     end fs_subfile
+
+_argv_1:
+	db "argv/1",0
+_argv_2:
+	db "argv/2",0
+_argv_3:
+	db "argv/3",0
+_argv_4:
+	db "argv/4",0
+_intstr_to_int:
+	db "numstr/intstr_to_int",0
+_int_to_str:
+	db "numstr/int_to_str",0
+_int_to_hexstr:
+	db "numstr/int_to_hexstr",0
+_long_to_str:
+	db "numstr/long_to_str",0
+_long_to_hexstr:
+	db "numstr/long_to_hexstr",0
+_byte_to_hexstr:
+	db "numstr/byte_to_hexstr",0
+_str_to_int:
+	db "numstr/str_to_int",0
+_hexstr_to_int:
+	db "numstr/hexstr_to_int",0
+_read_a_from_addr:
+	db "numstr/read_a_from_addr",0
+_set_a_at_addr:
+	db "numstr/set_a_from_addr",0
+_xor_val_addr:
+	db "numstr/xor_val_addr",0
+_or_val_addr:
+	db "numstr/or_val_addr",0
+_and_val_addr:
+	db "numstr/and_val_addr",0
+
 end fs_file
 
+fs_dir bin_sys_dir
+	fs_sfentry argv_so, "argv", "", f_system+f_subfile
+	fs_sfentry numstr_so, "numstr", "", f_system+f_subfile
+	fs_sfentry mem_so, "mem", "", f_system+f_subfile
+	fs_sfentry str_so, "str", "", f_system+f_subfile
+end fs_dir
+
+fs_file os_syslib
+	fs_subfile argv_so, bin_sys_dir
+		include 'fs/bin/argv.so.asm'
+	end fs_subfile
+
+	fs_subfile numstr_so
+		include 'fs/bin/numstr.so.asm'
+	end fs_subfile
+
+	fs_subfile mem_so
+		include 'fs/bin/mem.so.asm'
+	end fs_subfile
+
+	fs_subfile str_so
+		include 'fs/bin/str.so.asm'
+	end fs_subfile
+end fs_file
 
 
 ;-------------------------------------------------------------
@@ -344,33 +401,4 @@ fs_file memedit_exe
 	file '../obj/memedit.bin'
 end fs_file
 
-;-------------------------------------------------------------
-; this needs to be at the end, and the address is expected to be reflected in osrt.asm
-;-------------------------------------------------------------
-db $04E000 - $ dup $FF
-
-fs_file _osrt_lib_table
-	dl _osrt_argv_so
-	dl _osrt_numstr_so
-	dl _osrt_mem_so
-	dl _osrt_str_so
-end fs_file
-
-fs_file argv_so
-	include 'fs/bin/argv.so.asm'
-end fs_file
-
-fs_file numstr_so
-	include 'fs/bin/numstr.so.asm'
-end fs_file
-
-fs_file mem_so
-	include 'fs/bin/mem.so.asm'
-end fs_file
-
-fs_file str_so
-	include 'fs/bin/str.so.asm'
-end fs_file
-
 end fs_fs
-

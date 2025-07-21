@@ -14,21 +14,21 @@ _hexdump_main:
     jp c,.display_info
 	cp a,3
 	jr c,.no_offset_len
-	call osrt.argv_2
+	syscall _argv_2
 	push hl
-	call osrt.intstr_to_int
+	syscall _intstr_to_int
 	pop bc
 	ld (ix-3),hl
 	ld a,(ix+6)
 	cp a,4
 	jr c,.no_offset_len
-	call osrt.argv_3
+	syscall _argv_3
 	push hl
-	call osrt.intstr_to_int
+	syscall _intstr_to_int
 	pop bc
 	ld (ix-6),hl
 .no_offset_len:
-	call osrt.argv_1
+	syscall _argv_1
 	push hl
 	call bos.fs_GetFilePtr
 	pop de
@@ -72,7 +72,7 @@ _hexdump_main:
 .loop:
 	ld de,bos.gfx_string_temp
 	push iy,bc,hl,de
-	call osrt.byte_to_hexstr
+	syscall _byte_to_hexstr
 	pop hl
 	push hl
 	call bos.gui_Print

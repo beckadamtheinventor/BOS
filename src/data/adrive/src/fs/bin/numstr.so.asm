@@ -1,34 +1,18 @@
 
 ; shared str<-->num code for os executables
 
-_osrt_numstr_so:
-	dd 2
-	jp osrt.str_to_int
-	jp osrt.hexstr_to_int
-	jp osrt.nibble
-	jp osrt.byte_to_hexstr
-	jp osrt.int_to_hexstr
-	jp osrt.long_to_hexstr
-	jp osrt.b_to_hexstr
-	jp osrt.byte_to_str
-	jp osrt.int_to_str
-	jp osrt.long_to_str
-	jp osrt.intstr_to_int
-
-virtual
-	db "osrt.str_to_int       rb 4",$A
-	db "osrt.hexstr_to_int    rb 4",$A
-	db "osrt.nibble           rb 4",$A
-	db "osrt.byte_to_hexstr   rb 4",$A
-	db "osrt.int_to_hexstr    rb 4",$A
-	db "osrt.long_to_hexstr   rb 4",$A
-	db "osrt.b_to_hexstr      rb 4",$A
-	db "osrt.byte_to_str      rb 4",$A
-	db "osrt.int_to_str       rb 4",$A
-	db "osrt.long_to_str      rb 4",$A
-	db "osrt.intstr_to_str    rb 4",$A
-	load _routines_osrt_numstr_so: $-$$ from $$
-end virtual
+syscalllib "numstr", 0
+	export osrt.str_to_int, "str_to_int"
+	export osrt.hexstr_to_int, "hexstr_to_int"
+	export osrt.nibble, "nibble"
+	export osrt.byte_to_hexstr, "byte_to_hexstr"
+	export osrt.int_to_hexstr, "int_to_hexstr"
+	export osrt.long_to_hexstr, "long_to_hexstr"
+	export osrt.b_to_hexstr, "b_to_hexstr"
+	export osrt.byte_to_str, "byte_to_str"
+	export osrt.int_to_str, "int_to_str"
+	export osrt.long_to_str, "long_to_str"
+	export osrt.intstr_to_int, "intstr_to_int"
 
 
 ; convert a base-10 string into an integer
@@ -327,3 +311,5 @@ osrt.num_to_str_aqu.loop:
 	ld (iy),d
 	inc iy
 	ret
+
+end syscalllib

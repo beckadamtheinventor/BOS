@@ -1,1 +1,1 @@
-db "/usr/sys:/opt/sys:/sys"
+db "/usr/sys:/opt/sys:/sys:/bin/sys"

@@ -6,11 +6,11 @@ mv_main:
 	ld a,(ix+6)
 	cp a,3
 	jr nz,.info
-	call osrt.argv_2
+	syscall _argv_2
 	push hl
 	call bos.fs_OpenFile
 	jr nc,.failexists
-	call osrt.argv_1
+	syscall _argv_1
 	push hl
 	call bos.fs_OpenFile
 	jr c,.failnotfound

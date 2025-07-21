@@ -6,9 +6,9 @@ sleep_main:
 	ld a,(ix+6)
 	cp a,2
 	jr nz,.info
-	call osrt.argv_1
+	syscall _argv_1
 	push hl
-	call osrt.str_to_int
+	syscall _str_to_int
 	pop bc
 	ld bc,250
 	or a,a

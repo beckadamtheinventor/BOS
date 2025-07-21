@@ -12,9 +12,9 @@ cp_main:
 	call bos.gui_PrintLine
 	jr .done
 .trycopy:
-	call osrt.argv_2
+	syscall _argv_2
 	push hl
-	call osrt.argv_1
+	syscall _argv_1
 	push hl
 	call bos.fs_CopyFile
 	add hl,bc

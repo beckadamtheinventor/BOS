@@ -3,7 +3,7 @@
 	db "FEX",0
 jump_main:
 	call ti._frameset0
-	call osrt.argv_1
+	syscall _argv_1
 	ld a,(hl)
 	inc hl
 	cp a,'$'
@@ -19,7 +19,7 @@ jump_main:
 	dec hl
 .address:
 	push hl
-	call osrt.hexstr_to_int
+	syscall _hexstr_to_int
 .jump:
 	ld sp,ix
 	pop ix

@@ -90,71 +90,80 @@ end macro
 ;		db "gfx/PrintString",0
 macro syscall? lbl
 	rst $18
-	dl lbl - $+3
+	dl lbl - 3 - $
 end macro
 
 ;-------------------------------------------------------------------------------
 ; Syscall library macro
 ;-------------------------------------------------------------------------------
-macro syscalllib? sclname
-	local exports
-	local flashexecbase
-	element flashexecbase
-	virtual
+macro syscalllib? sclname, relocations:1
+	local exports, header, symbols
+	local flashexecbase, file_base
+	file_base = $
+	if relocations = 1
+		element flashexecbase
+	else
+		flashexecbase = 0
+	end if
+	db "SCL",0
+	virtual at $
 		exports.area::
 	end virtual
-	virtual as "h"
-		header.area::
-	end virtual
-	virtual as "src"
-		symbols.area::
-	end virtual
-	virtual at flashexecbase-5
-	db "SCL",0
-	macro export? routine, name, hname, hdef&
-		virtual exports.area
-			if defined routine.ramroutine
-				db 2
-			else
-				db 1
-			end if
-			dw routine-flashexecbase
-			db name, 0
+	if ~defined NO_SYSCALL_HEADERS
+		virtual as "h"
+			header.area::
 		end virtual
-		virtual header.area
-			db hdef
-			db $A
+		virtual as "src"
+			symbols.area::
 		end virtual
-		virtual symbols.area
-			db "public _", hname,$A
-			db '_',hname,' := syscall "',sclname,'/',name,'"',$A
-		end virtual
-	end macro
-	macro export_data? data, name, hname, hdef&
+	end if
+	virtual at flashexecbase + exports.end
+	macro export_data? data, name, hname:0, hdef&
 		virtual exports.area
 			db 3
-			dw data-flashexecbase
+			dw data - file_base - flashexecbase
 			db name, 0
 		end virtual
-		virtual header.area
-			db hdef
-			db $A
-		end virtual
+		if ~defined NO_SYSCALL_HEADERS & ~hname eq 0
+			virtual header.area
+				db hdef
+				db $A
+			end virtual
+		end if
 	end macro
-	macro export_ptr? routine, name, hname, hdef&
+	macro export_ptr? routine, name, hname:0, hdef&
 		virtual exports.area
-			db 8
+			db 7
 			dl routine
 			db name, 0
 		end virtual
-		virtual header.area
-			db hdef
-			db $A
+		if ~defined NO_SYSCALL_HEADERS & ~hname eq 0
+			virtual header.area
+				db hdef
+				db $A
+			end virtual
+			virtual symbols.area
+				db "public _", hname,$A
+				db '_',hname,' := syscall "',sclname,'/',name,'"',$A
+			end virtual
+		end if
+	end macro
+	macro export? routine, name, hname:0, hdef&
+		virtual exports.area
+			db 9
+			dw routine - file_base - flashexecbase
+			db name, 0
 		end virtual
-		virtual symbols.area
-			db "public _", hname,$A
-			db '_',hname,' := syscall "',sclname,'/',name,'"',$A
-		end virtual
+		if ~defined NO_SYSCALL_HEADERS & ~hname eq 0
+			virtual header.area
+				db hdef
+				db $A
+			end virtual
+			virtual symbols.area
+				db "public _", hname,$A
+				db '_',hname,' := syscall "',sclname,'/',name,'"',$A
+			end virtual
+		end if
 	end macro
 	macro ram_routine? routine, ramloc
 		routine.ramroutine:
@@ -187,61 +196,63 @@ macro syscalllib? sclname
 		end virtual
 		virtual exports.area
 			db 0
+			exports.end = $
 			load exports.data: $-$$ from $$
 		end virtual
 		db exports.data
 		db exports.code
-		purge call?
-		purge jp?
-		purge jq?
-		purge ld?
-		purge syscall?
-		purge export?
-		purge end?.syscalllib?
+		restore call?
+		restore jp?
+		restore jq?
+		restore ld?
+		restore syscall?
+		restore end?.syscalllib?
 	end macro
-	iterate opcode, call,jp,jq,ld,syscall
-		macro opcode? args&
-			match lhs=,rhs, args
-				match (val), lhs
-					if val relativeto flashexecbase
+	if relocations = 1
+		iterate opcode, call,jp,jq,ld,syscall
+			macro opcode? args&
+				match lhs=,rhs, args
+					match (val), lhs
+						if val relativeto flashexecbase
+							rst $28
+							opcode (0), rhs
+							store val - $ : 3 at $ - 3
+						else
+							opcode (val), rhs
+						end if
+					else match (val), rhs
+						if val relativeto flashexecbase
+							rst $28
+							opcode lhs, (0)
+							store val - $ : 3 at $ - 3
+						else
+							opcode lhs, (val)
+						end if
+					else if rhs relativeto flashexecbase
 						rst $28
-						opcode (0), rhs
-						store val - $ : 3 at $ - 3
+						opcode lhs, 0
+						store rhs - $ : 3 at $ - 3
 					else
-						opcode (val), rhs
+						opcode lhs, rhs
 					end if
-				else match (val), rhs
-					if val relativeto flashexecbase
+				else match opcode= lhs, line
+					match (val), lhs
+						opcode lhs
+					else if lhs relativeto flashexecbase
 						rst $28
-						opcode lhs, (0)
-						store val - $ : 3 at $ - 3
+						opcode 0
+						store lhs - $ : 3 at $ - 3
 					else
-						opcode lhs, (val)
+						opcode lhs
 					end if
-				else if rhs relativeto flashexecbase
-					rst $28
-					opcode lhs, 0
-					store rhs - $ : 3 at $ - 3
+				else if args relativeto flashexecbase
+					opcode args - flashexecbase
 				else
-					opcode lhs, rhs
+					opcode args
 				end if
-			else match opcode= lhs, line
-				match (val), lhs
-					opcode lhs
-				else if lhs relativeto flashexecbase
-					rst $28
-					opcode 0
-					store lhs - $ : 3 at $ - 3
-				else
-					opcode lhs
-				end if
-			else if args relativeto flashexecbase
-				opcode args - flashexecbase
-			else
-				opcode args
-			end if
-		end macro
-	end iterate
+			end macro
+		end iterate
+	end if
 end macro
 
 ;-------------------------------------------------------------------------------

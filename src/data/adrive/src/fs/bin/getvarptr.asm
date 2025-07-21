@@ -7,7 +7,7 @@ getvarptr_main:
 	cp a, 2
 	jr nz,.help
 
-	call osrt.argv_1
+	syscall _argv_1
 	push hl
 	call ti._strlen
 	ex (sp),hl

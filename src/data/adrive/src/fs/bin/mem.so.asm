@@ -1,40 +1,21 @@
 
 ; shared memory access code for os executables
 
-_osrt_mem_so:
-	dd 1
-	jp osrt.check_address_writable
-	jp osrt.read_a_from_addr
-	jp osrt.read_byte_from_addr
-	jp osrt.read_word_from_addr
-	jp osrt.read_int_from_addr
-	jp osrt.read_long_from_addr
-	jp osrt.set_a_at_addr
-	jp osrt.set_byte_at_addr
-	jp osrt.set_word_at_addr
-	jp osrt.set_int_at_addr
-	jp osrt.set_long_at_addr
-	jp osrt.xor_val_addr
-	jp osrt.or_val_addr
-	jp osrt.and_val_addr
-
-virtual
-	db "osrt.check_address_writable rb 4", $A
-	db "osrt.read_a_from_addr rb 4", $A
-	db "osrt.read_byte_from_addr rb 4", $A
-	db "osrt.read_word_from_addr rb 4", $A
-	db "osrt.read_int_from_addr rb 4", $A
-	db "osrt.read_long_from_addr rb 4", $A
-	db "osrt.set_a_at_addr rb 4", $A
-	db "osrt.set_byte_at_addr rb 4", $A
-	db "osrt.set_word_at_addr rb 4", $A
-	db "osrt.set_int_at_addr rb 4", $A
-	db "osrt.set_long_at_addr rb 4", $A
-	db "osrt.xor_val_addr rb 4", $A
-	db "osrt.or_val_addr rb 4", $A
-	db "osrt.and_val_addr rb 4", $A
-	load _routines_osrt_mem_so: $-$$ from $$
-end virtual
+syscalllib "mem", 0
+	export osrt.check_address_writable, "check_address_writable"
+	export osrt.read_a_from_addr, "read_a_from_addr"
+	export osrt.read_byte_from_addr, "read_byte_from_addr"
+	export osrt.read_word_from_addr, "read_word_from_addr"
+	export osrt.read_int_from_addr, "read_int_from_addr"
+	export osrt.read_long_from_addr, "read_long_from_addr"
+	export osrt.set_a_at_addr, "set_a_at_addr"
+	export osrt.set_byte_at_addr, "set_byte_at_addr"
+	export osrt.set_word_at_addr, "set_word_at_addr"
+	export osrt.set_int_at_addr, "set_int_at_addr"
+	export osrt.set_long_at_addr, "set_long_at_addr"
+	export osrt.xor_val_addr, "xor_val_addr"
+	export osrt.or_val_addr, "or_val_addr"
+	export osrt.and_val_addr, "and_val_addr"
 
 ; input a number of bytes to read
 ; input hl address to read from
@@ -252,5 +233,5 @@ osrt.and_val_addr:
 	dec d
 	ret
 
-
+end syscalllib
 

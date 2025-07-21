@@ -13,7 +13,7 @@ if_main:
 	ld a,(ix+6)
 	cp a,2
 	jq c,.info
-	call osrt.argv_1
+	syscall _argv_1
 	ld a,(hl)
 	or a,a
 	jq z,.info
@@ -150,14 +150,14 @@ if_main:
 	push hl
 	cp a,'$'
 	jr nz,.not_hex
-	call osrt.hexstr_to_int
+	syscall _hexstr_to_int
 	jr .number
 .not_hex:
 	sub a,'0'
 	jr c,.info
 	cp a,10
 	jr nc,.not_base_10_number
-	call osrt.str_to_int
+	syscall _str_to_int
 	jr .number
 .not_base_10_number:
 	sub a,'A'-'0'

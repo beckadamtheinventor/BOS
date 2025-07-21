@@ -75,10 +75,10 @@ sc_LoadSysCall:
 	cpi
 	ret po
 	cp a,8
-	jr c,.dont_skip_extra_byte
+	jr nc,.skip_extra_byte
 	cpi
 	ret po
-.dont_skip_extra_byte:
+.skip_extra_byte:
 	push bc,hl,de
 	call ti._strcmp
 	add hl,bc
@@ -97,13 +97,14 @@ sc_LoadSysCall:
 	ld (ix-6),hl
 	ld a,(ix-10)
 	cp a,8
-	jr c,.found_word_entry
+	jr nc,.found_offset_entry
 	dec hl
 	dec hl
 	dec hl
 	ld hl,(hl)
 	jr .check_entry_type
-.found_word_entry:
+.found_offset_entry:
+	and a,7
 	mlt de ; zero deu
 	dec hl
 	ld d,(hl)
@@ -119,7 +120,7 @@ sc_LoadSysCall:
 	jr z,.ram_routine ; if type==2, copy routine to ram first
 	cp a,3
 	jr z,.return_data ; if type==3, return data pointer in HL, length in BC
-	cp a,8
+	cp a,7
 	jr z,.success ; if type==8, return routine pointer
 ; fail if unknown routine type
 	jr .fail

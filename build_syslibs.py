@@ -47,8 +47,8 @@ def build_syscalls(path):
 
 	o = {
 		"str": [
-			f"export_ptr bos.strupper, \"ToUpper\"",
-			f"export_ptr bos.strlower, \"ToLower\"",
+			f"export_ptr bos.strupper, \"ToUpper\", \"str_ToUpper\", \"char* str_ToUpper(char*);\"",
+			f"export_ptr bos.strlower, \"ToLower\", \"str_ToLower\", \"char* str_ToLower(char*);\"",
 		]
 	}
 	for line in data:

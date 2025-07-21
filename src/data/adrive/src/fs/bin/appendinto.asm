@@ -14,7 +14,7 @@ _appendinto_exe:
 	or a,a
 	sbc hl,bc
 	jq z,.fail ;fail if -1
-	call osrt.argv_1
+	syscall _argv_1
 	push hl
 	call bos.fs_OpenFile
 	pop de

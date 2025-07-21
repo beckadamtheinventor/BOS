@@ -28,7 +28,7 @@ var_main:
 	jr .define_var
 
 .define_var_with_value:
-	call osrt.argv_3
+	syscall _argv_3
 	ld a,(hl)
 	cp a,'0'
 	jr nz,.grab_dec
@@ -39,26 +39,26 @@ var_main:
 
 .grab_dec:
 	push hl
-	call osrt.str_to_int
+	syscall _str_to_int
 	jr .define_var_with_value_set_value
 
 .grab_hex:
 	inc hl
 	push hl
-	call osrt.hexstr_to_int
+	syscall _hexstr_to_int
 
 .define_var_with_value_set_value:
 	pop bc
 	ld (ix-6),hl
 	xor a,a
 	ld (ix-7),a
-	call osrt.argv_2
+	syscall _argv_2
 	ld a,(hl)
 	cp a,'='
 	jr z,.set_to_value
 
 	push hl
-	call osrt.argv_1
+	syscall _argv_1
 	push hl
 	call varptr_main
 	ld (ix-14),hl
@@ -122,11 +122,11 @@ var_main:
 	ld (ix-6),hl
 
 .set_to_value:
-	call osrt.argv_3
+	syscall _argv_3
 	jr .define_var_hl
 
 .define_var_arg1:
-	call osrt.argv_1
+	syscall _argv_1
 
 .define_var_hl:
 	push hl

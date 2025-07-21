@@ -2,7 +2,7 @@
 	db "FEX",0
 info_exe_main:
 	call ti._frameset0
-	call osrt.argv_1
+	syscall _argv_1
 	push hl
 	call bos.fs_OpenFile
 	jq c,.fail
@@ -45,7 +45,7 @@ info_exe_main:
 	add hl,sp
 	ld de,bos.fsOP1
 	push de
-	call osrt.int_to_hexstr
+	syscall _int_to_hexstr
 	pop hl
 	call bos.gui_PrintLine
 	call bos.fs_GetFDPtr
@@ -57,7 +57,7 @@ info_exe_main:
 	add hl,sp
 	ld de,bos.fsOP1
 	push de
-	call osrt.int_to_hexstr
+	syscall _int_to_hexstr
 	pop hl
 	call bos.gui_PrintLine
 .dont_display_content_location:

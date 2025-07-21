@@ -10,9 +10,9 @@ mem_cpy_exe_main:
 	call bos.gui_PrintLine
 	jr .return0
 .correctnumberofarguments:
-	call osrt.argv_1
+	syscall _argv_1
 	push hl
-	call osrt.intstr_to_int
+	syscall _intstr_to_int
 	pop bc
 	ld bc,$D00000
 	or a,a
@@ -24,9 +24,9 @@ mem_cpy_exe_main:
 	jr nc,.failcopybeyondram
 	add hl,bc
 	push hl
-	call osrt.argv_3
+	syscall _argv_3
 	push hl
-	call osrt.intstr_to_int
+	syscall _intstr_to_int
 	pop bc
 	pop de
 	push hl,de
@@ -39,9 +39,9 @@ mem_cpy_exe_main:
 	ld bc,$D65800
 	sbc hl,bc
 	jr nc,.failcopybeyondram
-	call osrt.argv_2
+	syscall _argv_2
 	push hl
-	call osrt.intstr_to_int
+	syscall _intstr_to_int
 	pop bc,de,bc
 	ldir
 .return0:

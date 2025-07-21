@@ -13,7 +13,7 @@ peek_main:
 	ld a,(ix+6)
 	cp a,3
 	jr nz,.info
-	call osrt.argv_1
+	syscall _argv_1
 	ex hl,de
 	ld hl,bos.return_code_flags
 	ld a,(de)
@@ -33,12 +33,12 @@ peek_main:
 	jr nz,.info
 .peek:
 	push bc
-	call osrt.argv_2
+	syscall _argv_2
 	push hl
-	call osrt.hexstr_to_int
+	syscall _hexstr_to_int
 	pop bc,bc
 	ld a,c
-	call osrt.read_a_from_addr
+	syscall _read_a_from_addr
 	jr .done
 .info:
 	ld hl,.infostr

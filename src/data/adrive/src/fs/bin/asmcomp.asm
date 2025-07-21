@@ -15,7 +15,7 @@ _asmcomp_exe:
 	or a,a
 	jq .exit_cf
 .has_enough_arguments:
-	call osrt.argv_1
+	syscall _argv_1
 	push hl
 	call bos.fs_GetFilePtr
 	pop de
@@ -128,7 +128,7 @@ end repeat
 	push hl,bc
 	ld c,a
 	push bc
-	call osrt.argv_2
+	syscall _argv_2
 	push hl
 	call bos.fs_WriteNewFile
 	pop bc,bc,bc,bc
@@ -335,7 +335,7 @@ end repeat
 	cp a,'?'
 	jr nz,.not_set_origin
 	push hl
-	call osrt.hexstr_to_int
+	syscall _hexstr_to_int
 	pop bc
 	ld (ix-25),hl
 	ex hl,de

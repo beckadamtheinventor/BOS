@@ -9,15 +9,15 @@ _fputs_main:
     jp c,.info
     cp a,4
     jr c,.no_extra_args
-    call osrt.argv_3
+    syscall _argv_3
     call .extra_arg
     ld a,(ix+6)
     cp a,5
     jr c,.no_extra_args
-    call osrt.argv_4
+    syscall _argv_4
     call .extra_arg
 .no_extra_args:
-    call osrt.argv_2
+    syscall _argv_2
     push hl
     call ti._strlen
     ld (ix-10),hl ; string length
@@ -33,7 +33,7 @@ _fputs_main:
     ex (sp),hl
     ld l,0 ; file attribute byte
     push hl
-    call osrt.argv_1 ; file name
+    syscall _argv_1 ; file name
     push hl
     call bos.fs_OpenFile
     call nc,bos.fs_CreateFile
@@ -70,7 +70,7 @@ _fputs_main:
     push hl
     ld hl,(ix-4) ; string length
     push hl
-    call osrt.argv_2 ; string
+    syscall _argv_2 ; string
     push hl
     call bos.fs_Write
     pop bc,hl,bc,de
