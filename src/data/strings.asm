@@ -19,8 +19,8 @@ str_BadInterrupt:
 	db "Repeated interrupt restart",$A
 	db "called by program.",$A,0
 str_UnimplementedSysCall:
-	db "Unimplemented System routine called",$A
-	db "by program.",$A,0
+	db "Unknown/Unimplemented Syscall",$A
+	db "called by program.",$A,0
 str_UnimplementedOSCall:
 	db "Unimplemented OS routine called",$A
 	db "by program.",$A,0
