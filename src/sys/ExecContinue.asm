@@ -52,47 +52,47 @@ sys_ExecContinue:
 ; build argc/argv (string in de)
 .build_argc_argv:
 	call sys_ExecuteFile.load_argc_argv
-	bit 0,(ix-20)
-	jr z,.argv_not_forwarding_return_code
+	; bit 0,(ix-20)
+; 	jr z,.argv_not_forwarding_return_code
 
-	push bc ; push argc
-	push bc ; push argc
-	ex (sp),hl ; hl = argc, (sp) = argv
-	add hl,hl
-	add hl,bc
-	push hl ; push argc*3
-	call sys_Malloc.entryhl
-	jq c,.fail
-	ex hl,de
-	pop bc,hl ; pop argc*3, old argv
-	dec bc
-	dec bc
-	dec bc
-	push de ; push new argv
-	push hl ; push old argv
-	ldir ; copy old argv (argc*3 - 3 bytes)
-	push de
-	ld hl,12 ; number of base-10 characters needed to represent a 32-bit integer
-	call sys_Malloc.entryhl
-	jq c,.fail
-	ld (ix-23),hl ; save so we can free later
-	ld de,(LastCommandResult)
-	ld a,(LastCommandResult+3)
-	push de
-	ld e,a
-	push de
-	push hl
-	call str_FromLong ; convert 32-bit unsigned result
-	pop bc,bc,bc
-	ex hl,de ; stringified result -> de
-	pop hl
-	ld (hl),de ; store stringified last command result
-	pop hl ; pop old argv
-	call sys_Free.entryhl ; free old argv
-	pop hl ; pop new argv
-	pop bc ; pop old argc
-	db $3E ; dummify dec bc
-.argv_not_forwarding_return_code:
+; 	push bc ; push argc
+; 	push bc ; push argc
+; 	ex (sp),hl ; hl = argc, (sp) = argv
+; 	add hl,hl
+; 	add hl,bc
+; 	push hl ; push argc*3
+; 	call sys_Malloc.entryhl
+; 	jq c,.fail
+; 	ex hl,de
+; 	pop bc,hl ; pop argc*3, old argv
+; 	dec bc
+; 	dec bc
+; 	dec bc
+; 	push de ; push new argv
+; 	push hl ; push old argv
+; 	ldir ; copy old argv (argc*3 - 3 bytes)
+; 	push de
+; 	ld hl,12 ; number of base-10 characters needed to represent a 32-bit integer
+; 	call sys_Malloc.entryhl
+; 	jq c,.fail
+; 	ld (ix-23),hl ; save so we can free later
+; 	ld de,(LastCommandResult)
+; 	ld a,(LastCommandResult+3)
+; 	push de
+; 	ld e,a
+; 	push de
+; 	push hl
+; 	call str_FromLong ; convert 32-bit unsigned result
+; 	pop bc,bc,bc
+; 	ex hl,de ; stringified result -> de
+; 	pop hl
+; 	ld (hl),de ; store stringified last command result
+; 	pop hl ; pop old argv
+; 	call sys_Free.entryhl ; free old argv
+; 	pop hl ; pop new argv
+; 	pop bc ; pop old argc
+; 	db $3E ; dummify dec bc
+; .argv_not_forwarding_return_code:
 	dec bc ; decrement argc because otherwise there's an extra argument for some reason
 	; grab program name from argv[0]
 	ld de,(hl)
@@ -107,8 +107,24 @@ sys_ExecContinue:
 	call sys_ExecV
 	bit 0,(ix-20)
 	ld hl,(ix-23)
-	call nz,sys_Free.entryhl
-	pop bc,bc,bc
+	call nz,sys_Free.entryhl ; free space used to store return code if we're not going to use it
+	call sys_Free ; free program name (also stores argv entries)
+	pop bc,bc,hl
+; free argv (starting at index 1) used to call the program after the program's been run
+; 	jr .free_argv_loop_entry
+; .free_argv_loop:
+; 	push hl,bc
+; 	ld hl,(hl)
+; 	call sys_Free.entryhl
+; 	pop bc,hl
+; 	inc hl
+; 	inc hl
+; 	inc hl
+; .free_argv_loop_entry:
+; 	dec bc
+; 	ld a,b
+; 	or a,c
+; 	jr nz,.free_argv_loop
 ; .check_if_at_eol:
 .next_line:
 	ld a,(ix-10)

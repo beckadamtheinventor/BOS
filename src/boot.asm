@@ -1,6 +1,15 @@
 
 boot_os:
 	ld sp,ti.stackTop
+	; set flash wait states to 3, same as the CE C toolchain; minimum safe value
+	ld a,3
+	ld ($E00005),a
+	; set CPU speed to maximum
+	call ti.boot.Set48MHzMode
+	; set backlight to full brightness
+    ld bc,$B024
+	ld a,128
+    out (bc),a
 	; ld a,$8C
 	; out0 ($24),a
 	; in0 a,($06)
@@ -38,10 +47,6 @@ os_return:
 	or a,a
 	sbc hl,hl
 	ld (asm_prgm_size),hl
-
-	call ti.boot.Set48MHzMode
-	ld a,3           ;set flash wait states to 3, same as the CE C toolchain
-	ld ($E00005),a
 
 	ld hl,$000f00		; 0/Wait 15*256 APB cycles before scanning each row/Mode 0/
 	ld (ti.DI_Mode),hl

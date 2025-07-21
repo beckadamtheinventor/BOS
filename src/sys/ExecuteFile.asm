@@ -240,6 +240,7 @@ sys_ExecuteFile:
 	; ld de,(fsOP6+3) ; argv
 	; ld bc,(fsOP6+9) ; argc
 	; push de,bc
+	; save text colors
 	ld iy,ti.OP3
 	ld bc,(color_primary)
 	ld (iy),bc
@@ -259,6 +260,7 @@ sys_ExecuteFile:
 .runnothreading_actually:
 	call .actuallyrunprogram_nothread
 .restore_colors:
+	; restore text colors
 	call ti.PopOP3
 	ld iy,ti.OP3
 	ld a,(iy)
@@ -383,7 +385,6 @@ sys_jphl := $
 	push bc
 	; malloc as the next process ID so argc/argv get freed when it exits
 	call sys_NextProcessId
-	ld (running_process_id),a
 	call .load_argc_argv_loop_entry
 	ex (sp),hl
 	ld a,l
