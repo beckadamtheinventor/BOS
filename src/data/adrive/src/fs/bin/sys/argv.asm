@@ -1,7 +1,11 @@
 
+include "../include/ez80.inc"
+include "../include/ti84pceg.inc"
+include "../include/bos.inc"
+
 ; routines for accessing program arguments
 
-syscalllib "argv", 0
+syscalllib "argv"
 	export osrt.argv_0, "0"
 	export osrt.argv_1, "1"
 	export osrt.argv_2, "2"

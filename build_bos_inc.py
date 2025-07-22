@@ -131,7 +131,7 @@ macro syscalllib? sclname, relocations:1
 	local exports, header, symbols
 	local flashexecbase, file_base
 	file_base = $
-	if relocations = 1
+	if relocations eq 1
 		element flashexecbase
 	else
 		flashexecbase = 0
@@ -239,7 +239,7 @@ macro syscalllib? sclname, relocations:1
 		restore syscall?
 		restore end?.syscalllib?
 	end macro
-	if relocations = 1
+	if relocations eq 1
 		iterate opcode, call,jp,jq,ld,syscall
 			macro opcode? args&
 				match lhs=,rhs, args
@@ -277,7 +277,9 @@ macro syscalllib? sclname, relocations:1
 						opcode lhs
 					end if
 				else if args relativeto flashexecbase
-					opcode args - flashexecbase
+					rst $28
+					opcode 0
+					store args - $ : 3 at $ - 3
 				else
 					opcode args
 				end if

@@ -1,18 +1,22 @@
 
-; shared str<-->num code for os executables
+include "../include/ez80.inc"
+include "../include/ti84pceg.inc"
+include "../include/bos.inc"
 
-syscalllib "numstr", 0
-	export osrt.str_to_int, "str_to_int"
-	export osrt.hexstr_to_int, "hexstr_to_int"
+; shared str<-->num code
+
+syscalllib "numstr"
+	export osrt.str_to_int, "str_to_int", "_str_to_int", "int osrt.str_to_int(const char *str);"
+	export osrt.hexstr_to_int, "hexstr_to_int", "_hexstr_to_int", "int osrt.hexstr_to_int(const char *str);"
 	export osrt.nibble, "nibble"
 	export osrt.byte_to_hexstr, "byte_to_hexstr"
 	export osrt.int_to_hexstr, "int_to_hexstr"
 	export osrt.long_to_hexstr, "long_to_hexstr"
 	export osrt.b_to_hexstr, "b_to_hexstr"
-	export osrt.byte_to_str, "byte_to_str"
-	export osrt.int_to_str, "int_to_str"
-	export osrt.long_to_str, "long_to_str"
-	export osrt.intstr_to_int, "intstr_to_int"
+	export osrt.byte_to_str, "byte_to_str", "_byte_to_str", "char *osrt.byte_to_str(char *dest, uint8_t num);"
+	export osrt.int_to_str, "int_to_str", "_int_to_str", "char *osrt.int_to_str(char *dest, unsigned int num);"
+	export osrt.long_to_str, "long_to_str", "_long_to_str", "char *osrt.long_to_str(char *dest, uint32_t num);"
+	export osrt.intstr_to_int, "intstr_to_int", "_intstr_to_int", "int osrt.intstr_to_int(const char *str);"
 
 
 ; convert a base-10 string into an integer

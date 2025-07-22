@@ -5,7 +5,6 @@ include 'include/bosfs.inc'
 include 'include/bos.inc'
 include 'include/defines.inc'
 
-NO_SYSCALL_HEADERS := 1 ; don't generate C headers for bos syslibs for now
 
 org $040000+bos.fs_directory_size
 fs_fs $040000
@@ -316,26 +315,26 @@ end fs_file
 
 fs_dir bin_sys_dir
 	fs_sfentry argv_so, "argv", "", f_system+f_subfile
-	fs_sfentry numstr_so, "numstr", "", f_system+f_subfile
 	fs_sfentry mem_so, "mem", "", f_system+f_subfile
+	fs_sfentry numstr_so, "numstr", "", f_system+f_subfile
 	fs_sfentry str_so, "str", "", f_system+f_subfile
 end fs_dir
 
 fs_file os_syslib
 	fs_subfile argv_so, bin_sys_dir
-		include 'fs/bin/argv.so.asm'
+		file '../obj/argv.bin'
 	end fs_subfile
 
-	fs_subfile numstr_so
-		include 'fs/bin/numstr.so.asm'
+	fs_subfile mem_so, bin_sys_dir
+		file '../obj/mem.bin'
 	end fs_subfile
 
-	fs_subfile mem_so
-		include 'fs/bin/mem.so.asm'
+	fs_subfile numstr_so, bin_sys_dir
+		file '../obj/numstr.bin'
 	end fs_subfile
 
-	fs_subfile str_so
-		include 'fs/bin/str.so.asm'
+	fs_subfile str_so, bin_sys_dir
+		file '../obj/str.bin'
 	end fs_subfile
 end fs_file
 

@@ -1,28 +1,19 @@
 
+include "../include/ez80.inc"
+include "../include/ti84pceg.inc"
+include "../include/bos.inc"
+
 ; shared string related code
 
-_osrt_str_so:
-	dd 1
-	jp osrt.substring
-	jp osrt.duplicate_string
-	jp osrt.subsection_mem
-	jp osrt.duplicate_mem
-	jp osrt.sreadline
-	jp osrt.sreadlineuntil
-	jp osrt.sreaduntil
-	jp osrt.sreadidentifier
-
-virtual
-	db "osrt.substring        rb 4",$A
-	db "osrt.duplicate_string rb 4",$A
-	db "osrt.subsection_mem   rb 4",$A
-	db "osrt.duplicate_mem    rb 4",$A
-	db "osrt.sreadline         rb 4",$A
-	db "osrt.sreadlineuntil    rb 4",$A
-	db "osrt.sreaduntil        rb 4",$A
-	db "osrt.sreadidentifier   rb 4",$A
-	load _routines_osrt_str_so: $-$$ from $$
-end virtual
+syscalllib "str"
+	export osrt.substring, "substr", "_substr", "char *substr(const char *str, const size_t start, const size_t length);"
+	export osrt.duplicate_string, "dupstr", "_dupstr", "char *duplicate_string(const char *str);"
+	export osrt.subsection_mem, "submem", "_submem", "void *submem(const void *mem, const size_t start, const size_t length);"
+	export osrt.duplicate_mem, "dupmem", "_dupmem", "void *dupmem(const void *mem, const size_t len);"
+	export osrt.sreadline, "sreadline", "_sreadline", "char *sreadline(const char *src, const size_t offset, const size_t len);"
+	export osrt.sreadlineuntil, "sreadlineuntil", "_sreadlineuntil", "char *sreadlineuntil(const char *src, const size_t offset, const size_t len, char end);"
+	export osrt.sreaduntil, "sreaduntil", "_sreaduntil", "char *sreaduntil(const char *src, const size_t offset, const size_t len, char end);"
+	export osrt.sreadidentifier, "sreadidentifier", "_sreadidentifier", "char *sreadidentifier(const char *src, const size_t offset, const size_t len);"
 
 ; char *sreadidentifier(const char *src, const size_t offset, const size_t len);
 osrt.sreadidentifier:
@@ -223,3 +214,4 @@ osrt.duplicate_string.fail:
 	sbc hl,hl
 	ret
 
+end syscalllib

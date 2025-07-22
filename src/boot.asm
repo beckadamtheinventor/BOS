@@ -337,6 +337,15 @@ handle_offsetinstruction:
 	ld a,(hl)
 	call .check_opcode_is_call ; returns cf if not a call instruction
 	jq c,.offset_non_call_instruction
+	inc hl
+	inc hl
+	inc hl
+	inc hl
+	ld (iy),hl ; advance caller
+	dec hl
+	dec hl
+	dec hl
+	dec hl
 .offset_call_instruction:
 	lea de,iy + -3 + .offset_inst_temp ; grab pointer to 23 bytes of stack space below the current stack pointer
 	ld (offset_inst_sp_temp),de

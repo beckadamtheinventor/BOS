@@ -81,10 +81,9 @@ syslibs: $(call rwildcard,syslib,*.asm)
 	fasmg syslib/gui.asm obj/syslib/gui.bin
 	fasmg syslib/os.asm obj/syslib/os.bin
 	fasmg syslib/sys.asm obj/syslib/sys.bin
-	fasmg syslib/str.asm obj/syslib/str.bin
 	fasmg syslib/th.asm obj/syslib/th.bin
 	fasmg syslib/util.asm obj/syslib/util.bin
-	python add_file_to_rom.py --rom bin/BOSOSInited.rom obj/syslib/fs.bin /sys/fs obj/syslib/gfx.bin /sys/gfx obj/syslib/gui.bin /sys/gui obj/syslib/os.bin /sys/os obj/syslib/str.bin /sys/str obj/syslib/sys.bin /sys/sys obj/syslib/th.bin /sys/th obj/syslib/util.bin /sys/util
+	python add_file_to_rom.py --rom bin/BOSOSInited.rom obj/syslib/fs.bin /sys/fs obj/syslib/gfx.bin /sys/gfx obj/syslib/gui.bin /sys/gui obj/syslib/os.bin /sys/os obj/syslib/sys.bin /sys/sys obj/syslib/th.bin /sys/th obj/syslib/util.bin /sys/util
 
 # Rule to build include files
 includes:
@@ -147,6 +146,19 @@ $(call NATIVEPATH,$(FSOBJ)/explorer.bin): $(call rwildcard,$(call NATIVEPATH,$(F
 $(call NATIVEPATH,$(FSOBJ)/memedit.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/memedit.asm)
 	fasmg $(call NATIVEPATH,$(FSSRC)/fs/bin/memedit.asm) $(call NATIVEPATH,$(FSOBJ)/memedit.bin)
 
+# OS syslibs build rules
+$(call NATIVEPATH,$(FSOBJ)/argv.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/sys/argv.asm)
+	fasmg $(call NATIVEPATH,$(FSSRC)/fs/bin/sys/argv.asm) $(call NATIVEPATH,$(FSOBJ)/argv.bin)
+
+$(call NATIVEPATH,$(FSOBJ)/mem.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/sys/mem.asm)
+	fasmg $(call NATIVEPATH,$(FSSRC)/fs/bin/sys/mem.asm) $(call NATIVEPATH,$(FSOBJ)/mem.bin)
+
+$(call NATIVEPATH,$(FSOBJ)/numstr.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/sys/numstr.asm)
+	fasmg $(call NATIVEPATH,$(FSSRC)/fs/bin/sys/numstr.asm) $(call NATIVEPATH,$(FSOBJ)/numstr.bin)
+
+$(call NATIVEPATH,$(FSOBJ)/str.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/sys/str.asm)
+	fasmg $(call NATIVEPATH,$(FSSRC)/fs/bin/sys/str.asm) $(call NATIVEPATH,$(FSOBJ)/str.bin)
+
 #$(call NATIVEPATH,$(FSOBJ)/cfg.bin): $(call NATIVEPATH,$(FSSRC)/fs/sys/cfg.asm)
 #	fasmg $(call NATIVEPATH,$(FSSRC)/fs/sys/cfg.asm) $(call NATIVEPATH,$(FSOBJ)/cfg.bin)
 #	convbin -i $(call NATIVEPATH,$(FSOBJ)/cfg.bin) -o $(call NATIVEPATH,$(FSOBJ)/cfg.zx7.bin) -j bin -k bin -c zx7
@@ -191,7 +203,9 @@ $(call NATIVEPATH,$(FSOBJ)/keypadc.bin) $(call NATIVEPATH,$(FSOBJ)/msddrvce.bin)
 $(call NATIVEPATH,$(FSOBJ)/usbdrvce.bin) $(call NATIVEPATH,$(FSOBJ)/memedit.bin) $(call NATIVEPATH,$(FSOBJ)/cedit.zx7.bin) \
 $(call NATIVEPATH,$(FSOBJ)/LIB.bin) $(call NATIVEPATH,$(FSOBJ)/msd.zx7.bin) \
 $(call NATIVEPATH,$(FSOBJ)/serial.zx7.bin) $(call NATIVEPATH,$(FSOBJ)/PATH.bin) \
-$(call NATIVEPATH,$(FSOBJ)/TIVARS.bin) $(call NATIVEPATH,$(FSOBJ)/SYSCALLS.bin) $(call NATIVEPATH,$(FSOBJ)/explorer.bin)
+$(call NATIVEPATH,$(FSOBJ)/TIVARS.bin) $(call NATIVEPATH,$(FSOBJ)/SYSCALLS.bin) $(call NATIVEPATH,$(FSOBJ)/explorer.bin) \
+$(call NATIVEPATH,$(FSOBJ)/argv.bin) $(call NATIVEPATH,$(FSOBJ)/mem.bin) $(call NATIVEPATH,$(FSOBJ)/numstr.bin) \
+$(call NATIVEPATH,$(FSOBJ)/str.bin)
 	convbin -i $(call NATIVEPATH,$(FSSRC)/fs/etc/fontlibc/DrMono.dat) -o $(call NATIVEPATH,$(FSOBJ)/DrMono.zx7.dat) -j bin -k bin -c zx7
 	fasmg $(call NATIVEPATH,$(FSSRC)/main.asm) $(call NATIVEPATH,src/data/adrive/main.bin)
 	convbin -i $(call NATIVEPATH,src/data/adrive/main.bin) -o $(call NATIVEPATH,src/data/adrive/data.bin) -j bin -k bin -c zx7
@@ -250,6 +264,12 @@ clean-libs:
 	$(RM) $(call NATIVEPATH,$(FSOBJ)/msddrvce.bin)
 	$(RM) $(call NATIVEPATH,$(FSOBJ)/srldrvce.bin)
 	$(RM) $(call NATIVEPATH,$(FSOBJ)/usbdrvce.bin)
+
+clean-syslibs:
+	$(RM) $(call NATIVEPATH,$(FSOBJ)/argv.bin)
+	$(RM) $(call NATIVEPATH,$(FSOBJ)/mem.bin)
+	$(RM) $(call NATIVEPATH,$(FSOBJ)/numstr.bin)
+	$(RM) $(call NATIVEPATH,$(FSOBJ)/str.bin)
 
 #make clean
 clean:

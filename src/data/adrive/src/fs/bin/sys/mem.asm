@@ -1,7 +1,10 @@
 
-; shared memory access code for os executables
+include "../include/ez80.inc"
+include "../include/ti84pceg.inc"
+include "../include/bos.inc"
+; shared memory access code
 
-syscalllib "mem", 0
+syscalllib "mem"
 	export osrt.check_address_writable, "check_address_writable"
 	export osrt.read_a_from_addr, "read_a_from_addr"
 	export osrt.read_byte_from_addr, "read_byte_from_addr"
