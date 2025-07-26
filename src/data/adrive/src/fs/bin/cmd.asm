@@ -240,8 +240,8 @@ cmd_print_return_value:
 	ld e,a
 .print_number_euhl:
 	push de,hl
-	ld hl,bos.gfx_string_temp
-	push hl
+	ld de,bos.gfx_string_temp
+	push de
 	ld a,(bos.return_code_flags)
 	bit bos.bReturnHex,a
 	jr nz,._print_hex
@@ -250,7 +250,7 @@ cmd_print_return_value:
 	syscall _int_to_str
 	jr ._done_printing
 ._print_long:
-	jr nc,._done_printing
+	; jr nc,._done_printing
 	syscall _long_to_str
 	jr ._done_printing
 ._print_hex:

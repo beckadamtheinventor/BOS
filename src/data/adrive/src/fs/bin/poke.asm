@@ -25,14 +25,14 @@ poke_main:
 	ld (bos.fsOP6+8),a
 	syscall _argv_2
 	push hl
-	syscall _hexstr_to_int ; address
+	syscall _intstr_to_int ; address
 	pop bc
 	jr c,.done
 	ld (bos.fsOP6),hl
 	ld (bos.fsOP6+3),a
 	syscall _argv_4
 	push hl
-	syscall _hexstr_to_int ; value to write
+	syscall _intstr_to_int ; value to write
 	pop bc
 	ld (bos.fsOP6+4),hl
 	ld (bos.fsOP6+7),a
@@ -86,5 +86,5 @@ poke_main:
 	db "poke [l|i|s|b] [addr] [=^|&] [val]",$A
 	db "Writes 4|3|2|1 bytes to address from val.",$A
 	db "operators [=^|&] are set|xor|or|and.",$A
-	db "addr and val are read in hex.",$A
+	db "addr/val [[$]0-9A-F]",$A
 	db 0

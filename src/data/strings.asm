@@ -305,16 +305,16 @@ str_onbootconfig:
 	db "explorer",$A
 .len:=$-.
 
-; str_if:
-	; db "if",0
-; str_end:
-	; db "end",0
-; str_else:
-	; db "else",0
-; str_repeat:
-	; db "repeat",0
-; str_while:
-	; db "while",0
+str_if:
+	db "if",0
+str_end:
+	db "end",0
+str_else:
+	db "else",0
+str_repeat:
+	db "repeat",0
+str_while:
+	db "while",0
 
 ; _sha256_state_init:
 	; dl 648807

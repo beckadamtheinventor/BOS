@@ -1,3 +1,4 @@
+_CreateStrng:
 _CreateString:
 	ld a,ti.StrngObj
 	jr _CreateVar
@@ -16,14 +17,12 @@ _CreateAppVar:
 
 _CreateCplx:
 	ld a,ti.CplxObj
-	jr _CreateVar
-
-_CreateStrng:
-	ld a,ti.StrngObj
+	ld hl,8
 	jr _CreateVar
 
 _CreateReal:
 	xor a,a
+	ld hl,4
 assert $ = _CreateVar
 
 

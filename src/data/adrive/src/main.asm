@@ -71,7 +71,7 @@ fs_dir bin_dir
 	fs_entry memedit_exe, "hexed", "", f_system
 	fs_entry memedit_exe, "hexedit", "", f_system
 	fs_sfentry mf_exe, "mf", "", f_system+f_subfile
-	; fs_sfentry if_exe, "if", "", f_system+f_subfile
+	fs_sfentry if_exe, "if", "", f_system+f_subfile
 	fs_sfentry info_exe, "info", "", f_system+f_subfile
 	fs_sfentry imgview_exe, "imgview", "", f_system+f_subfile
 	fs_sfentry jump_exe, "jump", "", f_system+f_subfile
@@ -97,7 +97,7 @@ fs_dir bin_dir
 	fs_sfentry rm_exe, "rm", "", f_system+f_subfile
 	fs_sfentry sleep_exe, "sleep", "", f_system+f_subfile
 	fs_sfentry zx7_exe, "zx7", "", f_system+f_subfile
-	; fs_sfentry var_exe, "var", "", f_system+f_subfile
+	fs_sfentry var_exe, "var", "", f_system+f_subfile
 	fs_entry os_internal_subfiles, "osfiles", "dat", f_system
 end fs_dir
 
@@ -120,9 +120,9 @@ fs_file os_internal_subfiles
         include 'fs/sbin/hw.asm'
     end fs_subfile
 
-	; fs_subfile var_exe, bin_dir
-		; include 'fs/bin/var.asm'
-	; end fs_subfile
+	fs_subfile var_exe, bin_dir
+		include 'fs/bin/var.asm'
+	end fs_subfile
 
 	; fs_subfile writeinto_exe, bin_dir
 		; include 'fs/bin/writeinto.asm'
@@ -180,9 +180,9 @@ fs_file os_internal_subfiles
 		include 'fs/bin/ls.asm'
 	end fs_subfile
 
-	; fs_subfile if_exe, bin_dir
-		; include 'fs/bin/if.asm'
-	; end fs_subfile
+	fs_subfile if_exe, bin_dir
+		include 'fs/bin/if.asm'
+	end fs_subfile
 
 	fs_subfile info_exe, bin_dir
 		include 'fs/bin/info.asm'
@@ -301,15 +301,15 @@ _str_to_int:
 _hexstr_to_int:
 	db "numstr/hexstr_to_int",0
 _read_a_from_addr:
-	db "numstr/read_a_from_addr",0
+	db "mem/read_a_from_addr",0
 _set_a_at_addr:
-	db "numstr/set_a_from_addr",0
+	db "mem/set_a_at_addr",0
 _xor_val_addr:
-	db "numstr/xor_val_addr",0
+	db "mem/xor_val_addr",0
 _or_val_addr:
-	db "numstr/or_val_addr",0
+	db "mem/or_val_addr",0
 _and_val_addr:
-	db "numstr/and_val_addr",0
+	db "mem/and_val_addr",0
 
 end fs_file
 

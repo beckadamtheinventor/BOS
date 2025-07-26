@@ -229,6 +229,7 @@
 	public _fs_GetDirSize
 	public _fs_GetDirSizeFD
 	public __OP1ToAbsPath
+	public _sys_ExecSkipUntilEnd
 _boot_os                         := $20108
 _handle_interrupt                := $2010C
 _HandleInstruction               := $20110
@@ -458,6 +459,7 @@ _bosgfx_Ensure16bpp                 := $22784
 _fs_GetDirSize                   := $22788
 _fs_GetDirSizeFD                 := $2278C
 __OP1ToAbsPath                   := $22790
+_sys_ExecSkipUntilEnd            := $22794
 
 public ram_executable
 public ram_executable_at

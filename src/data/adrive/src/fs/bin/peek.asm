@@ -6,9 +6,7 @@ peek_main:
 	ld hl,bos.return_code_flags
 	ld a,(hl)
 	ld (ix-1),a
-	set bos.bReturnHex,a
-	set bos.bReturnNotError,a
-	set bos.bReturnLong,a
+	or a,bos.mReturnHex+bos.mReturnNotError+bos.mReturnLong
 	ld (hl),a
 	ld a,(ix+6)
 	cp a,3
@@ -35,7 +33,7 @@ peek_main:
 	push bc
 	syscall _argv_2
 	push hl
-	syscall _hexstr_to_int
+	syscall _intstr_to_int
 	pop bc,bc
 	ld a,c
 	syscall _read_a_from_addr
@@ -56,5 +54,5 @@ peek_main:
 .infostr:
 	db "usage: peek [l|i|s|b] [addr]",$A
 	db "read 32|24|16|8 bits from address.",0
-	db "addr is interpreted in hexadecimal.",$A
+	db "addr [[$]0-9A-F].",$A
 

@@ -10,8 +10,8 @@ syscalllib "numstr"
 	export osrt.hexstr_to_int, "hexstr_to_int", "_hexstr_to_int", "int osrt.hexstr_to_int(const char *str);"
 	export osrt.nibble, "nibble"
 	export osrt.byte_to_hexstr, "byte_to_hexstr"
-	export osrt.int_to_hexstr, "int_to_hexstr"
-	export osrt.long_to_hexstr, "long_to_hexstr"
+	export osrt.int_to_hexstr, "int_to_hexstr", "_int_to_hexstr", "char *osrt.int_to_hexstr(char *dest, unsigned int num);"
+	export osrt.long_to_hexstr, "long_to_hexstr", "_long_to_hexstr", "char *osrt.long_to_hexstr(char *dest, uint32_t num);"
 	export osrt.b_to_hexstr, "b_to_hexstr"
 	export osrt.byte_to_str, "byte_to_str", "_byte_to_str", "char *osrt.byte_to_str(char *dest, uint8_t num);"
 	export osrt.int_to_str, "int_to_str", "_int_to_str", "char *osrt.int_to_str(char *dest, unsigned int num);"
@@ -171,21 +171,24 @@ osrt.hexstr_to_int.add_a:
 	ld l,a
 	jr osrt.hexstr_to_int.loop
 
-; input hl pointer to number
-; input de pointer to output buffer
+; input char *osrt.int_to_hexstr(char *dest, uint32_t num);
 osrt.long_to_hexstr:
 	ld b,4
 	jr osrt.b_to_hexstr
 
-; input hl pointer to number
-; input de pointer to output buffer
+; input char *osrt.int_to_hexstr(char *dest, unsigned int num);
 osrt.int_to_hexstr:
 	ld b,3
 
-; input hl pointer to number
-; input de pointer to output buffer
+; input (sp+3) pointer to output buffer
+; input (sp+6) pointer to number
 ; input b number of input bytes
 osrt.b_to_hexstr:
+	push iy
+	ld iy,0
+	add iy,sp
+	lea hl,iy+9
+	ld de,(iy+6)
 	ld a,b
 osrt.int_to_hexstr.incloop:
 	inc hl
@@ -196,6 +199,8 @@ osrt.int_to_hexstr.loop:
 	djnz osrt.int_to_hexstr.loop
 	xor a,a
 	ld (de),a
+	ld hl,(iy+6)
+	pop iy
 	ret
 
 ; input hl pointer to input byte + 1
@@ -220,12 +225,10 @@ osrt.byte_to_hexstr:
 ; output A hex character
 osrt.nibble:
 	and a,$F
-	cp a,10
-	jq nc,osrt.nibble.over9
 	add a,'0'
-	ret
-osrt.nibble.over9:
-	add a,'A'-10
+	cp a,'0'+10
+	ret c
+	add a,'A'-'0'-10
 	ret
 
 ; input char *osrt.int_to_str(char *dest, unsigned int num);
@@ -234,6 +237,10 @@ osrt.int_to_str:
 	push hl,de,bc
 	push de,de
 	ex (sp),iy
+	push hl
+	adc hl,hl
+	pop hl
+	call c,osrt.long_to_str_negative
 	xor a,a
 	ld e,a
 	jr osrt.long_to_str_10m
@@ -248,6 +255,8 @@ osrt.byte_to_str:
 	or a,a
 	sbc hl,hl
 	ld l,a
+	add a,a ; sets Cf if biut 7 of A is set
+	call c,osrt.long_to_str_negative
 	xor a,a
 	ld e,a
 	jr osrt.long_to_str_100
@@ -260,6 +269,8 @@ osrt.long_to_str:
 	ld hl,(iy+9)
 	ld a,(iy+12)
 	ld iy,(iy+6)
+	bit 7,a
+	call nz,osrt.long_to_str_negative
 	pop bc
 	push iy,bc
 	ld e,1000000000 shr 24
@@ -290,17 +301,29 @@ osrt.long_to_str_100:
 	call osrt.num_to_str_aqu
 	ld (iy),0
 	pop iy,hl
+	ld a,(hl)
+	cp a,'-'
+	ld b,a
+	jr nz,.skip_zeroes_loop
+	inc hl
 .skip_zeroes_loop:
 	ld a,(hl)
 	or a,a
 	jr z,.return_single_zero
 	cp a,'0'
-	ret nz
+	jr nz,.finish_returning_string
 	inc hl
 	jr .skip_zeroes_loop
 .return_single_zero:
 	dec hl
+.finish_returning_string:
+	ld a,b
+	cp a,'-'
+	ret nz
+	dec hl
+	ld (hl),a
 	ret
+
 
 osrt.num_to_str_aqu:
 	ld d,'0'-1
@@ -313,6 +336,18 @@ osrt.num_to_str_aqu.loop:
 	add hl,bc
 	adc a,e
 	ld (iy),d
+	inc iy
+	ret
+
+osrt.long_to_str_negative:
+	neg ; negate A
+	ex hl,de
+	or a,a
+	sbc hl,hl
+	sbc hl,de ; 0 - value
+	dec a ; carry will always be set here unless value is 0, in which case this wouldn't be run anyways
+	; sbc a,0 ; subtract 1 from A
+	ld (iy),'-'
 	inc iy
 	ret
 

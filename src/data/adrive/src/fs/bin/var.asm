@@ -18,14 +18,14 @@ var_main:
 	ld hl,.helpstr
 	call bos.gui_PrintLine
 	ld hl,1
-	jr .done
+	jp .done
 
 .define_int_0:
 	xor a,a
 	sbc hl,hl
 	ld (ix-6),hl
 	ld (ix-7),a
-	jr .define_var
+	jq .set_to_value
 
 .define_var_with_value:
 	syscall _argv_3
@@ -59,11 +59,13 @@ var_main:
 
 	push hl
 	syscall _argv_1
-	push hl
-	call varptr_main
+	call ti.Mov9ToOP1
+	call ti.ChkFindSym
+	jr nc,.define_var_exists
+	call ti.CreateReal
+.define_var_exists:
 	ld (ix-14),hl
 	ld hl,(hl)
-	pop bc
 	pop de
 
 	ld a,(de)
@@ -86,6 +88,10 @@ var_main:
 	jr z,.sub_val
 	jq .help
 
+.mul_val:
+	call ti._imulu
+	jr .set_to_value_hl
+
 .mod_val:
 	call ti._iremu
 	jr .set_to_value_hl
@@ -100,14 +106,6 @@ var_main:
 	cp a,'/'
 	jr z,.set_to_value_hl ; integer division
 	inc (ix-11)
-	jr .set_to_value_hl
-
-.mod_val:
-	call ti._iremu
-	jr .set_to_value_hl
-
-.mult_val:
-	call ti._imulu
 	jr .set_to_value_hl
 
 .sub_val:

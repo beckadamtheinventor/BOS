@@ -579,6 +579,7 @@ namespace bos
 ?fs_GetDirSize                   := $22788
 ?fs_GetDirSizeFD                 := $2278C
 ?_OP1ToAbsPath                   := $22790
+?sys_ExecSkipUntilEnd            := $22794
 ;
 ; end of jump table
 ;-------------------------------------------------------------------------------

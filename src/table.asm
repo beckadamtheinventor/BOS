@@ -238,5 +238,6 @@
 	jp fs_GetDirSize
 	jp fs_GetDirSizeFD
 	jp _OP1ToAbsPath
+	jp sys_ExecSkipUntilEnd
 
 ; end of jump table

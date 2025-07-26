@@ -164,6 +164,28 @@ if_main:
 	jr c,.info
 	cp a,26
 	jr nc,.info
+	pop hl
+	dec hl
+	push hl
+	call ti.Mov9ToOP1
+	call ti.ChkFindSym
+	jr c,.var_not_found
+	ld de,(hl)
+	inc hl
+	inc hl
+	inc hl
+	ld a,(hl)
+.bypass_var_name:
+	pop hl
+	push af,de,hl
+	call bos.fs_PathLen
+	pop hl,hl,af
+	ret
+.var_not_found:
+	xor a,a
+	sbc hl,hl
+	ex hl,de
+	jr .bypass_var_name
 .number:
 	pop bc
 	ret
@@ -183,5 +205,5 @@ if_main:
 	db "if expr[<>=]expr",$A
 	db "...",$A
 	db "end",$A
-	db "expr: [-][A-Z|[$]0-9A-F]",$A
+	db "expr: [!][-][A-Z|[$]0-9A-F]",$A
 	db 0
