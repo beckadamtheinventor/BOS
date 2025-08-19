@@ -512,7 +512,7 @@ namespace bos
 ?fs_GetFilePtr                   := $2267C
 ?fs_GetFDPtr                     := $22680
 ?fs_GetFDLen                     := $22684
-?fs_ArcUnarcFD                   := $22688
+;DONOTHING                       := $22688
 ?util_Zx0Decompress              := $2268C
 ?sys_WaitKeyUnpress              := $22690
 ?sys_MallocDupStr                := $22694

@@ -8,8 +8,6 @@ sys_MallocDupStrN:
 	ld de,0
 	push bc,de,hl
 	call ti._memchr
-	pop de,bc
-	ex (sp),hl
-	pop bc
+	pop de,bc,bc
 	push de
 	jq sys_MallocDupStr._malloc_hl_plus_1

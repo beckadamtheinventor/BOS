@@ -162,7 +162,6 @@
 	public _fs_GetFilePtr
 	public _fs_GetFDPtr
 	public _fs_GetFDLen
-	public _fs_ArcUnarcFD
 	public _util_Zx0Decompress
 	public _sys_WaitKeyUnpress
 	public _sys_MallocDupStr
@@ -392,7 +391,6 @@ _th_KillThread                   := $22678
 _fs_GetFilePtr                   := $2267C
 _fs_GetFDPtr                     := $22680
 _fs_GetFDLen                     := $22684
-_fs_ArcUnarcFD                   := $22688
 _util_Zx0Decompress              := $2268C
 _sys_WaitKeyUnpress              := $22690
 _sys_MallocDupStr                := $22694
