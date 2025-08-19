@@ -12,7 +12,7 @@ sys_Malloc:
 	add hl,de
 	or a,a
 	sbc hl,de
-	jq z,.fail ; can't malloc 0 bytes
+	jr z,.fail ; can't malloc 0 bytes
 	ld a,l
 	and a,-1-(malloc_block_size-1)
 	ld l,a
@@ -25,7 +25,7 @@ sys_Malloc:
 .loop:
 	xor a,a
 	cpir
-	jq z,.checklen
+	jr z,.checklen
 	; fail if no 0x00 (free blocks) found
 .fail:
 	or a,a
@@ -40,17 +40,17 @@ sys_Malloc:
 	dec de
 	ld a,e
 	or a,d
-	jq z,.found_enough
+	jr z,.found_enough
 	inc hl
 .len_loop:
 	ld a,(hl)
 	or a,a
-	jq nz,.loop
+	jr nz,.loop
 	cpi
 	dec de
 	ld a,e
 	or a,d
-	jq nz,.len_loop
+	jr nz,.len_loop
 
 .found_enough:
 	ld hl,(ScrapMem)
@@ -81,7 +81,7 @@ end repeat
 	dec bc
 	ld a,b
 	or a,c
-	jq nz,.mark_loop
+	jr nz,.mark_loop
 	ex hl,de
 	ret
 
