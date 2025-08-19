@@ -1,4 +1,4 @@
-# set this to YES to enable threading at boot
+# set this to YES to enable co-operative threading at boot
 # note that threading is currently in a "sorta working" stage
 ENABLE_THREADING_ON_BOOT := NO
 
