@@ -6,17 +6,17 @@ include "../include/bos.inc"
 ; shared str<-->num code
 
 syscalllib "numstr"
-	export osrt.str_to_int, "str_to_int", "_str_to_int", "int osrt.str_to_int(const char *str);"
-	export osrt.hexstr_to_int, "hexstr_to_int", "_hexstr_to_int", "int osrt.hexstr_to_int(const char *str);"
+	export osrt.str_to_int, "str_to_int", "_numstr_str_to_int", "numstr_str_to_int(const char *str);"
+	export osrt.hexstr_to_int, "hexstr_to_int", "_numstr_hexstr_to_int", "int numstr_hexstr_to_int(const char *str);"
 	export osrt.nibble, "nibble"
 	export osrt.byte_to_hexstr, "byte_to_hexstr"
-	export osrt.int_to_hexstr, "int_to_hexstr", "_int_to_hexstr", "char *osrt.int_to_hexstr(char *dest, unsigned int num);"
-	export osrt.long_to_hexstr, "long_to_hexstr", "_long_to_hexstr", "char *osrt.long_to_hexstr(char *dest, uint32_t num);"
+	export osrt.int_to_hexstr, "int_to_hexstr", "_numstr_int_to_hexstr", "char *numstr_int_to_hexstr(char *dest, unsigned int num);"
+	export osrt.long_to_hexstr, "long_to_hexstr", "_numstr_long_to_hexstr", "char *numstr_long_to_hexstr(char *dest, uint32_t num);"
 	export osrt.b_to_hexstr, "b_to_hexstr"
-	export osrt.byte_to_str, "byte_to_str", "_byte_to_str", "char *osrt.byte_to_str(char *dest, uint8_t num);"
-	export osrt.int_to_str, "int_to_str", "_int_to_str", "char *osrt.int_to_str(char *dest, unsigned int num);"
-	export osrt.long_to_str, "long_to_str", "_long_to_str", "char *osrt.long_to_str(char *dest, uint32_t num);"
-	export osrt.intstr_to_int, "intstr_to_int", "_intstr_to_int", "int osrt.intstr_to_int(const char *str);"
+	export osrt.byte_to_str, "byte_to_str", "_numstr_byte_to_str", "char *numstr_byte_to_str(char *dest, uint8_t num);"
+	export osrt.int_to_str, "int_to_str", "_numstr_int_to_str", "char *numstr_int_to_str(char *dest, unsigned int num);"
+	export osrt.long_to_str, "long_to_str", "_numstr_long_to_str", "char *numstr_long_to_str(char *dest, uint32_t num);"
+	export osrt.intstr_to_int, "intstr_to_int", "_numstr_intstr_to_int", "intnumstr_.intstr_to_int(const char *str);"
 
 
 ; convert a base-10 string into an integer
