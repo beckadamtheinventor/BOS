@@ -187,9 +187,9 @@
 	public _sys_ExecContinue
 	public _fs_IsOSBackupPresent
 	public _util_SHA256
-	public _str_FromByte
-	public _str_FromInt
-	public _str_FromLong
+	public _str_ByteToStr
+	public _str_IntToStr
+	public _str_LongToStr
 	public _str_ToInt
 	public _gui_CharFromCode
 	public _sys_ExecuteFileArgcArgv
@@ -229,6 +229,10 @@
 	public _fs_GetDirSizeFD
 	public __OP1ToAbsPath
 	public _sys_ExecSkipUntilEnd
+	public _str_ByteToHexStr
+	public _str_HexToInt
+	public _str_IntStrToInt
+	public _str_IntToHexStr
 _boot_os                         := $20108
 _handle_interrupt                := $2010C
 _HandleInstruction               := $20110
@@ -416,9 +420,9 @@ _sys_ExecBegin                   := $226E0
 _sys_ExecContinue                := $226E4
 _fs_IsOSBackupPresent            := $226E8
 _util_SHA256                     := $226EC
-_str_FromByte                    := $226F0
-_str_FromInt                     := $226F4
-_str_FromLong                    := $226F8
+_str_ByteToStr                   := $226F0
+_str_IntToStr                    := $226F4
+_str_LongToStr                   := $226F8
 _str_ToInt                       := $226FC
 _gui_CharFromCode                := $22700
 _sys_ExecuteFileArgcArgv         := $22704
@@ -458,6 +462,10 @@ _fs_GetDirSize                   := $22788
 _fs_GetDirSizeFD                 := $2278C
 __OP1ToAbsPath                   := $22790
 _sys_ExecSkipUntilEnd            := $22794
+_str_ByteToHexStr                := $22798
+_str_HexToInt                    := $2279C
+_str_IntStrToInt                 := $227A0
+_str_IntToHexStr                 := $227A4
 
 public ram_executable
 public ram_executable_at

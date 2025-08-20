@@ -8,7 +8,7 @@ str_LongToStr:
 	ld a,(iy+12)
 	ld iy,(iy+6)
 	bit 7,a
-	call nz,.negative
+	call nz,.negate
 	pop bc
 	push iy,bc
 	ld e,1000000000 shr 24
@@ -76,7 +76,7 @@ str_LongToStr:
 	inc iy
 	ret
 
-.negative:
+.negate:
 	neg ; negate A
 	ex hl,de
 	or a,a

@@ -167,7 +167,7 @@
 <tr><td><a href="#fs_GetFilePtr">bos.fs_GetFilePtr</a></td><td><a href="#fs_GetFilePtr">02267C</a></td></tr>
 <tr><td><a href="#fs_GetFDPtr">bos.fs_GetFDPtr</a></td><td><a href="#fs_GetFDPtr">022680</a></td></tr>
 <tr><td><a href="#fs_GetFDLen">bos.fs_GetFDLen</a></td><td><a href="#fs_GetFDLen">022684</a></td></tr>
-<tr><td><a href="#fs_ArcUnarcFD">bos.fs_ArcUnarcFD</a></td><td><a href="#fs_ArcUnarcFD">022688</a></td></tr>
+<tr class="no_op"></tr><td><a href="#DONOTHING ">bos.DONOTHING </a></td><td><a href="#DONOTHING ">022688</a></td></tr>
 <tr><td><a href="#util_Zx0Decompress">bos.util_Zx0Decompress</a></td><td><a href="#util_Zx0Decompress">02268C</a></td></tr>
 <tr><td><a href="#sys_WaitKeyUnpress">bos.sys_WaitKeyUnpress</a></td><td><a href="#sys_WaitKeyUnpress">022690</a></td></tr>
 <tr><td><a href="#sys_MallocDupStr">bos.sys_MallocDupStr</a></td><td><a href="#sys_MallocDupStr">022694</a></td></tr>
@@ -193,9 +193,9 @@
 <tr><td><a href="#sys_ExecContinue">bos.sys_ExecContinue</a></td><td><a href="#sys_ExecContinue">0226E4</a></td></tr>
 <tr><td><a href="#fs_IsOSBackupPresent ">bos.fs_IsOSBackupPresent </a></td><td><a href="#fs_IsOSBackupPresent ">0226E8</a></td></tr>
 <tr><td><a href="#util_SHA256">bos.util_SHA256</a></td><td><a href="#util_SHA256">0226EC</a></td></tr>
-<tr><td><a href="#str_FromByte">bos.str_FromByte</a></td><td><a href="#str_FromByte">0226F0</a></td></tr>
-<tr><td><a href="#str_FromInt">bos.str_FromInt</a></td><td><a href="#str_FromInt">0226F4</a></td></tr>
-<tr><td><a href="#str_FromLong">bos.str_FromLong</a></td><td><a href="#str_FromLong">0226F8</a></td></tr>
+<tr><td><a href="#str_ByteToStr">bos.str_ByteToStr</a></td><td><a href="#str_ByteToStr">0226F0</a></td></tr>
+<tr><td><a href="#str_IntToStr">bos.str_IntToStr</a></td><td><a href="#str_IntToStr">0226F4</a></td></tr>
+<tr><td><a href="#str_LongToStr">bos.str_LongToStr</a></td><td><a href="#str_LongToStr">0226F8</a></td></tr>
 <tr><td><a href="#str_ToInt">bos.str_ToInt</a></td><td><a href="#str_ToInt">0226FC</a></td></tr>
 <tr><td><a href="#gui_CharFromCode">bos.gui_CharFromCode</a></td><td><a href="#gui_CharFromCode">022700</a></td></tr>
 <tr><td><a href="#sys_ExecuteFileArgcArgv">bos.sys_ExecuteFileArgcArgv</a></td><td><a href="#sys_ExecuteFileArgcArgv">022704</a></td></tr>
@@ -233,6 +233,12 @@
 <tr><td><a href="#gfx_Ensure16bpp">bos.gfx_Ensure16bpp</a></td><td><a href="#gfx_Ensure16bpp">022784</a></td></tr>
 <tr><td><a href="#fs_GetDirSize">bos.fs_GetDirSize</a></td><td><a href="#fs_GetDirSize">022788</a></td></tr>
 <tr><td><a href="#fs_GetDirSizeFD">bos.fs_GetDirSizeFD</a></td><td><a href="#fs_GetDirSizeFD">02278C</a></td></tr>
+<tr><td><a href="#_OP1ToAbsPath">bos._OP1ToAbsPath</a></td><td><a href="#_OP1ToAbsPath">022790</a></td></tr>
+<tr><td><a href="#sys_ExecSkipUntilEnd">bos.sys_ExecSkipUntilEnd</a></td><td><a href="#sys_ExecSkipUntilEnd">022794</a></td></tr>
+<tr><td><a href="#str_ByteToHexStr">bos.str_ByteToHexStr</a></td><td><a href="#str_ByteToHexStr">022798</a></td></tr>
+<tr><td><a href="#str_HexToInt">bos.str_HexToInt</a></td><td><a href="#str_HexToInt">02279C</a></td></tr>
+<tr><td><a href="#str_IntStrToInt">bos.str_IntStrToInt</a></td><td><a href="#str_IntStrToInt">0227A0</a></td></tr>
+<tr><td><a href="#str_IntToHexStr">bos.str_IntToHexStr</a></td><td><a href="#str_IntToHexStr">0227A4</a></td></tr>
 </table><div id="boot_os                  "><h1>boot_os                  </h1>	<h3>syscall Adress 020108</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 </table></div><div id="handle_interrupt"><h1>handle_interrupt</h1>	<h3>syscall Adress 02010C</h3>
@@ -894,10 +900,6 @@ Cannot kill thread ID 0.</td></tr>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Return length of file data given a file descriptor</td><td>int fs_GetFDLen(void *fd);</td><td>length of file data. Will be 0 if data has not been initizlized yet.</td><td></td><td>
 </td></tr>
-</table></div><div id="fs_ArcUnarcFD"><h1>fs_ArcUnarcFD</h1>	<h3>syscall Adress 022688</h3>
-<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td></td><td></td><td></td><td></td><td>
-</td></tr>
 </table></div><div id="util_Zx0Decompress"><h1>util_Zx0Decompress</h1>	<h3>syscall Adress 02268C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td></td><td></td><td></td><td></td><td>
@@ -998,21 +1000,21 @@ exit code also stored in bos.LastCommandResult</td><td></td><td>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Compute a SHA256 hash for some data, writing the 32-byte result to a buffer.</td><td>void util_SHA256(void* buffer, void* data, unsigned int len);</td><td>Nothing.</td><td></td><td>
 </td></tr>
-</table></div><div id="str_FromByte"><h1>str_FromByte</h1>	<h3>syscall Adress 0226F0</h3>
+</table></div><div id="str_ByteToStr"><h1>str_ByteToStr</h1>	<h3>syscall Adress 0226F0</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Convert num to a base-10 string.</td><td>char *str_FromByte(char *dest, uint8_t num);</td><td></td><td></td><td>
+<tr><td>Convert 8-bit signed integer to a base-10 string.</td><td>char *str_ByteToStr(char *dest, uint8_t num);</td><td></td><td></td><td>
 </td></tr>
-</table></div><div id="str_FromInt"><h1>str_FromInt</h1>	<h3>syscall Adress 0226F4</h3>
+</table></div><div id="str_IntToStr"><h1>str_IntToStr</h1>	<h3>syscall Adress 0226F4</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Convert num to a base-10 string.</td><td>char *str_FromInt(char *dest, unsigned int num);</td><td></td><td></td><td>
+<tr><td>Convert signed 24-bit integer to a base-10 string.</td><td>char *str_IntToStr(char *dest, int num);</td><td>pointer to dest.</td><td></td><td>
 </td></tr>
-</table></div><div id="str_FromLong"><h1>str_FromLong</h1>	<h3>syscall Adress 0226F8</h3>
+</table></div><div id="str_LongToStr"><h1>str_LongToStr</h1>	<h3>syscall Adress 0226F8</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Convert num to a base-10 string.</td><td>char *str_FromLong(char *dest, uint32_t num);</td><td></td><td></td><td>
+<tr><td>Convert 32-bit signed integer num to a base-10 string.</td><td>char *str_LongToStr(char *dest, uint32_t num);</td><td></td><td></td><td>
 </td></tr>
 </table></div><div id="str_ToInt"><h1>str_ToInt</h1>	<h3>syscall Adress 0226FC</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td></td><td></td><td></td><td></td><td>
+<tr><td>convert a base-10 string into a 32-bit integer.</td><td>int32_t str_ToInt(const char *str, char** end);</td><td>hl = number, *end = character where parsing stopped.</td><td></td><td>
 </td></tr>
 </table></div><div id="gui_CharFromCode"><h1>gui_CharFromCode</h1>	<h3>syscall Adress 022700</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -1175,5 +1177,29 @@ returns pointer to first empty entry or non-allocated dirextender in de</td></tr
 </table></div><div id="fs_GetDirSizeFD"><h1>fs_GetDirSizeFD</h1>	<h3>syscall Adress 02278C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Get the actual size used by a directory.</td><td>int fs_GetDirSizeFD(void* fd);</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="_OP1ToAbsPath"><h1>_OP1ToAbsPath</h1>	<h3>syscall Adress 022790</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Convert OP1 into a BOS file path in /tivars.</td><td>OP1 = Var type, Var name.</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="sys_ExecSkipUntilEnd"><h1>sys_ExecSkipUntilEnd</h1>	<h3>syscall Adress 022794</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Advance curPC until the corresponding "end" or "else"</td><td>void sys_ExecSkipUntilEnd(void);</td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="str_ByteToHexStr"><h1>str_ByteToHexStr</h1>	<h3>syscall Adress 022798</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td></td><td></td><td></td><td></td><td>
+</td></tr>
+</table></div><div id="str_HexToInt"><h1>str_HexToInt</h1>	<h3>syscall Adress 02279C</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Convert a base-16 (hex) string to an unsigned 32-bit integer.</td><td>uint32_t str_HexToInt(const char* str);</td><td>euhl = number.</td><td></td><td>
+</td></tr>
+</table></div><div id="str_IntStrToInt"><h1>str_IntStrToInt</h1>	<h3>syscall Adress 0227A0</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Convert a string representation of a number to a signed 32-bit integer. See Notes for details.</td><td>int32_t str_IntStrToInt(const char *str);</td><td>euhl = number.</td><td></td><td>
+If str starts with $ or 0x, it will be processed as a hex string, otherwise a decimal string. If str starts with %, the value will be read from a variable from the current symlist. (defaulting to zero if the variable doesn't exist)</td></tr>
+</table></div><div id="str_IntToHexStr"><h1>str_IntToHexStr</h1>	<h3>syscall Adress 0227A4</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Convert a 32-bit unsigned integer to a string</td><td>char* str_IntToHexStr(char* dest, uint32_t num);</td><td>pointer to dest</td><td></td><td>
 </td></tr>
 </table></div></body></html>

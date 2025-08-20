@@ -538,9 +538,9 @@ namespace bos
 ?sys_ExecContinue                := $226E4
 ?fs_IsOSBackupPresent            := $226E8
 ?util_SHA256                     := $226EC
-?str_FromByte                    := $226F0
-?str_FromInt                     := $226F4
-?str_FromLong                    := $226F8
+?str_ByteToStr                   := $226F0
+?str_IntToStr                    := $226F4
+?str_LongToStr                   := $226F8
 ?str_ToInt                       := $226FC
 ?gui_CharFromCode                := $22700
 ?sys_ExecuteFileArgcArgv         := $22704
@@ -580,6 +580,10 @@ namespace bos
 ?fs_GetDirSizeFD                 := $2278C
 ?_OP1ToAbsPath                   := $22790
 ?sys_ExecSkipUntilEnd            := $22794
+?str_ByteToHexStr                := $22798
+?str_HexToInt                    := $2279C
+?str_IntStrToInt                 := $227A0
+?str_IntToHexStr                 := $227A4
 ;
 ; end of jump table
 ;-------------------------------------------------------------------------------

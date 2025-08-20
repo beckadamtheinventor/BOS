@@ -9,11 +9,11 @@ str_ByteToHexStr:
 	rrca
 	rrca
 	rrca
-	call osrt.nibble
+	call str_Nibble
 	ld (de),a
 	inc de
 	ld a,(hl)
-	call osrt.nibble
+	call str_Nibble
 	ld (de),a
 	inc de
 	ret

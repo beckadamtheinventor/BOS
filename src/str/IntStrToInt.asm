@@ -25,7 +25,7 @@ str_IntStrToInt:
 .insstr_to_int.dec:
 	dec hl
 	push hl,bc
-	call str_ToUnsignedLong
+	call str_ToInt
     jr .negate_if_was_negative
 .hex:
 	push hl,bc
@@ -50,7 +50,7 @@ str_IntStrToInt:
 	sbc hl,de
 	inc hl
 	push de,hl
-	call bos.sys_Malloc
+	call sys_Malloc
 	ex hl,de
 	pop bc,hl
 	dec hl
@@ -58,18 +58,18 @@ str_IntStrToInt:
 	ldir
 	xor a,a
 	ld (de),a
-	ld hl,(bos.variable_sym_list_ptr)
+	ld hl,(variable_sym_list_ptr)
 	add hl,bc
 	or a,a
 	sbc hl,bc
 	jr z,.var.return_zero
 	push hl
-	call bos.util_SearchSymList
+	call util_SearchSymList
 	add hl,bc
 	xor a,a
 	sbc hl,bc
 	jr z,.var.dont_load_value
-	ld bc,bos.symbol.flags
+	ld bc,symbol.flags
 	add hl,bc
 	ld a,(hl)
 	inc hl
@@ -79,7 +79,7 @@ str_IntStrToInt:
 .var.return_zero:
 	pop bc
 	push af,hl,bc
-	call bos.sys_Free
+	call sys_Free
 	pop bc,hl,af
 	ld e,a
 	jr .negate_if_was_negative

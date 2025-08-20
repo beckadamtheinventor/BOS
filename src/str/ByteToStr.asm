@@ -11,4 +11,4 @@ str_ByteToStr:
 	ld l,a
 	xor a,a
 	ld e,a
-	jr str_FromLong.long_to_str_100
+	jq str_LongToStr.100
