@@ -150,14 +150,14 @@ if_main:
 	push hl
 	cp a,'$'
 	jr nz,.not_hex
-	syscall _hexstr_to_int
+	call bos.str_HexToInt
 	jr .number
 .not_hex:
 	sub a,'0'
 	jr c,.info
 	cp a,10
 	jr nc,.not_base_10_number
-	syscall _str_to_int
+	call bos.str_ToInt
 	jr .number
 .not_base_10_number:
 	sub a,'A'-'0'

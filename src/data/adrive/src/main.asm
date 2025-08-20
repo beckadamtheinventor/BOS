@@ -71,7 +71,7 @@ fs_dir bin_dir
 	fs_entry memedit_exe, "hexed", "", f_system
 	fs_entry memedit_exe, "hexedit", "", f_system
 	fs_sfentry mf_exe, "mf", "", f_system+f_subfile
-	fs_sfentry if_exe, "if", "", f_system+f_subfile
+	; fs_sfentry if_exe, "if", "", f_system+f_subfile
 	fs_sfentry info_exe, "info", "", f_system+f_subfile
 	fs_sfentry imgview_exe, "imgview", "", f_system+f_subfile
 	fs_sfentry jump_exe, "jump", "", f_system+f_subfile
@@ -180,9 +180,9 @@ fs_file os_internal_subfiles
 		include 'fs/bin/ls.asm'
 	end fs_subfile
 
-	fs_subfile if_exe, bin_dir
-		include 'fs/bin/if.asm'
-	end fs_subfile
+	; fs_subfile if_exe, bin_dir
+	; 	include 'fs/bin/if.asm'
+	; end fs_subfile
 
 	fs_subfile info_exe, bin_dir
 		include 'fs/bin/info.asm'
