@@ -1,6 +1,6 @@
-;@DOES Convert num to a base-10 string.
-;@INPUT char *str_FromByte(char *dest, uint8_t num);
-str_FromByte:
+;@DOES Convert 8-bit signed integer to a base-10 string.
+;@INPUT char *str_ByteToStr(char *dest, uint8_t num);
+str_ByteToStr:
 	pop bc,de,hl
 	push hl,de,bc
 	push de,de

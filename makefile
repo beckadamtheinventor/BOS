@@ -153,9 +153,6 @@ $(call NATIVEPATH,$(FSOBJ)/argv.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/sys/argv
 $(call NATIVEPATH,$(FSOBJ)/mem.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/sys/mem.asm)
 	fasmg $(call NATIVEPATH,$(FSSRC)/fs/bin/sys/mem.asm) $(call NATIVEPATH,$(FSOBJ)/mem.bin)
 
-$(call NATIVEPATH,$(FSOBJ)/numstr.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/sys/numstr.asm)
-	fasmg $(call NATIVEPATH,$(FSSRC)/fs/bin/sys/numstr.asm) $(call NATIVEPATH,$(FSOBJ)/numstr.bin)
-
 $(call NATIVEPATH,$(FSOBJ)/str.bin): $(call NATIVEPATH,$(FSSRC)/fs/bin/sys/str.asm)
 	fasmg $(call NATIVEPATH,$(FSSRC)/fs/bin/sys/str.asm) $(call NATIVEPATH,$(FSOBJ)/str.bin)
 
@@ -204,8 +201,7 @@ $(call NATIVEPATH,$(FSOBJ)/usbdrvce.bin) $(call NATIVEPATH,$(FSOBJ)/memedit.bin)
 $(call NATIVEPATH,$(FSOBJ)/LIB.bin) $(call NATIVEPATH,$(FSOBJ)/msd.zx7.bin) \
 $(call NATIVEPATH,$(FSOBJ)/serial.zx7.bin) $(call NATIVEPATH,$(FSOBJ)/PATH.bin) \
 $(call NATIVEPATH,$(FSOBJ)/TIVARS.bin) $(call NATIVEPATH,$(FSOBJ)/SYSCALLS.bin) $(call NATIVEPATH,$(FSOBJ)/explorer.bin) \
-$(call NATIVEPATH,$(FSOBJ)/argv.bin) $(call NATIVEPATH,$(FSOBJ)/mem.bin) $(call NATIVEPATH,$(FSOBJ)/numstr.bin) \
-$(call NATIVEPATH,$(FSOBJ)/str.bin)
+$(call NATIVEPATH,$(FSOBJ)/argv.bin) $(call NATIVEPATH,$(FSOBJ)/mem.bin) $(call NATIVEPATH,$(FSOBJ)/str.bin)
 	convbin -i $(call NATIVEPATH,$(FSSRC)/fs/etc/fontlibc/DrMono.dat) -o $(call NATIVEPATH,$(FSOBJ)/DrMono.zx7.dat) -j bin -k bin -c zx7
 	fasmg $(call NATIVEPATH,$(FSSRC)/main.asm) $(call NATIVEPATH,src/data/adrive/main.bin)
 	convbin -i $(call NATIVEPATH,src/data/adrive/main.bin) -o $(call NATIVEPATH,src/data/adrive/data.bin) -j bin -k bin -c zx7
@@ -268,7 +264,6 @@ clean-libs:
 clean-syslibs:
 	$(RM) $(call NATIVEPATH,$(FSOBJ)/argv.bin)
 	$(RM) $(call NATIVEPATH,$(FSOBJ)/mem.bin)
-	$(RM) $(call NATIVEPATH,$(FSOBJ)/numstr.bin)
 	$(RM) $(call NATIVEPATH,$(FSOBJ)/str.bin)
 
 #make clean
