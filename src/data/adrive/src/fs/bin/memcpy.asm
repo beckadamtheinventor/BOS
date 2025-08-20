@@ -12,7 +12,7 @@ mem_cpy_exe_main:
 .correctnumberofarguments:
 	syscall _argv_1
 	push hl
-	syscall _intstr_to_int
+	call bos.str_IntStrToInt
 	pop bc
 	ld bc,$D00000
 	or a,a
@@ -26,7 +26,7 @@ mem_cpy_exe_main:
 	push hl
 	syscall _argv_3
 	push hl
-	syscall _intstr_to_int
+	call bos.str_IntStrToInt
 	pop bc
 	pop de
 	push hl,de
@@ -41,7 +41,7 @@ mem_cpy_exe_main:
 	jr nc,.failcopybeyondram
 	syscall _argv_2
 	push hl
-	syscall _intstr_to_int
+	call bos.str_IntStrToInt
 	pop bc,de,bc
 	ldir
 .return0:

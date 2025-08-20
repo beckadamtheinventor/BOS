@@ -39,13 +39,13 @@ var_main:
 
 .grab_dec:
 	push hl
-	syscall _str_to_int
+	call bos.str_ToInt
 	jr .define_var_with_value_set_value
 
 .grab_hex:
 	inc hl
 	push hl
-	syscall _hexstr_to_int
+	call bos.str_HexToInt
 
 .define_var_with_value_set_value:
 	pop bc

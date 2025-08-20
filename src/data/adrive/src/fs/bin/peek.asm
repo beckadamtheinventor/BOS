@@ -33,7 +33,7 @@ peek_main:
 	push bc
 	syscall _argv_2
 	push hl
-	syscall _intstr_to_int
+	call bos.str_IntStrToInt
 	pop bc,bc
 	ld a,c
 	syscall _read_a_from_addr

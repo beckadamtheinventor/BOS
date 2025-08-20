@@ -25,14 +25,14 @@ poke_main:
 	ld (bos.fsOP6+8),a
 	syscall _argv_2
 	push hl
-	syscall _intstr_to_int ; address
+	call bos.str_IntStrToInt ; address
 	pop bc
 	jr c,.done
 	ld (bos.fsOP6),hl
 	ld (bos.fsOP6+3),a
 	syscall _argv_4
 	push hl
-	syscall _intstr_to_int ; value to write
+	call bos.str_IntStrToInt ; value to write
 	pop bc
 	ld (bos.fsOP6+4),hl
 	ld (bos.fsOP6+7),a

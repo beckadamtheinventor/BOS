@@ -45,7 +45,7 @@ info_exe_main:
 	add hl,sp
 	ld de,bos.fsOP1
 	push de
-	syscall _int_to_hexstr
+	call bos.str_IntToHexStr
 	pop hl
 	call bos.gui_PrintLine
 	call bos.fs_GetFDPtr
@@ -57,7 +57,7 @@ info_exe_main:
 	add hl,sp
 	ld de,bos.fsOP1
 	push de
-	syscall _int_to_hexstr
+	call bos.str_IntToHexStr
 	pop hl
 	call bos.gui_PrintLine
 .dont_display_content_location:

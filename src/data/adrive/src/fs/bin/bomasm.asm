@@ -260,7 +260,7 @@ assert bos.symbol.flags < 256
 	ld bc,(ix-9) ; src offset
 	add hl,bc
 	push hl
-	syscallcall _intstr_to_int
+	call str_IntStrToInt
 	ex (sp),hl
 	ex hl,de
 	or a,a

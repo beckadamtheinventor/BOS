@@ -239,27 +239,27 @@ cmd_print_return_value:
 .print_number_auhl:
 	ld e,a
 .print_number_euhl:
+	ld a,(bos.return_code_flags)
+	bit bos.bReturnLong,a
+	jr nz,.dont_zero_32bit_upper_byte
+	ld e,0
+.dont_zero_32bit_upper_byte:
 	push de,hl
 	ld de,bos.gfx_string_temp
 	push de
-	ld a,(bos.return_code_flags)
 	bit bos.bReturnHex,a
 	jr nz,._print_hex
 	bit bos.bReturnLong,a
 	jr nz,._print_long
-	syscall _int_to_str
+	call bos.str_IntToStr
 	jr ._done_printing
 ._print_long:
 	; jr nc,._done_printing
-	syscall _long_to_str
+	call bos.str_LongToStr
 	jr ._done_printing
 ._print_hex:
-	bit bos.bReturnLong,a
-	jr nz,._print_long_hex
-	syscall _int_to_hexstr
+	call bos.str_IntToHexStr
 	jr ._done_printing
-._print_long_hex:
-	syscall _long_to_hexstr
 ._done_printing:
 	pop bc,bc,bc
 	jp bos.gui_PrintLine

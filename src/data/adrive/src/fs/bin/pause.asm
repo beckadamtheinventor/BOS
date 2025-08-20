@@ -12,7 +12,7 @@ pause_main:
 	jr z,.help
 .not_a_flag:
 	push hl
-	syscall _str_to_int
+	call bos.str_IntStrToInt
 	pop bc
 	jr .wait_for_key
 .no_args:

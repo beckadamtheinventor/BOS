@@ -16,7 +16,7 @@ _hexdump_main:
 	jr c,.no_offset_len
 	syscall _argv_2
 	push hl
-	syscall _intstr_to_int
+	call bos.str_IntStrToInt
 	pop bc
 	ld (ix-3),hl
 	ld a,(ix+6)
@@ -24,7 +24,7 @@ _hexdump_main:
 	jr c,.no_offset_len
 	syscall _argv_3
 	push hl
-	syscall _intstr_to_int
+	call bos.str_IntStrToInt
 	pop bc
 	ld (ix-6),hl
 .no_offset_len:
@@ -72,7 +72,7 @@ _hexdump_main:
 .loop:
 	ld de,bos.gfx_string_temp
 	push iy,bc,hl,de
-	syscall _byte_to_hexstr
+	call bos.str_ByteToHexStr
 	pop hl
 	push hl
 	call bos.gui_Print

@@ -19,7 +19,7 @@ hw_config_start:
     ld (ix-3),hl
     syscall _argv_2
     push hl
-    syscall _intstr_to_int
+    call bos.str_IntStrToInt
     pop bc
     ld a,l
     ld hl,(ix-3)

@@ -335,7 +335,7 @@ end repeat
 	cp a,'?'
 	jr nz,.not_set_origin
 	push hl
-	syscall _hexstr_to_int
+	call bos.str_HexToInt
 	pop bc
 	ld (ix-25),hl
 	ex hl,de
