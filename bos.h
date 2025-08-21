@@ -381,20 +381,21 @@ int fs_GetSector(void *address);
 /**
  * Write a byte to a file.
  * @param byte Byte to write to file.
- * @param fd Pointer to file descriptor.
+ * @param fd File descriptor.
  * @param offset File offset to write to.
- * @return New file descriptor, or -1 if failed.
+ * @return True if write was successful.
+ * @note Fails if the byte cannot be written without moving the file.
  */
-void *fs_WriteByte(uint8_t byte, void *fd, int offset);
+bool fs_WriteByte(uint8_t byte, void *fd, int offset);
 
 /**
  * Fill a file with a given byte.
  * @param byte Byte to write to file.
- * @param fd Pointer to file descriptor.
+ * @param fd File descriptor.
  * @param count Number of bytes to write.
  * @return New file descriptor, or -1 if failed.
  */
-void *fs_WriteByte(uint8_t byte, void *fd, unsigned int count);
+void *fs_WriteBytes(uint8_t byte, void *fd, unsigned int count);
 
 /**
  * Rename a file.

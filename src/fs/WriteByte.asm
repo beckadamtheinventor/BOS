@@ -1,7 +1,7 @@
 
-;@DOES write a byte into a file if the byte can be written
+;@DOES Write a byte into a file if the byte can be written.
 ;@INPUT bool fs_WriteByte(uint8_t byte, void *fd, int offset);
-;@NOTE Fails if the byte can't be written without swapping
+;@NOTE Fails if the byte can't be written without moving the file.
 fs_WriteByte:
 	call ti._frameset0
 	push iy

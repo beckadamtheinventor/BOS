@@ -1,5 +1,5 @@
 ;@DOES Fill a file with a given byte.
-;@INPUT bool fs_WriteBytes(uint8_t byte, void *fd, unsigned int count);
+;@INPUT void *fs_WriteBytes(uint8_t byte, void *fd, unsigned int count);
 fs_WriteBytes:
     ld hl,-6
 	call ti._frameset
@@ -38,6 +38,7 @@ fs_WriteBytes:
     cpi ; bc--, PO set if bc decrements to zero
     jp pe,.writeloop
     call sys_FlashLock
+    ld hl,(ix+9) ; file descriptor
     jr .return
 .relocate_file:
     ld hl,(ix+9) ; fd

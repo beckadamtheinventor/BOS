@@ -234,6 +234,7 @@
 	public _str_IntStrToInt
 	public _str_IntToHexStr
 	public _fs_CleanupDeletedEntries
+	public _fs_WriteBytes
 _boot_os                         := $20108
 _handle_interrupt                := $2010C
 _HandleInstruction               := $20110
@@ -468,6 +469,7 @@ _str_HexToInt                    := $2279C
 _str_IntStrToInt                 := $227A0
 _str_IntToHexStr                 := $227A4
 _fs_CleanupDeletedEntries        := $227A8
+_fs_WriteBytes                   := $227AC
 
 public ram_executable
 public ram_executable_at
