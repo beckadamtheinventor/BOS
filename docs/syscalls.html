@@ -239,6 +239,7 @@
 <tr><td><a href="#str_HexToInt">bos.str_HexToInt</a></td><td><a href="#str_HexToInt">02279C</a></td></tr>
 <tr><td><a href="#str_IntStrToInt">bos.str_IntStrToInt</a></td><td><a href="#str_IntStrToInt">0227A0</a></td></tr>
 <tr><td><a href="#str_IntToHexStr">bos.str_IntToHexStr</a></td><td><a href="#str_IntToHexStr">0227A4</a></td></tr>
+<tr><td><a href="#fs_CleanupDeletedEntries">bos.fs_CleanupDeletedEntries</a></td><td><a href="#fs_CleanupDeletedEntries">0227A8</a></td></tr>
 </table><div id="boot_os                  "><h1>boot_os                  </h1>	<h3>syscall Adress 020108</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 </table></div><div id="handle_interrupt"><h1>handle_interrupt</h1>	<h3>syscall Adress 02010C</h3>
@@ -340,7 +341,7 @@ BC line length</td><td></td><td></td><td>
 </table></div><div id="gui_DrawConsoleWindow"><h1>gui_DrawConsoleWindow</h1>	<h3>syscall Adress 022450</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>clear the screen and display a string.</td><td>hl = string</td><td></td><td></td><td>
-Sets draw to buffer and display to vram.</td></tr>
+Ensures 8bpp mode, sets the draw location to the buffer and display to vram.</td></tr>
 </table></div><div id="gui_Input"><h1>gui_Input</h1>	<h3>syscall Adress 022454</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>get user input</td><td>uint8_t gui_Input(char *buffer, int max_len);</td><td>0 if user exit, 1 if user enter, 9|12 if user presses down|up arrow key</td><td></td><td>
@@ -676,8 +677,8 @@ Used for categorizing malloc'd memory and threads.</td></tr>
 DO NOT free process ID 1 since it is used by the OS and should be preserved.</td></tr>
 </table></div><div id="fs_GarbageCollect"><h1>fs_GarbageCollect</h1>	<h3>syscall Adress 0225A4</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Clean up the filesystem, resetting freed areas.</td><td>None</td><td>None</td><td></td><td>
-</td></tr>
+<tr><td>Clean up the filesystem, clearing freed areas.</td><td>None</td><td>None</td><td></td><td>
+Ensures 8bpp mode and draws progress indicator.</td></tr>
 </table></div><div id="gfx_SwapTextColors"><h1>gfx_SwapTextColors</h1>	<h3>syscall Adress 0225A8</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Swap lcd_text_fg and lcd_text_fg2</td><td></td><td></td><td></td><td>
@@ -1192,7 +1193,7 @@ returns pointer to first empty entry or non-allocated dirextender in de</td></tr
 </td></tr>
 </table></div><div id="str_HexToInt"><h1>str_HexToInt</h1>	<h3>syscall Adress 02279C</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
-<tr><td>Convert a base-16 (hex) string to an unsigned 32-bit integer.</td><td>uint32_t str_HexToInt(const char* str);</td><td>euhl = number.</td><td></td><td>
+<tr><td>Convert a base-16 (hex) string to an unsigned 32-bit integer.</td><td>uint32_t str_HexToInt(const char* str);</td><td>euhl = number, bc = character where parsing stopped.</td><td></td><td>
 </td></tr>
 </table></div><div id="str_IntStrToInt"><h1>str_IntStrToInt</h1>	<h3>syscall Adress 0227A0</h3>
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
@@ -1202,4 +1203,8 @@ If str starts with $ or 0x, it will be processed as a hex string, otherwise a de
 <table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
 <tr><td>Convert a 32-bit unsigned integer to a string</td><td>char* str_IntToHexStr(char* dest, uint32_t num);</td><td>pointer to dest</td><td></td><td>
 </td></tr>
+</table></div><div id="fs_CleanupDeletedEntries"><h1>fs_CleanupDeletedEntries</h1>	<h3>syscall Adress 0227A8</h3>
+<table><th>What it does</th><th>Inputs</th><th>Outputs</th><th>Destroys</th><th>Notes</th>
+<tr><td>Cleanup deleted directory entries</td><td>None</td><td>None</td><td></td><td>
+Ensures 8bpp mode and draws progress indicator.</td></tr>
 </table></div></body></html>
