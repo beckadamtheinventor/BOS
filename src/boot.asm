@@ -900,10 +900,10 @@ handle_unimplemented:
 .pop_lcd_state_threading_state:
 	pop af
 	cp a,ti.lcdBpp8
-	jr z,.pop_threading_state
+	jr z,.dont_change_bpp
 	ld (ti.mpLcdCtrl),a
-	call ti.boot.ClearVRAM
-.pop_threading_state:
+	call gfx_ZeroVRAM
+.dont_change_bpp:
 	pop af
 	ld (threading_enabled),a
 	ret

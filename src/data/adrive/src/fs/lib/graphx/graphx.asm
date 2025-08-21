@@ -257,9 +257,16 @@ gfx_Begin:
 
 ; ensure that BOS knows the display needs to be reinitialized
 	ld hl,bos.return_code_flags
-	set bos.bReturnFromFullScreen, (hl)
-
+	set bos.bReturnFromFullScreen,(hl)
+; don't cause flashbang if possible
+	ld a,(ti.mpLcdCtrl)
+	cp a,ti.lcdBpp8
+	jr nz,.clear_white ; clear the screen to white if we're not in 8bpp mode (compatibility)
+	call	bos.gfx_ZeroVRAM ; clear to black if we're already in 8bpp mode
+	jr .done_clearing
+.clear_white:
 	call	ti.boot.ClearVRAM	; clear the screen
+.done_clearing:
 	; call	bos.gfx_ZeroVRAM
 lcdGraphxMode := ti.lcdWatermark+ti.lcdIntFront+ti.lcdPwr+ti.lcdBgr+ti.lcdBpp8
 	ld	de,lcdGraphxMode

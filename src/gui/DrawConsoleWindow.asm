@@ -1,8 +1,9 @@
 ;@DOES clear the screen and display a string.
 ;@INPUT hl = string
-;@NOTE Sets draw to buffer and display to vram.
+;@NOTE Ensures 8bpp mode, sets the draw location to the buffer and display to vram.
 gui_DrawConsoleWindow:
 	push hl
+	call gfx_Ensure8bpp
 	xor a,a
 	ld (currow),a
 	ld (curcol),a
