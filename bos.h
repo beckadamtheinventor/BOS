@@ -120,7 +120,7 @@ void* fsd_GetDataPtr(void** fd);
  * @param fd file handle.
  * @return file handle, otherwise 0.
  */
-size_t fsd_GetSize(void** fd);
+unsigned int fsd_GetSize(void** fd);
 
 
 /**
@@ -138,7 +138,7 @@ bool fsd_InRam(void** fd);
  * @param fd file handle.
  * @return number of sections read.
  */
-size_t fsd_Read(void* ptr, size_t len, size_t count, void** fd);
+unsigned int fsd_Read(void* ptr, unsigned int len, unsigned int count, void** fd);
 
 /**
  * Write data to a file handle.
@@ -148,7 +148,7 @@ size_t fsd_Read(void* ptr, size_t len, size_t count, void** fd);
  * @param fd file handle.
  * @return number of sections written.
  */
-size_t fsd_Write(void* ptr, size_t len, size_t count, void** fd);
+unsigned int fsd_Write(void* ptr, unsigned int len, unsigned int count, void** fd);
 
 /**
  * Write a data string to a file handle, not including the null terminator.
@@ -156,7 +156,7 @@ size_t fsd_Write(void* ptr, size_t len, size_t count, void** fd);
  * @param fd file handle.
  * @return number of bytes written.
  */
-size_t fsd_WriteStr(const char* str, void** fd);
+unsigned int fsd_WriteStr(const char* str, void** fd);
 
 /**
  * Resize a file handle.
@@ -164,7 +164,7 @@ size_t fsd_WriteStr(const char* str, void** fd);
  * @param fd file handle.
  * @return new file size in bytes, or 0 if failed.
  */
-size_t fsd_Resize(size_t len, void** fd);
+unsigned int fsd_Resize(unsigned int len, void** fd);
 
 /**
  * Seek the read/write offset of a file handle.
@@ -178,7 +178,7 @@ void fsd_Seek(int len, void** fd);
  * @param fd file handle.
  * @return read/write offset, or 0 if failed.
  */
-size_t fsd_Tell(void** fd);
+unsigned int fsd_Tell(void** fd);
 
 
 
@@ -250,7 +250,7 @@ char *fs_CopyFileName(void *fd);
  * @param offset Offset of file to read data from.
  * @note reads len*count bytes.
  */
-unsigned int fs_Read(void *data, size_t len, uint8_t count, void *fd, unsigned int offset);
+unsigned int fs_Read(void *data, unsigned int len, uint8_t count, void *fd, unsigned int offset);
 
 /**
  * Write bytes to a file.
@@ -262,7 +262,7 @@ unsigned int fs_Read(void *data, size_t len, uint8_t count, void *fd, unsigned i
  * @return New file descriptor, or -1 if failed.
  * @note writes len*count bytes from data.
  */
-void *fs_Write(void *data, size_t len, uint8_t count, void *fd, unsigned int offset);
+void *fs_Write(void *data, unsigned int len, uint8_t count, void *fd, unsigned int offset);
 
 /**
  * Write bytes to a file without reallocating the file.
@@ -275,7 +275,7 @@ void *fs_Write(void *data, size_t len, uint8_t count, void *fd, unsigned int off
  * @note Only the amount of bytes allocated to the file can be written, this routine fails otherwise.
  *       This routine will also fail if the data can't be written correctly. (ANDed with existing data)
  */
-void *fs_WriteRaw(void *data, size_t len, uint8_t count, void *fd, unsigned int offset);
+void *fs_WriteRaw(void *data, unsigned int len, uint8_t count, void *fd, unsigned int offset);
 #define fs_WriteDirectly fs_WriteRaw
 
 /**
@@ -311,7 +311,7 @@ unsigned int fs_AllocChk(unsigned int len);
  * @return pointer to memory, or 0 if failed.
  * @note Use sys_AllocHeap instead; this is for allocating files in ram.
  */
-void* fs_AllocRam(size_t len);
+void* fs_AllocRam(unsigned int len);
 
 /**
  * Copy into OP1 and convert into a BOS file name.
@@ -386,6 +386,15 @@ int fs_GetSector(void *address);
  * @return New file descriptor, or -1 if failed.
  */
 void *fs_WriteByte(uint8_t byte, void *fd, int offset);
+
+/**
+ * Fill a file with a given byte.
+ * @param byte Byte to write to file.
+ * @param fd Pointer to file descriptor.
+ * @param count Number of bytes to write.
+ * @return New file descriptor, or -1 if failed.
+ */
+void *fs_WriteByte(uint8_t byte, void *fd, unsigned int count);
 
 /**
  * Rename a file.
@@ -463,7 +472,7 @@ unsigned int fs_DirList(void **buffer, const char *path, unsigned int num, unsig
  * Check how much space is free in the filesystem.
  * @return Number of bytes free.
  */
-size_t fs_GetFreeSpace(void);
+unsigned int fs_GetFreeSpace(void);
 
 /**
  * Do a garbage collect.
@@ -536,7 +545,7 @@ int drv_PutChar(device_t* ptr, int c);
  * @param offset Offset to read data from.
  * @return Depends on device, usually number of bytes read.
  */
-int drv_Read(device_t* ptr, void* buffer, size_t len, size_t offset);
+int drv_Read(device_t* ptr, void* buffer, unsigned int len, unsigned int offset);
 
 /**
  * Write some data to a device.
@@ -546,7 +555,7 @@ int drv_Read(device_t* ptr, void* buffer, size_t len, size_t offset);
  * @param offset Offset to write data to.
  * @return Depends on device, usually number of bytes written.
  */
-int drv_Write(device_t* ptr, void* buffer, size_t len, size_t offset);
+int drv_Write(device_t* ptr, void* buffer, unsigned int len, unsigned int offset);
 
 /**
  * Uninitialize a device.
@@ -780,7 +789,7 @@ void *sys_SetOnInterruptHandler(void (*handler)(void));
  * @param len number of bytes to allocate.
  * @return pointer to memory, or 0 if failed.
  */
-void* sys_AllocHeap(size_t len);
+void* sys_AllocHeap(unsigned int len);
 
 /**
  * Turn off the calculator until the user presses the [ON] key
