@@ -34,7 +34,6 @@ fs_WriteBytes:
 .writeloop:
     ld a,(ix+6) ; byte to write
     call sys_WriteFlashA
-    inc de
     cpi ; bc--, PO set if bc decrements to zero
     jp pe,.writeloop
     call sys_FlashLock

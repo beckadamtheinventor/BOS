@@ -4,6 +4,7 @@
 ;@NOTE If str starts with $ or 0x, it will be processed as a hex string, otherwise a decimal string. If str starts with %, the value will be read from a variable from the current symlist. (defaulting to zero if the variable doesn't exist)
 str_IntStrToInt:
 	pop bc,hl
+	push hl,bc
 	ld a,(hl)
     sub a,'-'
     push af
@@ -24,12 +25,14 @@ str_IntStrToInt:
 	dec hl
 .insstr_to_int.dec:
 	dec hl
-	push hl,bc
+	ld bc,0
+	push bc,hl
 	call str_ToInt
     jr .negate_if_was_negative
 .hex:
-	push hl,bc
+	push hl
     call str_HexToInt
+	db $3E ; dummify first pop bc
 .negate_if_was_negative:
     pop bc,bc
     pop af

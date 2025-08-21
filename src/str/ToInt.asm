@@ -8,6 +8,7 @@ str_ToInt:
 	ld (ix-1),a
 	ld (ix-2),a
 	sbc hl,hl
+	ld de,(ix+6)
 	ld a,(de)
 	cp a,'-'
 	jr nz,.entry
@@ -17,6 +18,16 @@ str_ToInt:
 	call .loop
 	bit 0,(ix-2)
 	call nz,.negate
+	push hl
+	ld hl,(ix+9)
+	add hl,bc
+	or a,a
+	sbc hl,bc
+	jr z,.dont_write_end
+	ld (hl),de
+.dont_write_end:
+	pop hl
+	ld sp,ix
 	pop ix
 	ret
 .loop:
