@@ -241,9 +241,14 @@ cmd_print_return_value:
 .print_number_euhl:
 	ld a,(bos.return_code_flags)
 	bit bos.bReturnLong,a
-	jr nz,.dont_zero_32bit_upper_byte
-	ld e,0
-.dont_zero_32bit_upper_byte:
+	jr nz,.dont_sign_ext_32bit_upper_byte
+	ld c,a
+	ld a,e
+	add a,a
+	sbc a,a ; -1 if Cf set, otherwise 0
+	ld e,a
+	ld a,c
+.dont_sign_ext_32bit_upper_byte:
 	push de,hl
 	ld de,bos.gfx_string_temp
 	push de
