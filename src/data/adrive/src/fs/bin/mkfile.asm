@@ -57,10 +57,18 @@ mkfile_main:
 	call bos.fs_CreateFile
 	pop bc
 	pop af
+	ld c,a
 	inc a ; zf set if A was 0xff
 	jr z,.exit_hl
-	dec a
-	push hl
+	ex hl,de
+	ld hl,(ix-6) ; file length
+	add hl,de
+	or a,a
+	sbc hl,de
+	push hl ; file length
+	push de ; file descriptor
+	push bc ; byte to write
+	call nz,bos.fs_WriteBytes
 .exit_hl:
 	ld iy,(ix-3)
 	ld sp,ix
@@ -70,14 +78,12 @@ mkfile_main:
 
 .args.entry:
 	ld (ix-15),bc ; save argc as a counter
-	call .nextargv ; bypass argv[0]
-	ret po ; return if no more arguments
 .args:
-	call .nextargv ; hl=argv[n]; n++;
+	call .nextargv ; hl=argv[++n];
 	ret po ; return if no more arguments
 	ld a,(hl)
 	cp a,'-'
-	ret nz
+	jr nz,.args.set_output_name
 	inc hl
 	ld a,(hl)
 	cp a,'l'
@@ -91,7 +97,11 @@ mkfile_main:
 	cp a,'s'
 	jr z,.args.string
 	cp a,'h'
-	jr nz,.args
+	jr z,.show_info
+	dec hl
+.args.set_output_name:
+	ld (ix-12),hl
+	jr .args
 
 .show_info:
 	ld hl,.info_string
@@ -117,19 +127,19 @@ mkfile_main:
 	jr .args
 .args.string:
 	call .nextargv
-	ld (ix-6),hl
+	ld (ix-9),hl
 	push hl
 	call ti._strlen
 	pop bc
-	ld (ix-9),hl
+	ld (ix-6),hl
 	jr .args
 .args.file:
 	call .nextargv
 	push hl
 	call bos.fs_GetFilePtr
 	pop de
-	ld (ix-6),hl
-	ld (ix-9),bc
+	ld (ix-6),bc
+	ld (ix-9),hl
 	jr .args
 ; returns argv at counter, advances counter
 ; returns PO if no more arguments, otherwise PE
@@ -137,8 +147,8 @@ mkfile_main:
 	ld bc,(ix-15)
 	cpi ; bc--, update p/v flag if zero
 	ld (ix-15),bc
-	ld hl,(iy)
 	lea iy,iy+3
+	ld hl,(iy)
 	ret
 .intstrtoint:
 	call .nextargv
