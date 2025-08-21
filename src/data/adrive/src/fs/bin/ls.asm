@@ -48,6 +48,10 @@ ls_main:
 .non_null_dir:
 	ld (ix-9),hl
 	push hl
+	call bos.fs_OpenFile ; locate the directory so we can fail if it doesn't exist
+	jq c,.fail
+	ld hl,(ix-9)
+	ex (sp),hl
 	call bos.gui_PrintLine
 	pop bc
 	ld hl,96
@@ -162,9 +166,7 @@ ls_main:
 	; jr .fail
 .exit:
 .exit_nopop:
-	xor a,a
-	sbc hl,hl
-	db $01
+	db $F6 ; or a,... unset carry flag, dummify
 .fail:
 	scf
 	sbc hl,hl
