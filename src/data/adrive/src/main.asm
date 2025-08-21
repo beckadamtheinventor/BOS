@@ -109,7 +109,7 @@ end fs_dir
 fs_file os_internal_subfiles
 
 	fs_subfile gc_cmd, sbin_dir
-		db "#!cmd",$A,"fsutil -c",$A
+		db "#!cmd",$A,"fsutil -dcm",$A
 	end fs_subfile
 
 	fs_subfile fsutil_exe, sbin_dir

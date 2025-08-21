@@ -1,7 +1,8 @@
-;@DOES Clean up the filesystem, resetting freed areas.
+;@DOES Clean up the filesystem, clearing freed areas.
 ;@INPUT None
 ;@OUTPUT None
 ;@DESTROYS All
+;@NOTE Ensures 8bpp mode and draws progress indicator.
 fs_GarbageCollect:
 	ld hl,-18
 	call ti._frameset
@@ -29,13 +30,6 @@ fs_GarbageCollect:
 	ld (ti.mpLcdUpbase),de
 .no_buffer_swap:
 	call sys_FlashUnlock
-
-; clean root directory
-    ld hl,.str_cleaning_dirs
-    call .print_cleaning_str
-
-    ld hl,fs_root_dir_address
-    call .cleanup_dirs
 
 	ld hl,.str_cleaning_up_step_1
     call .print_cleaning_str
@@ -209,39 +203,6 @@ fs_GarbageCollect:
 ; .str_trailing_zeroes:
 	; db "0000",0
 
-.cleanup_directory:
-    ld a,(hl) ; ensure we're pathing into a valid entry
-    or a,a
-    ret z
-    inc a
-    ret z
-    inc a
-    ret z
-    call fs_GetFDPtr.entry
-.cleanup_dirs:
-    push hl
-    call fs_DirCleanup.entryptr
-    pop hl
-.cleanup_dirs_loop:
-    push hl
-    call fs_GetFDAttr.entry
-    bit fd_subdir,a
-    pop hl
-    push hl
-    call nz,.cleanup_directory
-    pop hl
-    ld bc,fs_file_desc_size
-    add hl,bc
-    ld a,(hl)
-    inc a
-    ret z
-    inc a
-    jr nz,.cleanup_dirs_loop
-    call fs_GetFDPtr.entry
-    ret c
-    jr .cleanup_dirs_loop
-
-
 ; input hl = string to print
 ; sets lcd_x to the end of the string minus 5 characters
 .print_cleaning_str:
@@ -255,9 +216,6 @@ fs_GarbageCollect:
 	add hl,bc
 	ld (lcd_x),hl
     ret
-
-.str_cleaning_dirs:
-    db "Cleaning dirs",0
 
 .str_cleaning_up_step_1:
 	db "Cleaning: 00/55", 0

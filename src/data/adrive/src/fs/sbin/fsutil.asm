@@ -20,16 +20,23 @@ fsutil_start:
 	ld a,(hl)
 	inc hl
 	ld (ix-3),hl
+	or a,a
+	jr z,.done
 	cp a,'h'
 	jr z,.info
 	cp a,'m'
 	jr z,.rebuild_cmap
 	cp a,'s'
 	jr z,.sanity_check
+	cp a,'d'
+	jr z,.cleanup_dirs
 	cp a,'c'
-	jr nz,.done
+	jr nz,.info
 	call bos.fs_GarbageCollect
-	jr .done
+	jr .next
+.cleanup_dirs:
+	call bos.fs_CleanupDeletedEntries
+	jr .next
 .rebuild_cmap:
 	call bos.fs_InitClusterMap
 	jr .next
@@ -51,4 +58,5 @@ fsutil_start:
 	db "-s  run sanity check",$A
 	db "-c  cleanup the filesystem",$A
 	db "-m  rebuild cluster map",$A
-	db "eg. fsutil -mc",0
+	db "-d  cleanup deleted entries",$A
+	db "eg. fsutil -dcm",0
