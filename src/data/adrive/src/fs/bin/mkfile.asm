@@ -129,7 +129,7 @@ mkfile_main:
 	call bos.fs_GetFilePtr
 	pop de
 	ld (ix-6),hl
-	ld (ix-9),de
+	ld (ix-9),bc
 	jr .args
 ; returns argv at counter, advances counter
 ; returns PO if no more arguments, otherwise PE
