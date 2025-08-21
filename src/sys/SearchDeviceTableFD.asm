@@ -6,8 +6,9 @@
 sys_SearchDeviceTableFD:
 	pop bc,hl
 	push hl,bc
-	call sys_GetFDPtr
-	inc hl ; adjust for error value -1
+.entryhl:
+	call fs_GetFDPtr.entry
+	inc hl ; adjust for error value -1 -> 0
 	ret c
 	dec hl
 	jr sys_SearchDeviceTable.entryhl

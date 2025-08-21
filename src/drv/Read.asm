@@ -13,14 +13,16 @@ drv.common_3_args: ; space savings for drv_Write
 	add hl,bc
 	ld a,(hl)
 	cp a,$C3
-	ret nz
+	jr nz,drv.common_stack_exit
 	ld de,(ix+15) ; offset
 	push de
 	ld de,(ix+12) ; len
 	push de
 	ld de,(ix+9) ; buffer
+drv.common_push_de_call_hl:
 	push de
 	call sys_jphl
+drv.common_stack_exit:
 	ld sp,ix
 	pop ix
 	ret

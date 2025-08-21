@@ -233,7 +233,7 @@ devtIntHandler              := $09
 devtUSB                     := $10
 devtMSD                     := $14
 devtMTP                     := $15
-devtFS                      := $20
+devtFS                      := $80 ; if device type bitwise and devtFS, assume it is a filesystem
 
 ; device interrupt sources
 deviceIntNone               := $00

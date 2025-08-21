@@ -36,7 +36,7 @@ fsd_Open:
 	sbc hl,bc
 	dec hl
 	call z,.create
-	ld b,fsd_bNeedsFlush or fsd_bWrite
+	ld b,fsd_mNeedsFlush or fsd_mWrite
 	jr .append_table
 
 .open_read:
@@ -58,7 +58,7 @@ fsd_Open:
 	sbc hl,bc
 	dec hl
 	call z,.create
-	ld b,fsd_bNeedsFlush or fsd_bWrite or fsd_bOverwrite
+	ld b,fsd_mNeedsFlush or fsd_mWrite or fsd_mOverwrite
 
 .append_table:
 	xor a,a
@@ -77,7 +77,6 @@ fsd_Open:
 	sbc hl,de
 	jr z,.fail
 	push hl
-	push hl
 	pop iy
 
 	ld hl,(ix-6)
@@ -88,14 +87,11 @@ fsd_Open:
 	call fs_GetFDLen.entry
 	ld (iy+fsd_DataLen),hl ; file data length
 
-	pop hl
-
 	bit fd_device,(ix-7)
 	jr z,.dont_set_device_flag
 	set fsd_bIsDevice,(iy+fsd_OpenFlags)
-	jr z,.done ; don't move data to ram if reading/writing to a device file
+	jr .done ; don't move data to ram if reading/writing to a device file
 .dont_set_device_flag:
-
 	bit fsd_bWrite,(iy+fsd_OpenFlags)
 	jr z,.done ; don't move data to ram if writing not needed
 ; copy data to ram

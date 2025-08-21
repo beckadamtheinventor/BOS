@@ -93,8 +93,17 @@ fs_OpenFile:
 	cp a,$A
 	jq z,._return ;return if at end of path
 .into_dir:
-	bit fd_subdir,(iy + fsentry_fileattr) ;check if we're entering a directory
+	bit fd_subdir,(iy + fsentry_fileattr) ; check if we're entering a directory
 	jq z,.fail ;trying to path into a file?
+	bit fd_device,(iy + fsentry_fileattr) ; check if we're entering a filesystem device
+	jr z,.step_into_dir
+	ld de,(ix-3)
+	push de,iy
+	call fs_GetFDPtr
+	ex (sp),hl
+	call drv_OpenFile
+	pop bc,bc
+	ret ; device handles the rest of the path
 .step_into_dir:
 	push iy
 	call fs_GetFDPtr
