@@ -42,7 +42,9 @@ mkfile_main:
 	ld de,(ix-12) ; file name
 	ld bc,(ix-6) ; data pointer
 	ld hl,(ix-9) ; data length
-	push hl,bc,de
+	push hl,bc
+	ld c,0 ; file property byte
+	push bc,de
 	call bos.fs_WriteNewFile
 	pop bc,bc,bc
 	jr .exit_hl
@@ -55,7 +57,7 @@ mkfile_main:
 	ld hl,(ix-12) ; file name
 	push hl
 	call bos.fs_CreateFile
-	pop bc
+	pop bc,bc,bc
 	pop af
 	ld c,a
 	inc a ; zf set if A was 0xff
@@ -69,6 +71,8 @@ mkfile_main:
 	push de ; file descriptor
 	push bc ; byte to write
 	call nz,bos.fs_WriteBytes
+	or a,a
+	sbc hl,hl
 .exit_hl:
 	ld iy,(ix-3)
 	ld sp,ix
@@ -113,12 +117,10 @@ mkfile_main:
 
 .args.length:
 	call .intstrtoint
-	ret po
 	ld (ix-6),hl
 	jr .args
 .args.addr:
 	call .intstrtoint
-	ret po
 	ld (ix-9),hl
 	jr .args
 .args.byte:
@@ -135,6 +137,7 @@ mkfile_main:
 	jr .args
 .args.file:
 	call .nextargv
+	ret po
 	push hl
 	call bos.fs_GetFilePtr
 	pop de
@@ -149,6 +152,9 @@ mkfile_main:
 	ld (ix-15),bc
 	lea iy,iy+3
 	ld hl,(iy)
+	ret pe
+	or a,a
+	sbc hl,hl
 	ret
 .intstrtoint:
 	call .nextargv
