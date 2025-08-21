@@ -21,9 +21,21 @@ _asmcomp_exe:
 	pop de
 	; jq c,.exit_cf
 	jr nc,.file_exists
+	ld a,(de)
+	cp a,'-'
+	scf
+	jq nz,.exit_cf
+	cp a,'t'
+	scf
+	jq nz,.exit_cf
 	ld hl,.test_program_src
 	ld bc,.test_program_src.len
-	xor a,a
+	push bc,hl
+	syscall _argv_2
+	push hl
+	call bos.fs_WriteNewFile
+	pop bc,bc,bc
+	jq .exit_cf
 .file_exists:
 	bit bos.fd_subdir, a
 	scf
@@ -138,8 +150,13 @@ end repeat
 	ld hl,-2
 	jr .exit_hl
 .final_success:
+	push hl
 	ld hl,.str_success
-	call bos.gui_PrintLine
+	call bos.gui_Print
+	call bos.fs_GetFDLen
+	pop bc
+	call bos.gui_PrintInt
+	call bos.gui_NewLine
 	or a,a
 .exit_cf:
 	sbc hl,hl
@@ -330,24 +347,27 @@ end repeat
 	jr nz,.handle_string_loop
 	ld (ix-9),de
 	inc hl
-	jr .calc_new_remaining_len
+	ld de,(ix-3)
+	ld (ix-3),hl
+	; or a,a
+	jr .set_new_remaining_len
 .not_string:
 	cp a,'?'
 	jr nz,.not_set_origin
 	push hl
 	call bos.str_HexToInt
-	pop bc
 	ld (ix-25),hl
-	ex hl,de
-.calc_new_remaining_len:
 	ld de,(ix-3)
-	ld (ix-3),hl
+	ld (ix-3),bc
+	ld hl,(ix-3)
+	pop bc
 	or a,a
-	sbc hl,de
+.set_new_remaining_len:
+	sbc hl,de ; newptr - oldptr
 	ex hl,de
 	ld hl,(ix-6)
 	or a,a
-	sbc hl,de
+	sbc hl,de ; len - (newptr - oldptr)
 	ld (ix-6),hl
 	or a,a
 	ret
@@ -485,14 +505,15 @@ end virtual
 	db "Failed to write output", 0
 
 .str_success:
-	db "Success", 0
+	db "Success. Bytes: ", 0
 
 .str_info:
-	db "asmcomp source.asm output.bin", 0
+	db "asmcomp source.asm output.bin",$A
+	db "asmcomp -t test.bin",0
 
 .test_program_src:
 	db "?D1A881",$A
 	db '1804 "FEX" 00',$A
-	db "CD :main l",$A
+	db "CD F80000",$A
 	db "AFED62C9",$A
 .test_program_src.len:=$-.test_program_src

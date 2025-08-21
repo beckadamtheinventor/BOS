@@ -1,6 +1,6 @@
 ;@DOES Convert a base-16 (hex) string to an unsigned 32-bit integer.
 ;@INPUT uint32_t str_HexToInt(const char* str);
-;@OUTPUT euhl = number.
+;@OUTPUT euhl = number, bc = character where parsing stopped.
 str_HexToInt:
 	pop bc,de
 	push de,bc
@@ -8,6 +8,11 @@ str_HexToInt:
 	or a,a
 	sbc hl,hl
 	ld c,l
+	call .loop
+	push de
+	ld e,c
+	pop bc
+	ret
 .loop:
 	ld a,(de)
 	or a,a
