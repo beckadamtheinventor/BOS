@@ -284,22 +284,22 @@ _argv_3:
 	db "argv/3",0
 _argv_4:
 	db "argv/4",0
-_intstr_to_int:
-	db "numstr/intstr_to_int",0
-_int_to_str:
-	db "numstr/int_to_str",0
-_int_to_hexstr:
-	db "numstr/int_to_hexstr",0
-_long_to_str:
-	db "numstr/long_to_str",0
-_long_to_hexstr:
-	db "numstr/long_to_hexstr",0
-_byte_to_hexstr:
-	db "numstr/byte_to_hexstr",0
-_str_to_int:
-	db "numstr/str_to_int",0
-_hexstr_to_int:
-	db "numstr/hexstr_to_int",0
+; _intstr_to_int:
+; 	db "numstr/intstr_to_int",0
+; _int_to_str:
+; 	db "numstr/int_to_str",0
+; _int_to_hexstr:
+; 	db "numstr/int_to_hexstr",0
+; _long_to_str:
+; 	db "numstr/long_to_str",0
+; _long_to_hexstr:
+; 	db "numstr/long_to_hexstr",0
+; _byte_to_hexstr:
+; 	db "numstr/byte_to_hexstr",0
+; _str_to_int:
+; 	db "numstr/str_to_int",0
+; _hexstr_to_int:
+; 	db "numstr/hexstr_to_int",0
 _read_a_from_addr:
 	db "mem/read_a_from_addr",0
 _set_a_at_addr:
@@ -316,7 +316,7 @@ end fs_file
 fs_dir bin_sys_dir
 	fs_sfentry argv_so, "argv", "", f_system+f_subfile
 	fs_sfentry mem_so, "mem", "", f_system+f_subfile
-	fs_sfentry numstr_so, "numstr", "", f_system+f_subfile
+	; fs_sfentry numstr_so, "numstr", "", f_system+f_subfile
 	fs_sfentry str_so, "str", "", f_system+f_subfile
 end fs_dir
 
@@ -329,9 +329,9 @@ fs_file os_syslib
 		file '../obj/mem.bin'
 	end fs_subfile
 
-	fs_subfile numstr_so, bin_sys_dir
-		file '../obj/numstr.bin'
-	end fs_subfile
+	; fs_subfile numstr_so, bin_sys_dir
+	; 	file '../obj/numstr.bin'
+	; end fs_subfile
 
 	fs_subfile str_so, bin_sys_dir
 		file '../obj/str.bin'

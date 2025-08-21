@@ -8,7 +8,7 @@ sleep_main:
 	jr nz,.info
 	syscall _argv_1
 	push hl
-	syscall _str_to_int
+	call bos.str_IntStrToInt
 	pop bc
 	ld bc,250
 	or a,a

@@ -19,7 +19,7 @@ jump_main:
 	dec hl
 .address:
 	push hl
-	syscall _hexstr_to_int
+	call bos.str_IntStrToInt
 .jump:
 	ld sp,ix
 	pop ix
