@@ -1,12 +1,16 @@
-;@DOES Set the current draw buffer
-;@INPUT A buffer number 0 or 1
-;@DESTROYS HL
+;@DOES Set the current draw buffer and display buffer.
+;@INPUT A 0: display from LCD_VRAM, draw to LCD_BUFFER. 1: reversed.
+;@OUTPUT HL = new display buffer.
+;@OUTPUT DE = new draw buffer.
+;@DESTROYS HL,DE
 gfx_SetDraw:
 	ld hl,LCD_VRAM
+	ld de,LCD_BUFFER
 	or a,a
-	jr z,.setvram
-	ld hl,LCD_BUFFER
+	jr nz,.setvram
+	ex hl,de
 .setvram:
-	ld (cur_lcd_buffer),hl
+	ld (ti.mpLcdUpbase),hl
+	ld (cur_lcd_buffer),de
 	ret
 

@@ -1,12 +1,12 @@
-;@DOES print a character to the current lcd buffer
-;@INPUT A character to draw
+;@DOES Print a character to the current draw buffer.
+;@INPUT A Character to draw
+;@OUTPUT DE = Pointer to draw location
 ;@DESTROYS BC
 gfx_PrintChar:
 character_width := 8
 character_height := 8
 	push	hl
-	push	af
-	push	de
+	push	af ; character
 
 ; copy the ram code
 	ld	hl,.ram_code
@@ -35,30 +35,26 @@ character_height := 8
 	ld	a,(lcd_text_bg)
 	ld	(.ram_code_bg),a
 
+	ld hl,(lcd_x)
+	ld de,(lcd_y)
+	call gfx_Compute
+	push hl
+	ex hl,de
+
+; input de = pointer to draw location on screen
+; input c = character to draw
 .draw_char:
-	ld	a,c
-	ld	bc,(lcd_x)
-	push	bc
-	ld	hl,lcd_y
-	ld	l,(hl)
-	ld	h,LCD_WIDTH / 2
-	mlt	hl
-	add	hl,hl
-	ld	de,(cur_lcd_buffer)
-	add	hl,de
-	add	hl,bc				; add x value
-	push	hl
+	ld a,c
 	sbc	hl,hl
 	ld	l,a
-	add	hl,hl
-	add	hl,hl
-	add	hl,hl
-	ex	de,hl
-	ld	hl,(font_data)
-	add	hl,de				; hl -> character bitmap
-	pop	de				; de -> correct location on screen
-	ld	c,character_height
+	add	hl,hl ; x2
+	add	hl,hl ; x4
+	add	hl,hl ; x8
+	ld	bc,(font_data)
+	add	hl,bc				; hl -> character bitmap
+	ld	a,character_height
 .vert_loop:
+	ld c,a
 	ld	a,(hl)
 	inc	hl
 	; hl = pointer to next byte of the character bitmap
@@ -70,21 +66,22 @@ character_height := 8
 	ld	bc,LCD_WIDTH - character_width
 	add	hl,bc
 	ex	hl,de
-	ld	c,a
-	dec	c
+	dec	a
 	jr	nz,.vert_loop
-	pop	bc
-	pop	de
-	pop	af				; character
-	ld	hl,character_width
-;	ld	hl,(font_spacing)
-;	call sys_AddHLAndA
-;	ld	a,(hl)				; amount to step per character
-;	or	a,a
-;	sbc	hl,hl
-;	ld	l,a
-	add	hl,bc
-	ld	(lcd_x),hl
+
+	pop de ; de = pointer to original draw location
+	pop	af ; a = character
+	ld bc,(font_spacing)
+	or a,a
+	sbc hl,hl
+	ld l,a
+	add hl,bc
+	ld a,(hl) ; amount to step for this character
+	sbc hl,hl
+	ld l,a
+	ld bc,(lcd_x)
+	add hl,bc
+	ld (lcd_x),hl ; advance lcd_x
 	pop	hl
 	ret
 

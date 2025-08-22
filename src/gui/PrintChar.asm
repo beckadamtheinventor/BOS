@@ -1,11 +1,11 @@
-;@DOES Print a character to the back buffer and advance the text cursor
+;@DOES Print a character to the current draw buffer and advance the text cursor.
 ;@INPUT A = character to print
-;@DESTROYS Assume all except HL
+;@DESTROYS BC,DE,AF
 gui_PrintChar:
 assert curcol = currow+1
 	ld de,(currow)
 .entry_cold_rowe_chara:
-	push af
+	ld c,a
 	ld a,e ; a = currow
 	ld e,9
 	mlt de ; curcol * 9
@@ -16,16 +16,34 @@ assert curcol = currow+1
 	add a,a ; x8
 	add a,e ; x9
 	ld (lcd_y),a
-	pop af
-	push hl
+	ld a,c
+	push hl ; save original hl
+	ld de,(lcd_y) ; e = y coord
+	ld hl,(lcd_x) ; hl = x coord
+	call gfx_Compute
+	push hl ; save draw pointer
 	cp a,$20
 	jr c,.controlcode
+	cp a,$80
+	jr nc,.controlcode
 	call gfx_PrintChar
-	jr .advance
+.advance:
+	ld a,(curcol)
+	cp a,COLUMN_COUNT-1
+	jr nc,.advance_new_line
+	inc a
+	ld (curcol),a
+.done:
+	pop hl ; draw pointer
+	ld bc,9 ; blit 9x9 square from back buffer to display buffer
+	ld a,c
+	call gfx_BlitRectangle.computed
+	pop hl ; original hl
+	ret
 
 .controlcode:
 	or a,a
-	jr z,.nextline
+	jr z,.done_no_blit
 	cp a,$08 ; BS
 	jr z,.backspace
 	cp a,$0A ; LF
@@ -43,13 +61,12 @@ assert curcol = currow+1
 	jr .done_no_blit
 .tab:
 	ld a,(curcol)
-	inc a
-	inc a
-	jr .advance_entry
-.formfeed:
-	xor a,a
-	ld (currow),a
+	add a,TAB_SIZE
+	cp a,ROW_COUNT
+	jr nc,.nextline
+	ld (curcol),a
 	jr .done_no_blit
+.formfeed:=.carriage_return
 
 .backspace:
 	ld a,(curcol)
@@ -57,44 +74,31 @@ assert curcol = currow+1
 	jr z,.done_no_blit
 	dec a
 	ld (curcol),a
-	jr .done_no_blit
+
+.done_no_blit:
+	pop de
+	pop hl ; restore original hl
+	ret
 
 .nextline:
 	ld a,(currow)
-	cp a,25
-	jq nc,.scroll
+	cp a,ROW_COUNT-1
+	jr c,.nextline_noscroll
+	call gui_Scroll
+	jr .done_no_blit
+
+.nextline_noscroll:
 	inc a
 	ld (currow),a
-
-.advance:
-	ld a,(curcol)
-.advance_entry:
-	cp a,40
-	jr nc,.advance_new_line
-	inc a
-	ld (curcol),a
-
-.done:
-	call gfx_BlitBuffer
-.done_no_blit:
-	pop hl
-	ret
+	jr .carriage_return
 
 .advance_new_line:
 	xor a,a
-	sbc hl,hl
-	ld (lcd_x),hl
 	ld (curcol),a
 	ld a,(currow)
-	cp a,25
-	jr nc,.scroll
 	inc a
+	cp a,ROW_COUNT
 	ld (currow),a
-	jr .done
-
-.scroll:
-	push hl
-	call gui_Scroll
-	pop hl
-	jr .done
+	call nc,gui_Scroll
+	jr .done_no_blit
 

@@ -18,8 +18,11 @@ TEXT_MAX_ROW    := 231
 ; OS defines
 ;-------------------------------------------------------------------------------
 
-RAM_START  := 0D00000h
+RAM_START     := $D00000
 
+COLUMN_COUNT  := 35 ; floor(LCD_WIDTH / 9)
+ROW_COUNT     := 26 ; floor(LCD_HEIGHT / 9)
+TAB_SIZE      :=  2 ; size of tab in columns
 
 ; memory locations
 flag_start             := $D00000

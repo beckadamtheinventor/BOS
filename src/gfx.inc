@@ -2,6 +2,7 @@
 ; BOS graphics routines
 ; Some taken from Cesium and refactored to run from flash
 
+include 'gfx/BlitRectangle.asm'
 include 'gfx/BlitScreen.asm'
 include 'gfx/BlitBuffer.asm'
 include 'gfx/FillScreen.asm'
@@ -23,6 +24,8 @@ include 'gfx/PrintUInt.asm'
 include 'gfx/Rectangle.asm'
 include 'gfx/SetDefaultFont.asm'
 include 'gfx/SetDraw.asm'
+include 'gfx/SetDrawPtr.asm'
+include 'gfx/SetDisplayPtr.asm'
 include 'gfx/SetFont.asm'
 include 'gfx/SetTextXY.asm'
 include 'gfx/Sprite.asm'

@@ -11,7 +11,5 @@ gui_DrawConsoleWindow:
 	call gfx_SetDraw
 	ld a,(lcd_bg_color)
 	call gfx_BufClear
-	ld hl,LCD_VRAM
-	ld (ti.mpLcdUpbase),hl
 	pop hl
 	jp gui_PrintLine

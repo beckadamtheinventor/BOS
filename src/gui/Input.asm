@@ -1,8 +1,7 @@
-
-;@DOES get user input
+;@DOES Get string input from the user.
 ;@INPUT uint8_t gui_Input(char *buffer, int max_len);
 ;@OUTPUT 0 if user exit, 1 if user enter, 9|12 if user presses down|up arrow key
-;@DESTROYS All
+;@DESTROYS HL,DE,BC,AF
 gui_Input:
 	ld hl,-12
 	call ti._frameset
@@ -43,7 +42,7 @@ gui_Input:
 	ld bc,(lcd_x)
 	ld (ix-8),bc
 	ld a,(hl)
-	call gfx_PrintChar
+	call gui_PrintChar
 	ld hl,(ix-11)
 	ld bc,(ix-3)
 	or a,a

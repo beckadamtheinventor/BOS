@@ -1,8 +1,6 @@
 ;@DOES Ensure that the lcd to 8bpp mode. If not in 8bpp mode, clears vram.
-;@NOTE Also overwrites ti.mpLcdUpbase to match the current draw buffer. 
+;@DESTROYS HL,DE,BC,AF
 gfx_Ensure8bpp:
-    ld hl,(cur_lcd_buffer)
-    ld (ti.mpLcdUpbase),hl
     ld a,(ti.mpLcdCtrl)
     cp a,ti.lcdBpp8
     ret z

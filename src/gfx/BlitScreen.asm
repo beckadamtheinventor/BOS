@@ -1,7 +1,7 @@
-;@DOES copies the lcd to the back buffer
+;@DOES copies the current display buffer to the current back buffer.
 ;@DESTROYS HL,DE,BC
 gfx_BlitScreen:
-	ld	hl,LCD_VRAM
-	ld	de,LCD_BUFFER
+	ld	hl,(ti.mpLcdUpbase)
+	ld	de,(cur_lcd_buffer)
 	jq	gfx_BlitBuffer.copy
 
