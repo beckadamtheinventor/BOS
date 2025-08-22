@@ -1,15 +1,14 @@
-;@DOES print a string to the current lcd buffer
-;@INPUT HL pointer to string
-;@OUTPUT HL pointer to character after the last one printed
-;@DESTROYS HL,DE,BC
+;@DOES print a string to the current draw buffer.
+;@INPUT HL pointer to string.
+;@OUTPUT HL pointer to character following the null terminator.
+;@DESTROYS HL,DE,BC,AF
 gfx_PrintString:
-	ld	a,(lcd_y)
-	cp	a,TEXT_MAX_ROW
-	ret nc
 .loop:
 	ld	a,(hl)
 	inc hl
-	call	gfx_PrintChar			; saves de, hl
+	or a,a
+	ret z
+	call gfx_PrintChar ; saves hl
 	ex	hl,de
 	ld	bc,LCD_WIDTH - 8
 	ld	hl,(lcd_x)

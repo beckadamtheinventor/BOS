@@ -42,7 +42,7 @@ assert ~start_of_user_archive and $FF
 ; initialize a filesystem descriptor if no valid fs descriptors found
 	jr .run_init
 .has_valid_fs_descriptor:
-	call .check_ramfs
+	; call .check_ramfs
 	call .check_root ; check if root directory begins with the right directories
 	jq z,fs_InitClusterMap ; if everything seems fine so far, reinitialize the cluster map.
 	                       ; (will only actually reinitialize if there are no free sectors or all sectors are free)
@@ -126,7 +126,7 @@ assert ~start_of_user_archive and $FF
 
 .notfirst:
 	call sys_AnyKey ; doesn't modify BC
-	jq nz,.skip_splash
+	jr nz,.skip_splash
 	djnz	.loop
 
 	ld	a,228
@@ -136,29 +136,31 @@ assert ~start_of_user_archive and $FF
 
 	ld	hl,140
 	ld	a,86
-	call	gfx_SetTextXY
+	ld (lcd_x),hl
+	ld (lcd_y),a
 	ld	hl,str_ecks
-	call	gfx_PrintString
+	call gfx_PrintString
 
 	ld a,187
 	ld (lcd_x),a
 	ld a,134
 	ld (lcd_y),a
 	ld	hl,str_perate
-	call	gfx_PrintString
+	call gfx_PrintString
+
 	ld	a,220
 	ld (lcd_x),a
 	ld	a,181
 	ld (lcd_y),a
 	ld	hl,str_ystem
-	call	gfx_PrintString
+	call gfx_PrintString
 
-	call	gfx_BlitBuffer
+	call gfx_BlitBuffer
 
 	ld	b,100
 .Delay2:
 	call sys_AnyKey ; doesn't modify BC
-	jq nz,.skip_splash
+	jr nz,.skip_splash
 	call	ti.Delay10ms
 	djnz	.Delay2
 
@@ -196,11 +198,11 @@ assert ~start_of_user_archive and $FF
 	; ret
 
 
-.check_ramfs:
-	ld hl,str_ram_fs_device
+; .check_ramfs:
+; 	ld hl,str_ram_fs_device
 	
 	
-	ret
+; 	ret
 
 ; .check_root_dirs:
 	; ld hl,current_working_dir
