@@ -586,6 +586,7 @@ namespace bos
 ?str_IntToHexStr                 := $227A4
 ?fs_CleanupDeletedEntries        := $227A8
 ?fs_WriteBytes                   := $227AC
+?str_LongToHexStr                := $227B0
 ;
 ; end of jump table
 ;-------------------------------------------------------------------------------

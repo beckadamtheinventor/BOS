@@ -241,14 +241,6 @@ cmd_print_return_value:
 .print_number_euhl:
 	ld a,(bos.return_code_flags)
 	bit bos.bReturnLong,a
-	jr nz,.dont_sign_ext_32bit_upper_byte
-	ld c,a
-	ld a,e
-	add a,a
-	sbc a,a ; -1 if Cf set, otherwise 0
-	ld e,a
-	ld a,c
-.dont_sign_ext_32bit_upper_byte:
 	push de,hl
 	ld de,bos.gfx_string_temp
 	push de
@@ -263,8 +255,13 @@ cmd_print_return_value:
 	call bos.str_LongToStr
 	jr ._done_printing
 ._print_hex:
+	bit bos.bReturnLong,a
+	jr nz,._print_hex_long
 	call bos.str_IntToHexStr
 	jr ._done_printing
+._print_hex_long:
+	call bos.str_LongToHexStr
+	; jr ._done_printing
 ._done_printing:
 	pop bc,bc,bc
 	jp bos.gui_PrintLine

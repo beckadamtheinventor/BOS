@@ -245,5 +245,6 @@
 	jp str_IntToHexStr
 	jp fs_CleanupDeletedEntries
 	jp fs_WriteBytes
+	jp str_LongToHexStr
 
 ; end of jump table

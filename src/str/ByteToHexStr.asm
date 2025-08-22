@@ -1,5 +1,3 @@
-str_ByteToHexStr.entry_dec_hl:
-	dec hl
 ;@INPUT hl pointer to input byte
 ;@INPUT de pointer to output buffer
 ;@OUTPUT None
