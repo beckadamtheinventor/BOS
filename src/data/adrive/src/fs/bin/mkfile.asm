@@ -40,14 +40,14 @@ mkfile_main:
 	jr .empty_file
 .file_has_data:
 	ld de,(ix-12) ; file name
-	ld bc,(ix-6) ; data pointer
-	ld hl,(ix-9) ; data length
-	push hl,bc
+	ld bc,(ix-6) ; data length
+	ld hl,(ix-9) ; data pointer
+	push bc,hl
 	ld c,0 ; file property byte
 	push bc,de
 	call bos.fs_WriteNewFile
 	pop bc,bc,bc
-	jr .exit_hl
+	jr .exit_cf
 .empty_file:
 	push af
 	ld hl,(ix-6) ; file length. zero length works, just doesn't allocate a data section
@@ -72,6 +72,7 @@ mkfile_main:
 	push bc ; byte to write
 	call nz,bos.fs_WriteBytes
 	or a,a
+.exit_cf:
 	sbc hl,hl
 .exit_hl:
 	ld iy,(ix-3)
