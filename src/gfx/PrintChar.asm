@@ -52,23 +52,31 @@ character_height := 8
 	add	hl,hl ; x8
 	ld	bc,(font_data)
 	add	hl,bc				; hl -> character bitmap
+	ex hl,de
 	ld	a,character_height
 .vert_loop:
 	ld c,a
-	ld	a,(hl)
-	inc	hl
-	; hl = pointer to next byte of the character bitmap
-	ld	b,character_width
-	ex	hl,de
+	; de = pointer to next byte of the character bitmap
+	ld	a,(de)
+	inc	de
+	ld	b,character_width+1
 	jp .ram_code_location
 .ram_code_return:
 	ld	a,c
-	ld	bc,LCD_WIDTH - character_width
+	ld	bc,LCD_WIDTH - character_width - 1
 	add	hl,bc
-	ex	hl,de
 	dec	a
 	jr	nz,.vert_loop
-
+	ld	a,(text_flags)
+	bit	textflag_transparent_bg, a
+	jr nz,.no_row_8
+	ld a,(lcd_text_bg)
+	ld b,character_width+1
+.row_8:
+	ld (hl),a
+	inc hl
+	djnz .row_8
+.no_row_8:
 	pop de ; de = pointer to original draw location
 	pop	af ; a = character
 	ld bc,(font_spacing)
@@ -88,7 +96,7 @@ character_height := 8
 virtual at gfx_routine_temp
 	.ram_code_location:
 	.horiz_loop:
-		rlca
+		add a,a
 		jr	nc,.bg
 		ld	(hl),0
 	.ram_code_fg := $-1
