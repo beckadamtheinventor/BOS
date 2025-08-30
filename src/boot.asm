@@ -599,6 +599,7 @@ os_recovery_menu:
 	DisableThreading
 
 	call gfx_Set8bpp
+    call gfx_SetDefaultFont
 
 	ld hl,string_os_info
 	call gui_DrawConsoleWindow
