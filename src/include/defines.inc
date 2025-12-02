@@ -71,6 +71,7 @@ stdout_device_ptr      := ti.appData+84 ; 3 bytes, stores pointer to stdout devi
 random_source_ptr      := ti.appData+87 ; 3 bytes, stores pointer to random source address
 variable_sym_list_ptr  := ti.appData+90 ; 3 bytes, stores pointer to symbol list containing variables for command processing
 stdout_fd_ptr          := ti.appData+93 ; 3 bytes, stores pointer to stdout (or other) file descriptor
+unicode_font_ptr       := ti.appData+96 ; 3 bytes, stores pointer to Unicode font for use with Unicode routines.
 
 ScrapByte              := ti.flashByte
 ScrapWord              := ti.scrapMem
