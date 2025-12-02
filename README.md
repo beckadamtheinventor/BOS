@@ -2,6 +2,10 @@
 An Operating system (WIP) for the TI-84+CE family (eZ80) graphing calculators, with the aim of being freely distributable.
 
 
+# Important!
+Most if not all calculators you can buy now in stores or online are unable to run custom operating systems, which means BOS cannot be installed on those units. This is not something I can work around. The bootloader on most units removes non-TI operating systems (for many years now) and there is no way to patch that as of revision M calculators, short of hardware modifications.
+
+
 # Eye Candy
 ![](https://raw.githubusercontent.com/beckadamtheinventor/BOS/master/cap/cap6.gif)
 ![](https://raw.githubusercontent.com/beckadamtheinventor/BOS/master/cap/cap7.gif)
@@ -143,52 +147,11 @@ main:
 BOS comes pre-loaded with the standard libload libraries, including the USB drivers.
 + fatdrvce (stable, subject to change)
 + fontlibc (stable)
-+ fileioc (volatile, do not use at the moment)
++ fileioc (does not work yet on BOS, do not use)
 + graphx (stable)
 + keypadc (stable)
 + msddrvce (stable, subject to change)
 + srldrvce (stable, subject to change)
 + usbdrvce (stable, subject to change)
 
-There are three ways to use libload in BOS, depending on where your program runs from.
-When writing an assembly program using `boslibloader.inc` you can use routines from any library loaded with the `libload` macro. The macros will handle the rest.
-
-### Method A
-Program runs from RAM, default libload settings, optionally displaying libload messages.
-```
-include 'include/ez80.inc'
-include 'include/ti84pceg.inc'
-include 'include/bos.inc'
-include 'include/boslibloader.inc'
-
-format ram executable
-	libload load
-	ret nz
-	libload graphx ; or another standard libload library
-	;your code here
-```
-
-
-### Method B
-Program runs from RAM, libload uses malloc'd memory, libload does not display messages.
-```
-include 'include/ez80.inc'
-include 'include/ti84pceg.inc'
-include 'include/bos.inc'
-include 'include/boslibloader.inc'
-
-format ram executable
-	libload load LIBLOAD_USEMALLOC
-	ret nz
-	libload graphx ; or another standard libload library
-	; your code here
-```
-
-
-### Method C
-Program runs from flash, libload uses malloc'd memory, libload does not display messages.
-This is an advanced method!
-This method is the most difficult to use due to it requiring either relocation or offsets of the program file.
-To use this method, make sure the libload relocations are not stored in flash and BC = $aa5aa5 before the jump to libload.
-In addition, the program will likely need a way to reference itself due to it not knowing where it's run from until runtime.
 
