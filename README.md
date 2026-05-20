@@ -32,9 +32,11 @@ Check the [releases](https://github.com/beckadamtheinventor/BOS/releases) page o
 
 
 # Installing BOS to Hardware
+First of all, don't. No calculator you can buy on the market now short of combing ebay for a TI-84+CE *prior* to revision M will be able to run BOS, let alone install it.
+
 Before installing BOS, know that it is very much incomplete and lacks many features that TI-OS has.
 
-*IMPORTANT NOTE* BOS will not work on any python edition calculator! BOS will *only* work on the TI-84+CE and TI-83 premium CE calculators. Additionally, BOS will not work on any calculator revision M or higher. Check the last character of the serial number on the back of the calculator. If it's "M" or higher, BOS will not work.
+*IMPORTANT NOTE* BOS will not work on the TI-84 Evo nor any TI-84+ python edition calculator! BOS will *only* work on the TI-84+CE and *maybe* TI-83 premium CE calculators. Additionally, BOS will not work on any calculator revision M or higher. Check the last character of the serial number on the back of the calculator. If it's "M" or higher, BOS will not work.
 BOS will also fail to work on a non-patched bootcode 5.3.0 or higher due to boot-time OS verification. Patching your bootcode can be dangerous if done wrong, and unfortunately there is no longer a repo up containing the program necessary to patch your bootcode. You're on your own for now if your bootcode version is 5.3.0 or higher.
 
 Before installing BOS, note that it will erase all memory on your calculator! Both RAM and Archive! Make sure to back up your calculator's files before installing BOS!
@@ -44,7 +46,7 @@ If you do not get a formatting screen, but get an "invalid OS" error or the like
 
 
 # Building
-BOS requires the CE C toolchain version 12.0 or higher and the BOS toolchain extension.
+BOS requires the CE C toolchain version 12.0 through 14.2 and the BOS toolchain extension.
 Python 3.7 or higher is required to build includes and documentation.
 
 Link to CE C toolchain:
